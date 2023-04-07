@@ -36,19 +36,29 @@ struct Material {
     }
     
     
-    void Bind(void) {glBindTexture(GL_TEXTURE_2D, textureBuffer);}
+    void Bind(void);
     
-    void BindTextureSlot(unsigned int slot) {glActiveTexture(GL_TEXTURE0 + slot);}
+    void BindTextureSlot(unsigned int slot);
     
+    void UpdateTextureBuffer(void* textureData);
     
-    void UpdateTextureBuffer(void* textureData) {
-        
-        glBindTexture(GL_TEXTURE_2D, textureBuffer);
-        
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
-        
-    }
 };
 
 
+void Material::Bind(void) {
+    glBindTexture(GL_TEXTURE_2D, textureBuffer);
+}
+
+void Material::BindTextureSlot(unsigned int slot) {
+    glActiveTexture(GL_TEXTURE0 + slot);
+}
+
+
+void Material::UpdateTextureBuffer(void* textureData) {
+    
+    glBindTexture(GL_TEXTURE_2D, textureBuffer);
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+    return;
+}
 

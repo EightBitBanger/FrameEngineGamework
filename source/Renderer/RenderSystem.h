@@ -105,7 +105,11 @@ public:
         entityPtr->material = defaultMaterial;
         return entityPtr;
     }
-    void DestroyEntity(Entity* entityPtr)  {entity.Destroy(entityPtr);}
+    void DestroyEntity(Entity* entityPtr)  {
+        if (entityPtr->material != nullptr) material.Destroy(entityPtr->material);
+        if (entityPtr->script != nullptr) script.Destroy(entityPtr->script);
+        entity.Destroy(entityPtr);
+    }
     
     Mesh* CreateMesh(void)           {return mesh.Create();}
     void DestroyMesh(Mesh* meshPtr)  {mesh.Destroy(meshPtr);}
@@ -235,15 +239,12 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             if (currentMaterial != currentEntity->material) {
                 currentMaterial = currentEntity->material;
                 
-                if (currentMaterial != nullptr) {
-                    
-                    currentMaterial->Bind();
-                    currentMaterial->BindTextureSlot(0);
-                    
-                    currentShader->Bind();
-                    currentShader->SetMaterialColor(currentMaterial->color);
-                    currentShader->SetTextureSampler(0);
-                }
+                currentMaterial->Bind();
+                currentMaterial->BindTextureSlot(0);
+                
+                currentShader->Bind();
+                currentShader->SetMaterialColor(currentMaterial->color);
+                currentShader->SetTextureSampler(0);
                 
             }
             
