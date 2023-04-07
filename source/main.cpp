@@ -46,13 +46,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     SetWindowPos(wHnd, NULL, WindowSz.x, WindowSz.y, WindowSz.w, WindowSz.h, SWP_SHOWWINDOW);
     
-    // Delete the external log file
     Log.Clear();
-    
-    
-    //
-    // Initiate render system
-    //
     
     if (Renderer.SetRenderTarget(wHnd) != GLEW_OK) {
         DestroyWindow(wHnd);
@@ -65,15 +59,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Renderer.SetViewport(0, 0, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top);
     
-    //
-    // Initiate renderer
+    
     Renderer.Initiate();
     
     Resources.Initiate();
     
     Application.Start();
     
-    // Set timers
+    
     PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
     Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     
@@ -89,26 +82,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         }
         
         
-        // Check ESCAPE key
+        // ESCAPE key handling
         if (Input.CheckKeyPressed(VK_ESCAPE)) {
             isPaused = !isPaused;
             if (Renderer.cameraMain == nullptr) continue;
             
             if (isPaused) {
                 
-                // Disable mouse look
                 Renderer.cameraMain->DisableMouseLook();
                 
-                // Clear input state
                 Input.ClearKeys();
                 
             } else {
                 
-                // Reset mouse look
                 Renderer.cameraMain->EnableMouseLook();
                 Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
                 
-                // Reset timers
                 Time.Update();
                 PhysicsTime.Update();
                 RenderTime.Update();

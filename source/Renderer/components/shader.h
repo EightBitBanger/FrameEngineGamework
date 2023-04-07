@@ -92,6 +92,15 @@ int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentSc
     glDeleteShader(vs);
     glDeleteShader(fs);
     
+    GLint state;
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &state);
+    if (state == GL_FALSE) {
+        Log.WriteLn();
+        Log.Write(" ! Shader link error");
+        Log.WriteLn();
+        return 0;
+    }
+    
     SetUniformLocations();
     
     isShaderLoaded = true;
@@ -110,7 +119,12 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
     // Check compile status
     int vResult;
     glGetShaderiv(ShaderID, GL_COMPILE_STATUS, &vResult);
-    if (!vResult) {return 0;}
+    if (!vResult) {
+        Log.WriteLn();
+        Log.Write(" ! Shader compilation error");
+        Log.WriteLn();
+        return 0;
+    }
     
     return ShaderID;
 }

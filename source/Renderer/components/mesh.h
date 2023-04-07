@@ -287,6 +287,7 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
         indexBuffer.push_back(index);
     }
     
+    UpdateMesh();
     return 1;
 }
 

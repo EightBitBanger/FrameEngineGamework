@@ -218,7 +218,6 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             Shader* shader = mesh->shader;
             
             
-            
             // Update render bindings
             if (currentMesh != mesh) {
                 currentMesh = mesh;
@@ -236,12 +235,16 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             if (currentMaterial != currentEntity->material) {
                 currentMaterial = currentEntity->material;
                 
-                currentMaterial->Bind();
-                currentMaterial->BindTextureSlot(0);
+                if (currentMaterial != nullptr) {
+                    
+                    currentMaterial->Bind();
+                    currentMaterial->BindTextureSlot(0);
+                    
+                    currentShader->Bind();
+                    currentShader->SetMaterialColor(currentMaterial->color);
+                    currentShader->SetTextureSampler(0);
+                }
                 
-                currentShader->Bind();
-                currentShader->SetMaterialColor(currentMaterial->color);
-                currentShader->SetTextureSampler(0);
             }
             
             // Sync with the rigid body

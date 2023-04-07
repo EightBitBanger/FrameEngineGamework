@@ -32,7 +32,6 @@ void CameraMovement(void) {
 Mesh*      mesh;
 Mesh*      meshSource;
 
-Entity*    entity;
 Material*  material;
 Scene*     currentScene;
 
@@ -43,15 +42,13 @@ Scene*     currentScene;
 
 void MyApplication::Start(void) {
     
-    Resources.LoadTexture("data/barrel.png", "tex_barrel");
-    Resources.LoadTexture("data/grassy.png", "tex_ground");
-    Resources.LoadWaveFront("data/barrel.obj", "obj_barrel");
-    Resources.LoadShaderGLSL("data/default.shader", "glsl_default");
     
-    meshSource = Resources.CreateMeshFromTag("obj_barrel");
-    meshSource->ChangeSubMeshColor(0, Colors.white);
-    Material* material = Resources.CreateMaterialFromTag("tex_barrel");
-    Shader*   shader   = Resources.CreateShaderFromTag("glsl_default");
+    Resources.LoadShaderGLSL("data/default.shader", "default");
+    Resources.LoadWaveFront("data/barrel.obj", "Barrel");
+    
+    Resources.LoadTexture("data/barrel.png", "matBarrel");
+    Resources.LoadTexture("data/grassy.png", "matGround");
+    
     
     
     // Main scene
@@ -59,56 +56,23 @@ void MyApplication::Start(void) {
     Renderer.AddToRenderQueue(currentScene);
     
     
-    
-    
-    
-    Entity* plane = Renderer.CreateEntity();
-    plane->mesh = Renderer.CreateMesh();
-    plane->mesh->AddPlane(0,-100,0, 100, 100, Colors.white);
-    plane->mesh->UpdateMesh();
-    plane->mesh->SetDefaultAttributes();
-    plane->mesh->shader = shader;
-    plane->material = Resources.CreateMaterialFromTag("tex_ground");
-    currentScene->AddToSceneRoot(plane);
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    //
-    // Setup physics
-    
     Physics.SetGravity(0, 0, 0);
     
-    
-    //
-    // Setup render system
     
     Renderer.Blending.Enable();
     Renderer.Blending.SetFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     Renderer.DepthTest.Enable();
     
+    
+    
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
     Renderer.skyMain->background = Colors.black;
     
     
-    // Camera
     
+    // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
     Renderer.cameraMain->transform.position = glm::vec3(-20, 1, 0);
     Renderer.cameraMain->EnableMouseLook();
@@ -124,11 +88,14 @@ void MyApplication::Start(void) {
     // Mesh
     mesh = Renderer.CreateMesh();
     mesh->SetDefaultAttributes();
-    mesh->shader = shader;
+    mesh->shader = Resources.CreateShaderFromTag("default");
+    if (mesh->shader == nullptr) return;
+    
+    meshSource = Resources.CreateMeshFromTag("Barrel");
+    if (meshSource == nullptr) return;
     
     std::vector<Vertex> vertexBuff;
     std::vector<Index>  indexBuff;
-    
     meshSource->CopySubMesh(0, vertexBuff, indexBuff);
     
     mesh->AddSubMesh(0, 0, -10, vertexBuff, indexBuff);
@@ -140,32 +107,28 @@ void MyApplication::Start(void) {
     
     
     
-    entity = Renderer.CreateEntity();
-    entity->material = material;
-    entity->mesh = mesh;
+    Entity* entity = Renderer.CreateEntity();
+    entity->material = Resources.CreateMaterialFromTag("matBarrel");
+    if (entity->material == nullptr) return;
     
+    entity->mesh = mesh;
+    entity->material->color = Color(0, 0, 0, 1);
     currentScene->AddToSceneRoot(entity);
     
     return;
 }
 
 
-unsigned int selection = 0;
-
-float height=0;
 
 
 void MyApplication::Run(void) {
     
-    if (Input.CheckKeyCurrent(VK_1)) selection = 0;
-    if (Input.CheckKeyCurrent(VK_2)) selection = 1;
-    if (Input.CheckKeyCurrent(VK_3)) selection = 2;
-    
-    
-    
+    if (meshSource == nullptr) return;
+    if (mesh == nullptr) return;
     
     
     if (Input.CheckKeyCurrent(VK_I)) {
+        
         
         float x = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
         float y = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
@@ -173,11 +136,9 @@ void MyApplication::Run(void) {
         
         SubMesh newMesh;
         
-        meshSource->CopySubMesh(0, newMesh.vertexBuffer, newMesh.indexBuffer);
+        meshSource->CopySubMesh(0, newMesh);
         
-        if (mesh->AddSubMesh(x, y, z, newMesh.vertexBuffer, newMesh.indexBuffer)) 
-            mesh->UpdateMesh();
-        
+        mesh->AddSubMesh(x, y, z, newMesh.vertexBuffer, newMesh.indexBuffer);
     }
     
     

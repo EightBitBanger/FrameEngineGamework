@@ -17,14 +17,17 @@ public:
     bool LoadTexture(std::string filename, std::string resourceName);
     bool LoadShaderGLSL(std::string path, std::string resourceName);
     
-    
     MeshTag*    FindMeshTag(std::string name);
     TextureTag* FindTextureTag(std::string name);
     ShaderTag*  FindShaderTag(std::string name);
     
-    Mesh*     CreateMeshFromTag(std::string name);
-    Material* CreateMaterialFromTag(std::string name);
-    Shader*   CreateShaderFromTag(std::string name);
+    bool UnloadMeshTag(std::string name);
+    bool UnloadTextureTag(std::string name);
+    bool UnloadShaderTag(std::string name);
+    
+    Mesh*      CreateMeshFromTag(std::string name);
+    Material*  CreateMaterialFromTag(std::string name);
+    Shader*    CreateShaderFromTag(std::string name);
     
     
     void DestroyAssets(void);
@@ -67,6 +70,39 @@ ShaderTag* ResourceManager::FindShaderTag(std::string name) {
 
 
 
+
+bool ResourceManager::UnloadMeshTag(std::string name) {
+    for (std::vector<MeshTag>::iterator it = meshTags.begin(); it != meshTags.end(); ++it) {
+        if (it->name == name) {
+            meshTags.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ResourceManager::UnloadTextureTag(std::string name) {
+    for (std::vector<TextureTag>::iterator it = textureTags.begin(); it != textureTags.end(); ++it) {
+        if (it->name == name) {
+            textureTags.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ResourceManager::UnloadShaderTag(std::string name) {
+    for (std::vector<ShaderTag>::iterator it = shaderTags.begin(); it != shaderTags.end(); ++it) {
+        if (it->name == name) {
+            shaderTags.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+
+
 Mesh* ResourceManager::CreateMeshFromTag(std::string name) {
     MeshTag* meshTag = FindMeshTag(name);
     if (meshTag == nullptr) return nullptr;
@@ -84,7 +120,7 @@ Material* ResourceManager::CreateMaterialFromTag(std::string name) {
     Material* materialPtr = Renderer.CreateMaterial();
     materialPtr->width  = texTag->width;
     materialPtr->height = texTag->height;
-    materialPtr->UpdateTexture(texTag->buffer);
+    materialPtr->UpdateTextureBuffer(texTag->buffer);
     return materialPtr;
 }
 
@@ -151,10 +187,6 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName="")
 
 bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="") {
     
-    //FileLoader loader(filename);
-    //if (!loader.CheckIsFileLoaded()) return false;
-    //std::string data = loader.GetValueByName("name", 0);
-    
     objl::Loader loader;
     if (!loader.LoadFile(path)) {
         std::string logstr = " ! " + path;
@@ -180,6 +212,9 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="
         vertex.x = objlVertex.Position.X;
         vertex.y = objlVertex.Position.Y;
         vertex.z = objlVertex.Position.Z;
+        vertex.r = 1;
+        vertex.g = 1;
+        vertex.b = 1;
         vertex.u = objlVertex.TextureCoordinate.X;
         vertex.v = objlVertex.TextureCoordinate.Y;
         
