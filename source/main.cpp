@@ -1,5 +1,5 @@
 #include "main.h"
-#define IDI_ICON1  101
+#define IDI_ICON  101
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
@@ -15,7 +15,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wClassEx.hInstance       = hInstance;
     wClassEx.lpszMenuName    = NULL;
     wClassEx.hCursor         = LoadCursor(NULL, IDC_ARROW);
-    wClassEx.hIcon           = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+    wClassEx.hIcon           = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
     wClassEx.hIconSm         = LoadIcon(hInstance, IDI_APPLICATION);
     wClassEx.hbrBackground   = (HBRUSH)GetStockObject(BLACK_BRUSH);
     
@@ -76,7 +76,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     while (isActive) {
         
-        if (PeekMessage(&wMessages, NULL, 0, 0, PM_REMOVE)) {
+        while (PeekMessage(&wMessages, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&wMessages);
             DispatchMessage(&wMessages);
         }
@@ -88,31 +88,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             if (Renderer.cameraMain == nullptr) continue;
             
             if (isPaused) {
-                
                 Renderer.cameraMain->DisableMouseLook();
                 
                 Input.ClearKeys();
-                
             } else {
-                
                 Renderer.cameraMain->EnableMouseLook();
                 Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
                 
                 Time.Update();
                 PhysicsTime.Update();
                 RenderTime.Update();
-                
             }
         }
         
-        if (isPaused) continue;
-        
-        
-        if (PhysicsTime.Update()) Physics.world->update( PhysicsTime.delta );
+        if (PhysicsTime.Update()) 
+            Physics.world->update( PhysicsTime.delta );
         
         if (Time.Update()) {
             
-            Application.Run();
+            if (!isPaused) 
+                Application.Run();
             
             Renderer.RenderFrame( Time.delta );
             

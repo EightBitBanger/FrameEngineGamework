@@ -1,5 +1,8 @@
 struct Viewport {int x, y, w, h;};
 
+#include "enumerators.h"
+
+#include "types/bufferlayout.h"
 #include "types/transform.h"
 #include "types/color.h"
 
@@ -29,31 +32,6 @@ class RenderSystem {
     Material*  currentMaterial;
     Shader*    currentShader;
     
-    struct DEPTHTEST {
-        void Enable(void) {glEnable(GL_DEPTH_TEST);}
-        void Disable(void) {glDisable(GL_DEPTH_TEST);}
-        void EnableMask(void) {glDepthMask(GL_TRUE);}
-        void DisableMask(void) {glDepthMask(GL_FALSE);}
-        void SetFunction(GLenum Func) {glDepthFunc(Func);}
-    };
-    struct STENCILTEST {
-        void Enable(void) {glEnable(GL_STENCIL_TEST);}
-        void Disable(void) {glDisable(GL_STENCIL_TEST);}
-        void SetMask(GLenum Mask) {glStencilMask(Mask);}
-    };
-    struct FACECULLING {
-        void Enable(void) {glEnable(GL_CULL_FACE);}
-        void Disable(void) {glDisable(GL_CULL_FACE);}
-        void SetCullSide(bool Side) {if (Side) glCullFace(GL_BACK); else glCullFace(GL_FRONT);}
-        void SetFaceWinding(bool Wind) {if (Wind) glFrontFace(GL_CCW); else glFrontFace(GL_CW);}
-    };
-    struct BLENDING {
-        void Enable(void) {glEnable(GL_BLEND);}
-        void Disable(void) {glDisable(GL_BLEND);}
-        void SetFunction(GLenum source, GLenum destination) {glBlendFunc(source, destination);}
-        void SetFunctionSeperate(GLenum alphaSource, GLenum alphaDest, GLenum source, GLenum destination) {glBlendFuncSeparate(alphaSource, alphaDest, source, destination);}
-    };
-    
     PoolAllocator<Entity>    entity;
     PoolAllocator<Mesh>      mesh;
     PoolAllocator<Shader>    shader;
@@ -64,11 +42,6 @@ class RenderSystem {
     PoolAllocator<Script>    script;
     
 public:
-    
-    DEPTHTEST    DepthTest;
-    STENCILTEST  StencilTest;
-    FACECULLING  FaceCulling;
-    BLENDING     Blending;
     
     Material*  defaultMaterial;
     Shader*    defaultShader;
@@ -150,6 +123,7 @@ public:
     
     glm::mat4 CalculateModelMatrix(Transform& parentTransform, Transform& modelTransform);
     
+    std::vector<std::string> GetGLErrorCodes(std::string errorLocationString);
 };
 
 
@@ -170,7 +144,7 @@ void RenderSystem :: RenderFrame(float deltaTime) {
     
     // Set render sky
     if (skyMain != nullptr) {
-        Color color = skyMain->background;
+        Color& color = skyMain->background;
         glClearColor(color.r, color.g, color.b, 1);
     }
     
@@ -191,20 +165,12 @@ void RenderSystem :: RenderFrame(float deltaTime) {
     glm::mat4 viewProj = projection * view;
     currentShader = nullptr;
     
-    //
     // Process scene queues
     
     for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
         
         Scene* scenePtr = *it;
         
-        if (!scenePtr->isRenderable) 
-            continue;
-        
-        if (scenePtr->entityQueue.size() == 0)
-            continue;
-        
-        //
         // Run the entity list
         
         for (std::vector<Entity*>::iterator it = scenePtr->entityQueue.begin(); it != scenePtr->entityQueue.end(); ++it) {
@@ -223,13 +189,14 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             Shader* shader = mesh->shader;
             
             
-            // Update render bindings
+            // Mesh vertex array binding
             if (currentMesh != mesh) {
                 currentMesh = mesh;
                 
                 currentMesh->Bind();
             }
             
+            // Shader program binding
             if (currentShader != shader) {
                 currentShader = shader;
                 
@@ -237,16 +204,43 @@ void RenderSystem :: RenderFrame(float deltaTime) {
                 currentShader->SetProjectionMatrix(viewProj);
             }
             
+            // Material texture binding
             if (currentMaterial != currentEntity->material) {
                 currentMaterial = currentEntity->material;
                 
                 currentMaterial->Bind();
                 currentMaterial->BindTextureSlot(0);
                 
+                // Depth test
+                if (currentMaterial->doDepthTest) {
+                    glEnable(GL_DEPTH_TEST);
+                    glDepthMask(currentMaterial->doDepthTest);
+                    glDepthFunc(currentMaterial->depthFunc);
+                } else {
+                    glDisable(GL_DEPTH_TEST);
+                }
+                
+                // Face culling
+                if (currentMaterial->doFaceCulling) {
+                    glEnable(GL_CULL_FACE);
+                    glCullFace(currentMaterial->faceCullSide);
+                    glFrontFace(currentMaterial->faceWinding);
+                } else {
+                    glEnable(GL_CULL_FACE);
+                }
+                
+                // Blending
+                if (currentMaterial->doBlending) {
+                    glEnable(GL_BLEND);
+                    glBlendFuncSeparate(currentMaterial->blendSource, currentMaterial->blendDestination, currentMaterial->blendAlphaSource, currentMaterial->blendAlphaDestination);
+                } else {
+                    glDisable(GL_BLEND);
+                }
+                
+                
                 currentShader->Bind();
                 currentShader->SetMaterialColor(currentMaterial->color);
                 currentShader->SetTextureSampler(0);
-                
             }
             
             // Sync with the rigid body
@@ -276,6 +270,10 @@ void RenderSystem :: RenderFrame(float deltaTime) {
     
     SwapBuffers(deviceContext);
     
+#ifdef _RENDERER_CHECK_OPENGL_ERRORS__
+    GetGLErrorCodes("OnRender::");
+#endif
+    
     return;
 }
 
@@ -289,6 +287,7 @@ void RenderSystem :: Initiate(void) {
     
     defaultMaterial = CreateMaterial();
     defaultMaterial->color = Colors.white;
+    
     
     for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
         
@@ -306,6 +305,11 @@ void RenderSystem :: Initiate(void) {
         
     }
     
+#ifdef _RENDERER_CHECK_OPENGL_ERRORS__
+    GetGLErrorCodes("OnInitiate::");
+#endif
+    
+    return;
 }
 
 
@@ -437,28 +441,68 @@ void RenderSystem :: SetViewport(unsigned int x, unsigned int y, unsigned int w,
 
 glm::mat4 RenderSystem :: CalculateModelMatrix(Transform& parentTransform, Transform& modelTransform) {
     
-    glm::mat4 WorldTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( parentTransform.position.x, parentTransform.position.y, parentTransform.position.z ));
+    glm::mat4 parentTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( parentTransform.position.x, parentTransform.position.y, parentTransform.position.z ));
     
     glm::mat4 
-    WorldRotation = glm::rotate(glm::mat4(1.0f), glm::radians( 0.0f ), glm::vec3(0, 1, 0));
-    WorldRotation = glm::rotate(WorldRotation, parentTransform.rotation.x, glm::vec3( 0.0f, 1.0f, 0.0f ) );
-    WorldRotation = glm::rotate(WorldRotation, parentTransform.rotation.y, glm::vec3( 1.0f, 0.0f, 0.0f ) );
-    WorldRotation = glm::rotate(WorldRotation, parentTransform.rotation.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
+    parentRotation = glm::rotate(glm::mat4(1.0f), glm::radians( 0.0f ), glm::vec3(0, 1, 0));
+    parentRotation = glm::rotate(parentRotation, parentTransform.rotation.x, glm::vec3( 0.0f, 1.0f, 0.0f ) );
+    parentRotation = glm::rotate(parentRotation, parentTransform.rotation.y, glm::vec3( 1.0f, 0.0f, 0.0f ) );
+    parentRotation = glm::rotate(parentRotation, parentTransform.rotation.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
     
-    glm::mat4 WorldScale = glm::scale(glm::mat4(1.0f), glm::vec3( parentTransform.scale.x, parentTransform.scale.y, parentTransform.scale.z ));
+    glm::mat4 parentScale = glm::scale(glm::mat4(1.0f), glm::vec3( parentTransform.scale.x, parentTransform.scale.y, parentTransform.scale.z ));
     
-    glm::mat4 ModelTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( modelTransform.position.x, modelTransform.position.y, modelTransform.position.z ));
+    glm::mat4 modelTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( modelTransform.position.x, modelTransform.position.y, modelTransform.position.z ));
     
     glm::mat4 
-    ModelRotation = glm::rotate (glm::mat4(1.0f), glm::radians( 0.0f ), glm::vec3(0, 1, 0));
-    ModelRotation = glm::rotate(ModelRotation, modelTransform.rotation.x, glm::vec3( 0.0f, 1.0f, 0.0f ) );
-    ModelRotation = glm::rotate(ModelRotation, modelTransform.rotation.y, glm::vec3( 1.0f, 0.0f, 0.0f ) );
-    ModelRotation = glm::rotate(ModelRotation, modelTransform.rotation.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
+    modelRotation = glm::rotate (glm::mat4(1.0f), glm::radians( 0.0f ), glm::vec3(0, 1, 0));
+    modelRotation = glm::rotate(modelRotation, modelTransform.rotation.x, glm::vec3( 0.0f, 1.0f, 0.0f ) );
+    modelRotation = glm::rotate(modelRotation, modelTransform.rotation.y, glm::vec3( 1.0f, 0.0f, 0.0f ) );
+    modelRotation = glm::rotate(modelRotation, modelTransform.rotation.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
     
-    glm::mat4 ModelScale = glm::scale(glm::mat4(1.0f), glm::vec3( modelTransform.scale.x, modelTransform.scale.y, modelTransform.scale.z ));
+    glm::mat4 modelScale = glm::scale(glm::mat4(1.0f), glm::vec3( modelTransform.scale.x, modelTransform.scale.y, modelTransform.scale.z ));
     
-    return (WorldTranslation * WorldRotation * WorldScale) * (ModelTranslation * ModelRotation * ModelScale);
+    return (parentTranslation * parentRotation * parentScale) * (modelTranslation * modelRotation * modelScale);
 }
 
+
+
+// Log openGL errors
+std::vector<std::string> RenderSystem :: GetGLErrorCodes(std::string errorLocationString) {
+    
+    GLenum glError;
+    std::string ErrorMsg = errorLocationString;
+    std::vector<std::string> ErrorList;
+    
+    // Get any GL error
+    glError = glGetError();
+    
+    // While there are errors
+    while (glError != GL_NO_ERROR) {
+        
+        switch(glError) {
+            
+            case GL_INVALID_OPERATION:             ErrorMsg+=" INVALID_OPERATION"; break;
+            case GL_INVALID_ENUM:                  ErrorMsg+=" INVALID_ENUM";  break;
+            case GL_INVALID_VALUE:                 ErrorMsg+=" INVALID_VALUE"; break;
+            case GL_OUT_OF_MEMORY:                 ErrorMsg+=" OUT_OF_MEMORY"; break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION: ErrorMsg+=" INVALID_FRAMEBUFFER_OPERATION"; break;
+            default :                              ErrorMsg+=" UNKNOWN_ERROR"; break;
+            
+        }
+        
+        Log.Write(ErrorMsg);
+        Log.WriteLn();
+        
+        ErrorList.push_back( ErrorMsg );
+        
+        std::cout << ErrorMsg << std::endl;
+        
+        
+        // Get the next error
+        glError = glGetError();
+    }
+    
+    return ErrorList;
+}
 
 

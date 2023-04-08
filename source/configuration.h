@@ -13,6 +13,7 @@
 
 
 #define  LOG_RENDER_DETAILS_
+#define  _RENDERER_CHECK_OPENGL_ERRORS__
 
 //
 // Rendering system

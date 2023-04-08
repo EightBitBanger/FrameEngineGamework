@@ -1,35 +1,4 @@
 
-struct Vertex {
-    float x, y, z,  r, g, b,  u, v;
-    
-    Vertex() {
-        x=0; y=0; z=0; r=0; g=0; b=0; u=0; v=0;
-    }
-    
-    Vertex(float xx, float yy, float zz, float rr, float gg, float bb, float uu, float vv) {
-        x=xx; y=yy; z=zz; r=rr; g=gg; b=bb; u=uu; v=vv;
-    }
-    
-    void operator= (const Vertex& vertex) {
-        x = vertex.x;
-        y = vertex.y;
-        z = vertex.z;
-        r = vertex.r;
-        g = vertex.g;
-        b = vertex.b;
-        u = vertex.u;
-        v = vertex.v;
-        return;
-    }
-};
-
-struct Index  {
-    unsigned int index;
-    
-    Index(unsigned int value) {index = value;}
-};
-
-
 struct SubMesh {
     
     unsigned vertexBegin;
@@ -54,6 +23,8 @@ class Mesh {
     
     int primitive;
     
+    unsigned int maxSize;
+    
     std::vector<Vertex>   vertexBuffer;
     std::vector<Index>    indexBuffer;
     
@@ -68,10 +39,9 @@ public:
     Mesh() {
         
         primitive = GL_TRIANGLES;
+        shader    = nullptr;
         
-        shader = nullptr;
-        
-        AllocateBuffers();
+        AllocateBuffers(10000);
     }
     
     ~Mesh() {
@@ -92,7 +62,7 @@ public:
     
     void Bind(void);
     
-    void AllocateBuffers(void);
+    void AllocateBuffers(unsigned int maxBufferSize);
     void FreeBuffers(void);
     
     void DrawVertexArray(void);
@@ -100,8 +70,8 @@ public:
     
     unsigned int GetSubMeshCount(void) {return subMesh.size();}
     
-    void AddPlane(float x, float y, float z, float width, float height, Color color, unsigned int tess_width, unsigned int tess_height);
-    
+    bool AddPlane(float x, float y, float z, float width, float height, Color color);
+    void AddWall(float x, float y, float z, float xscale, float yscale, float zscale, Color color);
     
     
     
@@ -151,15 +121,19 @@ void Mesh::Bind() {
 }
 
 
-void Mesh::AllocateBuffers(void) {
+void Mesh::AllocateBuffers(unsigned int maxBufferSize) {
+    maxSize = maxBufferSize;
+    
     glGenVertexArrays(1, &vertexArray);
     glBindVertexArray(vertexArray);
     
     glGenBuffers(1, &bufferVertex);
     glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
+    glBufferData(GL_ARRAY_BUFFER, maxSize * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
     
     glGenBuffers(1, &bufferIndex);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, maxSize * sizeof(Index), NULL, GL_DYNAMIC_DRAW);
     
     return;
 }
@@ -196,7 +170,7 @@ void Mesh::SetDefaultAttributes(void) {
 }
 
 
-void Mesh::AddPlane(float x, float y, float z, float width, float height, Color color, unsigned int tess_width=1, unsigned int tess_height=1) {
+bool Mesh::AddPlane(float x, float y, float z, float width, float height, Color color) {
     
     Vertex vertex[4];
     vertex[0] = Vertex(x-width, y, z+height,  color.r, color.g, color.b, 0, 1);
@@ -204,30 +178,20 @@ void Mesh::AddPlane(float x, float y, float z, float width, float height, Color 
     vertex[2] = Vertex(x+width, y, z-height,  color.r, color.g, color.b, 1, 0);
     vertex[3] = Vertex(x-width, y, z-height,  color.r, color.g, color.b, 0, 0);
     
-    unsigned int startVertex = vertexBuffer.size();
-    unsigned int startIndex  = indexBuffer.size();
+    SubMesh subBuffer;
+    subBuffer.vertexBuffer.push_back(vertex[0]);
+    subBuffer.vertexBuffer.push_back(vertex[1]);
+    subBuffer.vertexBuffer.push_back(vertex[2]);
+    subBuffer.vertexBuffer.push_back(vertex[3]);
     
-    vertexBuffer.push_back(vertex[0]);
-    vertexBuffer.push_back(vertex[1]);
-    vertexBuffer.push_back(vertex[2]);
-    vertexBuffer.push_back(vertex[3]);
+    subBuffer.indexBuffer.push_back(0);
+    subBuffer.indexBuffer.push_back(1);
+    subBuffer.indexBuffer.push_back(2);
+    subBuffer.indexBuffer.push_back(0);
+    subBuffer.indexBuffer.push_back(2);
+    subBuffer.indexBuffer.push_back(3);
     
-    indexBuffer.push_back(startVertex+0);
-    indexBuffer.push_back(startVertex+1);
-    indexBuffer.push_back(startVertex+2);
-    indexBuffer.push_back(startVertex+0);
-    indexBuffer.push_back(startVertex+2);
-    indexBuffer.push_back(startVertex+3);
-    
-    SubMesh newMesh;
-    newMesh.vertexBegin = startVertex;
-    newMesh.vertexCount = 4;
-    newMesh.indexBegin  = startIndex;
-    newMesh.indexCount  = 6;
-    newMesh.position    = glm::vec3(x, y, z);
-    
-    subMesh.push_back(newMesh);
-    return;
+    return AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer);
 }
 
 
@@ -238,15 +202,13 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
         for (std::vector<SubMesh>::iterator it = freeMesh.begin(); it != freeMesh.end(); ++it) {
             SubMesh freeMeshPtr = *it;
             
-            if (vrtxBuffer.size() > freeMeshPtr.vertexCount) continue;
-            
-            std::vector<Vertex> destMesh;
-            std::vector<Index>  destIndex;
+            if (vrtxBuffer.size() != freeMeshPtr.vertexCount) continue;
             
             freeMesh.erase(it);
             
-            subMesh.push_back(freeMeshPtr);
             freeMeshPtr.position = glm::vec3(x, y, z);
+            
+            subMesh.push_back(freeMeshPtr);
             
             unsigned int i = 0;
             for (std::vector<Vertex>::iterator it = vertexBuffer.begin() + freeMeshPtr.vertexBegin; it != vertexBuffer.begin() + freeMeshPtr.vertexBegin + freeMeshPtr.vertexCount; ++it) {
@@ -259,7 +221,6 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
                 vertex.b = vrtxBuffer[i].b;
                 vertex.u = vrtxBuffer[i].u;
                 vertex.v = vrtxBuffer[i].v;
-                destMesh.push_back(vertex);
                 i++;
             }
             
@@ -267,17 +228,19 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
             for (std::vector<Index>::iterator it = indexBuffer.begin() + freeMeshPtr.indexBegin; it != indexBuffer.begin() + freeMeshPtr.indexBegin + freeMeshPtr.indexCount; ++it) {
                 Index& index = *it;
                 index.index = indxBuffer[i].index + freeMeshPtr.vertexBegin;
-                destIndex.push_back(index);
                 i++;
             }
             
             Bind();
-            glBufferSubData(GL_ARRAY_BUFFER, freeMeshPtr.vertexBegin * sizeof(Vertex), freeMeshPtr.vertexCount * sizeof(Vertex), &destMesh[0]);
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, freeMeshPtr.indexBegin * sizeof(Index), freeMeshPtr.indexCount * sizeof(Index), &destIndex[0]);
+            glBufferSubData(GL_ARRAY_BUFFER,         freeMeshPtr.vertexBegin * sizeof(Vertex), freeMeshPtr.vertexCount * sizeof(Vertex), &vertexBuffer[freeMeshPtr.vertexBegin]);
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, freeMeshPtr.indexBegin  * sizeof(Index),  freeMeshPtr.indexCount  * sizeof(Index),  &indexBuffer[freeMeshPtr.indexBegin]);
             
-            return 0;
+            return false;
         }
     }
+    
+    //if ((vertexBuffer.size() + vrtxBuffer.size()) > maxSize) return false;
+    //if ((indxBuffer.size()   + indxBuffer.size()) > maxSize) return false;
     
     unsigned int startVertex = vertexBuffer.size();
     unsigned int startIndex  = indexBuffer.size();
@@ -306,8 +269,12 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
         indexBuffer.push_back(index);
     }
     
+    //Bind();
+    //glBufferSubData(GL_ARRAY_BUFFER,         0, vertexBuffer.size() * sizeof(Vertex), &vertexBuffer[0]);
+    //glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBuffer.size()  * sizeof(Index), &indexBuffer[0]);
+    
     UpdateMesh();
-    return 1;
+    return true;
 }
 
 bool Mesh::RemoveSubMesh(unsigned int index) {
@@ -329,6 +296,8 @@ bool Mesh::RemoveSubMesh(unsigned int index) {
     
     Bind();
     glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
+    
+    std::cout<< "remove submesh" << std::endl;
     
     return true;
 }

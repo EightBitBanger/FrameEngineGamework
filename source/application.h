@@ -2,6 +2,7 @@
 // Application entry point
 
 
+
 struct MyApplication : ApplicationLayer {
     void Start(void);
     void Run(void);
@@ -50,20 +51,12 @@ void MyApplication::Start(void) {
     Resources.LoadTexture("data/grassy.png", "matGround");
     
     
-    
     // Main scene
     currentScene = Renderer.CreateScene();
     Renderer.AddToRenderQueue(currentScene);
     
     
     Physics.SetGravity(0, 0, 0);
-    
-    
-    Renderer.Blending.Enable();
-    Renderer.Blending.SetFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-    Renderer.DepthTest.Enable();
-    
     
     
     // Sky background
@@ -102,9 +95,6 @@ void MyApplication::Start(void) {
     mesh->AddSubMesh(0, 0,   0, vertexBuff, indexBuff);
     mesh->AddSubMesh(0, 0,  10, vertexBuff, indexBuff);
     
-    mesh->UpdateMesh();
-    
-    
     
     
     Entity* entity = Renderer.CreateEntity();
@@ -114,6 +104,7 @@ void MyApplication::Start(void) {
     entity->mesh = mesh;
     entity->material->color = Color(0, 0, 0, 1);
     currentScene->AddToSceneRoot(entity);
+    
     
     return;
 }
@@ -129,22 +120,15 @@ void MyApplication::Run(void) {
     
     if (Input.CheckKeyCurrent(VK_I)) {
         
-        
         float x = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
         float y = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
         float z = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
         
         SubMesh newMesh;
-        
         meshSource->CopySubMesh(0, newMesh);
-        
         mesh->AddSubMesh(x, y, z, newMesh.vertexBuffer, newMesh.indexBuffer);
+        
     }
-    
-    
-    
-    
-    
     
     if (Input.CheckKeyCurrent(VK_K)) {
         
@@ -155,114 +139,44 @@ void MyApplication::Run(void) {
     }
     
     
+    unsigned int randMesh = Random.Range(0, mesh->GetSubMeshCount());
+    
+    float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+    float yy = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+    float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+    
+    mesh->ChangeSubMeshPosition(randMesh, xx, yy, zz);
     
     
-    if (Input.CheckKeyCurrent(VK_C)) {
+    
+    
+    
+    randMesh = Random.Range(0, mesh->GetSubMeshCount());
+    
+    mesh->ChangeSubMeshColor(randMesh, Colors.MakeRandom());
+    
+    
+    
+    
+    if (Input.CheckKeyCurrent(VK_P)) {
         
-        unsigned int randMesh = Random.Range(0, mesh->GetSubMeshCount());
+        float x = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
+        float y = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
+        float z = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
         
-        float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
-        float yy = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
-        float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+        float xs = Random.Range(1, 100);
+        float ys = Random.Range(1, 100);
         
-        mesh->ChangeSubMeshPosition(randMesh, xx, yy, zz);
+        mesh->AddPlane(x,y,z, xs,ys, Colors.MakeRandom());
         
     }
     
-    if (Input.CheckKeyCurrent(VK_V)) {
-        
-        unsigned int randMesh = Random.Range(0, mesh->GetSubMeshCount());
-        
-        mesh->ChangeSubMeshColor(randMesh, Colors.MakeRandom());
-        
-    }
     
     
-    
-    if (Input.CheckKeyPressed(VK_P)) {
-        
-        mesh->AddPlane(0, -20, 0, 100, 100, Colors.white);
+    if (Input.CheckKeyCurrent(VK_R)) 
         mesh->UpdateMesh();
-    }
     
     
-    
-    return;
-    
-    
-    
-    
-    
-    
-    int   spawnCount   = 3;
-    int   spawnMax     = 3000;
-    
-    float spawnScale   = 100;
-    
-    float forceMul     = 100;
-    float torqueMul    = 30;
-    
-    
-    for (int i=0; i < spawnCount; i++) {
-        
-        Entity* entity = Renderer.CreateEntity();
-        entity->mesh = mesh;
-        
-        float xscale = (Random.Range(1.0, spawnScale) - Random.Range(1.0, spawnScale)) * 0.001;
-        float yscale = (Random.Range(1.0, spawnScale) - Random.Range(1.0, spawnScale)) * 0.001;
-        float zscale = (Random.Range(1.0, spawnScale) - Random.Range(1.0, spawnScale)) * 0.001;
-        entity->transform.scale    = glm::vec3(xscale, yscale, zscale);
-        
-        entity->material = Renderer.CreateMaterial();
-        entity->material->color = Colors.ltgray;
-        
-        entity->rigidBody = Physics.CreateRigidBody(0, 0, 0);
-        
-        
-        
-        
-        float xforce = Random.Range(1.0, forceMul) - Random.Range(1.0, forceMul);
-        float yforce = Random.Range(1.0, forceMul) - Random.Range(1.0, forceMul);
-        float zforce = Random.Range(1.0, forceMul) - Random.Range(1.0, forceMul);
-        
-        float xtorque = Random.Range(1.0, torqueMul) - Random.Range(1.0, torqueMul);
-        float ytorque = Random.Range(1.0, torqueMul) - Random.Range(1.0, torqueMul);
-        float ztorque = Random.Range(1.0, torqueMul) - Random.Range(1.0, torqueMul);
-        
-        
-        entity->AddForce(xforce, yforce, zforce);
-        entity->AddTorque(xtorque, ytorque, ztorque);
-        
-        currentScene->AddToSceneRoot(entity);
-    }
-    
-    
-    
-    
-    
-    if (currentScene->GetRenderQueueSize() > (unsigned int)spawnMax) {
-        
-        for (int i=0; i < spawnCount*2; i++) {
-            Entity* entity = currentScene->entityQueue[0];
-            
-            currentScene->RemoveFromSceneRoot(entity);
-            
-            Renderer.DestroyMaterial(entity->material);
-            
-            Renderer.DestroyEntity(entity);
-        }
-        
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    if (Renderer.cameraMain == nullptr) return;
     
     
     
