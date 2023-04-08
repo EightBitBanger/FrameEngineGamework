@@ -106,7 +106,7 @@ public:
         return entityPtr;
     }
     void DestroyEntity(Entity* entityPtr)  {
-        if (entityPtr->material != nullptr) material.Destroy(entityPtr->material);
+        if ((entityPtr->material != nullptr) & (entityPtr->material != defaultMaterial)) material.Destroy(entityPtr->material);
         if (entityPtr->script != nullptr) script.Destroy(entityPtr->script);
         entity.Destroy(entityPtr);
     }
@@ -134,13 +134,14 @@ public:
     
     
     
+    void Initiate(void);
+    
     GLenum  SetRenderTarget(HWND wHndl);
     void    ReleaseRenderTarget(void);
     
     void SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
     
     void RenderFrame(float deltaTime);
-    void Initiate(void);
     
     void AddToRenderQueue(Scene* scene);
     bool RemoveFromRenderQueue(Scene* scene);
@@ -287,7 +288,7 @@ void RenderSystem :: Initiate(void) {
     defaultShader->BuildDefault();
     
     defaultMaterial = CreateMaterial();
-    defaultMaterial->color = Colors.green;
+    defaultMaterial->color = Colors.white;
     
     for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
         

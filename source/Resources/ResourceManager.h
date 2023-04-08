@@ -5,11 +5,11 @@
 
 class ResourceManager {
     
-public:
-    
     std::vector<MeshTag>      meshTags;
     std::vector<TextureTag>   textureTags;
     std::vector<ShaderTag>    shaderTags;
+    
+public:
     
     void Initiate(void);
     
@@ -28,7 +28,6 @@ public:
     Mesh*      CreateMeshFromTag(std::string name);
     Material*  CreateMaterialFromTag(std::string name);
     Shader*    CreateShaderFromTag(std::string name);
-    
     
     void DestroyAssets(void);
     

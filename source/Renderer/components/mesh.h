@@ -1,12 +1,32 @@
 
-struct Vertex {float x, y, z,  r, g, b,  u, v;};
+struct Vertex {
+    float x, y, z,  r, g, b,  u, v;
+    
+    Vertex() {
+        x=0; y=0; z=0; r=0; g=0; b=0; u=0; v=0;
+    }
+    
+    Vertex(float xx, float yy, float zz, float rr, float gg, float bb, float uu, float vv) {
+        x=xx; y=yy; z=zz; r=rr; g=gg; b=bb; u=uu; v=vv;
+    }
+    
+    void operator= (const Vertex& vertex) {
+        x = vertex.x;
+        y = vertex.y;
+        z = vertex.z;
+        r = vertex.r;
+        g = vertex.g;
+        b = vertex.b;
+        u = vertex.u;
+        v = vertex.v;
+        return;
+    }
+};
 
 struct Index  {
-    
     unsigned int index;
     
     Index(unsigned int value) {index = value;}
-    
 };
 
 
@@ -178,12 +198,11 @@ void Mesh::SetDefaultAttributes(void) {
 
 void Mesh::AddPlane(float x, float y, float z, float width, float height, Color color, unsigned int tess_width=1, unsigned int tess_height=1) {
     
-    Vertex vertex[] = {
-        x-width, y, z+height,  color.r, color.g, color.b, 0, 1, 
-        x+width, y, z+height,  color.r, color.g, color.b, 1, 1, 
-        x+width, y, z-height,  color.r, color.g, color.b, 1, 0, 
-        x-width, y, z-height,  color.r, color.g, color.b, 0, 0, 
-    };
+    Vertex vertex[4];
+    vertex[0] = Vertex(x-width, y, z+height,  color.r, color.g, color.b, 0, 1);
+    vertex[1] = Vertex(x+width, y, z+height,  color.r, color.g, color.b, 1, 1);
+    vertex[2] = Vertex(x+width, y, z-height,  color.r, color.g, color.b, 1, 0);
+    vertex[3] = Vertex(x-width, y, z-height,  color.r, color.g, color.b, 0, 0);
     
     unsigned int startVertex = vertexBuffer.size();
     unsigned int startIndex  = indexBuffer.size();
@@ -294,7 +313,6 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
 bool Mesh::RemoveSubMesh(unsigned int index) {
     if (subMesh.size() == 0) return false;
     if (index > subMesh.size()) return false;
-    if (index == 0) return false;
     
     std::vector<Vertex> destMesh;
     SubMesh sourceMesh = subMesh[index];

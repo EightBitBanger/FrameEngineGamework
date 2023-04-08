@@ -108,8 +108,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         if (isPaused) continue;
         
         
-        if (PhysicsTime.Update()) 
-            Physics.world->update( PhysicsTime.delta );
+        if (PhysicsTime.Update()) Physics.world->update( PhysicsTime.delta );
         
         if (Time.Update()) {
             
