@@ -7,18 +7,11 @@
 
 struct RandomGen {
     
-    void  Seed(uint32_t value)  {srand(value);};
-    void  Seed(float value)     {srand((uint32_t)value);};
+    void  Seed(int value);
     
-    float  Range(float min, float max) {
-        if (min >= max) return 1;
-        return ((float)(rand() % (int)max) + min);
-    }
+    float Range(float min, float max);
     
-    int  Range(int min, int max) {
-        if (min >= max) return 1;
-        return (rand() % max) + min;
-    }
+    int Range(int min, int max);
     
 };
 

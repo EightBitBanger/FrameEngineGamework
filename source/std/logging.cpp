@@ -1,23 +1,3 @@
-//#define _WIN32_WINNT  0x500
-#include <SDKDDKVer.h>
-#include <windows.h>
-
-// Standard headers
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstdlib>
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-
-#include <string>
-#include <vector>
-#include <thread>
-#include <map>
-
-#include "strings.h"
-#include "types.h"
 #include "logging.h"
 
 
@@ -48,7 +28,7 @@ void Logger::Clear(void) {
     if (FileID.good()) {FileExists=true;}
     FileID.close();
     
-    if (FileExists) {remove(EVENT_LOG_FILENAME.c_str());}
+    if (FileExists) {remove(EVENT_LOG_FILENAME);}
     
 }
 

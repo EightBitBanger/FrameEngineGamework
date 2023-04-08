@@ -1,6 +1,7 @@
-// Logging and message boxes
+#include <string>
+#include <fstream>
 
-const std::string  EVENT_LOG_FILENAME = "events.txt";
+#define  EVENT_LOG_FILENAME   "events.txt"
 
 struct Logger {
     
