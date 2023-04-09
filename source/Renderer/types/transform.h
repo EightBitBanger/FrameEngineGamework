@@ -1,3 +1,7 @@
+#ifndef _TRANSFORM_TYPE__
+#define _TRANSFORM_TYPE__
+
+#include <vector>
 
 
 struct Transform {
@@ -47,3 +51,4 @@ struct Transform {
 
 
 
+#endif

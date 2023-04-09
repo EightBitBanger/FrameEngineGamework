@@ -29,16 +29,11 @@
 #include "std/random.h"
 #include "std/fileloader.h"
 
-Timer         PhysicsTime;
-Timer         RenderTime;
-Timer         Time;
-Logger        Log;
-RandomGen     Random;
-
-
-
-
-
+Timer      PhysicsTime;
+Timer      RenderTime;
+Timer      Time;
+Logger     Log;
+RandomGen  Random;
 
 
 #include "Input/InputSystem.h"
@@ -59,7 +54,6 @@ bool isActive = true;
 HWND wHnd = NULL;
 
 
-#include "application/applicationbase.h"
 #include "application.h"
 
 #include "winproc.h"

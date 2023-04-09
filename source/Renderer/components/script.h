@@ -1,17 +1,16 @@
+#ifndef COMPONENT_SCRIPT
+#define COMPONENT_SCRIPT
 
-void DefaultFunctionPtr(void) {return;}
+void DefaultFunctionPtr(void);
 
 struct Script {
     
     void(*OnCreate)();
     void(*OnUpdate)();
     
-    Script() {
-        OnCreate = DefaultFunctionPtr;
-        OnUpdate = DefaultFunctionPtr;
-    }
-    
+    Script();
     
 };
 
 
+#endif

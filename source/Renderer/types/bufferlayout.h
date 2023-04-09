@@ -1,3 +1,5 @@
+#ifndef _VERTEXBUFFER_TYPE__
+#define _VERTEXBUFFER_TYPE__
 
 struct Vertex {
     float x, y, z,  r, g, b,  u, v;
@@ -32,3 +34,4 @@ struct Index  {
 };
 
 
+#endif

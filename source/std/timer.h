@@ -1,5 +1,7 @@
-// General purpose timer class
+#ifndef TIMER_WINDOWS
+#define TIMER_WINDOWS
 
+#include <windows.h>
 
 class Timer {
     
@@ -28,3 +30,4 @@ public:
     
 };
 
+#endif

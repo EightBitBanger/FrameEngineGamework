@@ -64,7 +64,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Resources.Initiate();
     
-    Application.Start();
+    Start();
     
     
     PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
@@ -107,7 +107,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         if (Time.Update()) {
             
             if (!isPaused) 
-                Application.Run();
+                Run();
             
             Renderer.RenderFrame( Time.delta );
             
@@ -116,7 +116,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         continue;
     }
     
-    Application.Shutdown();
+    Shutdown();
     
     Physics.common.destroyPhysicsWorld(Physics.world);
     

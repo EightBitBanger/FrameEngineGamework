@@ -7,14 +7,12 @@
 
 struct RandomGen {
     
-    void  Seed(int value);
+    static void  Seed(int value);
     
-    float Range(float min, float max);
+    static float Range(float min, float max);
     
-    int Range(int min, int max);
+    static int Range(int min, int max);
     
 };
-
-
 
 #endif

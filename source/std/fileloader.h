@@ -35,6 +35,9 @@ class FileLoader {
     
 public:
     
+    // Raw file data
+    std::vector<std::string> rawData;
+    
     // Pair of names and values
     std::map<std::string, std::vector<std::string>> assetData;
     

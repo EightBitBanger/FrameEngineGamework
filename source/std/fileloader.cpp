@@ -22,6 +22,8 @@ FileLoader::FileLoader(std::string FileName)
             if (String == "") continue;
             if (String.find("//") == 0) continue;
             
+            rawData.push_back(String);
+            
             // Split string by spaces
             std::vector<std::string> ArrayData = StringExplode(String, ' ');
             int MaxSz = ArrayData.size();
@@ -83,6 +85,8 @@ std::string FileLoader::GetValueByName(std::string Name, unsigned int Index) {
     
     return "";
 }
+
+
 std::string FileLoader::GetDataBlockByName(std::string Name) {
     
     for (std::map<std::string, std::string>::iterator it = dataBlocks.begin(); it != dataBlocks.end(); it++) {

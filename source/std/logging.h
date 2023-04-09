@@ -1,3 +1,6 @@
+#ifndef EVENT_LOGGING
+#define EVENT_LOGGING
+
 #include <string>
 #include <fstream>
 
@@ -11,3 +14,4 @@ struct Logger {
     
 };
 
+#endif

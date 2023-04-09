@@ -15,7 +15,7 @@ public:
     
     bool LoadWaveFront(std::string filename, std::string resourceName);
     bool LoadTexture(std::string filename, std::string resourceName);
-    bool LoadShaderGLSL(std::string path, std::string resourceName);
+    bool LoadShaderGLSL(std::string filename, std::string resourceName);
     
     MeshTag*    FindMeshTag(std::string name);
     TextureTag* FindTextureTag(std::string name);
@@ -29,9 +29,129 @@ public:
     Material*  CreateMaterialFromTag(std::string name);
     Shader*    CreateShaderFromTag(std::string name);
     
+    bool LoadScene(std::string filename);
+    bool LoadDefinitions(std::string filename);
+    bool LoadLocations(std::string filename);
+    
+    
+    
     void DestroyAssets(void);
     
 };
+
+
+
+
+
+bool ResourceManager::LoadScene(std::string filename) {
+    
+    FileLoader sceneLoader(filename);
+    if (!sceneLoader.CheckIsFileLoaded()) {
+        std::string logstr = "! " + filename;
+        Log.WriteLn();
+        Log.Write(logstr);
+        return false;
+    }
+    
+    std::string logstr = filename;
+    Log.Write(logstr);
+    
+    std::vector<std::string> definitionsList;
+    std::vector<std::string> locationsList;
+    
+    for (unsigned int i=0; i < sceneLoader.rawData.size(); i++) {
+        std::string fileExt = StringGetExtFromFilename(sceneLoader.rawData[i]);
+        if (fileExt == "definitions") definitionsList.push_back( sceneLoader.rawData[i] );
+        if (fileExt == "locations")   locationsList.push_back( sceneLoader.rawData[i] );
+    }
+    
+    // Process definitions files
+    for (unsigned int i=0; i < definitionsList.size(); i++) 
+        LoadDefinitions(definitionsList[i]);
+    
+    // Process locations files
+    for (unsigned int i=0; i < locationsList.size(); i++) 
+        LoadLocations(locationsList[i]);
+    
+    return true;
+}
+
+
+bool ResourceManager::LoadDefinitions(std::string filename) {
+    
+    FileLoader definitionsLoader(filename);
+    if (!definitionsLoader.CheckIsFileLoaded()) {
+        std::string logstr = "! " + filename;
+        Log.WriteLn();
+        Log.Write(logstr);
+        return false;
+    }
+    
+    std::string logstr = "  " + filename;
+    Log.WriteLn();
+    Log.Write(logstr);
+    
+    for (unsigned int i=0; i < definitionsLoader.rawData.size(); i++) {
+        
+        std::vector<std::string> strexp = StringExplode(definitionsLoader.rawData[i], ' ');
+        
+        if (strexp[0] == "define_mesh") {
+            LoadWaveFront(strexp[2], strexp[1]);
+        }
+        
+        if (strexp[0] == "define_texture") {
+            LoadTexture(strexp[2], strexp[1]);
+        }
+        
+        if (strexp[0] == "define_shader") {
+            LoadShaderGLSL(strexp[2], strexp[1]);
+        }
+        
+    }
+    
+    return true;
+}
+
+bool ResourceManager::LoadLocations(std::string filename) {
+    
+    FileLoader locationsLoader(filename);
+    if (!locationsLoader.CheckIsFileLoaded()) {
+        std::string logstr = "! " + filename;
+        Log.WriteLn();
+        Log.Write(logstr);
+        return false;
+    }
+    
+    std::string logstr = "  " + filename;
+    Log.WriteLn();
+    Log.Write(logstr);
+    
+    for (unsigned int i=0; i < locationsLoader.rawData.size(); i++) {
+        
+        std::vector<std::string> strexp = StringExplode(locationsLoader.rawData[i], ' ');
+        
+        std::string logstr = "  + " + strexp[0] + "  " + strexp[1];
+        Log.Write(logstr);
+        
+        
+        
+    }
+    
+    return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -155,9 +275,9 @@ void ResourceManager::DestroyAssets(void) {
 
 
 
-bool ResourceManager::LoadTexture(std::string path, std::string resourceName="") {
+bool ResourceManager::LoadTexture(std::string filename, std::string resourceName="") {
     
-    std::string filename   = StringGetNameFromFilename(path);
+    std::string name       = StringGetNameFromFilename(filename);
     std::string assetName  = StringGetNameFromFilenameNoExt(filename);
     
     if (resourceName != "") 
@@ -166,10 +286,10 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName="")
     TextureTag textureTag;
     textureTag.name = assetName;
     
-    textureTag.buffer = stbi_load(path.c_str(), &textureTag.width, &textureTag.height, &textureTag.channels, 3);
+    textureTag.buffer = stbi_load(filename.c_str(), &textureTag.width, &textureTag.height, &textureTag.channels, 3);
     
     if (textureTag.buffer == nullptr) {
-        std::string logstr = " ! " + path;
+        std::string logstr = " ! " + name;
         Log.Write(logstr);
         std::cout << logstr << std::endl;
         return false;
@@ -177,18 +297,18 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName="")
     
     textureTags.push_back(textureTag);
     
-    std::string logstr = " + " + assetName + "  " + path;
+    std::string logstr = "  + " + assetName + "  " + name;
     Log.Write(logstr);
     std::cout << logstr << std::endl;
     return true;
 }
 
 
-bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="") {
+bool ResourceManager::LoadWaveFront(std::string filename, std::string resourceName="") {
     
     objl::Loader loader;
-    if (!loader.LoadFile(path)) {
-        std::string logstr = " ! " + path;
+    if (!loader.LoadFile(filename)) {
+        std::string logstr = " ! " + filename;
         Log.Write(logstr);
         std::cout << logstr << std::endl;
         return false;
@@ -226,7 +346,7 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="
     
     meshTags.push_back(newAsset);
     
-    std::string logstr = " + " + newAsset.name + "  " + path;
+    std::string logstr = "  + " + newAsset.name + "  " + filename;
     Log.Write(logstr);
     std::cout << logstr << std::endl;
     
@@ -234,23 +354,23 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="
 }
 
 
-bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName="") {
+bool ResourceManager::LoadShaderGLSL(std::string filename, std::string resourceName="") {
     
-    FileLoader loader(path);
+    FileLoader loader(filename);
     if (!loader.CheckIsFileLoaded()) {
-        std::string logstr = " ! " + path;
+        std::string logstr = " ! " + filename;
         Log.Write(logstr);
         std::cout << logstr << std::endl;
         return false;
     }
     
-    std::string filename = StringGetNameFromFilenameNoExt(path);
+    std::string name = StringGetNameFromFilenameNoExt(filename);
     
     std::string vertex   = loader.GetDataBlockByName("vertex");
     std::string fragment = loader.GetDataBlockByName("fragment");
     
     ShaderTag newAsset;
-    newAsset.name = filename;
+    newAsset.name = name;
     if (resourceName != "") 
         newAsset.name = resourceName;
     
@@ -259,7 +379,7 @@ bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName=
     
     shaderTags.push_back(newAsset);
     
-    std::string logstr = " + " + newAsset.name + "  " + path;
+    std::string logstr = "  + " + newAsset.name + "  " + name;
     Log.Write(logstr);
     std::cout << logstr << std::endl;
     

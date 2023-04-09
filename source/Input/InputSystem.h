@@ -5,22 +5,11 @@
 
 #include "Keys.h"
 
-void      CursorSetPosition(int xx, int yy) {SetCursorPos( xx, yy );}
+void CursorSetPosition(int xx, int yy);
+glm::vec2 CursorGetPosition(void);
 
-glm::vec2 CursorGetPosition(void) {
-    POINT Pos;
-    glm::vec2 MousePos;
-    
-    GetCursorPos(&Pos);
-    
-    MousePos.x = Pos.x;
-    MousePos.y = Pos.y;
-    
-    return MousePos;
-}
 
 class InputSystem{
-    private:
     
     bool KeyPressed  [256];
     bool KeyReleased [256];
@@ -31,59 +20,48 @@ class InputSystem{
     bool MouseLeftReleased;
     bool MouseRightReleased;
     
-    public:
+public:
     
     int  LastKeyPressed;
     
-    InputSystem(void)    {
-        
-        for (int i=0; i <= 255; i++) {KeyPressed[i] = 0; KeyReleased[i] = 0; KeyCurrent[i] = 0;}
-        
-        LastKeyPressed = -1;
-        
-        MouseLeftPressed = false;
-        MouseRightPressed = false;
-        MouseLeftReleased = false;
-        MouseRightReleased = false;
-        
-    }
+    InputSystem(void);
     
     // Set key state
-    void  SetKeyPressed(int keyid)  {KeyPressed[keyid] = true;  KeyReleased[keyid] = false; KeyCurrent[keyid] = true;}
-    void  SetKeyReleased(int keyid) {KeyPressed[keyid] = false; KeyReleased[keyid] = true;  KeyCurrent[keyid] = false;}
+    void SetKeyPressed(int keyid);
+    void SetKeyReleased(int keyid);
     
     // Check key state
-    bool  CheckKeyPressed(int keyid)  {int currentKey = KeyPressed[keyid];  KeyPressed[keyid]  = false; return currentKey;}
-    bool  CheckKeyReleased(int keyid) {int currentKey = KeyReleased[keyid]; KeyReleased[keyid] = false; return currentKey;}
-    bool  CheckKeyCurrent(int keyid)  {return KeyCurrent [keyid];}
+    bool CheckKeyPressed(int keyid);
+    bool CheckKeyReleased(int keyid);
+    bool CheckKeyCurrent(int keyid);
     
     // Set mouse state
-    void SetMouseLeftPressed    (bool State)  {MouseLeftPressed = State;}
-    void SetMouseRightPressed   (bool State)  {MouseRightPressed = State;}
-    void SetMouseLeftReleased   (bool State)  {MouseLeftReleased = State;}
-    void SetMouseRightReleased  (bool State)  {MouseRightReleased = State;}
+    void SetMouseLeftPressed(bool State);
+    void SetMouseRightPressed(bool State);
+    void SetMouseLeftReleased(bool State);
+    void SetMouseRightReleased(bool State);
     
     // Check mouse state
-    bool CheckMouseLeftPressed    (void)  {return MouseLeftPressed;}
-    bool CheckMouseRightPressed   (void)  {return MouseRightPressed;}
-    bool CheckMouseLeftReleased   (void)  {return MouseLeftReleased;}
-    bool CheckMouseRightReleased  (void)  {return MouseRightReleased;}
+    bool CheckMouseLeftPressed(void);
+    bool CheckMouseRightPressed(void);
+    bool CheckMouseLeftReleased(void);
+    bool CheckMouseRightReleased(void);
     
     // Clear mouse state
-    void ClearMouseLeft         (void)  {MouseLeftPressed = false; MouseLeftReleased = false;}
-    void ClearMouseRight        (void)  {MouseRightPressed = false; MouseRightReleased = false;}
+    void ClearMouseLeft(void);
+    void ClearMouseRight(void);
     
     // Clear key state
-    void  ClearKey(int keyid)         {KeyPressed[keyid] = false; KeyReleased[keyid] = false; KeyCurrent[keyid] = false;}
-    void  ClearKeyPressed(int keyid)  {KeyPressed[keyid] = false;}
-    void  ClearKeyReleased(int keyid) {KeyReleased[keyid] = false;}
-    void  ClearKeyCurrent(int keyid)  {KeyCurrent[keyid] = false;}
+    void ClearKey(int keyid);
+    void ClearKeyPressed(int keyid);
+    void ClearKeyReleased(int keyid);
+    void ClearKeyCurrent(int keyid);
     
     // Clear all key states
-    void  ClearKeys(void)         {for (int i=0; i <= 255; i++) {KeyPressed[i] = 0; KeyReleased[i] = 0; KeyCurrent[i] = 0;}}
-    void  ClearKeysPressed(void)  {for (int i=0; i <= 255; i++) {KeyPressed[i] = 0;}}
-    void  ClearKeysReleased(void) {for (int i=0; i <= 255; i++) {KeyReleased[i] = 0;}}
-    void  ClearKeysCurrent(void)  {for (int i=0; i <= 255; i++) {KeyCurrent[i] = 0;}}
+    void ClearKeys(void);
+    void ClearKeysPressed(void);
+    void ClearKeysReleased(void);
+    void ClearKeysCurrent(void);
     
 };
 

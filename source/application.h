@@ -1,18 +1,8 @@
-//
-// Application entry point
 
 
 
-struct MyApplication : ApplicationLayer {
-    void Start(void);
-    void Run(void);
-    void Shutdown(void);
-};
-MyApplication Application;
 
-
-
-void CameraMovement(void) {
+void CameraMovementScript(void) {
     
     float cameraSpeed = 100;
     
@@ -41,20 +31,16 @@ Scene*     currentScene;
 
 
 
-void MyApplication::Start(void) {
+void Start(void) {
     
-    
-    Resources.LoadShaderGLSL("data/default.shader", "default");
-    Resources.LoadWaveFront("data/barrel.obj", "Barrel");
-    
-    Resources.LoadTexture("data/barrel.png", "matBarrel");
-    Resources.LoadTexture("data/grassy.png", "matGround");
+    Resources.LoadScene("data/main.scene");
     
     
     
     // Main scene
     currentScene = Renderer.CreateScene();
     Renderer.AddToRenderQueue(currentScene);
+    
     
     
     
@@ -71,7 +57,7 @@ void MyApplication::Start(void) {
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     Renderer.cameraMain->script = Renderer.CreateScript();
-    Renderer.cameraMain->script->OnUpdate = CameraMovement;
+    Renderer.cameraMain->script->OnUpdate = CameraMovementScript;
     
     
     
@@ -86,13 +72,16 @@ void MyApplication::Start(void) {
     meshSource = Resources.CreateMeshFromTag("Barrel");
     if (meshSource == nullptr) return;
     
-    std::vector<Vertex> vertexBuff;
-    std::vector<Index>  indexBuff;
-    meshSource->CopySubMesh(0, vertexBuff, indexBuff);
+    SubMesh subPart;
+    meshSource->CopySubMesh(0, subPart);
     
-    mesh->AddSubMesh(0, 0, -10, vertexBuff, indexBuff);
-    mesh->AddSubMesh(0, 0,   0, vertexBuff, indexBuff);
-    mesh->AddSubMesh(0, 0,  10, vertexBuff, indexBuff);
+    for (int i=0; i < 100; i++) {
+        float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+        float yy = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+        float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+        
+        mesh->AddSubMesh(xx, yy, zz, subPart.vertexBuffer, subPart.indexBuffer);
+    }
     
     
     
@@ -105,88 +94,49 @@ void MyApplication::Start(void) {
     currentScene->AddToSceneRoot(entity);
     
     
+}
+
+
+void Run(void) {
+    
+    {
+        float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+        float yy = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+        float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+        
+        unsigned int randMesh = Random.Range(0, mesh->GetSubMeshCount());
+        mesh->ChangeSubMeshPosition(randMesh, xx, yy, zz);
+        
+        randMesh = Random.Range(0, mesh->GetSubMeshCount());
+        mesh->ChangeSubMeshColor(randMesh, Colors.MakeRandom());
+        
+    }
+    
+    
+    
+    {
+        float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+        float yy = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+        float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
+        
+        mesh->AddSubMesh(xx, yy, zz, meshSource->vertexBuffer, meshSource->indexBuffer);
+        
+        if (mesh->GetSubMeshCount() > 200) {
+            for (int i=0; i < 10; i++) {
+                unsigned int randMesh = Random.Range(0, mesh->GetSubMeshCount());
+                mesh->RemoveSubMesh(randMesh);
+            }
+        }
+        
+    }
+    
     return;
 }
 
 
-
-
-void MyApplication::Run(void) {
+void Shutdown(void) {
     
-    if (meshSource == nullptr) return;
-    if (mesh == nullptr) return;
-    
-    
-    if (Input.CheckKeyCurrent(VK_I)) {
-        
-        float x = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
-        float y = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
-        float z = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
-        
-        SubMesh newMesh;
-        meshSource->CopySubMesh(0, newMesh);
-        mesh->AddSubMesh(x, y, z, newMesh.vertexBuffer, newMesh.indexBuffer);
-        
-    }
-    
-    if (Input.CheckKeyCurrent(VK_K)) {
-        
-        unsigned int randMesh = Random.Range(0, mesh->GetSubMeshCount());
-        
-        mesh->RemoveSubMesh(randMesh);
-        
-    }
-    
-    /*
-    float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
-    float yy = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
-    float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
-    unsigned int randMesh = Random.Range(0, mesh->GetSubMeshCount());
-    mesh->ChangeSubMeshPosition(randMesh, xx, yy, zz);
-    
-    randMesh = Random.Range(0, mesh->GetSubMeshCount());
-    mesh->ChangeSubMeshColor(randMesh, Colors.MakeRandom());
-    */
-    
-    
-    
-    if (Input.CheckKeyCurrent(VK_P)) {
-        
-        float x = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
-        float y = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
-        float z = (Random.Range(1, 100) * 0.8) - (Random.Range(1, 100) * 0.8);
-        
-        float xs = Random.Range(1, 100);
-        float ys = Random.Range(1, 100);
-        
-        mesh->AddPlane(x,y,z, xs,ys, Colors.MakeRandom());
-        
-    }
-    
-    
-    
-    if (Input.CheckKeyCurrent(VK_R)) 
-        mesh->UpdateMesh();
-    
-    
-    
-    
-    
+    return;
 }
-
-
-
-
-void MyApplication::Shutdown(void) {
-    
-    
-    
-}
-
-
-
-
-
-
 
 

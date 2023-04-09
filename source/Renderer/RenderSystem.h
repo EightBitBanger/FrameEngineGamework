@@ -1,10 +1,40 @@
-struct Viewport {int x, y, w, h;};
+// Standard headers
+#include <stdio.h>
+#include <stdlib.h>
+#include <cstdlib>
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+#include <string>
+#include <vector>
+#include <thread>
+#include <map>
+
+
+#define GLEW_STATIC
+#include <gl/glew.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+
+#include "std/poolallocator.h"
+#include "std/timer.h"
+#include "std/strings.h"
+#include "std/types.h"
+#include "std/logging.h"
+#include "std/random.h"
+#include "std/fileloader.h"
+
 
 #include "enumerators.h"
 
 #include "types/bufferlayout.h"
 #include "types/transform.h"
 #include "types/color.h"
+#include "types/viewport.h"
 
 #include "components/shader.h"
 #include "components/material.h"
@@ -17,6 +47,55 @@ struct Viewport {int x, y, w, h;};
 #include "components/sky.h"
 
 #include "components/scene.h"
+
+
+
+
+
+struct ColorPreset {
+    
+    Color red      = {1, 0, 0, 1};
+    Color green    = {0, 1, 0, 1};
+    Color blue     = {0, 0, 1, 1};
+    
+    Color dkred    = {0.2, 0, 0, 1};
+    
+    Color yellow   = {0.87, 0.87, 0, 1};
+    Color orange   = {0.8, 0.3, 0, 1};
+    
+    Color purple   = {0.87, 0.0, 0.87, 1};
+    
+    Color gray     = {0.5, 0.5, 0.5, 1};
+    Color ltgray   = {0.87, 0.87, 0.87, 1};
+    Color dkgray   = {0.18, 0.18, 0.18, 1};
+    
+    Color white    = {1, 1, 1, 1};
+    Color black    = {0, 0, 0, 1};
+    
+    Color random;
+    Color custom;
+    
+    Color& Make(float r, float g, float b) {
+        custom.r = r;
+        custom.g = g;
+        custom.b = b;
+        return custom;
+    }
+    
+    Color& MakeRandom(void) {
+        random.r = Random.Range(1, 100) * 0.01;
+        random.g = Random.Range(1, 100) * 0.01;
+        random.b = Random.Range(1, 100) * 0.01;
+        return random;
+    }
+    
+} Colors;
+
+
+
+
+
+
 
 
 
@@ -54,56 +133,33 @@ public:
     glm::vec2 displaySize;
     glm::vec2 displayCenter;
     
-    Scene* operator[] (int const i) {return renderQueue[i];}
     
-    RenderSystem() {
-        
-        windowHandle   = NULL;
-        deviceContext  = NULL;
-        renderContext  = NULL;
-        
-        renderQueue.clear();
-        
-        currentMesh      = nullptr;
-        currentMaterial  = nullptr;
-        currentShader    = nullptr;
-        
-        cameraMain = nullptr;
-        
-    }
+    RenderSystem();
     
     
-    Entity* CreateEntity(void)             {
-        Entity* entityPtr = entity.Create();
-        entityPtr->material = defaultMaterial;
-        return entityPtr;
-    }
-    void DestroyEntity(Entity* entityPtr)  {
-        if ((entityPtr->material != nullptr) & (entityPtr->material != defaultMaterial)) material.Destroy(entityPtr->material);
-        if (entityPtr->script != nullptr) script.Destroy(entityPtr->script);
-        entity.Destroy(entityPtr);
-    }
+    Entity* CreateEntity(void);
+    void DestroyEntity(Entity* entityPtr);
     
-    Mesh* CreateMesh(void)           {return mesh.Create();}
-    void DestroyMesh(Mesh* meshPtr)  {mesh.Destroy(meshPtr);}
+    Mesh* CreateMesh(void);
+    void DestroyMesh(Mesh* meshPtr);
     
-    Shader* CreateShader(void)             {return shader.Create();}
-    void DestroyShader(Shader* shaderPtr)  {shader.Destroy(shaderPtr);}
+    Shader* CreateShader(void);
+    void DestroyShader(Shader* shaderPtr);
     
-    Camera* CreateCamera(void)             {return camera.Create();}
-    void DestroyCamera(Camera* cameraPtr)  {camera.Destroy(cameraPtr);}
+    Camera* CreateCamera(void);
+    void DestroyCamera(Camera* cameraPtr);
     
-    Material* CreateMaterial(void)               {return material.Create();}
-    void DestroyMaterial(Material* materialPtr)  {material.Destroy(materialPtr);}
+    Material* CreateMaterial(void);
+    void DestroyMaterial(Material* materialPtr);
     
-    Sky* CreateSky(void)          {return sky.Create();}
-    void DestroySky(Sky* skyPtr)  {sky.Destroy(skyPtr);}
+    Sky* CreateSky(void);
+    void DestroySky(Sky* skyPtr);
     
-    Scene* CreateScene(void)            {return scene.Create();}
-    void DestroyScene(Scene* scenePtr)  {scene.Destroy(scenePtr);}
+    Scene* CreateScene(void);
+    void DestroyScene(Scene* scenePtr);
     
-    Script* CreateScript(void)             {return script.Create();}
-    void DestroyScript(Script* scriptPtr)  {script.Destroy(scriptPtr);}
+    Script* CreateScript(void);
+    void DestroyScript(Script* scriptPtr);
     
     
     
@@ -128,9 +184,54 @@ public:
 
 
 
+RenderSystem::RenderSystem() {
+    
+    windowHandle   = NULL;
+    deviceContext  = NULL;
+    renderContext  = NULL;
+    
+    renderQueue.clear();
+    
+    currentMesh      = nullptr;
+    currentMaterial  = nullptr;
+    currentShader    = nullptr;
+    
+    cameraMain = nullptr;
+    
+}
 
 
+Entity* RenderSystem::CreateEntity(void) {
+    Entity* entityPtr = entity.Create();
+    entityPtr->material = defaultMaterial;
+    return entityPtr;
+}
+void RenderSystem::DestroyEntity(Entity* entityPtr) {
+    if ((entityPtr->material != nullptr) & (entityPtr->material != defaultMaterial)) material.Destroy(entityPtr->material);
+    if (entityPtr->script != nullptr) script.Destroy(entityPtr->script);
+    entity.Destroy(entityPtr);
+}
 
+Mesh* RenderSystem::CreateMesh(void) {return mesh.Create();}
+void RenderSystem::DestroyMesh(Mesh* meshPtr) {mesh.Destroy(meshPtr);}
+
+Shader* RenderSystem::CreateShader(void) {return shader.Create();}
+void RenderSystem::DestroyShader(Shader* shaderPtr) {shader.Destroy(shaderPtr);}
+
+Camera* RenderSystem::CreateCamera(void) {return camera.Create();}
+void RenderSystem::DestroyCamera(Camera* cameraPtr) {camera.Destroy(cameraPtr);}
+
+Material* RenderSystem::CreateMaterial(void) {return material.Create();}
+void RenderSystem::DestroyMaterial(Material* materialPtr) {material.Destroy(materialPtr);}
+
+Sky* RenderSystem::CreateSky(void) {return sky.Create();}
+void RenderSystem::DestroySky(Sky* skyPtr) {sky.Destroy(skyPtr);}
+
+Scene* RenderSystem::CreateScene(void) {return scene.Create();}
+void RenderSystem::DestroyScene(Scene* scenePtr) {scene.Destroy(scenePtr);}
+
+Script* RenderSystem::CreateScript(void) {return script.Create();}
+void RenderSystem::DestroyScript(Script* scriptPtr) {script.Destroy(scriptPtr);}
 
 
 void RenderSystem :: RenderFrame(float deltaTime) {
@@ -280,8 +381,6 @@ void RenderSystem :: RenderFrame(float deltaTime) {
 
 void RenderSystem :: Initiate(void) {
     
-    Log.Write(" Renderer initiated"); Log.WriteLn();
-    
     defaultShader = CreateShader();
     defaultShader->BuildDefault();
     
@@ -327,7 +426,7 @@ bool RenderSystem :: RemoveFromRenderQueue(Scene* scenePtr) {
             return true;
         }
     }
-    return false;    
+    return false;
 }
 
 unsigned int RenderSystem :: GetRenderQueueSize(void) {
@@ -490,8 +589,8 @@ std::vector<std::string> RenderSystem :: GetGLErrorCodes(std::string errorLocati
             
         }
         
-        Log.Write(ErrorMsg);
-        Log.WriteLn();
+        //Log.Write(ErrorMsg);
+        //Log.WriteLn();
         
         ErrorList.push_back( ErrorMsg );
         
