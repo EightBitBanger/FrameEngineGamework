@@ -14,7 +14,7 @@ MyApplication Application;
 
 void CameraMovement(void) {
     
-    float cameraSpeed = 80;
+    float cameraSpeed = 100;
     
     if (Input.CheckKeyCurrent(VK_W)) Renderer.cameraMain->transform.position += Renderer.cameraMain->forward * cameraSpeed * Time.delta * glm::vec3(1, 0.2, 1);
     if (Input.CheckKeyCurrent(VK_S)) Renderer.cameraMain->transform.position -= Renderer.cameraMain->forward * cameraSpeed * Time.delta * glm::vec3(1, 0.2, 1);
@@ -51,12 +51,11 @@ void MyApplication::Start(void) {
     Resources.LoadTexture("data/grassy.png", "matGround");
     
     
+    
     // Main scene
     currentScene = Renderer.CreateScene();
     Renderer.AddToRenderQueue(currentScene);
     
-    
-    Physics.SetGravity(0, 0, 0);
     
     
     // Sky background
@@ -138,23 +137,16 @@ void MyApplication::Run(void) {
         
     }
     
-    
-    unsigned int randMesh = Random.Range(0, mesh->GetSubMeshCount());
-    
+    /*
     float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
     float yy = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
     float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
-    
+    unsigned int randMesh = Random.Range(0, mesh->GetSubMeshCount());
     mesh->ChangeSubMeshPosition(randMesh, xx, yy, zz);
     
-    
-    
-    
-    
     randMesh = Random.Range(0, mesh->GetSubMeshCount());
-    
     mesh->ChangeSubMeshColor(randMesh, Colors.MakeRandom());
-    
+    */
     
     
     

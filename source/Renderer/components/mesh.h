@@ -41,7 +41,7 @@ public:
         primitive = GL_TRIANGLES;
         shader    = nullptr;
         
-        AllocateBuffers(10000);
+        AllocateBuffers(0);
     }
     
     ~Mesh() {
@@ -104,13 +104,13 @@ void Mesh::DisableAttribute(int index) {
 
 
 void Mesh::LoadVertexBuffer(Vertex* BufferData, int VertexCount) {
-    Bind();
+    glBindVertexArray(vertexArray);
     glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
     glBufferData(GL_ARRAY_BUFFER, VertexCount * sizeof(Vertex), &BufferData[0], GL_DYNAMIC_DRAW);
 }
 
 void Mesh::LoadIndexBuffer(Index* BufferData, int IndexCount) {
-    Bind();
+    glBindVertexArray(vertexArray);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, IndexCount * sizeof(Index), &BufferData[0], GL_DYNAMIC_DRAW);
 }
@@ -231,16 +231,15 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
                 i++;
             }
             
-            Bind();
-            glBufferSubData(GL_ARRAY_BUFFER,         freeMeshPtr.vertexBegin * sizeof(Vertex), freeMeshPtr.vertexCount * sizeof(Vertex), &vertexBuffer[freeMeshPtr.vertexBegin]);
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, freeMeshPtr.indexBegin  * sizeof(Index),  freeMeshPtr.indexCount  * sizeof(Index),  &indexBuffer[freeMeshPtr.indexBegin]);
+            glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
+            glBufferSubData(GL_ARRAY_BUFFER, freeMeshPtr.vertexBegin * sizeof(Vertex), freeMeshPtr.vertexCount * sizeof(Vertex), &vertexBuffer[freeMeshPtr.vertexBegin]);
+            
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
+            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, freeMeshPtr.indexBegin * sizeof(Index),  freeMeshPtr.indexCount * sizeof(Index), &indexBuffer[freeMeshPtr.indexBegin]);
             
             return false;
         }
     }
-    
-    //if ((vertexBuffer.size() + vrtxBuffer.size()) > maxSize) return false;
-    //if ((indxBuffer.size()   + indxBuffer.size()) > maxSize) return false;
     
     unsigned int startVertex = vertexBuffer.size();
     unsigned int startIndex  = indexBuffer.size();
@@ -269,11 +268,24 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
         indexBuffer.push_back(index);
     }
     
-    //Bind();
-    //glBufferSubData(GL_ARRAY_BUFFER,         0, vertexBuffer.size() * sizeof(Vertex), &vertexBuffer[0]);
-    //glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBuffer.size()  * sizeof(Index), &indexBuffer[0]);
+    // Check to allocate new GPU memory
+    if ((vertexBuffer.size() > maxSize) | (indexBuffer.size() > maxSize)) {
+        glBindVertexArray(vertexArray);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
+        glBufferData(GL_ARRAY_BUFFER, (vertexBuffer.size() * sizeof(Vertex)) + (vrtxBuffer.size() * 100), NULL, GL_DYNAMIC_DRAW);
+        
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (indexBuffer.size() * sizeof(Index)) + (indxBuffer.size() * 100), NULL, GL_DYNAMIC_DRAW);
+    }
     
-    UpdateMesh();
+    // Re-upload the buffer
+    glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBuffer.size() * sizeof(Vertex), &vertexBuffer[0]);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBuffer.size() * sizeof(Index), &indexBuffer[0]);
+    
     return true;
 }
 
@@ -380,8 +392,16 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
 
 void Mesh::UpdateMesh(void) {
     
-    LoadVertexBuffer(vertexBuffer.data(), vertexBuffer.size());
-    LoadIndexBuffer(indexBuffer.data(), indexBuffer.size());
+    glBindVertexArray(vertexArray);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
+    glBufferData(GL_ARRAY_BUFFER, vertexBuffer.size() * sizeof(Vertex), &vertexBuffer[0], GL_DYNAMIC_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.size() * sizeof(Index), &indexBuffer[0], GL_DYNAMIC_DRAW);
+    
+    //LoadVertexBuffer(vertexBuffer.data(), vertexBuffer.size());
+    //LoadIndexBuffer(indexBuffer.data(), indexBuffer.size());
     
 }
 

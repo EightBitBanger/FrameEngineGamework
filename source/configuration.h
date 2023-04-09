@@ -2,7 +2,7 @@
 //
 // Window configuration
 
-#define  WINDOW_NAME  "window"
+#define  WINDOW_NAME  "Scene view"
 
 #define  WINDOW_WIDTH       1190
 #define  WINDOW_HEIGHT      900

@@ -7,25 +7,21 @@ struct PhysicsSystem {
     rp3d::RigidBody* CreateRigidBody(float x, float y, float z);
     void DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr);
     
+    PhysicsSystem();
     
-    
-    PhysicsSystem() {
-        
-        world = common.createPhysicsWorld();
-    }
-    
-    
-    void SetGravity(float x, float y, float z) {world->setGravity(rp3d::Vector3(x, y, z));}
-    
-    
-    
-    
-    
+    void SetGravity(float x, float y, float z);
     
 };
 
 
 
+PhysicsSystem::PhysicsSystem() {
+    
+    world = common.createPhysicsWorld();
+}
+
+
+void PhysicsSystem::SetGravity(float x, float y, float z) {world->setGravity(rp3d::Vector3(x, y, z));}
 
 
 rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x=0.0, float y=0.0, float z=0.0) {
