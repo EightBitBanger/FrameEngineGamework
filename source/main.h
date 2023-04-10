@@ -45,7 +45,7 @@ PhysicsSystem Physics;
 #include "Renderer/RenderSystem.h"
 RenderSystem  Renderer;
 
-#include "Resources/ResourceManager.h"
+#include "resources/ResourceManager.h"
 ResourceManager Resources;
 
 ColorPreset Colors;

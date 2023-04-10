@@ -7,6 +7,8 @@
 
 struct RandomGen {
     
+    RandomGen();
+    
     static void  Seed(int value);
     
     static float Range(float min, float max);

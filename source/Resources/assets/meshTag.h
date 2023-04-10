@@ -6,12 +6,7 @@ struct MeshTag {
     std::vector<Vertex> vertexBuffer;
     std::vector<Index>  indexBuffer;
     
-    
-    
-    void UnloadBuffers(void) {
-        vertexBuffer.clear();
-        indexBuffer.clear();
-    }
+    MeshTag();
     
 };
 

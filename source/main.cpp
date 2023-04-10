@@ -62,13 +62,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Renderer.Initiate();
     
-    Resources.Initiate();
-    
-    Start();
-    
-    
     PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
     Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
+    
+    Start();
     
     RenderTime.Update();
     PhysicsTime.Update();
@@ -122,8 +119,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Renderer.ReleaseRenderTarget();
     DestroyWindow(wHnd);
-    
-    Resources.DestroyAssets();
     
     return wMessages.wParam;
 }

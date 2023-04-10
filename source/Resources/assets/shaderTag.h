@@ -6,9 +6,7 @@ struct ShaderTag {
     std::string vertexScript;
     std::string fragmentScript;
     
-    ShaderTag() {
-        
-    }
+    ShaderTag();
     
 };
 

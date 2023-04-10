@@ -1,5 +1,3 @@
-
-//
 // Window configuration
 
 #define  WINDOW_NAME  "Scene view"
@@ -14,13 +12,11 @@
 
 #define  LOG_RENDER_DETAILS_
 
-//
 // Rendering system
 
 #define  RENDER_FRAMES_PER_SECOND          120
 #define  _RENDERER_CHECK_OPENGL_ERRORS__
 
-//
 // Physics simulation
 
 #define PHYSICS_UPDATES_PER_SECOND         60
