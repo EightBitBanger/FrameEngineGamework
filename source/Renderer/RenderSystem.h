@@ -20,13 +20,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-#include "std/poolallocator.h"
-#include "std/timer.h"
-#include "std/strings.h"
-#include "std/types.h"
-#include "std/logging.h"
-#include "std/random.h"
-#include "std/fileloader.h"
+#include "../std/poolallocator.h"
+#include "../std/timer.h"
+#include "../std/strings.h"
+#include "../std/types.h"
+#include "../std/logging.h"
+#include "../std/random.h"
+#include "../std/fileloader.h"
 extern Logger Log;
 
 #include "enumerators.h"

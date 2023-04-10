@@ -18,7 +18,7 @@
 #include "script.h"
 
 #include "../../Input/InputSystem.h"
-#include <std/timer.h>
+#include "../../std/timer.h"
 
 struct Camera {
     
