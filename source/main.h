@@ -55,7 +55,7 @@ bool isActive = true;
 HWND wHnd = NULL;
 
 
-#include "application.h"
+#include "application/application.h"
 
 #include "winproc.h"
 
