@@ -48,6 +48,7 @@ RenderSystem  Renderer;
 #include "Resources/ResourceManager.h"
 ResourceManager Resources;
 
+ColorPreset Colors;
 
 bool isPaused = false;
 bool isActive = true;
