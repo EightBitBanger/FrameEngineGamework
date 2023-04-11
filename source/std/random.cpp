@@ -5,20 +5,16 @@
 
 #include <random>
 
-void RandomGen::Seed(int value) {
+void  RandomGen::Seed(int value) {
     srand(value);
 }
 
 float  RandomGen::Range(float min, float max) {
-    if (min == 0) min++;
-    if (max == 0) max++;
     if (min >= max) return 1;
     return ((float)(rand() % (int)max) + min);
 }
 
 int  RandomGen::Range(int min, int max) {
-    if (min == 0) min++;
-    if (max == 0) max++;
     if (min >= max) return 1;
     return (rand() % max) + min;
 }
@@ -26,6 +22,5 @@ int  RandomGen::Range(int min, int max) {
 RandomGen::RandomGen() {
     
     srand(100);
-    
 }
 

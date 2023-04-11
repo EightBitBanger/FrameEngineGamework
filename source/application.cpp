@@ -113,19 +113,24 @@ void Run(void) {
     if (counter == 20) mesh->ChangeSubMeshColor(3, Colors.MakeRandom() );
     if (counter == 25) mesh->ChangeSubMeshColor(4, Colors.MakeRandom() );
     
+    
+    
+    
+    unsigned int index = Random.Range( 0, mesh->GetSubMeshCount() );
+    float xx = (Random.Range(1, 100) - Random.Range(1, 100)) * 0.4;
+    float yy = (Random.Range(1, 100) - Random.Range(1, 100)) * 0.4;
+    float zz = (Random.Range(1, 100) - Random.Range(1, 100)) * 0.4;
+    mesh->ChangeSubMeshPosition(index, xx, yy, zz);
+    
+    
+    
+    
     counter++;
     return;
     
     
-    
-    
-    
-    
-    
-    
-    
     //
-    //    CRASH ON CALL - Random.Range()
+    //    CRASH ON CALL - Random.Range() .. ?
     //
     
     
