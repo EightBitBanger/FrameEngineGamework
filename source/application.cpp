@@ -89,6 +89,12 @@ void Start(void) {
     currentScene->AddToSceneRoot(entity);
     
     
+    mesh->AddSubMesh(0, 0, -20, subPart.vertexBuffer, subPart.indexBuffer);
+    mesh->AddSubMesh(0, 0, -10, subPart.vertexBuffer, subPart.indexBuffer);
+    mesh->AddSubMesh(0, 0,   0, subPart.vertexBuffer, subPart.indexBuffer);
+    mesh->AddSubMesh(0, 0,  10, subPart.vertexBuffer, subPart.indexBuffer);
+    mesh->AddSubMesh(0, 0,  20, subPart.vertexBuffer, subPart.indexBuffer);
+    
     return;
 }
 
@@ -99,13 +105,13 @@ unsigned int counter=0;
 
 void Run(void) {
     
-    if (counter > 500) return;
+    if (counter > 25) counter = 0;
     
-    if (counter == 100) mesh->AddSubMesh(0, 0, -20, subPart.vertexBuffer, subPart.indexBuffer);
-    if (counter == 200) mesh->AddSubMesh(0, 0, -10, subPart.vertexBuffer, subPart.indexBuffer);
-    if (counter == 300) mesh->AddSubMesh(0, 0,   0, subPart.vertexBuffer, subPart.indexBuffer);
-    if (counter == 400) mesh->AddSubMesh(0, 0,  10, subPart.vertexBuffer, subPart.indexBuffer);
-    if (counter == 500) mesh->AddSubMesh(0, 0,  20, subPart.vertexBuffer, subPart.indexBuffer);
+    if (counter == 5)  mesh->ChangeSubMeshColor(0, Colors.MakeRandom() );
+    if (counter == 10) mesh->ChangeSubMeshColor(1, Colors.MakeRandom() );
+    if (counter == 15) mesh->ChangeSubMeshColor(2, Colors.MakeRandom() );
+    if (counter == 20) mesh->ChangeSubMeshColor(3, Colors.MakeRandom() );
+    if (counter == 25) mesh->ChangeSubMeshColor(4, Colors.MakeRandom() );
     
     counter++;
     return;

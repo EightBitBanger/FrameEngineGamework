@@ -9,6 +9,8 @@ class ResourceManager {
     std::vector<TextureTag>   textureTags;
     std::vector<ShaderTag>    shaderTags;
     
+    unsigned char* LoadImageRaw(char const* filename, int* width, int* height, int* channels, int req_channels);
+    
 public:
     
     void Initiate(void);
@@ -33,7 +35,6 @@ public:
     bool LoadDefinitions(std::string filename);
     bool LoadLocations(std::string filename);
     
-    unsigned char* LoadImageRaw(char const* filename, int* width, int* height, int* channels, int req_channels);
     
     
     

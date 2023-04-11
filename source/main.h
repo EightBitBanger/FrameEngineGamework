@@ -20,21 +20,27 @@
 #include "configuration.h"
 #include "plugins.h"
 
+//
 // My standard includes
 #include "std/poolallocator.h"
-#include "std/timer.h"
 #include "std/strings.h"
 #include "std/types.h"
-#include "std/logging.h"
 #include "std/random.h"
+#include "std/logging.h"
 #include "std/fileloader.h"
 
+
+//
+// Singleton access points
+
+#include "std/timer.h"
 Timer      PhysicsTime;
 Timer      RenderTime;
+
 Timer      Time;
+
 Logger     Log;
 RandomGen  Random;
-
 
 #include "Input/InputSystem.h"
 InputSystem   Input;
@@ -44,11 +50,11 @@ PhysicsSystem Physics;
 
 #include "Renderer/RenderSystem.h"
 RenderSystem  Renderer;
+ColorPreset   Colors;
 
 #include "resources/ResourceManager.h"
 ResourceManager Resources;
 
-ColorPreset Colors;
 
 bool isPaused = false;
 bool isActive = true;
