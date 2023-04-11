@@ -60,12 +60,14 @@ void Start(void) {
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->transform.position = glm::vec3(-20, 1, 0);
+    Renderer.cameraMain->transform.position = glm::vec3(-40, 2, 0);
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     Renderer.cameraMain->script = Renderer.CreateScript();
     Renderer.cameraMain->script->OnUpdate = CameraMovementScript;
+    
+    
     
     // Mesh
     mesh = Renderer.CreateMesh();
@@ -97,13 +99,16 @@ unsigned int counter=0;
 
 void Run(void) {
     
-    if (counter > 0) return;
+    if (counter > 500) return;
+    
+    if (counter == 100) mesh->AddSubMesh(0, 0, -20, subPart.vertexBuffer, subPart.indexBuffer);
+    if (counter == 200) mesh->AddSubMesh(0, 0, -10, subPart.vertexBuffer, subPart.indexBuffer);
+    if (counter == 300) mesh->AddSubMesh(0, 0,   0, subPart.vertexBuffer, subPart.indexBuffer);
+    if (counter == 400) mesh->AddSubMesh(0, 0,  10, subPart.vertexBuffer, subPart.indexBuffer);
+    if (counter == 500) mesh->AddSubMesh(0, 0,  20, subPart.vertexBuffer, subPart.indexBuffer);
+    
     counter++;
-    
-    //mesh->ChangeSubMeshPosition(1, 0, 0, 0);
-    
-    
-    
+    return;
     
     
     
@@ -133,7 +138,7 @@ void Run(void) {
         //float yy = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
         //float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.7;
         
-        mesh->AddSubMesh(0, 0, 0, subPart.vertexBuffer, subPart.indexBuffer);
+        //mesh->AddSubMesh(0, 0, 0, subPart.vertexBuffer, subPart.indexBuffer);
     //}
     
     
