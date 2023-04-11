@@ -18,13 +18,6 @@ extern InputSystem       Input;
 
 
 
-Mesh*      mesh;
-Mesh*      meshSource;
-SubMesh    subPart;
-
-Material*  material;
-Scene*     currentScene;
-
 void CameraMovementScript(void) {
     
     float cameraSpeed = 100;
@@ -41,6 +34,13 @@ void CameraMovementScript(void) {
 
 
 
+
+Mesh*      mesh;
+Mesh*      meshSource;
+SubMesh    subPart;
+
+Material*  material;
+Scene*     currentScene;
 
 void Start(void) {
     
@@ -86,6 +86,7 @@ void Start(void) {
     entity->material->color = Color(0, 0, 0, 1);
     currentScene->AddToSceneRoot(entity);
     
+    
     return;
 }
 
@@ -100,6 +101,7 @@ void Run(void) {
     counter++;
     
     //mesh->ChangeSubMeshPosition(1, 0, 0, 0);
+    
     
     
     

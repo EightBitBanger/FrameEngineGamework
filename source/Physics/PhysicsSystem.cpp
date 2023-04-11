@@ -6,10 +6,7 @@ PhysicsSystem::PhysicsSystem() {
 }
 
 
-void PhysicsSystem::SetGravity(float x, float y, float z) {
-    rp3d::Vector3 direction = rp3d::Vector3(x, y, z);
-    world->setGravity(direction);
-}
+void PhysicsSystem::SetGravity(float x, float y, float z) {world->setGravity(rp3d::Vector3(x, y, z));}
 
 
 rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x=0.0, float y=0.0, float z=0.0) {
