@@ -72,6 +72,7 @@ public:
     void DrawVertexArray(void);
     void DrawIndexArray(void);
     
+    
     unsigned int GetSubMeshCount(void) {return subMesh.size();}
     
     
@@ -79,8 +80,9 @@ public:
     void AddWall(float x, float y, float z, float xscale, float yscale, float zscale, Color color);
     
     
-    
+    bool AddSubMesh(float x, float y, float z, SubMesh& mesh);
     bool AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer);
+    
     
     bool RemoveSubMesh(unsigned int index);
     

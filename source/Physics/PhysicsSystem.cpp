@@ -1,4 +1,5 @@
 #include "PhysicsSystem.h"
+#include <ReactPhysics3d/ReactPhysics3d.h>
 
 PhysicsSystem::PhysicsSystem() {
     

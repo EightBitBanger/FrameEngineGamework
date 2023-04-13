@@ -223,9 +223,6 @@ Shader* ResourceManager::CreateShaderFromTag(std::string name) {
 
 void ResourceManager::DestroyAssets(void) {
     
-    //for (std::vector<MeshTag>::iterator it = meshTags.begin(); it != meshTags.end(); ++it) 
-        //it->UnloadBuffers();
-    
     for (std::vector<TextureTag>::iterator it = textureTags.begin(); it != textureTags.end(); ++it) 
         if (it->buffer != nullptr) 
             stbi_image_free(it->buffer);

@@ -122,6 +122,10 @@ bool Mesh::AddPlane(float x, float y, float z, float width, float height, Color 
 }
 
 
+bool Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh) {
+    return AddSubMesh(x, y, z, mesh.vertexBuffer, mesh.indexBuffer);
+}
+
 bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer) {
     
     if (freeMesh.size() > 0) {

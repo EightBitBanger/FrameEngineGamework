@@ -35,12 +35,9 @@ void CameraMovementScript(void) {
 
 
 
-Mesh*      mesh;
-Mesh*      meshSource;
-SubMesh    subPart;
 
-Material*  material;
-Scene*     currentScene;
+
+
 
 void Start(void) {
     
@@ -51,12 +48,12 @@ void Start(void) {
     
     
     // Main scene
-    currentScene = Renderer.CreateScene();
+    Scene* currentScene = Renderer.CreateScene();
     Renderer.AddToRenderQueue(currentScene);
     
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
-    Renderer.skyMain->background = Colors.black;
+    Renderer.skyMain->background = Colors.Make(0.087, 0.087, 0.087);
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
@@ -69,31 +66,36 @@ void Start(void) {
     
     
     
-    // Mesh
-    mesh = Renderer.CreateMesh();
-    mesh->SetDefaultAttributes();
-    mesh->shader = Resources.CreateShaderFromTag("default");
-    if (mesh->shader == nullptr) return;
-    
-    meshSource = Resources.CreateMeshFromTag("Barrel");
-    if (meshSource == nullptr) return;
-    
-    meshSource->CopySubMesh(0, subPart);
-    
     Entity* entity = Renderer.CreateEntity();
+    
+    entity->mesh = Renderer.CreateMesh();
+    entity->mesh->SetDefaultAttributes();
+    
+    entity->mesh->shader = Resources.CreateShaderFromTag("default");
+    if (entity->mesh->shader == nullptr) return;
+    
     entity->material = Resources.CreateMaterialFromTag("matBarrel");
     if (entity->material == nullptr) return;
     
-    entity->mesh = mesh;
     entity->material->color = Color(0, 0, 0, 1);
+    
     currentScene->AddToSceneRoot(entity);
     
     
-    mesh->AddSubMesh(0, 0, -20, subPart.vertexBuffer, subPart.indexBuffer);
-    mesh->AddSubMesh(0, 0, -10, subPart.vertexBuffer, subPart.indexBuffer);
-    mesh->AddSubMesh(0, 0,   0, subPart.vertexBuffer, subPart.indexBuffer);
-    mesh->AddSubMesh(0, 0,  10, subPart.vertexBuffer, subPart.indexBuffer);
-    mesh->AddSubMesh(0, 0,  20, subPart.vertexBuffer, subPart.indexBuffer);
+    
+    // Load the mesh and copy out the sub mesh
+    Mesh* meshSource = Resources.CreateMeshFromTag("Barrel");
+    if (meshSource == nullptr) return;
+    
+    SubMesh subPart;
+    meshSource->CopySubMesh(0, subPart);
+    Renderer.DestroyMesh(meshSource);
+    
+    entity->mesh->AddSubMesh(0, 0, -20, subPart);
+    entity->mesh->AddSubMesh(0, 0, -10, subPart);
+    entity->mesh->AddSubMesh(0, 0,   0, subPart);
+    entity->mesh->AddSubMesh(0, 0,  10, subPart);
+    entity->mesh->AddSubMesh(0, 0,  20, subPart);
     
     return;
 }
@@ -104,7 +106,7 @@ void Start(void) {
 unsigned int counter=0;
 
 void Run(void) {
-    
+    /*
     if (counter > 25) counter = 0;
     
     if (counter == 5)  mesh->ChangeSubMeshColor(0, Colors.MakeRandom() );
@@ -123,7 +125,7 @@ void Run(void) {
     mesh->ChangeSubMeshPosition(index, xx, yy, zz);
     
     
-    
+    */
     
     counter++;
     return;

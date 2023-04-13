@@ -1,7 +1,6 @@
 #ifndef PHYSICSFRAMEWORK
 #define PHYSICSFRAMEWORK
 
-#include <ReactPhysics3d/ReactPhysics3d.h>
 
 struct PhysicsSystem {
     
