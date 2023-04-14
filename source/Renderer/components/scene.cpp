@@ -1,15 +1,16 @@
 #include "scene.h"
 
+Entity* Scene::GetEntity(unsigned int i) {return entities[i];}
 
 void Scene::AddToSceneRoot(Entity* entity) {
-    entityQueue.push_back( entity );
+    entities.push_back( entity );
 }
 
 bool Scene::RemoveFromSceneRoot(Entity* entity) {
-    for (std::vector<Entity*>::iterator it = entityQueue.begin(); it != entityQueue.end(); ++it) {
+    for (std::vector<Entity*>::iterator it = entities.begin(); it != entities.end(); ++it) {
         Entity* entityPtr = *it;
         if (entity == entityPtr) {
-            entityQueue.erase(it);
+            entities.erase(it);
             return true;
         }
     }
@@ -18,12 +19,12 @@ bool Scene::RemoveFromSceneRoot(Entity* entity) {
 
 
 unsigned int Scene::GetRenderQueueSize(void) {
-    return entityQueue.size();
+    return entities.size();
 }
 
 
 Entity* Scene::GetRenderQueueEntity(unsigned int index) {
-    return entityQueue[index];
+    return entities[index];
 }
 
 

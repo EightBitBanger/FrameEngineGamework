@@ -38,7 +38,6 @@ void CameraMovementScript(void) {
 
 
 
-
 void Start(void) {
     
     Resources.Initiate();
@@ -68,7 +67,8 @@ void Start(void) {
     
     Entity* entity = Renderer.CreateEntity();
     
-    entity->mesh = Renderer.CreateMesh();
+    Mesh* mesh = Renderer.CreateMesh();
+    entity->mesh = mesh;
     entity->mesh->SetDefaultAttributes();
     
     entity->mesh->shader = Resources.CreateShaderFromTag("default");
@@ -106,8 +106,9 @@ void Start(void) {
 unsigned int counter=0;
 
 void Run(void) {
-    /*
-    if (counter > 25) counter = 0;
+    
+    
+    Mesh* mesh = Renderer.GetScene(0)->GetEntity(0)->mesh;
     
     if (counter == 5)  mesh->ChangeSubMeshColor(0, Colors.MakeRandom() );
     if (counter == 10) mesh->ChangeSubMeshColor(1, Colors.MakeRandom() );
@@ -122,12 +123,15 @@ void Run(void) {
     float xx = (Random.Range(1, 100) - Random.Range(1, 100)) * 0.4;
     float yy = (Random.Range(1, 100) - Random.Range(1, 100)) * 0.4;
     float zz = (Random.Range(1, 100) - Random.Range(1, 100)) * 0.4;
+    
     mesh->ChangeSubMeshPosition(index, xx, yy, zz);
     
     
-    */
+    
     
     counter++;
+    if (counter > 25) counter = 0;
+    
     return;
     
     

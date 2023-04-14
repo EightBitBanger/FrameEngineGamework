@@ -74,6 +74,8 @@ class RenderSystem {
     
 public:
     
+    Scene* operator[] (unsigned int const i) {return renderQueue[i];}
+    
     Material*  defaultMaterial;
     Shader*    defaultShader;
     
@@ -108,6 +110,7 @@ public:
     void DestroySky(Sky* skyPtr);
     
     Scene* CreateScene(void);
+    Scene* GetScene(unsigned int index);
     void DestroyScene(Scene* scenePtr);
     
     Script* CreateScript(void);

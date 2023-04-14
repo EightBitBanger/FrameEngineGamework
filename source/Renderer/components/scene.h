@@ -5,9 +5,13 @@
 
 #include "entity.h"
 
-struct Scene {
+class Scene {
     
-    std::vector<Entity*>  entityQueue;
+public:
+    
+    std::vector<Entity*>  entities;
+    
+    Entity* GetEntity(unsigned int i);
     
     void AddToSceneRoot(Entity* entity);
     bool RemoveFromSceneRoot(Entity* entity);

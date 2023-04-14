@@ -41,13 +41,13 @@ class Mesh {
     
     unsigned int maxSize;
     
-public:
-    
     std::vector<Vertex>   vertexBuffer;
     std::vector<Index>    indexBuffer;
     
     std::vector<SubMesh> subMesh;
     std::vector<SubMesh> freeMesh;
+    
+public:
     
     Shader* shader;
     
@@ -60,8 +60,8 @@ public:
     void DisableAttribute(int index);
     void SetDefaultAttributes(void);
     
-    void LoadVertexBuffer(Vertex* BufferData, int VertexCount);
-    void LoadIndexBuffer(Index* BufferData, int IndexCount);
+    void LoadVertexBuffer(Vertex* bufferData, int vertexCount);
+    void LoadIndexBuffer(Index* bufferData, int indexCount);
     
     
     void Bind(void);
@@ -73,8 +73,7 @@ public:
     void DrawIndexArray(void);
     
     
-    unsigned int GetSubMeshCount(void) {return subMesh.size();}
-    
+    unsigned int GetSubMeshCount(void);
     
     bool AddPlane(float x, float y, float z, float width, float height, Color color);
     void AddWall(float x, float y, float z, float xscale, float yscale, float zscale, Color color);

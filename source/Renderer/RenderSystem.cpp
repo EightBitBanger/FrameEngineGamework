@@ -44,6 +44,7 @@ Sky* RenderSystem::CreateSky(void) {return sky.Create();}
 void RenderSystem::DestroySky(Sky* skyPtr) {sky.Destroy(skyPtr);}
 
 Scene* RenderSystem::CreateScene(void) {return scene.Create();}
+Scene* RenderSystem::GetScene(unsigned int index) {return renderQueue[index];}
 void RenderSystem::DestroyScene(Scene* scenePtr) {scene.Destroy(scenePtr);}
 
 Script* RenderSystem::CreateScript(void) {return script.Create();}
@@ -90,7 +91,7 @@ void RenderSystem :: RenderFrame(float deltaTime) {
         
         // Run the entity list
         
-        for (std::vector<Entity*>::iterator it = scenePtr->entityQueue.begin(); it != scenePtr->entityQueue.end(); ++it) {
+        for (std::vector<Entity*>::iterator it = scenePtr->entities.begin(); it != scenePtr->entities.end(); ++it) {
             
             Entity* currentEntity = *it;
             
@@ -208,7 +209,7 @@ void RenderSystem :: Initiate(void) {
         
         Scene* scenePtr = *it;
         
-        for (std::vector<Entity*>::iterator it = scenePtr->entityQueue.begin(); it != scenePtr->entityQueue.end(); ++it) {
+        for (std::vector<Entity*>::iterator it = scenePtr->entities.begin(); it != scenePtr->entities.end(); ++it) {
             
             Entity* currentEntity = *it;
             

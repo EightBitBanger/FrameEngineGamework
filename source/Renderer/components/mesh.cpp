@@ -30,16 +30,16 @@ void Mesh::DisableAttribute(int index) {
 
 
 
-void Mesh::LoadVertexBuffer(Vertex* BufferData, int VertexCount) {
+void Mesh::LoadVertexBuffer(Vertex* bufferData, int vertexCount) {
     glBindVertexArray(vertexArray);
     glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
-    glBufferData(GL_ARRAY_BUFFER, VertexCount * sizeof(Vertex), &BufferData[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), &bufferData[0], GL_DYNAMIC_DRAW);
 }
 
-void Mesh::LoadIndexBuffer(Index* BufferData, int IndexCount) {
+void Mesh::LoadIndexBuffer(Index* bufferData, int indexCount) {
     glBindVertexArray(vertexArray);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, IndexCount * sizeof(Index), &BufferData[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(Index), &bufferData[0], GL_DYNAMIC_DRAW);
 }
 
 
@@ -84,6 +84,10 @@ void Mesh::DrawIndexArray(void) {
     glDrawElements(primitive, indexBuffer.size(), GL_UNSIGNED_INT, (void*)0);
     
     return;
+}
+
+unsigned int Mesh::GetSubMeshCount(void) {
+    return subMesh.size();
 }
 
 void Mesh::SetDefaultAttributes(void) {
