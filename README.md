@@ -1,6 +1,6 @@
 ### Features
 * OpenGL render system  (in progress..)
-* Physics support by ReactPhysics3D
+* Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>
 * Audio  (considering OpenAL..)
 
 
