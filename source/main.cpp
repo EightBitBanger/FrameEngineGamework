@@ -103,8 +103,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         
         if (Time.Update()) {
             
-            if (!isPaused) 
-                Run();
+            Run();
             
             Renderer.RenderFrame( Time.delta );
             

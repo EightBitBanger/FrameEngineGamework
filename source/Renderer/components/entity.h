@@ -24,6 +24,8 @@
 
 #include "../../Physics/PhysicsSystem.h"
 
+extern PhysicsSystem Physics;
+
 struct Entity {
     
     Transform transform;

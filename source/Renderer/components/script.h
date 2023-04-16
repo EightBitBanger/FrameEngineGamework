@@ -2,6 +2,7 @@
 #define COMPONENT_SCRIPT
 
 void DefaultFunctionPtr(void);
+#define  nullfunc  DefaultFunctionPtr
 
 struct Script {
     

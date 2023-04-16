@@ -5,8 +5,10 @@ Mesh::Mesh() {
     
     primitive = GL_TRIANGLES;
     shader    = nullptr;
+    vertexBufferSz = 0;
+    indexBufferSz = 0;
     
-    AllocateBuffers(0);
+    AllocateBuffers(50000);
 }
 
 Mesh::~Mesh() {
@@ -74,14 +76,14 @@ void Mesh::FreeBuffers(void) {
 
 void Mesh::DrawVertexArray(void) {
     
-    glDrawArrays(primitive, 0, vertexBuffer.size());
+    glDrawArrays(primitive, 0, vertexBufferSz);
     
     return;
 }
 
 void Mesh::DrawIndexArray(void) {
     
-    glDrawElements(primitive, indexBuffer.size(), GL_UNSIGNED_INT, (void*)0);
+    glDrawElements(primitive, indexBufferSz, GL_UNSIGNED_INT, (void*)0);
     
     return;
 }
@@ -97,7 +99,7 @@ void Mesh::SetDefaultAttributes(void) {
     SetAttribute(0, 3, sizeof(Vertex), 0);
     SetAttribute(1, 3, sizeof(Vertex), 12);
     SetAttribute(2, 2, sizeof(Vertex), 24);
-    
+    return;
 }
 
 
@@ -203,23 +205,28 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
         indexBuffer.push_back(index);
     }
     
+    
+    vertexBufferSz = vertexBuffer.size();
+    indexBufferSz  = indexBuffer.size();
+    
     // Check to allocate new GPU memory
-    if ((vertexBuffer.size() > maxSize) | (indexBuffer.size() > maxSize)) {
-        glBindVertexArray(vertexArray);
+    if ((vertexBufferSz > maxSize) | (indexBufferSz > maxSize)) {
+        if (vertexBufferSz > indexBufferSz) 
+        {maxSize = vertexBufferSz;} else {maxSize = indexBufferSz;}
         
-        glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
-        glBufferData(GL_ARRAY_BUFFER, (vertexBuffer.size() * sizeof(Vertex)) + (vrtxBuffer.size() * 100), NULL, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertexBufferSz * sizeof(Vertex) + (vrtxBuffer.size() * sizeof(Vertex)), NULL, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSz * sizeof(Index) + (indxBuffer.size() * sizeof(Vertex)), NULL, GL_DYNAMIC_DRAW);
         
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, (indexBuffer.size() * sizeof(Index)) + (indxBuffer.size() * 100), NULL, GL_DYNAMIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBufferSz * sizeof(Vertex), &vertexBuffer[0]);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBufferSz * sizeof(Index), &indexBuffer[0]);
+        
+        return true;
     }
     
-    // Re-upload the buffer
-    glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBuffer.size() * sizeof(Vertex), &vertexBuffer[0]);
+    glBindVertexArray(vertexArray);
     
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBuffer.size() * sizeof(Index), &indexBuffer[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBufferSz * sizeof(Vertex), &vertexBuffer[0]);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBufferSz * sizeof(Index), &indexBuffer[0]);
     
     return true;
 }
@@ -241,7 +248,7 @@ bool Mesh::RemoveSubMesh(unsigned int index) {
     
     subMesh.erase(subMesh.begin() + index);
     
-    Bind();
+    glBindVertexArray(vertexArray);
     glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
     
     return true;
@@ -295,7 +302,7 @@ bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) 
     
     subMesh[index].position = glm::vec3(x, y, z);
     
-    Bind();
+    glBindVertexArray(vertexArray);
     glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
     
     return true;
@@ -316,7 +323,7 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
         destMesh.push_back(vertex);
     }
     
-    Bind();
+    glBindVertexArray(vertexArray);
     glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
     
     return true;
@@ -324,18 +331,17 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
 
 
 void Mesh::UpdateMesh(void) {
+    vertexBufferSz = vertexBuffer.size();
+    indexBufferSz  = indexBuffer.size();
     
     glBindVertexArray(vertexArray);
     
     glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
-    glBufferData(GL_ARRAY_BUFFER, vertexBuffer.size() * sizeof(Vertex), &vertexBuffer[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexBufferSz * sizeof(Vertex), &vertexBuffer[0], GL_DYNAMIC_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.size() * sizeof(Index), &indexBuffer[0], GL_DYNAMIC_DRAW);
-    
-    //LoadVertexBuffer(vertexBuffer.data(), vertexBuffer.size());
-    //LoadIndexBuffer(indexBuffer.data(), indexBuffer.size());
-    
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSz * sizeof(Index), &indexBuffer[0], GL_DYNAMIC_DRAW);
+    return;
 }
 
 

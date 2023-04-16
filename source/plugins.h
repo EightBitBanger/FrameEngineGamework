@@ -1,3 +1,6 @@
+//
+// Engine related plug-ins
+
 
 // OpenGL GLEW static
 //
@@ -17,9 +20,4 @@
 // Physics by ReactPhysics3D
 //
 #include <ReactPhysics3d/ReactPhysics3d.h>
-
-
-
-
-
 

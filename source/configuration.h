@@ -14,7 +14,7 @@
 
 // Rendering system
 
-#define  RENDER_FRAMES_PER_SECOND          120
+#define  RENDER_FRAMES_PER_SECOND          200
 #define  _RENDERER_CHECK_OPENGL_ERRORS__
 
 // Physics simulation

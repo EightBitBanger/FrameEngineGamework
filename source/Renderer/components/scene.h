@@ -11,7 +11,7 @@ public:
     
     std::vector<Entity*>  entities;
     
-    Entity* GetEntity(unsigned int i);
+    Entity* GetEntity(unsigned int index);
     
     void AddToSceneRoot(Entity* entity);
     bool RemoveFromSceneRoot(Entity* entity);

@@ -100,6 +100,10 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
 }
 
 
+void Shader::Bind(void) {
+    glUseProgram(shaderProgram);
+}
+
 
 bool Shader::BuildDefault(void) {
     

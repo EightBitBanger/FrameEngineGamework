@@ -27,6 +27,8 @@ public:
     bool UnloadTextureTag(std::string name);
     bool UnloadShaderTag(std::string name);
     
+    SubMesh    GetSubMeshFromTag(std::string name);
+    
     Mesh*      CreateMeshFromTag(std::string name);
     Material*  CreateMaterialFromTag(std::string name);
     Shader*    CreateShaderFromTag(std::string name);

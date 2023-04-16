@@ -39,6 +39,8 @@ class Mesh {
     
     int primitive;
     
+    unsigned int vertexBufferSz;
+    unsigned int indexBufferSz;
     unsigned int maxSize;
     
     std::vector<Vertex>   vertexBuffer;

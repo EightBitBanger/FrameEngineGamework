@@ -1,9 +1,14 @@
 #include "scene.h"
 
-Entity* Scene::GetEntity(unsigned int i) {return entities[i];}
+Entity* Scene::GetEntity(unsigned int index) {
+    if (index > entities.size()) 
+        return nullptr;
+    return entities[index];
+}
 
 void Scene::AddToSceneRoot(Entity* entity) {
     entities.push_back( entity );
+    return;
 }
 
 bool Scene::RemoveFromSceneRoot(Entity* entity) {

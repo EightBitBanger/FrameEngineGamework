@@ -92,29 +92,29 @@ public:
     
     
     Entity* CreateEntity(void);
-    void DestroyEntity(Entity* entityPtr);
+    bool DestroyEntity(Entity* entityPtr);
     
     Mesh* CreateMesh(void);
-    void DestroyMesh(Mesh* meshPtr);
+    bool DestroyMesh(Mesh* meshPtr);
     
     Shader* CreateShader(void);
-    void DestroyShader(Shader* shaderPtr);
+    bool DestroyShader(Shader* shaderPtr);
     
     Camera* CreateCamera(void);
-    void DestroyCamera(Camera* cameraPtr);
+    bool DestroyCamera(Camera* cameraPtr);
     
     Material* CreateMaterial(void);
-    void DestroyMaterial(Material* materialPtr);
+    bool DestroyMaterial(Material* materialPtr);
     
     Sky* CreateSky(void);
-    void DestroySky(Sky* skyPtr);
+    bool DestroySky(Sky* skyPtr);
     
     Scene* CreateScene(void);
     Scene* GetScene(unsigned int index);
-    void DestroyScene(Scene* scenePtr);
+    bool DestroyScene(Scene* scenePtr);
     
     Script* CreateScript(void);
-    void DestroyScript(Script* scriptPtr);
+    bool DestroyScript(Script* scriptPtr);
     
     
     

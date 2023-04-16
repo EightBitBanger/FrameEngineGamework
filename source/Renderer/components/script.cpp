@@ -1,8 +1,9 @@
 #include "script.h"
 
 Script::Script() {
-    OnCreate = DefaultFunctionPtr;
-    OnUpdate = DefaultFunctionPtr;
+    
+    OnCreate = nullfunc;
+    OnUpdate = nullfunc;
 }
 
 void DefaultFunctionPtr(void) {return;}

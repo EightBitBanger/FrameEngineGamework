@@ -200,6 +200,15 @@ Mesh* ResourceManager::CreateMeshFromTag(std::string name) {
     return meshPtr;
 }
 
+SubMesh ResourceManager::GetSubMeshFromTag(std::string name) {
+    SubMesh subPart;
+    MeshTag* meshTag = FindMeshTag(name);
+    if (meshTag == nullptr) return subPart;
+    subPart.vertexBuffer = meshTag->vertexBuffer;
+    subPart.indexBuffer = meshTag->indexBuffer;
+    return subPart;
+}
+
 Material* ResourceManager::CreateMaterialFromTag(std::string name) {
     TextureTag* texTag = FindTextureTag(name);
     if (texTag == nullptr) return nullptr;
@@ -240,7 +249,7 @@ void ResourceManager::DestroyAssets(void) {
 
 
 
-bool ResourceManager::LoadTexture(std::string filename, std::string resourceName="") {
+bool ResourceManager::LoadTexture(std::string filename, std::string resourceName="texDefault") {
     
     std::string name       = StringGetNameFromFilename(filename);
     std::string assetName  = StringGetNameFromFilenameNoExt(filename);
@@ -269,7 +278,7 @@ bool ResourceManager::LoadTexture(std::string filename, std::string resourceName
 }
 
 
-bool ResourceManager::LoadWaveFront(std::string filename, std::string resourceName="") {
+bool ResourceManager::LoadWaveFront(std::string filename, std::string resourceName="meshDefault") {
     
     objl::Loader loader;
     if (!loader.LoadFile(filename)) {
@@ -319,7 +328,7 @@ bool ResourceManager::LoadWaveFront(std::string filename, std::string resourceNa
 }
 
 
-bool ResourceManager::LoadShaderGLSL(std::string filename, std::string resourceName="") {
+bool ResourceManager::LoadShaderGLSL(std::string filename, std::string resourceName="shaDefault") {
     
     FileLoader loader(filename);
     if (!loader.CheckIsFileLoaded()) {

@@ -11,7 +11,7 @@ Entity::Entity() {
 }
 
 Entity::~Entity() {
-    /*
+    
     int colliderCount = rigidBody->getNbColliders();
     for (int i=0; i < colliderCount; i++) {
         rigidBody->removeCollider(rigidBody->getCollider(i));
@@ -24,7 +24,7 @@ Entity::~Entity() {
     
     if (rigidBody != nullptr) 
         Physics.DestroyRigidBody(rigidBody);
-    */
+    
 }
 
 

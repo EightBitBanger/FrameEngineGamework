@@ -1,68 +1,73 @@
 {\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}}
 {\colortbl ;\red0\green0\blue255;}
 {\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\ri-1800\sl240\slmult1\lang9\f0\fs22\par
-\b   SandStorm game engine framework aims to provides a simpler interface with more complex systems. \par
+\b   SandStorm game engine framework aims to provides a simpler interface with more complex systems. This framework provides APIs for rendering, physics, resource mangement, scene management, input, timing and random number generation.\par
+\par
 \par
 \par
 \fs48 Resource management\par
 \fs22\par
 Initiate must be called before using the management system.\par
-\cf1\fs24 void  Initiate( void );\par
+\cf1\fs24 void  ResourceManager :: Initiate( void );\par
 \cf0\fs22\par
+\par
 \par
 \par
 \fs36 Loading a resource from a file.\par
 \fs22\par
-Loads an ".obj" wavefront model file.\par
-\cf1 bool  LoadWaveFront( std::string filename, std::string resourceName );\par
+Load an ".obj" wavefront model file.\par
+\cf1 bool  \fs24 ResourceManager :: \fs22 LoadWaveFront( std::string filename, std::string resourceName );\par
 \cf0\par
-Loads a ".png" texture file.\par
-\cf1 bool  LoadTexture( std::string filename, std::string resourceName );\par
+Load a ".png" texture file.\par
+\cf1 bool  \fs24 ResourceManager :: \fs22 LoadTexture( std::string filename, std::string resourceName );\par
 \cf0\par
-Loads a ".shader" GLSL shader program.\par
-\cf1 bool  LoadShaderGLSL( std::string path, std::string resourceName );\par
+Load a ".shader" GLSL shader program.\par
+\cf1 bool  \fs24 ResourceManager :: \fs22 LoadShaderGLSL( std::string path, std::string resourceName );\par
 \cf0\par
+\par
 \par
 \par
 \fs36 Finding a loaded resource.\par
 \fs22\par
-Finds and returns a loaded mesh resource.\par
-\cf1 MeshTag*  FindMeshTag( std::string name );\par
+Find and return a loaded mesh resource.\par
+\cf1 MeshTag*  \fs24 ResourceManager :: \fs22 FindMeshTag( std::string name );\par
 \par
-\cf0 Finds and returns a loaded texture resource.\par
-\cf1 TextureTag*  FindTextureTag( std::string name );\par
+\cf0 Find and return a loaded texture resource.\par
+\cf1 TextureTag*  \fs24 ResourceManager :: \fs22 FindTextureTag( std::string name );\par
 \par
-\cf0 Finds and returns a loaded GLSL shader resource.\par
-\cf1 ShaderTag*  FindShaderTag( std::string name );\par
+\cf0 Find and return a loaded GLSL shader resource.\par
+\cf1 ShaderTag*  \fs24 ResourceManager :: \fs22 FindShaderTag( std::string name );\par
 \cf0\par
+\par
 \par
 \par
 \fs36 Creating rendering components from loaded resources.\par
 \fs22\par
-Creates a mesh component for the renderer from a loaded mesh resource.\par
-\cf1 Mesh*  CreateMeshFromTag( std::string name );\par
+Create a mesh component for the renderer from a loaded mesh resource.\par
+\cf1 Mesh*  \fs24 ResourceManager :: \fs22 CreateMeshFromTag( std::string name );\par
 \par
-\cf0 Creates a material component for the renderer from a loaded texture resource.\par
-\cf1 Material*  CreateMaterialFromTag( std::string name );\par
+\cf0 Create a material component for the renderer from a loaded texture resource.\par
+\cf1 Material*  \fs24 ResourceManager :: \fs22 CreateMaterialFromTag( std::string name );\par
 \par
-\cf0 Creates a shader component for the renderer from a loaded shader resource.\par
-\cf1 Shader*  CreateShaderFromTag( std::string name );\par
+\cf0 Create a shader component for the renderer from a loaded shader resource.\par
+\cf1 Shader*  \fs24 ResourceManager :: \fs22 CreateShaderFromTag( std::string name );\par
 \cf0\par
+\par
 \par
 \par
 \fs36 Freeing a resource.\par
 \fs22\par
-Unloads and frees a loaded mesh resource.\cf1\par
-bool  UnloadMeshTag( std::string name );\par
+Unload and free a loaded mesh resource.\cf1\par
+bool  \fs24 ResourceManager :: \fs22 UnloadMeshTag( std::string name );\par
 \par
-\cf0 Unloads and frees a loaded texture resource.\par
-\cf1 bool  UnloadTextureTag( std::string name );\par
+\cf0 Unload and free a loaded texture resource.\par
+\cf1 bool  \fs24 ResourceManager :: \fs22 UnloadTextureTag( std::string name );\par
 \par
-\cf0 Unloads and frees a loaded shader resource.\par
-\cf1 bool  UnloadShaderTag( std::string name );\par
+\cf0 Unload and free a loaded shader resource.\par
+\cf1 bool  \fs24 ResourceManager :: \fs22 UnloadShaderTag( std::string name );\par
 \cf0\par
 Clear all loaded assets and any memory allocated therein.\par
-\cf1 void  DestroyAssets( void );\par
+\cf1 void  \fs24 ResourceManager :: \fs22 DestroyAssets( void );\par
 \cf0\par
 \par
 \par
@@ -71,75 +76,78 @@ Clear all loaded assets and any memory allocated therein.\par
 \fs48 Rendering system\par
 \fs22\par
 Initiate must be called before the renderer can be used.\cf1\par
-void  Initiate( void );\par
+void  RenderSystem :: Initiate( void );\par
 \par
 \par
 \par
 \cf0 Mesh objects handle vertex buffers and layout.\cf1\par
-Mesh* CreateMesh( void );\par
-void     DestroyMesh( Mesh* meshPtr );\par
+Mesh* RenderSystem :: CreateMesh( void );\par
+bool     RenderSystem :: DestroyMesh( Mesh* meshPtr );\par
 \par
 \cf0 Materials handle texture layout and color effects.\cf1\par
-Material* CreateMaterial( void );\par
-void          DestroyMaterial( Material* materialPtr );\par
+Material* RenderSystem :: CreateMaterial( void );\par
+bool          RenderSystem :: DestroyMaterial( Material* materialPtr );\par
 \par
 \cf0 Shader objects handle shader compilation.\cf1\par
-Shader* CreateShader( void );\par
-void       DestroyShader( Shader* shaderPtr );\par
+Shader* RenderSystem :: CreateShader( void );\par
+bool       RenderSystem :: DestroyShader( Shader* shaderPtr );\par
 \par
-\cf0 Entities transform rendering objects.\cf1\par
-Entity* CreateEntity( void );\par
-void     DestroyEntity( Entity* entityPtr );\par
+\cf0 Entities transform rendering components.\cf1\par
+Entity* RenderSystem :: CreateEntity( void );\par
+bool     RenderSystem :: DestroyEntity( Entity* entityPtr );\par
 \par
 \cf0 Scene objects organize and group entities for rendering.\cf1\par
-Scene* CreateScene( void );\par
-void     DestroyScene( Scene* scenePtr );\par
+Scene* RenderSystem :: CreateScene( void );\par
+bool     RenderSystem :: DestroyScene( Scene* scenePtr );\par
 \par
-\cf0 Camera objects provide a projection for the rendering process.\cf1\par
-Camera* CreateCamera( void );\par
-void        DestroyCamera( Camera* cameraPtr );\par
+\cf0 Camera objects provide a projection angle for the rendering process.\cf1\par
+Camera* RenderSystem :: CreateCamera( void );\par
+bool        RenderSystem :: DestroyCamera( Camera* cameraPtr );\par
 \par
 \cf0 Sky objects provide a backdrop for rendering.\cf1\par
-Sky*  CreateSky( void );\par
-void  DestroySky( Sky* skyPtr );\par
+Sky*  RenderSystem :: CreateSky( void );\par
+bool  RenderSystem :: DestroySky( Sky* skyPtr );\par
 \par
 \cf0 Scripts provide native scripting.\par
-\cf1 Script* CreateScript( void );\par
-void     DestroyScript( Script* scriptPtr );\par
+\cf1 Script* RenderSystem :: CreateScript( void );\par
+bool     RenderSystem :: DestroyScript( Script* scriptPtr );\par
+\par
 \par
 \par
 \par
 \cf0\fs36 Renderer functions\par
 \fs22\par
 Sets the dimensions for the rendering viewport.\par
-\cf1 void    SetViewport( unsigned int x, unsigned int y, unsigned int w, unsigned int h );\par
+\cf1 void  RenderSystem :: SetViewport( unsigned int x, unsigned int y, unsigned int w, unsigned int h );\par
 \par
 \cf0 Render the current frame.\par
-\cf1 void RenderFrame( float deltaTime );\par
+\cf1 void  RenderSystem :: RenderFrame( float deltaTime );\par
 \par
 \cf0 The render queue is a list of scenes to be rendered by the renderer.\par
-\cf1 void AddToRenderQueue( Scene* scene );\par
-bool RemoveFromRenderQueue( Scene* scene );\par
+\cf1 void  RenderSystem :: AddToRenderQueue( Scene* scene );\par
+bool  RenderSystem :: RemoveFromRenderQueue( Scene* scene );\par
 \par
 \cf0 Returns the number of scenes in the render queue.\par
-\cf1 unsigned int GetRenderQueueSize( void );\par
+\cf1 unsigned int  RenderSystem :: GetRenderQueueSize( void );\par
 \cf0\par
 Returns a scene from the render queue.\par
-\cf1 Scene* GetRenderQueueScene( unsigned int index );\par
+\cf1 Scene*  RenderSystem :: GetRenderQueueScene( unsigned int index );\par
 \par
 \cf0 Calculates the matrix for the current transform from the parrent transform.\par
-\cf1 glm::mat4 CalculateModelMatrix( Transform& parent, Transform& model );\par
+\cf1 glm::mat4  RenderSystem :: CalculateModelMatrix( Transform& parent, Transform& model );\par
 \cf0\par
+\par
 \par
 \par
 \fs36 Setting the render context\par
 \cf1\fs22\par
 \cf0 Sets the render context target for the final render.\par
-\cf1 GLenum  SetRenderTarget( HWND wHndl );\par
+\cf1 GLenum  RenderSystem :: SetRenderTarget( HWND wHndl );\par
 \cf0\par
 Releases the render context target.\par
-\cf1 void    ReleaseRenderTarget( void );\par
+\cf1 void    RenderSystem :: ReleaseRenderTarget( void );\par
 \cf0\par
+\par
 \par
 \par
 \fs36 Meshes\par
@@ -156,70 +164,133 @@ Disables a vertex attribute.\par
 Sets the attributes for the default vertex buffer layout.\par
 \cf1 void  Mesh :: SetDefaultAttributes( void );\par
 \cf0\par
-Returns the number of sub meshes currently loaded into this mesh.\par
-\cf1 unsigned int  Mesh :: GetSubMeshCount( void );\par
 \par
-\cf0 Adds a plane sub mesh to the mesh at the given position and scaled with width and height. The color parameter will assign a color to the plane sub mesh.\par
+\par
+Adds a plane sub mesh to the mesh at the given position and scaled with width and height. The color parameter will assign a color to the plane sub mesh.\par
 \cf1 bool  Mesh :: AddPlane( float x, float y, float z, float width, float height, Color color );\par
 \cf0\par
 Adds a wall sub mesh to the mesh at the given position and scaled with xscale, yscale and zscale. The color parameter will assign a color to the wall sub mesh.\par
 \cf1 void  Mesh :: AddWall( float x, float y, float z, float xscale, float yscale, float zscale, Color color );\par
 \par
-\cf0 sub mesh\cf1\par
+\par
+\par
+\cf0 Returns the number of sub meshes currently loaded into this mesh vertex buffer.\par
+\cf1 unsigned int  Mesh :: GetSubMeshCount( void );\par
+\par
+\cf0 Adds a sub mesh to the mesh vertex buffer.\cf1\par
 bool  Mesh :: AddSubMesh( float x, float y, float z, SubMesh& mesh );\par
 \par
-\cf0 Removes a sub mesh at the given index.\par
+\cf0 Removes a sub mesh from the given index.\par
 \cf1 bool  Mesh :: RemoveSubMesh( unsigned int index );\par
 \cf0\par
 Copies the sub mesh at index and returns a SubMesh containing the mesh data.\par
 \cf1 bool  Mesh :: CopySubMesh( unsigned int index, SubMesh& mesh );\par
 \cf0\par
+\par
+\par
 Updates a sub mesh color to a new color.\par
 \cf1 bool  Mesh :: ChangeSubMeshColor( unsigned int index, Color newColor );\par
 \cf0\par
 Updates a sub mesh position to a new position.\par
 \cf1 bool  Mesh :: ChangeSubMeshPosition( unsigned int index, float x, float y, float z );\par
 \cf0\par
+\par
+\par
 Flushes the mesh buffer to the GPU for rendering.\par
 \cf1 bool  Mesh :: UpdateMesh( void );\par
 \cf0\par
 \par
 \par
+\par
 \fs36 Materials\par
 \fs22\par
 Enables testing for mesh depth\par
-\cf1 void  EnableDepthTest( void );\par
-void  DisableDepthTest( void );\par
+\cf1 void  Material :: EnableDepthTest( void );\par
+void  Material :: DisableDepthTest( void );\par
 \cf0\par
 Sets the function the renderer will use to test mesh depth.\par
-\cf1 void  SetDepthFunction(GLint func);\par
+\cf1 void  Material :: SetDepthFunction(GLint func);\par
 \par
-\cf0 Enables face culling.\par
-\cf1 void  EnableCulling( void );\par
-void  DisableCulling( void );\par
 \cf0\par
-Sets the side of the triangles where no pixles will be drawn. Default is GL_BACK.\par
-\cf1 void  SetFaceCullingSide( GLint side );\par
-\cf0\par
-Sets the triangle winding order. Default is GL_CCW.\par
-\cf1 void  SetFaceWindingOrder( GLint direction );\par
 \par
-\cf0 Enables alpha color blending.\par
-\cf1 void  EnableBlending( void );\par
-void  DisableBlending( void );\par
+Enables alpha color blending.\par
+\cf1 void  Material :: EnableBlending( void );\par
+void  Material :: DisableBlending( void );\par
 \par
 \cf0 Sets the blending source and destination.\par
-\cf1 void  SetBlending( GLint src, GLint dest );\par
+\cf1 void  Material :: SetBlending( GLint src, GLint dest );\par
 \cf0\par
 Sets the blending source and destination with alpha channels.\par
-\cf1 void  SetBlendingAlpha( GLint srca, GLint desta );\par
+\cf1 void  Material :: SetBlendingAlpha( GLint srca, GLint desta );\par
 \cf0\par
 Sets the function for blending.\par
-\cf1 void  SetBlendingFunction( GLint func );\par
+\cf1 void  Material :: SetBlendingFunction( GLint func );\par
 \cf0\par
+\par
+\par
+Enables face culling.\par
+\cf1 void  Material :: EnableCulling( void );\par
+void  Material :: DisableCulling( void );\par
+\cf0\par
+Sets the side of the triangles where no pixles will be drawn. Default is GL_BACK.\par
+\cf1 void  Material :: SetFaceCullingSide( GLint side );\par
+\cf0\par
+Sets the triangle winding order. Default is GL_CCW.\par
+\cf1 void  Material :: SetFaceWindingOrder( GLint direction );\par
+\cf0\par
+\par
+\par
 Flushes the texture data to the GPU buffer.\par
-\cf1 void  UpdateTextureBuffer( void* textureData );\par
+\cf1 void  Material :: UpdateTextureBuffer( void* textureData );\par
 \cf0\par
+\par
+\par
+\par
+\fs36 Shaders\par
+\cf1\fs22\par
+\cf0 Sets the uniform model matrix.\par
+\cf1 void  Shader :: SetModelMatrix( glm::mat4 &ModelMatrix );\par
+\cf0\par
+Sets the uniform projection matrix.\par
+\cf1 void  Shader :: SetProjectionMatrix( glm::mat4 &projectionMatrix );\par
+\par
+\cf0\par
+\par
+Sets the uniform material color.\par
+\cf1 void  Shader :: SetMaterialColor( Color color );\par
+\cf0\par
+Sets the uniform texture sampler\par
+\cf1 void  Shader :: SetTextureSampler( unsigned int index );\par
+\cf0\par
+\par
+\par
+Initiates the uniform locations within the shader program.\par
+\cf1 void  Shader :: SetUniformLocations( void );\par
+\par
+\cf0 Compiles a vertex and fragment script into a shader program.\par
+\cf1 int  Shader :: CreateShaderProgram( std::string VertexScript, std::string FragmentScript );\par
+\par
+\cf0 Builds a default shader program.\par
+\cf1 bool  Shader :: BuildDefault( void );\par
+\par
+\par
+\cf0\par
+\par
+\par
+\fs48 Physics by ReactPhysics3D\par
+\fs22\par
+Builds a default shader program.\par
+\cf1 rp3d::RigidBody*  Physics :: CreateRigidBody( float x, float y, float z );\par
+\cf0\par
+Builds a default shader program.\par
+\cf1 void  Physics :: DestroyRigidBody( rp3d::RigidBody* rigidBodyPtr );\par
+\cf0\par
+\par
+\par
+Builds a default shader program.\par
+\cf1 void  Physics :: SetWorldGravity( float x, float y, float z );\par
+\cf0\par
+\par
 \par
 \par
 \par

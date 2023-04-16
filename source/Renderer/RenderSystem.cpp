@@ -22,33 +22,72 @@ Entity* RenderSystem::CreateEntity(void) {
     entityPtr->material = defaultMaterial;
     return entityPtr;
 }
-void RenderSystem::DestroyEntity(Entity* entityPtr) {
+bool RenderSystem::DestroyEntity(Entity* entityPtr) {
     if ((entityPtr->material != nullptr) & (entityPtr->material != defaultMaterial)) material.Destroy(entityPtr->material);
     if (entityPtr->script != nullptr) script.Destroy(entityPtr->script);
-    entity.Destroy(entityPtr);
+    return entity.Destroy(entityPtr);
 }
 
-Mesh* RenderSystem::CreateMesh(void) {return mesh.Create();}
-void RenderSystem::DestroyMesh(Mesh* meshPtr) {mesh.Destroy(meshPtr);}
+Mesh* RenderSystem::CreateMesh(void) {
+    Mesh* meshPtr = mesh.Create();
+    return meshPtr;
+}
+bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
+    return mesh.Destroy(meshPtr);
+}
 
-Shader* RenderSystem::CreateShader(void) {return shader.Create();}
-void RenderSystem::DestroyShader(Shader* shaderPtr) {shader.Destroy(shaderPtr);}
+Shader* RenderSystem::CreateShader(void) {
+    Shader* shaderPtr = shader.Create();
+    return shaderPtr;
+}
+bool RenderSystem::DestroyShader(Shader* shaderPtr) {
+    return shader.Destroy(shaderPtr);
+}
 
-Camera* RenderSystem::CreateCamera(void) {return camera.Create();}
-void RenderSystem::DestroyCamera(Camera* cameraPtr) {camera.Destroy(cameraPtr);}
+Camera* RenderSystem::CreateCamera(void) {
+    Camera* cameraPtr = camera.Create();
+    return cameraPtr;
+}
+bool RenderSystem::DestroyCamera(Camera* cameraPtr) {
+    return camera.Destroy(cameraPtr);
+}
 
-Material* RenderSystem::CreateMaterial(void) {return material.Create();}
-void RenderSystem::DestroyMaterial(Material* materialPtr) {material.Destroy(materialPtr);}
+Material* RenderSystem::CreateMaterial(void) {
+    Material* materialPtr = material.Create();
+    return materialPtr;
+}
+bool RenderSystem::DestroyMaterial(Material* materialPtr) {
+    return material.Destroy(materialPtr);
+}
 
-Sky* RenderSystem::CreateSky(void) {return sky.Create();}
-void RenderSystem::DestroySky(Sky* skyPtr) {sky.Destroy(skyPtr);}
+Sky* RenderSystem::CreateSky(void) {
+    Sky* skyPtr = sky.Create();
+    return skyPtr;
+}
+bool RenderSystem::DestroySky(Sky* skyPtr) {
+    return sky.Destroy(skyPtr);
+}
 
-Scene* RenderSystem::CreateScene(void) {return scene.Create();}
-Scene* RenderSystem::GetScene(unsigned int index) {return renderQueue[index];}
-void RenderSystem::DestroyScene(Scene* scenePtr) {scene.Destroy(scenePtr);}
+Scene* RenderSystem::CreateScene(void) {
+    Scene* scenePtr = scene.Create();
+    return scenePtr;
+}
+Scene* RenderSystem::GetScene(unsigned int index) {
+    if (index > renderQueue.size()) 
+        return nullptr;
+    return renderQueue[index];
+}
+bool RenderSystem::DestroyScene(Scene* scenePtr) {
+    return scene.Destroy(scenePtr);
+}
 
-Script* RenderSystem::CreateScript(void) {return script.Create();}
-void RenderSystem::DestroyScript(Script* scriptPtr) {script.Destroy(scriptPtr);}
+Script* RenderSystem::CreateScript(void) {
+    Script* scriptPtr = script.Create();
+    return scriptPtr;
+}
+bool RenderSystem::DestroyScript(Script* scriptPtr) {
+    return script.Destroy(scriptPtr);
+}
 
 
 void RenderSystem :: RenderFrame(float deltaTime) {
@@ -56,49 +95,41 @@ void RenderSystem :: RenderFrame(float deltaTime) {
     if (cameraMain == nullptr) 
         return;
     
-    // Set and clear view port
     glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    // Set render sky
+    
     if (skyMain != nullptr) {
         Color& color = skyMain->background;
         glClearColor(color.r, color.g, color.b, 1);
     }
     
     
-    
-    // Update camera
     if (cameraMain->script != nullptr) 
           cameraMain->script->OnUpdate();
     
-    // Mouse look
+    
     if (cameraMain->useMouseLook) 
         cameraMain->MouseLook(deltaTime, displayCenter.x, displayCenter.y);
     
-    // Calculate projection matrix
+    
     glm::mat4 projection = cameraMain->CalculatePerspectiveMatrix();
     glm::mat4 view = cameraMain->CalculateView();
     
     glm::mat4 viewProj = projection * view;
     currentShader = nullptr;
     
-    // Process scene queues
     
     for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
         
         Scene* scenePtr = *it;
         
-        // Run the entity list
-        
         for (std::vector<Entity*>::iterator it = scenePtr->entities.begin(); it != scenePtr->entities.end(); ++it) {
             
             Entity* currentEntity = *it;
             
-            // Update native script
             if (currentEntity->script != nullptr) 
                 currentEntity->script->OnUpdate();
-            
             
             if (currentEntity->mesh == nullptr) continue;
             Mesh* mesh = currentEntity->mesh;
@@ -107,14 +138,13 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             Shader* shader = mesh->shader;
             
             
-            // Mesh vertex array binding
             if (currentMesh != mesh) {
                 currentMesh = mesh;
                 
                 currentMesh->Bind();
             }
             
-            // Shader program binding
+            
             if (currentShader != shader) {
                 currentShader = shader;
                 
@@ -122,14 +152,14 @@ void RenderSystem :: RenderFrame(float deltaTime) {
                 currentShader->SetProjectionMatrix(viewProj);
             }
             
-            // Material texture binding
+            
             if (currentMaterial != currentEntity->material) {
                 currentMaterial = currentEntity->material;
                 
                 currentMaterial->Bind();
                 currentMaterial->BindTextureSlot(0);
                 
-                // Depth test
+                
                 if (currentMaterial->doDepthTest) {
                     glEnable(GL_DEPTH_TEST);
                     glDepthMask(currentMaterial->doDepthTest);
@@ -138,7 +168,7 @@ void RenderSystem :: RenderFrame(float deltaTime) {
                     glDisable(GL_DEPTH_TEST);
                 }
                 
-                // Face culling
+                
                 if (currentMaterial->doFaceCulling) {
                     glEnable(GL_CULL_FACE);
                     glCullFace(currentMaterial->faceCullSide);
@@ -147,7 +177,7 @@ void RenderSystem :: RenderFrame(float deltaTime) {
                     glEnable(GL_CULL_FACE);
                 }
                 
-                // Blending
+                
                 if (currentMaterial->doBlending) {
                     glEnable(GL_BLEND);
                     glBlendFuncSeparate(currentMaterial->blendSource, currentMaterial->blendDestination, currentMaterial->blendAlphaSource, currentMaterial->blendAlphaDestination);
@@ -155,20 +185,16 @@ void RenderSystem :: RenderFrame(float deltaTime) {
                     glDisable(GL_BLEND);
                 }
                 
-                
                 currentShader->Bind();
                 currentShader->SetMaterialColor(currentMaterial->color);
                 currentShader->SetTextureSampler(0);
             }
             
-            // Sync with the rigid body
+            
             if (currentEntity->rigidBody != nullptr) 
                 currentEntity->SyncRigidBody();
             
-            
-            //
-            // Calculate model matrix
-            glm::mat4 model = glm::mat4(1);
+            glm::mat4 model(1);
             
             Transform parent;
             if (currentEntity->transform.parent != nullptr) 
@@ -178,7 +204,6 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             
             currentShader->SetModelMatrix(model);
             
-            // Draw call
             mesh->DrawIndexArray();
             
             continue;

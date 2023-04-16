@@ -27,6 +27,8 @@ class Shader {
     
     bool  isShaderLoaded;
     
+    unsigned int CompileSource(unsigned int Type, std::string Script);
+    
 public:
     
     Shader();
@@ -41,13 +43,11 @@ public:
     
     void SetUniformLocations(void);
     
-    unsigned int CompileSource(unsigned int Type, std::string Script);
     int CreateShaderProgram(std::string VertexScript, std::string FragmentScript);
     
-    void Bind(void) {glUseProgram(shaderProgram);}
+    void Bind(void);
     
     bool BuildDefault(void);
-    
     
 };
 
