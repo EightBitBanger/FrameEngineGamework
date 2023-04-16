@@ -103,6 +103,11 @@ void Start(void) {
 
 
 
+float spawnRadiusMul  = 0.1;
+float forceMul        = 30;
+float torqueMul       = 0.1;
+
+
 void Run(void) {
     
     Scene* scene = Renderer.GetScene(0);
@@ -111,40 +116,39 @@ void Run(void) {
     Entity* entity = scene->GetEntity(0);
     if (entity == nullptr) return;
     
-    
-    
-    float spawnRadiusMul = 0.1;
-    float xx = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
-    float yy = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
-    float zz = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
-    
-    float forceMul = 30;
-    float fx = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
-    float fy = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
-    float fz = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
-    
-    
-    Entity* newEntity       = Renderer.CreateEntity();
-    newEntity->mesh         = subPart;
-    newEntity->material     = material;
-    newEntity->mesh->shader = defaultShader;
-    
-    newEntity->rigidBody = Physics.CreateRigidBody(xx, yy, zz);
-    
-    newEntity->AddForce(fx, fy, fz);
-    
-    //newEntity->mesh->AddSubMesh(0, 0, 0, subPart);
-    
-    scene->AddToSceneRoot(newEntity);
-    
-    if (scene->GetRenderQueueSize() > 100) {
+    for (int i=0; i < 3; i++) {
+        float xx = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
+        float yy = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
+        float zz = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
         
-        for (int i=0; i < 4; i++) {
+        float fx = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
+        float fy = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
+        float fz = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
+        
+        float tx = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
+        float ty = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
+        float tz = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
+        
+        
+        Entity* newEntity       = Renderer.CreateEntity();
+        newEntity->mesh         = subPart;
+        newEntity->material     = material;
+        newEntity->mesh->shader = defaultShader;
+        
+        newEntity->rigidBody = Physics.CreateRigidBody(xx, yy, zz);
+        
+        newEntity->AddForce(fx, fy, fz);
+        newEntity->AddTorque(tx, ty, tz);
+        
+        scene->AddToSceneRoot(newEntity);
+    }
+    
+    if (scene->GetRenderQueueSize() > 2000) {
+        
+        for (int i=0; i < 10; i++) {
             Entity* oldEntity = scene->entities[0];
             scene->RemoveFromSceneRoot(oldEntity);
             
-            //Renderer.DestroyMesh(oldEntity->mesh);
-            //Renderer.DestroyMaterial(oldEntity->material);
             Renderer.DestroyEntity(oldEntity);
             
         }
