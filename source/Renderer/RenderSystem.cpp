@@ -23,8 +23,6 @@ Entity* RenderSystem::CreateEntity(void) {
     return entityPtr;
 }
 bool RenderSystem::DestroyEntity(Entity* entityPtr) {
-    if ((entityPtr->material != nullptr) & (entityPtr->material != defaultMaterial)) material.Destroy(entityPtr->material);
-    if (entityPtr->script != nullptr) script.Destroy(entityPtr->script);
     return entity.Destroy(entityPtr);
 }
 
@@ -227,7 +225,7 @@ void RenderSystem :: Initiate(void) {
     defaultShader->BuildDefault();
     
     defaultMaterial = CreateMaterial();
-    defaultMaterial->color = Color(0,0,0,1);
+    defaultMaterial->color = Color(1,1,1,1);
     
     
     for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {

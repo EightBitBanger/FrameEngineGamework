@@ -25,9 +25,19 @@ void CameraMovementScript(void);
 
 
 
+Mesh*     subPart;
+Material* material;
+Shader*   defaultShader;
 
 
 void Start(void) {
+    
+    
+    Physics.Initiate();
+    Physics.SetWorldGravity(0, -20, 0);
+    
+    
+    
     
     Resources.Initiate();
     
@@ -67,13 +77,19 @@ void Start(void) {
     entity->mesh = mesh;
     entity->mesh->SetDefaultAttributes();
     
-    entity->mesh->shader = Resources.CreateShaderFromTag("default");
+    defaultShader = Resources.CreateShaderFromTag("default");
+    entity->mesh->shader = defaultShader;
     if (entity->mesh->shader == nullptr) return;
     
-    entity->material = Resources.CreateMaterialFromTag("matBarrel");
+    material = Resources.CreateMaterialFromTag("matBarrel");
+    entity->material = material;
     if (entity->material == nullptr) return;
     
     entity->material->color = Color(0, 0, 0, 1);
+    
+    subPart = Resources.CreateMeshFromTag("barrel");
+    subPart->SetDefaultAttributes();
+    
     
     
     currentScene->AddToSceneRoot(entity);
@@ -86,16 +102,8 @@ void Start(void) {
 
 
 
-unsigned int gridSize    = 8;
-unsigned int gridSpacing = 10;
-
-bool endRoutine = false;
-unsigned int i=0;
-unsigned int a=0;
-
 
 void Run(void) {
-    
     
     Scene* scene = Renderer.GetScene(0);
     if (scene == nullptr) return;
@@ -103,7 +111,58 @@ void Run(void) {
     Entity* entity = scene->GetEntity(0);
     if (entity == nullptr) return;
     
-    Mesh* mesh = entity->mesh;
+    
+    
+    float spawnRadiusMul = 0.1;
+    float xx = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
+    float yy = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
+    float zz = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
+    
+    float forceMul = 30;
+    float fx = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
+    float fy = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
+    float fz = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
+    
+    
+    Entity* newEntity       = Renderer.CreateEntity();
+    newEntity->mesh         = subPart;
+    newEntity->material     = material;
+    newEntity->mesh->shader = defaultShader;
+    
+    newEntity->rigidBody = Physics.CreateRigidBody(xx, yy, zz);
+    
+    newEntity->AddForce(fx, fy, fz);
+    
+    //newEntity->mesh->AddSubMesh(0, 0, 0, subPart);
+    
+    scene->AddToSceneRoot(newEntity);
+    
+    if (scene->GetRenderQueueSize() > 100) {
+        
+        for (int i=0; i < 4; i++) {
+            Entity* oldEntity = scene->entities[0];
+            scene->RemoveFromSceneRoot(oldEntity);
+            
+            //Renderer.DestroyMesh(oldEntity->mesh);
+            //Renderer.DestroyMaterial(oldEntity->material);
+            Renderer.DestroyEntity(oldEntity);
+            
+        }
+        
+    }
+    
+    return;
+    
+    
+    
+    /*
+    
+    unsigned int gridSize    = 8;
+    unsigned int gridSpacing = 10;
+    
+    bool endRoutine = false;
+    unsigned int i=0;
+    unsigned int a=0;
     
     unsigned int index = Random.Range( 0, mesh->GetSubMeshCount() );
     mesh->ChangeSubMeshColor(index, Colors.MakeRandom() );
@@ -124,6 +183,7 @@ void Run(void) {
     
     mesh->AddSubMesh(gridSpacing * a, 0, gridSpacing * i, subPartSource);
     
+    */
     
     
     

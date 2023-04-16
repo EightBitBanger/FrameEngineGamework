@@ -12,19 +12,21 @@ Entity::Entity() {
 
 Entity::~Entity() {
     
-    int colliderCount = rigidBody->getNbColliders();
-    for (int i=0; i < colliderCount; i++) {
-        rigidBody->removeCollider(rigidBody->getCollider(i));
-    }
+    if (rigidBody == nullptr) return;
     
     for (std::vector<rp3d::BoxShape*>::iterator it = BoxList.begin(); it != BoxList.end(); ++it) {
         
         Physics.common.destroyBoxShape(*it);
     }
     
-    if (rigidBody != nullptr) 
-        Physics.DestroyRigidBody(rigidBody);
+    int colliderCount = rigidBody->getNbColliders();
+    for (int i=0; i < colliderCount; i++) {
+        rigidBody->removeCollider(rigidBody->getCollider(i));
+    }
     
+    Physics.DestroyRigidBody(rigidBody);
+    
+    return;
 }
 
 
@@ -88,7 +90,7 @@ void Entity::SyncRigidBody(void) {
 
 
 void Entity::AddBoxCollider(float x, float y, float z, float xscale, float yscale, float zscale) {
-    /*
+    
     if (rigidBody == nullptr) return;
     
     rp3d::Transform offsetTransform;
@@ -100,7 +102,6 @@ void Entity::AddBoxCollider(float x, float y, float z, float xscale, float yscal
     rigidBody->addCollider(colliderShape, offsetTransform);
     
     BoxList.push_back(colliderShape);
-    */
     
     return;
 }

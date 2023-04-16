@@ -279,17 +279,30 @@ Initiates the uniform locations within the shader program.\par
 \par
 \fs48 Physics by ReactPhysics3D\par
 \fs22\par
-Builds a default shader program.\par
+Initiate must be called before the physics system can be used.\par
+\cf1 void Initiate(void);\par
+\cf0\par
+Rigid bodies simulate physical objects in a 3D space.\par
 \cf1 rp3d::RigidBody*  Physics :: CreateRigidBody( float x, float y, float z );\par
+void                        Physics :: DestroyRigidBody( rp3d::RigidBody* rigidBodyPtr );\par
 \cf0\par
-Builds a default shader program.\par
-\cf1 void  Physics :: DestroyRigidBody( rp3d::RigidBody* rigidBodyPtr );\par
-\cf0\par
-\par
-\par
-Builds a default shader program.\par
+World gravity will effect all objects within the world space.\par
 \cf1 void  Physics :: SetWorldGravity( float x, float y, float z );\par
 \cf0\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
 \par
 \par
 \par

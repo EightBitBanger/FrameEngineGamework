@@ -9,7 +9,9 @@ struct PhysicsSystem {
     
     PhysicsSystem();
     
-    rp3d::RigidBody* CreateRigidBody(float x, float y, float z);
+    void Initiate(void);
+    
+    rp3d::RigidBody* CreateRigidBody(float x=0.0, float y=0.0, float z=0.0);
     void DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr);
     
     
