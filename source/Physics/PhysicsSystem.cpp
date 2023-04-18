@@ -24,7 +24,14 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
 }
 
 void PhysicsSystem::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
-    //assert(rigidBodyPtr == nullptr);
+    assert(rigidBodyPtr != nullptr);
     world->destroyRigidBody(rigidBodyPtr);
+}
+
+
+
+rp3d::BoxShape* PhysicsSystem::CreateBoxShape(float xscale, float yscale, float zscale) {
+    rp3d::Vector3 scale(xscale, yscale, zscale);
+    return common.createBoxShape(scale);
 }
 

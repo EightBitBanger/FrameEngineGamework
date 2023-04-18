@@ -71,8 +71,7 @@ Scene* RenderSystem::CreateScene(void) {
     return scenePtr;
 }
 Scene* RenderSystem::GetScene(unsigned int index) {
-    if (index > renderQueue.size()) 
-        return nullptr;
+    assert(index <= renderQueue.size());
     return renderQueue[index];
 }
 bool RenderSystem::DestroyScene(Scene* scenePtr) {

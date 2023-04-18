@@ -6,8 +6,5 @@ MeshTag::MeshTag() {
     
     name = "";
     
-    vertexBuffer.clear();
-    indexBuffer.clear();
-    
 }
 

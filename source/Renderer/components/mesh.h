@@ -77,7 +77,9 @@ public:
     
     unsigned int GetSubMeshCount(void);
     
-    bool AddPlane(float x, float y, float z, float width, float height, Color color);
+    void AddPlain(float x, float y, float z, float width, float height, Color color);
+    void AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
+    
     void AddWall(float x, float y, float z, float xscale, float yscale, float zscale, Color color);
     
     

@@ -27,29 +27,36 @@ void CameraMovementScript(void);
 
 Mesh*     subPart;
 Material* material;
-Shader*   defaultShader;
+
+rp3d::BoxShape* collider;
+
 
 
 void Start(void) {
     
     
+    // Start up the physics system
     Physics.Initiate();
-    Physics.SetWorldGravity(0, -20, 0);
+    Physics.SetWorldGravity(0, -29, 0);
+    
+    Physics.world->setIsDebugRenderingEnabled(true);
     
     
-    
-    
+    // Load some initial resources
     Resources.Initiate();
     
-    //Resources.LoadScene("data/main.scene");
+    Resources.LoadScene("data/main.scene");
     
-    Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
-    
-    Resources.LoadTexture("data/barrel/barrel.png", "matBarrel");
-    
-    Resources.LoadShaderGLSL("data/default.shader", "default");
+    //Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
+    //Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
+    //Resources.LoadShaderGLSL("data/default.shader", "default");
     
     
+    collider = Resources.GetColliderFromTag("coll_barrel");
+    assert(collider != nullptr);
+    
+    // Start the renderer and setup a scene
+    Renderer.Initiate();
     
     
     // Main scene
@@ -62,26 +69,24 @@ void Start(void) {
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->transform.position = glm::vec3(-40, 2, 0);
+    Renderer.cameraMain->transform.position = glm::vec3(-50, 5, 0);
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     Renderer.cameraMain->script = Renderer.CreateScript();
     Renderer.cameraMain->script->OnUpdate = CameraMovementScript;
     
-    
-    
     Entity* entity = Renderer.CreateEntity();
-    
     Mesh* mesh = Renderer.CreateMesh();
     entity->mesh = mesh;
     entity->mesh->SetDefaultAttributes();
+    entity->mesh->shader = Renderer.defaultShader;
     
-    defaultShader = Resources.CreateShaderFromTag("default");
-    entity->mesh->shader = defaultShader;
+    //defaultShader = Resources.CreateShaderFromTag("default");
+    entity->mesh->shader = Renderer.defaultShader;
     if (entity->mesh->shader == nullptr) return;
     
-    material = Resources.CreateMaterialFromTag("matBarrel");
+    material = Resources.CreateMaterialFromTag("mat_barrel");
     entity->material = material;
     if (entity->material == nullptr) return;
     
@@ -95,6 +100,36 @@ void Start(void) {
     currentScene->AddToSceneRoot(entity);
     
     
+    // Plain object
+    Entity* plain = Renderer.CreateEntity();
+    plain->mesh = Renderer.CreateMesh();
+    plain->mesh->SetDefaultAttributes();
+    
+    //plain->mesh->AddPlain(  0, 0, 10, 10, 10, Colors.white);
+    //plain->mesh->AddPlain(-10, 0, 10, 10, 10, Colors.white);
+    
+    plain->mesh->AddPlainSubDivided(0, 0, 0, 10, 10, Colors.blue, 8, 8);
+    
+    plain->mesh->shader = Renderer.defaultShader;
+    plain->material = Resources.CreateMaterialFromTag("mat_plain");
+    plain->material->color = Colors.black;
+    
+    
+    rp3d::BoxShape* collPlain = Resources.GetColliderFromTag("coll_plain");
+    
+    plain->rigidBody = Physics.CreateRigidBody();
+    plain->AddCollider(collPlain, 0, -10, 0);
+    
+    
+    
+    plain->SetLinearAxisLockFactor(0, 0, 0);
+    plain->SetAngularAxisLockFactor(0, 0, 0);
+    
+    Scene* newScene = Renderer.CreateScene();
+    
+    newScene->AddToSceneRoot(plain);
+    Renderer.AddToRenderQueue(newScene);
+    
     return;
 }
 
@@ -102,13 +137,60 @@ void Start(void) {
 
 
 
+float spawnRadiusMul  = 0.3;
+float forceMul        = 0.01;
+float torqueMul       = 0.01;
 
-float spawnRadiusMul  = 0.1;
-float forceMul        = 30;
-float torqueMul       = 0.1;
+bool final = false;
+
+Mesh* debugMesh;
 
 
 void Run(void) {
+    
+    
+    debugMesh = Renderer.CreateMesh();
+    debugMesh->SetDefaultAttributes();
+    debugMesh->SetPrimitive(GL_LINES);
+    
+    
+    
+    rp3d::DebugRenderer& debugRenderer = Physics.world->getDebugRenderer();
+    
+    //debugRenderer->DebugLine();
+    
+    debugRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_POINT, true);
+    
+    
+    unsigned int lineCount = debugRenderer.getNbLines();
+    
+    const rp3d::DebugRenderer::DebugLine* pointsList = debugRenderer.getLinesArray();
+    
+    SubMesh subDebug;
+    
+    /*
+    for (unsigned int) {
+        
+        subDebug.vertexBuffer
+        subDebug.vertexBegin
+        subDebug.vertexCount
+        
+        
+    }
+    */
+    
+    debugMesh->AddSubMesh(0, 0, 0, subDebug);
+    
+    
+    
+    
+    
+    return;
+    
+    
+    
+    
+    if (final) return;
     
     Scene* scene = Renderer.GetScene(0);
     if (scene == nullptr) return;
@@ -116,7 +198,7 @@ void Run(void) {
     Entity* entity = scene->GetEntity(0);
     if (entity == nullptr) return;
     
-    for (int i=0; i < 3; i++) {
+    for (int i=0; i < 30; i++) {
         float xx = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
         float yy = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
         float zz = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
@@ -133,19 +215,42 @@ void Run(void) {
         Entity* newEntity       = Renderer.CreateEntity();
         newEntity->mesh         = subPart;
         newEntity->material     = material;
-        newEntity->mesh->shader = defaultShader;
+        newEntity->mesh->shader = Renderer.defaultShader;
+        newEntity->transform.scale = glm::vec3(0.5,0.5,0.5);
         
-        newEntity->rigidBody = Physics.CreateRigidBody(xx, yy, zz);
+        newEntity->rigidBody = Physics.CreateRigidBody(xx, yy + 80, zz);
+        newEntity->rigidBody->setIsAllowedToSleep(true);
+        newEntity->AddCollider(collider, 0, 0, 0);
         
-        newEntity->AddForce(fx, fy, fz);
-        newEntity->AddTorque(tx, ty, tz);
+        // Sus
+        
+        newEntity->rigidBody->setMass(50);
+        newEntity->rigidBody->setAngularDamping(0.5);
+        newEntity->rigidBody->setLinearDamping(0.7);
+        
+        
+        //newEntity->CalculatePhysics();
+        newEntity->rigidBody->updateMassFromColliders();
+        //newEntity->rigidBody->updateLocalCenterOfMassFromColliders();
+        //newEntity->rigidBody->updateLocalInertiaTensorFromColliders();
+        
+        
+        
+        
+        
+        
+        //newEntity->AddForce(fx, fy, fz);
+        //newEntity->AddTorque(tx, ty, tz);
         
         scene->AddToSceneRoot(newEntity);
     }
     
-    if (scene->GetRenderQueueSize() > 2000) {
+    if (scene->GetRenderQueueSize() > 100) {
         
-        for (int i=0; i < 10; i++) {
+        final = true;
+        return;
+        
+        for (int i=0; i < 5; i++) {
             Entity* oldEntity = scene->entities[0];
             scene->RemoveFromSceneRoot(oldEntity);
             
@@ -154,58 +259,6 @@ void Run(void) {
         }
         
     }
-    
-    return;
-    
-    
-    
-    /*
-    
-    unsigned int gridSize    = 8;
-    unsigned int gridSpacing = 10;
-    
-    bool endRoutine = false;
-    unsigned int i=0;
-    unsigned int a=0;
-    
-    unsigned int index = Random.Range( 0, mesh->GetSubMeshCount() );
-    mesh->ChangeSubMeshColor(index, Colors.MakeRandom() );
-    
-    if (endRoutine) return;
-    
-    // Get the loaded model as a sub mesh and
-    // create a grid of sub meshes in the mesh
-    SubMesh subPartSource = Resources.GetSubMeshFromTag("barrel");
-    
-    if (i > gridSize) {
-        i=0; a++;
-        if (a > gridSize) {
-            endRoutine = true;
-            return;
-        }
-    }i++;
-    
-    mesh->AddSubMesh(gridSpacing * a, 0, gridSpacing * i, subPartSource);
-    
-    */
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    //index = Random.Range( 0, mesh->GetSubMeshCount() );
-    //float xx = (Random.Range(1, 100) - Random.Range(1, 100)) * 1;
-    //float yy = (Random.Range(1, 100) - Random.Range(1, 100)) * 1;
-    //float zz = (Random.Range(1, 100) - Random.Range(1, 100)) * 1;
-    
-    //mesh->ChangeSubMeshPosition(index, xx, yy, zz);
     
     return;
 }

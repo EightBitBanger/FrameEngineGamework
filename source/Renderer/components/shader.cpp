@@ -122,13 +122,13 @@ bool Shader::BuildDefault(void) {
         ""
         "void main() "
         "{"
-        "  "
-        "  v_color = l_color;"
-        "  v_coord = l_uv;"
-        "  "
-        "  gl_Position = u_proj * u_model * vec4(l_position, 1);"
-        "  "
-        "}";
+        ""
+        "v_color = l_color;"
+        "v_coord = l_uv;"
+        ""
+        "gl_Position = u_proj * u_model * vec4(l_position, 1);"
+        ""
+        "};";
     
     std::string fragmentShader = 
         "#version 330 core\n"

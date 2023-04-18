@@ -12,19 +12,8 @@ Entity::Entity() {
 
 Entity::~Entity() {
     
-    if (rigidBody == nullptr) return;
-    
-    for (std::vector<rp3d::BoxShape*>::iterator it = BoxList.begin(); it != BoxList.end(); ++it) {
-        
-        Physics.common.destroyBoxShape(*it);
-    }
-    
-    int colliderCount = rigidBody->getNbColliders();
-    for (int i=0; i < colliderCount; i++) {
-        rigidBody->removeCollider(rigidBody->getCollider(i));
-    }
-    
-    Physics.DestroyRigidBody(rigidBody);
+    if (rigidBody != nullptr) 
+        Physics.DestroyRigidBody(rigidBody);
     
     return;
 }
@@ -66,6 +55,7 @@ void Entity::CalculatePhysics(void) {
     rigidBody->updateMassFromColliders();
     rigidBody->updateLocalCenterOfMassFromColliders();
     rigidBody->updateLocalInertiaTensorFromColliders();
+    return;
 }
 
 
@@ -84,24 +74,32 @@ void Entity::SyncRigidBody(void) {
     transform.rotation.x = glm::degrees(physicsRotation.x);
     transform.rotation.y = glm::degrees(physicsRotation.y);
     transform.rotation.z = glm::degrees(physicsRotation.z);
+    return;
 }
 
 
+void Entity::SetLinearAxisLockFactor(float x, float y, float z) {
+    assert(rigidBody != nullptr);
+    rp3d::Vector3 lockFactor(x, y, z);
+    rigidBody->setLinearLockAxisFactor(lockFactor);
+    return;
+}
+
+void Entity::SetAngularAxisLockFactor(float x, float y, float z) {
+    assert(rigidBody != nullptr);
+    rp3d::Vector3 lockFactor(x, y, z);
+    rigidBody->setAngularLockAxisFactor(lockFactor);
+    return;
+}
 
 
-void Entity::AddBoxCollider(float x, float y, float z, float xscale, float yscale, float zscale) {
-    
-    if (rigidBody == nullptr) return;
+void Entity::AddCollider(rp3d::BoxShape* boxShape, float x, float y, float z) {
+    assert(rigidBody != nullptr);
     
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
     
-    rp3d::Vector3 colliderScale(xscale, yscale, zscale);
-    rp3d::BoxShape* colliderShape = Physics.common.createBoxShape(colliderScale);
-    
-    rigidBody->addCollider(colliderShape, offsetTransform);
-    
-    BoxList.push_back(colliderShape);
+    rigidBody->addCollider(boxShape, offsetTransform);
     
     return;
 }

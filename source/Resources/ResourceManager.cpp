@@ -2,6 +2,8 @@
 
 #include "../Renderer/RenderSystem.h"
 extern RenderSystem Renderer;
+#include "../Physics/PhysicsSystem.h"
+extern PhysicsSystem Physics;
 
 #include "ResourceManager.h"
 
@@ -10,15 +12,14 @@ unsigned char* ResourceManager::LoadImageRaw(char const* filename, int* width, i
     return stbi_load(filename, width, height, channels, req_channels);
 }
 
+
+
+
+
 bool ResourceManager::LoadScene(std::string filename) {
     
     FileLoader sceneLoader(filename);
-    if (!sceneLoader.CheckIsFileLoaded()) {
-        std::string logstr = "! " + filename;
-        Log.WriteLn();
-        Log.Write(logstr);
-        return false;
-    }
+    assert(sceneLoader.CheckIsFileLoaded());
     
     std::string logstr = filename;
     Log.Write(logstr);
@@ -44,15 +45,12 @@ bool ResourceManager::LoadScene(std::string filename) {
 }
 
 
+
+
 bool ResourceManager::LoadDefinitions(std::string filename) {
     
     FileLoader definitionsLoader(filename);
-    if (!definitionsLoader.CheckIsFileLoaded()) {
-        std::string logstr = "! " + filename;
-        Log.WriteLn();
-        Log.Write(logstr);
-        return false;
-    }
+    assert(definitionsLoader.CheckIsFileLoaded());
     
     std::string logstr = "  " + filename;
     Log.WriteLn();
@@ -74,20 +72,36 @@ bool ResourceManager::LoadDefinitions(std::string filename) {
             LoadShaderGLSL(strexp[2], strexp[1]);
         }
         
+        if (strexp[0] == "define_collider") {
+            ColliderTag colliderTag;
+            rp3d::Vector3 scale(1, 1, 1);
+            scale.x += StringToFloat(strexp[2]);
+            scale.y += StringToFloat(strexp[3]);
+            scale.z += StringToFloat(strexp[4]);
+            
+            colliderTag.name = strexp[1];
+            colliderTag.colliderShape = Physics.common.createBoxShape(scale);
+            assert(colliderTag.colliderShape != nullptr);
+            
+            colliderTags.push_back(colliderTag);
+            
+            std::string logstr = "  + " + strexp[1];
+            Log.Write(logstr);
+            std::cout << logstr << std::endl;
+            return true;
+        }
+        
     }
     
     return true;
 }
 
+
+
 bool ResourceManager::LoadLocations(std::string filename) {
     
     FileLoader locationsLoader(filename);
-    if (!locationsLoader.CheckIsFileLoaded()) {
-        std::string logstr = "! " + filename;
-        Log.WriteLn();
-        Log.Write(logstr);
-        return false;
-    }
+    assert(locationsLoader.CheckIsFileLoaded());
     
     std::string logstr = "  " + filename;
     Log.WriteLn();
@@ -116,102 +130,73 @@ bool ResourceManager::LoadLocations(std::string filename) {
 
 
 
-
-
-
-
-
-
-
 void ResourceManager::Initiate(void) {
     
     stbi_set_flip_vertically_on_load(true);
     
 }
 
+
+
+
+
 MeshTag* ResourceManager::FindMeshTag(std::string name) {
-    for (std::vector<MeshTag>::iterator it = meshTags.begin(); it != meshTags.end(); ++it) {
+    for (std::vector<MeshTag>::iterator it = meshTags.begin(); it != meshTags.end(); ++it) 
         if (it->name == name) 
             return &it[0];
-    }
     return nullptr;
 }
 
 TextureTag* ResourceManager::FindTextureTag(std::string name) {
-    for (std::vector<TextureTag>::iterator it = textureTags.begin(); it != textureTags.end(); ++it) {
+    for (std::vector<TextureTag>::iterator it = textureTags.begin(); it != textureTags.end(); ++it) 
         if (it->name == name) 
             return &it[0];
-    }
     return nullptr;
 }
 
 ShaderTag* ResourceManager::FindShaderTag(std::string name) {
-    for (std::vector<ShaderTag>::iterator it = shaderTags.begin(); it != shaderTags.end(); ++it) {
+    for (std::vector<ShaderTag>::iterator it = shaderTags.begin(); it != shaderTags.end(); ++it) 
         if (it->name == name) 
             return &it[0];
-    }
+    return nullptr;
+}
+
+ColliderTag* ResourceManager::FindColliderTag(std::string name) {
+    for (std::vector<ColliderTag>::iterator it = colliderTags.begin(); it != colliderTags.end(); ++it) 
+        if (it->name == name) 
+            return &it[0];
     return nullptr;
 }
 
 
 
 
-
-bool ResourceManager::UnloadMeshTag(std::string name) {
-    for (std::vector<MeshTag>::iterator it = meshTags.begin(); it != meshTags.end(); ++it) {
-        if (it->name == name) {
-            meshTags.erase(it);
-            return true;
-        }
-    }
-    return false;
-}
-
-bool ResourceManager::UnloadTextureTag(std::string name) {
-    for (std::vector<TextureTag>::iterator it = textureTags.begin(); it != textureTags.end(); ++it) {
-        if (it->name == name) {
-            textureTags.erase(it);
-            return true;
-        }
-    }
-    return false;
-}
-
-bool ResourceManager::UnloadShaderTag(std::string name) {
-    for (std::vector<ShaderTag>::iterator it = shaderTags.begin(); it != shaderTags.end(); ++it) {
-        if (it->name == name) {
-            shaderTags.erase(it);
-            return true;
-        }
-    }
-    return false;
-}
 
 
 
 Mesh* ResourceManager::CreateMeshFromTag(std::string name) {
     MeshTag* meshTag = FindMeshTag(name);
-    if (meshTag == nullptr) return nullptr;
+    assert(meshTag != nullptr);
     Mesh* meshPtr = Renderer.CreateMesh();
-    meshPtr->AddSubMesh(0,0,0, meshTag->vertexBuffer, meshTag->indexBuffer);
+    meshPtr->AddSubMesh(0,0,0, meshTag->mesh.vertexBuffer, meshTag->mesh.indexBuffer);
     meshPtr->SetAttribute(0, 3, sizeof(Vertex), 0);
     meshPtr->SetAttribute(1, 3, sizeof(Vertex), 12);
     meshPtr->SetAttribute(2, 2, sizeof(Vertex), 24);
     return meshPtr;
 }
 
-SubMesh ResourceManager::GetSubMeshFromTag(std::string name) {
+SubMesh* ResourceManager::GetSubMeshFromTag(std::string name) {
     SubMesh subPart;
     MeshTag* meshTag = FindMeshTag(name);
-    if (meshTag == nullptr) return subPart;
-    subPart.vertexBuffer = meshTag->vertexBuffer;
-    subPart.indexBuffer = meshTag->indexBuffer;
-    return subPart;
+    assert(meshTag != nullptr);
+    subPart.vertexBuffer = meshTag->mesh.vertexBuffer;
+    subPart.indexBuffer = meshTag->mesh.indexBuffer;
+    return &meshTag->mesh;
 }
 
 Material* ResourceManager::CreateMaterialFromTag(std::string name) {
     TextureTag* texTag = FindTextureTag(name);
-    if (texTag == nullptr) return nullptr;
+    assert(texTag != nullptr);
     Material* materialPtr = Renderer.CreateMaterial();
     materialPtr->width  = texTag->width;
     materialPtr->height = texTag->height;
@@ -221,11 +206,23 @@ Material* ResourceManager::CreateMaterialFromTag(std::string name) {
 
 Shader* ResourceManager::CreateShaderFromTag(std::string name) {
     ShaderTag* shaderTag = FindShaderTag(name);
-    if (shaderTag == nullptr) return nullptr;
+    assert(shaderTag != nullptr);
     Shader* shaderPtr = Renderer.CreateShader();
     shaderPtr->CreateShaderProgram(shaderTag->vertexScript, shaderTag->fragmentScript);
     return shaderPtr;
 }
+
+
+rp3d::BoxShape* ResourceManager::GetColliderFromTag(std::string name) {
+    for (std::vector<ColliderTag>::iterator it = colliderTags.begin(); it != colliderTags.end(); ++it) 
+        if (it->name == name) 
+            return it->colliderShape;
+    return nullptr;
+}
+
+
+
+
 
 
 
@@ -261,13 +258,7 @@ bool ResourceManager::LoadTexture(std::string filename, std::string resourceName
     textureTag.name = assetName;
     
     textureTag.buffer = LoadImageRaw(filename.c_str(), &textureTag.width, &textureTag.height, &textureTag.channels, 3);
-    
-    if (textureTag.buffer == nullptr) {
-        std::string logstr = " ! " + name;
-        Log.Write(logstr);
-        std::cout << logstr << std::endl;
-        return false;
-    }
+    assert(textureTag.buffer != nullptr);
     
     textureTags.push_back(textureTag);
     
@@ -278,15 +269,11 @@ bool ResourceManager::LoadTexture(std::string filename, std::string resourceName
 }
 
 
+
 bool ResourceManager::LoadWaveFront(std::string filename, std::string resourceName="meshDefault") {
     
     objl::Loader loader;
-    if (!loader.LoadFile(filename)) {
-        std::string logstr = " ! " + filename;
-        Log.Write(logstr);
-        std::cout << logstr << std::endl;
-        return false;
-    }
+    assert(loader.LoadFile(filename));
     
     unsigned int numberOfMeshes = loader.LoadedMeshes.size();
     if (numberOfMeshes == 0) return false;
@@ -311,11 +298,11 @@ bool ResourceManager::LoadWaveFront(std::string filename, std::string resourceNa
         vertex.u = objlVertex.TextureCoordinate.X;
         vertex.v = objlVertex.TextureCoordinate.Y;
         
-        newAsset.vertexBuffer.push_back(vertex);
+        newAsset.mesh.vertexBuffer.push_back(vertex);
     }
     
     for (unsigned int i=0; i < loader.LoadedMeshes[0].Indices.size(); i++) {
-        newAsset.indexBuffer.push_back(loader.LoadedMeshes[0].Indices[i]);
+        newAsset.mesh.indexBuffer.push_back(loader.LoadedMeshes[0].Indices[i]);
     }
     
     meshTags.push_back(newAsset);
@@ -328,11 +315,12 @@ bool ResourceManager::LoadWaveFront(std::string filename, std::string resourceNa
 }
 
 
+
 bool ResourceManager::LoadShaderGLSL(std::string filename, std::string resourceName="shaDefault") {
     
     FileLoader loader(filename);
     if (!loader.CheckIsFileLoaded()) {
-        std::string logstr = " ! " + filename;
+        std::string logstr = "! " + filename;
         Log.Write(logstr);
         std::cout << logstr << std::endl;
         return false;
@@ -359,4 +347,44 @@ bool ResourceManager::LoadShaderGLSL(std::string filename, std::string resourceN
     
     return true;
 }
+
+
+
+
+
+
+
+
+
+
+bool ResourceManager::UnloadMeshTag(std::string name) {
+    for (std::vector<MeshTag>::iterator it = meshTags.begin(); it != meshTags.end(); ++it) {
+        if (it->name == name) {
+            meshTags.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ResourceManager::UnloadTextureTag(std::string name) {
+    for (std::vector<TextureTag>::iterator it = textureTags.begin(); it != textureTags.end(); ++it) {
+        if (it->name == name) {
+            textureTags.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ResourceManager::UnloadShaderTag(std::string name) {
+    for (std::vector<ShaderTag>::iterator it = shaderTags.begin(); it != shaderTags.end(); ++it) {
+        if (it->name == name) {
+            shaderTags.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
 

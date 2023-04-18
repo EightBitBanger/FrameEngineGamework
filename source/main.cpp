@@ -30,7 +30,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Console window
     HWND cHnd = GetConsoleWindow();
     ShowWindow(cHnd, SW_SHOW);
-    SetWindowPos(cHnd, NULL, 5, 50, 400, 800, SWP_SHOWWINDOW);
+    SetWindowPos(cHnd, NULL, 5, 50, 700, 800, SWP_SHOWWINDOW);
     
     // Figure a good window size
     HDC hDC = GetDC(wHnd);
@@ -59,8 +59,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Renderer.SetViewport(0, 0, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top);
     
-    
-    Renderer.Initiate();
     
     PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
     Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);

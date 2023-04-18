@@ -103,7 +103,9 @@ void Mesh::SetDefaultAttributes(void) {
 }
 
 
-bool Mesh::AddPlane(float x, float y, float z, float width, float height, Color color) {
+void Mesh::AddPlain(float x, float y, float z, float width, float height, Color color) {
+    
+    z -= x;
     
     Vertex vertex[4];
     vertex[0] = Vertex(x-width, y, z+height,  color.r, color.g, color.b, 0, 1);
@@ -124,7 +126,15 @@ bool Mesh::AddPlane(float x, float y, float z, float width, float height, Color 
     subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(3);
     
-    return AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer);
+    AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer);
+    return;
+}
+
+void Mesh::AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub) {
+    for (int x=0; x < widthSub; x++) 
+        for (int z=0; z < heightSub; z++) 
+            AddPlain( z * width, 0, x * (height * 2), width, height, color);
+    return;
 }
 
 

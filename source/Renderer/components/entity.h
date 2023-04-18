@@ -36,7 +36,6 @@ struct Entity {
     Script*   script;
     
     rp3d::RigidBody* rigidBody;
-    std::vector<rp3d::BoxShape*> BoxList;
     
     Entity();
     ~Entity();
@@ -44,11 +43,14 @@ struct Entity {
     void AddForce(float x, float y, float z);
     void AddTorque(float x, float y, float z);
     
-    void AddBoxCollider(float x, float y, float z, float xscale, float yscale, float zscale);
+    void AddCollider(rp3d::BoxShape* boxShape, float x, float y, float z);
     
     void SetMass(float mass);
     void SetLinearDamping(float damping);
     void SetAngularDamping(float damping);
+    
+    void SetLinearAxisLockFactor(float x, float y, float z);
+    void SetAngularAxisLockFactor(float x, float y, float z);
     
     void EnableGravity(bool enabled);
     
