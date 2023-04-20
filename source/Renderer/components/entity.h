@@ -56,8 +56,6 @@ struct Entity {
     
     void CalculatePhysics(void);
     
-    void SyncRigidBody(void);
-    
 };
 
 

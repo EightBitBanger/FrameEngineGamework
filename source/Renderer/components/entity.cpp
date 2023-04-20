@@ -59,25 +59,6 @@ void Entity::CalculatePhysics(void) {
 }
 
 
-void Entity::SyncRigidBody(void) {
-    
-    rp3d::Transform physicsTransform = rigidBody->getTransform();
-    
-    rp3d::Vector3 physicsPosition = physicsTransform.getPosition();
-    rp3d::Quaternion quaternion   = physicsTransform.getOrientation();
-    rp3d::Vector3 physicsRotation = quaternion.getVectorV();
-    
-    transform.position.x = physicsPosition.x;
-    transform.position.y = physicsPosition.y;
-    transform.position.z = physicsPosition.z;
-    
-    transform.rotation.x = glm::degrees(physicsRotation.x);
-    transform.rotation.y = glm::degrees(physicsRotation.y);
-    transform.rotation.z = glm::degrees(physicsRotation.z);
-    return;
-}
-
-
 void Entity::SetLinearAxisLockFactor(float x, float y, float z) {
     assert(rigidBody != nullptr);
     rp3d::Vector3 lockFactor(x, y, z);

@@ -1,5 +1,5 @@
 #include "shader.h"
-
+extern Logger Log;
 
 Shader::Shader() {
     shaderProgram = 0;
@@ -65,9 +65,9 @@ int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentSc
     GLint state;
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &state);
     if (state == GL_FALSE) {
-        //Log.WriteLn();
-        //Log.Write(" ! Shader link error");
-        //Log.WriteLn();
+        Log.WriteLn();
+        Log.Write(" ! Shader link error");
+        Log.WriteLn();
         return 0;
     }
     
@@ -90,9 +90,9 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
     int vResult;
     glGetShaderiv(ShaderID, GL_COMPILE_STATUS, &vResult);
     if (!vResult) {
-        //Log.WriteLn();
-        //Log.Write(" ! Shader compilation error");
-        //Log.WriteLn();
+        Log.WriteLn();
+        Log.Write(" ! Shader compilation error");
+        Log.WriteLn();
         return 0;
     }
     

@@ -37,7 +37,7 @@ void Start(void) {
     
     // Start up the physics system
     Physics.Initiate();
-    Physics.SetWorldGravity(0, -29, 0);
+    Physics.SetWorldGravity(0, -30, 0);
     
     Physics.world->setIsDebugRenderingEnabled(true);
     
@@ -69,7 +69,7 @@ void Start(void) {
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->transform.position = glm::vec3(-50, 5, 0);
+    Renderer.cameraMain->transform.position = glm::vec3(0, 5, 0);
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
@@ -108,7 +108,9 @@ void Start(void) {
     //plain->mesh->AddPlain(  0, 0, 10, 10, 10, Colors.white);
     //plain->mesh->AddPlain(-10, 0, 10, 10, 10, Colors.white);
     
-    plain->mesh->AddPlainSubDivided(0, 0, 0, 10, 10, Colors.blue, 8, 8);
+    //plain->mesh->AddPlainSubDivided(0, 0, 0, 10, 10, Colors.blue, 8, 8);
+    
+    plain->mesh->AddPlain(0, 0, 0, 100, 100, Colors.white);
     
     plain->mesh->shader = Renderer.defaultShader;
     plain->material = Resources.CreateMaterialFromTag("mat_plain");
@@ -121,6 +123,7 @@ void Start(void) {
     plain->AddCollider(collPlain, 0, -10, 0);
     
     
+    plain->SetMass(9999);
     
     plain->SetLinearAxisLockFactor(0, 0, 0);
     plain->SetAngularAxisLockFactor(0, 0, 0);
@@ -137,9 +140,9 @@ void Start(void) {
 
 
 
-float spawnRadiusMul  = 0.3;
-float forceMul        = 0.01;
-float torqueMul       = 0.01;
+float spawnRadiusMul  = 0.01;
+float forceMul        = 0.3;
+float torqueMul       = 0.1;
 
 bool final = false;
 
@@ -147,48 +150,6 @@ Mesh* debugMesh;
 
 
 void Run(void) {
-    
-    
-    debugMesh = Renderer.CreateMesh();
-    debugMesh->SetDefaultAttributes();
-    debugMesh->SetPrimitive(GL_LINES);
-    
-    
-    
-    rp3d::DebugRenderer& debugRenderer = Physics.world->getDebugRenderer();
-    
-    //debugRenderer->DebugLine();
-    
-    debugRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_POINT, true);
-    
-    
-    unsigned int lineCount = debugRenderer.getNbLines();
-    
-    const rp3d::DebugRenderer::DebugLine* pointsList = debugRenderer.getLinesArray();
-    
-    SubMesh subDebug;
-    
-    /*
-    for (unsigned int) {
-        
-        subDebug.vertexBuffer
-        subDebug.vertexBegin
-        subDebug.vertexCount
-        
-        
-    }
-    */
-    
-    debugMesh->AddSubMesh(0, 0, 0, subDebug);
-    
-    
-    
-    
-    
-    return;
-    
-    
-    
     
     if (final) return;
     
@@ -198,7 +159,7 @@ void Run(void) {
     Entity* entity = scene->GetEntity(0);
     if (entity == nullptr) return;
     
-    for (int i=0; i < 30; i++) {
+    for (int i=0; i < 1; i++) {
         float xx = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
         float yy = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
         float zz = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
@@ -207,45 +168,49 @@ void Run(void) {
         float fy = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
         float fz = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
         
-        float tx = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
-        float ty = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
-        float tz = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
+        float tx=0;
+        float ty=0;
+        float tz=0;
+        
+        tx = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
+        ty = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
+        tz = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
         
         
         Entity* newEntity       = Renderer.CreateEntity();
         newEntity->mesh         = subPart;
         newEntity->material     = material;
         newEntity->mesh->shader = Renderer.defaultShader;
-        newEntity->transform.scale = glm::vec3(0.5,0.5,0.5);
+        newEntity->transform.scale = glm::vec3(0.5, 0.5, 0.5);
         
         newEntity->rigidBody = Physics.CreateRigidBody(xx, yy + 80, zz);
         newEntity->rigidBody->setIsAllowedToSleep(true);
         newEntity->AddCollider(collider, 0, 0, 0);
         
-        // Sus
         
-        newEntity->rigidBody->setMass(50);
-        newEntity->rigidBody->setAngularDamping(0.5);
-        newEntity->rigidBody->setLinearDamping(0.7);
+        
+        // Im doing it wrong...
+        
+        newEntity->rigidBody->setMass(0.05);
+        newEntity->rigidBody->setAngularDamping(4.5);
+        newEntity->rigidBody->setLinearDamping(0.3);
         
         
         //newEntity->CalculatePhysics();
         newEntity->rigidBody->updateMassFromColliders();
-        //newEntity->rigidBody->updateLocalCenterOfMassFromColliders();
+        newEntity->rigidBody->updateLocalCenterOfMassFromColliders();
         //newEntity->rigidBody->updateLocalInertiaTensorFromColliders();
         
         
-        
-        
-        
-        
-        //newEntity->AddForce(fx, fy, fz);
-        //newEntity->AddTorque(tx, ty, tz);
+        newEntity->AddForce(fx, fy, fz);
+        newEntity->AddTorque(tx, ty, tz);
         
         scene->AddToSceneRoot(newEntity);
+        continue;
     }
     
-    if (scene->GetRenderQueueSize() > 100) {
+    
+    if (scene->GetRenderQueueSize() > 200) {
         
         final = true;
         return;
@@ -259,6 +224,32 @@ void Run(void) {
         }
         
     }
+    
+    
+    
+    
+    /*    1ST PHYSICS DEBUG ATTEMPT
+    debugMesh = Renderer.CreateMesh();
+    debugMesh->SetDefaultAttributes();
+    debugMesh->SetPrimitive(GL_LINES);
+    
+    rp3d::DebugRenderer& debugRenderer = Physics.world->getDebugRenderer();
+    //debugRenderer->DebugLine();
+    debugRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_POINT, true);
+    
+    unsigned int lineCount = debugRenderer.getNbLines();
+    const rp3d::DebugRenderer::DebugLine* pointsList = debugRenderer.getLinesArray();
+    SubMesh subDebug;
+    
+    for (unsigned int) {
+        subDebug.vertexBuffer
+        subDebug.vertexBegin
+        subDebug.vertexCount
+    }
+    
+    debugMesh->AddSubMesh(0, 0, 0, subDebug);
+    */
+    
     
     return;
 }
