@@ -37,9 +37,11 @@ void Start(void) {
     
     // Start up the physics system
     Physics.Initiate();
-    Physics.SetWorldGravity(0, -30, 0);
+    Physics.SetWorldGravity(0, -9.98, 0);
     
-    Physics.world->setIsDebugRenderingEnabled(true);
+    //Physics.world->setIsDebugRenderingEnabled(true);
+    
+    
     
     
     // Load some initial resources
@@ -54,6 +56,9 @@ void Start(void) {
     
     collider = Resources.GetColliderFromTag("coll_barrel");
     assert(collider != nullptr);
+    
+    
+    
     
     // Start the renderer and setup a scene
     Renderer.Initiate();
@@ -191,14 +196,14 @@ void Run(void) {
         
         // Im doing it wrong...
         
-        newEntity->rigidBody->setMass(0.05);
+        newEntity->rigidBody->setMass(0.01);
         newEntity->rigidBody->setAngularDamping(4.5);
         newEntity->rigidBody->setLinearDamping(0.3);
         
         
         //newEntity->CalculatePhysics();
-        newEntity->rigidBody->updateMassFromColliders();
-        newEntity->rigidBody->updateLocalCenterOfMassFromColliders();
+        //newEntity->rigidBody->updateMassFromColliders();
+        //newEntity->rigidBody->updateLocalCenterOfMassFromColliders();
         //newEntity->rigidBody->updateLocalInertiaTensorFromColliders();
         
         
@@ -210,7 +215,7 @@ void Run(void) {
     }
     
     
-    if (scene->GetRenderQueueSize() > 200) {
+    if (scene->GetRenderQueueSize() > 100) {
         
         final = true;
         return;

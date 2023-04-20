@@ -15,7 +15,9 @@ struct PhysicsSystem {
     rp3d::RigidBody* CreateRigidBody(float x=0.0, float y=0.0, float z=0.0);
     void DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr);
     
-    rp3d::BoxShape* CreateBoxShape(float xscale, float yscale, float zscale);
+    rp3d::BoxShape*     CreateColliderBox(float xscale, float yscale, float zscale);
+    rp3d::SphereShape*  CreateColliderSphere(float radius);
+    rp3d::CapsuleShape* CreateColliderCapsule(float radius, float height);
     
     void SetWorldGravity(float x, float y, float z);
     

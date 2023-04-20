@@ -29,9 +29,17 @@ void PhysicsSystem::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
 }
 
 
-
-rp3d::BoxShape* PhysicsSystem::CreateBoxShape(float xscale, float yscale, float zscale) {
+rp3d::BoxShape* PhysicsSystem::CreateColliderBox(float xscale, float yscale, float zscale) {
     rp3d::Vector3 scale(xscale, yscale, zscale);
     return common.createBoxShape(scale);
 }
+
+rp3d::SphereShape* PhysicsSystem::CreateColliderSphere(float radius) {
+    return common.createSphereShape(radius);
+}
+
+rp3d::CapsuleShape* PhysicsSystem::CreateColliderCapsule(float radius, float height) {
+    return common.createCapsuleShape(radius, height);
+}
+
 
