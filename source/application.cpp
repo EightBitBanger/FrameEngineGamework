@@ -37,6 +37,8 @@ void Start(void) {
     Physics.Initiate();
     Physics.SetWorldGravity(0, -9.98, 0);
     
+    
+    //
     // Load some initial resources
     Resources.Initiate();
     
@@ -85,23 +87,20 @@ void Start(void) {
     plain->mesh = Renderer.CreateMesh();
     plain->mesh->SetDefaultAttributes();
     
-    //plain->mesh->AddPlain(  0, 0, 10, 10, 10, Colors.white);
-    //plain->mesh->AddPlain(-10, 0, 10, 10, 10, Colors.white);
     
-    //plain->mesh->AddPlainSubDivided(0, 0, 0, 10, 10, Colors.blue, 8, 8);
+    plain->mesh->AddPlainSubDivided(-10, 0, -10, 10, 10, Colors.gray, 3, 3);
     
-    plain->mesh->AddPlain(0, 0, 0, 100, 100, Colors.white);
+    //plain->mesh->AddPlain(0, 0, 0, 100, 100, Colors.gray);
     
     plain->mesh->shader = Renderer.defaultShader;
     plain->material = Resources.CreateMaterialFromTag("mat_plain");
     plain->material->color = Colors.white;
     
     
-    rp3d::Vector3 shape(1000, 100, 1000);
-    rp3d::BoxShape* collPlain = Physics.CreateColliderBox(shape.x, shape.y, shape.z);
+    rp3d::BoxShape* collPlain = Physics.CreateColliderBox(1000, 100, 1000);
     
     plain->rigidBody = Physics.CreateRigidBody();
-    plain->AddCollider(collPlain, 0, -shape.z, 0);
+    plain->AddCollider(collPlain, 0, -100, 0);
     
     
     plain->SetMass(9999);
@@ -109,47 +108,43 @@ void Start(void) {
     plain->SetLinearAxisLockFactor(0, 0, 0);
     plain->SetAngularAxisLockFactor(0, 0, 0);
     
-    Scene* newScene = Renderer.CreateScene();
     
-    newScene->AddToSceneRoot(plain);
-    Renderer.AddToRenderQueue(newScene);
+    currentScene->AddToSceneRoot(plain);
     
     // Renderer.InitiateScriptsOnStart(); or Renderer.InitiateScenes();
     
     
+    rp3d::BoxShape* collBarrel = Physics.CreateColliderBox(3, 4, 3);
     
-    
-    
-    // Barrel object
-    Entity* barrel = Renderer.CreateEntity();
-    barrel->mesh = Resources.CreateMeshFromTag("barrel");
-    barrel->mesh->SetDefaultAttributes();
-    
-    barrel->mesh->AddPlain(0, 0, 0, 100, 100, Colors.white);
-    
-    barrel->mesh->shader = Renderer.defaultShader;
-    barrel->material = Resources.CreateMaterialFromTag("mat_barrel");
-    barrel->material->color = Colors.white;
-    
-    
-    
-    rp3d::BoxShape* collBarrel = Physics.CreateColliderBox(1, 1, 1);
-    
-    barrel->rigidBody = Physics.CreateRigidBody(0, -100, 0);
-    barrel->AddCollider(collBarrel, 0, 0, 0);
-    
-    
-    barrel->SetMass(0.8);
-    
-    barrel->SetLinearAxisLockFactor(0, 0, 0);
-    barrel->SetAngularAxisLockFactor(0, 0, 0);
-    
-    
-    
-    newScene->AddToSceneRoot(barrel);
-    
-    
-    
+    unsigned int max = 10;
+    for (int i=0; i < max; i++) {
+        
+        // Barrel object
+        Entity* barrel = Renderer.CreateEntity();
+        barrel->mesh = Resources.CreateMeshFromTag("barrel");
+        barrel->mesh->SetDefaultAttributes();
+        
+        barrel->mesh->shader = Renderer.defaultShader;
+        barrel->material = Resources.CreateMaterialFromTag("mat_barrel");
+        barrel->material->color = Colors.white;
+        
+        
+        
+        
+        barrel->rigidBody = Physics.CreateRigidBody(0, max - i, 0);
+        barrel->AddCollider(collBarrel, 0, 0, 0);
+        
+        
+        //barrel->SetMass(3);
+        //barrel->SetAngularDamping(5);
+        //barrel->SetLinearDamping(0);
+        
+        barrel->SetAngularAxisLockFactor(0, 0, 0);
+        
+        currentScene->AddToSceneRoot(barrel);
+        
+        continue;
+    }
     
     
     
