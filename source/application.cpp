@@ -25,44 +25,40 @@ void CameraMovementScript(void);
 
 
 
-Mesh*     subPart;
-Material* material;
-
-rp3d::BoxShape* collider;
 
 
 
 void Start(void) {
     
     
-    // Start up the physics system
+    //
+    // Start up the physics system and setup the simulation
+    
     Physics.Initiate();
     Physics.SetWorldGravity(0, -9.98, 0);
-    
-    //Physics.world->setIsDebugRenderingEnabled(true);
-    
-    
-    
     
     // Load some initial resources
     Resources.Initiate();
     
-    Resources.LoadScene("data/main.scene");
+    //Resources.LoadScene("data/main.scene");
     
-    //Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
-    //Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
-    //Resources.LoadShaderGLSL("data/default.shader", "default");
-    
-    
-    collider = Resources.GetColliderFromTag("coll_barrel");
-    assert(collider != nullptr);
+    Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
+    Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
+    Resources.LoadTexture("data/grassy.png", "mat_plain");
+    Resources.LoadShaderGLSL("data/default.shader", "default");
     
     
+    //rp3d::BoxShape* collider = Resources.GetColliderFromTag("coll_barrel");
+    //assert(collider != nullptr);
     
     
+    
+    
+    
+    //
     // Start the renderer and setup a scene
-    Renderer.Initiate();
     
+    Renderer.Initiate();
     
     // Main scene
     Scene* currentScene = Renderer.CreateScene();
@@ -81,28 +77,7 @@ void Start(void) {
     Renderer.cameraMain->script = Renderer.CreateScript();
     Renderer.cameraMain->script->OnUpdate = CameraMovementScript;
     
-    Entity* entity = Renderer.CreateEntity();
-    Mesh* mesh = Renderer.CreateMesh();
-    entity->mesh = mesh;
-    entity->mesh->SetDefaultAttributes();
-    entity->mesh->shader = Renderer.defaultShader;
     
-    //defaultShader = Resources.CreateShaderFromTag("default");
-    entity->mesh->shader = Renderer.defaultShader;
-    if (entity->mesh->shader == nullptr) return;
-    
-    material = Resources.CreateMaterialFromTag("mat_barrel");
-    entity->material = material;
-    if (entity->material == nullptr) return;
-    
-    entity->material->color = Color(0, 0, 0, 1);
-    
-    subPart = Resources.CreateMeshFromTag("barrel");
-    subPart->SetDefaultAttributes();
-    
-    
-    
-    currentScene->AddToSceneRoot(entity);
     
     
     // Plain object
@@ -119,13 +94,14 @@ void Start(void) {
     
     plain->mesh->shader = Renderer.defaultShader;
     plain->material = Resources.CreateMaterialFromTag("mat_plain");
-    plain->material->color = Colors.black;
+    plain->material->color = Colors.white;
     
     
-    rp3d::BoxShape* collPlain = Resources.GetColliderFromTag("coll_plain");
+    rp3d::Vector3 shape(1000, 100, 1000);
+    rp3d::BoxShape* collPlain = Physics.CreateColliderBox(shape.x, shape.y, shape.z);
     
     plain->rigidBody = Physics.CreateRigidBody();
-    plain->AddCollider(collPlain, 0, -10, 0);
+    plain->AddCollider(collPlain, 0, -shape.z, 0);
     
     
     plain->SetMass(9999);
@@ -138,6 +114,56 @@ void Start(void) {
     newScene->AddToSceneRoot(plain);
     Renderer.AddToRenderQueue(newScene);
     
+    // Renderer.InitiateScriptsOnStart(); or Renderer.InitiateScenes();
+    
+    
+    
+    
+    
+    // Barrel object
+    Entity* barrel = Renderer.CreateEntity();
+    barrel->mesh = Resources.CreateMeshFromTag("barrel");
+    barrel->mesh->SetDefaultAttributes();
+    
+    barrel->mesh->AddPlain(0, 0, 0, 100, 100, Colors.white);
+    
+    barrel->mesh->shader = Renderer.defaultShader;
+    barrel->material = Resources.CreateMaterialFromTag("mat_barrel");
+    barrel->material->color = Colors.white;
+    
+    
+    
+    rp3d::BoxShape* collBarrel = Physics.CreateColliderBox(1, 1, 1);
+    
+    barrel->rigidBody = Physics.CreateRigidBody(0, -100, 0);
+    barrel->AddCollider(collBarrel, 0, 0, 0);
+    
+    
+    barrel->SetMass(0.8);
+    
+    barrel->SetLinearAxisLockFactor(0, 0, 0);
+    barrel->SetAngularAxisLockFactor(0, 0, 0);
+    
+    
+    
+    newScene->AddToSceneRoot(barrel);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     return;
 }
 
@@ -145,116 +171,7 @@ void Start(void) {
 
 
 
-float spawnRadiusMul  = 0.01;
-float forceMul        = 0.3;
-float torqueMul       = 0.1;
-
-bool final = false;
-
-Mesh* debugMesh;
-
-
 void Run(void) {
-    
-    if (final) return;
-    
-    Scene* scene = Renderer.GetScene(0);
-    if (scene == nullptr) return;
-    
-    Entity* entity = scene->GetEntity(0);
-    if (entity == nullptr) return;
-    
-    for (int i=0; i < 1; i++) {
-        float xx = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
-        float yy = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
-        float zz = (Random.Range(1, 100) - Random.Range(1, 100)) * spawnRadiusMul;
-        
-        float fx = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
-        float fy = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
-        float fz = (Random.Range(1, 100) - Random.Range(1, 100)) * forceMul;
-        
-        float tx=0;
-        float ty=0;
-        float tz=0;
-        
-        tx = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
-        ty = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
-        tz = (Random.Range(1, 100) - Random.Range(1, 100)) * torqueMul;
-        
-        
-        Entity* newEntity       = Renderer.CreateEntity();
-        newEntity->mesh         = subPart;
-        newEntity->material     = material;
-        newEntity->mesh->shader = Renderer.defaultShader;
-        newEntity->transform.scale = glm::vec3(0.5, 0.5, 0.5);
-        
-        newEntity->rigidBody = Physics.CreateRigidBody(xx, yy + 80, zz);
-        newEntity->rigidBody->setIsAllowedToSleep(true);
-        newEntity->AddCollider(collider, 0, 0, 0);
-        
-        
-        
-        // Im doing it wrong...
-        
-        newEntity->rigidBody->setMass(0.01);
-        newEntity->rigidBody->setAngularDamping(4.5);
-        newEntity->rigidBody->setLinearDamping(0.3);
-        
-        
-        //newEntity->CalculatePhysics();
-        //newEntity->rigidBody->updateMassFromColliders();
-        //newEntity->rigidBody->updateLocalCenterOfMassFromColliders();
-        //newEntity->rigidBody->updateLocalInertiaTensorFromColliders();
-        
-        
-        newEntity->AddForce(fx, fy, fz);
-        newEntity->AddTorque(tx, ty, tz);
-        
-        scene->AddToSceneRoot(newEntity);
-        continue;
-    }
-    
-    
-    if (scene->GetRenderQueueSize() > 100) {
-        
-        final = true;
-        return;
-        
-        for (int i=0; i < 5; i++) {
-            Entity* oldEntity = scene->entities[0];
-            scene->RemoveFromSceneRoot(oldEntity);
-            
-            Renderer.DestroyEntity(oldEntity);
-            
-        }
-        
-    }
-    
-    
-    
-    
-    /*    1ST PHYSICS DEBUG ATTEMPT
-    debugMesh = Renderer.CreateMesh();
-    debugMesh->SetDefaultAttributes();
-    debugMesh->SetPrimitive(GL_LINES);
-    
-    rp3d::DebugRenderer& debugRenderer = Physics.world->getDebugRenderer();
-    //debugRenderer->DebugLine();
-    debugRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::CONTACT_POINT, true);
-    
-    unsigned int lineCount = debugRenderer.getNbLines();
-    const rp3d::DebugRenderer::DebugLine* pointsList = debugRenderer.getLinesArray();
-    SubMesh subDebug;
-    
-    for (unsigned int) {
-        subDebug.vertexBuffer
-        subDebug.vertexBegin
-        subDebug.vertexCount
-    }
-    
-    debugMesh->AddSubMesh(0, 0, 0, subDebug);
-    */
-    
     
     return;
 }
