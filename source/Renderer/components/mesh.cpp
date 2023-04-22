@@ -105,7 +105,7 @@ void Mesh::SetDefaultAttributes(void) {
 
 void Mesh::AddPlain(float x, float y, float z, float width, float height, Color color) {
     
-    z -= x;
+    z -= x; // De-stagger
     
     Vertex vertex[4];
     vertex[0] = Vertex(x-width, y, z+height,  color.r, color.g, color.b, 0, 1);
@@ -133,7 +133,42 @@ void Mesh::AddPlain(float x, float y, float z, float width, float height, Color 
 void Mesh::AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub) {
     for (unsigned int xx=0; xx < widthSub; xx++) 
         for (unsigned int zz=0; zz < heightSub; zz++) 
-            AddPlain( z + (zz * width), 0, x + (xx * (height * 2)), width, height, color);
+            AddPlain( z + (zz * width), y, x + (xx * (height * 2)), width, height, color);
+    return;
+}
+
+
+void Mesh::AddWall(float x, float y, float z, float width, float height, Color color) {
+    
+    z -= x; // De-stagger on sub divide
+    
+    Vertex vertex[4];
+    vertex[0] = Vertex(x-width, y+height, z,  color.r, color.g, color.b, 0, 1);
+    vertex[1] = Vertex(x+width, y+height, z,  color.r, color.g, color.b, 1, 1);
+    vertex[2] = Vertex(x+width, y-height, z,  color.r, color.g, color.b, 1, 0);
+    vertex[3] = Vertex(x-width, y-height, z,  color.r, color.g, color.b, 0, 0);
+    
+    SubMesh subBuffer;
+    subBuffer.vertexBuffer.push_back(vertex[0]);
+    subBuffer.vertexBuffer.push_back(vertex[1]);
+    subBuffer.vertexBuffer.push_back(vertex[2]);
+    subBuffer.vertexBuffer.push_back(vertex[3]);
+    
+    subBuffer.indexBuffer.push_back(0);
+    subBuffer.indexBuffer.push_back(1);
+    subBuffer.indexBuffer.push_back(2);
+    subBuffer.indexBuffer.push_back(0);
+    subBuffer.indexBuffer.push_back(2);
+    subBuffer.indexBuffer.push_back(3);
+    
+    AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer);
+    return;
+}
+
+void Mesh::AddWallSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub) {
+    for (unsigned int xx=0; xx < widthSub; xx++) 
+        for (unsigned int zz=0; zz < heightSub; zz++) 
+            AddWall( z + (zz * width), y + (xx * height), x, width, height, color);
     return;
 }
 

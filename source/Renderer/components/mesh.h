@@ -80,7 +80,8 @@ public:
     void AddPlain(float x, float y, float z, float width, float height, Color color);
     void AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
     
-    void AddWall(float x, float y, float z, float xscale, float yscale, float zscale, Color color);
+    void AddWall(float x, float y, float z, float width, float height, Color color);
+    void AddWallSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
     
     
     bool AddSubMesh(float x, float y, float z, SubMesh& mesh);

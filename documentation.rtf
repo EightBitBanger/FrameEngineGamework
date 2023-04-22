@@ -128,7 +128,7 @@ bool     RenderSystem :: DestroyScript( Script* scriptPtr );\par
 \cf0\fs36 Renderer functions\par
 \fs22\par
 Set the dimensions for the rendering viewport.\par
-Note: Viewport is NOT the window size, but the area rendered within the window.\par
+Note: Viewport is NOT the window size. Viewport is the area rendered within the window.\par
 \cf1 void  RenderSystem :: SetViewport( unsigned int x, unsigned int y, unsigned int w, unsigned int h );\par
 \par
 \cf0 Render a frame using the current camera.\par
@@ -181,9 +181,9 @@ Add a plain sub mesh to the mesh at the given position and scaled by width and h
 The color parameter will assign a color to the plane sub mesh.\par
 \cf1 bool  Mesh :: AddPlain( float x, float y, float z, float width, float height, Color color );\par
 \cf0\par
-Add a wall sub mesh to the mesh at the given position and scaled by xscale, yscale and zscale.\par
+Add a wall sub mesh to the mesh at the given position and scaled by width and height.\par
 The color parameter will assign a color to the wall sub mesh.\par
-\cf1 void  Mesh :: AddWall( float x, float y, float z, float xscale, float yscale, float zscale, Color color );\par
+\cf1 void  Mesh :: AddWall( float x, float y, float z, float width, float height, Color color );\par
 \par
 \par
 \par
@@ -297,7 +297,7 @@ Initiate must be called before the physics system can be used.\par
 \cf0\par
 Rigid bodies simulate physical objects in a 3D space.\par
 \cf1 rp3d::RigidBody*  Physics :: CreateRigidBody( float x, float y, float z );\par
-void                        Physics :: DestroyRigidBody( rp3d::RigidBody* rigidBodyPtr );\par
+void  Physics :: DestroyRigidBody( rp3d::RigidBody* rigidBodyPtr );\par
 \cf0\par
 World gravity will effect all objects within the world space.\par
 \cf1 void  Physics :: SetWorldGravity( float x, float y, float z );\par

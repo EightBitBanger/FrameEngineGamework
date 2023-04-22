@@ -72,7 +72,7 @@ void Start(void) {
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->transform.position = glm::vec3(0, 5, 0);
+    Renderer.cameraMain->transform.position = glm::vec3(0, 0, 0);
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
@@ -88,16 +88,18 @@ void Start(void) {
     plain->mesh->SetDefaultAttributes();
     
     
-    plain->mesh->AddPlainSubDivided(-10, 0, -10, 10, 10, Colors.gray, 3, 3);
+    plain->mesh->AddPlainSubDivided(-5, 0, -5, 10, 10, Colors.gray, 3, 3);
     
     //plain->mesh->AddPlain(0, 0, 0, 100, 100, Colors.gray);
+    
+    plain->mesh->AddWallSubDivided(-5, -5, 0, 10, 10, Colors.white, 3, 3);
     
     plain->mesh->shader = Renderer.defaultShader;
     plain->material = Resources.CreateMaterialFromTag("mat_plain");
     plain->material->color = Colors.white;
     
     
-    rp3d::BoxShape* collPlain = Physics.CreateColliderBox(1000, 100, 1000);
+    rp3d::BoxShape* collPlain = Physics.CreateColliderBox(100, 100, 100);
     
     plain->rigidBody = Physics.CreateRigidBody();
     plain->AddCollider(collPlain, 0, -100, 0);
@@ -117,7 +119,7 @@ void Start(void) {
     rp3d::BoxShape* collBarrel = Physics.CreateColliderBox(3, 4, 3);
     
     unsigned int max = 10;
-    for (int i=0; i < max; i++) {
+    for (unsigned int i=0; i < max; i++) {
         
         // Barrel object
         Entity* barrel = Renderer.CreateEntity();
