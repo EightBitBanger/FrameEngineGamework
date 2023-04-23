@@ -12,6 +12,8 @@ public:
     Entity* CreateGameObject(float x, float y, float z, std::string meshName="", std::string materialName="", std::string colliderName="");
     void    DestroyGameObject(Entity* entityPtr);
     
+    Camera* CreateCameraController(float x, float y, float z);
+    
 };
 
 #endif

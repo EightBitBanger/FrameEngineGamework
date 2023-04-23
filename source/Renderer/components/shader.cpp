@@ -19,6 +19,7 @@ Shader::~Shader() {
 
 
 void Shader::SetModelMatrix(glm::mat4 &ModelMatrix) {glUniformMatrix4fv(modelMatrixLocation, 1, 0, &ModelMatrix[0][0]);}
+
 void Shader::SetProjectionMatrix(glm::mat4 &projectionMatrix) {glUniformMatrix4fv(projectionMatrixLocation, 1, 0, &projectionMatrix[0][0]);}
 
 void Shader::SetMaterialColor(Color color) {glUniform4f(materialColorLocation, color.r, color.g, color.b, color.a);}

@@ -77,6 +77,12 @@ bool ResourceManager::LoadDefinitions(std::string filename) {
             scale.y += StringToFloat(strexp[3]);
             scale.z += StringToFloat(strexp[4]);
             
+            if (strexp[5] == "dynamic") {
+                colliderTag.isStatic = false;
+            } else {
+                colliderTag.isStatic = true;
+            }
+            
             colliderTag.name = strexp[1];
             colliderTag.colliderShape = Physics.common.createBoxShape(scale);
             assert(colliderTag.colliderShape != nullptr);
@@ -227,9 +233,9 @@ rp3d::BoxShape* ResourceManager::GetColliderFromTag(std::string name) {
 
 void ResourceManager::DestroyAssets(void) {
     
-    for (std::vector<TextureTag>::iterator it = textureTags.begin(); it != textureTags.end(); ++it) 
-        if (it->buffer != nullptr) 
-            stbi_image_free(it->buffer);
+    //for (std::vector<TextureTag>::iterator it = textureTags.begin(); it != textureTags.end(); ++it) 
+    //    if (it->buffer != nullptr) 
+    //        stbi_image_free(it->buffer);
     
 }
 

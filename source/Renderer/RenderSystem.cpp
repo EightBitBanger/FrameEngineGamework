@@ -188,29 +188,18 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             }
             
             
-            if (currentEntity->rigidBody != nullptr) {
-                rp3d::Transform physicsTransform = currentEntity->rigidBody->getTransform();
-                
-                rp3d::Vector3    pos  = physicsTransform.getPosition();
-                rp3d::Quaternion quat = physicsTransform.getOrientation();
-                rp3d::Vector3    rot  = quat.getVectorV();
-                
-                currentEntity->transform.position.x = pos.x;
-                currentEntity->transform.position.y = pos.y;
-                currentEntity->transform.position.z = pos.z;
-                
-                currentEntity->transform.rotation.x = (rot.x * 180) / 3.14159 ;
-                currentEntity->transform.rotation.y = (rot.y * 180) / 3.14159 ;
-                currentEntity->transform.rotation.z = (rot.z * 180) / 3.14159 ;
-            }
-            
-            glm::mat4 model(1);
-            
+            // Calculate model matrix
             Transform parent;
             if (currentEntity->transform.parent != nullptr) 
                 parent = *currentEntity->transform.parent;
             
-            model = CalculateModelMatrix(parent, currentEntity->transform);
+            glm::mat4 model(1);
+            if (currentEntity->rigidBody != nullptr) {
+                currentEntity->rigidBody->getTransform().getOpenGLMatrix(&model[0][0]);
+            } else {
+                model = CalculateModelMatrix(parent, currentEntity->transform);
+            }
+            
             
             currentShader->SetModelMatrix(model);
             

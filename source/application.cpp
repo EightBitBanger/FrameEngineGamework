@@ -26,63 +26,19 @@ void CameraMovementScript(void);
 
 
 
-
-
-
-
-
 void Start(void) {
-    
-    Physics.Initiate();
-    
-    Renderer.Initiate();
-    
-    Resources.Initiate();
-    
-    Engine.Initiate();
-    
-    
-    
-    //
-    // Start up the physics system and setup the simulation
-    
-    Physics.SetWorldGravity(0, -9.98, 0);
     
     //
     // Load some initial resources
     
     Resources.LoadScene("data/main.scene");
     
-    //Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
-    //Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
-    //Resources.LoadTexture("data/grassy.png", "mat_plain");
-    //Resources.LoadShaderGLSL("data/default.shader", "default");
-    
-    
-    //rp3d::BoxShape* collider = Resources.GetColliderFromTag("coll_barrel");
-    //assert(collider != nullptr);
-    
-    
-    
-    
-    
-    //
-    // Start the renderer and setup a scene
-    
-    
-    // Main scene
-    Scene* currentScene = Renderer.CreateScene();
-    Renderer.AddToRenderQueue(currentScene);
-    
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
     Renderer.skyMain->background = Colors.Make(0.087, 0.087, 0.087);
     
     // Camera
-    Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->transform.position = glm::vec3(-50, 10, 0);
-    Renderer.cameraMain->EnableMouseLook();
-    Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    Renderer.cameraMain = Engine.CreateCameraController(-30, 10, 0);
     
     Renderer.cameraMain->script = Renderer.CreateScript();
     Renderer.cameraMain->script->OnUpdate = CameraMovementScript;
@@ -90,37 +46,8 @@ void Start(void) {
     
     
     
-    // Plain object
-    Entity* plain = Renderer.CreateEntity();
-    plain->mesh = Renderer.CreateMesh();
-    plain->mesh->SetDefaultAttributes();
-    
-    
-    plain->mesh->AddPlainSubDivided(-5, 0, -5, 10, 10, Colors.gray, 3, 3);
-    
-    //plain->mesh->AddPlain(0, 0, 0, 100, 100, Colors.gray);
-    
-    //plain->mesh->AddWallSubDivided(-5, -5, 0, 10, 10, Colors.white, 3, 3);
-    
-    plain->mesh->shader = Renderer.defaultShader;
-    plain->material = Resources.CreateMaterialFromTag("mat_plain");
-    plain->material->color = Colors.white;
-    
-    rp3d::BoxShape* collPlain = Physics.CreateColliderBox(100, 100, 100);
-    
-    plain->rigidBody = Physics.CreateRigidBody();
-    plain->AddCollider(collPlain, 0, -100, 0);
-    
-    
-    plain->SetMass(0);
-    
-    plain->SetLinearAxisLockFactor(0, 0, 0);
-    plain->SetAngularAxisLockFactor(0, 0, 0);
-    
-    
-    currentScene->AddToSceneRoot(plain);
-    
-    
+    Entity* newPlain = Engine.CreateGameObject(0, -100, 0, "", "mat_plain", "coll_plain");
+    newPlain->mesh->AddPlain(0, 50, 0, 100, 100, Colors.white);
     
     
     return;
@@ -132,9 +59,8 @@ void Start(void) {
 
 void Run(void) {
     
-    
-    if (Input.CheckKeyPressed(VK_RETURN)) 
-        Entity* barrel1 = Engine.CreateGameObject(0, 50, 0, "barrel", "mat_barrel", "coll_barrel");
+    if (Input.CheckKeyCurrent(VK_RETURN)) 
+        Entity* barrel = Engine.CreateGameObject(0, 50, 0, "barrel", "mat_barrel", "coll_barrel");
     
     
     return;
@@ -144,9 +70,6 @@ void Run(void) {
 
 
 void Shutdown(void) {
-    
-    
-    Resources.DestroyAssets();
     
     return;
 }

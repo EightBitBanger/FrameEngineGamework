@@ -6,6 +6,12 @@ PhysicsSystem::PhysicsSystem() {}
 void PhysicsSystem::Initiate(void) {
     
     world = common.createPhysicsWorld();
+    SetWorldGravity(0, -39, 0);
+    world->enableSleeping(true);
+    
+    world->setSleepLinearVelocity(0.8);
+    world->setSleepAngularVelocity(0.8);
+    
     return;
 }
 

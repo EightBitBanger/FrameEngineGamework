@@ -22,18 +22,26 @@ Entity* EngineMainAPI::CreateGameObject(float x, float y, float z, std::string m
     sceneMain->AddToSceneRoot(newEntity);
     if (meshName != "") {
         newEntity->mesh = Resources.CreateMeshFromTag(meshName);
-        newEntity->mesh->SetDefaultAttributes();
+    } else {
+        newEntity->mesh = Renderer.CreateMesh();
     }
+    newEntity->mesh->SetDefaultAttributes();
+    newEntity->mesh->shader = Renderer.defaultShader;
     if (materialName != "") {
-        newEntity->mesh->shader = Renderer.defaultShader;
         newEntity->material = Resources.CreateMaterialFromTag(materialName);
         newEntity->material->color = Colors.white;
-    }
+    } else {newEntity->material = Renderer.CreateMaterial();}
     if (colliderName != "") {
         newEntity->rigidBody = Physics.CreateRigidBody(x, y, z);
         newEntity->rigidBody->setMass(0.1);
-        newEntity->rigidBody->setAngularDamping(10);
-        rp3d::BoxShape* collider = Resources.GetColliderFromTag(colliderName);
+        newEntity->rigidBody->setLinearDamping(0.01);
+        newEntity->rigidBody->setAngularDamping(0.3);
+        ColliderTag* colliderTag = Resources.FindColliderTag(colliderName);
+        rp3d::BoxShape* collider = colliderTag->colliderShape;
+        if (colliderTag->isStatic) {
+            newEntity->rigidBody->setType(rp3d::BodyType::STATIC);} else {
+            newEntity->rigidBody->setType(rp3d::BodyType::DYNAMIC);
+        }
         newEntity->AddCollider(collider, 0, 0, 0);
     }
     return newEntity;
@@ -46,6 +54,36 @@ void EngineMainAPI::DestroyGameObject(Entity* entityPtr) {
     Renderer.DestroyEntity(entityPtr);
     return;
 }
+
+
+Camera* EngineMainAPI::CreateCameraController(float x, float y, float z) {
+    Camera* newCamera = Renderer.CreateCamera();
+    newCamera->transform.position = glm::vec3(x, y, z);
+    newCamera->EnableMouseLook();
+    newCamera->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    return newCamera;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
