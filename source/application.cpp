@@ -132,10 +132,10 @@ void Start(void) {
 
 void Run(void) {
     
-    if (!Input.CheckKeyPressed(VK_RETURN)) 
-        return;
     
-    Entity* barrel1 = Engine.CreateGameObject(0, 50, 0, "barrel", "mat_barrel", "coll_barrel");
+    if (Input.CheckKeyPressed(VK_RETURN)) 
+        Entity* barrel1 = Engine.CreateGameObject(0, 50, 0, "barrel", "mat_barrel", "coll_barrel");
+    
     
     return;
 }
