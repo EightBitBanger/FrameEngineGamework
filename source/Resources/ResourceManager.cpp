@@ -14,8 +14,6 @@ unsigned char* ResourceManager::LoadImageRaw(char const* filename, int* width, i
 
 
 
-
-
 bool ResourceManager::LoadScene(std::string filename) {
     
     FileLoader sceneLoader(filename);

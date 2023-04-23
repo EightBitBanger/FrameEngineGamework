@@ -4,6 +4,7 @@
 #include "Input/InputSystem.h"
 #include "Physics/PhysicsSystem.h"
 #include "Resources/ResourceManager.h"
+#include "Engine/EngineMain.h"
 
 extern RandomGen         Random;
 extern ColorPreset       Colors;
@@ -14,6 +15,8 @@ extern ResourceManager   Resources;
 extern RenderSystem      Renderer;
 extern PhysicsSystem     Physics;
 extern InputSystem       Input;
+
+extern EngineMainAPI     Engine;
 
 
 
@@ -30,24 +33,30 @@ void CameraMovementScript(void);
 
 void Start(void) {
     
+    Physics.Initiate();
+    
+    Renderer.Initiate();
+    
+    Resources.Initiate();
+    
+    Engine.Initiate();
+    
+    
     
     //
     // Start up the physics system and setup the simulation
     
-    Physics.Initiate();
     Physics.SetWorldGravity(0, -9.98, 0);
-    
     
     //
     // Load some initial resources
-    Resources.Initiate();
     
-    //Resources.LoadScene("data/main.scene");
+    Resources.LoadScene("data/main.scene");
     
-    Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
-    Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
-    Resources.LoadTexture("data/grassy.png", "mat_plain");
-    Resources.LoadShaderGLSL("data/default.shader", "default");
+    //Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
+    //Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
+    //Resources.LoadTexture("data/grassy.png", "mat_plain");
+    //Resources.LoadShaderGLSL("data/default.shader", "default");
     
     
     //rp3d::BoxShape* collider = Resources.GetColliderFromTag("coll_barrel");
@@ -60,7 +69,6 @@ void Start(void) {
     //
     // Start the renderer and setup a scene
     
-    Renderer.Initiate();
     
     // Main scene
     Scene* currentScene = Renderer.CreateScene();
@@ -72,7 +80,7 @@ void Start(void) {
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->transform.position = glm::vec3(0, 0, 0);
+    Renderer.cameraMain->transform.position = glm::vec3(-50, 10, 0);
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
@@ -92,12 +100,11 @@ void Start(void) {
     
     //plain->mesh->AddPlain(0, 0, 0, 100, 100, Colors.gray);
     
-    plain->mesh->AddWallSubDivided(-5, -5, 0, 10, 10, Colors.white, 3, 3);
+    //plain->mesh->AddWallSubDivided(-5, -5, 0, 10, 10, Colors.white, 3, 3);
     
     plain->mesh->shader = Renderer.defaultShader;
     plain->material = Resources.CreateMaterialFromTag("mat_plain");
     plain->material->color = Colors.white;
-    
     
     rp3d::BoxShape* collPlain = Physics.CreateColliderBox(100, 100, 100);
     
@@ -105,58 +112,13 @@ void Start(void) {
     plain->AddCollider(collPlain, 0, -100, 0);
     
     
-    plain->SetMass(9999);
+    plain->SetMass(0);
     
     plain->SetLinearAxisLockFactor(0, 0, 0);
     plain->SetAngularAxisLockFactor(0, 0, 0);
     
     
     currentScene->AddToSceneRoot(plain);
-    
-    // Renderer.InitiateScriptsOnStart(); or Renderer.InitiateScenes();
-    
-    
-    rp3d::BoxShape* collBarrel = Physics.CreateColliderBox(3, 4, 3);
-    
-    unsigned int max = 10;
-    for (unsigned int i=0; i < max; i++) {
-        
-        // Barrel object
-        Entity* barrel = Renderer.CreateEntity();
-        barrel->mesh = Resources.CreateMeshFromTag("barrel");
-        barrel->mesh->SetDefaultAttributes();
-        
-        barrel->mesh->shader = Renderer.defaultShader;
-        barrel->material = Resources.CreateMaterialFromTag("mat_barrel");
-        barrel->material->color = Colors.white;
-        
-        
-        
-        
-        barrel->rigidBody = Physics.CreateRigidBody(0, max - i, 0);
-        barrel->AddCollider(collBarrel, 0, 0, 0);
-        
-        
-        //barrel->SetMass(3);
-        //barrel->SetAngularDamping(5);
-        //barrel->SetLinearDamping(0);
-        
-        barrel->SetAngularAxisLockFactor(0, 0, 0);
-        
-        currentScene->AddToSceneRoot(barrel);
-        
-        continue;
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     
@@ -169,6 +131,11 @@ void Start(void) {
 
 
 void Run(void) {
+    
+    if (!Input.CheckKeyPressed(VK_RETURN)) 
+        return;
+    
+    Entity* barrel1 = Engine.CreateGameObject(0, 50, 0, "barrel", "mat_barrel", "coll_barrel");
     
     return;
 }

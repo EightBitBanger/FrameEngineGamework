@@ -52,8 +52,11 @@ PhysicsSystem Physics;
 RenderSystem  Renderer;
 ColorPreset   Colors;
 
-#include "resources/ResourceManager.h"
+#include "Resources/ResourceManager.h"
 ResourceManager Resources;
+
+#include "Engine/EngineMain.h"
+EngineMainAPI Engine;
 
 
 bool isPaused = false;
