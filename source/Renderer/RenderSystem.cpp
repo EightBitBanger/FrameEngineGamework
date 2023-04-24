@@ -102,13 +102,20 @@ void RenderSystem :: RenderFrame(float deltaTime) {
     }
     
     
+    if (cameraMain->rigidBody != nullptr) {
+        rp3d::Transform bodyTransform = cameraMain->rigidBody->getTransform();
+        rp3d::Vector3 bodyPosition = bodyTransform.getPosition();
+        cameraMain->transform.position.x = bodyPosition.x;
+        cameraMain->transform.position.y = bodyPosition.y;
+        cameraMain->transform.position.z = bodyPosition.z;
+    }
+    
     if (cameraMain->script != nullptr) 
           cameraMain->script->OnUpdate();
     
     
     if (cameraMain->useMouseLook) 
         cameraMain->MouseLook(deltaTime, displayCenter.x, displayCenter.y);
-    
     
     glm::mat4 projection = cameraMain->CalculatePerspectiveMatrix();
     glm::mat4 view = cameraMain->CalculateView();

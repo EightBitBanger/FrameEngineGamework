@@ -17,6 +17,10 @@
 
 #include "script.h"
 
+#include "../../Physics/PhysicsSystem.h"
+
+#include "../../Resources/assets/colliderTag.h"
+
 #include "../../Input/InputSystem.h"
 #include "../../std/timer.h"
 
@@ -29,6 +33,8 @@ struct Camera {
     glm::vec3 right;
     
     Script* script;
+    
+    rp3d::RigidBody* rigidBody;
     
     bool useMovementKeys;
     bool useMouseLook;
@@ -59,6 +65,27 @@ struct Camera {
     glm::mat4 CalculateView(void);
     glm::mat4 CalculatePerspectiveMatrix(void);
     glm::mat4 CalculateOrthiographicMatrix(Viewport viewport);
+    
+    
+    void AddForce(float x, float y, float z);
+    void AddTorque(float x, float y, float z);
+    
+    void AddCollider(rp3d::BoxShape* boxShape, float x, float y, float z);
+    void AddCollider(ColliderTag* colliderTag, float x, float y, float z);
+    
+    void SetMass(float mass);
+    void SetLinearDamping(float damping);
+    void SetAngularDamping(float damping);
+    
+    void SetLinearAxisLockFactor(float x, float y, float z);
+    void SetAngularAxisLockFactor(float x, float y, float z);
+    
+    void EnableGravity(bool enabled);
+    
+    void CalculatePhysics(void);
+    
+    void SetRigidBodyStatic(void);
+    void SetRigidBodyDynamic(void);
     
 };
 

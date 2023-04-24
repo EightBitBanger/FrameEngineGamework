@@ -4,8 +4,8 @@
 
 
 // Window starting size and MAX size
-#define  WINDOW_WIDTH       1190
-#define  WINDOW_HEIGHT      900
+#define  WINDOW_WIDTH       1330
+#define  WINDOW_HEIGHT      1000
 
 #define  WINDOW_WIDTH_MIN   300
 #define  WINDOW_HEIGHT_MIN  200
@@ -22,6 +22,6 @@
 
 
 // Physics simulation
-#define PHYSICS_UPDATES_PER_SECOND         60
+#define PHYSICS_UPDATES_PER_SECOND         30
 
 

@@ -45,7 +45,16 @@ void Start(void) {
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->transform.position = glm::vec3(-120, 20, 0);
+    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(0, 50, 0);
+    Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
+    Renderer.cameraMain->SetMass(10);
+    Renderer.cameraMain->SetLinearDamping(0.0);
+    Renderer.cameraMain->SetAngularAxisLockFactor(0, 0, 0);
+    Renderer.cameraMain->rigidBody->setIsAllowedToSleep(false);
+    Renderer.cameraMain->rigidBody->enableGravity(true);
+    
+    
+    //Renderer.cameraMain->transform.position = glm::vec3(-120, 20, 0);
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
@@ -89,14 +98,21 @@ void Start(void) {
     return;
 }
 
+
+
+
+
+
 float spreadMul   = 1.0;
 int counter=0;
 
+
 void Run(void) {
+    
+    if (Input.CheckKeyCurrent(VK_RETURN)) counter = 0;
+    
     if (counter == 100) return;
     
-    //if (!Input.CheckKeyCurrent(VK_RETURN)) 
-    //    return;
     
     if (Random.Range(1, 2) == 1) {
         
@@ -143,14 +159,22 @@ void Shutdown(void) {
 void CameraMovementScript(void) {
     
     float cameraSpeed = 100;
+    glm::vec3 force;
     
-    if (Input.CheckKeyCurrent(VK_W)) Renderer.cameraMain->transform.position += Renderer.cameraMain->forward * cameraSpeed * Time.delta * glm::vec3(1, 0.2, 1);
-    if (Input.CheckKeyCurrent(VK_S)) Renderer.cameraMain->transform.position -= Renderer.cameraMain->forward * cameraSpeed * Time.delta * glm::vec3(1, 0.2, 1);
-    if (Input.CheckKeyCurrent(VK_A)) Renderer.cameraMain->transform.position += Renderer.cameraMain->right * cameraSpeed * Time.delta;
-    if (Input.CheckKeyCurrent(VK_D)) Renderer.cameraMain->transform.position -= Renderer.cameraMain->right * cameraSpeed * Time.delta;
+    if (Input.CheckKeyCurrent(VK_W)) {
+        force = Renderer.cameraMain->forward;
+        force *= cameraSpeed;
+    }
     
-    if (Input.CheckKeyCurrent(VK_SPACE)) Renderer.cameraMain->transform.position += Renderer.cameraMain->up * cameraSpeed * Time.delta;
-    if (Input.CheckKeyCurrent(VK_SHIFT)) Renderer.cameraMain->transform.position -= Renderer.cameraMain->up * cameraSpeed * Time.delta;
+    Renderer.cameraMain->AddForce(force.x, force.y, force.z);
+    
+    //if (Input.CheckKeyCurrent(VK_W)) Renderer.cameraMain->transform.position += Renderer.cameraMain->forward * cameraSpeed * Time.delta * glm::vec3(1, 0.2, 1);
+    //if (Input.CheckKeyCurrent(VK_S)) Renderer.cameraMain->transform.position -= Renderer.cameraMain->forward * cameraSpeed * Time.delta * glm::vec3(1, 0.2, 1);
+    //if (Input.CheckKeyCurrent(VK_A)) Renderer.cameraMain->transform.position += Renderer.cameraMain->right * cameraSpeed * Time.delta;
+    //if (Input.CheckKeyCurrent(VK_D)) Renderer.cameraMain->transform.position -= Renderer.cameraMain->right * cameraSpeed * Time.delta;
+    
+    //if (Input.CheckKeyCurrent(VK_SPACE)) Renderer.cameraMain->transform.position += Renderer.cameraMain->up * cameraSpeed * Time.delta;
+    //if (Input.CheckKeyCurrent(VK_SHIFT)) Renderer.cameraMain->transform.position -= Renderer.cameraMain->up * cameraSpeed * Time.delta;
     
     return;
 };

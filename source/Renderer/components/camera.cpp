@@ -7,6 +7,7 @@ Camera::Camera() {
     right   = glm::vec3(0, 0, 0);
     
     script = nullptr;
+    rigidBody = nullptr;
     
     useMovementKeys = false;
     useMouseLook = false;
@@ -92,5 +93,106 @@ glm::mat4 Camera::CalculateOrthiographicMatrix(Viewport viewport) {
     
     return projection;
 }
+
+
+// Camera physics
+
+void Camera::AddForce(float x, float y, float z) {
+    if (rigidBody == nullptr) return;
+    rp3d::Vector3 nudge = rp3d::Vector3(x, y, z);
+    rigidBody->applyLocalForceAtCenterOfMass(nudge);
+    return;
+}
+
+void Camera::AddTorque(float x, float y, float z) {
+    if (rigidBody == nullptr) return;
+    rp3d::Vector3 twist = rp3d::Vector3(x, y, z);
+    rigidBody->applyLocalTorque(twist);
+    return;
+}
+
+void Camera::SetMass(float mass) {
+    rigidBody->setMass(mass);
+}
+
+void Camera::SetLinearDamping(float damping) {
+    rigidBody->setLinearDamping(damping);
+}
+
+void Camera::SetAngularDamping(float damping) {
+    rigidBody->setAngularDamping(damping);
+}
+
+void Camera::EnableGravity(bool enabled) {
+    rigidBody->enableGravity(enabled);
+}
+
+
+void Camera::CalculatePhysics(void) {
+    if (rigidBody == nullptr) return;
+    rigidBody->updateMassFromColliders();
+    rigidBody->updateLocalCenterOfMassFromColliders();
+    rigidBody->updateLocalInertiaTensorFromColliders();
+    return;
+}
+
+
+void Camera::SetLinearAxisLockFactor(float x, float y, float z) {
+    assert(rigidBody != nullptr);
+    rp3d::Vector3 lockFactor(x, y, z);
+    rigidBody->setLinearLockAxisFactor(lockFactor);
+    return;
+}
+
+void Camera::SetAngularAxisLockFactor(float x, float y, float z) {
+    assert(rigidBody != nullptr);
+    rp3d::Vector3 lockFactor(x, y, z);
+    rigidBody->setAngularLockAxisFactor(lockFactor);
+    return;
+}
+
+
+void Camera::AddCollider(rp3d::BoxShape* boxShape, float x, float y, float z) {
+    assert(rigidBody != nullptr);
+    
+    rp3d::Transform offsetTransform;
+    offsetTransform.setPosition(rp3d::Vector3(x, y, z));
+    
+    rigidBody->addCollider(boxShape, offsetTransform);
+    
+    return;
+}
+
+void Camera::AddCollider(ColliderTag* colliderTag, float x, float y, float z) {
+    assert(rigidBody != nullptr);
+    if (colliderTag->isStatic) {
+        rigidBody->setType(rp3d::BodyType::STATIC);
+    } else {
+        rigidBody->setType(rp3d::BodyType::DYNAMIC);
+    }
+    rp3d::Transform offsetTransform;
+    offsetTransform.setPosition(rp3d::Vector3(x, y, z));
+    
+    rigidBody->addCollider(colliderTag->colliderShape, offsetTransform);
+    
+    return;
+}
+
+
+void Camera::SetRigidBodyStatic(void) {
+    assert(rigidBody != nullptr);
+    rigidBody->setType(rp3d::BodyType::STATIC);
+    return;
+}
+
+
+void Camera::SetRigidBodyDynamic(void) {
+    assert(rigidBody != nullptr);
+    rigidBody->setType(rp3d::BodyType::DYNAMIC);
+    return;
+}
+
+
+
 
 
