@@ -30,7 +30,9 @@ Entity* EngineMainAPI::CreateGameObject(float x, float y, float z, std::string m
     if (materialName != "") {
         newEntity->material = Resources.CreateMaterialFromTag(materialName);
         newEntity->material->color = Colors.white;
-    } else {newEntity->material = Renderer.CreateMaterial();}
+    } else {
+        newEntity->material = Renderer.CreateMaterial();
+    }
     if (colliderName != "") {
         newEntity->rigidBody = Physics.CreateRigidBody(x, y, z);
         newEntity->rigidBody->setMass(0.1);

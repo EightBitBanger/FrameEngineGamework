@@ -1,3 +1,5 @@
+#ifndef RESOURCE_COLLIDER_TAG
+#define RESOURCE_COLLIDER_TAG
 
 struct ColliderTag {
     
@@ -11,3 +13,4 @@ struct ColliderTag {
     
 };
 
+#endif

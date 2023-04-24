@@ -85,4 +85,36 @@ void Entity::AddCollider(rp3d::BoxShape* boxShape, float x, float y, float z) {
     return;
 }
 
+void Entity::AddCollider(ColliderTag* colliderTag, float x, float y, float z) {
+    assert(rigidBody != nullptr);
+    if (colliderTag->isStatic) {
+        rigidBody->setType(rp3d::BodyType::STATIC);
+    } else {
+        rigidBody->setType(rp3d::BodyType::DYNAMIC);
+    }
+    rp3d::Transform offsetTransform;
+    offsetTransform.setPosition(rp3d::Vector3(x, y, z));
+    
+    rigidBody->addCollider(colliderTag->colliderShape, offsetTransform);
+    
+    return;
+}
+
+
+void Entity::SetRigidBodyStatic(void) {
+    assert(rigidBody != nullptr);
+    rigidBody->setType(rp3d::BodyType::STATIC);
+    return;
+}
+
+
+void Entity::SetRigidBodyDynamic(void) {
+    assert(rigidBody != nullptr);
+    rigidBody->setType(rp3d::BodyType::DYNAMIC);
+    return;
+}
+
+
+
+
 

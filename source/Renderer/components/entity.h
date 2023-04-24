@@ -24,6 +24,8 @@
 
 #include "../../Physics/PhysicsSystem.h"
 
+#include "../../Resources/assets/colliderTag.h"
+
 extern PhysicsSystem Physics;
 
 struct Entity {
@@ -44,6 +46,7 @@ struct Entity {
     void AddTorque(float x, float y, float z);
     
     void AddCollider(rp3d::BoxShape* boxShape, float x, float y, float z);
+    void AddCollider(ColliderTag* colliderTag, float x, float y, float z);
     
     void SetMass(float mass);
     void SetLinearDamping(float damping);
@@ -55,6 +58,9 @@ struct Entity {
     void EnableGravity(bool enabled);
     
     void CalculatePhysics(void);
+    
+    void SetRigidBodyStatic(void);
+    void SetRigidBodyDynamic(void);
     
 };
 

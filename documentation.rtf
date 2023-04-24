@@ -1,8 +1,8 @@
 {\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}}
 {\colortbl ;\red0\green0\blue255;}
 {\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\ri-1800\sl240\slmult1\lang9\f0\fs22\par
-\b   This game engine framework aims to provides a simpler interface with more complex systems.\par
-This framework provides APIs for rendering, physics, resource mangement, scene management, input, timing and random number generation.\par
+\b   This game engine aims to provides a simpler interface with more complex systems.\par
+This engine provides APIs for rendering, physics, resource mangement, scene management, input, timing and random number generation.\par
 \par
 \par
 \par
@@ -288,6 +288,32 @@ Initiate the uniform locations within the shader program.\par
 \par
 \par
 \cf0\par
+\par
+\fs36 Camera\par
+\cf1\fs22\par
+\cf0 Update the mouse look angle by the givin delta time. The mouse pointer will be reset \par
+to the position at mouseResetX and mouseResetY.\par
+\cf1 void  Camera :: MouseLook( float deltaTime, int mouseResetX, int mouseResetY );\par
+\cf0\par
+Enable camera mouse looking.\par
+\cf1 void  Camera :: EnableMouseLook( void );\par
+\par
+\cf0 Disable camera mouse looking.\par
+\cf1 void  Camera :: DisableMouseLook( void );\par
+\par
+\cf0 Set the uniform model matrix.\par
+\cf1 void Camera::SetMouseCenter(int mouseResetX, int mouseResetY)\par
+\par
+\par
+\par
+\par
+\cf0\fs36 Sky\par
+\fs22\par
+Set the background color.\par
+\cf1 void  Sky :: SetColor( Color newColor );\cf0\par
+\par
+\par
+\par
 \par
 \par
 \fs48 Physics System\par

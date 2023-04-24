@@ -11,7 +11,7 @@ Camera::Camera() {
     useMovementKeys = false;
     useMouseLook = false;
     
-    cameraSpeed = 200;
+    cameraSpeed = 100;
     
     fov       = 60;
     aspect    = 1.33;
@@ -26,23 +26,18 @@ Camera::Camera() {
     
 }
 
-void Camera::SetMouseCenter(int reset_x, int reset_y) {CursorSetPosition(reset_x, reset_y);}
-
+void Camera::SetMouseCenter(int mouseResetX, int mouseResetY) {CursorSetPosition(mouseResetX, mouseResetY);}
 void Camera::EnableMouseLook(void)  {ShowCursor(false); useMouseLook = true;}
 void Camera::DisableMouseLook(void) {ShowCursor(true); useMouseLook = false;}
 
 
-void Camera::Update(void) {
-    return;
-}
-
-void Camera::MouseLook(float delta, int reset_x, int reset_y) {
+void Camera::MouseLook(float deltaTime, int mouseResetX, int mouseResetY) {
     
     glm::vec2 MousePos = CursorGetPosition();
-    CursorSetPosition(reset_x, reset_y);
+    CursorSetPosition(mouseResetX, mouseResetY);
     
-    float MouseDiffX = (MousePos.x - reset_x) * MouseSensitivityYaw * delta;
-    float MouseDiffY = (MousePos.y - reset_y) * MouseSensitivityPitch * delta;
+    float MouseDiffX = (MousePos.x - mouseResetX) * MouseSensitivityYaw * deltaTime;
+    float MouseDiffY = (MousePos.y - mouseResetY) * MouseSensitivityPitch * deltaTime;
     
     transform.rotation.x += (float)MouseDiffX;
     transform.rotation.y -= (float)MouseDiffY;

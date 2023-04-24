@@ -76,13 +76,13 @@ public:
     
     Scene* operator[] (unsigned int const i) {return renderQueue[i];}
     
-    Material*  defaultMaterial;
-    Shader*    defaultShader;
+    Material* defaultMaterial;
+    Shader*   defaultShader;
     
-    Sky*    skyMain;
-    Camera* cameraMain;
+    Sky*      skyMain;
+    Camera*   cameraMain;
     
-    Viewport viewport;
+    Viewport  viewport;
     
     glm::vec2 displaySize;
     glm::vec2 displayCenter;
@@ -115,7 +115,6 @@ public:
     
     Script* CreateScript(void);
     bool DestroyScript(Script* scriptPtr);
-    
     
     
     void Initiate(void);

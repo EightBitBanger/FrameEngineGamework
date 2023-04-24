@@ -8,7 +8,10 @@ Mesh::Mesh() {
     vertexBufferSz = 0;
     indexBufferSz = 0;
     
-    AllocateBuffers(50000);
+    AllocateBuffers(32);
+    
+    SetDefaultAttributes();
+    return;
 }
 
 Mesh::~Mesh() {

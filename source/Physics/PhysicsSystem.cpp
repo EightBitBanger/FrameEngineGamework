@@ -6,7 +6,9 @@ PhysicsSystem::PhysicsSystem() {}
 void PhysicsSystem::Initiate(void) {
     
     world = common.createPhysicsWorld();
-    SetWorldGravity(0, -39, 0);
+    
+    SetWorldGravity(0, -9.98 * 2 * 2, 0);
+    
     world->enableSleeping(true);
     
     world->setSleepLinearVelocity(0.8);
@@ -25,6 +27,10 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
     rp3d::Transform physicsTransform = rp3d::Transform(position, orientation);
     
     rp3d::RigidBody* body = world->createRigidBody(physicsTransform);
+    
+    body->setMass(1);
+    body->setLinearDamping(0);
+    body->setAngularDamping(0.087);
     
     return body;
 }

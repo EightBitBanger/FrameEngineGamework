@@ -48,16 +48,12 @@ struct Camera {
     
     Camera();
     
-    void SetMouseCenter(int reset_x, int reset_y);
+    void SetMouseCenter(int mouseResetX, int mouseResetY);
     
     void EnableMouseLook(void);
     void DisableMouseLook(void);
     
-    void Update(void);
-    void MouseLook(float delta, int reset_x, int reset_y);
-    
-    void EnableMovementInput(void);
-    void DisableMovementInput(void);
+    void MouseLook(float deltaTime, int mouseResetX, int mouseResetY);
     
     
     glm::mat4 CalculateView(void);

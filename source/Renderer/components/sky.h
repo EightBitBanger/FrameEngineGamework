@@ -10,6 +10,8 @@ struct Sky {
     
     Sky();
     
+    void SetColor(Color newColor);
+    
 };
 
 
