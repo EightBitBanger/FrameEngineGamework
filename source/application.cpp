@@ -36,11 +36,12 @@ Scene* objectScene;
 
 void Start(void) {
     
+    Physics.SetWorldGravity(0, 0, 0);
+    
     //
     // Load some initial resources
     
     Resources.LoadScene("data/main.scene");
-    
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
     Renderer.skyMain->SetColor( Colors.Make(0.087, 0.087, 0.087) );
@@ -81,7 +82,7 @@ void Start(void) {
     plainScene->AddToSceneRoot(plain);
     
     plain->mesh = Renderer.CreateMesh();
-    plain->mesh->AddPlain(0, 0, 0, 100, 100, Colors.gray);
+    plain->mesh->AddPlain(0, 0, 0, 10, 10, Colors.gray);
     
     plain->material = Resources.CreateMaterialFromTag("mat_plain");
     plain->rigidBody = Physics.CreateRigidBody(0, 0, 0);
@@ -107,7 +108,7 @@ void Start(void) {
 
 
 float spreadMul   = 1.0;
-float focus       = 50;
+unsigned int focus       = 50;
 float count       = 200;
 
 int counter=0;

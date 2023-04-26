@@ -117,13 +117,11 @@ void Mesh::SetDefaultAttributes(void) {
 
 void Mesh::AddPlain(float x, float y, float z, float width, float height, Color color) {
     
-    z -= x; // De-stagger
-    
     Vertex vertex[4];
-    vertex[0] = Vertex(x-width, y, z+height,  color.r, color.g, color.b, 0, 1);
-    vertex[1] = Vertex(x+width, y, z+height,  color.r, color.g, color.b, 1, 1);
-    vertex[2] = Vertex(x+width, y, z-height,  color.r, color.g, color.b, 1, 0);
-    vertex[3] = Vertex(x-width, y, z-height,  color.r, color.g, color.b, 0, 0);
+    vertex[0] = Vertex( x-width, 0, z+height,  color.r, color.g, color.b, 0, 1);
+    vertex[1] = Vertex( x+width, 0, z+height,  color.r, color.g, color.b, 1, 1);
+    vertex[2] = Vertex( x+width, 0, z-height,  color.r, color.g, color.b, 1, 0);
+    vertex[3] = Vertex( x-width, 0, z-height,  color.r, color.g, color.b, 0, 0);
     
     SubMesh subBuffer;
     subBuffer.vertexBuffer.push_back(vertex[0]);
@@ -144,8 +142,11 @@ void Mesh::AddPlain(float x, float y, float z, float width, float height, Color 
 
 void Mesh::AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub) {
     for (unsigned int xx=0; xx < widthSub; xx++) 
-        for (unsigned int zz=0; zz < heightSub; zz++) 
-            AddPlain( z + (zz * width), y, x + (xx * (height * 2)), width, height, color);
+        for (unsigned int zz=0; zz < heightSub; zz++) {
+            float xxx = x + (xx * height);
+            float zzz = z + ((zz * width) - xxx);
+            AddPlain(xxx, y, zzz, width, height, color);
+        }
     return;
 }
 

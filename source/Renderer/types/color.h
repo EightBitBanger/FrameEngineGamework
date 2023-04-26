@@ -4,7 +4,9 @@
 #include <cstdlib>
 
 
-struct Color {
+class Color {
+    
+public:
     
     float r;
     float g;
@@ -22,7 +24,9 @@ struct Color {
 };
 
 
-struct ColorPreset {
+class ColorPreset {
+    
+public:
     
     Color red      = {1, 0, 0, 1};
     Color green    = {0, 1, 0, 1};

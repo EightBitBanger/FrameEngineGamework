@@ -1,7 +1,9 @@
 #ifndef _VERTEXBUFFER_TYPE__
 #define _VERTEXBUFFER_TYPE__
 
-struct Vertex {
+class Vertex {
+    
+public:
     
     float x, y, z,  r, g, b,  u, v;
     
@@ -14,7 +16,9 @@ struct Vertex {
 };
 
 
-struct Index  {
+class Index  {
+    
+public:
     
     unsigned int index;
     
