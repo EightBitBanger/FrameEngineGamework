@@ -5,7 +5,7 @@
 
 struct PhysicsSystem {
     
-    rp3d::PhysicsWorld* world = nullptr;
+    rp3d::PhysicsWorld* world;
     rp3d::PhysicsCommon common;
     
     PhysicsSystem();

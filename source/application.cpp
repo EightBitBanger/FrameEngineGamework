@@ -25,8 +25,14 @@ void CameraMovementScript(void);
 Mesh*     barrelMesh;
 Material* barrelMaterial;
 
-Scene* objectsScene;
+Scene* objectScene;
 
+
+
+
+//
+// Application entry point
+//
 
 void Start(void) {
     
@@ -41,16 +47,16 @@ void Start(void) {
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(-130, 50, 0);
+    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(-80, 10, 0);
     Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
-    Renderer.cameraMain->SetMass(10);
-    Renderer.cameraMain->SetLinearDamping(0.4);
+    Renderer.cameraMain->SetMass(2);
+    Renderer.cameraMain->SetLinearDamping(0.2);
     Renderer.cameraMain->SetAngularAxisLockFactor(0, 0, 0);
     Renderer.cameraMain->rigidBody->setIsAllowedToSleep(false);
-    Renderer.cameraMain->rigidBody->enableGravity(false);
+    Renderer.cameraMain->rigidBody->enableGravity(true);
     
     
-    //Renderer.cameraMain->transform.position = glm::vec3(-120, 20, 0);
+    //Renderer.cameraMain->transform.position = glm::vec3(-130, 50, 0);
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
@@ -85,8 +91,8 @@ void Start(void) {
     
     
     // Objects scene
-    objectsScene = Renderer.CreateScene();
-    Renderer.AddToRenderQueue(objectsScene);
+    objectScene = Renderer.CreateScene();
+    Renderer.AddToRenderQueue(objectScene);
     
     return;
 }
@@ -96,36 +102,48 @@ void Start(void) {
 
 
 
+
+
+
+
 float spreadMul   = 1.0;
+float focus       = 50;
+float count       = 200;
+
 int counter=0;
 
+
+
+//
+// Application main loop
+//
 
 void Run(void) {
     
     if (Input.CheckKeyCurrent(VK_RETURN)) counter = 0;
     
-    if (counter > 100) return;
+    if (counter > count) return;
     
     
     if (Random.Range(1, 2) == 1) {
         
         counter++;
         
-        float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+        float xx = (Random.Range(0, focus) - Random.Range(0, focus)) * spreadMul;
         float yy = 100;
-        float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+        float zz = (Random.Range(0, focus) - Random.Range(0, focus)) * spreadMul;
         
         // Create a barrel object
         Entity* barrel = Renderer.CreateEntity();
-        objectsScene->AddToSceneRoot(barrel);
+        objectScene->AddToSceneRoot(barrel);
         
         barrel->mesh = barrelMesh;
         barrel->material = barrelMaterial;
         
         barrel->rigidBody = Physics.CreateRigidBody(xx, yy, zz);
-        //barrel->SetRigidBodyDynamic();
         
-        barrel->AddCollider( Resources.FindColliderTag("coll_barrel"), 0, 0, 0);
+        ColliderTag* colliderTag = Resources.FindColliderTag("coll_barrel");
+        barrel->AddCollider(colliderTag, 0, 0, 0);
         
     }
     

@@ -8,6 +8,6 @@ ShaderTag::ShaderTag() {
     
     vertexScript   = "";
     fragmentScript = "";
-    
+    return;
 }
 

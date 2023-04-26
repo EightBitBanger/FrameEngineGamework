@@ -6,7 +6,9 @@
 
 #define  EVENT_LOG_FILENAME   "events.txt"
 
-struct Logger {
+class Logger {
+    
+public:
     
     void Write(std::string LogString);
     void WriteLn(void);

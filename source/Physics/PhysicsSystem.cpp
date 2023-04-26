@@ -1,23 +1,35 @@
 #include <ReactPhysics3d/ReactPhysics3d.h>
 #include "PhysicsSystem.h"
 
-PhysicsSystem::PhysicsSystem() {}
+
+PhysicsSystem::PhysicsSystem() {
+    
+    world = nullptr;
+    return;
+}
 
 void PhysicsSystem::Initiate(void) {
     
-    world = common.createPhysicsWorld();
+    rp3d::PhysicsWorld::WorldSettings worldSettings;
+    worldSettings.defaultBounciness            = 0.5;
+    worldSettings.defaultFrictionCoefficient   = 0.7;
+    worldSettings.restitutionVelocityThreshold = 0.9;
     
-    SetWorldGravity(0, -9.98 * 2 * 2, 0);
+    world = common.createPhysicsWorld(worldSettings);
+    
+    SetWorldGravity(0, -9.98 * 3 * 3, 0);
     
     world->enableSleeping(true);
-    
-    world->setSleepLinearVelocity(0.8);
-    world->setSleepAngularVelocity(0.8);
+    world->setSleepLinearVelocity(0.1);
+    world->setSleepAngularVelocity(0.1);
     
     return;
 }
 
-void PhysicsSystem::SetWorldGravity(float x, float y, float z) {world->setGravity(rp3d::Vector3(x, y, z));}
+void PhysicsSystem::SetWorldGravity(float x, float y, float z) {
+    world->setGravity(rp3d::Vector3(x, y, z));
+    return;
+}
 
 
 rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
@@ -29,8 +41,8 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
     rp3d::RigidBody* body = world->createRigidBody(physicsTransform);
     
     body->setMass(1);
-    body->setLinearDamping(0);
-    body->setAngularDamping(0.087);
+    body->setLinearDamping(0.01);
+    body->setAngularDamping(0.08);
     
     return body;
 }

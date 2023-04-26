@@ -9,6 +9,6 @@ TextureTag::TextureTag() {
     channels = 0;
     
     buffer = nullptr;
-    
+    return;
 }
 

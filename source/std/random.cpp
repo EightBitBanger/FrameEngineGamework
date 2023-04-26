@@ -7,6 +7,7 @@
 
 void  RandomGen::Seed(int value) {
     srand(value);
+    return;
 }
 
 float  RandomGen::Range(float min, float max) {
@@ -22,5 +23,6 @@ int  RandomGen::Range(int min, int max) {
 RandomGen::RandomGen() {
     
     srand(100);
+    return;
 }
 

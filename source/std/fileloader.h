@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 
+
 /// General purpose file loading class.
 class FileLoader {
     
@@ -30,9 +31,6 @@ class FileLoader {
     
     */
     
-    // State of the file
-    bool isFileLoaded;
-    
 public:
     
     // Raw file data
@@ -50,6 +48,12 @@ public:
     
     std::string GetValueByName(std::string Name, unsigned int Index);
     std::string GetDataBlockByName(std::string Name);
+    
+    
+private:
+    
+    // State of the loaded file
+    bool isFileLoaded;
     
 };
 

@@ -13,7 +13,7 @@ RenderSystem::RenderSystem() {
     currentShader    = nullptr;
     
     cameraMain = nullptr;
-    
+    return;
 }
 
 
@@ -136,6 +136,7 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             
             Entity* currentEntity = *it;
             
+            // Call update on entity scripts
             if (currentEntity->script != nullptr) 
                 currentEntity->script->OnUpdate();
             
@@ -268,6 +269,7 @@ void RenderSystem :: Initiate(void) {
 
 void RenderSystem :: AddToRenderQueue(Scene* scenePtr) {
     renderQueue.push_back( scenePtr );
+    return;
 }
 
 bool RenderSystem :: RemoveFromRenderQueue(Scene* scenePtr) {
@@ -387,6 +389,7 @@ void RenderSystem :: SetViewport(unsigned int x, unsigned int y, unsigned int w,
     viewport.y = y;
     viewport.w = w;
     viewport.h = h;
+    return;
 }
 
 

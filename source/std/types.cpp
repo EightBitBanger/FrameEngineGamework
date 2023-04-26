@@ -42,3 +42,4 @@ int StringToInt(std::string String) {
     std::stringstream(String) >> Integer;
     return Integer;
 }
+

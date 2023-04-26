@@ -33,24 +33,6 @@ struct SubMesh {
 
 class Mesh {
     
-    unsigned int vertexArray;
-    unsigned int bufferVertex;
-    unsigned int bufferIndex;
-    
-    int primitive;
-    
-    unsigned int vertexBufferSz;
-    unsigned int indexBufferSz;
-    unsigned int maxSize;
-    
-    std::vector<Vertex>   vertexBuffer;
-    std::vector<Index>    indexBuffer;
-    
-    std::vector<SubMesh> subMesh;
-    std::vector<SubMesh> freeMesh;
-    
-    void SetDefaultAttributes(void);
-    
 public:
     
     Shader* shader;
@@ -98,6 +80,27 @@ public:
     bool ChangeSubMeshPosition(unsigned int index, float x, float y, float z);
     
     void UpdateMesh(void);
+    
+    
+private:
+    
+    unsigned int vertexArray;
+    unsigned int bufferVertex;
+    unsigned int bufferIndex;
+    
+    int primitive;
+    
+    unsigned int vertexBufferSz;
+    unsigned int indexBufferSz;
+    unsigned int maxSize;
+    
+    std::vector<Vertex>   vertexBuffer;
+    std::vector<Index>    indexBuffer;
+    
+    std::vector<SubMesh> subMesh;
+    std::vector<SubMesh> freeMesh;
+    
+    void SetDefaultAttributes(void);
     
 };
 

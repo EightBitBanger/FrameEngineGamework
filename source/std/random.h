@@ -1,19 +1,17 @@
-//
-// Random number generation class
-#ifndef _RANDOM_NUMBER_GENERATOR__
-#define _RANDOM_NUMBER_GENERATOR__
+#ifndef RANDOM_NUMBER_GENERATOR
+#define RANDOM_NUMBER_GENERATOR
 
 #include <cstdlib>
 
-struct RandomGen {
+class RandomGen {
+    
+public:
     
     RandomGen();
     
-    static void  Seed(int value);
-    
-    static float Range(float min, float max);
-    
-    static int Range(int min, int max);
+    void  Seed(int value);
+    float Range(float min, float max);
+    int   Range(int min, int max);
     
 };
 

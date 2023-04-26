@@ -16,19 +16,6 @@
 
 class Shader {
     
-    unsigned int shaderProgram;
-    
-    int projectionMatrixLocation;
-    int modelMatrixLocation;
-    
-    int materialColorLocation;
-    
-    int samplerLocation;
-    
-    bool  isShaderLoaded;
-    
-    unsigned int CompileSource(unsigned int Type, std::string Script);
-    
 public:
     
     Shader();
@@ -48,6 +35,22 @@ public:
     void Bind(void);
     
     bool BuildDefault(void);
+    
+    
+private:
+    
+    unsigned int shaderProgram;
+    
+    int projectionMatrixLocation;
+    int modelMatrixLocation;
+    
+    int materialColorLocation;
+    
+    int samplerLocation;
+    
+    bool  isShaderLoaded;
+    
+    unsigned int CompileSource(unsigned int Type, std::string Script);
     
 };
 

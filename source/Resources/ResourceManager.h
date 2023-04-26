@@ -6,20 +6,13 @@
 
 class ResourceManager {
     
-    std::vector<MeshTag>      meshTags;
-    std::vector<TextureTag>   textureTags;
-    std::vector<ShaderTag>    shaderTags;
-    std::vector<ColliderTag>  colliderTags;
-    
-    unsigned char* LoadImageRaw(char const* filename, int* width, int* height, int* channels, int req_channels);
-    
 public:
     
     void Initiate(void);
     
-    bool LoadWaveFront(std::string filename, std::string resourceName);
-    bool LoadTexture(std::string filename, std::string resourceName);
-    bool LoadShaderGLSL(std::string filename, std::string resourceName);
+    bool LoadWaveFront(std::string path, std::string resourceName);
+    bool LoadTexture(std::string path, std::string resourceName);
+    bool LoadShaderGLSL(std::string path, std::string resourceName);
     
     MeshTag*     FindMeshTag(std::string name);
     TextureTag*  FindTextureTag(std::string name);
@@ -36,14 +29,21 @@ public:
     Material* CreateMaterialFromTag(std::string name);
     Shader*   CreateShaderFromTag(std::string name);
     
-    bool LoadScene(std::string filename);
-    bool LoadDefinitions(std::string filename);
-    bool LoadLocations(std::string filename);
-    
-    
-    
+    bool LoadScene(std::string path);
+    bool LoadDefinitions(std::string path);
+    bool LoadLocations(std::string path);
     
     void DestroyAssets(void);
+    
+    
+private:
+    
+    std::vector<MeshTag>      meshTags;
+    std::vector<TextureTag>   textureTags;
+    std::vector<ShaderTag>    shaderTags;
+    std::vector<ColliderTag>  colliderTags;
+    
+    unsigned char* LoadImageRaw(char const* path, int* width, int* height, int* channels, int req_channels);
     
 };
 

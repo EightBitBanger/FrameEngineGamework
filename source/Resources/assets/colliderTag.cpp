@@ -7,6 +7,6 @@ ColliderTag::ColliderTag() {
     name = "";
     
     colliderShape = nullptr;
-    
+    return;
 }
 

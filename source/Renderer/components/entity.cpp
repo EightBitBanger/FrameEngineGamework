@@ -7,7 +7,7 @@ Entity::Entity() {
     material   = nullptr;
     script     = nullptr;
     rigidBody  = nullptr;
-    
+    return;
 }
 
 Entity::~Entity() {
@@ -88,9 +88,9 @@ void Entity::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z)
 void Entity::AddCollider(ColliderTag* colliderTag, float x, float y, float z) {
     assert(rigidBody != nullptr);
     if (colliderTag->isStatic) {
-        rigidBody->setType(rp3d::BodyType::STATIC);
+        SetRigidBodyStatic();
     } else {
-        rigidBody->setType(rp3d::BodyType::DYNAMIC);
+        SetRigidBodyDynamic();
     }
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));

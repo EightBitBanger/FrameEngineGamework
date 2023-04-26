@@ -53,25 +53,6 @@ extern Logger Log;
 
 class RenderSystem {
     
-    HWND  windowHandle;
-    HDC   deviceContext;
-    HGLRC renderContext;
-    
-    std::vector<Scene*>  renderQueue;
-    
-    Mesh*      currentMesh;
-    Material*  currentMaterial;
-    Shader*    currentShader;
-    
-    PoolAllocator<Entity>    entity;
-    PoolAllocator<Mesh>      mesh;
-    PoolAllocator<Shader>    shader;
-    PoolAllocator<Camera>    camera;
-    PoolAllocator<Material>  material;
-    PoolAllocator<Sky>       sky;
-    PoolAllocator<Scene>     scene;
-    PoolAllocator<Script>    script;
-    
 public:
     
     Scene* operator[] (unsigned int const i) {return renderQueue[i];}
@@ -89,6 +70,7 @@ public:
     
     
     RenderSystem();
+    
     
     
     Entity* CreateEntity(void);
@@ -118,6 +100,7 @@ public:
     bool DestroyScript(Script* scriptPtr);
     
     
+    
     void Initiate(void);
     
     GLenum  SetRenderTarget(HWND wHndl);
@@ -135,4 +118,29 @@ public:
     glm::mat4 CalculateModelMatrix(Transform& modelTransform);
     
     std::vector<std::string> GetGLErrorCodes(std::string errorLocationString);
+    
+    
+private:
+    
+    HWND  windowHandle;
+    HDC   deviceContext;
+    HGLRC renderContext;
+    
+    std::vector<Scene*>  renderQueue;
+    
+    Mesh*      currentMesh;
+    Material*  currentMaterial;
+    Shader*    currentShader;
+    
+    PoolAllocator<Entity>    entity;
+    PoolAllocator<Mesh>      mesh;
+    PoolAllocator<Shader>    shader;
+    PoolAllocator<Camera>    camera;
+    PoolAllocator<Material>  material;
+    PoolAllocator<Sky>       sky;
+    PoolAllocator<Scene>     scene;
+    PoolAllocator<Script>    script;
+    
 };
+
+

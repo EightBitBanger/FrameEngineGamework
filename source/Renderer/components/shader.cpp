@@ -10,21 +10,35 @@ Shader::Shader() {
     samplerLocation = 0;
     
     isShaderLoaded = false;
+    return;
 }
 
 Shader::~Shader() {
     
     if (isShaderLoaded) glDeleteProgram(shaderProgram);
+    return;
 }
 
 
-void Shader::SetModelMatrix(glm::mat4 &ModelMatrix) {glUniformMatrix4fv(modelMatrixLocation, 1, 0, &ModelMatrix[0][0]);}
+void Shader::SetModelMatrix(glm::mat4 &ModelMatrix) {
+    glUniformMatrix4fv(modelMatrixLocation, 1, 0, &ModelMatrix[0][0]);
+    return;
+}
 
-void Shader::SetProjectionMatrix(glm::mat4 &projectionMatrix) {glUniformMatrix4fv(projectionMatrixLocation, 1, 0, &projectionMatrix[0][0]);}
+void Shader::SetProjectionMatrix(glm::mat4 &projectionMatrix) {
+    glUniformMatrix4fv(projectionMatrixLocation, 1, 0, &projectionMatrix[0][0]);
+    return;
+}
 
-void Shader::SetMaterialColor(Color color) {glUniform4f(materialColorLocation, color.r, color.g, color.b, color.a);}
+void Shader::SetMaterialColor(Color color) {
+    glUniform4f(materialColorLocation, color.r, color.g, color.b, color.a);
+    return;
+}
 
-void Shader::SetTextureSampler(unsigned int index) {glUniform1i(samplerLocation, index);}
+void Shader::SetTextureSampler(unsigned int index) {
+    glUniform1i(samplerLocation, index);
+    return;
+}
 
 
 void Shader::SetUniformLocations(void) {
@@ -38,7 +52,7 @@ void Shader::SetUniformLocations(void) {
     modelMatrixLocation       = glGetUniformLocation(shaderProgram, modelUniformName.c_str());
     materialColorLocation     = glGetUniformLocation(shaderProgram, colorUniformName.c_str());
     samplerLocation           = glGetUniformLocation(shaderProgram, samplerUniformName.c_str());
-    
+    return;
 }
 
 int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentScript) {
@@ -103,6 +117,7 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
 
 void Shader::Bind(void) {
     glUseProgram(shaderProgram);
+    return;
 }
 
 

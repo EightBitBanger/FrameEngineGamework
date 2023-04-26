@@ -17,20 +17,26 @@ Mesh::Mesh() {
 Mesh::~Mesh() {
     
     FreeBuffers();
+    return;
 }
 
 
-void Mesh::SetPrimitive(int primitiveType) {primitive = primitiveType;}
+void Mesh::SetPrimitive(int primitiveType) {
+    primitive = primitiveType;
+    return;
+}
 
 void Mesh::SetAttribute(int index, int attributeCount, int vertexSize, int byteOffset) {
     Bind();
     glEnableVertexAttribArray(index);
     glVertexAttribPointer(index, attributeCount, GL_FLOAT, GL_FALSE, vertexSize, (void*) byteOffset);
+    return;
 }
 
 void Mesh::DisableAttribute(int index) {
     Bind();
     glDisableVertexAttribArray(index);
+    return;
 }
 
 
@@ -39,17 +45,20 @@ void Mesh::LoadVertexBuffer(Vertex* bufferData, int vertexCount) {
     glBindVertexArray(vertexArray);
     glBindBuffer(GL_ARRAY_BUFFER, bufferVertex);
     glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), &bufferData[0], GL_DYNAMIC_DRAW);
+    return;
 }
 
 void Mesh::LoadIndexBuffer(Index* bufferData, int indexCount) {
     glBindVertexArray(vertexArray);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIndex);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(Index), &bufferData[0], GL_DYNAMIC_DRAW);
+    return;
 }
 
 
 void Mesh::Bind() {
     glBindVertexArray(vertexArray);
+    return;
 }
 
 

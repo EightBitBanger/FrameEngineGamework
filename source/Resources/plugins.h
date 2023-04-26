@@ -1,5 +1,7 @@
 //
 // Resource loading plug-ins
+#ifndef RESOURCE_PLUGINS
+#define RESOURCE_PLUGINS
 
 
 
@@ -23,3 +25,4 @@
 #include "Bly7/OBJ_Loader.h"
 
 
+#endif

@@ -1,5 +1,5 @@
-//
-// Engine related plug-ins
+#ifndef APPLICATION_PLUGINS
+#define APPLICATION_PLUGINS
 
 
 // OpenGL GLEW static
@@ -21,3 +21,6 @@
 //
 #include <ReactPhysics3d/ReactPhysics3d.h>
 
+
+
+#endif

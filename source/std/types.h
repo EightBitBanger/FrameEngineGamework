@@ -1,3 +1,6 @@
+#ifndef TYPE_CONVERSION
+#define TYPE_CONVERSION
+
 //#define _WIN32_WINNT  0x500
 #include <SDKDDKVer.h>
 #include <windows.h>
@@ -23,3 +26,4 @@ std::string IntToString(int Integer);
 
 int StringToInt(std::string String);
 
+#endif

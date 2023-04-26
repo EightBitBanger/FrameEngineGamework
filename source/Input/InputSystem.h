@@ -1,7 +1,5 @@
-//
-// Input capture and processing system
-#ifndef INPUT_SYSTEM_
-#define INPUT_SYSTEM_
+#ifndef INPUT_CAPTURE_SYSTEM
+#define INPUT_CAPTURE_SYSTEM
 
 #include "Keys.h"
 
@@ -9,22 +7,13 @@ void CursorSetPosition(int xx, int yy);
 glm::vec2 CursorGetPosition(void);
 
 
-class InputSystem{
-    
-    bool KeyPressed  [256];
-    bool KeyReleased [256];
-    bool KeyCurrent  [256];
-    
-    bool MouseLeftPressed;
-    bool MouseRightPressed;
-    bool MouseLeftReleased;
-    bool MouseRightReleased;
+class InputSystem {
     
 public:
     
-    int  LastKeyPressed;
-    
     InputSystem(void);
+    
+    int  LastKeyPressed;
     
     // Set key state
     void SetKeyPressed(int keyid);
@@ -62,6 +51,17 @@ public:
     void ClearKeysPressed(void);
     void ClearKeysReleased(void);
     void ClearKeysCurrent(void);
+    
+private:
+    
+    bool KeyPressed  [256];
+    bool KeyReleased [256];
+    bool KeyCurrent  [256];
+    
+    bool MouseLeftPressed;
+    bool MouseRightPressed;
+    bool MouseLeftReleased;
+    bool MouseRightReleased;
     
 };
 

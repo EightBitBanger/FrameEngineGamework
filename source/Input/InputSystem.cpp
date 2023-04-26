@@ -7,7 +7,10 @@
 #include "InputSystem.h"
 #include "Keys.h"
 
-void CursorSetPosition(int xx, int yy) {SetCursorPos( xx, yy );}
+void CursorSetPosition(int xx, int yy) {
+    SetCursorPos( xx, yy );
+    return;
+}
 
 glm::vec2 CursorGetPosition(void) {
     POINT Pos;

@@ -7,12 +7,13 @@ Transform::Transform() {
     scale    = glm::vec3(1, 1, 1);
     
     parent = nullptr;
-    
+    return;
 }
 
 
 void Transform::ChildAdd(Transform* transform) {
     child.push_back(transform);
+    return;
 }
 
 bool Transform::ChildRemove(Transform* transform) {

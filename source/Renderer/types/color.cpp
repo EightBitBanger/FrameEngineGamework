@@ -22,6 +22,7 @@ Color::Color() {
     g = 0;
     b = 0;
     a = 1;
+    return;
 }
 
 Color::Color(Color& color) {
@@ -29,6 +30,7 @@ Color::Color(Color& color) {
     g = color.g;
     b = color.b;
     a = color.a;
+    return;
 }
 
 
@@ -37,6 +39,7 @@ Color::Color(float red, float green, float blue, float alpha) {
     g = green;
     b = blue;
     a = alpha;
+    return;
 }
 
 Color::Color(float red, float green, float blue) {
@@ -44,11 +47,8 @@ Color::Color(float red, float green, float blue) {
     g = green;
     b = blue;
     a = 1;
+    return;
 }
-
-
-
-
 
 
 Color& ColorPreset::Make(float r, float g, float b) {
@@ -64,5 +64,4 @@ Color& ColorPreset::MakeRandom(void) {
     random.b = ((float)(rand() % (int)100) + 1) * 0.01;
     return random;
 }
-
 

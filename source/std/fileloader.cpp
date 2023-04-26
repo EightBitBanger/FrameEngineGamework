@@ -2,7 +2,7 @@
 #include "fileloader.h"
 
 FileLoader::FileLoader(std::string FileName) 
-: isFileLoaded(false)
+    : isFileLoaded(false) 
 {
     
     std::fstream FileStream;
@@ -63,7 +63,7 @@ FileLoader::FileLoader(std::string FileName)
         FileStream.close();
         isFileLoaded = true;
     }
-    
+    return;
 }
 
 std::string FileLoader::GetValueByName(std::string Name, unsigned int Index) {

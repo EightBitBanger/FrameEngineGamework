@@ -5,11 +5,6 @@
 
 class Timer {
     
-    double timeFrequency;
-    LARGE_INTEGER tLast;
-    
-    float accumulator;
-    
 public:
     
     float  delta;
@@ -27,6 +22,14 @@ public:
     float Current(void);
     
     void SetRefreshRate(int rate);
+    
+    
+private:
+    
+    double timeFrequency;
+    LARGE_INTEGER tLast;
+    
+    float accumulator;
     
 };
 

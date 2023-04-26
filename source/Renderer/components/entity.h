@@ -28,7 +28,10 @@
 
 extern PhysicsSystem Physics;
 
-struct Entity {
+
+class Entity {
+    
+public:
     
     Transform transform;
     

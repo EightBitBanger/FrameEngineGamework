@@ -18,6 +18,7 @@ Timer::Timer() {
     timeFrequency = tFrequency.QuadPart / 1000;
     
     QueryPerformanceCounter(&tLast);
+    return;
 }
 
 
@@ -66,5 +67,6 @@ float Timer::Current(void) {
 void Timer::SetRefreshRate(int rate) {
     updateRateMs = 1000 / rate;
     updateRateMax = updateRateMs + (updateRateMs / 4);
+    return;
 }
 

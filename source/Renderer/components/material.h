@@ -14,9 +14,9 @@
 
 #include "../enumerators.h"
 
-struct Material {
+class Material {
     
-    unsigned int textureBuffer;
+public:
     
     unsigned int width;
     unsigned int height;
@@ -54,10 +54,13 @@ struct Material {
     void SetBlendingAlpha(GLint srca, GLint desta);
     void SetBlendingFunction(GLint func);
     
-    
     void Bind(void);
     void BindTextureSlot(unsigned int slot);
     void UpdateTextureBuffer(void* textureData);
+    
+private:
+    
+    unsigned int textureBuffer;
     
 };
 

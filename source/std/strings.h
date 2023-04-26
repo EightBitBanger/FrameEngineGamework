@@ -1,3 +1,6 @@
+#ifndef STRING_FUNCTIONS
+#define STRING_FUNCTIONS
+
 //#define _WIN32_WINNT  0x500
 #include <SDKDDKVer.h>
 #include <windows.h>
@@ -20,3 +23,4 @@ std::string StringGetNameFromFilename(std::string FilePath);
 std::string StringGetNameFromFilenameNoExt(std::string FilePath);
 std::string StringGetExtFromFilename(std::string FilePath);
 
+#endif

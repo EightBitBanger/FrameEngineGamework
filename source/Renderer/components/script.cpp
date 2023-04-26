@@ -6,5 +6,8 @@ Script::Script() {
     OnUpdate = nullfunc;
 }
 
-void DefaultFunctionPtr(void) {return;}
+// Dummy landing function
+void DefaultFunctionPtr(void) {
+    return;
+}
 

@@ -9,8 +9,6 @@ class Scene {
     
 public:
     
-    std::vector<Entity*>  entities;
-    
     Entity* GetEntity(unsigned int index);
     
     void AddToSceneRoot(Entity* entity);
@@ -18,6 +16,8 @@ public:
     
     unsigned int GetRenderQueueSize(void);
     Entity* GetRenderQueueEntity(unsigned int index);
+    
+    std::vector<Entity*>  entities;
     
 };
 

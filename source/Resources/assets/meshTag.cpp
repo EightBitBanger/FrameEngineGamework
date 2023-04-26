@@ -5,6 +5,6 @@
 MeshTag::MeshTag() {
     
     name = "";
-    
+    return;
 }
 

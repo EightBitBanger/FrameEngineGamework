@@ -24,7 +24,9 @@
 #include "../../Input/InputSystem.h"
 #include "../../std/timer.h"
 
-struct Camera {
+class Camera {
+    
+public:
     
     Transform transform;
     

@@ -1,3 +1,5 @@
+#ifndef WINDOW_PROCEDURE
+#define WINDOW_PROCEDURE
 
 LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam) {
     
@@ -65,3 +67,4 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
     return 0;
 }
 
+#endif

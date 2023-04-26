@@ -4,7 +4,9 @@
 void DefaultFunctionPtr(void);
 #define  nullfunc  DefaultFunctionPtr
 
-struct Script {
+class Script {
+    
+public:
     
     void(*OnCreate)();
     void(*OnUpdate)();
