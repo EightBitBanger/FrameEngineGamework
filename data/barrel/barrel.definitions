@@ -1,0 +1,6 @@
+define_mesh     barrel        data/barrel/barrel.obj
+define_texture  mat_barrel    data/barrel/barrel.png
+define_shader   default       data/default.shader
+
+define_collider  coll_barrel    1.5 2.8 1.5      dynamic
+

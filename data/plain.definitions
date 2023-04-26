@@ -1,0 +1,4 @@
+define_texture  mat_plain    data/grassy.png
+
+define_collider  coll_plain    100.0 10.0 100.0    static
+
