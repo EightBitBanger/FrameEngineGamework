@@ -19,10 +19,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wClassEx.hIconSm         = LoadIcon(hInstance, IDI_APPLICATION);
     wClassEx.hbrBackground   = (HBRUSH)GetStockObject(BLACK_BRUSH);
     
-    if (!RegisterClassEx(&wClassEx)) {
-        MessageBox(NULL, "Failed to register the window class.", "Error", MB_OK);
-        return 0;
-    }
+    assert( RegisterClassEx(&wClassEx) );
     
     wHnd = CreateWindowEx(0, "frame", WINDOW_NAME, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
     ShowWindow(wHnd, nCmdShow);
@@ -30,7 +27,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Console window
     HWND cHnd = GetConsoleWindow();
     ShowWindow(cHnd, SW_SHOW);
-    SetWindowPos(cHnd, NULL, 5, 50, 700, 800, SWP_SHOWWINDOW);
+    SetWindowPos(cHnd, NULL, WINDOW_CONSOLE_LEFT, WINDOW_CONSOLE_TOP, WINDOW_CONSOLE_WIDTH, WINDOW_CONSOLE_HEIGHT, SWP_SHOWWINDOW);
+    
     
     // Figure a good window size
     HDC hDC = GetDC(wHnd);
@@ -50,7 +48,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     if (Renderer.SetRenderTarget(wHnd) != GLEW_OK) {
         DestroyWindow(wHnd);
-        MessageBox(NULL, "Failed to link to the OpenGL library.", "Error", MB_OK);
+        MessageBox(NULL, "Cannot locate the OpenGL library. Please update your graphics drivers...", "Error", MB_OK);
         return 0;
     }
     
@@ -66,13 +64,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Physics.Initiate();
     Renderer.Initiate();
     Resources.Initiate();
-    Engine.Initiate();
     
     Start();
     
     RenderTime.Update();
     PhysicsTime.Update();
     Time.Update();
+    
     
     while (isActive) {
         
@@ -82,7 +80,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         }
         
         
-        // ESCAPE key handling
         if (Input.CheckKeyPressed(VK_ESCAPE)) {
             isPaused = !isPaused;
             if (Renderer.cameraMain == nullptr) continue;
@@ -101,8 +98,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             }
         }
         
+        
         if (PhysicsTime.Update()) 
             Physics.world->update( PhysicsTime.delta );
+        
         
         if (Time.Update()) {
             

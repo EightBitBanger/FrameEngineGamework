@@ -10,6 +10,13 @@
 #define  WINDOW_WIDTH_MIN   300
 #define  WINDOW_HEIGHT_MIN  200
 
+// Console window
+#define     WINDOW_CONSOLE_LEFT    5
+#define     WINDOW_CONSOLE_TOP     50
+#define     WINDOW_CONSOLE_WIDTH   700
+#define     WINDOW_CONSOLE_HEIGHT  800
+
+
 
 
 // Logging
@@ -22,6 +29,6 @@
 
 
 // Physics simulation
-#define PHYSICS_UPDATES_PER_SECOND         30
+#define PHYSICS_UPDATES_PER_SECOND         60
 
 

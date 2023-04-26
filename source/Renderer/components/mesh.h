@@ -49,6 +49,8 @@ class Mesh {
     std::vector<SubMesh> subMesh;
     std::vector<SubMesh> freeMesh;
     
+    void SetDefaultAttributes(void);
+    
 public:
     
     Shader* shader;
@@ -60,7 +62,6 @@ public:
     
     void SetAttribute(int index, int attributeCount, int vertexSize, int byteOffset);
     void DisableAttribute(int index);
-    void SetDefaultAttributes(void);
     
     void LoadVertexBuffer(Vertex* bufferData, int vertexCount);
     void LoadIndexBuffer(Index* bufferData, int indexCount);

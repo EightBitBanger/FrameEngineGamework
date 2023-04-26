@@ -28,6 +28,7 @@ bool RenderSystem::DestroyEntity(Entity* entityPtr) {
 
 Mesh* RenderSystem::CreateMesh(void) {
     Mesh* meshPtr = mesh.Create();
+    meshPtr->shader = defaultShader;
     return meshPtr;
 }
 bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
@@ -73,6 +74,9 @@ Scene* RenderSystem::CreateScene(void) {
 Scene* RenderSystem::GetScene(unsigned int index) {
     assert(index <= renderQueue.size());
     return renderQueue[index];
+}
+unsigned int RenderSystem::GetSceneCount(void) {
+    return scene.GetObjectCount();
 }
 bool RenderSystem::DestroyScene(Scene* scenePtr) {
     return scene.Destroy(scenePtr);
@@ -148,7 +152,7 @@ void RenderSystem :: RenderFrame(float deltaTime) {
                 currentMesh->Bind();
             }
             
-            
+            // Shader binding
             if (currentShader != shader) {
                 currentShader = shader;
                 
@@ -156,7 +160,7 @@ void RenderSystem :: RenderFrame(float deltaTime) {
                 currentShader->SetProjectionMatrix(viewProj);
             }
             
-            
+            // Material binding
             if (currentMaterial != currentEntity->material) {
                 currentMaterial = currentEntity->material;
                 
@@ -196,15 +200,15 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             
             
             // Calculate model matrix
-            Transform parent;
-            if (currentEntity->transform.parent != nullptr) 
-                parent = *currentEntity->transform.parent;
-            
             glm::mat4 model(1);
+            
             if (currentEntity->rigidBody != nullptr) {
+                
                 currentEntity->rigidBody->getTransform().getOpenGLMatrix(&model[0][0]);
+                
             } else {
-                model = CalculateModelMatrix(parent, currentEntity->transform);
+                
+                model = CalculateModelMatrix(currentEntity->transform);
             }
             
             
@@ -386,29 +390,19 @@ void RenderSystem :: SetViewport(unsigned int x, unsigned int y, unsigned int w,
 }
 
 
-glm::mat4 RenderSystem :: CalculateModelMatrix(Transform& parentTransform, Transform& modelTransform) {
+glm::mat4 RenderSystem :: CalculateModelMatrix(Transform& model) {
     
-    glm::mat4 parentTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( parentTransform.position.x, parentTransform.position.y, parentTransform.position.z ));
-    
-    glm::mat4 
-    parentRotation = glm::rotate(glm::mat4(1.0f), glm::radians( 0.0f ), glm::vec3(0, 1, 0));
-    parentRotation = glm::rotate(parentRotation, parentTransform.rotation.x, glm::vec3( 0.0f, 1.0f, 0.0f ) );
-    parentRotation = glm::rotate(parentRotation, parentTransform.rotation.y, glm::vec3( 1.0f, 0.0f, 0.0f ) );
-    parentRotation = glm::rotate(parentRotation, parentTransform.rotation.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
-    
-    glm::mat4 parentScale = glm::scale(glm::mat4(1.0f), glm::vec3( parentTransform.scale.x, parentTransform.scale.y, parentTransform.scale.z ));
-    
-    glm::mat4 modelTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( modelTransform.position.x, modelTransform.position.y, modelTransform.position.z ));
+    glm::mat4 modelTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( model.position.x, model.position.y, model.position.z ));
     
     glm::mat4 
     modelRotation = glm::rotate (glm::mat4(1.0f), glm::radians( 0.0f ), glm::vec3(0, 1, 0));
-    modelRotation = glm::rotate(modelRotation, modelTransform.rotation.x, glm::vec3( 0.0f, 1.0f, 0.0f ) );
-    modelRotation = glm::rotate(modelRotation, modelTransform.rotation.y, glm::vec3( 1.0f, 0.0f, 0.0f ) );
-    modelRotation = glm::rotate(modelRotation, modelTransform.rotation.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
+    modelRotation = glm::rotate(modelRotation, model.rotation.x, glm::vec3( 0.0f, 1.0f, 0.0f ) );
+    modelRotation = glm::rotate(modelRotation, model.rotation.y, glm::vec3( 1.0f, 0.0f, 0.0f ) );
+    modelRotation = glm::rotate(modelRotation, model.rotation.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
     
-    glm::mat4 modelScale = glm::scale(glm::mat4(1.0f), glm::vec3( modelTransform.scale.x, modelTransform.scale.y, modelTransform.scale.z ));
+    glm::mat4 modelScale = glm::scale(glm::mat4(1.0f), glm::vec3( model.scale.x, model.scale.y, model.scale.z ));
     
-    return (parentTranslation * parentRotation * parentScale) * (modelTranslation * modelRotation * modelScale);
+    return modelTranslation * modelRotation * modelScale;
 }
 
 

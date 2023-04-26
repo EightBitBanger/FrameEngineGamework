@@ -1,6 +1,7 @@
 {\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\fnil\fcharset0 Segoe UI;}}
 {\colortbl ;\red0\green0\blue255;}
-{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\ri-1800\sl240\slmult1\lang9\f0\fs22\par
+{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\ri-1800\sl240\slmult1\lang9\b\f0\fs48 Brief introduction\par
+\b0\fs22\par
 \b   This game engine aims to provides a simpler interface with more complex systems.\par
 This engine provides APIs for rendering, physics, resource mangement, scene management, input, timing and random number generation.\par
 \par
@@ -59,9 +60,6 @@ Create a mesh component for the renderer from a loaded mesh resource.\par
 Get a physics collider from a loaded collision resource.\par
 \cf1 rp3d::BoxShape*  \fs24 ResourceManager :: \fs22 GetColliderFromTag( std::string name );\par
 \cf0\par
-Get a submesh from a loaded mesh component.\par
-\cf1 SubMesh*  \fs24 ResourceManager :: \fs22 GetSubMeshFromTag( std::string name );\par
-\cf0\par
 \par
 \par
 \par
@@ -108,6 +106,8 @@ bool     RenderSystem :: DestroyEntity( Entity* entityPtr );\par
 \par
 \cf0 Scene objects organize and group entities for rendering.\cf1\par
 Scene* RenderSystem :: CreateScene( void );\par
+Scene* RenderSystem :: GetScene( unsigned int index );\par
+unsigned int  RenderSystem :: GetSceneCount( void );\par
 bool     RenderSystem :: DestroyScene( Scene* scenePtr );\par
 \par
 \cf0 Camera objects provide a projection angle for the rendering process.\cf1\par
@@ -144,8 +144,8 @@ bool  RenderSystem :: RemoveFromRenderQueue( Scene* scene );\par
 Return a scene from the render queue at the givin index.\par
 \cf1 Scene*  RenderSystem :: GetRenderQueueScene( unsigned int index );\par
 \par
-\cf0 Calculate the matrix for the current transform from the parrent transform.\par
-\cf1 glm::mat4  RenderSystem :: CalculateModelMatrix( Transform& parent, Transform& model );\par
+\cf0 Calculate the matrix for the model transform.\par
+\cf1 glm::mat4  RenderSystem :: CalculateModelMatrix( Transform& model );\par
 \cf0\par
 \par
 \par
@@ -357,8 +357,7 @@ rp3d::CapsuleShape*  Physics :: CreateColliderCapsule(float radius, float height
 \par
 \par
 \par
-\par
-\par
+\tab\tab Copyright (c) 2023\par
 \par
 \par
 }

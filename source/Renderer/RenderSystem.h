@@ -111,6 +111,7 @@ public:
     
     Scene* CreateScene(void);
     Scene* GetScene(unsigned int index);
+    unsigned int GetSceneCount(void);
     bool DestroyScene(Scene* scenePtr);
     
     Script* CreateScript(void);
@@ -131,7 +132,7 @@ public:
     unsigned int GetRenderQueueSize(void);
     Scene* GetRenderQueueScene(unsigned int index);
     
-    glm::mat4 CalculateModelMatrix(Transform& parentTransform, Transform& modelTransform);
+    glm::mat4 CalculateModelMatrix(Transform& modelTransform);
     
     std::vector<std::string> GetGLErrorCodes(std::string errorLocationString);
 };

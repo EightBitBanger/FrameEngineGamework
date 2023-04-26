@@ -4,7 +4,6 @@
 #include "Input/InputSystem.h"
 #include "Physics/PhysicsSystem.h"
 #include "Resources/ResourceManager.h"
-#include "Engine/EngineMain.h"
 
 extern RandomGen         Random;
 extern ColorPreset       Colors;
@@ -15,9 +14,6 @@ extern ResourceManager   Resources;
 extern RenderSystem      Renderer;
 extern PhysicsSystem     Physics;
 extern InputSystem       Input;
-
-extern EngineMainAPI     Engine;
-
 
 
 // User native scripts
@@ -45,13 +41,13 @@ void Start(void) {
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(0, 50, 0);
+    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(-130, 50, 0);
     Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
     Renderer.cameraMain->SetMass(10);
-    Renderer.cameraMain->SetLinearDamping(0.0);
+    Renderer.cameraMain->SetLinearDamping(0.4);
     Renderer.cameraMain->SetAngularAxisLockFactor(0, 0, 0);
     Renderer.cameraMain->rigidBody->setIsAllowedToSleep(false);
-    Renderer.cameraMain->rigidBody->enableGravity(true);
+    Renderer.cameraMain->rigidBody->enableGravity(false);
     
     
     //Renderer.cameraMain->transform.position = glm::vec3(-120, 20, 0);
@@ -63,8 +59,7 @@ void Start(void) {
     
     
     barrelMesh = Resources.CreateMeshFromTag("barrel");
-    barrelMesh->SetDefaultAttributes();
-    barrelMesh->shader = Renderer.defaultShader;
+    
     barrelMesh->ChangeSubMeshColor(0, Colors.ltgray);
     
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
@@ -80,8 +75,6 @@ void Start(void) {
     plainScene->AddToSceneRoot(plain);
     
     plain->mesh = Renderer.CreateMesh();
-    plain->mesh->SetDefaultAttributes();
-    plain->mesh->shader = Renderer.defaultShader;
     plain->mesh->AddPlain(0, 0, 0, 100, 100, Colors.gray);
     
     plain->material = Resources.CreateMaterialFromTag("mat_plain");
@@ -111,17 +104,15 @@ void Run(void) {
     
     if (Input.CheckKeyCurrent(VK_RETURN)) counter = 0;
     
-    if (counter == 100) return;
+    if (counter > 100) return;
     
     
     if (Random.Range(1, 2) == 1) {
         
         counter++;
-        if (counter > 100) 
-            counter = 100;
         
         float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-        float yy = (Random.Range(0, 10)  - Random.Range(0, 10))  * spreadMul;
+        float yy = 100;
         float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
         
         // Create a barrel object
@@ -129,13 +120,12 @@ void Run(void) {
         objectsScene->AddToSceneRoot(barrel);
         
         barrel->mesh = barrelMesh;
-        
         barrel->material = barrelMaterial;
-        barrel->rigidBody = Physics.CreateRigidBody(xx, yy + 100, zz);
-        barrel->SetRigidBodyStatic();
+        
+        barrel->rigidBody = Physics.CreateRigidBody(xx, yy, zz);
+        //barrel->SetRigidBodyDynamic();
         
         barrel->AddCollider( Resources.FindColliderTag("coll_barrel"), 0, 0, 0);
-        
         
     }
     
@@ -158,23 +148,19 @@ void Shutdown(void) {
 
 void CameraMovementScript(void) {
     
-    float cameraSpeed = 100;
-    glm::vec3 force;
+    float cameraSpeed = 1000;
+    glm::vec3 force(0);
     
-    if (Input.CheckKeyCurrent(VK_W)) {
-        force = Renderer.cameraMain->forward;
-        force *= cameraSpeed;
-    }
+    if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
+    if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
+    if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
+    if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
     
+    if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
+    if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
+    
+    force *= cameraSpeed;
     Renderer.cameraMain->AddForce(force.x, force.y, force.z);
-    
-    //if (Input.CheckKeyCurrent(VK_W)) Renderer.cameraMain->transform.position += Renderer.cameraMain->forward * cameraSpeed * Time.delta * glm::vec3(1, 0.2, 1);
-    //if (Input.CheckKeyCurrent(VK_S)) Renderer.cameraMain->transform.position -= Renderer.cameraMain->forward * cameraSpeed * Time.delta * glm::vec3(1, 0.2, 1);
-    //if (Input.CheckKeyCurrent(VK_A)) Renderer.cameraMain->transform.position += Renderer.cameraMain->right * cameraSpeed * Time.delta;
-    //if (Input.CheckKeyCurrent(VK_D)) Renderer.cameraMain->transform.position -= Renderer.cameraMain->right * cameraSpeed * Time.delta;
-    
-    //if (Input.CheckKeyCurrent(VK_SPACE)) Renderer.cameraMain->transform.position += Renderer.cameraMain->up * cameraSpeed * Time.delta;
-    //if (Input.CheckKeyCurrent(VK_SHIFT)) Renderer.cameraMain->transform.position -= Renderer.cameraMain->up * cameraSpeed * Time.delta;
     
     return;
 };

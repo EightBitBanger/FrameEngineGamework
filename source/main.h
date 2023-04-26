@@ -2,7 +2,6 @@
 #include <SDKDDKVer.h>
 #include <windows.h>
 
-// Standard headers
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdlib>
@@ -20,7 +19,7 @@
 #include "configuration.h"
 #include "plugins.h"
 
-//
+
 // My standard includes
 #include "std/poolallocator.h"
 #include "std/strings.h"
@@ -28,12 +27,8 @@
 #include "std/random.h"
 #include "std/logging.h"
 #include "std/fileloader.h"
-
-
-//
-// Singleton access points
-
 #include "std/timer.h"
+
 Timer      PhysicsTime;
 Timer      RenderTime;
 
@@ -55,9 +50,6 @@ ColorPreset   Colors;
 #include "Resources/ResourceManager.h"
 ResourceManager Resources;
 
-#include "Engine/EngineMain.h"
-EngineMainAPI Engine;
-
 
 bool isPaused = false;
 bool isActive = true;
@@ -67,5 +59,7 @@ HWND wHnd = NULL;
 #include "application/application.h"
 
 #include "winproc.h"
+
+
 
 

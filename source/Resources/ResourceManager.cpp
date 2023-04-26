@@ -182,20 +182,12 @@ Mesh* ResourceManager::CreateMeshFromTag(std::string name) {
     MeshTag* meshTag = FindMeshTag(name);
     assert(meshTag != nullptr);
     Mesh* meshPtr = Renderer.CreateMesh();
+    meshPtr->shader = Renderer.defaultShader;
     meshPtr->AddSubMesh(0,0,0, meshTag->mesh.vertexBuffer, meshTag->mesh.indexBuffer);
     meshPtr->SetAttribute(0, 3, sizeof(Vertex), 0);
     meshPtr->SetAttribute(1, 3, sizeof(Vertex), 12);
     meshPtr->SetAttribute(2, 2, sizeof(Vertex), 24);
     return meshPtr;
-}
-
-SubMesh* ResourceManager::GetSubMeshFromTag(std::string name) {
-    SubMesh subPart;
-    MeshTag* meshTag = FindMeshTag(name);
-    assert(meshTag != nullptr);
-    subPart.vertexBuffer = meshTag->mesh.vertexBuffer;
-    subPart.indexBuffer = meshTag->mesh.indexBuffer;
-    return &meshTag->mesh;
 }
 
 Material* ResourceManager::CreateMaterialFromTag(std::string name) {

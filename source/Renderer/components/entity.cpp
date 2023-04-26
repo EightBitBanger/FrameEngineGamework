@@ -74,7 +74,7 @@ void Entity::SetAngularAxisLockFactor(float x, float y, float z) {
 }
 
 
-void Entity::AddCollider(rp3d::BoxShape* boxShape, float x, float y, float z) {
+void Entity::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z) {
     assert(rigidBody != nullptr);
     
     rp3d::Transform offsetTransform;
@@ -104,6 +104,9 @@ void Entity::AddCollider(ColliderTag* colliderTag, float x, float y, float z) {
 void Entity::SetRigidBodyStatic(void) {
     assert(rigidBody != nullptr);
     rigidBody->setType(rp3d::BodyType::STATIC);
+    rp3d::Vector3 lockFactor(0,0,0);
+    rigidBody->setLinearLockAxisFactor(lockFactor);
+    rigidBody->setAngularLockAxisFactor(lockFactor);
     return;
 }
 
@@ -111,6 +114,9 @@ void Entity::SetRigidBodyStatic(void) {
 void Entity::SetRigidBodyDynamic(void) {
     assert(rigidBody != nullptr);
     rigidBody->setType(rp3d::BodyType::DYNAMIC);
+    rp3d::Vector3 lockFactor(1,1,1);
+    rigidBody->setLinearLockAxisFactor(lockFactor);
+    rigidBody->setAngularLockAxisFactor(lockFactor);
     return;
 }
 
