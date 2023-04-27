@@ -5,8 +5,11 @@
 - Resource management
 - Random number generation
 - Window input handling
+<a>
+⁪
+</a>
 
-### Application entry point
+### Application entry point 
 The engine contains various sub systems which can be accessed though the following "singleton" access points.
 
 ```c++
@@ -27,9 +30,17 @@ extern RenderSystem      Renderer;
 extern PhysicsSystem     Physics;
 extern InputSystem       Input;
 ```
+You must provide the framework with the functions Start() and Run(). These functions will act as an entry point for your application.
 
+```c++
+Start() {
+  
+}
 
-
+Run() {
+  
+}
+```
 
 ### Exteral linkage
 ```
