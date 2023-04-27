@@ -27,9 +27,3 @@ unsigned int Scene::GetRenderQueueSize(void) {
     return entities.size();
 }
 
-
-Entity* Scene::GetRenderQueueEntity(unsigned int index) {
-    return entities[index];
-}
-
-

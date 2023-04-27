@@ -1,11 +1,4 @@
-//#define _WIN32_WINNT  0x500
-#include <SDKDDKVer.h>
-#include <windows.h>
-
-#include <glm/glm.hpp>
-
 #include "InputSystem.h"
-#include "Keys.h"
 
 void CursorSetPosition(int xx, int yy) {
     SetCursorPos( xx, yy );

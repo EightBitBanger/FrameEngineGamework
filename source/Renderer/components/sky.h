@@ -6,10 +6,12 @@
 
 struct Sky {
     
+    /// The background view port color.
     Color background;
     
     Sky();
     
+    /// Set the sky color
     void SetColor(Color newColor);
     
 };

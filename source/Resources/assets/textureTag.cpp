@@ -1,4 +1,3 @@
-#include "../../Renderer/RenderSystem.h"
 #include "textureTag.h"
 
 

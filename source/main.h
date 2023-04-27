@@ -2,20 +2,6 @@
 #include <SDKDDKVer.h>
 #include <windows.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstdlib>
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-
-#include <string>
-#include <vector>
-#include <thread>
-#include <map>
-
-
 #include "configuration.h"
 #include "plugins.h"
 

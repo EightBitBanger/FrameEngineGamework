@@ -1,3 +1,6 @@
+#ifndef OPENGL_RENDERER_SYSTEM
+#define OPENGL_RENDERER_SYSTEM
+
 // Standard headers
 #include <stdio.h>
 #include <stdlib.h>
@@ -152,20 +155,20 @@ public:
     
 private:
     
-    /// Device render context
+    // Device render context
     HWND  windowHandle;
     HDC   deviceContext;
     HGLRC renderContext;
     
-    /// Render queue group
+    // Render queue group
     std::vector<Scene*>  renderQueue;
     
-    /// Current asset bindings
+    // Current asset bindings
     Mesh*      currentMesh;
     Material*  currentMaterial;
     Shader*    currentShader;
     
-    /// Allocators
+    // Allocators
     PoolAllocator<Entity>    entity;
     PoolAllocator<Mesh>      mesh;
     PoolAllocator<Shader>    shader;
@@ -178,3 +181,4 @@ private:
 };
 
 
+#endif

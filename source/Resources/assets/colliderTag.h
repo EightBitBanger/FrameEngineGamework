@@ -1,6 +1,8 @@
 #ifndef RESOURCE_COLLIDER_TAG
 #define RESOURCE_COLLIDER_TAG
 
+#include "../../Physics/PhysicsSystem.h"
+
 struct ColliderTag {
     
     std::string name;

@@ -1,3 +1,7 @@
+#ifndef RESOURCE_MESH_TAG
+#define RESOURCE_MESH_TAG
+
+#include "../../Renderer/RenderSystem.h"
 
 struct MeshTag {
     
@@ -9,3 +13,4 @@ struct MeshTag {
     
 };
 
+#endif

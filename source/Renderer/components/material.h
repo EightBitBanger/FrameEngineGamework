@@ -38,24 +38,39 @@ public:
     
     Material();
     ~Material();
-
+    
+    /// Enable depth testing.
     void EnableDepthTest(void);
+    /// Disable depth testing.
     void DisableDepthTest(void);
+    /// Set the depth testing function.
     void SetDepthFunction(GLint func);
     
+    /// Enable face culling.
     void EnableCulling(void);
+    /// Disable face culling.
     void DisableCulling(void);
+    /// Set the size which will be culled during rendering.
     void SetFaceCullingSide(GLint side);
+    /// Set the winding direction for drawing triangles.
     void SetFaceWindingOrder(GLint direction);
     
+    /// Enable blending.
     void EnableBlending(void);
+    /// Disable blending.
     void DisableBlending(void);
+    /// Set blending source and destination.
     void SetBlending(GLint src, GLint dest);
+    /// Set blending source and destination with alpha.
     void SetBlendingAlpha(GLint srca, GLint desta);
+    /// Set blending function.
     void SetBlendingFunction(GLint func);
     
+    /// Bind the material texture for rendering.
     void Bind(void);
+    /// Bind the texture slot for textured rendering.
     void BindTextureSlot(unsigned int slot);
+    /// Reupload the texture buffer onto the GPU.
     void UpdateTextureBuffer(void* textureData);
     
 private:

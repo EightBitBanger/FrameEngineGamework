@@ -34,8 +34,10 @@ public:
     glm::vec3 forward;
     glm::vec3 right;
     
+    /// Script component pointer.
     Script* script;
     
+    /// Rigid body component pointer.
     rp3d::RigidBody* rigidBody;
     
     bool useMovementKeys;
@@ -56,11 +58,14 @@ public:
     
     Camera();
     
+    /// Set the position the mouse will reset to on mouse look update.
     void SetMouseCenter(int mouseResetX, int mouseResetY);
     
+    /// Enable mouse look.
     void EnableMouseLook(void);
+    /// Disable mouse look.
     void DisableMouseLook(void);
-    
+    /// Update the mouse look state by the deltaTime. The mouse will reset to mouseResetX and mouseResetY.
     void MouseLook(float deltaTime, int mouseResetX, int mouseResetY);
     
     
@@ -68,25 +73,37 @@ public:
     glm::mat4 CalculatePerspectiveMatrix(void);
     glm::mat4 CalculateOrthiographicMatrix(Viewport viewport);
     
-    
+    /// Add directional force to the associated rigid body.
     void AddForce(float x, float y, float z);
+    /// Add rotational torque to the associated rigid body.
     void AddTorque(float x, float y, float z);
     
+    /// Add a collider from a resource tag at the offset position x, y, z.
     void AddCollider(ColliderTag* colliderTag, float x, float y, float z);
+    /// Add a box collider shape at the offset position x, y, z.
     void AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z);
     
+    /// Set the rigid body mass.
     void SetMass(float mass);
+    /// Set the physical resistance to movement.
     void SetLinearDamping(float damping);
+    /// Set the physical resistance to rotation.
     void SetAngularDamping(float damping);
     
+    /// Set the lock multiplier for linear movement.
     void SetLinearAxisLockFactor(float x, float y, float z);
+    /// Set the lock multiplier for angular rotation.
     void SetAngularAxisLockFactor(float x, float y, float z);
     
+    /// Set the gravity state.
     void EnableGravity(bool enabled);
     
+    /// Calculate the physical weight proportions by the size and offset of colliders.
     void CalculatePhysics(void);
     
+    /// Make the rigid body non movable.
     void SetRigidBodyStatic(void);
+    /// Make the rigid body dynamicly movable.
     void SetRigidBodyDynamic(void);
     
 };

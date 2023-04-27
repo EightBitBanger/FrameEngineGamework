@@ -4,7 +4,6 @@
 #define RESOURCE_PLUGINS
 
 
-
 // Image file loader by STB-Image
 //
 #define  STB_IMAGE_IMPLEMENTATION

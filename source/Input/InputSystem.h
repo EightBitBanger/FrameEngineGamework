@@ -1,6 +1,12 @@
 #ifndef INPUT_CAPTURE_SYSTEM
 #define INPUT_CAPTURE_SYSTEM
 
+//#define _WIN32_WINNT  0x500
+#include <SDKDDKVer.h>
+#include <windows.h>
+
+#include <glm/glm.hpp>
+
 #include "Keys.h"
 
 void CursorSetPosition(int xx, int yy);

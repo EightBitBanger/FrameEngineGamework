@@ -1,11 +1,9 @@
 #include "plugins.h"
 
-#include "../Renderer/RenderSystem.h"
-extern RenderSystem Renderer;
-#include "../Physics/PhysicsSystem.h"
-extern PhysicsSystem Physics;
-
 #include "ResourceManager.h"
+
+extern RenderSystem Renderer;
+extern PhysicsSystem Physics;
 
 
 unsigned char* ResourceManager::LoadImageRaw(char const* path, int* width, int* height, int* channels, int req_channels) {
