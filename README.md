@@ -33,12 +33,44 @@ extern InputSystem       Input;
 You must provide the framework with the functions Start() and Run(). These functions will act as an entry point for your application.
 
 ```c++
-Start() {
-  
+void Start() {
+    // Load resources
+    Resources.LoadTexture("data/grassy.png", "mat_grassy");
+    
+    // Camera controller
+    Renderer.cameraMain = Renderer.CreateCamera();
+    Renderer.cameraMain->transform.position = glm::vec3(0, 10, 0);
+    
+    Renderer.cameraMain->EnableMouseLook();
+    Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    
+    // Create a plain
+    Scene* plainScene = Renderer.CreateScene();
+    Renderer.AddToRenderQueue(plainScene);
+    
+    Entity* plain = Renderer.CreateEntity();
+    plainScene->AddToSceneRoot(plain);
+    
+    plain->mesh = Renderer.CreateMesh();
+    plain->mesh->AddPlainSubDivided(-100, 0, -150,  10, 10,  Colors.gray,  20, 20);
+    
+    plain->material = Resources.CreateMaterialFromTag("mat_grassy");
 }
 
-Run() {
-  
+void Run() {
+    float cameraSpeed = 1000;
+    
+    glm::vec3 force(0);
+    if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
+    if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
+    if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
+    if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
+    
+    if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
+    if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
+    
+    force *= cameraSpeed;
+    Renderer.cameraMain->AddForce(force.x, force.y, force.z);
 }
 ```
 
