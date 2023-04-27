@@ -36,35 +36,35 @@ Scene* objectScene;
 
 void Start(void) {
     
-    Physics.SetWorldGravity(0, 0, 0);
+    //Physics.SetWorldGravity(0, 0, 0);
     
     //
     // Load some initial resources
     
     Resources.LoadScene("data/main.scene");
+    
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
     Renderer.skyMain->SetColor( Colors.Make(0.087, 0.087, 0.087) );
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(-80, 10, 0);
-    Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
+    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(-0, 0, 0);
+    //Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
     Renderer.cameraMain->SetMass(2);
     Renderer.cameraMain->SetLinearDamping(0.2);
     Renderer.cameraMain->SetAngularAxisLockFactor(0, 0, 0);
     Renderer.cameraMain->rigidBody->setIsAllowedToSleep(false);
-    Renderer.cameraMain->rigidBody->enableGravity(true);
+    Renderer.cameraMain->rigidBody->enableGravity(false);
     
     
-    //Renderer.cameraMain->transform.position = glm::vec3(-130, 50, 0);
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     Renderer.cameraMain->script = Renderer.CreateScript();
     Renderer.cameraMain->script->OnUpdate = CameraMovementScript;
     
-    
+    // Create objects from resource tags
     barrelMesh = Resources.CreateMeshFromTag("barrel");
     
     barrelMesh->ChangeSubMeshColor(0, Colors.ltgray);
@@ -72,17 +72,18 @@ void Start(void) {
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
     
     
-    // Plain scene
+    
+    // Create a plain
+    
     Scene* plainScene = Renderer.CreateScene();
     Renderer.AddToRenderQueue(plainScene);
     
     
-    // Create a plain
     Entity* plain = Renderer.CreateEntity();
     plainScene->AddToSceneRoot(plain);
     
     plain->mesh = Renderer.CreateMesh();
-    plain->mesh->AddPlain(0, 0, 0, 10, 10, Colors.gray);
+    plain->mesh->AddPlainSubDivided(-50, 0, -50,  10, 10,  Colors.gray,  10, 10);
     
     plain->material = Resources.CreateMaterialFromTag("mat_plain");
     plain->rigidBody = Physics.CreateRigidBody(0, 0, 0);
@@ -91,16 +92,13 @@ void Start(void) {
     plain->AddCollider( Resources.FindColliderTag("coll_plain"), 0, -10.0, 0);
     
     
-    // Objects scene
+    
+    // Object container scene
     objectScene = Renderer.CreateScene();
     Renderer.AddToRenderQueue(objectScene);
     
     return;
 }
-
-
-
-
 
 
 

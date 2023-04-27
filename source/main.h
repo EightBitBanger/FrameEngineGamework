@@ -30,7 +30,6 @@
 #include "std/timer.h"
 
 Timer      PhysicsTime;
-Timer      RenderTime;
 
 Timer      Time;
 

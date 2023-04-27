@@ -57,7 +57,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Renderer.SetViewport(0, 0, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top);
     
-    
+    // Initiate engine sub systems
     PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
     Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     
@@ -67,7 +67,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Start();
     
-    RenderTime.Update();
     PhysicsTime.Update();
     Time.Update();
     
@@ -79,7 +78,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             DispatchMessage(&wMessages);
         }
         
-        
+        // Escape key handling
         if (Input.CheckKeyPressed(VK_ESCAPE)) {
             isPaused = !isPaused;
             if (Renderer.cameraMain == nullptr) continue;
@@ -94,15 +93,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 
                 Time.Update();
                 PhysicsTime.Update();
-                RenderTime.Update();
             }
         }
         
-        
+        // Physics update
         if (PhysicsTime.Update()) 
             Physics.world->update( PhysicsTime.delta );
         
-        
+        // Update application and renderer
         if (Time.Update()) {
             
             Run();
@@ -114,6 +112,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         continue;
     }
     
+    // Shutdown engine sub systems
     Shutdown();
     
     Resources.DestroyAssets();
