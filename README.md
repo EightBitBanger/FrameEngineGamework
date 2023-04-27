@@ -1,15 +1,12 @@
-### Features
+## Features
 - OpenGL render system  (in progress..)
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 - ⁯⁮⁭Audio (Considering openAL)
 - Resource management
 - Random number generation
 - Window input handling
-<a>
-⁪
-</a>
 
-### Application entry point 
+## Core access pointers
 The engine contains various sub systems which can be accessed though the following "singleton" access points.
 
 ```c++
@@ -30,8 +27,10 @@ extern RenderSystem      Renderer;
 extern PhysicsSystem     Physics;
 extern InputSystem       Input;
 ```
-You must provide the framework with the functions Start() and Run(). These functions will act as an entry point for your application.
+## Application entry point
+You must provide the framework with the functions "Start()" and "Run()". These functions will act as an entry point for your application.
 
+Start is used to load and initiate resources and to setup the render scene.
 ```c++
 void Start() {
     // Load resources
@@ -56,7 +55,10 @@ void Start() {
     
     plain->material = Resources.CreateMaterialFromTag("mat_grassy");
 }
-
+```
+### Application main loop
+The run function serves to update the scene and any objects requiring updating.
+```
 void Run() {
     float cameraSpeed = 1000;
     
