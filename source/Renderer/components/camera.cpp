@@ -98,38 +98,42 @@ glm::mat4 Camera::CalculateOrthiographicMatrix(Viewport viewport) {
 // Camera physics
 
 void Camera::AddForce(float x, float y, float z) {
-    if (rigidBody == nullptr) return;
+    assert(rigidBody != nullptr);
     rp3d::Vector3 nudge = rp3d::Vector3(x, y, z);
     rigidBody->applyLocalForceAtCenterOfMass(nudge);
     return;
 }
 
 void Camera::AddTorque(float x, float y, float z) {
-    if (rigidBody == nullptr) return;
+    assert(rigidBody != nullptr);
     rp3d::Vector3 twist = rp3d::Vector3(x, y, z);
     rigidBody->applyLocalTorque(twist);
     return;
 }
 
 void Camera::SetMass(float mass) {
+    assert(rigidBody != nullptr);
     rigidBody->setMass(mass);
 }
 
 void Camera::SetLinearDamping(float damping) {
+    assert(rigidBody != nullptr);
     rigidBody->setLinearDamping(damping);
 }
 
 void Camera::SetAngularDamping(float damping) {
+    assert(rigidBody != nullptr);
     rigidBody->setAngularDamping(damping);
 }
 
 void Camera::EnableGravity(bool enabled) {
+    assert(rigidBody != nullptr);
     rigidBody->enableGravity(enabled);
 }
 
 
 void Camera::CalculatePhysics(void) {
-    if (rigidBody == nullptr) return;
+    assert(rigidBody != nullptr);
     rigidBody->updateMassFromColliders();
     rigidBody->updateLocalCenterOfMassFromColliders();
     rigidBody->updateLocalInertiaTensorFromColliders();
@@ -152,8 +156,9 @@ void Camera::SetAngularAxisLockFactor(float x, float y, float z) {
 }
 
 
-void Camera::AddCollider(rp3d::BoxShape* boxShape, float x, float y, float z) {
+void Camera::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z) {
     assert(rigidBody != nullptr);
+    assert(boxShape != nullptr);
     
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
@@ -165,6 +170,7 @@ void Camera::AddCollider(rp3d::BoxShape* boxShape, float x, float y, float z) {
 
 void Camera::AddCollider(ColliderTag* colliderTag, float x, float y, float z) {
     assert(rigidBody != nullptr);
+    assert(colliderTag != nullptr);
     if (colliderTag->isStatic) {
         rigidBody->setType(rp3d::BodyType::STATIC);
     } else {

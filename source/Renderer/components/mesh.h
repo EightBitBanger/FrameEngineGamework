@@ -40,6 +40,8 @@ public:
     Mesh();
     ~Mesh();
     
+    void Reallocate(unsigned int newBufferSize);
+    
     void SetPrimitive(int primitiveType);
     
     void SetAttribute(int index, int attributeCount, int vertexSize, int byteOffset);
@@ -50,9 +52,6 @@ public:
     
     
     void Bind(void);
-    
-    void AllocateBuffers(unsigned int maxBufferSize);
-    void FreeBuffers(void);
     
     void DrawVertexArray(void);
     void DrawIndexArray(void);
@@ -101,6 +100,9 @@ private:
     std::vector<SubMesh> freeMesh;
     
     void SetDefaultAttributes(void);
+    
+    void AllocateBuffers(unsigned int maxBufferSize);
+    void FreeBuffers(void);
     
 };
 

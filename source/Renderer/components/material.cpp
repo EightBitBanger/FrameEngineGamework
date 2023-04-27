@@ -6,7 +6,7 @@ Material::Material() {
     width  = 0;
     height = 0;
     
-    color = Color(1, 1, 1, 1);
+    color = Color(0, 0, 0, 1);
     
     doDepthTest   = true;
     doBlending    = false;

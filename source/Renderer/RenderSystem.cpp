@@ -23,6 +23,7 @@ Entity* RenderSystem::CreateEntity(void) {
     return entityPtr;
 }
 bool RenderSystem::DestroyEntity(Entity* entityPtr) {
+    assert(entityPtr != nullptr);
     return entity.Destroy(entityPtr);
 }
 
@@ -32,6 +33,7 @@ Mesh* RenderSystem::CreateMesh(void) {
     return meshPtr;
 }
 bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
+    assert(meshPtr != nullptr);
     return mesh.Destroy(meshPtr);
 }
 
@@ -40,6 +42,7 @@ Shader* RenderSystem::CreateShader(void) {
     return shaderPtr;
 }
 bool RenderSystem::DestroyShader(Shader* shaderPtr) {
+    assert(shaderPtr != nullptr);
     return shader.Destroy(shaderPtr);
 }
 
@@ -48,6 +51,7 @@ Camera* RenderSystem::CreateCamera(void) {
     return cameraPtr;
 }
 bool RenderSystem::DestroyCamera(Camera* cameraPtr) {
+    assert(cameraPtr != nullptr);
     return camera.Destroy(cameraPtr);
 }
 
@@ -56,6 +60,7 @@ Material* RenderSystem::CreateMaterial(void) {
     return materialPtr;
 }
 bool RenderSystem::DestroyMaterial(Material* materialPtr) {
+    assert(materialPtr != nullptr);
     return material.Destroy(materialPtr);
 }
 
@@ -64,6 +69,7 @@ Sky* RenderSystem::CreateSky(void) {
     return skyPtr;
 }
 bool RenderSystem::DestroySky(Sky* skyPtr) {
+    assert(skyPtr != nullptr);
     return sky.Destroy(skyPtr);
 }
 
@@ -79,6 +85,7 @@ unsigned int RenderSystem::GetSceneCount(void) {
     return scene.GetObjectCount();
 }
 bool RenderSystem::DestroyScene(Scene* scenePtr) {
+    assert(scenePtr != nullptr);
     return scene.Destroy(scenePtr);
 }
 
@@ -87,6 +94,7 @@ Script* RenderSystem::CreateScript(void) {
     return scriptPtr;
 }
 bool RenderSystem::DestroyScript(Script* scriptPtr) {
+    assert(scriptPtr != nullptr);
     return script.Destroy(scriptPtr);
 }
 
@@ -96,6 +104,8 @@ void RenderSystem :: RenderFrame(float deltaTime) {
     if (cameraMain == nullptr) 
         return;
     
+    //
+    // Clear the screen
     glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -105,6 +115,15 @@ void RenderSystem :: RenderFrame(float deltaTime) {
         glClearColor(color.r, color.g, color.b, 1);
     }
     
+    //
+    // Update main camera
+    if (cameraMain->script != nullptr) {
+        if (!cameraMain->script->hasBeenInitiated) {
+            cameraMain->script->hasBeenInitiated = true;
+            cameraMain->script->OnCreate();
+        }
+        cameraMain->script->OnUpdate();
+    }
     
     if (cameraMain->rigidBody != nullptr) {
         rp3d::Transform bodyTransform = cameraMain->rigidBody->getTransform();
@@ -113,10 +132,6 @@ void RenderSystem :: RenderFrame(float deltaTime) {
         cameraMain->transform.position.y = bodyPosition.y;
         cameraMain->transform.position.z = bodyPosition.z;
     }
-    
-    if (cameraMain->script != nullptr) 
-          cameraMain->script->OnUpdate();
-    
     
     if (cameraMain->useMouseLook) 
         cameraMain->MouseLook(deltaTime, displayCenter.x, displayCenter.y);
@@ -127,7 +142,8 @@ void RenderSystem :: RenderFrame(float deltaTime) {
     glm::mat4 viewProj = projection * view;
     currentShader = nullptr;
     
-    
+    //
+    // Draw entity meshes
     for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
         
         Scene* scenePtr = *it;
@@ -137,8 +153,13 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             Entity* currentEntity = *it;
             
             // Call update on entity scripts
-            if (currentEntity->script != nullptr) 
+            if (currentEntity->script != nullptr) {
+                if (!currentEntity->script->hasBeenInitiated) {
+                    currentEntity->script->hasBeenInitiated = true;
+                    currentEntity->script->OnCreate();
+                }
                 currentEntity->script->OnUpdate();
+            }
             
             if (currentEntity->mesh == nullptr) continue;
             Mesh* mesh = currentEntity->mesh;
@@ -146,7 +167,7 @@ void RenderSystem :: RenderFrame(float deltaTime) {
             if (mesh->shader == nullptr) continue;
             Shader* shader = mesh->shader;
             
-            
+            // Mesh binding
             if (currentMesh != mesh) {
                 currentMesh = mesh;
                 
@@ -238,24 +259,7 @@ void RenderSystem :: Initiate(void) {
     defaultShader->BuildDefault();
     
     defaultMaterial = CreateMaterial();
-    defaultMaterial->color = Color(1,1,1,1);
-    
-    
-    for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
-        
-        Scene* scenePtr = *it;
-        
-        for (std::vector<Entity*>::iterator it = scenePtr->entities.begin(); it != scenePtr->entities.end(); ++it) {
-            
-            Entity* currentEntity = *it;
-            
-            if (currentEntity->script != nullptr) 
-                currentEntity->script->OnCreate();
-            
-            
-        }
-        
-    }
+    defaultMaterial->color = Color(0, 0, 0, 1);
     
 #ifdef _RENDERER_CHECK_OPENGL_ERRORS__
     GetGLErrorCodes("OnInitiate::");
@@ -265,14 +269,14 @@ void RenderSystem :: Initiate(void) {
 }
 
 
-
-
 void RenderSystem :: AddToRenderQueue(Scene* scenePtr) {
+    assert(scenePtr != nullptr);
     renderQueue.push_back( scenePtr );
     return;
 }
 
 bool RenderSystem :: RemoveFromRenderQueue(Scene* scenePtr) {
+    assert(scenePtr != nullptr);
     for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
         Scene* thisScenePtr = *it;
         if (scenePtr == thisScenePtr) {

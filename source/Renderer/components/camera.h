@@ -72,8 +72,8 @@ public:
     void AddForce(float x, float y, float z);
     void AddTorque(float x, float y, float z);
     
-    void AddCollider(rp3d::BoxShape* boxShape, float x, float y, float z);
     void AddCollider(ColliderTag* colliderTag, float x, float y, float z);
+    void AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z);
     
     void SetMass(float mass);
     void SetLinearDamping(float damping);

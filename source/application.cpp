@@ -34,8 +34,42 @@ Scene* objectScene;
 // Application entry point
 //
 
-void Start(void) {
+void Start() {
     
+    // Load resources
+    Resources.LoadTexture("data/grassy.png", "mat_grassy");
+    
+    // Camera controller
+    Renderer.cameraMain = Renderer.CreateCamera();
+    //Renderer.cameraMain->transform.position = glm::vec3(0, 10, 0);
+    
+    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(0, 10, 0);
+    Renderer.cameraMain->SetMass(2);
+    Renderer.cameraMain->SetLinearDamping(0.2);
+    Renderer.cameraMain->SetAngularAxisLockFactor(0, 0, 0);
+    Renderer.cameraMain->rigidBody->setIsAllowedToSleep(false);
+    Renderer.cameraMain->rigidBody->enableGravity(false);
+    
+    Renderer.cameraMain->EnableMouseLook();
+    Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    
+    // Create a plain
+    Scene* plainScene = Renderer.CreateScene();
+    Renderer.AddToRenderQueue(plainScene);
+    
+    Entity* plain = Renderer.CreateEntity();
+    plainScene->AddToSceneRoot(plain);
+    
+    plain->mesh = Renderer.CreateMesh();
+    plain->mesh->AddPlainSubDivided(-100, 0, -150,  10, 10,  Colors.gray,  20, 20);
+    
+    plain->material = Resources.CreateMaterialFromTag("mat_grassy");
+    
+    
+    
+    
+    
+    /*
     //Physics.SetWorldGravity(0, 0, 0);
     
     //
@@ -50,7 +84,7 @@ void Start(void) {
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
     Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(-0, 0, 0);
-    //Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
+    Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
     Renderer.cameraMain->SetMass(2);
     Renderer.cameraMain->SetLinearDamping(0.2);
     Renderer.cameraMain->SetAngularAxisLockFactor(0, 0, 0);
@@ -96,7 +130,7 @@ void Start(void) {
     // Object container scene
     objectScene = Renderer.CreateScene();
     Renderer.AddToRenderQueue(objectScene);
-    
+    */
     return;
 }
 
@@ -105,9 +139,9 @@ void Start(void) {
 
 
 
-float spreadMul   = 1.0;
-unsigned int focus       = 50;
-float count       = 200;
+float spreadMul     = 0.7;
+unsigned int focus  = 50;
+float count         = 200;
 
 int counter=0;
 
@@ -117,8 +151,25 @@ int counter=0;
 // Application main loop
 //
 
-void Run(void) {
+void Run() {
     
+    
+    float cameraSpeed = 1000;
+    glm::vec3 force(0);
+    
+    if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
+    if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
+    if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
+    if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
+    
+    if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
+    if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
+    
+    force *= cameraSpeed;
+    Renderer.cameraMain->AddForce(force.x, force.y, force.z);
+    
+    
+    return;
     if (Input.CheckKeyCurrent(VK_RETURN)) counter = 0;
     
     if (counter > count) return;

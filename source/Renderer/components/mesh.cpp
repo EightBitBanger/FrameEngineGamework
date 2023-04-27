@@ -1,6 +1,14 @@
 #include "mesh.h"
 
 
+void Mesh::Reallocate(unsigned int newBufferSize) {
+    FreeBuffers();
+    AllocateBuffers(newBufferSize);
+    
+    SetDefaultAttributes();
+    return;
+}
+
 Mesh::Mesh() {
     
     primitive = GL_TRIANGLES;

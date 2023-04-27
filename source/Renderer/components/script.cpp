@@ -2,6 +2,8 @@
 
 Script::Script() {
     
+    hasBeenInitiated = false;
+    
     OnCreate = nullfunc;
     OnUpdate = nullfunc;
 }
