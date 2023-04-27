@@ -6,8 +6,8 @@
 - Random number generation
 - Window input handling
 
-## Core access pointers
-The engine contains various sub systems which can be accessed though the following "singleton" access points.
+## Core access points
+The engine contains various sub systems which can be accessed though the following "singleton" access pointers.
 
 ```c++
 #include "application/application.h"
