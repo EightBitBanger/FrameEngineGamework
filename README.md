@@ -6,16 +6,11 @@
 - Random number generation
 - Window input handling
 
-## Core singletons
-The engine contains various sub systems which can be accessed though the following "singleton" access pointers.
+## Singleton access points
+The framework contains many sub systems which can be accessed though the following singletons.
 
 ```c++
 #include "application/application.h"
-
-#include "Renderer/RenderSystem.h"
-#include "Input/InputSystem.h"
-#include "Physics/PhysicsSystem.h"
-#include "Resources/ResourceManager.h"
 
 extern RandomGen         Random;
 extern ColorPreset       Colors;
@@ -29,7 +24,8 @@ extern InputSystem       Input;
 ```
 
 ## Application entry point
-You must provide the framework with the functions "Start()" and "Run()". These functions will act as an entry point for your application.
+You must provide the framework with the functions ``Start()`` and ``Run()``. These functions will act as an entry point for your application.
+
 
 ```c++
 void Start() {
@@ -75,7 +71,7 @@ void Run() {
 }
 ```
 
-### Exteral linkage
+### Exteral build linkage
 ```
 glew32s  glu32  gdi32  user32  kernel32  comctl32  opengl32  reactphysics3d
 ```
