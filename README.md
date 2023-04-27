@@ -6,7 +6,7 @@
 - Random number generation
 - Window input handling
 
-## Core access points
+## Core singletons
 The engine contains various sub systems which can be accessed though the following "singleton" access pointers.
 
 ```c++
