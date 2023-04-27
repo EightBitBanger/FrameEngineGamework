@@ -48,7 +48,10 @@ void Start() {
     sceneMain->AddToSceneRoot(plain);
     
     plain->mesh = Renderer.CreateMesh();
-    plain->mesh->AddPlainSubDivided(-100, 0, -150,  10, 10,  Colors.gray,  20, 20);
+    plain->mesh->AddPlainSubDivided(-100,  0, -150,  // Position
+                                      10, 10,        // Scale
+                                      Colors.gray,   // Vertex color
+                                      20, 20 );      // Number of sub divisions
     
     plain->material = Resources.CreateMaterialFromTag("mat_grassy");
 }
