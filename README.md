@@ -24,8 +24,9 @@ extern InputSystem       Input;
 ```
 
 ## Application entry point
-You must provide the framework with the functions ``Start()`` and ``Run()``. These functions will act as an entry point for your application.
+You must provide the framework with the functions `Start()` and `Run()`. These functions will act as an entry point for your application.
 
+The function `Start()` will be called once during application initiation.
 
 ```c++
 void Start() {
@@ -52,7 +53,10 @@ void Start() {
     plain->material = Resources.CreateMaterialFromTag("mat_grassy");
 }
 ```
-## Application main loop
+
+## Main loop
+The framework will continue to call `Run()` once per frame.
+
 ```c++
 void Run() {
     float cameraSpeed = 1000;
