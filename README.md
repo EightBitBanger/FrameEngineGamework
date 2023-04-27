@@ -8,7 +8,8 @@
 
 ### Application entry point
 The engine contains various sub systems which can be accessed though the following "singleton" access points.
-```
+
+```c++
 #include "application/application.h"
 
 #include "Renderer/RenderSystem.h"
