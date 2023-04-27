@@ -1,7 +1,13 @@
+bool isPaused = false;
+bool isActive = true;
+
 #include "main.h"
 #define IDI_ICON  101
 
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    
+    HWND wHnd = NULL;
     
     WNDCLASSEX wClassEx;
     MSG  wMessages;
