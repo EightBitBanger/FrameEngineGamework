@@ -27,10 +27,10 @@ extern RenderSystem      Renderer;
 extern PhysicsSystem     Physics;
 extern InputSystem       Input;
 ```
+
 ## Application entry point
 You must provide the framework with the functions "Start()" and "Run()". These functions will act as an entry point for your application.
 
-Start is used to load and initiate resources and to setup the render scene.
 ```c++
 void Start() {
     // Load resources
@@ -57,7 +57,6 @@ void Start() {
 }
 ```
 ## Application main loop
-The run function serves to update the scene and any objects requiring updating.
 ```c++
 void Run() {
     float cameraSpeed = 1000;
