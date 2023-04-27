@@ -41,11 +41,11 @@ void Start() {
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     // Create a plain
-    Scene* plainScene = Renderer.CreateScene();
-    Renderer.AddToRenderQueue(plainScene);
+    Scene* sceneMain = Renderer.CreateScene();
+    Renderer.AddToRenderQueue(sceneMain);
     
     Entity* plain = Renderer.CreateEntity();
-    plainScene->AddToSceneRoot(plain);
+    sceneMain->AddToSceneRoot(plain);
     
     plain->mesh = Renderer.CreateMesh();
     plain->mesh->AddPlainSubDivided(-100, 0, -150,  10, 10,  Colors.gray,  20, 20);
