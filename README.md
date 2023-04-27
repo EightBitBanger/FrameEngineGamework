@@ -56,9 +56,9 @@ void Start() {
     plain->material = Resources.CreateMaterialFromTag("mat_grassy");
 }
 ```
-### Application main loop
+## Application main loop
 The run function serves to update the scene and any objects requiring updating.
-```
+```c++
 void Run() {
     float cameraSpeed = 1000;
     
