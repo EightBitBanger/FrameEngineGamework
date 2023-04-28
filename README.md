@@ -29,6 +29,8 @@ You must provide the framework with the functions `Start()` and `Run()`. These f
 The function `Start()` will be called once during application initiation.
 
 ```c++
+//
+// This example will setup a basic scene.
 
 void Start() {
     // Load resources
@@ -67,8 +69,11 @@ void Start() {
 The framework will continue to call `Run()` once per frame.
 
 ```c++
+//
+// This example will move the camera with the WSAD directional keys and space / shift for elevation.
+
 void Run() {
-    float cameraSpeed = 1000;
+    float cameraSpeed = 700;
     
     glm::vec3 force(0);
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
