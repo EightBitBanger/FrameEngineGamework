@@ -29,16 +29,22 @@ You must provide the framework with the functions `Start()` and `Run()`. These f
 The function `Start()` will be called once during application initiation.
 
 ```c++
+
 void Start() {
     // Load resources
     Resources.LoadTexture("data/grassy.png", "mat_grassy");
     
     // Camera controller
     Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->transform.position = glm::vec3(0, 10, 0);
-    
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    
+    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(0,  // Position
+                                                             10,
+                                                             0);
+    Renderer.cameraMain->rigidBody->enableGravity(false);
+    Renderer.cameraMain->SetLinearDamping(4);
+    
     
     // Create a plain
     Scene* sceneMain = Renderer.CreateScene();
