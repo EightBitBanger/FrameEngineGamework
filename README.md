@@ -47,8 +47,7 @@ void Start() {
     Renderer.cameraMain->rigidBody->enableGravity(false);
     Renderer.cameraMain->SetLinearDamping(4);
     
-    
-    // Create a plain
+    // Create a sub divided plain mesh
     Scene* sceneMain = Renderer.CreateScene();
     Renderer.AddToRenderQueue(sceneMain);
     
@@ -56,12 +55,12 @@ void Start() {
     sceneMain->AddToSceneRoot(plain);
     
     plain->mesh = Renderer.CreateMesh();
+    plain->material = Resources.CreateMaterialFromTag("mat_grassy");
+    
     plain->mesh->AddPlainSubDivided(-100,  0, -150,  // Position
                                       10, 10,        // Scale
                                       Colors.gray,   // Vertex color
                                       20, 20 );      // Number of sub divisions
-    
-    plain->material = Resources.CreateMaterialFromTag("mat_grassy");
 }
 ```
 
@@ -73,18 +72,22 @@ The framework will continue to call `Run()` once per frame.
 // This example will move the camera with the WSAD directional keys and space / shift for elevation.
 
 void Run() {
+    
     float cameraSpeed = 700;
     
     glm::vec3 force(0);
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
+    
     if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
     if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
     
     if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
+    // Apply camera speed multiplier
     force *= cameraSpeed;
+    
     Renderer.cameraMain->AddForce(force.x, force.y, force.z);
 }
 ```
