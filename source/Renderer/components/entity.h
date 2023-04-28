@@ -33,6 +33,8 @@ class Entity {
     
 public:
     
+    std::string name;
+    
     Transform transform;
     
     /// Mesh component pointer.

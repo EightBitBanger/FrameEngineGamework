@@ -3,10 +3,13 @@
 
 Entity::Entity() {
     
+    name = "";
+    
     mesh       = nullptr;
     material   = nullptr;
     script     = nullptr;
     rigidBody  = nullptr;
+    
     return;
 }
 

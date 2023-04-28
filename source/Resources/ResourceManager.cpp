@@ -109,14 +109,55 @@ bool ResourceManager::LoadLocations(std::string path) {
     Log.WriteLn();
     Log.Write(logstr);
     
+    std::vector<std::string> strexp;
+    strexp.reserve(11);
+    
     for (unsigned int i=0; i < locationsLoader.rawData.size(); i++) {
         
-        std::vector<std::string> strexp = StringExplode(locationsLoader.rawData[i], ' ');
+        // Create a new entity
+        Entity* newEntity = Renderer.CreateEntity();
+        sceneMain->AddToSceneRoot(newEntity);
+        
+        strexp.clear();
+        strexp = StringExplode(locationsLoader.rawData[i], ' ');
+        newEntity->name = strexp[0];
+        
+        // Assign mesh
+        newEntity->mesh      = CreateMeshFromTag( strexp[1] );
+        newEntity->material  = CreateMaterialFromTag( strexp[2] );
+        
+        float posx = StringToFloat(strexp[3]);
+        float posy = StringToFloat(strexp[4]);
+        float posz = StringToFloat(strexp[5]);
+        newEntity->transform.position = glm::vec3(posx, posy, posz);
+        
+        float rotx = StringToFloat(strexp[6]);
+        float roty = StringToFloat(strexp[7]);
+        float rotz = StringToFloat(strexp[8]);
+        newEntity->transform.rotation = glm::vec3(rotx, roty, rotz);
+        
+        float sclx = StringToFloat(strexp[9]);
+        float scly = StringToFloat(strexp[10]);
+        float sclz = StringToFloat(strexp[11]);
+        newEntity->transform.scale = glm::vec3(sclx, scly, sclz);
+        
+        // Check object physics type
+        if (strexp[12] != "none") {
+            
+            // Position
+            newEntity->rigidBody = Physics.CreateRigidBody(posx, posy, posz);
+            newEntity->SetRigidBodyStatic();
+            newEntity->AddCollider( FindColliderTag(strexp[12]), 0, 0, 0 );
+            
+            // Rotate
+            const rp3d::Quaternion quaternion = rp3d::Quaternion::fromEulerAngles(rotx, roty, rotz);
+            rp3d::Transform rbTransform = newEntity->rigidBody->getTransform();
+            rbTransform.setOrientation(quaternion);
+            
+        }
         
         std::string logstr = "  + " + strexp[0] + "  " + strexp[1];
         Log.Write(logstr);
-        
-        
         
     }
     
@@ -133,6 +174,9 @@ bool ResourceManager::LoadLocations(std::string path) {
 
 
 void ResourceManager::Initiate(void) {
+    
+    sceneMain = Renderer.CreateScene();
+    Renderer.AddToRenderQueue(sceneMain);
     
     stbi_set_flip_vertically_on_load(true);
     return;

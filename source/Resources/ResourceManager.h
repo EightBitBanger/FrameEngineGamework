@@ -13,6 +13,9 @@
 class ResourceManager {
     
 public:
+    /// Main rendering scene.
+    Scene* sceneMain;
+    
     /// Prepare the loading system.
     void Initiate(void);
     

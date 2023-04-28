@@ -31,11 +31,6 @@ Scene* objectScene;
 
 void Start() {
     
-    //Physics.SetWorldGravity(0, 0, 0);
-    
-    //
-    // Load some initial resources
-    
     Resources.LoadScene("data/main.scene");
     
     // Sky background
@@ -114,6 +109,8 @@ int counter=0;
 
 void Run() {
     
+    return;
+    
     if (Input.CheckKeyCurrent(VK_RETURN)) counter = 0;
     
     if (counter > count) return;
@@ -161,8 +158,8 @@ void Shutdown(void) {
 void CameraMovementScript(void) {
     
     float cameraSpeed = 1000;
-    glm::vec3 force(0);
     
+    glm::vec3 force(0);
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
