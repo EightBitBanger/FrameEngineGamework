@@ -5,7 +5,7 @@
 
 struct PhysicsSystem {
     
-    /// Physical simulation world.
+    /// Physical world simulation.
     rp3d::PhysicsWorld* world;
     /// Physics engine common access singleton.
     rp3d::PhysicsCommon common;
@@ -15,12 +15,12 @@ struct PhysicsSystem {
     /// Prepare the physics system.
     void Initiate(void);
     
-    /// Create a rigid body object.
+    /// Create a rigid body object and return its pointer.
     rp3d::RigidBody* CreateRigidBody(float x=0.0, float y=0.0, float z=0.0);
     /// Destroy a rigid body object.
     void DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr);
     
-    /// Set the gravity for the simulation world.
+    /// Set the gravity for the world simulation.
     void SetWorldGravity(float x, float y, float z);
     
     /// Create a box collider scaled by xscale, yscale, zscale.

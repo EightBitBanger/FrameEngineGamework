@@ -17,6 +17,10 @@
 #define     WINDOW_CONSOLE_HEIGHT  800
 
 
+// Exit runtime with the ESCAPE key
+//#define  ESCAPE_KEY_QUIT
+
+
 // Logging
 #define  LOG_RENDER_DETAILS_
 

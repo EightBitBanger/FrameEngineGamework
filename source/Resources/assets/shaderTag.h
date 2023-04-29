@@ -5,9 +5,13 @@
 
 struct ShaderTag {
     
+    /// Shader resource name.
     std::string name;
     
+    /// Vertex shader script.
     std::string vertexScript;
+    
+    /// Fragment shader script.
     std::string fragmentScript;
     
     ShaderTag();

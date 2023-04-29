@@ -11,7 +11,7 @@ struct Sky {
     
     Sky();
     
-    /// Set the sky color
+    /// Set the sky color.
     void SetColor(Color newColor);
     
 };

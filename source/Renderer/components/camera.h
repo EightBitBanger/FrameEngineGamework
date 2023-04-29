@@ -68,14 +68,18 @@ public:
     /// Update the mouse look state by the deltaTime. The mouse will reset to mouseResetX and mouseResetY.
     void MouseLook(float deltaTime, int mouseResetX, int mouseResetY);
     
+    /// Get the camera pitch angle.
+    float GetPitch(void);
+    /// Get the camera yaw angle.
+    float GetYaw(float pitch);
+    
     
     glm::mat4 CalculateView(void);
     glm::mat4 CalculatePerspectiveMatrix(void);
     glm::mat4 CalculateOrthiographicMatrix(Viewport viewport);
-    
-    /// Add directional force to the associated rigid body.
+    /// Add directional force to the rigid body.
     void AddForce(float x, float y, float z);
-    /// Add rotational torque to the associated rigid body.
+    /// Add rotational torque to the rigid body.
     void AddTorque(float x, float y, float z);
     
     /// Add a collider from a resource tag at the offset position x, y, z.
@@ -85,25 +89,25 @@ public:
     
     /// Set the rigid body mass.
     void SetMass(float mass);
-    /// Set the physical resistance to movement.
+    /// Set the rigid body physical resistance to movement.
     void SetLinearDamping(float damping);
-    /// Set the physical resistance to rotation.
+    /// Set the rigid body physical resistance to rotation.
     void SetAngularDamping(float damping);
     
-    /// Set the lock multiplier for linear movement.
+    /// Set the linear movement lock multiplier.
     void SetLinearAxisLockFactor(float x, float y, float z);
-    /// Set the lock multiplier for angular rotation.
+    /// Set the angular rotation lock multiplier.
     void SetAngularAxisLockFactor(float x, float y, float z);
     
     /// Set the gravity state.
     void EnableGravity(bool enabled);
     
-    /// Calculate the physical weight proportions by the size and offset of colliders.
+    /// Calculate the physical weight proportions by the size and offset of attached colliders.
     void CalculatePhysics(void);
     
     /// Make the rigid body non movable.
     void SetRigidBodyStatic(void);
-    /// Make the rigid body dynamicly movable.
+    /// Make the rigid body dynamically movable.
     void SetRigidBodyDynamic(void);
     
 };

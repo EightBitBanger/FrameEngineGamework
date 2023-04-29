@@ -5,48 +5,51 @@
 #include <vector>
 #include <map>
 
+/*
+The asset file`s header should be defined
+in the following way:
 
-/// General purpose file loading class.
+define_asset YourAssetName
+
+Data/value pairs can be specified by
+the following layout:
+
+Name Value
+
+Data blocks are specified
+using the following syntax:
+
+[begin] YourDataBlockName
+
+Data...
+
+[end]
+
+*/
+
+
 class FileLoader {
-    
-    /** 
-    The asset file`s header should be defined
-    in the following way:
-    
-    define_asset YourAssetName
-    
-    Data/value pairs can be specified by
-    the following layout:
-    
-    Name Value
-    
-    Data blocks are specified
-    using the following syntax:
-    
-    [begin] YourDataBlockName
-    
-    Data...
-    
-    [end]
-    
-    */
     
 public:
     
-    // Raw file data
+    /// Array of raw data strings from a loaded file.
     std::vector<std::string> rawData;
     
-    // Pair of names and values
+    /// Array of name / value pairs from a loaded file.
     std::map<std::string, std::vector<std::string>> assetData;
     
-    // Pair of names and data blocks
+    /// Array of name / data_block pairs from a loaded file.
     std::map<std::string, std::string> dataBlocks;
     
     FileLoader(std::string FileName);
     
+    /// Returns whether a file was loaded successfully.
     bool CheckIsFileLoaded(void) {return this ->isFileLoaded;}
     
+    /// Returns a value of the index location from the name.
     std::string GetValueByName(std::string Name, unsigned int Index);
+    
+    /// Returns a data block of the index location from the name.
     std::string GetDataBlockByName(std::string Name);
     
     

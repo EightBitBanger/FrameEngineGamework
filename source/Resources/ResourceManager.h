@@ -26,15 +26,20 @@ public:
     /// Load a GLSL shader file and assign it a resource tag name.
     bool LoadShaderGLSL(std::string path, std::string resourceName);
     
-    /// Find a resource by its resource tag name.
+    /// Find a mesh resource by its resource tag name.
     MeshTag*     FindMeshTag(std::string name);
+    /// Find a texture resource by its resource tag name.
     TextureTag*  FindTextureTag(std::string name);
+    /// Find a shader resource by its resource tag name.
     ShaderTag*   FindShaderTag(std::string name);
+    /// Find a resource by its resource tag name.
     ColliderTag* FindColliderTag(std::string name);
     
-    /// Free memory for a resource.
+    /// Destroy and deallocate a mesh model resource by its name.
     bool UnloadMeshTag(std::string name);
+    /// Destroy and deallocate a texture image resource by its name.
     bool UnloadTextureTag(std::string name);
+    /// Destroy and deallocate a shader program resource by its name.
     bool UnloadShaderTag(std::string name);
     
     /// Get a physics collision shape from a collider resource tag.

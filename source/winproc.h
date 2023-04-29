@@ -6,6 +6,8 @@
 #include "Input/InputSystem.h"
 #include "Renderer/RenderSystem.h"
 
+#include "application/applicationlayer.h"
+
 LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam);
 
 #endif

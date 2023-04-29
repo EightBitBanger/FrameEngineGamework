@@ -60,96 +60,98 @@ public:
     
     Scene* operator[] (unsigned int const i) {return renderQueue[i];}
     
-    /// Default objects
+    /// Default material object.
     Material* defaultMaterial;
+    /// Default GLSL shader object.
     Shader*   defaultShader;
     
-    /// Current sky object used for rendering
+    /// Current sky object used for rendering.
     Sky*      skyMain;
-    /// Current camera object used for rendering
+    /// Current camera object used for rendering.
     Camera*   cameraMain;
     
     /// Current rendering view port
     Viewport  viewport;
-    /// Current screen size and center
+    /// Current size of the display.
     glm::vec2 displaySize;
+    /// Current center of the display.
     glm::vec2 displayCenter;
     
     
     RenderSystem();
     
     
-    /// Create an entity object and return its pointer
+    /// Create an entity object and return its pointer.
     Entity* CreateEntity(void);
-    /// Destroy an entity object and return true on success
+    /// Destroy an entity object and return true on success.
     bool DestroyEntity(Entity* entityPtr);
     
-    /// Create a mesh object and return its pointer
+    /// Create a mesh object and return its pointer.
     Mesh* CreateMesh(void);
-    /// Destroy a mesh object and return true on success
+    /// Destroy a mesh object and return true on success.
     bool DestroyMesh(Mesh* meshPtr);
     
-    /// Create a shader object and return its pointer
+    /// Create a shader object and return its pointer.
     Shader* CreateShader(void);
-    /// Destroy a shader object and return true on success
+    /// Destroy a shader object and return true on success.
     bool DestroyShader(Shader* shaderPtr);
     
-    /// Create a camera object and return its pointer
+    /// Create a camera object and return its pointer.
     Camera* CreateCamera(void);
-    /// Destroy a camera object and return true on success
+    /// Destroy a camera object and return true on success.
     bool DestroyCamera(Camera* cameraPtr);
     
-    /// Create a material object and return its pointer
+    /// Create a material object and return its pointer.
     Material* CreateMaterial(void);
-    /// Destroy a material object and return true on success
+    /// Destroy a material object and return true on success.
     bool DestroyMaterial(Material* materialPtr);
     
-    /// Create a sky object and return its pointer
+    /// Create a sky object and return its pointer.
     Sky* CreateSky(void);
-    /// Destroy a sky object and return true on success
+    /// Destroy a sky object and return true on success.
     bool DestroySky(Sky* skyPtr);
     
-    /// Create a scene object and return its pointer
+    /// Create a scene object and return its pointer.
     Scene* CreateScene(void);
-    /// Get a scene object currently in the render queue
+    /// Get a scene object currently in the render queue.
     Scene* GetScene(unsigned int index);
-    /// Get the number of scenes in the render queue
+    /// Get the number of scenes in the render queue.
     unsigned int GetSceneCount(void);
-    /// Destroy a scene object and return true on success
+    /// Destroy a scene object and return true on success.
     bool DestroyScene(Scene* scenePtr);
     
-    /// Create a script object and return its pointer
+    /// Create a script object and return its pointer.
     Script* CreateScript(void);
-    /// Destroy a script object and return true on success
+    /// Destroy a script object and return true on success.
     bool DestroyScript(Script* scriptPtr);
     
     
-    /// Start the render system
+    /// Start the render system.
     void Initiate(void);
     
-    /// Set the target render context
+    /// Set the target render context.
     GLenum  SetRenderTarget(HWND wHndl);
-    /// Free the target render context
+    /// Free the target render context.
     void    ReleaseRenderTarget(void);
     
-    /// Set the render area within the display
+    /// Set the render area within the display.
     void SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
-    /// Draw the current frame as it stands
+    /// Draw the current frame as it stands.
     void RenderFrame(float deltaTime);
     
-    /// Add a scene to the render queue for drawing
+    /// Add a scene to the render queue for drawing.
     void AddToRenderQueue(Scene* scene);
-    /// Remove a scene from the render queue
+    /// Remove a scene from the render queue.
     bool RemoveFromRenderQueue(Scene* scene);
-    /// Get the number of scenes in the render queue
+    /// Get the number of scenes in the render queue.
     unsigned int GetRenderQueueSize(void);
-    /// Return a scene pointer at the index position within the render queue
+    /// Return a scene pointer at the index position within the render queue.
     Scene* GetRenderQueueScene(unsigned int index);
     
-    /// Calculate the model matrix from a given transform
+    /// Calculate the model matrix from a given transform.
     glm::mat4 CalculateModelMatrix(Transform& modelTransform);
     
-    /// Return a list of any and all openGL error codes
+    /// Return a list of any and all openGL error codes.
     std::vector<std::string> GetGLErrorCodes(std::string errorLocationString);
     
     

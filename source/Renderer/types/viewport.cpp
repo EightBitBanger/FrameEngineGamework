@@ -8,3 +8,10 @@ Viewport::Viewport() {
     return;
 }
 
+Viewport::Viewport(int left, int top, int width, int height) {
+    x = left;
+    y = top;
+    w = width;
+    h = height;
+}
+

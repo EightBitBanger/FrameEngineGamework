@@ -37,24 +37,24 @@ public:
     
     Transform transform;
     
-    /// Mesh component pointer.
+    /// Pointer to a mesh component.
     Mesh*     mesh;
     
-    /// Material component pointer.
+    /// Pointer to a material component.
     Material* material;
     
-    /// Script component pointer.
+    /// Pointer to a user script component.
     Script*   script;
     
-    /// Rigid body component pointer.
+    /// Pointer to a rigid body physics component.
     rp3d::RigidBody* rigidBody;
     
     Entity();
     ~Entity();
     
-    /// Add directional force to the associated rigid body.
+    /// Add directional force to the rigid body.
     void AddForce(float x, float y, float z);
-    /// Add rotational torque to the associated rigid body.
+    /// Add rotational torque to the rigid body.
     void AddTorque(float x, float y, float z);
     
     /// Add a collider from a resource tag at the offset position x, y, z.
@@ -64,25 +64,25 @@ public:
     
     /// Set the rigid body mass.
     void SetMass(float mass);
-    /// Set the physical resistance to movement.
+    /// Set the rigid body physical resistance to movement.
     void SetLinearDamping(float damping);
-    /// Set the physical resistance to rotation.
+    /// Set the rigid body physical resistance to rotation.
     void SetAngularDamping(float damping);
     
-    /// Set the lock multiplier for linear movement.
+    /// Set the linear movement lock multiplier.
     void SetLinearAxisLockFactor(float x, float y, float z);
-    /// Set the lock multiplier for angular rotation.
+    /// Set the angular rotation lock multiplier.
     void SetAngularAxisLockFactor(float x, float y, float z);
     
     /// Set the gravity state.
     void EnableGravity(bool enabled);
     
-    /// Calculate the physical weight proportions by the size and offset of colliders.
+    /// Calculate the physical weight proportions by the size and offset of attached colliders.
     void CalculatePhysics(void);
     
     /// Make the rigid body non movable.
     void SetRigidBodyStatic(void);
-    /// Make the rigid body dynamicly movable.
+    /// Make the rigid body dynamically movable.
     void SetRigidBodyDynamic(void);
     
 };

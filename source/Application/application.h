@@ -6,8 +6,13 @@
 #include "../Physics/PhysicsSystem.h"
 #include "../Resources/ResourceManager.h"
 
+#include "application.h"
+#include "applicationlayer.h"
+
 void Start(void);
+
 void Run(void);
+
 void Shutdown(void);
 
 #endif

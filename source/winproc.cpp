@@ -3,8 +3,7 @@
 extern InputSystem    Input;
 extern RenderSystem   Renderer;
 
-extern bool isPaused;
-extern bool isActive;
+extern ApplicationLayer Application;
 
 LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam) {
     
@@ -64,7 +63,7 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
         // Close button handling
         case WM_CLOSE:
             
-            isActive = false;
+            Application.isActive = false;
             PostQuitMessage(0);
             
             break;

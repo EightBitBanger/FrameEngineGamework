@@ -5,7 +5,9 @@ class Vertex {
     
 public:
     
-    float x, y, z,  r, g, b,  u, v;
+    float x, y, z;  // Position
+    float r, g, b;  // Color
+    float u, v;     // Texture coordinate
     
     Vertex();
     

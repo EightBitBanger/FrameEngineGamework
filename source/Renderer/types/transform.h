@@ -20,10 +20,12 @@ public:
     
     Transform();
     
+    /// Add a transform to this transform as a child transform.
     void ChildAdd(Transform* transform);
-    
+    /// Remove a child transform from this transform.
     bool ChildRemove(Transform* transform);
     
+    /// Return an identity transforms.
     Transform Identity(void);
     
 };

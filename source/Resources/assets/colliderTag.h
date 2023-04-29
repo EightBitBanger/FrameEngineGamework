@@ -5,10 +5,13 @@
 
 struct ColliderTag {
     
+    /// Collider resource name.
     std::string name;
     
+    /// Collider state is static or reacts dynamically.
     bool  isStatic;
     
+    /// Physical box collider shape.
     rp3d::BoxShape* colliderShape;
     
     ColliderTag();

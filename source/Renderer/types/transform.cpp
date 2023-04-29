@@ -29,7 +29,7 @@ bool Transform::ChildRemove(Transform* transform) {
 
 
 Transform Transform::Identity(void) {
-    Transform identity;
+    Transform identity = Transform();
     return identity;
 }
 

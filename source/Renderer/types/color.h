@@ -8,9 +8,13 @@ class Color {
     
 public:
     
+    /// Red color value.
     float r;
+    /// Green color value.
     float g;
+    /// Blue color value.
     float b;
+    /// Alpha color value.
     float a;
     
     Color operator+ (const Color& color);
@@ -33,6 +37,8 @@ public:
     Color blue     = {0, 0, 1, 1};
     
     Color dkred    = {0.2, 0, 0, 1};
+    Color dkgreen  = {0, 0.2, 0, 1};
+    Color dkblue   = {0, 0, 0.2, 1};
     
     Color yellow   = {0.87, 0.87, 0, 1};
     Color orange   = {0.8, 0.3, 0, 1};
@@ -46,11 +52,14 @@ public:
     Color white    = {1, 1, 1, 1};
     Color black    = {0, 0, 0, 1};
     
-    Color random;
-    Color custom;
-    
     Color& Make(float r, float g, float b);
     Color& MakeRandom(void);
+    
+    
+private:
+    
+    Color random;
+    Color custom;
     
 };
 

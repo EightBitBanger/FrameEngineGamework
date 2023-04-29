@@ -5,9 +5,17 @@ class Viewport {
     
 public:
     
-    int x, y, w, h;
+    /// View left.
+    int x;
+    /// View top.
+    int y;
+    /// View width.
+    int w;
+    /// View height.
+    int h;
     
     Viewport();
+    Viewport(int x, int y, int w, int h);
     
 };
 
