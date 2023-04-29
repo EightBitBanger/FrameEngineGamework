@@ -21,6 +21,8 @@ extern ResourceManager   Resources;
 extern RenderSystem      Renderer;
 extern PhysicsSystem     Physics;
 extern InputSystem       Input;
+
+extern ApplicationLayer  Application;
 ```
 
 ## Application entry point
