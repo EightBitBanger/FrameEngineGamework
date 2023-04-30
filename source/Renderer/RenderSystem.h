@@ -113,10 +113,6 @@ public:
     
     /// Create a scene object and return its pointer.
     Scene* CreateScene(void);
-    /// Get a scene object currently in the render queue.
-    Scene* GetScene(unsigned int index);
-    /// Get the number of scenes in the render queue.
-    unsigned int GetSceneCount(void);
     /// Destroy a scene object and return true on success.
     bool DestroyScene(Scene* scenePtr);
     

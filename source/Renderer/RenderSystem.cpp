@@ -77,13 +77,6 @@ Scene* RenderSystem::CreateScene(void) {
     Scene* scenePtr = scene.Create();
     return scenePtr;
 }
-Scene* RenderSystem::GetScene(unsigned int index) {
-    assert(index <= renderQueue.size());
-    return renderQueue[index];
-}
-unsigned int RenderSystem::GetSceneCount(void) {
-    return scene.GetObjectCount();
-}
 bool RenderSystem::DestroyScene(Scene* scenePtr) {
     assert(scenePtr != nullptr);
     return scene.Destroy(scenePtr);
@@ -292,6 +285,7 @@ unsigned int RenderSystem :: GetRenderQueueSize(void) {
 }
 
 Scene* RenderSystem :: GetRenderQueueScene(unsigned int index) {
+    assert(index <= renderQueue.size());
     return renderQueue[index];
 }
 

@@ -11,7 +11,7 @@ class Transform {
 public:
     
     glm::vec3 position;
-    glm::vec3 rotation;
+    glm::vec4 rotation;
     glm::vec3 scale;
     
     Transform* parent;
@@ -25,7 +25,7 @@ public:
     /// Remove a child transform from this transform.
     bool ChildRemove(Transform* transform);
     
-    /// Return an identity transforms.
+    /// Return an identity transform.
     Transform Identity(void);
     
 };

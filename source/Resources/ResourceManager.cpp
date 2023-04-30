@@ -134,7 +134,7 @@ bool ResourceManager::LoadLocations(std::string path) {
         float rotx = StringToFloat(strexp[6]);
         float roty = StringToFloat(strexp[7]);
         float rotz = StringToFloat(strexp[8]);
-        newEntity->transform.rotation = glm::vec3(rotx, roty, rotz);
+        newEntity->transform.rotation = glm::vec4(rotx, roty, rotz, 1);
         
         float sclx = StringToFloat(strexp[9]);
         float scly = StringToFloat(strexp[10]);

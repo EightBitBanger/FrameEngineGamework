@@ -6,7 +6,7 @@ ApplicationLayer Application;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
     // Create a main window
-    HWND wHndl = Application.CreateWindowHandle("scene_frame", "Scene View");
+    HWND wHndl = Application.CreateWindowHandle("windowFrame", "Scene View");
     
     // Console window
     HWND cHnd = GetConsoleWindow();

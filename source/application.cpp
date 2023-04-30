@@ -55,7 +55,7 @@ void Start() {
     
     
     
-    // Assign the camera controller native script
+    // Assign the camera controller a native script
     Renderer.cameraMain->script = Renderer.CreateScript();
     Renderer.cameraMain->script->OnUpdate = ScriptCameraController;
     
@@ -186,7 +186,7 @@ void Shutdown(void) {
 
 void ScriptCameraController(void) {
     
-    float cameraSpeed = 700;
+    float cameraSpeed = 1000;
     
     glm::vec3 force(0);
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
