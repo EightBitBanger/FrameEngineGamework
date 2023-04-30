@@ -49,7 +49,7 @@ extern ApplicationLayer  Application;
 
 <br><br/>
 ### Application entry point
-You must provide the framework with the functions `Start()` and `Run()`. These functions will act as an entry point for your application.
+> You must provide the framework with the functions `Start()` and `Run()`.These functions will act as an entry point for your application.
 
 The function `Start()` will be called once during application initiation.
 
