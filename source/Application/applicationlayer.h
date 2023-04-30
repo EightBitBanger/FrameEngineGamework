@@ -7,8 +7,8 @@
 #include "../Input/InputSystem.h"
 #include "../Physics/PhysicsSystem.h"
 #include "../Resources/ResourceManager.h"
+#include "../Scripting/ScriptSystem.h"
 
-#include "../Renderer/types/viewport.h"
 #include "winproc.h"
 
 

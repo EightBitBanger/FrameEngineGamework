@@ -6,13 +6,12 @@ extern Timer             Time;
 extern Timer             PhysicsTime;
 extern Logger            Log;
 
+extern ApplicationLayer  Application;
 extern ResourceManager   Resources;
 extern RenderSystem      Renderer;
 extern PhysicsSystem     Physics;
 extern InputSystem       Input;
-
-extern ApplicationLayer  Application;
-
+extern ScriptSystem      Scripting;
 
 
 // User scripts
@@ -57,7 +56,7 @@ void Framework::Start() {
     
     
     // Assign the camera controller a native script
-    Renderer.cameraMain->script = Renderer.CreateScript();
+    Renderer.cameraMain->script = Scripting.CreateScript();
     Renderer.cameraMain->script->OnUpdate = ScriptCameraController;
     
     

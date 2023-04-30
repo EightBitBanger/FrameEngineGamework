@@ -9,6 +9,7 @@ ColorPreset  Colors;
 InputSystem       Input;
 PhysicsSystem     Physics;
 RenderSystem      Renderer;
+ScriptSystem      Scripting;
 ResourceManager   Resources;
 
 ApplicationLayer      Application;
@@ -19,11 +20,20 @@ EngineSystemManager::EngineSystemManager(void) {
     return;
 }
 
+
 Entity* EngineSystemManager::CreateGameObject(void) {
     Entity* newEntity = Renderer.CreateEntity();
-    newEntity->script = Renderer.CreateScript();
+    newEntity->script = Scripting.CreateScript();
     
     return newEntity;
+}
+
+void EngineSystemManager::DestroyGameObject(Entity* entityPtr) {
+    assert(entityPtr != nullptr);
+    if (entityPtr->script != nullptr) Scripting.DestroyScript(entityPtr->script);
+    
+    Renderer.DestroyEntity(entityPtr);
+    return;
 }
 
 

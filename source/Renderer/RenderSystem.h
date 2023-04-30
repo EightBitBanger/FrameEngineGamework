@@ -43,7 +43,6 @@ extern Logger Log;
 #include "components/material.h"
 #include "components/mesh.h"
 
-#include "components/script.h"
 #include "components/camera.h"
 #include "components/entity.h"
 
@@ -116,10 +115,6 @@ public:
     /// Destroy a scene object and return true on success.
     bool DestroyScene(Scene* scenePtr);
     
-    /// Create a script object and return its pointer.
-    Script* CreateScript(void);
-    /// Destroy a script object and return true on success.
-    bool DestroyScript(Script* scriptPtr);
     
     
     /// Start the render system.
@@ -174,7 +169,6 @@ private:
     PoolAllocator<Material>  material;
     PoolAllocator<Sky>       sky;
     PoolAllocator<Scene>     scene;
-    PoolAllocator<Script>    script;
     
 };
 

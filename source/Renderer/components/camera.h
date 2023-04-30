@@ -15,7 +15,7 @@
 #include "../types/color.h"
 #include "../types/viewport.h"
 
-#include "script.h"
+#include "../../Scripting/components/script.h"
 
 #include "../../Physics/PhysicsSystem.h"
 

@@ -82,14 +82,6 @@ bool RenderSystem::DestroyScene(Scene* scenePtr) {
     return scene.Destroy(scenePtr);
 }
 
-Script* RenderSystem::CreateScript(void) {
-    Script* scriptPtr = script.Create();
-    return scriptPtr;
-}
-bool RenderSystem::DestroyScript(Script* scriptPtr) {
-    assert(scriptPtr != nullptr);
-    return script.Destroy(scriptPtr);
-}
 
 
 void RenderSystem :: RenderFrame(float deltaTime) {
@@ -106,16 +98,6 @@ void RenderSystem :: RenderFrame(float deltaTime) {
     if (skyMain != nullptr) {
         Color& color = skyMain->background;
         glClearColor(color.r, color.g, color.b, 1);
-    }
-    
-    //
-    // Update main camera
-    if (cameraMain->script != nullptr) {
-        if (!cameraMain->script->hasBeenInitiated) {
-            cameraMain->script->hasBeenInitiated = true;
-            cameraMain->script->OnCreate();
-        }
-        cameraMain->script->OnUpdate();
     }
     
     if (cameraMain->rigidBody != nullptr) {
@@ -144,15 +126,6 @@ void RenderSystem :: RenderFrame(float deltaTime) {
         for (std::vector<Entity*>::iterator it = scenePtr->entities.begin(); it != scenePtr->entities.end(); ++it) {
             
             Entity* currentEntity = *it;
-            
-            // Call update on entity scripts
-            if (currentEntity->script != nullptr) {
-                if (!currentEntity->script->hasBeenInitiated) {
-                    currentEntity->script->hasBeenInitiated = true;
-                    currentEntity->script->OnCreate();
-                }
-                currentEntity->script->OnUpdate();
-            }
             
             if (currentEntity->mesh == nullptr) continue;
             Mesh* mesh = currentEntity->mesh;

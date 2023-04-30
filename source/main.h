@@ -19,6 +19,7 @@
 #include "Physics/PhysicsSystem.h"
 #include "Renderer/RenderSystem.h"
 #include "Resources/ResourceManager.h"
+#include "Scripting/ScriptSystem.h"
 
 #include "application/applicationlayer.h"
 

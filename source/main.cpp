@@ -1,8 +1,16 @@
 #include "main.h"
 
+extern Timer        PhysicsTime;
+extern Timer        Time;
+
+extern RenderSystem      Renderer;
+extern ScriptSystem      Scripting;
+extern ResourceManager   Resources;
+extern ApplicationLayer  Application;
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
-    // Create a main window
+    // Create the main render window
     HWND wHndl = Application.CreateWindowHandle("windowFrame", "Scene View");
     
     // Console window
@@ -39,10 +47,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     PhysicsTime.Update();
     Time.Update();
     
-    // Initial application state
-    Application.isActive = true;
-    Application.isPaused = false;
-    
     MSG messages;
     
     while (Application.isActive) {
@@ -65,6 +69,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         if (Time.Update()) {
             
             Framework::Run();
+            
+            Scripting.Update();
             
             Renderer.RenderFrame( Time.delta );
             

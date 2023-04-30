@@ -14,7 +14,7 @@
 #include "../types/color.h"
 #include "../types/viewport.h"
 
-#include "../components/script.h"
+#include "../../Scripting/components/script.h"
 #include "../components/shader.h"
 #include "../components/material.h"
 #include "../components/mesh.h"
