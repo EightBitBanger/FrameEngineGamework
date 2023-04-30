@@ -1,21 +1,14 @@
 #ifndef SCRIPTING_SYSTEM
 #define SCRIPTING_SYSTEM
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstdlib>
-
 #include "../std/poolallocator.h"
 
 #include "components/script.h"
 
 
-
 class ScriptSystem {
     
-    
 public:
-    
     
     
     ScriptSystem();

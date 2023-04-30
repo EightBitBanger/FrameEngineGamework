@@ -16,13 +16,11 @@
 #include "../types/viewport.h"
 
 #include "../../Scripting/components/script.h"
-
 #include "../../Physics/PhysicsSystem.h"
-
 #include "../../Resources/assets/colliderTag.h"
-
 #include "../../Input/InputSystem.h"
 #include "../../std/timer.h"
+
 
 class Camera {
     

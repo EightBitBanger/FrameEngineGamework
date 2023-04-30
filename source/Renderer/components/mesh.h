@@ -12,8 +12,9 @@
 #include "../types/color.h"
 #include "../types/viewport.h"
 
-#include "../components/material.h"
-#include "../components/shader.h"
+#include "material.h"
+#include "shader.h"
+
 
 struct SubMesh {
     

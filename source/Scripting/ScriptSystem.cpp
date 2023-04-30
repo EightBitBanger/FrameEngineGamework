@@ -14,7 +14,7 @@ ScriptSystem::~ScriptSystem() {
 
 void ScriptSystem::Update(void) {
     
-    for (unsigned int i=0; i < script.Size(); i++ ) {
+    for (int i=0; i < script.Size(); i++ ) {
         Script* scriptRef = script[i];
         
         if (!scriptRef->isActive) 

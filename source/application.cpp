@@ -14,6 +14,7 @@ extern InputSystem       Input;
 extern ScriptSystem      Scripting;
 
 
+
 // User scripts
 void ScriptCameraController(void);
 

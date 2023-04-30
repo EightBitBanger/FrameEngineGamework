@@ -9,22 +9,22 @@
 
 #include <ReactPhysics3d/ReactPhysics3d.h>
 
+#include "../../std/timer.h"
+
 #include "../types/bufferlayout.h"
 #include "../types/transform.h"
 #include "../types/color.h"
 #include "../types/viewport.h"
 
-#include "../../Scripting/components/script.h"
-#include "../components/shader.h"
-#include "../components/material.h"
-#include "../components/mesh.h"
-
 #include "../../Input/InputSystem.h"
-#include "../../std/timer.h"
-
 #include "../../Physics/PhysicsSystem.h"
-
 #include "../../Resources/assets/colliderTag.h"
+#include "../../Scripting/components/script.h"
+
+#include "shader.h"
+#include "material.h"
+#include "mesh.h"
+
 
 extern PhysicsSystem Physics;
 

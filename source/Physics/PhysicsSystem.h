@@ -24,9 +24,9 @@ struct PhysicsSystem {
     void SetWorldGravity(float x, float y, float z);
     
     /// Create a box collider scaled by xscale, yscale, zscale.
-    rp3d::BoxShape*     CreateColliderBox(float xscale, float yscale, float zscale);
+    rp3d::BoxShape* CreateColliderBox(float xscale, float yscale, float zscale);
     /// Create a sphere collider scaled by radius.
-    rp3d::SphereShape*  CreateColliderSphere(float radius);
+    rp3d::SphereShape* CreateColliderSphere(float radius);
     /// Create a capsule collider scaled by radius and height.
     rp3d::CapsuleShape* CreateColliderCapsule(float radius, float height);
     

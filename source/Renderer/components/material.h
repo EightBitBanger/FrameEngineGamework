@@ -11,8 +11,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../types/color.h"
-
 #include "../enumerators.h"
+
 
 class Material {
     

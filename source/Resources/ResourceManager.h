@@ -13,6 +13,7 @@
 class ResourceManager {
     
 public:
+    
     /// Main rendering scene.
     Scene* sceneMain;
     
