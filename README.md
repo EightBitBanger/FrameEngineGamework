@@ -1,6 +1,8 @@
 ## Introduction
 
-This game engine framework aims to provides a simple interface with more complex systems. The application layer provides APIs for rendering, physics, resource management, scene management, input, timing and random number generation. This wiki will provide a reference for classes, functions and types used in the framework.
+This game engine framework aims to provides a simple interface with more complex systems. The application layer provides APIs for rendering, physics, resource management, scene management, input, timing and random number generation. 
+
+
 
 ### Features
 - OpenGL render system  (in progress..)
@@ -11,9 +13,9 @@ This game engine framework aims to provides a simple interface with more complex
 - Window input handling
 
 
+
 <br><br/>
 ###  Building the project
-
 
 #### Requires the following libraries
 * <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
@@ -24,6 +26,13 @@ This game engine framework aims to provides a simple interface with more complex
 ```
 glew32s  glu32  gdi32  user32  kernel32  comctl32  opengl32  reactphysics3d
 ```
+
+
+
+<br><br/>
+### Documentation
+This <a href="https://github.com/RetroBytes32/GameEngine-Framework/wiki">wiki</a>⁭ will provide a reference for classes, functions and types used in the framework.
+
 
 
 <br><br/>
