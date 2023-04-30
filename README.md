@@ -1,4 +1,8 @@
-## Features
+## Introduction
+
+This game engine framework aims to provides a simple interface with more complex systems. The application layer provides APIs for rendering, physics, resource management, scene management, input, timing and random number generation. This wiki will provide a reference for classes, functions and types used in the framework.
+
+### Features
 - OpenGL render system  (in progress..)
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 - ⁯⁮⁭Audio (Considering openAL)
@@ -9,14 +13,17 @@
 
 <br><br/>
 ###  Building the project
-Exteral build linkage
+
+Required exteral linkage.
 ```
 glew32s  glu32  gdi32  user32  kernel32  comctl32  opengl32  reactphysics3d
 ```
 
 
-## Singleton access points
+<br><br/>
+### Singleton access points
 The framework contains many sub systems which can be accessed though the following singletons.
+
 
 ```c++
 #include "application/application.h"
@@ -34,7 +41,8 @@ extern InputSystem       Input;
 extern ApplicationLayer  Application;
 ```
 
-## Application entry point
+<br><br/>
+### Application entry point
 You must provide the framework with the functions `Start()` and `Run()`. These functions will act as an entry point for your application.
 
 The function `Start()` will be called once during application initiation.
@@ -75,7 +83,8 @@ void Start() {
 }
 ```
 
-## Main loop
+<br><br/>
+### Main loop
 The framework will continue to call `Run()` once per frame.
 
 ```c++
