@@ -1,11 +1,28 @@
-#ifndef APPLICATION_LAYER_TYPE
-#define APPLICATION_LAYER_TYPE
+#ifndef APPLICATION_LAYER
+#define APPLICATION_LAYER
 
 #include <windows.h>
-#include <string>
+
+#include "../Renderer/RenderSystem.h"
+#include "../Input/InputSystem.h"
+#include "../Physics/PhysicsSystem.h"
+#include "../Resources/ResourceManager.h"
 
 #include "../Renderer/types/viewport.h"
-#include "../winproc.h"
+#include "winproc.h"
+
+
+namespace Framework {
+    
+    void Start(void);
+    
+    void Run(void);
+    
+    void Shutdown(void);
+    
+};
+
+
 
 class ApplicationLayer {
     

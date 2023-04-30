@@ -1,4 +1,4 @@
-#include "application/application.h"
+#include "Engine/Engine.h"
 
 extern RandomGen         Random;
 extern ColorPreset       Colors;
@@ -12,6 +12,7 @@ extern PhysicsSystem     Physics;
 extern InputSystem       Input;
 
 extern ApplicationLayer  Application;
+
 
 
 // User scripts
@@ -32,7 +33,7 @@ Material* barrelMaterial;
 // Application entry point
 //
 
-void Start() {
+void Framework::Start() {
     
     Resources.LoadScene("data/main.scene");
     
@@ -46,12 +47,12 @@ void Start() {
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(-100, 30, 0);
-    //Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
+    Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
     Renderer.cameraMain->SetMass(2);
     Renderer.cameraMain->SetLinearDamping(4);
     Renderer.cameraMain->SetAngularAxisLockFactor(0, 0, 0);
     Renderer.cameraMain->rigidBody->setIsAllowedToSleep(false);
-    Renderer.cameraMain->rigidBody->enableGravity(false);
+    Renderer.cameraMain->rigidBody->enableGravity(true);
     
     
     
@@ -78,7 +79,7 @@ void Start() {
     plainScene->AddToSceneRoot(plain);
     
     plain->mesh = Renderer.CreateMesh();
-    plain->mesh->AddPlainSubDivided(-50, 0, -50,  10, 10,  Colors.gray,  10, 10);
+    plain->mesh->AddPlainSubDivided(-80, 0, -150,  10, 10,  Colors.gray,  20, 20);
     
     plain->material = Resources.CreateMaterialFromTag("mat_plain");
     plain->rigidBody = Physics.CreateRigidBody(0, 0, 0);
@@ -111,7 +112,7 @@ int counter=0;
 // Application main loop
 //
 
-void Run() {
+void Framework::Run() {
     
     //
     // Escape key pause
@@ -173,7 +174,7 @@ void Run() {
 
 
 
-void Shutdown(void) {
+void Framework::Shutdown(void) {
     
     return;
 }

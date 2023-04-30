@@ -20,17 +20,7 @@
 #include "Renderer/RenderSystem.h"
 #include "Resources/ResourceManager.h"
 
-#include "application/application.h"
-#include "winproc.h"
+#include "application/applicationlayer.h"
 
-Timer        PhysicsTime;
-Timer        Time;
-Logger       Log;
-RandomGen    Random;
+#include "engine/engine.h"
 
-ColorPreset  Colors;
-
-InputSystem    Input;
-PhysicsSystem  Physics;
-RenderSystem   Renderer;
-ResourceManager  Resources;

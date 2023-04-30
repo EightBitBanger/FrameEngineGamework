@@ -1,7 +1,4 @@
 #include "main.h"
-#define IDI_ICON  101
-
-ApplicationLayer Application;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
@@ -37,7 +34,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Renderer.Initiate();
     Resources.Initiate();
     
-    Start();
+    Framework::Start();
     
     PhysicsTime.Update();
     Time.Update();
@@ -67,7 +64,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         // Update application and renderer
         if (Time.Update()) {
             
-            Run();
+            Framework::Run();
             
             Renderer.RenderFrame( Time.delta );
             
@@ -77,7 +74,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
     
     // Shutdown engine sub systems
-    Shutdown();
+    Framework::Shutdown();
     
     Resources.DestroyAssets();
     

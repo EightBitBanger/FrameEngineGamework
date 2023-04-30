@@ -1,5 +1,4 @@
 #include "applicationlayer.h"
-#include "application.h"
 
 #define IDI_ICON  101
 
