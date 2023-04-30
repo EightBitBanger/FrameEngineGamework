@@ -6,6 +6,15 @@
 - Random number generation
 - Window input handling
 
+
+<br><br/>
+###  Building the project
+Exteral build linkage
+```
+glew32s  glu32  gdi32  user32  kernel32  comctl32  opengl32  reactphysics3d
+```
+
+
 ## Singleton access points
 The framework contains many sub systems which can be accessed though the following singletons.
 
@@ -92,10 +101,5 @@ void Run() {
     
     Renderer.cameraMain->AddForce(force.x, force.y, force.z);
 }
-```
-
-### Exteral build linkage
-```
-glew32s  glu32  gdi32  user32  kernel32  comctl32  opengl32  reactphysics3d
 ```
 
