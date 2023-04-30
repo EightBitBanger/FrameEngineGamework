@@ -14,7 +14,13 @@ This game engine framework aims to provides a simple interface with more complex
 <br><br/>
 ###  Building the project
 
-Required exteral linkage.
+
+#### Requires the following libraries
+* <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
+* <a href="https://github.com/nothings/stb">STB-Image</a>⁭
+* <a href="https://github.com/Bly7/OBJ-Loader">OBJ-loader</a>⁭
+
+#### Required exteral linkage.
 ```
 glew32s  glu32  gdi32  user32  kernel32  comctl32  opengl32  reactphysics3d
 ```
