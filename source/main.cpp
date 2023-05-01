@@ -3,10 +3,11 @@
 extern Timer        PhysicsTime;
 extern Timer        Time;
 
-extern RenderSystem      Renderer;
-extern ScriptSystem      Scripting;
-extern ResourceManager   Resources;
-extern ApplicationLayer  Application;
+extern RenderSystem         Renderer;
+extern ScriptSystem         Scripting;
+extern ResourceManager      Resources;
+extern ApplicationLayer     Application;
+extern EngineSystemManager  Engine;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
@@ -42,6 +43,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Renderer.Initiate();
     Resources.Initiate();
     
+    // Initiate the engine last
+    Engine.Initiate();
+    
     Framework::Start();
     
     PhysicsTime.Update();
@@ -71,6 +75,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             Framework::Run();
             
             Scripting.Update();
+            
+            Engine.Update();
             
             Renderer.RenderFrame( Time.delta );
             

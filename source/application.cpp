@@ -6,12 +6,13 @@ extern Timer             Time;
 extern Timer             PhysicsTime;
 extern Logger            Log;
 
-extern ApplicationLayer  Application;
-extern ResourceManager   Resources;
-extern RenderSystem      Renderer;
-extern PhysicsSystem     Physics;
-extern InputSystem       Input;
-extern ScriptSystem      Scripting;
+extern EngineSystemManager  Engine;
+extern ApplicationLayer     Application;
+extern ResourceManager      Resources;
+extern RenderSystem         Renderer;
+extern PhysicsSystem        Physics;
+extern InputSystem          Input;
+extern ScriptSystem         Scripting;
 
 
 
@@ -27,6 +28,7 @@ Material* barrelMaterial;
 
 
 
+Scene* plainScene;
 
 
 //
@@ -43,26 +45,11 @@ void Framework::Start() {
     
     // Camera
     Renderer.cameraMain = Renderer.CreateCamera();
+    Renderer.cameraMain->transform.position = glm::vec3(-50, 50, 0);
+    
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
-    rp3d::RigidBody* rigidBodyCamera = Physics.CreateRigidBody(-100, 30, 0);
-    rigidBodyCamera->setIsAllowedToSleep(false);
-    rigidBodyCamera->enableGravity(true);
-    
-    Renderer.cameraMain->AttachRigidBody(rigidBodyCamera);
-    Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
-    Renderer.cameraMain->SetMass(2);
-    Renderer.cameraMain->SetLinearDamping(4);
-    Renderer.cameraMain->SetAngularAxisLockFactor(0, 0, 0);
-    
-    
-    
-    // Assign the camera controller a native script
-    Script* scriptPtr = Scripting.CreateScript();
-    scriptPtr->OnUpdate = ScriptCameraController;
-    
-    Renderer.cameraMain->AttachScript(scriptPtr);
     
     
     
@@ -75,7 +62,15 @@ void Framework::Start() {
     
     
     
+    
+    
+    plainScene = Renderer.CreateScene();
+    Renderer.AddToRenderQueue(plainScene);
+    
+    
+    
     // Create a plain
+    /*
     
     Scene* plainScene = Renderer.CreateScene();
     Renderer.AddToRenderQueue(plainScene);
@@ -85,23 +80,30 @@ void Framework::Start() {
     
     Mesh* meshPlain = Renderer.CreateMesh();
     plain->AttachMesh(meshPlain);
-    meshPlain->AddPlainSubDivided(-80, 0, -150,  10, 10,  Colors.gray,  20, 20);
-    
+    meshPlain->AddPlain(0, 0, 0,  100, 100,  Colors.gray);
     
     Material* materialPtr = Resources.CreateMaterialFromTag("mat_plain");
     plain->AttachMaterial(materialPtr);
+    */
     
-    rp3d::RigidBody* rigidBodyPtr = Physics.CreateRigidBody(0, 0, 0);
-    plain->AttachRidigBody(rigidBodyPtr);
-    plain->SetRigidBodyStatic();
+    //rp3d::RigidBody* rigidBodyPtr = Physics.CreateRigidBody(0, 0, 0);
+    //plain->AttachRidigBody(rigidBodyPtr);
+    //plain->SetRigidBodyStatic();
     
-    plain->AddCollider( Resources.FindColliderTag("coll_plain"), 0, -10.0, 0);
+    //plain->AddCollider( Resources.FindColliderTag("coll_plain"), 0, -10.0, 0);
     
     
     
-    // Object container scene
-    objectScene = Renderer.CreateScene();
-    Renderer.AddToRenderQueue(objectScene);
+    //rp3d::Vector3 lockfactor(0, 0, 0);
+    //rigidBody->setLinearLockAxisFactor(lockfactor);
+    //rigidBody->setAngularLockAxisFactor(lockfactor);
+    //rigidBody->setType(rp3d::BodyType::STATIC);
+    
+    
+    
+    
+    
+    
     
     return;
 }
@@ -118,12 +120,42 @@ float count         = 200;
 int counter=0;
 
 
+
+
 //
 // Application main loop
 //
 
 void Framework::Run() {
     
+    GameObject* gameObject = Engine.CreateGameObject();
+    
+    rp3d::RigidBody* rigidBody = Engine.CreateRigidBody();
+    gameObject->AttachRidigBody(rigidBody);
+    
+    Entity* entityRenderer = Engine.CreateEntityRenderer(barrelMesh, barrelMaterial);
+    gameObject->AttachEntity(entityRenderer);
+    
+    
+    
+    unsigned int size = Engine.GetGameObjectCount();
+    
+    if (size > 100) {
+        
+        GameObject* oldObject = Engine.GetGameObject(0);
+        
+        rp3d::RigidBody* body = oldObject->GetAttachedRidigBody();
+        
+        Engine.DestroyRigidBody(body);
+        Engine.DestroyGameObject(oldObject);
+        
+    }
+    
+    
+    
+    
+    
+    /*
     //
     // Escape key pause
     
@@ -179,7 +211,7 @@ void Framework::Run() {
         barrel->AddCollider(colliderTag, 0, 0, 0);
         
     }
-    
+    */
     return;
 }
 
@@ -199,6 +231,7 @@ void Framework::Shutdown(void) {
 
 void ScriptCameraController(void) {
     
+    
     float cameraSpeed = 1000;
     
     glm::vec3 force(0);
@@ -212,6 +245,7 @@ void ScriptCameraController(void) {
     
     force *= cameraSpeed;
     Renderer.cameraMain->AddForce(force.x, force.y, force.z);
+    
     
     return;
 };

@@ -145,15 +145,15 @@ bool ResourceManager::LoadLocations(std::string path) {
         if (strexp[12] != "none") {
             
             // Position
-            rp3d::RigidBody* rigidBody = Physics.CreateRigidBody(posx, posy, posz);
-            newEntity->AttachRidigBody(rigidBody);
-            newEntity->SetRigidBodyStatic();
-            newEntity->AddCollider( FindColliderTag(strexp[12]), 0, 0, 0 );
+            //rp3d::RigidBody* rigidBody = Physics.CreateRigidBody(posx, posy, posz);
+            //newEntity->AttachRidigBody(rigidBody);
+            //newEntity->SetRigidBodyStatic();
+            //newEntity->AddCollider( FindColliderTag(strexp[12]), 0, 0, 0 );
             
             // Rotate
-            const rp3d::Quaternion quaternion = rp3d::Quaternion::fromEulerAngles(rotx, roty, rotz);
-            rp3d::Transform rbTransform = rigidBody->getTransform();
-            rbTransform.setOrientation(quaternion);
+            //const rp3d::Quaternion quaternion = rp3d::Quaternion::fromEulerAngles(rotx, roty, rotz);
+            //rp3d::Transform rbTransform = rigidBody->getTransform();
+            //rbTransform.setOrientation(quaternion);
             
         }
         

@@ -20,15 +20,6 @@ void RenderSystem::RenderFrame(float deltaTime) {
     
     // Synchronize attached rigid body transform
     
-    rp3d::RigidBody* rigidBodyPtr = cameraMain->GetAttachedRigidBody();
-    if (rigidBodyPtr != nullptr) {
-        rp3d::Transform bodyTransform = rigidBodyPtr->getTransform();
-        rp3d::Vector3 bodyPosition = bodyTransform.getPosition();
-        cameraMain->transform.position.x = bodyPosition.x;
-        cameraMain->transform.position.y = bodyPosition.y;
-        cameraMain->transform.position.z = bodyPosition.z;
-    }
-    
     if (cameraMain->useMouseLook) 
         cameraMain->MouseLook(deltaTime, displayCenter.x, displayCenter.y);
     
@@ -111,23 +102,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 currentShader->SetTextureSampler(0);
             }
             
-            
-            // Calculate model matrix
-            glm::mat4 model(1);
-            
-            rp3d::RigidBody* rigidBodyPtr = currentEntity->GetAttachedRidigBody();
-            
-            if (rigidBodyPtr != nullptr) {
-                
-                rigidBodyPtr->getTransform().getOpenGLMatrix(&model[0][0]);
-                
-            } else {
-                
-                model = CalculateModelMatrix(currentEntity->transform);
-            }
-            
-            
-            currentShader->SetModelMatrix(model);
+            currentShader->SetModelMatrix(currentEntity->transform.modelMatrix);
             
             mesh->DrawIndexArray();
             
