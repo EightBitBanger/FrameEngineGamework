@@ -123,8 +123,8 @@ bool ResourceManager::LoadLocations(std::string path) {
         newEntity->name = strexp[0];
         
         // Assign mesh
-        newEntity->mesh      = CreateMeshFromTag( strexp[1] );
-        newEntity->material  = CreateMaterialFromTag( strexp[2] );
+        newEntity->AttachMesh(CreateMeshFromTag( strexp[1] ));
+        newEntity->AttachMaterial(CreateMaterialFromTag( strexp[2] ));
         
         float posx = StringToFloat(strexp[3]);
         float posy = StringToFloat(strexp[4]);
@@ -145,13 +145,14 @@ bool ResourceManager::LoadLocations(std::string path) {
         if (strexp[12] != "none") {
             
             // Position
-            newEntity->rigidBody = Physics.CreateRigidBody(posx, posy, posz);
+            rp3d::RigidBody* rigidBody = Physics.CreateRigidBody(posx, posy, posz);
+            newEntity->AttachRidigBody(rigidBody);
             newEntity->SetRigidBodyStatic();
             newEntity->AddCollider( FindColliderTag(strexp[12]), 0, 0, 0 );
             
             // Rotate
             const rp3d::Quaternion quaternion = rp3d::Quaternion::fromEulerAngles(rotx, roty, rotz);
-            rp3d::Transform rbTransform = newEntity->rigidBody->getTransform();
+            rp3d::Transform rbTransform = rigidBody->getTransform();
             rbTransform.setOrientation(quaternion);
             
         }
@@ -186,30 +187,30 @@ void ResourceManager::Initiate(void) {
 
 
 
-MeshTag* ResourceManager::FindMeshTag(std::string name) {
+MeshTag* ResourceManager::FindMeshTag(std::string resourceName) {
     for (std::vector<MeshTag>::iterator it = meshTags.begin(); it != meshTags.end(); ++it) 
-        if (it->name == name) 
+        if (it->name == resourceName) 
             return &it[0];
     return nullptr;
 }
 
-TextureTag* ResourceManager::FindTextureTag(std::string name) {
+TextureTag* ResourceManager::FindTextureTag(std::string resourceName) {
     for (std::vector<TextureTag>::iterator it = textureTags.begin(); it != textureTags.end(); ++it) 
-        if (it->name == name) 
+        if (it->name == resourceName) 
             return &it[0];
     return nullptr;
 }
 
-ShaderTag* ResourceManager::FindShaderTag(std::string name) {
+ShaderTag* ResourceManager::FindShaderTag(std::string resourceName) {
     for (std::vector<ShaderTag>::iterator it = shaderTags.begin(); it != shaderTags.end(); ++it) 
-        if (it->name == name) 
+        if (it->name == resourceName) 
             return &it[0];
     return nullptr;
 }
 
-ColliderTag* ResourceManager::FindColliderTag(std::string name) {
+ColliderTag* ResourceManager::FindColliderTag(std::string resourceName) {
     for (std::vector<ColliderTag>::iterator it = colliderTags.begin(); it != colliderTags.end(); ++it) 
-        if (it->name == name) 
+        if (it->name == resourceName) 
             return &it[0];
     return nullptr;
 }
@@ -220,11 +221,11 @@ ColliderTag* ResourceManager::FindColliderTag(std::string name) {
 
 
 
-Mesh* ResourceManager::CreateMeshFromTag(std::string name) {
-    MeshTag* meshTag = FindMeshTag(name);
+Mesh* ResourceManager::CreateMeshFromTag(std::string resourceName) {
+    MeshTag* meshTag = FindMeshTag(resourceName);
     assert(meshTag != nullptr);
     Mesh* meshPtr = Renderer.CreateMesh();
-    meshPtr->shader = Renderer.defaultShader;
+    meshPtr->AttachShader(Renderer.defaultShader);
     meshPtr->AddSubMesh(0,0,0, meshTag->mesh.vertexBuffer, meshTag->mesh.indexBuffer);
     meshPtr->SetAttribute(0, 3, sizeof(Vertex), 0);
     meshPtr->SetAttribute(1, 3, sizeof(Vertex), 12);
@@ -232,8 +233,8 @@ Mesh* ResourceManager::CreateMeshFromTag(std::string name) {
     return meshPtr;
 }
 
-Material* ResourceManager::CreateMaterialFromTag(std::string name) {
-    TextureTag* texTag = FindTextureTag(name);
+Material* ResourceManager::CreateMaterialFromTag(std::string resourceName) {
+    TextureTag* texTag = FindTextureTag(resourceName);
     assert(texTag != nullptr);
     Material* materialPtr = Renderer.CreateMaterial();
     materialPtr->width  = texTag->width;
@@ -242,8 +243,8 @@ Material* ResourceManager::CreateMaterialFromTag(std::string name) {
     return materialPtr;
 }
 
-Shader* ResourceManager::CreateShaderFromTag(std::string name) {
-    ShaderTag* shaderTag = FindShaderTag(name);
+Shader* ResourceManager::CreateShaderFromTag(std::string resourceName) {
+    ShaderTag* shaderTag = FindShaderTag(resourceName);
     assert(shaderTag != nullptr);
     Shader* shaderPtr = Renderer.CreateShader();
     shaderPtr->CreateShaderProgram(shaderTag->vertexScript, shaderTag->fragmentScript);
@@ -251,9 +252,9 @@ Shader* ResourceManager::CreateShaderFromTag(std::string name) {
 }
 
 
-rp3d::BoxShape* ResourceManager::GetColliderFromTag(std::string name) {
+rp3d::BoxShape* ResourceManager::GetColliderFromTag(std::string resourceName) {
     for (std::vector<ColliderTag>::iterator it = colliderTags.begin(); it != colliderTags.end(); ++it) 
-        if (it->name == name) 
+        if (it->name == resourceName) 
             return it->colliderShape;
     return nullptr;
 }
@@ -390,9 +391,9 @@ bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName=
 
 
 
-bool ResourceManager::UnloadMeshTag(std::string name) {
+bool ResourceManager::UnloadMeshTag(std::string resourceName) {
     for (std::vector<MeshTag>::iterator it = meshTags.begin(); it != meshTags.end(); ++it) {
-        if (it->name == name) {
+        if (it->name == resourceName) {
             meshTags.erase(it);
             return true;
         }
@@ -400,9 +401,9 @@ bool ResourceManager::UnloadMeshTag(std::string name) {
     return false;
 }
 
-bool ResourceManager::UnloadTextureTag(std::string name) {
+bool ResourceManager::UnloadTextureTag(std::string resourceName) {
     for (std::vector<TextureTag>::iterator it = textureTags.begin(); it != textureTags.end(); ++it) {
-        if (it->name == name) {
+        if (it->name == resourceName) {
             textureTags.erase(it);
             return true;
         }
@@ -410,9 +411,9 @@ bool ResourceManager::UnloadTextureTag(std::string name) {
     return false;
 }
 
-bool ResourceManager::UnloadShaderTag(std::string name) {
+bool ResourceManager::UnloadShaderTag(std::string resourceName) {
     for (std::vector<ShaderTag>::iterator it = shaderTags.begin(); it != shaderTags.end(); ++it) {
-        if (it->name == name) {
+        if (it->name == resourceName) {
             shaderTags.erase(it);
             return true;
         }

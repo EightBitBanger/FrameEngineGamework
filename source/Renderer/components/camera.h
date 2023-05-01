@@ -32,13 +32,6 @@ public:
     glm::vec3 forward;
     glm::vec3 right;
     
-    /// Script component pointer.
-    Script* script;
-    
-    /// Rigid body component pointer.
-    rp3d::RigidBody* rigidBody;
-    
-    bool useMovementKeys;
     bool useMouseLook;
     
     float cameraSpeed;
@@ -71,10 +64,25 @@ public:
     /// Get the camera yaw angle.
     float GetYaw(float pitch);
     
+    /// Attach a script object to the camera.
+    void AttachScript(Script* scriptPtr);
+    /// Detach the script object from the camera.
+    void DetachScript(void);
+    /// Return the currently attached script object.
+    Script* GetAttachedScript(void);
+    
+    /// Attach a rigid body object to the camera.
+    void AttachRigidBody(rp3d::RigidBody* rigidBodyPtr);
+    /// Detach the rigid body object from the camera.
+    void DetachRigidBody(void);
+    /// Return the currently attached rigid body object.
+    rp3d::RigidBody* GetAttachedRigidBody(void);
+    
     
     glm::mat4 CalculateView(void);
     glm::mat4 CalculatePerspectiveMatrix(void);
     glm::mat4 CalculateOrthiographicMatrix(Viewport viewport);
+    
     /// Add directional force to the rigid body.
     void AddForce(float x, float y, float z);
     /// Add rotational torque to the rigid body.
@@ -108,6 +116,18 @@ public:
     /// Make the rigid body dynamically movable.
     void SetRigidBodyDynamic(void);
     
+    
+private:
+    
+    /// Script component pointer.
+    Script* script;
+    
+    /// Rigid body component pointer.
+    rp3d::RigidBody* rigidBody;
+    
 };
 
+
 #endif
+
+

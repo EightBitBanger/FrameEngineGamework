@@ -1,16 +1,5 @@
 #include "ScriptSystem.h"
 
-ScriptSystem::ScriptSystem() {
-    
-    return;
-}
-
-ScriptSystem::~ScriptSystem() {
-    
-    return;
-}
-
-
 
 void ScriptSystem::Update(void) {
     

@@ -17,24 +17,20 @@ EngineSystemManager   Engine;
 
 
 EngineSystemManager::EngineSystemManager(void) {
+    
     return;
 }
 
 
-Entity* EngineSystemManager::CreateGameObject(void) {
-    Entity* newEntity = Renderer.CreateEntity();
-    newEntity->script = Scripting.CreateScript();
-    
-    return newEntity;
+GameObject* EngineSystemManager::CreateGameObject(void) {
+    GameObject* newGameObject = gameObject.Create();
+    return newGameObject;
 }
 
-void EngineSystemManager::DestroyGameObject(Entity* entityPtr) {
-    assert(entityPtr != nullptr);
-    if (entityPtr->script != nullptr) Scripting.DestroyScript(entityPtr->script);
-    
-    Renderer.DestroyEntity(entityPtr);
+void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
+    assert(gameObjectPtr != nullptr);
+    gameObject.Destroy(gameObjectPtr);
     return;
 }
-
 
 

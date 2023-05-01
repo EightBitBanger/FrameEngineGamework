@@ -29,6 +29,22 @@ Mesh::~Mesh() {
 }
 
 
+void Mesh::AttachShader(Shader* shaderPtr) {
+    shader = shaderPtr;
+    return;
+}
+
+void Mesh::DetachShader(void) {
+    shader = nullptr;
+    return;
+}
+
+Shader* Mesh::GetAttachedShader(void) {
+    return shader;
+}
+
+
+
 void Mesh::SetPrimitive(int primitiveType) {
     primitive = primitiveType;
     return;

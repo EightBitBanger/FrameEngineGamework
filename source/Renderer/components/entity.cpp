@@ -22,6 +22,68 @@ Entity::~Entity() {
 }
 
 
+
+void Entity::AttachMesh(Mesh* meshPtr) {
+    mesh = meshPtr;
+    return;
+}
+
+void Entity::DetachMesh(void) {
+    mesh = nullptr;
+    return;
+}
+
+Mesh* Entity::GetAttachedMesh(void) {
+    return mesh;
+}
+
+
+void Entity::AttachMaterial(Material* materialPtr) {
+    material = materialPtr;
+    return;
+}
+
+void Entity::DetachMaterial(void) {
+    material = nullptr;
+    return;
+}
+
+Material* Entity::GetAttachedMaterial(void) {
+    return material;
+}
+
+
+void Entity::AttachScript(Script* scriptPtr) {
+    script = scriptPtr;
+    return;
+}
+
+void Entity::DetachScript(void) {
+    script = nullptr;
+    return;
+}
+
+Script* Entity::GetAttachedScript(void) {
+    return script;
+}
+
+
+void Entity::AttachRidigBody(rp3d::RigidBody* rigidBodyPtr){
+    rigidBody = rigidBodyPtr;
+    return;
+}
+
+void Entity::DetachRidigBody(void) {
+    rigidBody = nullptr;
+    return;
+}
+
+rp3d::RigidBody* Entity::GetAttachedRidigBody(){
+    return rigidBody;
+}
+
+
+
 void Entity::AddForce(float x, float y, float z) {
     if (rigidBody == nullptr) return;
     rp3d::Vector3 nudge = rp3d::Vector3(x, y, z);

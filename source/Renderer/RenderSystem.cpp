@@ -19,7 +19,7 @@ RenderSystem::RenderSystem() {
 
 Entity* RenderSystem::CreateEntity(void) {
     Entity* entityPtr = entity.Create();
-    entityPtr->material = defaultMaterial;
+    entityPtr->AttachMaterial(defaultMaterial);
     return entityPtr;
 }
 bool RenderSystem::DestroyEntity(Entity* entityPtr) {
@@ -29,7 +29,7 @@ bool RenderSystem::DestroyEntity(Entity* entityPtr) {
 
 Mesh* RenderSystem::CreateMesh(void) {
     Mesh* meshPtr = mesh.Create();
-    meshPtr->shader = defaultShader;
+    meshPtr->AttachShader(defaultShader);
     return meshPtr;
 }
 bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
@@ -81,143 +81,6 @@ bool RenderSystem::DestroyScene(Scene* scenePtr) {
     assert(scenePtr != nullptr);
     return scene.Destroy(scenePtr);
 }
-
-
-
-void RenderSystem :: RenderFrame(float deltaTime) {
-    
-    if (cameraMain == nullptr) 
-        return;
-    
-    //
-    // Clear the screen
-    glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    
-    if (skyMain != nullptr) {
-        Color& color = skyMain->background;
-        glClearColor(color.r, color.g, color.b, 1);
-    }
-    
-    if (cameraMain->rigidBody != nullptr) {
-        rp3d::Transform bodyTransform = cameraMain->rigidBody->getTransform();
-        rp3d::Vector3 bodyPosition = bodyTransform.getPosition();
-        cameraMain->transform.position.x = bodyPosition.x;
-        cameraMain->transform.position.y = bodyPosition.y;
-        cameraMain->transform.position.z = bodyPosition.z;
-    }
-    
-    if (cameraMain->useMouseLook) 
-        cameraMain->MouseLook(deltaTime, displayCenter.x, displayCenter.y);
-    
-    glm::mat4 projection = cameraMain->CalculatePerspectiveMatrix();
-    glm::mat4 view = cameraMain->CalculateView();
-    
-    glm::mat4 viewProj = projection * view;
-    currentShader = nullptr;
-    
-    //
-    // Draw entity meshes
-    for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
-        
-        Scene* scenePtr = *it;
-        
-        for (std::vector<Entity*>::iterator it = scenePtr->entities.begin(); it != scenePtr->entities.end(); ++it) {
-            
-            Entity* currentEntity = *it;
-            
-            if (currentEntity->mesh == nullptr) continue;
-            Mesh* mesh = currentEntity->mesh;
-            
-            if (mesh->shader == nullptr) continue;
-            Shader* shader = mesh->shader;
-            
-            // Mesh binding
-            if (currentMesh != mesh) {
-                currentMesh = mesh;
-                
-                currentMesh->Bind();
-            }
-            
-            // Shader binding
-            if (currentShader != shader) {
-                currentShader = shader;
-                
-                currentShader->Bind();
-                currentShader->SetProjectionMatrix(viewProj);
-            }
-            
-            // Material binding
-            if (currentMaterial != currentEntity->material) {
-                currentMaterial = currentEntity->material;
-                
-                currentMaterial->Bind();
-                currentMaterial->BindTextureSlot(0);
-                
-                
-                if (currentMaterial->doDepthTest) {
-                    glEnable(GL_DEPTH_TEST);
-                    glDepthMask(currentMaterial->doDepthTest);
-                    glDepthFunc(currentMaterial->depthFunc);
-                } else {
-                    glDisable(GL_DEPTH_TEST);
-                }
-                
-                
-                if (currentMaterial->doFaceCulling) {
-                    glEnable(GL_CULL_FACE);
-                    glCullFace(currentMaterial->faceCullSide);
-                    glFrontFace(currentMaterial->faceWinding);
-                } else {
-                    glEnable(GL_CULL_FACE);
-                }
-                
-                
-                if (currentMaterial->doBlending) {
-                    glEnable(GL_BLEND);
-                    glBlendFuncSeparate(currentMaterial->blendSource, currentMaterial->blendDestination, currentMaterial->blendAlphaSource, currentMaterial->blendAlphaDestination);
-                } else {
-                    glDisable(GL_BLEND);
-                }
-                
-                currentShader->Bind();
-                currentShader->SetMaterialColor(currentMaterial->color);
-                currentShader->SetTextureSampler(0);
-            }
-            
-            
-            // Calculate model matrix
-            glm::mat4 model(1);
-            
-            if (currentEntity->rigidBody != nullptr) {
-                
-                currentEntity->rigidBody->getTransform().getOpenGLMatrix(&model[0][0]);
-                
-            } else {
-                
-                model = CalculateModelMatrix(currentEntity->transform);
-            }
-            
-            
-            currentShader->SetModelMatrix(model);
-            
-            mesh->DrawIndexArray();
-            
-            continue;
-        }
-        
-    }
-    
-    SwapBuffers(deviceContext);
-    
-#ifdef RENDERER_CHECK_OPENGL_ERRORS
-    GetGLErrorCodes("OnRender::");
-#endif
-    
-    return;
-}
-
 
 void RenderSystem :: Initiate(void) {
     

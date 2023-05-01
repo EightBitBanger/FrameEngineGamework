@@ -28,30 +28,30 @@ public:
     bool LoadShaderGLSL(std::string path, std::string resourceName);
     
     /// Find a mesh resource by its resource tag name.
-    MeshTag*     FindMeshTag(std::string name);
+    MeshTag*     FindMeshTag(std::string resourceName);
     /// Find a texture resource by its resource tag name.
-    TextureTag*  FindTextureTag(std::string name);
+    TextureTag*  FindTextureTag(std::string resourceName);
     /// Find a shader resource by its resource tag name.
-    ShaderTag*   FindShaderTag(std::string name);
+    ShaderTag*   FindShaderTag(std::string resourceName);
     /// Find a resource by its resource tag name.
-    ColliderTag* FindColliderTag(std::string name);
+    ColliderTag* FindColliderTag(std::string resourceName);
     
     /// Destroy and deallocate a mesh model resource by its name.
-    bool UnloadMeshTag(std::string name);
+    bool UnloadMeshTag(std::string resourceName);
     /// Destroy and deallocate a texture image resource by its name.
-    bool UnloadTextureTag(std::string name);
+    bool UnloadTextureTag(std::string resourceName);
     /// Destroy and deallocate a shader program resource by its name.
-    bool UnloadShaderTag(std::string name);
+    bool UnloadShaderTag(std::string resourceName);
     
     /// Get a physics collision shape from a collider resource tag.
-    rp3d::BoxShape* GetColliderFromTag(std::string name);
+    rp3d::BoxShape* GetColliderFromTag(std::string resourceName);
     
     /// Create a render mesh object from a mesh resource tag.
-    Mesh*     CreateMeshFromTag(std::string name);
+    Mesh*     CreateMeshFromTag(std::string resourceName);
     /// Create a material object from a texture image resource tag.
-    Material* CreateMaterialFromTag(std::string name);
+    Material* CreateMaterialFromTag(std::string resourceName);
     /// Create a shader object from a GLSL shader resource tag.
-    Shader*   CreateShaderFromTag(std::string name);
+    Shader*   CreateShaderFromTag(std::string resourceName);
     
     /// Load a ".scene" file. Scene files construct scenes on load from definition and location files.
     bool LoadScene(std::string path);

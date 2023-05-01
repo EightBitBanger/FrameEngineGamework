@@ -46,19 +46,24 @@ void Framework::Start() {
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
-    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(-100, 30, 0);
+    rp3d::RigidBody* rigidBodyCamera = Physics.CreateRigidBody(-100, 30, 0);
+    rigidBodyCamera->setIsAllowedToSleep(false);
+    rigidBodyCamera->enableGravity(true);
+    
+    Renderer.cameraMain->AttachRigidBody(rigidBodyCamera);
     Renderer.cameraMain->AddCollider( Resources.FindColliderTag("coll_player"), 0, -10, 0 );
     Renderer.cameraMain->SetMass(2);
     Renderer.cameraMain->SetLinearDamping(4);
     Renderer.cameraMain->SetAngularAxisLockFactor(0, 0, 0);
-    Renderer.cameraMain->rigidBody->setIsAllowedToSleep(false);
-    Renderer.cameraMain->rigidBody->enableGravity(true);
     
     
     
     // Assign the camera controller a native script
-    Renderer.cameraMain->script = Scripting.CreateScript();
-    Renderer.cameraMain->script->OnUpdate = ScriptCameraController;
+    Script* scriptPtr = Scripting.CreateScript();
+    scriptPtr->OnUpdate = ScriptCameraController;
+    
+    Renderer.cameraMain->AttachScript(scriptPtr);
+    
     
     
     // Create objects from resource tags
@@ -78,11 +83,16 @@ void Framework::Start() {
     Entity* plain = Renderer.CreateEntity();
     plainScene->AddToSceneRoot(plain);
     
-    plain->mesh = Renderer.CreateMesh();
-    plain->mesh->AddPlainSubDivided(-80, 0, -150,  10, 10,  Colors.gray,  20, 20);
+    Mesh* meshPlain = Renderer.CreateMesh();
+    plain->AttachMesh(meshPlain);
+    meshPlain->AddPlainSubDivided(-80, 0, -150,  10, 10,  Colors.gray,  20, 20);
     
-    plain->material = Resources.CreateMaterialFromTag("mat_plain");
-    plain->rigidBody = Physics.CreateRigidBody(0, 0, 0);
+    
+    Material* materialPtr = Resources.CreateMaterialFromTag("mat_plain");
+    plain->AttachMaterial(materialPtr);
+    
+    rp3d::RigidBody* rigidBodyPtr = Physics.CreateRigidBody(0, 0, 0);
+    plain->AttachRidigBody(rigidBodyPtr);
     plain->SetRigidBodyStatic();
     
     plain->AddCollider( Resources.FindColliderTag("coll_plain"), 0, -10.0, 0);
@@ -154,14 +164,16 @@ void Framework::Run() {
         float yy = 100;
         float zz = (Random.Range(0, focus) - Random.Range(0, focus)) * spreadMul;
         
+        
         // Create a barrel object
         Entity* barrel = Renderer.CreateEntity();
         objectScene->AddToSceneRoot(barrel);
         
-        barrel->mesh = barrelMesh;
-        barrel->material = barrelMaterial;
         
-        barrel->rigidBody = Physics.CreateRigidBody(xx, yy, zz);
+        barrel->AttachMesh(barrelMesh);
+        barrel->AttachMaterial(barrelMaterial);
+        
+        barrel->AttachRidigBody( Physics.CreateRigidBody(xx, yy, zz) );
         
         ColliderTag* colliderTag = Resources.FindColliderTag("coll_barrel");
         barrel->AddCollider(colliderTag, 0, 0, 0);

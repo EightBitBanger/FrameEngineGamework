@@ -1,6 +1,8 @@
 #ifndef ENGINE_CORE
 #define ENGINE_CORE
 
+#include "components/gameobject.h"
+
 #include "../application/applicationlayer.h"
 
 
@@ -11,15 +13,17 @@ public:
     EngineSystemManager();
     
     /// Create a game object and return its pointer.
-    Entity* CreateGameObject(void);
+    GameObject* CreateGameObject(void);
     
     /// Destroy a game object.
-    void DestroyGameObject(Entity* entityPtr);
+    void DestroyGameObject(GameObject* gameObjectPtr);
     
+    
+    void Update(void);
     
 private:
     
-    
+    PoolAllocator<GameObject> gameObject;
     
 };
 

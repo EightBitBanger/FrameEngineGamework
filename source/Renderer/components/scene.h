@@ -10,9 +10,6 @@ class Scene {
     
 public:
     
-    /// Return an entity from an index location.
-    Entity* GetEntity(unsigned int index);
-    
     /// Add an entity to this scene.
     void AddToSceneRoot(Entity* entity);
     /// Remove an entity from this scene.
@@ -20,6 +17,12 @@ public:
     
     /// Return the number of entities in this scene.
     unsigned int GetRenderQueueSize(void);
+    
+    /// Return an entity from an index location.
+    Entity* GetEntity(unsigned int index);
+    
+    
+private:
     
     /// List of entities in this scene.
     std::vector<Entity*>  entities;

@@ -9,7 +9,6 @@ Camera::Camera() {
     script = nullptr;
     rigidBody = nullptr;
     
-    useMovementKeys = false;
     useMouseLook = false;
     
     cameraSpeed = 100;
@@ -30,6 +29,37 @@ Camera::Camera() {
 void Camera::SetMouseCenter(int mouseResetX, int mouseResetY) {CursorSetPosition(mouseResetX, mouseResetY);}
 void Camera::EnableMouseLook(void)  {ShowCursor(false); useMouseLook = true;}
 void Camera::DisableMouseLook(void) {ShowCursor(true); useMouseLook = false;}
+
+
+void Camera::AttachScript(Script* scriptPtr) {
+    script = scriptPtr;
+    return;
+}
+
+void Camera::DetachScript(void) {
+    script = nullptr;
+    return;
+}
+
+Script* Camera::GetAttachedScript(void) {
+    return script;
+}
+
+void Camera::AttachRigidBody(rp3d::RigidBody* rigidBodyPtr) {
+    rigidBody = rigidBodyPtr;
+    return;
+}
+
+void Camera::DetachRigidBody(void) {
+    rigidBody = nullptr;
+    return;
+}
+
+rp3d::RigidBody* Camera::GetAttachedRigidBody(void) {
+    return rigidBody;
+}
+
+
 
 void Camera::MouseLook(float deltaTime, int mouseResetX, int mouseResetY) {
     
