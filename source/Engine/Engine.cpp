@@ -31,8 +31,62 @@ GameObject* EngineSystemManager::CreateGameObject(void) {
 void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
     RemoveGameObjectFromActiveList(gameObjectPtr);
+    
+    // Destroy rigid body
+    Entity* entityRenderer = gameObjectPtr->GetAttachedEntity();
+    if (entityRenderer != nullptr)
+        DestroyEntityRenderer(entityRenderer);
+    
+    // Destroy entity renderer
+    rp3d::RigidBody* rigidBody = gameObjectPtr->GetAttachedRidigBody();
+    if (rigidBody != nullptr) 
+        DestroyRigidBody(rigidBody);
+    
     gameObject.Destroy(gameObjectPtr);
     return;
+}
+
+
+
+void ScriptCameraController(void);
+
+
+
+GameObject* EngineSystemManager::CreateCameraController(float x, float y, float z) {
+    
+    GameObject* cameraController = Engine.CreateGameObject();
+    cameraController->name = "camera";
+    
+    Renderer.cameraMain = Renderer.CreateCamera();
+    cameraController->AttachCamera(Renderer.cameraMain);
+    Renderer.cameraMain->EnableMouseLook();
+    Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    
+    rp3d::RigidBody* cameraBody = Engine.CreateRigidBody(x, y, z);
+    cameraController->AttachRidigBody(cameraBody);
+    cameraController->SetLinearDamping(3);
+    cameraController->EnableGravity(false);
+    
+    Script* scriptPtr = Scripting.CreateScript();
+    cameraController->AttachScript(scriptPtr);
+    scriptPtr->OnUpdate = ScriptCameraController;
+    
+    return cameraController;
+}
+
+void EngineSystemManager::DestroyCameraController(GameObject* cameraControllerPtr) {
+    
+    Script*    attachedScript = cameraControllerPtr->GetAttachedScript();
+    Scripting.DestroyScript(attachedScript);
+    
+    rp3d::RigidBody* attachedBody   = cameraControllerPtr->GetAttachedRidigBody();
+    Engine.DestroyRigidBody(attachedBody);
+    
+    Camera* attachedCamera = cameraControllerPtr->GetAttachedCamera();
+    if (Renderer.cameraMain == attachedCamera) 
+        Renderer.cameraMain = nullptr;
+    Renderer.DestroyCamera(attachedCamera);
+    
 }
 
 
@@ -110,23 +164,58 @@ void EngineSystemManager::Initiate() {
 
 void EngineSystemManager::Update(void) {
     
-    for (int i=0; i < gameObject.Size(); i++ ) {
+    for (int i=0; i < gameObject.Size()-1; i++ ) {
         GameObject* objectPtr = gameObject[i];
-        
         
         if (!objectPtr->isActive) 
             continue;
         
-        Entity* entitytPtr = objectPtr->GetAttachedEntity();
-        if (entitytPtr == nullptr) 
-            continue;
-        
+        // Sync with the rigid body
         rp3d::RigidBody* rigidBodyPtr = objectPtr->GetAttachedRidigBody();
         if (rigidBodyPtr == nullptr) 
             continue;
         
-        rigidBodyPtr->getTransform().getOpenGLMatrix(&entitytPtr->transform.modelMatrix[0][0]);
+        Entity* entitytPtr = objectPtr->GetAttachedEntity();
+        if (entitytPtr != nullptr) {
+            rp3d::Transform bodyTransform = rigidBodyPtr->getTransform();
+            bodyTransform.getOpenGLMatrix(&entitytPtr->transform.matrix[0][0]);
+            
+            // Translation
+            rp3d::Vector3 bodyPos = bodyTransform.getPosition();
+            entitytPtr->transform.position.x = bodyPos.x;
+            entitytPtr->transform.position.y = bodyPos.y;
+            entitytPtr->transform.position.z = bodyPos.z;
+            
+            // Orientation
+            rp3d::Quaternion quaterion = bodyTransform.getOrientation();
+            entitytPtr->transform.rotation.x = quaterion.x;
+            entitytPtr->transform.rotation.y = quaterion.y;
+            entitytPtr->transform.rotation.z = quaterion.z;
+            entitytPtr->transform.rotation.w = quaterion.w;
+            
+        }
         
+        Camera* CameraPtr = objectPtr->GetAttachedCamera();
+        if (CameraPtr != nullptr) {
+            rp3d::Transform bodyTransform = rigidBodyPtr->getTransform();
+            rigidBodyPtr->getTransform().getOpenGLMatrix(&CameraPtr->transform.matrix[0][0]);
+            
+            // Translation
+            rp3d::Vector3 bodyPos = bodyTransform.getPosition();
+            CameraPtr->transform.position.x = bodyPos.x;
+            CameraPtr->transform.position.y = bodyPos.y;
+            CameraPtr->transform.position.z = bodyPos.z;
+            
+            // Orientation
+            if (!CameraPtr->useMouseLook) {
+                rp3d::Quaternion quaterion = bodyTransform.getOrientation();
+                CameraPtr->transform.rotation.x = quaterion.x;
+                CameraPtr->transform.rotation.y = quaterion.y;
+                CameraPtr->transform.rotation.z = quaterion.z;
+                CameraPtr->transform.rotation.w = quaterion.w;
+            }
+            
+        }
         
         continue;
     }

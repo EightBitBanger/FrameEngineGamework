@@ -1,13 +1,16 @@
 #include "gameobject.h"
 
 GameObject::GameObject():
+name(""),
 isActive(true),
 entity(nullptr),
 script(nullptr),
+camera(nullptr),
 rigidBody(nullptr) {
-    
     return;
 }
+
+
 
 
 void GameObject::AttachEntity(Entity* entityPtr) {
@@ -27,11 +30,13 @@ Entity* GameObject::GetAttachedEntity(void) {
 
 void GameObject::AttachScript(Script* scriptPtr) {
     script = scriptPtr;
+    scriptPtr->isActive = true;
     return;
 }
 
 void GameObject::DetachScript(void) {
     script = nullptr;
+    script->isActive = false;
     return;
 }
 
@@ -50,24 +55,47 @@ void GameObject::DetachRidigBody(void) {
     return;
 }
 
-rp3d::RigidBody* GameObject::GetAttachedRidigBody(){
+rp3d::RigidBody* GameObject::GetAttachedRidigBody(void) {
     return rigidBody;
+}
+
+
+
+void GameObject::AttachCamera(Camera* cameraPtr) {
+    camera = cameraPtr;
+    return;
+}
+
+void GameObject::DetachCamera(void) {
+    camera = nullptr;
+    return;
+}
+
+Camera* GameObject::GetAttachedCamera(void) {
+    return camera;
 }
 
 
 
 
 
+
+
+
+//
+// Physics functions
+//
+
 void GameObject::AddForce(float x, float y, float z) {
     assert(rigidBody != nullptr);
-    rp3d::Vector3 nudge = rp3d::Vector3(x, y, z);
+    rp3d::Vector3 nudge(x, y, z);
     rigidBody->applyLocalForceAtCenterOfMass(nudge);
     return;
 }
 
 void GameObject::AddTorque(float x, float y, float z) {
     assert(rigidBody != nullptr);
-    rp3d::Vector3 twist = rp3d::Vector3(x, y, z);
+    rp3d::Vector3 twist(x, y, z);
     rigidBody->applyLocalTorque(twist);
     return;
 }

@@ -6,7 +6,7 @@ Transform::Transform() {
     rotation = glm::vec4(0, 0, 0, 0);
     scale    = glm::vec3(1, 1, 1);
     
-    modelMatrix = glm::mat4(1);
+    matrix = glm::mat4(1);
     
     parent = nullptr;
     return;

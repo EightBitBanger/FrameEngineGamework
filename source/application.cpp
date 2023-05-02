@@ -30,6 +30,8 @@ Material* barrelMaterial;
 
 Scene* plainScene;
 
+GameObject* cameraController = nullptr;
+
 
 //
 // Application entry point
@@ -39,16 +41,25 @@ void Framework::Start() {
     
     Resources.LoadScene("data/main.scene");
     
+    Physics.SetWorldGravity(0, 0, 0);
+    
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
     Renderer.skyMain->SetColor( Colors.Make(0.087, 0.087, 0.087) );
     
-    // Camera
-    Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->transform.position = glm::vec3(-50, 50, 0);
     
-    Renderer.cameraMain->EnableMouseLook();
-    Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    
+    
+    
+    // Setup a camera
+    //Renderer.cameraMain = Renderer.CreateCamera();
+    
+    //Renderer.cameraMain->transform.position = glm::vec3(-50, 0, 0);
+    //Renderer.cameraMain->EnableMouseLook();
+    //Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    
+    // Camera controller
+    cameraController = Engine.CreateCameraController(-50, 0, 0);
     
     
     
@@ -68,43 +79,6 @@ void Framework::Start() {
     Renderer.AddToRenderQueue(plainScene);
     
     
-    
-    // Create a plain
-    /*
-    
-    Scene* plainScene = Renderer.CreateScene();
-    Renderer.AddToRenderQueue(plainScene);
-    
-    Entity* plain = Renderer.CreateEntity();
-    plainScene->AddToSceneRoot(plain);
-    
-    Mesh* meshPlain = Renderer.CreateMesh();
-    plain->AttachMesh(meshPlain);
-    meshPlain->AddPlain(0, 0, 0,  100, 100,  Colors.gray);
-    
-    Material* materialPtr = Resources.CreateMaterialFromTag("mat_plain");
-    plain->AttachMaterial(materialPtr);
-    */
-    
-    //rp3d::RigidBody* rigidBodyPtr = Physics.CreateRigidBody(0, 0, 0);
-    //plain->AttachRidigBody(rigidBodyPtr);
-    //plain->SetRigidBodyStatic();
-    
-    //plain->AddCollider( Resources.FindColliderTag("coll_plain"), 0, -10.0, 0);
-    
-    
-    
-    //rp3d::Vector3 lockfactor(0, 0, 0);
-    //rigidBody->setLinearLockAxisFactor(lockfactor);
-    //rigidBody->setAngularLockAxisFactor(lockfactor);
-    //rigidBody->setType(rp3d::BodyType::STATIC);
-    
-    
-    
-    
-    
-    
-    
     return;
 }
 
@@ -113,13 +87,8 @@ void Framework::Start() {
 
 
 
-float spreadMul     = 0.7;
-unsigned int focus  = 50;
-float count         = 200;
-
-int counter=0;
-
-
+float forceMul  = 10;
+float torqueMul = 1;
 
 
 //
@@ -128,25 +97,41 @@ int counter=0;
 
 void Framework::Run() {
     
-    GameObject* gameObject = Engine.CreateGameObject();
     
-    rp3d::RigidBody* rigidBody = Engine.CreateRigidBody();
-    gameObject->AttachRidigBody(rigidBody);
+    for (unsigned int i=0; i < 10; i++) {
+        
+        GameObject* gameObject = Engine.CreateGameObject();
+        
+        rp3d::RigidBody* rigidBody = Engine.CreateRigidBody();
+        gameObject->AttachRidigBody(rigidBody);
+        
+        Entity* entityRenderer = Engine.CreateEntityRenderer(barrelMesh, barrelMaterial);
+        gameObject->AttachEntity(entityRenderer);
+        
+        float forcex = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
+        float forcey = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
+        float forcez = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
+        
+        float torquex = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
+        float torquey = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
+        float torquez = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
+        
+        gameObject->AddForce(forcex, forcey, forcez);
+        gameObject->AddTorque(torquex, torquey, torquez);
+    }
     
-    Entity* entityRenderer = Engine.CreateEntityRenderer(barrelMesh, barrelMaterial);
-    gameObject->AttachEntity(entityRenderer);
     
     
-    
-    unsigned int size = Engine.GetGameObjectCount();
-    
-    if (size > 100) {
+    while (Engine.GetGameObjectCount() > 2000) {
         
         GameObject* oldObject = Engine.GetGameObject(0);
         
-        rp3d::RigidBody* body = oldObject->GetAttachedRidigBody();
+        if (oldObject->name == "camera") 
+            oldObject = Engine.GetGameObject(1);
         
-        Engine.DestroyRigidBody(body);
+        rp3d::RigidBody* body   = oldObject->GetAttachedRidigBody();
+        Entity*          entity = oldObject->GetAttachedEntity();
+        
         Engine.DestroyGameObject(oldObject);
         
     }
@@ -155,7 +140,8 @@ void Framework::Run() {
     
     
     
-    /*
+    
+    
     //
     // Escape key pause
     
@@ -180,38 +166,7 @@ void Framework::Run() {
         }
     }
     
-    // Enter key trigger spawn reset
-    if (Input.CheckKeyCurrent(VK_RETURN)) counter = 0;
     
-    
-    //
-    // Spawn a bunch of random objects
-    
-    if (counter > count) return;
-    if (Random.Range(1, 2) == 1) {
-        
-        counter++;
-        
-        float xx = (Random.Range(0, focus) - Random.Range(0, focus)) * spreadMul;
-        float yy = 100;
-        float zz = (Random.Range(0, focus) - Random.Range(0, focus)) * spreadMul;
-        
-        
-        // Create a barrel object
-        Entity* barrel = Renderer.CreateEntity();
-        objectScene->AddToSceneRoot(barrel);
-        
-        
-        barrel->AttachMesh(barrelMesh);
-        barrel->AttachMaterial(barrelMaterial);
-        
-        barrel->AttachRidigBody( Physics.CreateRigidBody(xx, yy, zz) );
-        
-        ColliderTag* colliderTag = Resources.FindColliderTag("coll_barrel");
-        barrel->AddCollider(colliderTag, 0, 0, 0);
-        
-    }
-    */
     return;
 }
 
@@ -231,7 +186,6 @@ void Framework::Shutdown(void) {
 
 void ScriptCameraController(void) {
     
-    
     float cameraSpeed = 1000;
     
     glm::vec3 force(0);
@@ -244,8 +198,8 @@ void ScriptCameraController(void) {
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
     force *= cameraSpeed;
-    Renderer.cameraMain->AddForce(force.x, force.y, force.z);
     
+    cameraController->AddForce(force.x, force.y, force.z);
     
     return;
 };

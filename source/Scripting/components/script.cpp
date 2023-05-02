@@ -2,7 +2,7 @@
 
 Script::Script() {
     
-    isActive = true;
+    isActive         = false;
     hasBeenInitiated = false;
     
     OnCreate = nullfunc;

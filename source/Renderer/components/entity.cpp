@@ -3,20 +3,11 @@
 
 Entity::Entity() {
     
-    name = "";
-    
     mesh       = nullptr;
     material   = nullptr;
     
     return;
 }
-
-Entity::~Entity() {
-    
-    return;
-}
-
-
 
 void Entity::AttachMesh(Mesh* meshPtr) {
     mesh = meshPtr;

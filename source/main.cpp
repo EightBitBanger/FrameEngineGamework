@@ -3,6 +3,7 @@
 extern Timer        PhysicsTime;
 extern Timer        Time;
 
+extern PhysicsSystem        Physics;
 extern RenderSystem         Renderer;
 extern ScriptSystem         Scripting;
 extern ResourceManager      Resources;

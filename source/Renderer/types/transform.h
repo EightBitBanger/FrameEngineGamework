@@ -16,7 +16,7 @@ public:
     
     Transform* parent;
     
-    glm::mat4 modelMatrix;
+    glm::mat4 matrix;
     
     std::vector<Transform*> child;
     

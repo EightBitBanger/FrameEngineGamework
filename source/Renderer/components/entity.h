@@ -1,44 +1,19 @@
 #ifndef COMPONENT_ENTITY
 #define COMPONENT_ENTITY
 
-#define GLEW_STATIC
-#include <gl/glew.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <ReactPhysics3d/ReactPhysics3d.h>
-
-#include "../../std/timer.h"
-
-#include "../types/bufferlayout.h"
 #include "../types/transform.h"
-#include "../types/color.h"
-#include "../types/viewport.h"
 
-#include "../../Input/InputSystem.h"
-#include "../../Physics/PhysicsSystem.h"
-#include "../../Resources/assets/colliderTag.h"
-#include "../../Scripting/components/script.h"
-
-#include "shader.h"
 #include "material.h"
 #include "mesh.h"
-
-
-extern PhysicsSystem Physics;
 
 
 class Entity {
     
 public:
     
-    std::string name;
-    
     Transform transform;
     
     Entity();
-    ~Entity();
     
     /// Attach a mesh object to the entity.
     void AttachMesh(Mesh* meshPtr);

@@ -5,6 +5,10 @@
 
 #include "../application/applicationlayer.h"
 
+#include "../Renderer/components/entity.h"
+#include "../Scripting/components/script.h"
+#include "../Renderer/components/camera.h"
+
 
 class EngineSystemManager {
     
@@ -16,6 +20,11 @@ public:
     GameObject* CreateGameObject(void);
     /// Destroy a game object.
     void DestroyGameObject(GameObject* gameObjectPtr);
+    
+    /// Create a camera controller game object and return its pointer.
+    GameObject* CreateCameraController(float x=0, float y=0, float z=0);
+    /// Destroy a camera controller game object.
+    void DestroyCameraController(GameObject* gameObjectPtr);
     
     /// Create an entity renderer component and return its pointer.
     Entity* CreateEntityRenderer(Mesh* meshPtr, Material* materialPtr);

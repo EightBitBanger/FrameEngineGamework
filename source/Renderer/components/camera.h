@@ -64,66 +64,9 @@ public:
     /// Get the camera yaw angle.
     float GetYaw(float pitch);
     
-    /// Attach a script object to the camera.
-    void AttachScript(Script* scriptPtr);
-    /// Detach the script object from the camera.
-    void DetachScript(void);
-    /// Return the currently attached script object.
-    Script* GetAttachedScript(void);
-    
-    /// Attach a rigid body object to the camera.
-    void AttachRigidBody(rp3d::RigidBody* rigidBodyPtr);
-    /// Detach the rigid body object from the camera.
-    void DetachRigidBody(void);
-    /// Return the currently attached rigid body object.
-    rp3d::RigidBody* GetAttachedRigidBody(void);
-    
-    
-    glm::mat4 CalculateView(void);
-    glm::mat4 CalculatePerspectiveMatrix(void);
-    glm::mat4 CalculateOrthiographicMatrix(Viewport viewport);
-    
-    /// Add directional force to the rigid body.
-    void AddForce(float x, float y, float z);
-    /// Add rotational torque to the rigid body.
-    void AddTorque(float x, float y, float z);
-    
-    /// Add a collider from a resource tag at the offset position x, y, z.
-    void AddCollider(ColliderTag* colliderTag, float x, float y, float z);
-    /// Add a box collider shape at the offset position x, y, z.
-    void AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z);
-    
-    /// Set the rigid body mass.
-    void SetMass(float mass);
-    /// Set the rigid body physical resistance to movement.
-    void SetLinearDamping(float damping);
-    /// Set the rigid body physical resistance to rotation.
-    void SetAngularDamping(float damping);
-    
-    /// Set the linear movement lock multiplier.
-    void SetLinearAxisLockFactor(float x, float y, float z);
-    /// Set the angular rotation lock multiplier.
-    void SetAngularAxisLockFactor(float x, float y, float z);
-    
-    /// Set the gravity state.
-    void EnableGravity(bool enabled);
-    
-    /// Calculate the physical weight proportions by the size and offset of attached colliders.
-    void CalculatePhysics(void);
-    
-    /// Make the rigid body non movable.
-    void SetRigidBodyStatic(void);
-    /// Make the rigid body dynamically movable.
-    void SetRigidBodyDynamic(void);
     
     
 private:
-    
-    /// Script component pointer.
-    Script* script;
-    
-    /// Rigid body component pointer.
-    rp3d::RigidBody* rigidBody;
     
 };
 

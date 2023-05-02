@@ -23,15 +23,38 @@ void RenderSystem::RenderFrame(float deltaTime) {
     if (cameraMain->useMouseLook) 
         cameraMain->MouseLook(deltaTime, displayCenter.x, displayCenter.y);
     
-    glm::mat4 projection = cameraMain->CalculatePerspectiveMatrix();
-    glm::mat4 view = cameraMain->CalculateView();
+    glm::mat4 projection = glm::perspective( glm::radians( cameraMain->fov ), cameraMain->aspect, cameraMain->clipNear, cameraMain->clipFar);
     
-    glm::mat4 viewProj = projection * view;
+    
+    // Calculate viewing angle
+    glm::vec3 pos;
+    pos.x = cameraMain->transform.position.x;
+    pos.y = cameraMain->transform.position.y;
+    pos.z = cameraMain->transform.position.z;
+    
+    // Looking angle
+    cameraMain->forward.x = cos( cameraMain->transform.rotation.x * 180 / glm::pi<float>() );
+    cameraMain->forward.y = tan( cameraMain->transform.rotation.y * 180 / glm::pi<float>() );
+    cameraMain->forward.z = sin( cameraMain->transform.rotation.x * 180 / glm::pi<float>() );
+    
+    cameraMain->forward = glm::normalize(cameraMain->forward);
+    
+    // Right angle to the looking angle
+    glm::vec3 angle;
+    angle.x = cameraMain->transform.position.x + cameraMain->forward.x;
+    angle.y = cameraMain->transform.position.y + cameraMain->forward.y;
+    angle.z = cameraMain->transform.position.z + cameraMain->forward.z;
+    
+    cameraMain->right = glm::normalize(glm::cross(cameraMain->up, cameraMain->forward));
+    glm::mat4 view = glm::lookAt(pos, angle, cameraMain->up);
+    
+    
+    // Trip the shader to reset the camera projection
     currentShader = nullptr;
     
     
-    // Draw entity meshes
     
+    // Draw entity meshes
     for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
         
         Scene* scenePtr = *it;
@@ -60,7 +83,9 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 currentShader = shader;
                 
                 currentShader->Bind();
-                currentShader->SetProjectionMatrix(viewProj);
+                
+                glm::mat4 viewProjection = projection * view;
+                currentShader->SetProjectionMatrix( viewProjection );
             }
             
             // Material binding
@@ -102,7 +127,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 currentShader->SetTextureSampler(0);
             }
             
-            currentShader->SetModelMatrix(currentEntity->transform.modelMatrix);
+            currentShader->SetModelMatrix(currentEntity->transform.matrix);
             
             mesh->DrawIndexArray();
             

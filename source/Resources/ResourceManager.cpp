@@ -120,7 +120,7 @@ bool ResourceManager::LoadLocations(std::string path) {
         
         strexp.clear();
         strexp = StringExplode(locationsLoader.rawData[i], ' ');
-        newEntity->name = strexp[0];
+        //newEntity->name = strexp[0];
         
         // Assign mesh
         newEntity->AttachMesh(CreateMeshFromTag( strexp[1] ));

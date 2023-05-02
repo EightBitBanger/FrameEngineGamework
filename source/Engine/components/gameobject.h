@@ -2,14 +2,17 @@
 #define ENGINE_GAME_OBJECT
 
 #include "../../Renderer/components/entity.h"
+#include "../../Scripting/components/script.h"
+#include "../../Renderer/components/camera.h"
 
 
 class GameObject {
     
 public:
     
-    bool isActive;
+    std::string name;
     
+    bool isActive;
     
     GameObject();
     
@@ -32,7 +35,12 @@ public:
     /// Detach the rigid body object from the game object.
     void DetachRidigBody(void);
     /// Return the attached rigid body object.
-    rp3d::RigidBody* GetAttachedRidigBody();
+    rp3d::RigidBody* GetAttachedRidigBody(void);
+    
+    
+    void AttachCamera(Camera* cameraPtr);
+    void DetachCamera(void);
+    Camera* GetAttachedCamera(void);
     
     
     /// Add directional force to the rigid body.
@@ -70,11 +78,9 @@ public:
     
 private:
     
-    /// Pointer to an entity component.
     Entity*          entity;
-    /// Pointer to a user script component.
     Script*          script;
-    /// Pointer to a rigid body physics component.
+    Camera*          camera;
     rp3d::RigidBody* rigidBody;
     
 };
