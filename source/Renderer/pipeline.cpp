@@ -18,8 +18,6 @@ void RenderSystem::RenderFrame(float deltaTime) {
     }
     
     
-    // Synchronize attached rigid body transform
-    
     if (cameraMain->useMouseLook) 
         cameraMain->MouseLook(deltaTime, displayCenter.x, displayCenter.y);
     
@@ -66,10 +64,10 @@ void RenderSystem::RenderFrame(float deltaTime) {
             Entity* currentEntity = scenePtr->GetEntity(i);
             
             Mesh* mesh = currentEntity->GetAttachedMesh();
-            if (mesh == nullptr) continue;
+            assert(mesh != nullptr);
             
             Shader* shader = mesh->GetAttachedShader();
-            if (shader == nullptr) continue;
+            assert(shader != nullptr);
             
             // Mesh binding
             if (currentMesh != mesh) {

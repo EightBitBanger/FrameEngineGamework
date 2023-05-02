@@ -29,7 +29,6 @@ Material* barrelMaterial;
 
 
 
-Scene* plainScene;
 
 GameObject* cameraController = nullptr;
 
@@ -42,7 +41,7 @@ void Framework::Start() {
     
     Resources.LoadScene("data/main.scene");
     
-    Physics.SetWorldGravity(0, 0, 0);
+    Physics.SetWorldGravity(0, -90, 0);
     
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
@@ -57,17 +56,21 @@ void Framework::Start() {
     
     // Create objects from resource tags
     barrelMesh = Resources.CreateMeshFromTag("barrel");
-    
-    barrelMesh->ChangeSubMeshColor(0, Colors.ltgray);
-    
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
     
+    barrelMesh->ChangeSubMeshColor(0, Colors.yellow);
     
     
     
     
-    plainScene = Renderer.CreateScene();
-    Renderer.AddToRenderQueue(plainScene);
+    GameObject* plain = Engine.CreateGameObject();
+    Entity* renderer = Engine.CreateEntityRenderer(barrelMesh, barrelMaterial);
+    plain->AttachEntity(renderer);
+    
+    rp3d::RigidBody* body = Engine.CreateRigidBody(0, 0, 0);
+    //plain->AttachRidigBody(body);
+    
+    
     
     
     return;
@@ -89,54 +92,13 @@ float torqueMul = 5;
 void Framework::Run() {
     
     
-    for (unsigned int i=0; i < 10; i++) {
-        
-        GameObject* gameObject = Engine.CreateGameObject();
-        
-        rp3d::RigidBody* rigidBody = Engine.CreateRigidBody();
-        gameObject->AttachRidigBody(rigidBody);
-        
-        Entity* entityRenderer = Engine.CreateEntityRenderer(barrelMesh, barrelMaterial);
-        gameObject->AttachEntity(entityRenderer);
-        
-        float forcex = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
-        float forcey = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
-        float forcez = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
-        
-        float torquex = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
-        float torquey = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
-        float torquez = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
-        
-        gameObject->AddForce(forcex, forcey, forcez);
-        gameObject->AddTorque(torquex, torquey, torquez);
-    }
-    
-    
-    
-    while (Engine.GetGameObjectCount() > 2000) {
-        
-        GameObject* oldObject = Engine.GetGameObject(0);
-        
-        if (oldObject->name == "camera") 
-            oldObject = Engine.GetGameObject(1);
-        
-        rp3d::RigidBody* body   = oldObject->GetAttachedRidigBody();
-        Entity*          entity = oldObject->GetAttachedEntity();
-        
-        Engine.DestroyGameObject(oldObject);
-        
-    }
-    
-    
-    
-    
-    
-    
     
     //
     // Escape key pause
     
     if (Input.CheckKeyPressed(VK_ESCAPE)) {
+        //Application.isActive = false;
+        
         Application.Pause();
         
         if (Application.isPaused) {
@@ -155,6 +117,7 @@ void Framework::Run() {
             Time.Update();
             PhysicsTime.Update();
         }
+        
     }
     
     

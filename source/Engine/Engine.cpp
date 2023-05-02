@@ -35,12 +35,12 @@ void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
     RemoveGameObjectFromActiveList(gameObjectPtr);
     
-    // Destroy rigid body
+    // Destroy entity renderer
     Entity* entityRenderer = gameObjectPtr->GetAttachedEntity();
     if (entityRenderer != nullptr) 
         DestroyEntityRenderer(entityRenderer);
     
-    // Destroy entity renderer
+    // Destroy rigid body
     rp3d::RigidBody* rigidBody = gameObjectPtr->GetAttachedRidigBody();
     if (rigidBody != nullptr) 
         DestroyRigidBody(rigidBody);
@@ -162,7 +162,7 @@ bool EngineSystemManager::RemoveGameObjectFromActiveList(GameObject* gameObjectP
 }
 
 GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
-    assert(index <= gameObjectActive.size());
+    assert(index < gameObjectActive.size());
     return gameObjectActive[index];
 }
 
@@ -179,7 +179,7 @@ void EngineSystemManager::Initiate() {
 
 void EngineSystemManager::Update(void) {
     
-    for (int i=0; i < gameObject.Size()-1; i++ ) {
+    for (int i=0; i < gameObject.Size(); i++ ) {
         GameObject* objectPtr = gameObject[i];
         
         if (!objectPtr->isActive) 
@@ -221,7 +221,7 @@ void EngineSystemManager::Update(void) {
             CameraPtr->transform.position.y = bodyPos.y;
             CameraPtr->transform.position.z = bodyPos.z;
             
-            // Orientation
+            // Orientation if NOT mouse looking
             if (!CameraPtr->useMouseLook) {
                 rp3d::Quaternion quaterion = bodyTransform.getOrientation();
                 CameraPtr->transform.rotation.x = quaterion.x;

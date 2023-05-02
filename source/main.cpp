@@ -10,6 +10,7 @@ extern ResourceManager      Resources;
 extern ApplicationLayer     Application;
 extern EngineSystemManager  Engine;
 
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
     // Create the main render window
@@ -86,7 +87,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         continue;
     }
     
-    // Shutdown engine sub systems
+    // Shutdown engine & sub systems
     Framework::Shutdown();
     
     Resources.DestroyAssets();
