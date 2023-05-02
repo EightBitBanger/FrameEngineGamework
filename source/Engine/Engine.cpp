@@ -1,19 +1,21 @@
 #include "engine.h"
 
-Timer        PhysicsTime;
-Timer        Time;
-Logger       Log;
-RandomGen    Random;
-ColorPreset  Colors;
+ColorPreset       Colors;
+RandomGen         Random;
+Logger            Log;
+Timer             PhysicsTime;
+Timer             Time;
 
-InputSystem       Input;
+ResourceManager   Resources;
 PhysicsSystem     Physics;
 RenderSystem      Renderer;
 ScriptSystem      Scripting;
-ResourceManager   Resources;
+InputSystem       Input;
 
 ApplicationLayer      Application;
 EngineSystemManager   Engine;
+
+
 
 
 EngineSystemManager::EngineSystemManager(void) {
@@ -28,13 +30,14 @@ GameObject* EngineSystemManager::CreateGameObject(void) {
     return newGameObject;
 }
 
+
 void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
     RemoveGameObjectFromActiveList(gameObjectPtr);
     
     // Destroy rigid body
     Entity* entityRenderer = gameObjectPtr->GetAttachedEntity();
-    if (entityRenderer != nullptr)
+    if (entityRenderer != nullptr) 
         DestroyEntityRenderer(entityRenderer);
     
     // Destroy entity renderer
@@ -48,45 +51,57 @@ void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
 
 
 
-void ScriptCameraController(void);
 
 
 
 GameObject* EngineSystemManager::CreateCameraController(float x, float y, float z) {
     
-    GameObject* cameraController = Engine.CreateGameObject();
+    GameObject* cameraController = CreateGameObject();
     cameraController->name = "camera";
     
+    // Basic camera
     Renderer.cameraMain = Renderer.CreateCamera();
     cameraController->AttachCamera(Renderer.cameraMain);
     Renderer.cameraMain->EnableMouseLook();
     Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
-    rp3d::RigidBody* cameraBody = Engine.CreateRigidBody(x, y, z);
+    // Physical movement
+    rp3d::RigidBody* cameraBody = CreateRigidBody(x, y, z);
     cameraController->AttachRidigBody(cameraBody);
     cameraController->SetLinearDamping(3);
     cameraController->EnableGravity(false);
     
+    // Default camera movement
     Script* scriptPtr = Scripting.CreateScript();
     cameraController->AttachScript(scriptPtr);
-    scriptPtr->OnUpdate = ScriptCameraController;
     
     return cameraController;
 }
 
 void EngineSystemManager::DestroyCameraController(GameObject* cameraControllerPtr) {
     
-    Script*    attachedScript = cameraControllerPtr->GetAttachedScript();
-    Scripting.DestroyScript(attachedScript);
-    
-    rp3d::RigidBody* attachedBody   = cameraControllerPtr->GetAttachedRidigBody();
-    Engine.DestroyRigidBody(attachedBody);
-    
     Camera* attachedCamera = cameraControllerPtr->GetAttachedCamera();
-    if (Renderer.cameraMain == attachedCamera) 
-        Renderer.cameraMain = nullptr;
-    Renderer.DestroyCamera(attachedCamera);
+    if (attachedCamera != nullptr) {
+        if (Renderer.cameraMain == attachedCamera) {
+            Renderer.cameraMain = nullptr;
+        }
+        cameraControllerPtr->DetachCamera();
+        Renderer.DestroyCamera(attachedCamera);
+    }
     
+    Script* attachedScript = cameraControllerPtr->GetAttachedScript();
+    if (attachedScript != nullptr) {
+        cameraControllerPtr->DetachScript();
+        Scripting.DestroyScript(attachedScript);
+    }
+    
+    rp3d::RigidBody* attachedBody = cameraControllerPtr->GetAttachedRidigBody();
+    if (attachedBody != nullptr) {
+        cameraControllerPtr->DetachRidigBody();
+        DestroyRigidBody(attachedBody);
+    }
+    
+    DestroyGameObject(cameraControllerPtr);
 }
 
 
@@ -221,12 +236,6 @@ void EngineSystemManager::Update(void) {
     }
     return;
 }
-
-
-
-
-
-
 
 
 

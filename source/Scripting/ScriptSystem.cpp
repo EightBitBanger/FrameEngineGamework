@@ -11,15 +11,14 @@ void ScriptSystem::Update(void) {
         
         if (!scriptRef->hasBeenInitiated) {
             scriptRef->hasBeenInitiated = true;
-            scriptRef->OnCreate();
+            scriptRef->OnCreate(scriptRef->gameObject);
         }
         
-        scriptRef->OnUpdate();
+        scriptRef->OnUpdate(scriptRef->gameObject);
     }
     
     return;
 }
-
 
 Script* ScriptSystem::CreateScript(void) {
     Script* scriptPtr = script.Create();

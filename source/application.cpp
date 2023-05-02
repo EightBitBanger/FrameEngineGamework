@@ -17,7 +17,8 @@ extern ScriptSystem         Scripting;
 
 
 // User scripts
-void ScriptCameraController(void);
+void ScriptCameraController(void* gameObject);
+
 
 
 // Cached resource pointers
@@ -48,19 +49,9 @@ void Framework::Start() {
     Renderer.skyMain->SetColor( Colors.Make(0.087, 0.087, 0.087) );
     
     
-    
-    
-    
-    // Setup a camera
-    //Renderer.cameraMain = Renderer.CreateCamera();
-    
-    //Renderer.cameraMain->transform.position = glm::vec3(-50, 0, 0);
-    //Renderer.cameraMain->EnableMouseLook();
-    //Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
-    
     // Camera controller
     cameraController = Engine.CreateCameraController(-50, 0, 0);
-    
+    cameraController->GetAttachedScript()->OnUpdate = ScriptCameraController;
     
     
     
@@ -87,8 +78,8 @@ void Framework::Start() {
 
 
 
-float forceMul  = 10;
-float torqueMul = 1;
+float forceMul  = 50;
+float torqueMul = 5;
 
 
 //
@@ -157,8 +148,8 @@ void Framework::Run() {
         } else {
             
             if (Renderer.cameraMain != nullptr) {
-                Renderer.cameraMain->EnableMouseLook();
                 Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+                Renderer.cameraMain->EnableMouseLook();
             }
             
             Time.Update();
@@ -182,9 +173,9 @@ void Framework::Shutdown(void) {
 
 
 
-
-
-void ScriptCameraController(void) {
+void ScriptCameraController(void* gameObjectPtr) {
+    
+    GameObject* gameObject = (GameObject*)gameObjectPtr;
     
     float cameraSpeed = 1000;
     
@@ -199,10 +190,11 @@ void ScriptCameraController(void) {
     
     force *= cameraSpeed;
     
-    cameraController->AddForce(force.x, force.y, force.z);
+    gameObject->AddForce(force.x, force.y, force.z);
     
     return;
 };
+
 
 
 

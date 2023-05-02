@@ -47,8 +47,11 @@ public:
     
 private:
     
+    // Add an entity to the internal list of active objects
     void AddGameObjectToActiveList(GameObject* gameObjectPtr);
+    // Remove an entity from the internal list of active objects
     bool RemoveGameObjectFromActiveList(GameObject* gameObjectPtr);
+    
     
     Scene* sceneMain;
     
@@ -57,12 +60,6 @@ private:
     PoolAllocator<GameObject> gameObject;
     
 };
-
-
-
-
-
-
 
 
 

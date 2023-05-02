@@ -31,12 +31,14 @@ Entity* GameObject::GetAttachedEntity(void) {
 void GameObject::AttachScript(Script* scriptPtr) {
     script = scriptPtr;
     scriptPtr->isActive = true;
+    scriptPtr->gameObject = this;
     return;
 }
 
 void GameObject::DetachScript(void) {
-    script = nullptr;
     script->isActive = false;
+    script->gameObject = nullptr;
+    script = nullptr;
     return;
 }
 
@@ -87,42 +89,42 @@ Camera* GameObject::GetAttachedCamera(void) {
 //
 
 void GameObject::AddForce(float x, float y, float z) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rp3d::Vector3 nudge(x, y, z);
     rigidBody->applyLocalForceAtCenterOfMass(nudge);
     return;
 }
 
 void GameObject::AddTorque(float x, float y, float z) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rp3d::Vector3 twist(x, y, z);
     rigidBody->applyLocalTorque(twist);
     return;
 }
 
 void GameObject::SetMass(float mass) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rigidBody->setMass(mass);
 }
 
 void GameObject::SetLinearDamping(float damping) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rigidBody->setLinearDamping(damping);
 }
 
 void GameObject::SetAngularDamping(float damping) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rigidBody->setAngularDamping(damping);
 }
 
 void GameObject::EnableGravity(bool enabled) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rigidBody->enableGravity(enabled);
 }
 
 
 void GameObject::CalculatePhysics(void) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rigidBody->updateMassFromColliders();
     rigidBody->updateLocalCenterOfMassFromColliders();
     rigidBody->updateLocalInertiaTensorFromColliders();
@@ -131,14 +133,14 @@ void GameObject::CalculatePhysics(void) {
 
 
 void GameObject::SetLinearAxisLockFactor(float x, float y, float z) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rp3d::Vector3 lockFactor(x, y, z);
     rigidBody->setLinearLockAxisFactor(lockFactor);
     return;
 }
 
 void GameObject::SetAngularAxisLockFactor(float x, float y, float z) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rp3d::Vector3 lockFactor(x, y, z);
     rigidBody->setAngularLockAxisFactor(lockFactor);
     return;
@@ -146,7 +148,7 @@ void GameObject::SetAngularAxisLockFactor(float x, float y, float z) {
 
 
 void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     assert(boxShape != nullptr);
     
     rp3d::Transform offsetTransform;
@@ -158,7 +160,7 @@ void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, floa
 }
 
 void GameObject::AddCollider(ColliderTag* colliderTag, float x, float y, float z) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     assert(colliderTag != nullptr);
     if (colliderTag->isStatic) {
         rigidBody->setType(rp3d::BodyType::STATIC);
@@ -175,14 +177,14 @@ void GameObject::AddCollider(ColliderTag* colliderTag, float x, float y, float z
 
 
 void GameObject::SetRigidBodyStatic(void) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rigidBody->setType(rp3d::BodyType::STATIC);
     return;
 }
 
 
 void GameObject::SetRigidBodyDynamic(void) {
-    assert(rigidBody != nullptr);
+    if (rigidBody == nullptr) return;
     rigidBody->setType(rp3d::BodyType::DYNAMIC);
     return;
 }

@@ -1,8 +1,11 @@
 #ifndef COMPONENT_SCRIPT
 #define COMPONENT_SCRIPT
 
-void DefaultFunctionPtr(void);
+void DefaultFunctionPtr(void* gameObject);
+
 #define  nullfunc  DefaultFunctionPtr
+
+
 
 struct Script {
     
@@ -12,10 +15,13 @@ struct Script {
     /// State whether OnCreate() has already been called.
     bool hasBeenInitiated;
     
+    /// Pointer to the game object who referenced this script.
+    void* gameObject;
+    
     /// This function will be called on object creation.
-    void(*OnCreate)();
+    void(*OnCreate)(void* gameObjectPtr);
     /// This function will be called once per frame.
-    void(*OnUpdate)();
+    void(*OnUpdate)(void* gameObjectPtr);
     
     Script();
     
