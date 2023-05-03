@@ -71,6 +71,8 @@ void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
                 
         }
         
+        DestroyComponent(componentPtr);
+        continue;
     }
     
     gameObject.Destroy(gameObjectPtr);
@@ -215,7 +217,7 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
 
 void EngineSystemManager::Update(void) {
     
-    // Run each game object
+    // Run through the game objects
     for (int i=0; i < gameObject.Size(); i++ ) {
         
         // Component references
@@ -229,7 +231,7 @@ void EngineSystemManager::Update(void) {
         if (!objectPtr->isActive) 
             continue;
         
-        // Find existing components
+        // Run through the components
         for (unsigned int c=0; c < objectPtr->GetComponentCount(); c++) {
             
             Component* componentPtr = objectPtr->GetComponent(c);
@@ -263,7 +265,7 @@ void EngineSystemManager::Update(void) {
             componentEntityRenderer->transform.matrix = modleMatrix;
         }
         
-        // Nothing to update
+        // Nothing further to update
         if (componentRigidBody == nullptr) 
             continue;
         

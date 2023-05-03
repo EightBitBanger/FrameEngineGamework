@@ -7,6 +7,8 @@
 #define COMPONENT_TYPE_SCRIPT         102
 #define COMPONENT_TYPE_CAMERA         103
 
+typedef unsigned int    componentENUM;
+
 #include <string>
 
 class Component {
@@ -20,10 +22,10 @@ public:
     void* GetComponent(void);
     
     /// Return the component type.
-    unsigned int GetType(void);
+    componentENUM GetType(void);
     
     /// Set the component type and reference object.
-    void SetComponent(unsigned int type, void* object);
+    void SetComponent(componentENUM type, void* object);
     
     Component();
     

@@ -41,7 +41,7 @@ void Framework::Start() {
     
     Resources.LoadScene("data/main.scene");
     
-    Physics.SetWorldGravity(0, -90, 0);
+    Physics.SetWorldGravity(0, -0, -1000);
     
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
@@ -59,36 +59,13 @@ void Framework::Start() {
     //
     // Create a camera controller
     
-    cameraController = Engine.CreateCameraController(-50, 0, 0);
+    cameraController = Engine.CreateCameraController(-200, 0, 0);
     Component* scriptComponent = cameraController->FindComponent(COMPONENT_TYPE_SCRIPT);
     
     Script* cameraScript = (Script*)scriptComponent->GetComponent();
     cameraScript->OnUpdate = ScriptCameraController;
     
     
-    
-    //
-    // Create a barrel object
-    
-    GameObject* barrel = Engine.CreateGameObject();
-    
-    
-    // Add a renderer component
-    Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
-    barrel->AddComponent(entityRenderer);
-    
-    Entity* entity = (Entity*)entityRenderer->GetComponent();
-    entity->AttachMesh(barrelMesh);
-    entity->AttachMaterial(barrelMaterial);
-    
-    
-    // Add a physics component
-    Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
-    barrel->AddComponent(rigidBodyComponent);
-    
-    rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
-    
-    barrel->SetPosition(0, 20, 0);
     
     
     return;
@@ -99,8 +76,9 @@ void Framework::Start() {
 
 
 
-float forceMul  = 50;
-float torqueMul = 5;
+float spreadMul  = 0.4;
+float forceMul   = 200;
+float torqueMul  = 10;
 
 
 //
@@ -108,6 +86,62 @@ float torqueMul = 5;
 //
 
 void Framework::Run() {
+    
+    for (int i=0; i < 30; i++) {
+        
+        //
+        // Create a barrel object
+        
+        GameObject* barrel = Engine.CreateGameObject();
+        
+        
+        // Add a renderer component
+        Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
+        barrel->AddComponent(entityRenderer);
+        
+        Entity* entity = (Entity*)entityRenderer->GetComponent();
+        entity->AttachMesh(barrelMesh);
+        entity->AttachMaterial(barrelMaterial);
+        
+        
+        // Add a physics component
+        Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+        barrel->AddComponent(rigidBodyComponent);
+        
+        rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+        
+        
+        float startx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+        float starty = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+        float startz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+        
+        float forcex = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
+        float forcey = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
+        float forcez = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
+        
+        float torquex = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
+        float torquey = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
+        float torquez = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
+        
+        barrel->SetPosition(startx, starty + 100, startz);
+        barrel->AddForce(forcex, forcey, forcez);
+        barrel->AddTorque(torquex, torquey, torquez);
+        
+        continue;
+    }
+    
+    
+    while (Engine.GetGameObjectCount() > 1000) {
+        
+        GameObject* gameObject = Engine.GetGameObject(0);
+        Component* cameraComponent = gameObject->FindComponent(COMPONENT_TYPE_CAMERA);
+        if (cameraComponent != nullptr) 
+            gameObject = Engine.GetGameObject(1);
+        
+        Engine.DestroyGameObject(gameObject);
+        
+    }
+    
     
     
     

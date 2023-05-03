@@ -19,6 +19,8 @@ public:
     GameObject();
     
     
+    // Components
+    
     /// Add a component to the game object.
     void AddComponent(Component* component);
     /// Remove a component from the game object.
@@ -30,6 +32,9 @@ public:
     Component* GetComponent(unsigned int index);
     /// Get the number of components attached to the game object.
     unsigned int GetComponentCount(void);
+    
+    
+    // Physics
     
     /// Set the position of the object.
     void SetPosition(float x, float y, float z);

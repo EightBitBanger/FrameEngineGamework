@@ -21,7 +21,7 @@ void GameObject::AddComponent(Component* component) {
     // Set the shortcut pointers
     if (component->GetType() == COMPONENT_TYPE_RIGIDBODY) {
         rigidBodyCache = (rp3d::RigidBody*)component->GetComponent();
-        // Update the rigid body on attach
+        // Update the rigid body position on attach
         if (entityCache != nullptr) SetPosition(entityCache->transform.position.x,
                                                 entityCache->transform.position.y,
                                                 entityCache->transform.position.z);
