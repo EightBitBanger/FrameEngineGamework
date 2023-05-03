@@ -76,7 +76,7 @@ void Framework::Start() {
 
 
 
-float spreadMul  = 0.4;
+float spreadMul  = 0.8;
 float forceMul   = 200;
 float torqueMul  = 10;
 
@@ -105,10 +105,10 @@ void Framework::Run() {
         
         
         // Add a physics component
-        Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
-        barrel->AddComponent(rigidBodyComponent);
+        //Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+        //barrel->AddComponent(rigidBodyComponent);
         
-        rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+        //rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
         
         
         float startx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -124,8 +124,8 @@ void Framework::Run() {
         float torquez = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
         
         barrel->SetPosition(startx, starty + 100, startz);
-        barrel->AddForce(forcex, forcey, forcez);
-        barrel->AddTorque(torquex, torquey, torquez);
+        //barrel->AddForce(forcex, forcey, forcez);
+        //barrel->AddTorque(torquex, torquey, torquez);
         
         continue;
     }

@@ -1,7 +1,8 @@
 #include "rendersystem.h"
 
 
-void RenderSystem::RenderFrame(float deltaTime) {
+void RenderSystem::RenderFrame(float deltaTime) 
+{
     
     if (cameraMain == nullptr) 
         return;
@@ -109,7 +110,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
                     glCullFace(currentMaterial->faceCullSide);
                     glFrontFace(currentMaterial->faceWinding);
                 } else {
-                    glEnable(GL_CULL_FACE);
+                    glDisable(GL_CULL_FACE);
                 }
                 
                 
