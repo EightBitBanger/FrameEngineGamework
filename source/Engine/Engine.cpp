@@ -257,10 +257,17 @@ void EngineSystemManager::Update(void) {
             continue;
         }
         
-        // Sync with the rigid body
-        //if (componentRigidBody == nullptr) 
-        //    continue;
+        // No rigid body just a renderer, update the matrix from position and rotation
+        if (componentEntityRenderer != nullptr) {
+            glm::mat4 modleMatrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
+            componentEntityRenderer->transform.matrix = modleMatrix;
+        }
         
+        // Nothing to update
+        if (componentRigidBody == nullptr) 
+            continue;
+        
+        // Sync with the rigid body
         rp3d::Transform bodyTransform = componentRigidBody->getTransform();
         
         if (componentEntityRenderer != nullptr) {

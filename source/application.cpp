@@ -48,39 +48,48 @@ void Framework::Start() {
     Renderer.skyMain->SetColor( Colors.Make(0.087, 0.087, 0.087) );
     
     
-    // Camera controller
-    cameraController = Engine.CreateCameraController(-50, 0, 0);
-    Component* scriptComponent = cameraController->FindComponent(COMPONENT_TYPE_SCRIPT);
-    Script* cameraScript = (Script*)scriptComponent->GetComponent();
-    cameraScript->OnUpdate = ScriptCameraController;
-    
-    //cameraController->GetAttachedScript()->OnUpdate = ScriptCameraController;
-    
-    
-    
     // Create objects from resource tags
     barrelMesh = Resources.CreateMeshFromTag("barrel");
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
     
-    barrelMesh->ChangeSubMeshColor(0, Colors.yellow);
+    barrelMesh->ChangeSubMeshColor(0, Colors.gray);
     
     
     
+    //
+    // Create a camera controller
     
-    GameObject* plain = Engine.CreateGameObject();
+    cameraController = Engine.CreateCameraController(-50, 0, 0);
+    Component* scriptComponent = cameraController->FindComponent(COMPONENT_TYPE_SCRIPT);
     
+    Script* cameraScript = (Script*)scriptComponent->GetComponent();
+    cameraScript->OnUpdate = ScriptCameraController;
+    
+    
+    
+    //
+    // Create a barrel object
+    
+    GameObject* barrel = Engine.CreateGameObject();
+    
+    
+    // Add a renderer component
     Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
-    plain->AddComponent(entityRenderer);
+    barrel->AddComponent(entityRenderer);
     
     Entity* entity = (Entity*)entityRenderer->GetComponent();
     entity->AttachMesh(barrelMesh);
     entity->AttachMaterial(barrelMaterial);
     
     
-    Component* bodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
-    plain->AddComponent(bodyComponent);
+    // Add a physics component
+    Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+    barrel->AddComponent(rigidBodyComponent);
     
-    rp3d::RigidBody* body = (rp3d::RigidBody*)bodyComponent->GetComponent();
+    rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+    
+    barrel->SetPosition(0, 20, 0);
+    
     
     return;
 }

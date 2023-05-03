@@ -31,6 +31,8 @@ public:
     /// Get the number of components attached to the game object.
     unsigned int GetComponentCount(void);
     
+    /// Set the position of the object.
+    void SetPosition(float x, float y, float z);
     
     /// Add directional force to the rigid body.
     void AddForce(float x, float y, float z);
@@ -69,7 +71,8 @@ private:
     
     std::vector<Component*> componentList;
     
-    rp3d::RigidBody* rigidBody;
+    rp3d::RigidBody* rigidBodyCache;
+    Entity*          entityCache;
     
 };
 

@@ -37,7 +37,6 @@ public:
     void DestroyEntityRenderer(Entity* entityPtr);
     
     
-    
     /// Get the number of game objects.
     unsigned int GetGameObjectCount(void);
     /// Return a pointer to a game object at the index position.

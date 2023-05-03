@@ -17,6 +17,9 @@ RenderSystem::RenderSystem() {
 }
 
 
+
+
+
 Entity* RenderSystem::CreateEntity(void) {
     Entity* entityPtr = entity.Create();
     entityPtr->AttachMaterial(defaultMaterial);
@@ -26,6 +29,7 @@ bool RenderSystem::DestroyEntity(Entity* entityPtr) {
     assert(entityPtr != nullptr);
     return entity.Destroy(entityPtr);
 }
+
 
 Mesh* RenderSystem::CreateMesh(void) {
     Mesh* meshPtr = mesh.Create();
@@ -37,6 +41,7 @@ bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
     return mesh.Destroy(meshPtr);
 }
 
+
 Shader* RenderSystem::CreateShader(void) {
     Shader* shaderPtr = shader.Create();
     return shaderPtr;
@@ -45,6 +50,7 @@ bool RenderSystem::DestroyShader(Shader* shaderPtr) {
     assert(shaderPtr != nullptr);
     return shader.Destroy(shaderPtr);
 }
+
 
 Camera* RenderSystem::CreateCamera(void) {
     Camera* cameraPtr = camera.Create();
@@ -55,6 +61,7 @@ bool RenderSystem::DestroyCamera(Camera* cameraPtr) {
     return camera.Destroy(cameraPtr);
 }
 
+
 Material* RenderSystem::CreateMaterial(void) {
     Material* materialPtr = material.Create();
     return materialPtr;
@@ -63,6 +70,7 @@ bool RenderSystem::DestroyMaterial(Material* materialPtr) {
     assert(materialPtr != nullptr);
     return material.Destroy(materialPtr);
 }
+
 
 Sky* RenderSystem::CreateSky(void) {
     Sky* skyPtr = sky.Create();
@@ -73,6 +81,7 @@ bool RenderSystem::DestroySky(Sky* skyPtr) {
     return sky.Destroy(skyPtr);
 }
 
+
 Scene* RenderSystem::CreateScene(void) {
     Scene* scenePtr = scene.Create();
     return scenePtr;
@@ -81,6 +90,11 @@ bool RenderSystem::DestroyScene(Scene* scenePtr) {
     assert(scenePtr != nullptr);
     return scene.Destroy(scenePtr);
 }
+
+
+
+
+
 
 void RenderSystem :: Initiate(void) {
     
@@ -96,6 +110,7 @@ void RenderSystem :: Initiate(void) {
     
     return;
 }
+
 
 
 void RenderSystem :: AddToRenderQueue(Scene* scenePtr) {
@@ -124,6 +139,7 @@ Scene* RenderSystem :: GetRenderQueueScene(unsigned int index) {
     assert(index <= renderQueue.size());
     return renderQueue[index];
 }
+
 
 
 
@@ -217,6 +233,7 @@ void RenderSystem :: ReleaseRenderTarget(void) {
     
     return;
 }
+
 
 void RenderSystem :: SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
     viewport.x = x;
