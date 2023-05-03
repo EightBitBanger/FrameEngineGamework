@@ -5,6 +5,8 @@
 #include "../../Scripting/components/script.h"
 #include "../../Renderer/components/camera.h"
 
+#include "component.h"
+
 
 class GameObject {
     
@@ -16,31 +18,18 @@ public:
     
     GameObject();
     
-    /// Attach an entity object to the game object.
-    void AttachEntity(Entity* scriptPtr);
-    /// Detach the material object from the game object.
-    void DetachEntity(void);
-    /// Return the attached material object.
-    Entity* GetAttachedEntity(void);
     
-    /// Attach a script object to the game object.
-    void AttachScript(Script* scriptPtr);
-    /// Detach the script object from the game object.
-    void DetachScript(void);
-    /// Return the attached script object.
-    Script* GetAttachedScript(void);
+    /// Add a component to the game object.
+    void AddComponent(Component* component);
+    /// Remove a component from the game object.
+    bool RemoveComponent(Component* component);
+    /// Find a component by its type.
+    Component* FindComponent(unsigned int component_type);
     
-    /// Attach a rigid body object to the game object.
-    void AttachRidigBody(rp3d::RigidBody* rigidBodyPtr);
-    /// Detach the rigid body object from the game object.
-    void DetachRidigBody(void);
-    /// Return the attached rigid body object.
-    rp3d::RigidBody* GetAttachedRidigBody(void);
-    
-    
-    void AttachCamera(Camera* cameraPtr);
-    void DetachCamera(void);
-    Camera* GetAttachedCamera(void);
+    /// Get a component by its index position.
+    Component* GetComponent(unsigned int index);
+    /// Get the number of components attached to the game object.
+    unsigned int GetComponentCount(void);
     
     
     /// Add directional force to the rigid body.
@@ -78,9 +67,8 @@ public:
     
 private:
     
-    Entity*          entity;
-    Script*          script;
-    Camera*          camera;
+    std::vector<Component*> componentList;
+    
     rp3d::RigidBody* rigidBody;
     
 };

@@ -1,5 +1,5 @@
-#ifndef COMPONENT_MATERIAL
-#define COMPONENT_MATERIAL
+#ifndef __COMPONENT_MATERIAL
+#define __COMPONENT_MATERIAL
 
 #include <SDKDDKVer.h>
 #include <windows.h>

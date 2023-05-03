@@ -1,5 +1,5 @@
-#ifndef COMPONENT_SKY
-#define COMPONENT_SKY
+#ifndef __COMPONENT_SKY
+#define __COMPONENT_SKY
 
 #include "../types/color.h"
 

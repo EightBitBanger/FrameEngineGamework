@@ -1,5 +1,5 @@
-#ifndef COMPONENT_ENTITY
-#define COMPONENT_ENTITY
+#ifndef __COMPONENT_ENTITY
+#define __COMPONENT_ENTITY
 
 #include "../types/transform.h"
 

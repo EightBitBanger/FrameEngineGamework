@@ -50,7 +50,11 @@ void Framework::Start() {
     
     // Camera controller
     cameraController = Engine.CreateCameraController(-50, 0, 0);
-    cameraController->GetAttachedScript()->OnUpdate = ScriptCameraController;
+    Component* scriptComponent = cameraController->FindComponent(COMPONENT_TYPE_SCRIPT);
+    Script* cameraScript = (Script*)scriptComponent->GetComponent();
+    cameraScript->OnUpdate = ScriptCameraController;
+    
+    //cameraController->GetAttachedScript()->OnUpdate = ScriptCameraController;
     
     
     
@@ -64,14 +68,19 @@ void Framework::Start() {
     
     
     GameObject* plain = Engine.CreateGameObject();
-    Entity* renderer = Engine.CreateEntityRenderer(barrelMesh, barrelMaterial);
-    plain->AttachEntity(renderer);
     
-    rp3d::RigidBody* body = Engine.CreateRigidBody(0, 0, 0);
-    //plain->AttachRidigBody(body);
+    Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
+    plain->AddComponent(entityRenderer);
+    
+    Entity* entity = (Entity*)entityRenderer->GetComponent();
+    entity->AttachMesh(barrelMesh);
+    entity->AttachMaterial(barrelMaterial);
     
     
+    Component* bodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+    plain->AddComponent(bodyComponent);
     
+    rp3d::RigidBody* body = (rp3d::RigidBody*)bodyComponent->GetComponent();
     
     return;
 }

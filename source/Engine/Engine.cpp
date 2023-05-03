@@ -35,15 +35,43 @@ void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
     RemoveGameObjectFromActiveList(gameObjectPtr);
     
-    // Destroy entity renderer
-    Entity* entityRenderer = gameObjectPtr->GetAttachedEntity();
-    if (entityRenderer != nullptr) 
-        DestroyEntityRenderer(entityRenderer);
+    // Destroy all components
+    Entity* componentEntityRenderer;
+    rp3d::RigidBody* componentRigidBody;
+    Script* componentScript;
+    Camera* componentCamera;
     
-    // Destroy rigid body
-    rp3d::RigidBody* rigidBody = gameObjectPtr->GetAttachedRidigBody();
-    if (rigidBody != nullptr) 
-        DestroyRigidBody(rigidBody);
+    for (unsigned int i=0; i < gameObjectPtr->GetComponentCount(); i++) {
+        
+        Component* componentPtr = gameObjectPtr->GetComponent(i);
+        
+        unsigned int componentType = componentPtr->GetType();
+        
+        switch (componentType) {
+            
+            case COMPONENT_TYPE_RENDERER:
+                componentEntityRenderer = (Entity*)componentPtr->GetComponent();
+                DestroyEntityRenderer(componentEntityRenderer);
+                break;
+                
+            case COMPONENT_TYPE_RIGIDBODY:
+                componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
+                Physics.DestroyRigidBody(componentRigidBody);
+                break;
+                
+            case COMPONENT_TYPE_SCRIPT: 
+                componentScript = (Script*)componentPtr->GetComponent();
+                Scripting.DestroyScript(componentScript);
+                break;
+                
+            case COMPONENT_TYPE_CAMERA: 
+                componentCamera = (Camera*)componentPtr->GetComponent();
+                Renderer.DestroyCamera(componentCamera);
+                break;
+                
+        }
+        
+    }
     
     gameObject.Destroy(gameObjectPtr);
     return;
@@ -59,87 +87,54 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
     GameObject* cameraController = CreateGameObject();
     cameraController->name = "camera";
     
-    // Basic camera
-    Renderer.cameraMain = Renderer.CreateCamera();
-    cameraController->AttachCamera(Renderer.cameraMain);
-    Renderer.cameraMain->EnableMouseLook();
-    Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    // Camera component
+    Component* cameraComponent = CreateComponent(COMPONENT_TYPE_CAMERA);
+    Camera* cameraMain = (Camera*)cameraComponent->GetComponent();
+    Renderer.cameraMain = cameraMain;
+    cameraMain->EnableMouseLook();
+    cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
-    // Physical movement
-    rp3d::RigidBody* cameraBody = CreateRigidBody(x, y, z);
-    cameraController->AttachRidigBody(cameraBody);
-    cameraController->SetLinearDamping(3);
-    cameraController->EnableGravity(false);
+    // Rigid body component
+    Component* rigidBodyComponent = CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+    rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+    rigidBody->setLinearDamping(4);
+    rigidBody->enableGravity(false);
     
-    // Default camera movement
-    Script* scriptPtr = Scripting.CreateScript();
-    cameraController->AttachScript(scriptPtr);
+    rp3d::Vector3 position(x, y, z);
+    rp3d::Quaternion quat = rp3d::Quaternion::identity();
+    
+    rp3d::Transform bodyTransform(position, quat);
+    rigidBody->setTransform(bodyTransform);
+    
+    // Script component
+    Component* scriptComponent = CreateComponent(COMPONENT_TYPE_SCRIPT);
+    Script* script = (Script*)scriptComponent->GetComponent();
+    script->gameObject = cameraController;
+    script->isActive = true;
+    
+    cameraController->AddComponent(cameraComponent);
+    cameraController->AddComponent(rigidBodyComponent);
+    cameraController->AddComponent(scriptComponent);
     
     return cameraController;
-}
-
-void EngineSystemManager::DestroyCameraController(GameObject* cameraControllerPtr) {
-    
-    Camera* attachedCamera = cameraControllerPtr->GetAttachedCamera();
-    if (attachedCamera != nullptr) {
-        if (Renderer.cameraMain == attachedCamera) {
-            Renderer.cameraMain = nullptr;
-        }
-        cameraControllerPtr->DetachCamera();
-        Renderer.DestroyCamera(attachedCamera);
-    }
-    
-    Script* attachedScript = cameraControllerPtr->GetAttachedScript();
-    if (attachedScript != nullptr) {
-        cameraControllerPtr->DetachScript();
-        Scripting.DestroyScript(attachedScript);
-    }
-    
-    rp3d::RigidBody* attachedBody = cameraControllerPtr->GetAttachedRidigBody();
-    if (attachedBody != nullptr) {
-        cameraControllerPtr->DetachRidigBody();
-        DestroyRigidBody(attachedBody);
-    }
-    
-    DestroyGameObject(cameraControllerPtr);
 }
 
 
 Entity* EngineSystemManager::CreateEntityRenderer(Mesh* meshPtr, Material* materialPtr) {
     Entity* entityPtr = Renderer.CreateEntity();
-    
-    assert(meshPtr != nullptr);
-    assert(materialPtr != nullptr);
-    
     entityPtr->AttachMesh( meshPtr );
     entityPtr->AttachMaterial( materialPtr );
-    
     sceneMain->AddToSceneRoot(entityPtr);
     return entityPtr;
 }
 
 void EngineSystemManager::DestroyEntityRenderer(Entity* entityPtr) {
     assert(entityPtr != nullptr);
-    
     sceneMain->RemoveFromSceneRoot(entityPtr);
-    
     Renderer.DestroyEntity(entityPtr);
-    
     return;
 }
 
-
-rp3d::RigidBody* EngineSystemManager::CreateRigidBody(float x, float y, float z) {
-    rp3d::RigidBody* rigidBody = Physics.CreateRigidBody(x, y, z);
-    
-    return rigidBody;
-}
-
-void EngineSystemManager::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
-    assert(rigidBodyPtr != nullptr);
-    Physics.DestroyRigidBody(rigidBodyPtr);
-    return;
-}
 
 
 
@@ -177,63 +172,138 @@ void EngineSystemManager::Initiate() {
 }
 
 
+
+Component* EngineSystemManager::CreateComponent(unsigned int component_type) {
+    void* component_object = nullptr;
+    
+    switch (component_type) {
+        
+        case COMPONENT_TYPE_RENDERER:
+            component_object = (void*)this->CreateEntityRenderer(nullptr, nullptr);
+            break;
+            
+        case COMPONENT_TYPE_RIGIDBODY:
+            component_object = (void*)Physics.CreateRigidBody();
+            break;
+            
+        case COMPONENT_TYPE_SCRIPT:
+            component_object = (void*)Scripting.CreateScript();
+            break;
+            
+        case COMPONENT_TYPE_CAMERA:
+            component_object = (void*)Renderer.CreateCamera();
+            break;
+        
+    }
+    
+    Component* newComponent = components.Create();
+    newComponent->SetComponent(component_type, component_object);
+    return newComponent;
+}
+
+void EngineSystemManager::DestroyComponent(Component* componentPtr) {
+    assert(componentPtr != nullptr);
+    components.Destroy(componentPtr);
+    return;
+}
+
+
+
+
+
+
+
 void EngineSystemManager::Update(void) {
     
+    // Run each game object
     for (int i=0; i < gameObject.Size(); i++ ) {
+        
+        // Component references
+        Camera*           componentCamera = nullptr;
+        //Script*           componentScript = nullptr;
+        rp3d::RigidBody*  componentRigidBody = nullptr;
+        Entity*           componentEntityRenderer = nullptr;
+        
         GameObject* objectPtr = gameObject[i];
         
         if (!objectPtr->isActive) 
             continue;
         
-        // Sync with the rigid body
-        rp3d::RigidBody* rigidBodyPtr = objectPtr->GetAttachedRidigBody();
-        if (rigidBodyPtr == nullptr) 
+        // Find existing components
+        for (unsigned int c=0; c < objectPtr->GetComponentCount(); c++) {
+            
+            Component* componentPtr = objectPtr->GetComponent(c);
+            
+            switch (componentPtr->GetType()) {
+                
+                case COMPONENT_TYPE_RENDERER:
+                    componentEntityRenderer = (Entity*)componentPtr->GetComponent();
+                    break;
+                    
+                case COMPONENT_TYPE_RIGIDBODY:
+                    componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
+                    break;
+                    
+                //case COMPONENT_TYPE_SCRIPT: 
+                //    componentScript = (Script*)componentPtr->GetComponent();
+                //    break;
+                    
+                case COMPONENT_TYPE_CAMERA: 
+                    componentCamera = (Camera*)componentPtr->GetComponent();
+                    break;
+                    
+            }
+            
             continue;
+        }
         
-        Entity* entitytPtr = objectPtr->GetAttachedEntity();
-        if (entitytPtr != nullptr) {
-            rp3d::Transform bodyTransform = rigidBodyPtr->getTransform();
-            bodyTransform.getOpenGLMatrix(&entitytPtr->transform.matrix[0][0]);
+        // Sync with the rigid body
+        //if (componentRigidBody == nullptr) 
+        //    continue;
+        
+        rp3d::Transform bodyTransform = componentRigidBody->getTransform();
+        
+        if (componentEntityRenderer != nullptr) {
+            bodyTransform.getOpenGLMatrix(&componentEntityRenderer->transform.matrix[0][0]);
             
             // Translation
             rp3d::Vector3 bodyPos = bodyTransform.getPosition();
-            entitytPtr->transform.position.x = bodyPos.x;
-            entitytPtr->transform.position.y = bodyPos.y;
-            entitytPtr->transform.position.z = bodyPos.z;
+            componentEntityRenderer->transform.position.x = bodyPos.x;
+            componentEntityRenderer->transform.position.y = bodyPos.y;
+            componentEntityRenderer->transform.position.z = bodyPos.z;
             
             // Orientation
             rp3d::Quaternion quaterion = bodyTransform.getOrientation();
-            entitytPtr->transform.rotation.x = quaterion.x;
-            entitytPtr->transform.rotation.y = quaterion.y;
-            entitytPtr->transform.rotation.z = quaterion.z;
-            entitytPtr->transform.rotation.w = quaterion.w;
+            componentEntityRenderer->transform.rotation.x = quaterion.x;
+            componentEntityRenderer->transform.rotation.y = quaterion.y;
+            componentEntityRenderer->transform.rotation.z = quaterion.z;
+            componentEntityRenderer->transform.rotation.w = quaterion.w;
             
         }
         
-        Camera* CameraPtr = objectPtr->GetAttachedCamera();
-        if (CameraPtr != nullptr) {
-            rp3d::Transform bodyTransform = rigidBodyPtr->getTransform();
-            rigidBodyPtr->getTransform().getOpenGLMatrix(&CameraPtr->transform.matrix[0][0]);
+        if (componentCamera != nullptr) {
+            bodyTransform.getOpenGLMatrix(&componentCamera->transform.matrix[0][0]);
             
             // Translation
             rp3d::Vector3 bodyPos = bodyTransform.getPosition();
-            CameraPtr->transform.position.x = bodyPos.x;
-            CameraPtr->transform.position.y = bodyPos.y;
-            CameraPtr->transform.position.z = bodyPos.z;
+            componentCamera->transform.position.x = bodyPos.x;
+            componentCamera->transform.position.y = bodyPos.y;
+            componentCamera->transform.position.z = bodyPos.z;
             
             // Orientation if NOT mouse looking
-            if (!CameraPtr->useMouseLook) {
+            if (!componentCamera->useMouseLook) {
                 rp3d::Quaternion quaterion = bodyTransform.getOrientation();
-                CameraPtr->transform.rotation.x = quaterion.x;
-                CameraPtr->transform.rotation.y = quaterion.y;
-                CameraPtr->transform.rotation.z = quaterion.z;
-                CameraPtr->transform.rotation.w = quaterion.w;
+                componentCamera->transform.rotation.x = quaterion.x;
+                componentCamera->transform.rotation.y = quaterion.y;
+                componentCamera->transform.rotation.z = quaterion.z;
+                componentCamera->transform.rotation.w = quaterion.w;
             }
             
         }
         
         continue;
     }
+    
     return;
 }
 

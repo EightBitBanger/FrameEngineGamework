@@ -1,5 +1,5 @@
-#ifndef COMPONENT_SHADER
-#define COMPONENT_SHADER
+#ifndef __COMPONENT_SHADER
+#define __COMPONENT_SHADER
 
 #include <string>
 

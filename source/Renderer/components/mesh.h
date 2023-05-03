@@ -1,5 +1,5 @@
-#ifndef COMPONENT_MESH
-#define COMPONENT_MESH
+#ifndef __COMPONENT_MESH
+#define __COMPONENT_MESH
 
 #define GLEW_STATIC
 #include <gl/glew.h>

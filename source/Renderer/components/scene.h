@@ -1,5 +1,5 @@
-#ifndef COMPONENT_SCENE
-#define COMPONENT_SCENE
+#ifndef __COMPONENT_SCENE
+#define __COMPONENT_SCENE
 
 #include <vector>
 

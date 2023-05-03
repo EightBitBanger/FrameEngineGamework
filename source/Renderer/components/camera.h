@@ -1,5 +1,5 @@
-#ifndef COMPONENT_CAMERA
-#define COMPONENT_CAMERA
+#ifndef __COMPONENT_CAMERA
+#define __COMPONENT_CAMERA
 
 #include <SDKDDKVer.h>
 #include <windows.h>

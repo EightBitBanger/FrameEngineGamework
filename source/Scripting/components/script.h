@@ -1,5 +1,5 @@
-#ifndef COMPONENT_SCRIPT
-#define COMPONENT_SCRIPT
+#ifndef __COMPONENT_SCRIPT
+#define __COMPONENT_SCRIPT
 
 void DefaultFunctionPtr(void* gameObject);
 
