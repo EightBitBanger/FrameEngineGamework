@@ -9,10 +9,10 @@ extern Logger            Log;
 extern EngineSystemManager  Engine;
 extern ApplicationLayer     Application;
 extern ResourceManager      Resources;
+extern ScriptSystem         Scripting;
 extern RenderSystem         Renderer;
 extern PhysicsSystem        Physics;
 extern InputSystem          Input;
-extern ScriptSystem         Scripting;
 
 
 
@@ -20,17 +20,14 @@ extern ScriptSystem         Scripting;
 void ScriptCameraController(void* gameObject);
 
 
-
 // Cached resource pointers
-Scene*    objectScene;
-
 Mesh*     barrelMesh;
 Material* barrelMaterial;
 
-
-
-
 GameObject* cameraController = nullptr;
+
+
+
 
 
 //
@@ -49,9 +46,9 @@ void Framework::Start() {
     
     
     // Create objects from resource tags
-    barrelMesh = Resources.CreateMeshFromTag("barrel");
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
     
+    barrelMesh = Resources.CreateMeshFromTag("barrel");
     barrelMesh->ChangeSubMeshColor(0, Colors.gray);
     
     
@@ -76,9 +73,13 @@ void Framework::Start() {
 
 
 
-float spreadMul  = 0.8;
-float forceMul   = 200;
-float torqueMul  = 10;
+float spreadMul    = 0.3;
+float spawnHeight  = 100;
+
+float forceMul   = 100;
+float torqueMul  = 3;
+
+
 
 
 //
@@ -87,10 +88,10 @@ float torqueMul  = 10;
 
 void Framework::Run() {
     
-    for (int i=0; i < 30; i++) {
+    for (int i=0; i < 100; i++) {
         
         //
-        // Create a barrel object
+        // Create some barrel objects in random positions
         
         GameObject* barrel = Engine.CreateGameObject();
         
@@ -105,11 +106,10 @@ void Framework::Run() {
         
         
         // Add a physics component
-        //Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
-        //barrel->AddComponent(rigidBodyComponent);
+        Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+        barrel->AddComponent(rigidBodyComponent);
         
         //rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
-        
         
         float startx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
         float starty = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -123,9 +123,9 @@ void Framework::Run() {
         float torquey = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
         float torquez = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
         
-        barrel->SetPosition(startx, starty + 100, startz);
-        //barrel->AddForce(forcex, forcey, forcez);
-        //barrel->AddTorque(torquex, torquey, torquez);
+        barrel->SetPosition(startx, starty + spawnHeight, startz);
+        barrel->AddForce(forcex, forcey, forcez);
+        barrel->AddTorque(torquex, torquey, torquez);
         
         continue;
     }

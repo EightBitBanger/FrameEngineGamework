@@ -10,6 +10,10 @@
 #include "../Renderer/components/camera.h"
 
 
+#include "../std/timer.h"
+#include "../std/logging.h"
+#include "../std/random.h"
+
 class EngineSystemManager {
     
 public:
@@ -54,9 +58,18 @@ private:
     // Remove an entity from the internal list of active objects
     bool RemoveGameObjectFromActiveList(GameObject* gameObjectPtr);
     
+    // Rigid body free list
+    void AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr);
+    rp3d::RigidBody* RemoveRigidBodyFromFreeList(void);
+    
+    
     Scene* sceneMain;
     
+    // List of active game objects
     std::vector<GameObject*> gameObjectActive;
+    
+    // Free list of rigid bodies
+    std::vector<rp3d::RigidBody*> rigidBodyFreeList;
     
     PoolAllocator<GameObject> gameObject;
     PoolAllocator<Component>  components;

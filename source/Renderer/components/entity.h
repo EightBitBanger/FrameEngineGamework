@@ -11,6 +11,7 @@ class Entity {
     
 public:
     
+    /// Transformation matrix.
     Transform transform;
     
     Entity();

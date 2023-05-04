@@ -1,5 +1,6 @@
 #include "rendersystem.h"
 
+
 RenderSystem::RenderSystem() {
     
     windowHandle   = NULL;
@@ -15,9 +16,6 @@ RenderSystem::RenderSystem() {
     cameraMain = nullptr;
     return;
 }
-
-
-
 
 
 Entity* RenderSystem::CreateEntity(void) {

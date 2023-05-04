@@ -1,9 +1,7 @@
 #ifndef _VERTEXBUFFER_TYPE__
 #define _VERTEXBUFFER_TYPE__
 
-class Vertex {
-    
-public:
+struct Vertex {
     
     float x, y, z;  // Position
     float r, g, b;  // Color
@@ -18,9 +16,7 @@ public:
 };
 
 
-class Index  {
-    
-public:
+struct Index  {
     
     unsigned int index;
     

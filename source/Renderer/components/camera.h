@@ -1,50 +1,48 @@
 #ifndef __COMPONENT_CAMERA
 #define __COMPONENT_CAMERA
 
-#include <SDKDDKVer.h>
-#include <windows.h>
-
-#define GLEW_STATIC
-#include <gl/glew.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include "../types/bufferlayout.h"
 #include "../types/transform.h"
-#include "../types/color.h"
-#include "../types/viewport.h"
 
-#include "../../Scripting/components/script.h"
-#include "../../Physics/PhysicsSystem.h"
-#include "../../Resources/assets/colliderTag.h"
 #include "../../Input/InputSystem.h"
-#include "../../std/timer.h"
 
 
 class Camera {
     
 public:
     
+    /// Transformation matrix.
     Transform transform;
     
+    /// Up angle orientation reference.
     glm::vec3 up;
+    /// Forward looking angle.
     glm::vec3 forward;
+    /// Right angle to the cameras forward angle.
     glm::vec3 right;
     
+    /// Whether mouse look is calculated on update.
     bool useMouseLook;
     
+    /// Speed of mo
     float cameraSpeed;
     
+    /// Field of view.
     float fov;
+    /// View aspect ratio.
     float aspect;
+    /// Near camera clipping distance.
     float clipNear;
+    /// Far camera clipping distance.
     float clipFar;
     
+    /// Maximum pitch angle limit. (in radians)
     int MouseLimitPitchMax;
+    /// Minimum pitch angle limit. (in radians)
     int MouseLimitPitchMin;
     
+    /// Mouse horizontal movement sensitivity. (in radians)
     float MouseSensitivityYaw;
+    /// Mouse vertical movement sensitivity. (in radians)
     float MouseSensitivityPitch;
     
     Camera();

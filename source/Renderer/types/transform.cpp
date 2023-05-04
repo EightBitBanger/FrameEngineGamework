@@ -50,6 +50,16 @@ bool Transform::ChildRemove(Transform* transform) {
 }
 
 
+void Transform::SetParentTransform(Transform* parentTransform) {
+    parent = parentTransform;
+    return;
+}
+
+Transform* Transform::GetParentTransform(void) {
+    return parent;
+}
+
+
 Transform Transform::Identity(void) {
     Transform identity = Transform();
     return identity;

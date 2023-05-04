@@ -1,9 +1,7 @@
 #ifndef _VIEWPORT_TYPE__
 #define _VIEWPORT_TYPE__
 
-class Viewport {
-    
-public:
+struct Viewport {
     
     /// View left.
     int x;

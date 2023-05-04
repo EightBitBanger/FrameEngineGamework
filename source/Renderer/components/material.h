@@ -1,14 +1,8 @@
 #ifndef __COMPONENT_MATERIAL
 #define __COMPONENT_MATERIAL
 
-#include <SDKDDKVer.h>
-#include <windows.h>
-
 #define GLEW_STATIC
 #include <gl/glew.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include "../types/color.h"
 #include "../enumerators.h"

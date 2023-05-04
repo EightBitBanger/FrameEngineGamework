@@ -4,13 +4,9 @@
 #define GLEW_STATIC
 #include <gl/glew.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <vector>
 
 #include "../types/bufferlayout.h"
-#include "../types/transform.h"
-#include "../types/color.h"
-#include "../types/viewport.h"
 
 #include "material.h"
 #include "shader.h"
@@ -18,14 +14,18 @@
 
 struct SubMesh {
     
+    /// Begin offset position 
     unsigned vertexBegin;
     unsigned vertexCount;
     unsigned indexBegin;
     unsigned indexCount;
     
+    /// Current mesh position offset. (internal)
     glm::vec3 position;
     
+    /// Vertex buffer array.
     std::vector<Vertex>  vertexBuffer;
+    /// Index buffer array.
     std::vector<Index>   indexBuffer;
     
 };
@@ -105,26 +105,36 @@ public:
     
 private:
     
+    // Attached shader
     Shader* shader;
     
+    // OpenGL buffer indexes
     unsigned int vertexArray;
     unsigned int bufferVertex;
     unsigned int bufferIndex;
     
+    // Render draw type
     int primitive;
     
+    // Buffer sizes
     unsigned int vertexBufferSz;
     unsigned int indexBufferSz;
     unsigned int maxSize;
     
+    // Vertex buffer array
     std::vector<Vertex>   vertexBuffer;
+    // Index buffer array
     std::vector<Index>    indexBuffer;
     
+    // List of sub meshes in this mesh
     std::vector<SubMesh> subMesh;
+    // List of freed sub meshes in this mesh
     std::vector<SubMesh> freeMesh;
     
+    // Apply default layout settings
     void SetDefaultAttributes(void);
     
+    // Allocate/deallocate 
     void AllocateBuffers(unsigned int maxBufferSize);
     void FreeBuffers(void);
     

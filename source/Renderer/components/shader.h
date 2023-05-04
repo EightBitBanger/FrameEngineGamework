@@ -3,15 +3,16 @@
 
 #include <string>
 
+#include <iostream>
+
 #define GLEW_STATIC
 #include <gl/glew.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "../types/transform.h"
 
 #include "../types/color.h"
 
-#include "../../std/logging.h"
+//#include "../../std/logging.h"
 
 
 class Shader {

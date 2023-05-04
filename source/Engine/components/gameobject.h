@@ -2,8 +2,11 @@
 #define ENGINE_GAME_OBJECT
 
 #include "../../Renderer/components/entity.h"
-#include "../../Scripting/components/script.h"
 #include "../../Renderer/components/camera.h"
+#include "../../Scripting/components/script.h"
+#include "../../Physics/PhysicsSystem.h"
+
+#include "../../Resources/assets/colliderTag.h"
 
 #include "component.h"
 
@@ -18,7 +21,7 @@ public:
     
     GameObject();
     
-    
+    //
     // Components
     
     /// Add a component to the game object.
@@ -33,7 +36,7 @@ public:
     /// Get the number of components attached to the game object.
     unsigned int GetComponentCount(void);
     
-    
+    //
     // Physics
     
     /// Set the position of the object.
@@ -72,10 +75,13 @@ public:
     /// Make the rigid body dynamically movable.
     void SetRigidBodyDynamic(void);
     
+    
 private:
     
+    // Attached component list
     std::vector<Component*> componentList;
     
+    // Cached pointers, to avoid overhead from working with components
     rp3d::RigidBody* rigidBodyCache;
     Entity*          entityCache;
     

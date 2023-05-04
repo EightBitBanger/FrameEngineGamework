@@ -1,6 +1,5 @@
 #include "material.h"
 
-
 Material::Material() {
     
     width  = 0;

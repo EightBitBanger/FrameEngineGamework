@@ -20,6 +20,10 @@ EngineSystemManager   Engine;
 
 EngineSystemManager::EngineSystemManager(void) {
     
+    // Preallocate some buffer space
+    gameObjectActive.reserve(512);
+    rigidBodyFreeList.reserve(512);
+    
     return;
 }
 
@@ -35,42 +39,10 @@ void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
     RemoveGameObjectFromActiveList(gameObjectPtr);
     
-    // Destroy all components
-    Entity* componentEntityRenderer;
-    rp3d::RigidBody* componentRigidBody;
-    Script* componentScript;
-    Camera* componentCamera;
-    
+    // Remove all components
     for (unsigned int i=0; i < gameObjectPtr->GetComponentCount(); i++) {
         
         Component* componentPtr = gameObjectPtr->GetComponent(i);
-        
-        unsigned int componentType = componentPtr->GetType();
-        
-        switch (componentType) {
-            
-            case COMPONENT_TYPE_RENDERER:
-                componentEntityRenderer = (Entity*)componentPtr->GetComponent();
-                DestroyEntityRenderer(componentEntityRenderer);
-                break;
-                
-            case COMPONENT_TYPE_RIGIDBODY:
-                componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
-                Physics.DestroyRigidBody(componentRigidBody);
-                break;
-                
-            case COMPONENT_TYPE_SCRIPT: 
-                componentScript = (Script*)componentPtr->GetComponent();
-                Scripting.DestroyScript(componentScript);
-                break;
-                
-            case COMPONENT_TYPE_CAMERA: 
-                componentCamera = (Camera*)componentPtr->GetComponent();
-                Renderer.DestroyCamera(componentCamera);
-                break;
-                
-        }
-        
         DestroyComponent(componentPtr);
         continue;
     }
@@ -184,7 +156,12 @@ Component* EngineSystemManager::CreateComponent(unsigned int component_type) {
             component_object = (void*)this->CreateEntityRenderer(nullptr, nullptr);
             break;
             
-        case COMPONENT_TYPE_RIGIDBODY:
+        case COMPONENT_TYPE_RIGIDBODY: {
+            if (rigidBodyFreeList.size() > 0) {
+                component_object = (void*)RemoveRigidBodyFromFreeList();
+                break;
+            }
+            }
             component_object = (void*)Physics.CreateRigidBody();
             break;
             
@@ -205,6 +182,39 @@ Component* EngineSystemManager::CreateComponent(unsigned int component_type) {
 
 void EngineSystemManager::DestroyComponent(Component* componentPtr) {
     assert(componentPtr != nullptr);
+    
+    // Destroy attached component object
+    Entity* componentEntityRenderer;
+    rp3d::RigidBody* componentRigidBody;
+    Script* componentScript;
+    Camera* componentCamera;
+    
+    unsigned int componentType = componentPtr->GetType();
+    
+    switch (componentType) {
+        
+        case COMPONENT_TYPE_RENDERER:
+            componentEntityRenderer = (Entity*)componentPtr->GetComponent();
+            DestroyEntityRenderer(componentEntityRenderer);
+            break;
+            
+        case COMPONENT_TYPE_RIGIDBODY:
+            componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
+            //Physics.DestroyRigidBody(componentRigidBody);
+            AddRigidBodyToFreeList(componentRigidBody);
+            break;
+            
+        case COMPONENT_TYPE_SCRIPT: 
+            componentScript = (Script*)componentPtr->GetComponent();
+            Scripting.DestroyScript(componentScript);
+            break;
+            
+        case COMPONENT_TYPE_CAMERA: 
+            componentCamera = (Camera*)componentPtr->GetComponent();
+            Renderer.DestroyCamera(componentCamera);
+            break;
+            
+    }
     components.Destroy(componentPtr);
     return;
 }
@@ -212,6 +222,27 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
 
 
 
+void EngineSystemManager::AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr) {
+    rigidBodyFreeList.push_back(rigidBodyPtr);
+    rigidBodyPtr->setIsActive(false);
+    return;
+}
+
+rp3d::RigidBody* EngineSystemManager::RemoveRigidBodyFromFreeList(void) {
+    rp3d::RigidBody* bodyPtr = nullptr;
+    for (std::vector<rp3d::RigidBody*>::iterator it = rigidBodyFreeList.begin(); it != rigidBodyFreeList.end(); ++it) {
+        rp3d::RigidBody* thisBodyPtr = *it;
+        rigidBodyFreeList.erase(it);
+        bodyPtr = thisBodyPtr;
+        bodyPtr->setIsActive(true);
+        break;
+    }
+    if (bodyPtr == nullptr) {
+        return Physics.CreateRigidBody(0, 0, 0);
+    }
+    
+    return bodyPtr;
+}
 
 
 

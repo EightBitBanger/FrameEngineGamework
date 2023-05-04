@@ -1,42 +1,14 @@
 #ifndef OPENGL_RENDERER_SYSTEM
 #define OPENGL_RENDERER_SYSTEM
 
-// Standard headers
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstdlib>
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-
-#include <string>
-#include <vector>
-#include <thread>
-#include <map>
-
-
-#define GLEW_STATIC
-#include <gl/glew.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 
 #include "../std/poolallocator.h"
-#include "../std/timer.h"
-#include "../std/strings.h"
 #include "../std/types.h"
 #include "../std/logging.h"
-#include "../std/random.h"
-#include "../std/fileloader.h"
 extern Logger Log;
 
 #include "enumerators.h"
 
-#include "types/bufferlayout.h"
-#include "types/transform.h"
-#include "types/color.h"
 #include "types/viewport.h"
 
 #include "components/shader.h"
@@ -49,7 +21,6 @@ extern Logger Log;
 #include "components/sky.h"
 
 #include "components/scene.h"
-
 
 
 
@@ -117,7 +88,7 @@ public:
     
     
     
-    /// Start the render system.
+    /// Prepare the render system.
     void Initiate(void);
     
     /// Set the target render context.
