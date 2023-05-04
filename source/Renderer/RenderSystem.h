@@ -14,15 +14,12 @@ extern Logger Log;
 #include "components/shader.h"
 #include "components/material.h"
 #include "components/mesh.h"
-
 #include "components/camera.h"
 #include "components/entity.h"
-
 #include "components/sky.h"
-
 #include "components/scene.h"
 
-
+#include "pipeline.h"
 
 class RenderSystem {
     
@@ -86,6 +83,10 @@ public:
     /// Destroy a scene object and return true on success.
     bool DestroyScene(Scene* scenePtr);
     
+    /// Create a render pipeline object and return its pointer.
+    RenderPipeline* CreateRenderPipeline(void);
+    /// Destroy a render pipeline object and return true on success.
+    bool DestroyRenderPipeline(RenderPipeline* renderPipelinePtr);
     
     
     /// Prepare the render system.
@@ -133,6 +134,8 @@ private:
     Shader*    currentShader;
     
     // Allocators
+    
+    // Render components
     PoolAllocator<Entity>    entity;
     PoolAllocator<Mesh>      mesh;
     PoolAllocator<Shader>    shader;
@@ -140,6 +143,8 @@ private:
     PoolAllocator<Material>  material;
     PoolAllocator<Sky>       sky;
     PoolAllocator<Scene>     scene;
+    
+    PoolAllocator<RenderPipeline>  pipeline;
     
 };
 
