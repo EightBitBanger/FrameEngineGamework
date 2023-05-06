@@ -47,9 +47,11 @@ public:
     GameObject* GetGameObject(unsigned int index);
     
     
-    void Initiate();
+    void Initiate(void);
     
     void Update(void);
+    
+    void Shutdown(void);
     
 private:
     

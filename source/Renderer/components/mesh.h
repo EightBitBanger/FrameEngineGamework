@@ -39,13 +39,6 @@ public:
     Mesh();
     ~Mesh();
     
-    /// Attach a shader object to the mesh.
-    void AttachShader(Shader* shaderPtr);
-    /// Detach the shader object from the mesh.
-    void DetachShader(void);
-    /// Get the attached shader object from the mesh.
-    Shader* GetAttachedShader(void);
-    
     /// Reallocate new GPU memory.
     void Reallocate(unsigned int newBufferSize);
     
@@ -104,9 +97,6 @@ public:
     
     
 private:
-    
-    // Attached shader
-    Shader* shader;
     
     // OpenGL buffer indexes
     unsigned int vertexArray;

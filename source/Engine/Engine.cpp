@@ -277,10 +277,6 @@ void EngineSystemManager::Update(void) {
                     componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
                     break;
                     
-                //case COMPONENT_TYPE_SCRIPT: 
-                //    componentScript = (Script*)componentPtr->GetComponent();
-                //    break;
-                    
                 case COMPONENT_TYPE_CAMERA: 
                     componentCamera = (Camera*)componentPtr->GetComponent();
                     break;
@@ -347,6 +343,14 @@ void EngineSystemManager::Update(void) {
     return;
 }
 
+
+void EngineSystemManager::Shutdown(void) {
+    
+    while (GetGameObjectCount() > 0) {
+        DestroyGameObject( GetGameObject(0) );
+    }
+    return;
+}
 
 
 

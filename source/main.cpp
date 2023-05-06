@@ -90,6 +90,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Shutdown engine & sub systems
     Framework::Shutdown();
     
+    Engine.Shutdown();
+    
     Resources.DestroyAssets();
     
     Physics.common.destroyPhysicsWorld(Physics.world);

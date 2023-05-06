@@ -3,17 +3,11 @@
 
 #include "components/shader.h"
 
-class RenderPipeline {
-    
-public:
-    
-    void SetShader(Shader* newShader);
+struct RenderPipeline {
     
     RenderPipeline();
     
     void Bind(void);
-    
-private:
     
     Shader* currentShader;
     

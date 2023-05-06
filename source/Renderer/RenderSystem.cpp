@@ -11,7 +11,6 @@ RenderSystem::RenderSystem() {
     
     currentMesh      = nullptr;
     currentMaterial  = nullptr;
-    currentShader    = nullptr;
     
     cameraMain = nullptr;
     return;
@@ -31,7 +30,6 @@ bool RenderSystem::DestroyEntity(Entity* entityPtr) {
 
 Mesh* RenderSystem::CreateMesh(void) {
     Mesh* meshPtr = mesh.Create();
-    meshPtr->AttachShader(defaultShader);
     return meshPtr;
 }
 bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
@@ -110,6 +108,9 @@ void RenderSystem :: Initiate(void) {
     
     defaultMaterial = CreateMaterial();
     defaultMaterial->color = Color(0, 0, 0, 1);
+    
+    currentPipeline = CreateRenderPipeline();
+    currentPipeline->currentShader = defaultShader;
     
 #ifdef _RENDERER_CHECK_OPENGL_ERRORS__
     GetGLErrorCodes("OnInitiate::");
@@ -359,10 +360,16 @@ void RenderSystem::RenderFrame(float deltaTime) {
     
     cameraMain->right = glm::normalize(glm::cross(cameraMain->up, cameraMain->forward));
     glm::mat4 view = glm::lookAt(pos, angle, cameraMain->up);
+    glm::mat4 viewProjection = projection * view;
     
     
-    // Trip the shader to reset the camera projection
-    currentShader = nullptr;
+    // Bind the render pipeline
+    assert(currentPipeline != nullptr);
+    
+    currentPipeline->currentShader->Bind();
+    
+    currentPipeline->currentShader->SetProjectionMatrix( viewProjection );
+    
     
     
     
@@ -380,24 +387,11 @@ void RenderSystem::RenderFrame(float deltaTime) {
             Mesh* mesh = currentEntity->GetAttachedMesh();
             assert(mesh != nullptr);
             
-            Shader* shader = mesh->GetAttachedShader();
-            assert(shader != nullptr);
-            
             // Mesh binding
             if (currentMesh != mesh) {
                 currentMesh = mesh;
                 
                 currentMesh->Bind();
-            }
-            
-            // Shader binding
-            if (currentShader != shader) {
-                currentShader = shader;
-                
-                currentShader->Bind();
-                
-                glm::mat4 viewProjection = projection * view;
-                currentShader->SetProjectionMatrix( viewProjection );
             }
             
             // Material binding
@@ -434,12 +428,11 @@ void RenderSystem::RenderFrame(float deltaTime) {
                     glDisable(GL_BLEND);
                 }
                 
-                currentShader->Bind();
-                currentShader->SetMaterialColor(currentMaterial->color);
-                currentShader->SetTextureSampler(0);
+                currentPipeline->currentShader->SetMaterialColor(currentMaterial->color);
+                currentPipeline->currentShader->SetTextureSampler(0);
             }
             
-            currentShader->SetModelMatrix(currentEntity->transform.matrix);
+            currentPipeline->currentShader->SetModelMatrix(currentEntity->transform.matrix);
             
             mesh->DrawIndexArray();
             

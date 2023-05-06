@@ -40,8 +40,8 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
     rp3d::RigidBody* body = world->createRigidBody(physicsTransform);
     
     body->setMass(1);
-    body->setLinearDamping(0.01);
-    body->setAngularDamping(0.08);
+    body->setLinearDamping(0.001);
+    body->setAngularDamping(0.004);
     
     return body;
 }

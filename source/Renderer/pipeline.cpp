@@ -3,17 +3,13 @@
 
 RenderPipeline::RenderPipeline() {
     
+    currentShader = nullptr;
     return;
 }
 
-
-void RenderPipeline::SetShader(Shader* newShader) {
-    assert(newShader != nullptr);
-    currentShader = newShader;
-    return;
-}
 
 void RenderPipeline::Bind(void) {
-    
+    assert(currentShader != nullptr);
     currentShader->Bind();
+    return;
 }

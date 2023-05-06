@@ -36,6 +36,8 @@ public:
     Sky*      skyMain;
     /// Current camera object used for rendering.
     Camera*   cameraMain;
+    /// Current pipeline used for rendering.
+    RenderPipeline*  currentPipeline;
     
     /// Current rendering view port
     Viewport  viewport;
@@ -131,7 +133,7 @@ private:
     // Current asset bindings
     Mesh*      currentMesh;
     Material*  currentMaterial;
-    Shader*    currentShader;
+    
     
     // Allocators
     

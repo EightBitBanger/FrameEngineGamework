@@ -38,7 +38,8 @@ void Framework::Start() {
     
     Resources.LoadScene("data/main.scene");
     
-    Physics.SetWorldGravity(0, -0, -1000);
+    //Physics.SetWorldGravity(0, -0, -1000);
+    Physics.SetWorldGravity(0, -9, 0);
     
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
@@ -73,7 +74,7 @@ void Framework::Start() {
 
 
 
-float spreadMul    = 0.3;
+float spreadMul    = 0.1;
 float spawnHeight  = 100;
 
 float forceMul   = 100;
@@ -87,8 +88,8 @@ float torqueMul  = 3;
 //
 
 void Framework::Run() {
-    
-    for (int i=0; i < 100; i++) {
+    /*
+    for (int i=0; i < 1; i++) {
         
         //
         // Create some barrel objects in random positions
@@ -130,8 +131,8 @@ void Framework::Run() {
         continue;
     }
     
-    
-    while (Engine.GetGameObjectCount() > 1000) {
+    */
+    while (Engine.GetGameObjectCount() > 50) {
         
         GameObject* gameObject = Engine.GetGameObject(0);
         Component* cameraComponent = gameObject->FindComponent(COMPONENT_TYPE_CAMERA);
@@ -188,11 +189,10 @@ void Framework::Shutdown(void) {
 
 
 
+float cameraSpeed = 1000;
+
 void ScriptCameraController(void* gameObjectPtr) {
-    
     GameObject* gameObject = (GameObject*)gameObjectPtr;
-    
-    float cameraSpeed = 1000;
     
     glm::vec3 force(0);
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
@@ -202,6 +202,42 @@ void ScriptCameraController(void* gameObjectPtr) {
     
     if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
+    
+    //
+    // Shoot object from camera
+    
+    if (Input.CheckMouseLeftPressed()) {
+        Input.SetMouseLeftPressed(false);
+        
+        GameObject* barrel = Engine.CreateGameObject();
+        
+        
+        // Add a render component
+        Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
+        barrel->AddComponent(entityRenderer);
+        
+        Entity* entity = (Entity*)entityRenderer->GetComponent();
+        entity->AttachMesh(barrelMesh);
+        entity->AttachMaterial(barrelMaterial);
+        
+        
+        // Add a physics component
+        Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+        barrel->AddComponent(rigidBodyComponent);
+        
+        glm::vec3 fwd = Renderer.cameraMain->forward;
+        fwd *= 3; // Start offset from camera
+        
+        glm::vec3 pos = Renderer.cameraMain->transform.position;
+        pos += fwd;
+        fwd *= 800; // Total forward force + camera offset
+        
+        barrel->SetPosition(pos.x, pos.y, pos.z);
+        barrel->AddForce(fwd.x, fwd.y, fwd.z);
+        
+        
+        
+    }
     
     force *= cameraSpeed;
     
