@@ -1,22 +1,22 @@
 #include "component.h"
 
 void* Component::GetComponent(void) {
-    return object;
+    return mObject;
 }
 
 componentENUM Component::GetType(void) {
-    return type;
+    return mType;
 }
 
 void Component::SetComponent(componentENUM component_type, void* component_object) {
-    type = component_type;
-    object = component_object;
+    mType = component_type;
+    mObject = component_object;
     return;
 }
 
 Component::Component() {
-    type = COMPONENT_TYPE_UNDEFINED;
-    object = nullptr;
+    mType = COMPONENT_TYPE_UNDEFINED;
+    mObject = nullptr;
     return;
 }
 

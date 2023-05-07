@@ -3,7 +3,9 @@
 
 #include <ReactPhysics3d/ReactPhysics3d.h>
 
-struct PhysicsSystem {
+class PhysicsSystem {
+    
+public:
     
     /// Physical world simulation.
     rp3d::PhysicsWorld* world;
@@ -14,6 +16,9 @@ struct PhysicsSystem {
     
     /// Prepare the physics system.
     void Initiate(void);
+    
+    /// Prepare the physics system.
+    void Shutdown(void);
     
     /// Create a rigid body object and return its pointer.
     rp3d::RigidBody* CreateRigidBody(float x=0.0, float y=0.0, float z=0.0);
@@ -29,6 +34,19 @@ struct PhysicsSystem {
     rp3d::SphereShape* CreateColliderSphere(float radius);
     /// Create a capsule collider scaled by radius and height.
     rp3d::CapsuleShape* CreateColliderCapsule(float radius, float height);
+    
+    
+private:
+    
+    // Add a rigid body to the free list
+    void AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr);
+    // Remove a rigid body from the free list
+    rp3d::RigidBody* RemoveRigidBodyFromFreeList(void);
+    
+    
+    // Free list of rigid bodies
+    std::vector<rp3d::RigidBody*> mRigidBodyFreeList;
+    
     
 };
 

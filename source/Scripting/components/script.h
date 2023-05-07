@@ -15,13 +15,16 @@ struct Script {
     /// State whether OnCreate() has already been called.
     bool hasBeenInitiated;
     
-    /// Pointer to the game object who referenced this script.
+    /// Pointer to the game object who owns this script.
     void* gameObject;
+    
     
     /// This function will be called on object creation.
     void(*OnCreate)(void* gameObjectPtr);
+    
     /// This function will be called once per frame.
     void(*OnUpdate)(void* gameObjectPtr);
+    
     
     Script();
     

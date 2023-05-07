@@ -38,8 +38,8 @@ void Framework::Start() {
     
     Resources.LoadScene("data/main.scene");
     
-    //Physics.SetWorldGravity(0, -0, -1000);
-    Physics.SetWorldGravity(0, -9, 0);
+    Physics.SetWorldGravity(0, -0, -700);
+    //Physics.SetWorldGravity(0, -0, 0);
     
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
@@ -75,10 +75,10 @@ void Framework::Start() {
 
 
 float spreadMul    = 0.1;
-float spawnHeight  = 100;
+float spawnHeight  = 70;
 
-float forceMul   = 100;
-float torqueMul  = 3;
+float forceMul   = 80;
+float torqueMul  = 1;
 
 
 
@@ -88,22 +88,19 @@ float torqueMul  = 3;
 //
 
 void Framework::Run() {
-    /*
-    for (int i=0; i < 1; i++) {
+    
+    //
+    // Create some barrel objects in random positions
+    
+    for (int i=0; i < 10; i++) {
         
-        //
-        // Create some barrel objects in random positions
-        
+        // Create a game object
         GameObject* barrel = Engine.CreateGameObject();
         
         
         // Add a renderer component
-        Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
+        Component* entityRenderer = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
         barrel->AddComponent(entityRenderer);
-        
-        Entity* entity = (Entity*)entityRenderer->GetComponent();
-        entity->AttachMesh(barrelMesh);
-        entity->AttachMaterial(barrelMaterial);
         
         
         // Add a physics component
@@ -131,14 +128,19 @@ void Framework::Run() {
         continue;
     }
     
-    */
-    while (Engine.GetGameObjectCount() > 50) {
+    unsigned int index=0;
+    
+    while (Engine.GetGameObjectCount() > 1000) {
         
-        GameObject* gameObject = Engine.GetGameObject(0);
+        GameObject* gameObject = Engine.GetGameObject(index);
+        if (gameObject->name == "bullet") {
+            index++;
+            continue;
+        }
+        
         Component* cameraComponent = gameObject->FindComponent(COMPONENT_TYPE_CAMERA);
         if (cameraComponent != nullptr) 
             gameObject = Engine.GetGameObject(1);
-        
         Engine.DestroyGameObject(gameObject);
         
     }
@@ -209,12 +211,12 @@ void ScriptCameraController(void* gameObjectPtr) {
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
         
-        GameObject* barrel = Engine.CreateGameObject();
-        
+        GameObject* projectile = Engine.CreateGameObject();
+        projectile->name = "bullet";
         
         // Add a render component
         Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
-        barrel->AddComponent(entityRenderer);
+        projectile->AddComponent(entityRenderer);
         
         Entity* entity = (Entity*)entityRenderer->GetComponent();
         entity->AttachMesh(barrelMesh);
@@ -223,20 +225,18 @@ void ScriptCameraController(void* gameObjectPtr) {
         
         // Add a physics component
         Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
-        barrel->AddComponent(rigidBodyComponent);
+        projectile->AddComponent(rigidBodyComponent);
         
         glm::vec3 fwd = Renderer.cameraMain->forward;
         fwd *= 3; // Start offset from camera
         
         glm::vec3 pos = Renderer.cameraMain->transform.position;
         pos += fwd;
-        fwd *= 800; // Total forward force + camera offset
+        fwd *= 1000; // Total forward force + camera offset
         
-        barrel->SetPosition(pos.x, pos.y, pos.z);
-        barrel->AddForce(fwd.x, fwd.y, fwd.z);
-        
-        
-        
+        projectile->SetPosition(pos.x, pos.y, pos.z);
+        projectile->AddForce(fwd.x, fwd.y, fwd.z);
+        projectile->EnableGravity(false);
     }
     
     force *= cameraSpeed;

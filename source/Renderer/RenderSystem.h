@@ -25,7 +25,7 @@ class RenderSystem {
     
 public:
     
-    Scene* operator[] (unsigned int const i) {return renderQueue[i];}
+    Scene* operator[] (unsigned int const i) {return mRenderQueue[i];}
     
     /// Default material object.
     Material* defaultMaterial;
@@ -123,30 +123,29 @@ public:
 private:
     
     // Device render context
-    HWND  windowHandle;
-    HDC   deviceContext;
-    HGLRC renderContext;
+    HWND  mWindowHandle;
+    HDC   mDeviceContext;
+    HGLRC mRenderContext;
     
     // Render queue group
-    std::vector<Scene*>  renderQueue;
+    std::vector<Scene*>  mRenderQueue;
     
     // Current asset bindings
-    Mesh*      currentMesh;
-    Material*  currentMaterial;
+    Mesh*      mCurrentMesh;
+    Material*  mCurrentMaterial;
     
     
     // Allocators
     
-    // Render components
-    PoolAllocator<Entity>    entity;
-    PoolAllocator<Mesh>      mesh;
-    PoolAllocator<Shader>    shader;
-    PoolAllocator<Camera>    camera;
-    PoolAllocator<Material>  material;
-    PoolAllocator<Sky>       sky;
-    PoolAllocator<Scene>     scene;
-    
-    PoolAllocator<RenderPipeline>  pipeline;
+    // Render component allocators
+    PoolAllocator<Entity>   mEntity;
+    PoolAllocator<Mesh>     mMesh;
+    PoolAllocator<Shader>   mShader;
+    PoolAllocator<Camera>   mCamera;
+    PoolAllocator<Material> mMaterial;
+    PoolAllocator<Sky>      mSky;
+    PoolAllocator<Scene>    mScene;
+    PoolAllocator<RenderPipeline>  mPipeline;
     
 };
 

@@ -15,9 +15,14 @@ class GameObject {
     
 public:
     
+    // Object elements
+    
+    /// Object name.
     std::string name;
     
+    /// State whether the object is active.
     bool isActive;
+    
     
     GameObject();
     
@@ -78,12 +83,12 @@ public:
     
 private:
     
-    // Attached component list
-    std::vector<Component*> componentList;
+    // List of attached components
+    std::vector<Component*> mComponentList;
     
-    // Cached pointers, to avoid overhead from working with components
-    rp3d::RigidBody* rigidBodyCache;
-    Entity*          entityCache;
+    // Cached component pointers, to avoid overhead from working with components internally
+    rp3d::RigidBody* mRigidBodyCache;
+    Entity*          mEntityCache;
     
 };
 

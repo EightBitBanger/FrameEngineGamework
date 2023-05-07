@@ -25,7 +25,7 @@ public:
 private:
     
     /// List of entities in this scene.
-    std::vector<Entity*>  entities;
+    std::vector<Entity*>  mEntityList;
     
 };
 

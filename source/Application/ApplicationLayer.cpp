@@ -10,7 +10,7 @@ ApplicationLayer::ApplicationLayer() {
     displayWidth  = 1024;
     displayHeight = 800;
     
-    isWindowRunning = false;
+    mIsWindowRunning = false;
     
     isPaused = false;
     isActive = true;
@@ -54,7 +54,7 @@ HWND ApplicationLayer::CreateWindowHandle(std::string className, std::string win
     displayWidth  = GetDeviceCaps(deviceContext, HORZRES);
     displayHeight = GetDeviceCaps(deviceContext, VERTRES);
     
-    isWindowRunning = true;
+    mIsWindowRunning = true;
     return windowHandle;
 }
 
@@ -62,7 +62,7 @@ void ApplicationLayer::DestroyWindowHandle(void) {
     assert(windowHandle != NULL);
     DestroyWindow(windowHandle);
     windowHandle = NULL;
-    isWindowRunning = false;
+    mIsWindowRunning = false;
     return;
 }
 

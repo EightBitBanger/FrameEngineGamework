@@ -3,8 +3,8 @@
 
 void ScriptSystem::Update(void) {
     
-    for (int i=0; i < script.Size(); i++ ) {
-        Script* scriptRef = script[i];
+    for (int i=0; i < mScript.Size(); i++ ) {
+        Script* scriptRef = mScript[i];
         
         if (!scriptRef->isActive) 
             continue;
@@ -21,11 +21,12 @@ void ScriptSystem::Update(void) {
 }
 
 Script* ScriptSystem::CreateScript(void) {
-    Script* scriptPtr = script.Create();
+    Script* scriptPtr = mScript.Create();
     return scriptPtr;
 }
 
 bool ScriptSystem::DestroyScript(Script* scriptPtr) {
-    return script.Destroy(scriptPtr);
+    bool ret = mScript.Destroy(scriptPtr);
+    return ret;
 }
 

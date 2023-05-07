@@ -99,27 +99,27 @@ public:
 private:
     
     // OpenGL buffer indexes
-    unsigned int vertexArray;
-    unsigned int bufferVertex;
-    unsigned int bufferIndex;
+    unsigned int mVertexArray;
+    unsigned int mBufferVertex;
+    unsigned int mBufferIndex;
     
     // Render draw type
-    int primitive;
+    int mPrimitive;
     
     // Buffer sizes
-    unsigned int vertexBufferSz;
-    unsigned int indexBufferSz;
-    unsigned int maxSize;
+    unsigned int mVertexBufferSz;
+    unsigned int mIndexBufferSz;
+    unsigned int mMaxSize;
     
     // Vertex buffer array
-    std::vector<Vertex>   vertexBuffer;
+    std::vector<Vertex>   mVertexBuffer;
     // Index buffer array
-    std::vector<Index>    indexBuffer;
+    std::vector<Index>    mIndexBuffer;
     
     // List of sub meshes in this mesh
-    std::vector<SubMesh> subMesh;
+    std::vector<SubMesh> mSubMesh;
     // List of freed sub meshes in this mesh
-    std::vector<SubMesh> freeMesh;
+    std::vector<SubMesh> mFreeMesh;
     
     // Apply default layout settings
     void SetDefaultAttributes(void);

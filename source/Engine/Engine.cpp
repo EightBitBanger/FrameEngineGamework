@@ -21,15 +21,14 @@ EngineSystemManager   Engine;
 EngineSystemManager::EngineSystemManager(void) {
     
     // Preallocate some buffer space
-    gameObjectActive.reserve(512);
-    rigidBodyFreeList.reserve(512);
+    mGameObjectActive.reserve(512);
     
     return;
 }
 
 
 GameObject* EngineSystemManager::CreateGameObject(void) {
-    GameObject* newGameObject = gameObject.Create();
+    GameObject* newGameObject = mGameObject.Create();
     AddGameObjectToActiveList(newGameObject);
     return newGameObject;
 }
@@ -47,7 +46,7 @@ void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
         continue;
     }
     
-    gameObject.Destroy(gameObjectPtr);
+    mGameObject.Destroy(gameObjectPtr);
     return;
 }
 
@@ -68,7 +67,7 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
     cameraMain->EnableMouseLook();
     cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
-    // Rigid body component
+    //Add a rigid body component
     Component* rigidBodyComponent = CreateComponent(COMPONENT_TYPE_RIGIDBODY);
     rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
     rigidBody->setLinearDamping(4);
@@ -80,7 +79,7 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
     rp3d::Transform bodyTransform(position, quat);
     rigidBody->setTransform(bodyTransform);
     
-    // Script component
+    // Add a scripting component
     Component* scriptComponent = CreateComponent(COMPONENT_TYPE_SCRIPT);
     Script* script = (Script*)scriptComponent->GetComponent();
     script->gameObject = cameraController;
@@ -94,17 +93,29 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
 }
 
 
+Component* EngineSystemManager::CreateComponentEntityRenderer(Mesh* meshPtr, Material* materialPtr) {
+    Component* newComponent = CreateComponent(COMPONENT_TYPE_RENDERER);
+    Entity* entityRenderer = (Entity*)newComponent->GetComponent();
+    entityRenderer->AttachMesh(meshPtr);
+    entityRenderer->AttachMaterial(materialPtr);
+    
+    
+    return newComponent;
+}
+
+
+
 Entity* EngineSystemManager::CreateEntityRenderer(Mesh* meshPtr, Material* materialPtr) {
     Entity* entityPtr = Renderer.CreateEntity();
     entityPtr->AttachMesh( meshPtr );
     entityPtr->AttachMaterial( materialPtr );
-    sceneMain->AddToSceneRoot(entityPtr);
+    mSceneMain->AddToSceneRoot(entityPtr);
     return entityPtr;
 }
 
 void EngineSystemManager::DestroyEntityRenderer(Entity* entityPtr) {
     assert(entityPtr != nullptr);
-    sceneMain->RemoveFromSceneRoot(entityPtr);
+    mSceneMain->RemoveFromSceneRoot(entityPtr);
     Renderer.DestroyEntity(entityPtr);
     return;
 }
@@ -114,16 +125,16 @@ void EngineSystemManager::DestroyEntityRenderer(Entity* entityPtr) {
 
 void EngineSystemManager::AddGameObjectToActiveList(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
-    gameObjectActive.push_back( gameObjectPtr );
+    mGameObjectActive.push_back( gameObjectPtr );
     return;
 }
 
 bool EngineSystemManager::RemoveGameObjectFromActiveList(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
-    for (std::vector<GameObject*>::iterator it = gameObjectActive.begin(); it != gameObjectActive.end(); ++it) {
+    for (std::vector<GameObject*>::iterator it = mGameObjectActive.begin(); it != mGameObjectActive.end(); ++it) {
         GameObject* thisGameObjectPtr = *it;
         if (gameObjectPtr == thisGameObjectPtr) {
-            gameObjectActive.erase(it);
+            mGameObjectActive.erase(it);
             return true;
         }
     }
@@ -131,17 +142,17 @@ bool EngineSystemManager::RemoveGameObjectFromActiveList(GameObject* gameObjectP
 }
 
 GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
-    assert(index < gameObjectActive.size());
-    return gameObjectActive[index];
+    assert(index < mGameObjectActive.size());
+    return mGameObjectActive[index];
 }
 
 unsigned int EngineSystemManager::GetGameObjectCount(void) {
-    return gameObjectActive.size();
+    return mGameObjectActive.size();
 }
 
 void EngineSystemManager::Initiate() {
-    sceneMain = Renderer.CreateScene();
-    Renderer.AddToRenderQueue(sceneMain);
+    mSceneMain = Renderer.CreateScene();
+    Renderer.AddToRenderQueue(mSceneMain);
     return;
 }
 
@@ -157,14 +168,9 @@ Component* EngineSystemManager::CreateComponent(unsigned int component_type) {
             break;
             
         case COMPONENT_TYPE_RIGIDBODY: {
-            if (rigidBodyFreeList.size() > 0) {
-                component_object = (void*)RemoveRigidBodyFromFreeList();
-                break;
-            }
-            }
             component_object = (void*)Physics.CreateRigidBody();
             break;
-            
+        }
         case COMPONENT_TYPE_SCRIPT:
             component_object = (void*)Scripting.CreateScript();
             break;
@@ -175,7 +181,7 @@ Component* EngineSystemManager::CreateComponent(unsigned int component_type) {
         
     }
     
-    Component* newComponent = components.Create();
+    Component* newComponent = mComponents.Create();
     newComponent->SetComponent(component_type, component_object);
     return newComponent;
 }
@@ -200,8 +206,7 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
             
         case COMPONENT_TYPE_RIGIDBODY:
             componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
-            //Physics.DestroyRigidBody(componentRigidBody);
-            AddRigidBodyToFreeList(componentRigidBody);
+            Physics.DestroyRigidBody(componentRigidBody);
             break;
             
         case COMPONENT_TYPE_SCRIPT: 
@@ -215,49 +220,24 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
             break;
             
     }
-    components.Destroy(componentPtr);
+    mComponents.Destroy(componentPtr);
     return;
 }
 
-
-
-
-void EngineSystemManager::AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr) {
-    rigidBodyFreeList.push_back(rigidBodyPtr);
-    rigidBodyPtr->setIsActive(false);
-    return;
-}
-
-rp3d::RigidBody* EngineSystemManager::RemoveRigidBodyFromFreeList(void) {
-    rp3d::RigidBody* bodyPtr = nullptr;
-    for (std::vector<rp3d::RigidBody*>::iterator it = rigidBodyFreeList.begin(); it != rigidBodyFreeList.end(); ++it) {
-        rp3d::RigidBody* thisBodyPtr = *it;
-        rigidBodyFreeList.erase(it);
-        bodyPtr = thisBodyPtr;
-        bodyPtr->setIsActive(true);
-        break;
-    }
-    if (bodyPtr == nullptr) {
-        return Physics.CreateRigidBody(0, 0, 0);
-    }
-    
-    return bodyPtr;
-}
 
 
 
 void EngineSystemManager::Update(void) {
     
     // Run through the game objects
-    for (int i=0; i < gameObject.Size(); i++ ) {
+    for (int i=0; i < mGameObject.Size(); i++ ) {
         
         // Component references
         Camera*           componentCamera = nullptr;
-        //Script*           componentScript = nullptr;
         rp3d::RigidBody*  componentRigidBody = nullptr;
         Entity*           componentEntityRenderer = nullptr;
         
-        GameObject* objectPtr = gameObject[i];
+        GameObject* objectPtr = mGameObject[i];
         
         if (!objectPtr->isActive) 
             continue;
@@ -286,15 +266,18 @@ void EngineSystemManager::Update(void) {
             continue;
         }
         
-        // No rigid body just a renderer, update the matrix from position and rotation
-        if (componentEntityRenderer != nullptr) {
-            glm::mat4 modleMatrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
-            componentEntityRenderer->transform.matrix = modleMatrix;
-        }
         
         // Nothing further to update
-        if (componentRigidBody == nullptr) 
+        if (componentRigidBody == nullptr) {
+            
+            // No rigid body just a renderer, update the matrix from position and rotation
+            if (componentEntityRenderer != nullptr) {
+                glm::mat4 modleMatrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
+                componentEntityRenderer->transform.matrix = modleMatrix;
+            }
             continue;
+        }
+        
         
         // Sync with the rigid body
         rp3d::Transform bodyTransform = componentRigidBody->getTransform();

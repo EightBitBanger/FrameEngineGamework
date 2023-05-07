@@ -3,14 +3,14 @@
 
 RenderSystem::RenderSystem() {
     
-    windowHandle   = NULL;
-    deviceContext  = NULL;
-    renderContext  = NULL;
+    mWindowHandle   = NULL;
+    mDeviceContext  = NULL;
+    mRenderContext  = NULL;
     
-    renderQueue.clear();
+    mRenderQueue.clear();
     
-    currentMesh      = nullptr;
-    currentMaterial  = nullptr;
+    mCurrentMesh      = nullptr;
+    mCurrentMaterial  = nullptr;
     
     cameraMain = nullptr;
     return;
@@ -18,82 +18,82 @@ RenderSystem::RenderSystem() {
 
 
 Entity* RenderSystem::CreateEntity(void) {
-    Entity* entityPtr = entity.Create();
+    Entity* entityPtr = mEntity.Create();
     entityPtr->AttachMaterial(defaultMaterial);
     return entityPtr;
 }
 bool RenderSystem::DestroyEntity(Entity* entityPtr) {
     assert(entityPtr != nullptr);
-    return entity.Destroy(entityPtr);
+    return mEntity.Destroy(entityPtr);
 }
 
 
 Mesh* RenderSystem::CreateMesh(void) {
-    Mesh* meshPtr = mesh.Create();
+    Mesh* meshPtr = mMesh.Create();
     return meshPtr;
 }
 bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
     assert(meshPtr != nullptr);
-    return mesh.Destroy(meshPtr);
+    return mMesh.Destroy(meshPtr);
 }
 
 
 Shader* RenderSystem::CreateShader(void) {
-    Shader* shaderPtr = shader.Create();
+    Shader* shaderPtr = mShader.Create();
     return shaderPtr;
 }
 bool RenderSystem::DestroyShader(Shader* shaderPtr) {
     assert(shaderPtr != nullptr);
-    return shader.Destroy(shaderPtr);
+    return mShader.Destroy(shaderPtr);
 }
 
 
 Camera* RenderSystem::CreateCamera(void) {
-    Camera* cameraPtr = camera.Create();
+    Camera* cameraPtr = mCamera.Create();
     return cameraPtr;
 }
 bool RenderSystem::DestroyCamera(Camera* cameraPtr) {
     assert(cameraPtr != nullptr);
-    return camera.Destroy(cameraPtr);
+    return mCamera.Destroy(cameraPtr);
 }
 
 
 Material* RenderSystem::CreateMaterial(void) {
-    Material* materialPtr = material.Create();
+    Material* materialPtr = mMaterial.Create();
     return materialPtr;
 }
 bool RenderSystem::DestroyMaterial(Material* materialPtr) {
     assert(materialPtr != nullptr);
-    return material.Destroy(materialPtr);
+    return mMaterial.Destroy(materialPtr);
 }
 
 
 Sky* RenderSystem::CreateSky(void) {
-    Sky* skyPtr = sky.Create();
+    Sky* skyPtr = mSky.Create();
     return skyPtr;
 }
 bool RenderSystem::DestroySky(Sky* skyPtr) {
     assert(skyPtr != nullptr);
-    return sky.Destroy(skyPtr);
+    return mSky.Destroy(skyPtr);
 }
 
 
 Scene* RenderSystem::CreateScene(void) {
-    Scene* scenePtr = scene.Create();
+    Scene* scenePtr = mScene.Create();
     return scenePtr;
 }
 bool RenderSystem::DestroyScene(Scene* scenePtr) {
     assert(scenePtr != nullptr);
-    return scene.Destroy(scenePtr);
+    return mScene.Destroy(scenePtr);
 }
 
 RenderPipeline* RenderSystem::CreateRenderPipeline(void) {
-    return pipeline.Create();
+    return mPipeline.Create();
 }
 
 bool RenderSystem::DestroyRenderPipeline(RenderPipeline* renderPipelinePtr) {
     assert(renderPipelinePtr != nullptr);
-    return pipeline.Destroy(renderPipelinePtr);
+    return mPipeline.Destroy(renderPipelinePtr);
 }
 
 
@@ -123,16 +123,16 @@ void RenderSystem :: Initiate(void) {
 
 void RenderSystem :: AddToRenderQueue(Scene* scenePtr) {
     assert(scenePtr != nullptr);
-    renderQueue.push_back( scenePtr );
+    mRenderQueue.push_back( scenePtr );
     return;
 }
 
 bool RenderSystem :: RemoveFromRenderQueue(Scene* scenePtr) {
     assert(scenePtr != nullptr);
-    for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
+    for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
         Scene* thisScenePtr = *it;
         if (scenePtr == thisScenePtr) {
-            renderQueue.erase(it);
+            mRenderQueue.erase(it);
             return true;
         }
     }
@@ -140,12 +140,12 @@ bool RenderSystem :: RemoveFromRenderQueue(Scene* scenePtr) {
 }
 
 unsigned int RenderSystem :: GetRenderQueueSize(void) {
-    return renderQueue.size();
+    return mRenderQueue.size();
 }
 
 Scene* RenderSystem :: GetRenderQueueScene(unsigned int index) {
-    assert(index <= renderQueue.size());
-    return renderQueue[index];
+    assert(index <= mRenderQueue.size());
+    return mRenderQueue[index];
 }
 
 
@@ -158,19 +158,19 @@ GLenum RenderSystem :: SetRenderTarget(HWND wHndl) {
     std::string gcVendor, gcRenderer, gcExtensions, gcVersion, Line;
     
     // Set the window handle and get the device context
-    windowHandle = wHndl;
+    mWindowHandle = wHndl;
     HDC hDC = GetDC(wHndl);
-    deviceContext = hDC;
+    mDeviceContext = hDC;
     
     // Get display size
-    displaySize.x = GetDeviceCaps(deviceContext, HORZRES);
-    displaySize.y = GetDeviceCaps(deviceContext, VERTRES);
+    displaySize.x = GetDeviceCaps(mDeviceContext, HORZRES);
+    displaySize.y = GetDeviceCaps(mDeviceContext, VERTRES);
     displayCenter.x = displaySize.x / 2;
     displayCenter.y = displaySize.y / 2;
     
     // Get window size
     RECT wRect;
-    GetWindowRect(windowHandle, &wRect);
+    GetWindowRect(mWindowHandle, &wRect);
     
     SetViewport(0, 0, wRect.right - wRect.left, wRect.bottom - wRect.top);
     
@@ -186,13 +186,13 @@ GLenum RenderSystem :: SetRenderTarget(HWND wHndl) {
     pfd.iLayerType  = PFD_MAIN_PLANE;
     
     // Setup pixel format
-    iFormat = ChoosePixelFormat(deviceContext, &pfd);
-    SetPixelFormat(deviceContext, iFormat, &pfd);
+    iFormat = ChoosePixelFormat(mDeviceContext, &pfd);
+    SetPixelFormat(mDeviceContext, iFormat, &pfd);
     
     HGLRC hRC = wglCreateContext(hDC);
-    renderContext = hRC;
+    mRenderContext = hRC;
     
-    wglMakeCurrent(deviceContext, hRC);
+    wglMakeCurrent(mDeviceContext, hRC);
     
     // Initiate glew after setting the render target
     GLenum glpassed = glewInit();
@@ -235,9 +235,9 @@ GLenum RenderSystem :: SetRenderTarget(HWND wHndl) {
 void RenderSystem :: ReleaseRenderTarget(void) {
     
     wglMakeCurrent (NULL, NULL);
-    wglDeleteContext(renderContext);
+    wglDeleteContext(mRenderContext);
     
-    ReleaseDC(windowHandle, deviceContext);
+    ReleaseDC(mWindowHandle, mDeviceContext);
     
     return;
 }
@@ -345,36 +345,32 @@ void RenderSystem::RenderFrame(float deltaTime) {
     pos.y = cameraMain->transform.position.y;
     pos.z = cameraMain->transform.position.z;
     
-    // Looking angle
+    // Forward looking angle
     cameraMain->forward.x = cos( cameraMain->transform.rotation.x * 180 / glm::pi<float>() );
     cameraMain->forward.y = tan( cameraMain->transform.rotation.y * 180 / glm::pi<float>() );
     cameraMain->forward.z = sin( cameraMain->transform.rotation.x * 180 / glm::pi<float>() );
-    
     cameraMain->forward = glm::normalize(cameraMain->forward);
     
-    // Right angle to the looking angle
+    // Calculate view point
     glm::vec3 angle;
     angle.x = cameraMain->transform.position.x + cameraMain->forward.x;
     angle.y = cameraMain->transform.position.y + cameraMain->forward.y;
     angle.z = cameraMain->transform.position.z + cameraMain->forward.z;
-    
-    cameraMain->right = glm::normalize(glm::cross(cameraMain->up, cameraMain->forward));
     glm::mat4 view = glm::lookAt(pos, angle, cameraMain->up);
     glm::mat4 viewProjection = projection * view;
+    
+    // Right angle to the looking angle
+    cameraMain->right = glm::normalize(glm::cross(cameraMain->up, cameraMain->forward));
     
     
     // Bind the render pipeline
     assert(currentPipeline != nullptr);
     
     currentPipeline->currentShader->Bind();
-    
     currentPipeline->currentShader->SetProjectionMatrix( viewProjection );
     
-    
-    
-    
     // Draw entity meshes
-    for (std::vector<Scene*>::iterator it = renderQueue.begin(); it != renderQueue.end(); ++it) {
+    for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
         
         Scene* scenePtr = *it;
         
@@ -388,47 +384,47 @@ void RenderSystem::RenderFrame(float deltaTime) {
             assert(mesh != nullptr);
             
             // Mesh binding
-            if (currentMesh != mesh) {
-                currentMesh = mesh;
+            if (mCurrentMesh != mesh) {
+                mCurrentMesh = mesh;
                 
-                currentMesh->Bind();
+                mCurrentMesh->Bind();
             }
             
             // Material binding
             Material* materialPtr = currentEntity->GetAttachedMaterial();
-            if (currentMaterial != materialPtr) {
-                currentMaterial = materialPtr;
+            if (mCurrentMaterial != materialPtr) {
+                mCurrentMaterial = materialPtr;
                 
-                currentMaterial->Bind();
-                currentMaterial->BindTextureSlot(0);
+                mCurrentMaterial->Bind();
+                mCurrentMaterial->BindTextureSlot(0);
                 
-                
-                if (currentMaterial->doDepthTest) {
+                // Check depth testing
+                if (mCurrentMaterial->doDepthTest) {
                     glEnable(GL_DEPTH_TEST);
-                    glDepthMask(currentMaterial->doDepthTest);
-                    glDepthFunc(currentMaterial->depthFunc);
+                    glDepthMask(mCurrentMaterial->doDepthTest);
+                    glDepthFunc(mCurrentMaterial->depthFunc);
                 } else {
                     glDisable(GL_DEPTH_TEST);
                 }
                 
-                
-                if (currentMaterial->doFaceCulling) {
+                // Check face culling and winding
+                if (mCurrentMaterial->doFaceCulling) {
                     glEnable(GL_CULL_FACE);
-                    glCullFace(currentMaterial->faceCullSide);
-                    glFrontFace(currentMaterial->faceWinding);
+                    glCullFace(mCurrentMaterial->faceCullSide);
+                    glFrontFace(mCurrentMaterial->faceWinding);
                 } else {
                     glDisable(GL_CULL_FACE);
                 }
                 
-                
-                if (currentMaterial->doBlending) {
+                // Check blending
+                if (mCurrentMaterial->doBlending) {
                     glEnable(GL_BLEND);
-                    glBlendFuncSeparate(currentMaterial->blendSource, currentMaterial->blendDestination, currentMaterial->blendAlphaSource, currentMaterial->blendAlphaDestination);
+                    glBlendFuncSeparate(mCurrentMaterial->blendSource, mCurrentMaterial->blendDestination, mCurrentMaterial->blendAlphaSource, mCurrentMaterial->blendAlphaDestination);
                 } else {
                     glDisable(GL_BLEND);
                 }
                 
-                currentPipeline->currentShader->SetMaterialColor(currentMaterial->color);
+                currentPipeline->currentShader->SetMaterialColor(mCurrentMaterial->color);
                 currentPipeline->currentShader->SetTextureSampler(0);
             }
             
@@ -441,7 +437,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
         
     }
     
-    SwapBuffers(deviceContext);
+    SwapBuffers(mDeviceContext);
     
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::");

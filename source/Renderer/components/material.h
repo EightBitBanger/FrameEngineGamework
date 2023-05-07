@@ -69,7 +69,7 @@ public:
     
 private:
     
-    unsigned int textureBuffer;
+    unsigned int mTextureBuffer;
     
 };
 

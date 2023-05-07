@@ -1,41 +1,41 @@
 #include "shader.h"
 
 Shader::Shader() {
-    shaderProgram = 0;
+    mShaderProgram = 0;
     
-    projectionMatrixLocation = 0;
-    modelMatrixLocation = 0;
-    materialColorLocation = 0;
-    samplerLocation = 0;
+    mProjectionMatrixLocation = 0;
+    mModelMatrixLocation = 0;
+    mMaterialColorLocation = 0;
+    mSamplerLocation = 0;
     
-    isShaderLoaded = false;
+    mIsShaderLoaded = false;
     return;
 }
 
 Shader::~Shader() {
     
-    if (isShaderLoaded) glDeleteProgram(shaderProgram);
+    if (mIsShaderLoaded) glDeleteProgram(mShaderProgram);
     return;
 }
 
 
 void Shader::SetModelMatrix(glm::mat4 &ModelMatrix) {
-    glUniformMatrix4fv(modelMatrixLocation, 1, 0, &ModelMatrix[0][0]);
+    glUniformMatrix4fv(mModelMatrixLocation, 1, 0, &ModelMatrix[0][0]);
     return;
 }
 
 void Shader::SetProjectionMatrix(glm::mat4 &projectionMatrix) {
-    glUniformMatrix4fv(projectionMatrixLocation, 1, 0, &projectionMatrix[0][0]);
+    glUniformMatrix4fv(mProjectionMatrixLocation, 1, 0, &projectionMatrix[0][0]);
     return;
 }
 
 void Shader::SetMaterialColor(Color color) {
-    glUniform4f(materialColorLocation, color.r, color.g, color.b, color.a);
+    glUniform4f(mMaterialColorLocation, color.r, color.g, color.b, color.a);
     return;
 }
 
 void Shader::SetTextureSampler(unsigned int index) {
-    glUniform1i(samplerLocation, index);
+    glUniform1i(mSamplerLocation, index);
     return;
 }
 
@@ -47,10 +47,10 @@ void Shader::SetUniformLocations(void) {
     std::string colorUniformName    = "m_color";
     std::string samplerUniformName  = "u_sampler";
     
-    projectionMatrixLocation  = glGetUniformLocation(shaderProgram, projUniformName.c_str());;
-    modelMatrixLocation       = glGetUniformLocation(shaderProgram, modelUniformName.c_str());
-    materialColorLocation     = glGetUniformLocation(shaderProgram, colorUniformName.c_str());
-    samplerLocation           = glGetUniformLocation(shaderProgram, samplerUniformName.c_str());
+    mProjectionMatrixLocation  = glGetUniformLocation(mShaderProgram, projUniformName.c_str());;
+    mModelMatrixLocation       = glGetUniformLocation(mShaderProgram, modelUniformName.c_str());
+    mMaterialColorLocation     = glGetUniformLocation(mShaderProgram, colorUniformName.c_str());
+    mSamplerLocation           = glGetUniformLocation(mShaderProgram, samplerUniformName.c_str());
     return;
 }
 
@@ -63,21 +63,21 @@ int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentSc
     if (vs==0) return -1;
     if (fs==0) return -2;
     
-    shaderProgram = glCreateProgram();
+    mShaderProgram = glCreateProgram();
     
-    glAttachShader(shaderProgram, vs);
-    glAttachShader(shaderProgram, fs);
+    glAttachShader(mShaderProgram, vs);
+    glAttachShader(mShaderProgram, fs);
     
-    glLinkProgram(shaderProgram);
+    glLinkProgram(mShaderProgram);
     
-    glDetachShader(shaderProgram, vs);
-    glDetachShader(shaderProgram, fs);
+    glDetachShader(mShaderProgram, vs);
+    glDetachShader(mShaderProgram, fs);
     
     glDeleteShader(vs);
     glDeleteShader(fs);
     
     GLint state;
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &state);
+    glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &state);
     if (state == GL_FALSE) {
         std::cout << " ! Shader link error" << std::endl;
         assert(0);
@@ -86,7 +86,7 @@ int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentSc
     
     SetUniformLocations();
     
-    isShaderLoaded = true;
+    mIsShaderLoaded = true;
     return 1;
 }
 
@@ -113,7 +113,7 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
 
 
 void Shader::Bind(void) {
-    glUseProgram(shaderProgram);
+    glUseProgram(mShaderProgram);
     return;
 }
 

@@ -58,8 +58,8 @@ public:
     
 private:
     
-    Color random;
-    Color custom;
+    Color mRandom;
+    Color mCustom;
     
 };
 

@@ -33,7 +33,6 @@ Color::Color(Color& color) {
     return;
 }
 
-
 Color::Color(float red, float green, float blue, float alpha) {
     r = red;
     g = green;
@@ -50,18 +49,17 @@ Color::Color(float red, float green, float blue) {
     return;
 }
 
-
 Color& ColorPreset::Make(float r, float g, float b) {
-    custom.r = r;
-    custom.g = g;
-    custom.b = b;
-    return custom;
+    mCustom.r = r;
+    mCustom.g = g;
+    mCustom.b = b;
+    return mCustom;
 }
 
 Color& ColorPreset::MakeRandom(void) {
-    random.r = ((float)(rand() % (int)100) + 1) * 0.01;
-    random.g = ((float)(rand() % (int)100) + 1) * 0.01;
-    random.b = ((float)(rand() % (int)100) + 1) * 0.01;
-    return random;
+    mRandom.r = ((float)(rand() % (int)100) + 1) * 0.01;
+    mRandom.g = ((float)(rand() % (int)100) + 1) * 0.01;
+    mRandom.b = ((float)(rand() % (int)100) + 1) * 0.01;
+    return mRandom;
 }
 

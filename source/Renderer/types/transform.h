@@ -47,9 +47,9 @@ public:
 private:
     
     // List of child transforms
-    std::vector<Transform*> child;
+    std::vector<Transform*> mChildList;
     
-    Transform* parent;
+    Transform* mParent;
     
 };
 

@@ -34,9 +34,9 @@ public:
 private:
     
     /// Pointer to a mesh component.
-    Mesh*     mesh;
+    Mesh*     mMesh;
     /// Pointer to a material component.
-    Material* material;
+    Material* mMaterial;
     
 };
 

@@ -8,7 +8,7 @@ Transform::Transform() {
     
     matrix = glm::mat4(1);
     
-    parent = nullptr;
+    mParent = nullptr;
     return;
 }
 
@@ -26,6 +26,7 @@ void Transform::SetRotation(float x, float y, float z) {
     return;
 }
 
+
 void Transform::SetScale(float x, float y, float z) {
     scale = glm::vec3(x, y, z);
     UpdateMatrix();
@@ -34,15 +35,15 @@ void Transform::SetScale(float x, float y, float z) {
 
 
 void Transform::ChildAdd(Transform* transform) {
-    child.push_back(transform);
+    mChildList.push_back(transform);
     return;
 }
 
 bool Transform::ChildRemove(Transform* transform) {
-    for (std::vector<Transform*>::iterator it = child.begin(); it != child.end(); ++it) {
+    for (std::vector<Transform*>::iterator it = mChildList.begin(); it != mChildList.end(); ++it) {
         Transform* transformPtr = *it;
         if (transform == transformPtr) {
-            child.erase(it);
+            mChildList.erase(it);
             return true;
         }
     }
@@ -51,12 +52,12 @@ bool Transform::ChildRemove(Transform* transform) {
 
 
 void Transform::SetParentTransform(Transform* parentTransform) {
-    parent = parentTransform;
+    mParent = parentTransform;
     return;
 }
 
 Transform* Transform::GetParentTransform(void) {
-    return parent;
+    return mParent;
 }
 
 

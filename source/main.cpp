@@ -67,18 +67,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             Application.isActive = false;
 #endif
         
-        // Physics update
+        // Physics timer
         if (PhysicsTime.Update()) 
             Physics.world->update( PhysicsTime.delta );
         
-        // Update application and renderer
+        // Application and render timer
         if (Time.Update()) {
             
             Framework::Run();
             
-            Scripting.Update();
-            
             Engine.Update();
+            
+            Scripting.Update();
             
             Renderer.RenderFrame( Time.delta );
             
@@ -86,6 +86,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         
         continue;
     }
+    
     
     // Shutdown engine & sub systems
     Framework::Shutdown();

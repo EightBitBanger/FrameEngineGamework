@@ -76,14 +76,14 @@ public:
     
 private:
     
-    bool KeyPressed  [256];
-    bool KeyReleased [256];
-    bool KeyCurrent  [256];
+    bool mKeyPressed  [256];
+    bool mKeyReleased [256];
+    bool mKeyCurrent  [256];
     
-    bool MouseLeftPressed;
-    bool MouseRightPressed;
-    bool MouseLeftReleased;
-    bool MouseRightReleased;
+    bool mMouseLeftPressed;
+    bool mMouseRightPressed;
+    bool mMouseLeftReleased;
+    bool mMouseRightReleased;
     
 };
 

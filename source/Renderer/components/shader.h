@@ -12,8 +12,6 @@
 
 #include "../types/color.h"
 
-//#include "../../std/logging.h"
-
 
 class Shader {
     
@@ -47,15 +45,15 @@ public:
     
 private:
     
-    unsigned int shaderProgram;
+    unsigned int mShaderProgram;
     
     // Uniform locations
-    int projectionMatrixLocation;
-    int modelMatrixLocation;
-    int materialColorLocation;
-    int samplerLocation;
+    int mProjectionMatrixLocation;
+    int mModelMatrixLocation;
+    int mMaterialColorLocation;
+    int mSamplerLocation;
     
-    bool  isShaderLoaded;
+    bool  mIsShaderLoaded;
     
     unsigned int CompileSource(unsigned int Type, std::string Script);
     

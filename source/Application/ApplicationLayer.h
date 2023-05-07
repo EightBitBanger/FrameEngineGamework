@@ -42,7 +42,7 @@ public:
     
     ApplicationLayer();
     
-    /// Freeze the application loop.
+    /// Toggle freezing the application loop.
     void Pause(void);
     
     /// Create the window handle and return its handle.
@@ -71,7 +71,7 @@ public:
     
 private:
     
-    bool isWindowRunning;
+    bool mIsWindowRunning;
     
 };
 

@@ -2,6 +2,9 @@
 #include <SDKDDKVer.h>
 #include <windows.h>
 
+#include <thread>
+#include <mutex>
+
 #include "configuration.h"
 #include "plugins.h"
 

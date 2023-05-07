@@ -1,6 +1,8 @@
 #ifndef SCRIPTING_SYSTEM
 #define SCRIPTING_SYSTEM
 
+#include <mutex>
+
 #include "../std/poolallocator.h"
 
 #include "components/script.h"
@@ -21,7 +23,7 @@ public:
     
 private:
     
-    PoolAllocator<Script> script;
+    PoolAllocator<Script> mScript;
     
 };
 

@@ -3,38 +3,38 @@
 
 Entity::Entity() {
     
-    mesh       = nullptr;
-    material   = nullptr;
+    mMesh       = nullptr;
+    mMaterial   = nullptr;
     
     return;
 }
 
 void Entity::AttachMesh(Mesh* meshPtr) {
-    mesh = meshPtr;
+    mMesh = meshPtr;
     return;
 }
 
 void Entity::DetachMesh(void) {
-    mesh = nullptr;
+    mMesh = nullptr;
     return;
 }
 
 Mesh* Entity::GetAttachedMesh(void) {
-    return mesh;
+    return mMesh;
 }
 
 
 void Entity::AttachMaterial(Material* materialPtr) {
-    material = materialPtr;
+    mMaterial = materialPtr;
     return;
 }
 
 void Entity::DetachMaterial(void) {
-    material = nullptr;
+    mMaterial = nullptr;
     return;
 }
 
 Material* Entity::GetAttachedMaterial(void) {
-    return material;
+    return mMaterial;
 }
 

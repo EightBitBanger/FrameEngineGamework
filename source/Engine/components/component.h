@@ -31,11 +31,11 @@ public:
     
 private:
     
-    // Type identifier.
-    unsigned int type;
+    // Type identifier declaring the component pointer type.
+    unsigned int mType;
     
     // Object pointer
-    void* object;
+    void* mObject;
     
 };
 

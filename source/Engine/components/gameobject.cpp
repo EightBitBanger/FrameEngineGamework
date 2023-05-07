@@ -6,7 +6,7 @@ GameObject::GameObject() {
     
     isActive = true;
     
-    rigidBodyCache = nullptr;
+    mRigidBodyCache = nullptr;
     
 }
 
@@ -20,28 +20,28 @@ void GameObject::AddComponent(Component* component) {
     
     // Set the shortcut pointers
     if (component->GetType() == COMPONENT_TYPE_RIGIDBODY) {
-        rigidBodyCache = (rp3d::RigidBody*)component->GetComponent();
+        mRigidBodyCache = (rp3d::RigidBody*)component->GetComponent();
         // Update the rigid body position on attach
-        if (entityCache != nullptr) SetPosition(entityCache->transform.position.x,
-                                                entityCache->transform.position.y,
-                                                entityCache->transform.position.z);
+        if (mEntityCache != nullptr) SetPosition(mEntityCache->transform.position.x,
+                                                mEntityCache->transform.position.y,
+                                                mEntityCache->transform.position.z);
     }
-    if (component->GetType() == COMPONENT_TYPE_RENDERER) entityCache = (Entity*)component->GetComponent();
+    if (component->GetType() == COMPONENT_TYPE_RENDERER) mEntityCache = (Entity*)component->GetComponent();
     
-    componentList.push_back(component);
+    mComponentList.push_back(component);
     return;
 }
 
 bool GameObject::RemoveComponent(Component* component) {
     assert(component != nullptr);
-    for (std::vector<Component*>::iterator it = componentList.begin(); it != componentList.end(); ++it) {
+    for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
         Component* thisComponentPtr = *it;
         if (component == thisComponentPtr) {
             
             // Null the shortcut pointers
-            if (thisComponentPtr->GetType() == COMPONENT_TYPE_RIGIDBODY) rigidBodyCache = nullptr;
-            if (thisComponentPtr->GetType() == COMPONENT_TYPE_RENDERER) entityCache = nullptr;
-            componentList.erase(it);
+            if (thisComponentPtr->GetType() == COMPONENT_TYPE_RIGIDBODY) mRigidBodyCache = nullptr;
+            if (thisComponentPtr->GetType() == COMPONENT_TYPE_RENDERER) mEntityCache = nullptr;
+            mComponentList.erase(it);
             return true;
         }
     }
@@ -49,7 +49,7 @@ bool GameObject::RemoveComponent(Component* component) {
 }
 
 Component* GameObject::FindComponent(unsigned int component_type) {
-    for (std::vector<Component*>::iterator it = componentList.begin(); it != componentList.end(); ++it) {
+    for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
         Component* thisComponentPtr = *it;
         if (component_type == thisComponentPtr->GetType()) {
             return thisComponentPtr;
@@ -60,134 +60,130 @@ Component* GameObject::FindComponent(unsigned int component_type) {
 
 
 Component* GameObject::GetComponent(unsigned int index) {
-    assert(index < componentList.size());
-    return componentList[index];
+    assert(index < mComponentList.size());
+    return mComponentList[index];
 }
 
 unsigned int GameObject::GetComponentCount(void) {
-    return componentList.size();
+    return mComponentList.size();
 }
-
-
-
 
 
 //
 // Physics functions
 
 void GameObject::SetPosition(float x, float y, float z) {
-    if (rigidBodyCache != nullptr) {
+    if (mRigidBodyCache != nullptr) {
         rp3d::Vector3 position(x, y, z);
-        rp3d::Transform bodyTransform = rigidBodyCache->getTransform();
+        rp3d::Transform bodyTransform = mRigidBodyCache->getTransform();
         bodyTransform.setPosition(position);
-        rigidBodyCache->setTransform(bodyTransform);
+        mRigidBodyCache->setTransform(bodyTransform);
     } else {
-        if (entityCache != nullptr) {
-            entityCache->transform.position = glm::vec3(x, y, z);
+        if (mEntityCache != nullptr) {
+            mEntityCache->transform.position = glm::vec3(x, y, z);
         }
     }
     return;
 }
 
 void GameObject::AddForce(float x, float y, float z) {
-    assert(rigidBodyCache != nullptr);
+    assert(mRigidBodyCache != nullptr);
     rp3d::Vector3 nudge(x, y, z);
-    rigidBodyCache->applyLocalForceAtCenterOfMass(nudge);
+    mRigidBodyCache->applyLocalForceAtCenterOfMass(nudge);
     return;
 }
 
 void GameObject::AddTorque(float x, float y, float z) {
-    assert(rigidBodyCache != nullptr);
+    assert(mRigidBodyCache != nullptr);
     rp3d::Vector3 twist(x, y, z);
-    rigidBodyCache->applyLocalTorque(twist);
+    mRigidBodyCache->applyLocalTorque(twist);
     return;
 }
 
 void GameObject::SetMass(float mass) {
-    assert(rigidBodyCache != nullptr);
-    rigidBodyCache->setMass(mass);
+    assert(mRigidBodyCache != nullptr);
+    mRigidBodyCache->setMass(mass);
 }
 
 void GameObject::SetLinearDamping(float damping) {
-    assert(rigidBodyCache != nullptr);
-    rigidBodyCache->setLinearDamping(damping);
+    assert(mRigidBodyCache != nullptr);
+    mRigidBodyCache->setLinearDamping(damping);
 }
 
 void GameObject::SetAngularDamping(float damping) {
-    assert(rigidBodyCache != nullptr);
-    rigidBodyCache->setAngularDamping(damping);
+    assert(mRigidBodyCache != nullptr);
+    mRigidBodyCache->setAngularDamping(damping);
 }
 
 void GameObject::EnableGravity(bool enabled) {
-    assert(rigidBodyCache != nullptr);
-    rigidBodyCache->enableGravity(enabled);
+    assert(mRigidBodyCache != nullptr);
+    mRigidBodyCache->enableGravity(enabled);
 }
 
 
 void GameObject::CalculatePhysics(void) {
-    assert(rigidBodyCache != nullptr);
-    rigidBodyCache->updateMassFromColliders();
-    rigidBodyCache->updateLocalCenterOfMassFromColliders();
-    rigidBodyCache->updateLocalInertiaTensorFromColliders();
+    assert(mRigidBodyCache != nullptr);
+    mRigidBodyCache->updateMassFromColliders();
+    mRigidBodyCache->updateLocalCenterOfMassFromColliders();
+    mRigidBodyCache->updateLocalInertiaTensorFromColliders();
     return;
 }
 
 
 void GameObject::SetLinearAxisLockFactor(float x, float y, float z) {
-    assert(rigidBodyCache != nullptr);
+    assert(mRigidBodyCache != nullptr);
     rp3d::Vector3 lockFactor(x, y, z);
-    rigidBodyCache->setLinearLockAxisFactor(lockFactor);
+    mRigidBodyCache->setLinearLockAxisFactor(lockFactor);
     return;
 }
 
 void GameObject::SetAngularAxisLockFactor(float x, float y, float z) {
-    assert(rigidBodyCache != nullptr);
+    assert(mRigidBodyCache != nullptr);
     rp3d::Vector3 lockFactor(x, y, z);
-    rigidBodyCache->setAngularLockAxisFactor(lockFactor);
+    mRigidBodyCache->setAngularLockAxisFactor(lockFactor);
     return;
 }
 
 
 void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z) {
-    assert(rigidBodyCache != nullptr);
+    assert(mRigidBodyCache != nullptr);
     assert(boxShape != nullptr);
     
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
     
-    rigidBodyCache->addCollider(boxShape, offsetTransform);
+    mRigidBodyCache->addCollider(boxShape, offsetTransform);
     
     return;
 }
 
 void GameObject::AddCollider(ColliderTag* colliderTag, float x, float y, float z) {
-    assert(rigidBodyCache != nullptr);
+    assert(mRigidBodyCache != nullptr);
     assert(colliderTag != nullptr);
     if (colliderTag->isStatic) {
-        rigidBodyCache->setType(rp3d::BodyType::STATIC);
+        mRigidBodyCache->setType(rp3d::BodyType::STATIC);
     } else {
-        rigidBodyCache->setType(rp3d::BodyType::DYNAMIC);
+        mRigidBodyCache->setType(rp3d::BodyType::DYNAMIC);
     }
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
     
-    rigidBodyCache->addCollider(colliderTag->colliderShape, offsetTransform);
+    mRigidBodyCache->addCollider(colliderTag->colliderShape, offsetTransform);
     
     return;
 }
 
 
 void GameObject::SetRigidBodyStatic(void) {
-    assert(rigidBodyCache != nullptr);
-    rigidBodyCache->setType(rp3d::BodyType::STATIC);
+    assert(mRigidBodyCache != nullptr);
+    mRigidBodyCache->setType(rp3d::BodyType::STATIC);
     return;
 }
 
 
 void GameObject::SetRigidBodyDynamic(void) {
-    //if (rigidBodyCache == nullptr) return;
-    assert(rigidBodyCache != nullptr);
-    rigidBodyCache->setType(rp3d::BodyType::DYNAMIC);
+    assert(mRigidBodyCache != nullptr);
+    mRigidBodyCache->setType(rp3d::BodyType::DYNAMIC);
     return;
 }
 

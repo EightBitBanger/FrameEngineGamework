@@ -63,8 +63,9 @@ public:
     float GetYaw(float pitch);
     
     
-    
 private:
+    
+    
     
 };
 

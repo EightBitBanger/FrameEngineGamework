@@ -72,10 +72,10 @@ public:
 private:
     
     // Asset lists
-    std::vector<MeshTag>      meshTags;
-    std::vector<TextureTag>   textureTags;
-    std::vector<ShaderTag>    shaderTags;
-    std::vector<ColliderTag>  colliderTags;
+    std::vector<MeshTag>      mMeshTags;
+    std::vector<TextureTag>   mTextureTags;
+    std::vector<ShaderTag>    mShaderTags;
+    std::vector<ColliderTag>  mColliderTags;
     
     // Raw image data loader
     unsigned char* LoadImageRaw(char const* path, int* width, int* height, int* channels, int req_channels);

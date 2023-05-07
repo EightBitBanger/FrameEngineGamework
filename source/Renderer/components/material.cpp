@@ -20,8 +20,8 @@ Material::Material() {
     blendAlphaDestination = BLEND_ONE_MINUS_SRC_ALPHA;
     blendFunction         = BLEND_EQUATION_ADD;
     
-    glGenTextures(1, &textureBuffer);
-    glBindTexture(GL_TEXTURE_2D, textureBuffer);
+    glGenTextures(1, &mTextureBuffer);
+    glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -34,7 +34,7 @@ Material::Material() {
 }
 
 Material::~Material() {
-    glDeleteTextures(1, &textureBuffer);
+    glDeleteTextures(1, &mTextureBuffer);
 }
 
 void Material::EnableDepthTest(void)  {doDepthTest = true;}
@@ -53,7 +53,7 @@ void Material::SetBlendingAlpha(GLint srca, GLint desta)  {blendAlphaSource = sr
 void Material::SetBlendingFunction(GLint func)  {blendFunction = func;}
 
 void Material::Bind(void) {
-    glBindTexture(GL_TEXTURE_2D, textureBuffer);
+    glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
 }
 
 void Material::BindTextureSlot(unsigned int slot) {
@@ -63,7 +63,7 @@ void Material::BindTextureSlot(unsigned int slot) {
 
 void Material::UpdateTextureBuffer(void* textureData) {
     
-    glBindTexture(GL_TEXTURE_2D, textureBuffer);
+    glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
     
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
     return;
