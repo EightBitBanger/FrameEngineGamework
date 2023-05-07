@@ -17,7 +17,7 @@ This game engine framework aims to provides a simple interface with more complex
 <br><br/>
 ###  Building the project
 
-#### Requires the following libraries
+Building this repository will require the following libraries to be installed.
 * <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 * <a href="https://github.com/nothings/stb">STB-Image</a>⁭
 * <a href="https://github.com/Bly7/OBJ-Loader">Bly7-OBJ-loader</a>⁭
