@@ -10,13 +10,13 @@
 
 
 // My standard includes
-#include "std/poolallocator.h"
-#include "std/strings.h"
-#include "std/types.h"
-#include "std/random.h"
-#include "std/logging.h"
-#include "std/fileloader.h"
-#include "std/timer.h"
+#include "vendor/my-std-lib/poolallocator.h"
+#include "vendor/my-std-lib/strings.h"
+#include "vendor/my-std-lib/types.h"
+#include "vendor/my-std-lib/random.h"
+#include "vendor/my-std-lib/logging.h"
+#include "vendor/my-std-lib/fileloader.h"
+#include "vendor/my-std-lib/timer.h"
 
 #include "Input/InputSystem.h"
 #include "Physics/PhysicsSystem.h"

@@ -10,9 +10,9 @@
 #include "../Renderer/components/camera.h"
 
 
-#include "../std/timer.h"
-#include "../std/logging.h"
-#include "../std/random.h"
+#include "../vendor/my-std-lib/timer.h"
+#include "../vendor/my-std-lib/logging.h"
+#include "../vendor/my-std-lib/random.h"
 
 class EngineSystemManager {
     

@@ -1,6 +1,6 @@
-#include "plugins.h"
-
 #include "ResourceManager.h"
+
+#include "plugins.h"
 
 extern RenderSystem Renderer;
 extern PhysicsSystem Physics;

@@ -2,9 +2,9 @@
 #define OPENGL_RENDERER_SYSTEM
 
 
-#include "../std/poolallocator.h"
-#include "../std/types.h"
-#include "../std/logging.h"
+#include "../vendor/my-std-lib/poolallocator.h"
+#include "../vendor/my-std-lib/types.h"
+#include "../vendor/my-std-lib/logging.h"
 extern Logger Log;
 
 #include "enumerators.h"

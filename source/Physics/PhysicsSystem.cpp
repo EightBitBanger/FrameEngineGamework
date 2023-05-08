@@ -62,9 +62,11 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
 
 void PhysicsSystem::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
     assert(rigidBodyPtr != nullptr);
-    // !! Warning: leak on destroy !!
+    
+    // !! Warning: leak on rigid body destroy !!
     //world->destroyRigidBody(rigidBodyPtr);
-    // Use free list instead...
+    
+    // Use a free list instead...
     AddRigidBodyToFreeList(rigidBodyPtr);
 }
 

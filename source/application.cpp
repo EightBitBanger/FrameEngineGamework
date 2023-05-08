@@ -22,6 +22,7 @@ void ScriptCameraController(void* gameObject);
 
 // Cached resource pointers
 Mesh*     barrelMesh;
+Mesh*     projectileMesh;
 Material* barrelMaterial;
 
 GameObject* cameraController = nullptr;
@@ -36,7 +37,9 @@ GameObject* cameraController = nullptr;
 
 void Framework::Start() {
     
-    Resources.LoadScene("data/main.scene");
+    Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
+    Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
+    
     
     Physics.SetWorldGravity(0, -0, -700);
     //Physics.SetWorldGravity(0, -0, 0);
@@ -49,8 +52,13 @@ void Framework::Start() {
     // Create objects from resource tags
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
     
+    // Load a barrel mesh
     barrelMesh = Resources.CreateMeshFromTag("barrel");
     barrelMesh->ChangeSubMeshColor(0, Colors.gray);
+    
+    // Load a mesh to serve as a projectile
+    projectileMesh = Resources.CreateMeshFromTag("barrel");
+    projectileMesh->ChangeSubMeshColor(0, Colors.green);
     
     
     
@@ -58,6 +66,7 @@ void Framework::Start() {
     // Create a camera controller
     
     cameraController = Engine.CreateCameraController(-200, 0, 0);
+    cameraController->name = "camera";
     Component* scriptComponent = cameraController->FindComponent(COMPONENT_TYPE_SCRIPT);
     
     Script* cameraScript = (Script*)scriptComponent->GetComponent();
@@ -77,7 +86,7 @@ void Framework::Start() {
 float spreadMul    = 0.1;
 float spawnHeight  = 70;
 
-float forceMul   = 80;
+float forceMul   = 10;
 float torqueMul  = 1;
 
 
@@ -92,38 +101,38 @@ void Framework::Run() {
     //
     // Create some barrel objects in random positions
     
-    for (int i=0; i < 10; i++) {
+    for (int i=0; i < 50; i++) {
         
         // Create a game object
-        GameObject* barrel = Engine.CreateGameObject();
-        
+        GameObject* particle = Engine.CreateGameObject();
+        particle->name = "particle";
         
         // Add a renderer component
-        Component* entityRenderer = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
-        barrel->AddComponent(entityRenderer);
-        
+        particle->AddComponent( Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial) );
         
         // Add a physics component
-        Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
-        barrel->AddComponent(rigidBodyComponent);
+        particle->AddComponent( Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY) );
         
-        //rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+        
+        // Apply some physical forces
         
         float startx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
         float starty = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
         float startz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
         
+        particle->SetPosition(startx, starty + spawnHeight, startz);
+        
         float forcex = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
         float forcey = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
         float forcez = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
+        
+        particle->AddForce(forcex, forcey, forcez);
         
         float torquex = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
         float torquey = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
         float torquez = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
         
-        barrel->SetPosition(startx, starty + spawnHeight, startz);
-        barrel->AddForce(forcex, forcey, forcez);
-        barrel->AddTorque(torquex, torquey, torquez);
+        particle->AddTorque(torquex, torquey, torquez);
         
         continue;
     }
@@ -132,15 +141,16 @@ void Framework::Run() {
     
     while (Engine.GetGameObjectCount() > 1000) {
         
-        GameObject* gameObject = Engine.GetGameObject(index);
-        if (gameObject->name == "bullet") {
-            index++;
-            continue;
-        }
         
-        Component* cameraComponent = gameObject->FindComponent(COMPONENT_TYPE_CAMERA);
-        if (cameraComponent != nullptr) 
-            gameObject = Engine.GetGameObject(1);
+        GameObject* gameObject = Engine.GetGameObject(index);
+        index++;
+        
+        // Ignore cameras and projectiles
+        if (gameObject->name == "projectile") 
+            continue;
+        if (gameObject->name == "camera") 
+            continue;
+        
         Engine.DestroyGameObject(gameObject);
         
     }
@@ -191,7 +201,7 @@ void Framework::Shutdown(void) {
 
 
 
-float cameraSpeed = 1000;
+float cameraSpeed = 1500;
 
 void ScriptCameraController(void* gameObjectPtr) {
     GameObject* gameObject = (GameObject*)gameObjectPtr;
@@ -212,29 +222,43 @@ void ScriptCameraController(void* gameObjectPtr) {
         Input.SetMouseLeftPressed(false);
         
         GameObject* projectile = Engine.CreateGameObject();
-        projectile->name = "bullet";
+        projectile->name = "projectile";
         
         // Add a render component
         Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
         projectile->AddComponent(entityRenderer);
         
         Entity* entity = (Entity*)entityRenderer->GetComponent();
-        entity->AttachMesh(barrelMesh);
+        entity->AttachMesh(projectileMesh);
         entity->AttachMaterial(barrelMaterial);
         
         
         // Add a physics component
         Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
         projectile->AddComponent(rigidBodyComponent);
+        rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
         
+        
+        // Calculate projectile force
         glm::vec3 fwd = Renderer.cameraMain->forward;
+        glm::vec3 fwdAngle = Renderer.cameraMain->forward;
         fwd *= 3; // Start offset from camera
         
         glm::vec3 pos = Renderer.cameraMain->transform.position;
         pos += fwd;
-        fwd *= 1000; // Total forward force + camera offset
+        fwd *= 4500; // Total forward force + camera offset
         
-        projectile->SetPosition(pos.x, pos.y, pos.z);
+        // Transform the rigid body
+        rp3d::Transform newTransform;
+        newTransform.setPosition(rp3d::Vector3(pos.x, pos.y, pos.z));
+        
+        rp3d::Quaternion quat;
+        quat.setAllValues(fwdAngle.x, fwdAngle.y, fwdAngle.z, 0);
+        
+        newTransform.setOrientation(quat);
+        
+        body->setTransform(newTransform);
+        
         projectile->AddForce(fwd.x, fwd.y, fwd.z);
         projectile->EnableGravity(false);
     }
