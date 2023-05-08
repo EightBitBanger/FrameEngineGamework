@@ -1,2 +1,0 @@
-define_collider  coll_player    2.0 10.0 2.0    dynamic
-
