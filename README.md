@@ -9,7 +9,6 @@ This game engine framework aims to provides a simple interface with more complex
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 - ⁯⁮⁭Audio (Considering openAL)
 - Resource management
-- Random number generation
 - Window input handling
 
 
@@ -21,6 +20,7 @@ Building this repository will require the following libraries to be installed.
 * <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 * <a href="https://github.com/nothings/stb">STB-Image</a>⁭
 * <a href="https://github.com/Bly7/OBJ-Loader">Bly7-OBJ-loader</a>⁭
+* <a href="https://github.com/Groovounet/glm">glm</a>⁭
 
 #### Required exteral linkage.
 ```
