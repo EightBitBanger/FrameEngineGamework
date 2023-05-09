@@ -15,7 +15,7 @@ This game engine framework aims to provides a simple interface with more complex
 
 
 <br><br/>
-###  Building the project
+##  Building the project
 
 Building this repository will require the following libraries to be installed.
 * <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
@@ -24,106 +24,104 @@ Building this repository will require the following libraries to be installed.
 
 #### Required exteral linkage.
 ```
-glew32s  glu32  gdi32  user32  kernel32  comctl32  opengl32  reactphysics3d
+glew32s glu32 gdi32 user32 kernel32 comctl32 opengl32 reactphysics3d
 ```
 
 
 
 <br><br/>
-### Documentation
+## Documentation
 You can find the API documentation <a href="https://github.com/RetroBytes32/GameEngine-Framework/wiki">here</a>⁭.
 
 
 
 <br><br/>
-### Singleton access points
+## Singleton access pointers
 The framework contains many sub systems which can be accessed though the following singletons.
 
 
 ```c++
-#include "application/application.h"
+#include "Engine/Engine.h"
 
 extern RandomGen         Random;
 extern ColorPreset       Colors;
 extern Timer             Time;
+extern Timer             PhysicsTime;
 extern Logger            Log;
 
-extern ResourceManager   Resources;
-extern RenderSystem      Renderer;
-extern PhysicsSystem     Physics;
-extern InputSystem       Input;
-
-extern ApplicationLayer  Application;
+extern EngineSystemManager  Engine;
+extern ApplicationLayer     Application;
+extern ResourceManager      Resources;
+extern ScriptSystem         Scripting;
+extern RenderSystem         Renderer;
+extern PhysicsSystem        Physics;
+extern InputSystem          Input;
 ```
 
-<br><br/>
-### Application entry point
-> You must provide the framework with the functions `Start()` and `Run()`.These functions will act as an entry point for your application.
 
-The function `Start()` will be called once during application initiation.
+<br><br/>
+## Application entry point
+> You must provide the framework with the functions `Start()` and `Run()`.These functions will act as an entry point for your application.
+> The function `Start()` will be called once during application initiation.
 
 ```c++
-//
-// This example will setup a basic scene.
+// This example will load a model and a texture and display it centered on screen.
 
-void Start() {
-    // Load resources
-    Resources.LoadTexture("data/grassy.png", "mat_grassy");
+GameObject* cameraController;
+
+void Framework::Start() {
     
-    // Camera controller
-    Renderer.cameraMain = Renderer.CreateCamera();
-    Renderer.cameraMain->EnableMouseLook();
-    Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    // Load some external files
+    Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
+    Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
     
-    Renderer.cameraMain->rigidBody = Physics.CreateRigidBody(0,  // Position
-                                                             10,
-                                                             0);
-    Renderer.cameraMain->rigidBody->enableGravity(false);
-    Renderer.cameraMain->SetLinearDamping(4);
+    // Set the gravity vector for the simulation
+    Physics.SetWorldGravity(0, -0, 0);
     
-    // Create a sub divided plain mesh
-    Scene* sceneMain = Renderer.CreateScene();
-    Renderer.AddToRenderQueue(sceneMain);
+    // Create objects from resource tags
+    Material* barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
+    Mesh*     barrelMesh     = Resources.CreateMeshFromTag("barrel");
     
-    Entity* plain = Renderer.CreateEntity();
-    sceneMain->AddToSceneRoot(plain);
     
-    plain->mesh = Renderer.CreateMesh();
-    plain->material = Resources.CreateMaterialFromTag("mat_grassy");
+    // Create a game object
+    GameObject* barrel = Engine.CreateGameObject();
     
-    plain->mesh->AddPlainSubDivided(-100,  0, -150,  // Position
-                                      10, 10,        // Scale
-                                      Colors.gray,   // Vertex color
-                                      20, 20 );      // Number of sub divisions
+    // Add a render component
+    Component* entityRenderer = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
+    barrel->AddComponent(entityRenderer);
+    
+    // Add a physics component
+    Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+    barrel->AddComponent(rigidBodyComponent);
+    
+    
+    // Create a camera controller
+    cameraController = Engine.CreateCameraController(-50, 0, 0);
 }
 ```
 
 <br><br/>
 ### Main loop
-The framework will continue to call `Run()` once per frame.
+> The `Run()` function will be called once per frame.
 
 ```c++
-//
-// This example will move the camera with the WSAD directional keys and space / shift for elevation.
+// This example will apply force to the camera`s rigid body on key presses.
 
-void Run() {
-    
-    float cameraSpeed = 700;
+void Framework::Run() {
     
     glm::vec3 force(0);
+    
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
-    
     if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
     if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
     
     if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
-    // Apply camera speed multiplier
-    force *= cameraSpeed;
+    // Camera speed
+    force *= 100;
     
-    Renderer.cameraMain->AddForce(force.x, force.y, force.z);
+    cameraController->AddForce(force.x, force.y, force.z);
 }
 ```
-
