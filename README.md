@@ -21,6 +21,7 @@ Building this repository will require the following libraries to be installed.
 * <a href="https://github.com/nothings/stb">STB-Image</a>⁭
 * <a href="https://github.com/Bly7/OBJ-Loader">Bly7-OBJ-loader</a>⁭
 * <a href="https://github.com/Groovounet/glm">glm</a>⁭
+* <a href="https://github.com/nigels-com/glew">glew</a>⁭
 
 #### Required exteral linkage.
 ```
