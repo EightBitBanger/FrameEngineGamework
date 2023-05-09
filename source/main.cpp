@@ -5,6 +5,7 @@ extern Timer        Time;
 
 extern PhysicsSystem        Physics;
 extern RenderSystem         Renderer;
+extern AudioSystem          Audio;
 extern ScriptSystem         Scripting;
 extern ResourceManager      Resources;
 extern ApplicationLayer     Application;
@@ -43,6 +44,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Physics.Initiate();
     Renderer.Initiate();
+    Audio.Initiate();
     Resources.Initiate();
     
     // Initiate the engine last
@@ -76,9 +78,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             Framework::Run();
             
-            Engine.Update();
-            
             Scripting.Update();
+            
+            Engine.Update();
             
             Renderer.RenderFrame( Time.delta );
             
@@ -96,6 +98,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Resources.DestroyAssets();
     
     Physics.common.destroyPhysicsWorld(Physics.world);
+    
+    Audio.Shutdown();
     
     Renderer.ReleaseRenderTarget();
     

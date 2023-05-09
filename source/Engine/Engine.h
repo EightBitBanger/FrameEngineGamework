@@ -9,7 +9,6 @@
 #include "../Scripting/components/script.h"
 #include "../Renderer/components/camera.h"
 
-
 #include "../vendor/my-std-lib/timer.h"
 #include "../vendor/my-std-lib/logging.h"
 #include "../vendor/my-std-lib/random.h"

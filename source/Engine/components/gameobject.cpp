@@ -78,10 +78,9 @@ void GameObject::SetPosition(float x, float y, float z) {
         rp3d::Transform bodyTransform = mRigidBodyCache->getTransform();
         bodyTransform.setPosition(position);
         mRigidBodyCache->setTransform(bodyTransform);
-    } else {
-        if (mEntityCache != nullptr) {
-            mEntityCache->transform.position = glm::vec3(x, y, z);
-        }
+    }
+    if (mEntityCache != nullptr) {
+        mEntityCache->transform.position = glm::vec3(x, y, z);
     }
     return;
 }

@@ -9,6 +9,7 @@ Timer             Time;
 ResourceManager   Resources;
 PhysicsSystem     Physics;
 RenderSystem      Renderer;
+AudioSystem       Audio;
 ScriptSystem      Scripting;
 InputSystem       Input;
 
@@ -203,7 +204,7 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
             componentEntityRenderer = (Entity*)componentPtr->GetComponent();
             DestroyEntityRenderer(componentEntityRenderer);
             break;
-            
+          
         case COMPONENT_TYPE_RIGIDBODY:
             componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
             Physics.DestroyRigidBody(componentRigidBody);

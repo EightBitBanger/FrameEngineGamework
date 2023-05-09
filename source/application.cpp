@@ -20,12 +20,11 @@ extern InputSystem          Input;
 void ScriptCameraController(void* gameObject);
 
 
-// Cached resource pointers
+// Cached resources
 Mesh*     barrelMesh;
 Mesh*     projectileMesh;
 Material* barrelMaterial;
 
-GameObject* cameraController = nullptr;
 
 
 
@@ -35,14 +34,50 @@ GameObject* cameraController = nullptr;
 // Application entry point
 //
 
+GameObject* cameraController;
+
 void Framework::Start() {
     
+    // Load some external files
     Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
     Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
     
+    // Set the gravity vector for the simulation
+    Physics.SetWorldGravity(0, -0, 0);
     
-    Physics.SetWorldGravity(0, -0, -700);
-    //Physics.SetWorldGravity(0, -0, 0);
+    // Create objects from resource tags
+    Material* barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
+    Mesh*     barrelMesh     = Resources.CreateMeshFromTag("barrel");
+    
+    
+    // Create a game object
+    GameObject* barrel = Engine.CreateGameObject();
+    
+    // Add a render component
+    Component* entityRenderer = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
+    barrel->AddComponent(entityRenderer);
+    
+    // Add a physics component
+    Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+    barrel->AddComponent(rigidBodyComponent);
+    
+    
+    // Create a camera controller
+    cameraController = Engine.CreateCameraController(-50, 0, 0);
+    
+    
+    return;
+    
+    
+    
+    /*
+    
+    //
+    // Stress test
+    //
+    
+    //Physics.SetWorldGravity(0, -0, -700);
+    Physics.SetWorldGravity(0, -0, 0);
     
     // Sky background
     Renderer.skyMain = Renderer.CreateSky();
@@ -72,6 +107,8 @@ void Framework::Start() {
     Script* cameraScript = (Script*)scriptComponent->GetComponent();
     cameraScript->OnUpdate = ScriptCameraController;
     
+    */
+    
     
     
     
@@ -97,6 +134,27 @@ float torqueMul  = 1;
 //
 
 void Framework::Run() {
+    
+    glm::vec3 force(0);
+    
+    if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
+    if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
+    if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
+    if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
+    
+    if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
+    if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
+    
+    // Camera speed
+    force *= 1000;
+    
+    cameraController->AddForce(force.x, force.y, force.z);
+    
+    
+    
+    
+    
+    return;
     
     //
     // Create some barrel objects in random positions
@@ -239,7 +297,9 @@ void ScriptCameraController(void* gameObjectPtr) {
         rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
         
         
+        //
         // Calculate projectile force
+        
         glm::vec3 fwd = Renderer.cameraMain->forward;
         glm::vec3 fwdAngle = Renderer.cameraMain->forward;
         fwd *= 3; // Start offset from camera
@@ -247,6 +307,7 @@ void ScriptCameraController(void* gameObjectPtr) {
         glm::vec3 pos = Renderer.cameraMain->transform.position;
         pos += fwd;
         fwd *= 4500; // Total forward force + camera offset
+        
         
         // Transform the rigid body
         rp3d::Transform newTransform;
