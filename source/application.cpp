@@ -25,6 +25,7 @@ Mesh*     barrelMesh;
 Mesh*     projectileMesh;
 Material* barrelMaterial;
 
+GameObject* cameraController;
 
 
 
@@ -34,8 +35,6 @@ Material* barrelMaterial;
 // Application entry point
 //
 
-GameObject* cameraController;
-
 void Framework::Start() {
     
     // Load some external files
@@ -43,11 +42,16 @@ void Framework::Start() {
     Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
     
     // Set the gravity vector for the simulation
-    Physics.SetWorldGravity(0, -0, 0);
+    Physics.SetWorldGravity(0, -90, 0);
     
     // Create objects from resource tags
-    Material* barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
-    Mesh*     barrelMesh     = Resources.CreateMeshFromTag("barrel");
+    barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
+    
+    barrelMesh     = Resources.CreateMeshFromTag("barrel");
+    barrelMesh->ChangeSubMeshColor(0, Colors.white);
+    
+    projectileMesh = Resources.CreateMeshFromTag("barrel");
+    projectileMesh->ChangeSubMeshColor(0, Colors.red);
     
     
     // Create a game object
@@ -62,11 +66,20 @@ void Framework::Start() {
     barrel->AddComponent(rigidBodyComponent);
     
     
+    
     // Create a camera controller
     cameraController = Engine.CreateCameraController(-50, 0, 0);
+    Component* componentPtr = cameraController->FindComponent(COMPONENT_TYPE_SCRIPT);
+    
+    Script* cameraScript = (Script*)componentPtr->GetComponent();
+    cameraScript->OnUpdate = ScriptCameraController;
+    
     
     
     return;
+    
+    
+    
     
     
     
@@ -135,31 +148,11 @@ float torqueMul  = 1;
 
 void Framework::Run() {
     
-    glm::vec3 force(0);
-    
-    if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
-    if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
-    if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
-    if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
-    
-    if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
-    if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
-    
-    // Camera speed
-    force *= 1000;
-    
-    cameraController->AddForce(force.x, force.y, force.z);
-    
-    
-    
-    
-    
-    return;
     
     //
     // Create some barrel objects in random positions
     
-    for (int i=0; i < 50; i++) {
+    for (int i=0; i < 30; i++) {
         
         // Create a game object
         GameObject* particle = Engine.CreateGameObject();
@@ -172,8 +165,7 @@ void Framework::Run() {
         particle->AddComponent( Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY) );
         
         
-        // Apply some physical forces
-        
+        // Apply some random physical forces
         float startx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
         float starty = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
         float startz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -197,7 +189,7 @@ void Framework::Run() {
     
     unsigned int index=0;
     
-    while (Engine.GetGameObjectCount() > 1000) {
+    while (Engine.GetGameObjectCount() > 2000) {
         
         
         GameObject* gameObject = Engine.GetGameObject(index);

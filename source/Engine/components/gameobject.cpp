@@ -27,6 +27,10 @@ void GameObject::AddComponent(Component* component) {
                                                 mEntityCache->transform.position.z);
     }
     if (component->GetType() == COMPONENT_TYPE_RENDERER) mEntityCache = (Entity*)component->GetComponent();
+    if (component->GetType() == COMPONENT_TYPE_SCRIPT) {
+        Script* scriptPtr = (Script*)component->GetComponent();
+        scriptPtr->isActive = true;
+    }
     
     mComponentList.push_back(component);
     return;
@@ -39,8 +43,13 @@ bool GameObject::RemoveComponent(Component* component) {
         if (component == thisComponentPtr) {
             
             // Null the shortcut pointers
-            if (thisComponentPtr->GetType() == COMPONENT_TYPE_RIGIDBODY) mRigidBodyCache = nullptr;
-            if (thisComponentPtr->GetType() == COMPONENT_TYPE_RENDERER) mEntityCache = nullptr;
+            if (component->GetType() == COMPONENT_TYPE_RIGIDBODY) mRigidBodyCache = nullptr;
+            if (component->GetType() == COMPONENT_TYPE_RENDERER) mEntityCache = nullptr;
+            if (component->GetType() == COMPONENT_TYPE_SCRIPT) {
+                Script* scriptPtr = (Script*)component->GetComponent();
+                scriptPtr->isActive = true;
+            }
+            
             mComponentList.erase(it);
             return true;
         }
