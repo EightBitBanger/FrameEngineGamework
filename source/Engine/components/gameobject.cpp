@@ -47,7 +47,7 @@ bool GameObject::RemoveComponent(Component* component) {
             if (component->GetType() == COMPONENT_TYPE_RENDERER) mEntityCache = nullptr;
             if (component->GetType() == COMPONENT_TYPE_SCRIPT) {
                 Script* scriptPtr = (Script*)component->GetComponent();
-                scriptPtr->isActive = true;
+                scriptPtr->isActive = false;
             }
             
             mComponentList.erase(it);

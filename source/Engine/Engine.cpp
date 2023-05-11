@@ -143,8 +143,9 @@ bool EngineSystemManager::RemoveGameObjectFromActiveList(GameObject* gameObjectP
 }
 
 GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
-    assert(index < mGameObjectActive.size());
-    return mGameObjectActive[index];
+    if (index <= mGameObjectActive.size()) 
+        return mGameObjectActive[index];
+    return nullptr;
 }
 
 unsigned int EngineSystemManager::GetGameObjectCount(void) {
