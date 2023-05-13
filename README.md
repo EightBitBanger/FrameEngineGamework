@@ -3,8 +3,8 @@
 This game engine framework aims to provides a simple interface with more complex systems. The application layer provides APIs for rendering, physics, resource management, scene management, input, timing and random number generation. 
 
 
-
-### Features
+<br><br/>
+### Core Features
 - OpenGL render system  (in progress..)
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 - ⁯⁮⁭Audio (Considering openAL)
@@ -44,11 +44,11 @@ The framework contains many sub systems which can be accessed though the followi
 ```c++
 #include "Engine/Engine.h"
 
-extern RandomGen         Random;
-extern ColorPreset       Colors;
-extern Timer             Time;
-extern Timer             PhysicsTime;
-extern Logger            Log;
+extern RandomGen            Random;
+extern ColorPreset          Colors;
+extern Timer                Time;
+extern Timer                PhysicsTime;
+extern Logger               Log;
 
 extern EngineSystemManager  Engine;
 extern ApplicationLayer     Application;
