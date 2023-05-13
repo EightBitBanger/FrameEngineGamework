@@ -48,15 +48,14 @@ public:
     /// Destroy and deallocate a shader program resource by its name.
     bool UnloadShaderTag(std::string resourceName);
     
-    /// Get a physics collision shape from a collider resource tag.
-    rp3d::BoxShape* GetColliderFromTag(std::string resourceName);
-    
     /// Create a render mesh object from a mesh resource tag.
     Mesh*     CreateMeshFromTag(std::string resourceName);
     /// Create a material object from a texture image resource tag.
     Material* CreateMaterialFromTag(std::string resourceName);
     /// Create a shader object from a GLSL shader resource tag.
     Shader*   CreateShaderFromTag(std::string resourceName);
+    /// Create a physics collision shape from a collider resource tag.
+    rp3d::BoxShape* CreateColliderFromTag(std::string resourceName);
     
     /// Load a ".scene" file. Scene files construct scenes on load from definition and location files.
     bool LoadScene(std::string path);

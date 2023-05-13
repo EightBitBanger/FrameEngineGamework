@@ -235,7 +235,7 @@ Shader* ResourceManager::CreateShaderFromTag(std::string resourceName) {
 }
 
 
-rp3d::BoxShape* ResourceManager::GetColliderFromTag(std::string resourceName) {
+rp3d::BoxShape* ResourceManager::CreateColliderFromTag(std::string resourceName) {
     for (std::vector<ColliderTag>::iterator it = mColliderTags.begin(); it != mColliderTags.end(); ++it) 
         if (it->name == resourceName) 
             return it->colliderShape;

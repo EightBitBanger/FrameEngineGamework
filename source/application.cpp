@@ -74,57 +74,6 @@ void Framework::Start() {
     Script* cameraScript = (Script*)componentPtr->GetComponent();
     cameraScript->OnUpdate = ScriptCameraController;
     
-    
-    
-    return;
-    
-    
-    
-    
-    
-    
-    /*
-    
-    //
-    // Stress test
-    //
-    
-    //Physics.SetWorldGravity(0, -0, -700);
-    Physics.SetWorldGravity(0, -0, 0);
-    
-    // Sky background
-    Renderer.skyMain = Renderer.CreateSky();
-    Renderer.skyMain->SetColor( Colors.Make(0.087, 0.087, 0.087) );
-    
-    
-    // Create objects from resource tags
-    barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
-    
-    // Load a barrel mesh
-    barrelMesh = Resources.CreateMeshFromTag("barrel");
-    barrelMesh->ChangeSubMeshColor(0, Colors.gray);
-    
-    // Load a mesh to serve as a projectile
-    projectileMesh = Resources.CreateMeshFromTag("barrel");
-    projectileMesh->ChangeSubMeshColor(0, Colors.green);
-    
-    
-    
-    //
-    // Create a camera controller
-    
-    cameraController = Engine.CreateCameraController(-200, 0, 0);
-    cameraController->name = "camera";
-    Component* scriptComponent = cameraController->FindComponent(COMPONENT_TYPE_SCRIPT);
-    
-    Script* cameraScript = (Script*)scriptComponent->GetComponent();
-    cameraScript->OnUpdate = ScriptCameraController;
-    
-    */
-    
-    
-    
-    
     return;
 }
 
@@ -152,7 +101,7 @@ void Framework::Run() {
     //
     // Create some barrel objects in random positions
     /*
-    for (int i=0; i < 30; i++) {
+    for (int i=0; i < 300; i++) {
         
         // Create a game object
         GameObject* particle = Engine.CreateGameObject();
@@ -187,9 +136,11 @@ void Framework::Run() {
         continue;
     }
     
-    unsigned int index=0;
     
-    while (Engine.GetGameObjectCount() > 2000) {
+    // Remove extra objects
+    
+    unsigned int index=0;
+    while (Engine.GetGameObjectCount() > 1000) {
         
         
         GameObject* gameObject = Engine.GetGameObject(index);
@@ -251,6 +202,12 @@ void Framework::Shutdown(void) {
 
 
 
+
+
+
+
+
+
 float cameraSpeed = 900;
 
 void ScriptCameraController(void* gameObjectPtr) {
@@ -269,7 +226,16 @@ void ScriptCameraController(void* gameObjectPtr) {
     // Shoot object from camera
     
     if (Input.CheckMouseLeftPressed()) {
-        //Input.SetMouseLeftPressed(false);
+        Input.SetMouseLeftPressed(false);
+        
+        float spreadMul = 0.001;
+        
+        for (int i=0; i < 30; i++) {
+        
+        // Apply some random physical forces
+        float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+        float offsety = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+        float offsetz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
         
         GameObject* projectile = Engine.CreateGameObject();
         projectile->name = "projectile";
@@ -294,11 +260,11 @@ void ScriptCameraController(void* gameObjectPtr) {
         
         glm::vec3 fwd = Renderer.cameraMain->forward;
         glm::vec3 fwdAngle = Renderer.cameraMain->forward;
-        fwd *= 3; // Start offset from camera
+        fwd *= 10; // Start offset from camera
         
         glm::vec3 pos = Renderer.cameraMain->transform.position;
         pos += fwd;
-        fwd *= 4500; // Total forward force + camera offset
+        fwd *= 3000; // Total forward force + camera offset
         
         
         // Transform the rigid body
@@ -306,7 +272,7 @@ void ScriptCameraController(void* gameObjectPtr) {
         newTransform.setPosition(rp3d::Vector3(pos.x, pos.y, pos.z));
         
         rp3d::Quaternion quat;
-        quat.setAllValues(fwdAngle.x, fwdAngle.y, fwdAngle.z, 0);
+        quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, 0);
         
         newTransform.setOrientation(quat);
         
@@ -314,6 +280,10 @@ void ScriptCameraController(void* gameObjectPtr) {
         
         projectile->AddForce(fwd.x, fwd.y, fwd.z);
         projectile->EnableGravity(false);
+        
+        continue;
+        }
+        
     }
     
     force *= cameraSpeed;

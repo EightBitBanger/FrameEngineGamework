@@ -49,25 +49,24 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
     rp3d::Quaternion orientation = rp3d::Quaternion::identity();
     rp3d::Transform physicsTransform = rp3d::Transform(position, orientation);
     
-    rp3d::RigidBody* body = RemoveRigidBodyFromFreeList();
-    if (body != nullptr) {
-        body->setTransform(physicsTransform);
-        return body;
-    }
+    //rp3d::RigidBody* body = RemoveRigidBodyFromFreeList();
+    //if (body != nullptr) {
+    //    body->setTransform(physicsTransform);
+    //    return body;
+    //}
+    //body = world->createRigidBody(physicsTransform);
     
-    body = world->createRigidBody(physicsTransform);
-    
-    return body;
+    return world->createRigidBody(physicsTransform);
 }
 
 void PhysicsSystem::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
     assert(rigidBodyPtr != nullptr);
     
     // !! Warning: leak on rigid body destroy !!
-    //world->destroyRigidBody(rigidBodyPtr);
+    world->destroyRigidBody(rigidBodyPtr);
     
     // Use a free list instead...
-    AddRigidBodyToFreeList(rigidBodyPtr);
+    //AddRigidBodyToFreeList(rigidBodyPtr);
 }
 
 rp3d::BoxShape* PhysicsSystem::CreateColliderBox(float xscale, float yscale, float zscale) {
