@@ -12,7 +12,6 @@ This game engine framework aims to provides a simple interface with more complex
 - Window input handling
 
 
-
 <br><br/>
 ##  Building the project
 
@@ -29,11 +28,9 @@ glew32s glu32 gdi32 user32 kernel32 comctl32 opengl32 reactphysics3d
 ```
 
 
-
 <br><br/>
 ## Documentation
 You can find the API documentation <a href="https://github.com/RetroBytes32/GameEngine-Framework/wiki">here</a>⁭.
-
 
 
 <br><br/>
