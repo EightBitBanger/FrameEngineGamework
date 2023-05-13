@@ -91,7 +91,7 @@ template<typename T> class PoolAllocator {
         m_poolCount--;
     }
     
-    public:
+public:
     
     T* operator[] (unsigned int const i) {return m_activeList[i];}
     

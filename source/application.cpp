@@ -1,10 +1,10 @@
 #include "Engine/Engine.h"
 
-extern RandomGen         Random;
-extern ColorPreset       Colors;
-extern Timer             Time;
-extern Timer             PhysicsTime;
-extern Logger            Log;
+extern RandomGen            Random;
+extern ColorPreset          Colors;
+extern Timer                Time;
+extern Timer                PhysicsTime;
+extern Logger               Log;
 
 extern EngineSystemManager  Engine;
 extern ApplicationLayer     Application;
