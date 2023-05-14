@@ -12,7 +12,8 @@ Script::Script() {
 }
 
 // Dummy landing function
-void DefaultFunctionPtr(void* gameObjectPtr) {
+void DefaultFunctionPtr(void* dummyObjectPtr) {
     return;
 }
+
 

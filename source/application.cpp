@@ -20,6 +20,9 @@ extern InputSystem          Input;
 void ScriptCameraController(void* gameObject);
 
 
+
+
+
 // Cached resources
 Mesh*     barrelMesh;
 Mesh*     projectileMesh;
@@ -231,57 +234,57 @@ void ScriptCameraController(void* gameObjectPtr) {
         float spreadMul = 0.001;
         
         for (int i=0; i < 30; i++) {
-        
-        // Apply some random physical forces
-        float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-        float offsety = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-        float offsetz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-        
-        GameObject* projectile = Engine.CreateGameObject();
-        projectile->name = "projectile";
-        
-        // Add a render component
-        Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
-        projectile->AddComponent(entityRenderer);
-        
-        Entity* entity = (Entity*)entityRenderer->GetComponent();
-        entity->AttachMesh(projectileMesh);
-        entity->AttachMaterial(barrelMaterial);
-        
-        
-        // Add a physics component
-        Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
-        projectile->AddComponent(rigidBodyComponent);
-        rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
-        
-        
-        //
-        // Calculate projectile force
-        
-        glm::vec3 fwd = Renderer.cameraMain->forward;
-        glm::vec3 fwdAngle = Renderer.cameraMain->forward;
-        fwd *= 10; // Start offset from camera
-        
-        glm::vec3 pos = Renderer.cameraMain->transform.position;
-        pos += fwd;
-        fwd *= 3000; // Total forward force + camera offset
-        
-        
-        // Transform the rigid body
-        rp3d::Transform newTransform;
-        newTransform.setPosition(rp3d::Vector3(pos.x, pos.y, pos.z));
-        
-        rp3d::Quaternion quat;
-        quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, 0);
-        
-        newTransform.setOrientation(quat);
-        
-        body->setTransform(newTransform);
-        
-        projectile->AddForce(fwd.x, fwd.y, fwd.z);
-        projectile->EnableGravity(false);
-        
-        continue;
+            
+            // Apply some random physical forces
+            float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+            float offsety = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+            float offsetz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+            
+            GameObject* projectile = Engine.CreateGameObject();
+            projectile->name = "projectile";
+            
+            // Add a render component
+            Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
+            projectile->AddComponent(entityRenderer);
+            
+            Entity* entity = (Entity*)entityRenderer->GetComponent();
+            entity->AttachMesh(projectileMesh);
+            entity->AttachMaterial(barrelMaterial);
+            
+            
+            // Add a physics component
+            Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+            projectile->AddComponent(rigidBodyComponent);
+            rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+            
+            
+            //
+            // Calculate projectile force
+            
+            glm::vec3 fwd = Renderer.cameraMain->forward;
+            glm::vec3 fwdAngle = Renderer.cameraMain->forward;
+            fwd *= 10; // Start offset from camera
+            
+            glm::vec3 pos = Renderer.cameraMain->transform.position;
+            pos += fwd;
+            fwd *= 3000; // Total forward force + camera offset
+            
+            
+            // Transform the rigid body
+            rp3d::Transform newTransform;
+            newTransform.setPosition(rp3d::Vector3(pos.x, pos.y, pos.z));
+            
+            rp3d::Quaternion quat;
+            quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, 0);
+            
+            newTransform.setOrientation(quat);
+            
+            body->setTransform(newTransform);
+            
+            projectile->AddForce(fwd.x, fwd.y, fwd.z);
+            projectile->EnableGravity(false);
+            
+            continue;
         }
         
     }
@@ -291,7 +294,7 @@ void ScriptCameraController(void* gameObjectPtr) {
     gameObject->AddForce(force.x, force.y, force.z);
     
     return;
-};
+}
 
 
 
