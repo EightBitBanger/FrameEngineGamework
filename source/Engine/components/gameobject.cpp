@@ -6,31 +6,43 @@ GameObject::GameObject() {
     
     isActive = true;
     
+    mCameraCache = nullptr;
     mRigidBodyCache = nullptr;
-    
+    mEntityCache = nullptr;
 }
 
-
-
 //
-// Components
+// Component functions
+//
 
 void GameObject::AddComponent(Component* component) {
     assert(component != nullptr);
     
-    // Set the shortcut pointers
+    // Cache the rigid body component
     if (component->GetType() == ComponentType::RigidBody) {
         mRigidBodyCache = (rp3d::RigidBody*)component->GetComponent();
         // Update the rigid body position on attach
         if (mEntityCache != nullptr) SetPosition(mEntityCache->transform.position.x,
-                                                mEntityCache->transform.position.y,
-                                                mEntityCache->transform.position.z);
+                                                 mEntityCache->transform.position.y,
+                                                 mEntityCache->transform.position.z);
     }
-    if (component->GetType() == ComponentType::Renderer) mEntityCache = (Entity*)component->GetComponent();
+    
+    // Cache the entity renderer component
+    if (component->GetType() == ComponentType::Renderer) {
+        mEntityCache = (Entity*)component->GetComponent();
+    }
+    
+    // Initiate the script component
     if (component->GetType() == ComponentType::Script) {
         Script* scriptPtr = (Script*)component->GetComponent();
         scriptPtr->isActive = true;
     }
+    
+    // Cache the camera component
+    if (component->GetType() == ComponentType::Camera) {
+        mCameraCache = (Camera*)component->GetComponent();
+    }
+    
     
     mComponentList.push_back(component);
     return;
@@ -67,7 +79,6 @@ Component* GameObject::FindComponent(ComponentType component_type) {
     return nullptr;
 }
 
-
 Component* GameObject::GetComponent(unsigned int index) {
     assert(index < mComponentList.size());
     return mComponentList[index];
@@ -77,9 +88,21 @@ unsigned int GameObject::GetComponentCount(void) {
     return mComponentList.size();
 }
 
+Camera* GameObject::GetCachedCamera(void) {
+    return mCameraCache;
+}
+
+rp3d::RigidBody* GameObject::GetCachedRigidBody(void) {
+    return mRigidBodyCache;
+}
+
+Entity* GameObject::GetCachedEntity(void) {
+    return mEntityCache;
+}
 
 //
 // Physics functions
+//
 
 void GameObject::SetPosition(float x, float y, float z) {
     if (mRigidBodyCache != nullptr) {
@@ -128,7 +151,6 @@ void GameObject::EnableGravity(bool enabled) {
     mRigidBodyCache->enableGravity(enabled);
 }
 
-
 void GameObject::CalculatePhysics(void) {
     assert(mRigidBodyCache != nullptr);
     mRigidBodyCache->updateMassFromColliders();
@@ -136,7 +158,6 @@ void GameObject::CalculatePhysics(void) {
     mRigidBodyCache->updateLocalInertiaTensorFromColliders();
     return;
 }
-
 
 void GameObject::SetLinearAxisLockFactor(float x, float y, float z) {
     assert(mRigidBodyCache != nullptr);
@@ -151,7 +172,6 @@ void GameObject::SetAngularAxisLockFactor(float x, float y, float z) {
     mRigidBodyCache->setAngularLockAxisFactor(lockFactor);
     return;
 }
-
 
 void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z) {
     assert(mRigidBodyCache != nullptr);
@@ -181,18 +201,14 @@ void GameObject::AddCollider(ColliderTag* colliderTag, float x, float y, float z
     return;
 }
 
-
 void GameObject::SetRigidBodyStatic(void) {
     assert(mRigidBodyCache != nullptr);
     mRigidBodyCache->setType(rp3d::BodyType::STATIC);
     return;
 }
 
-
 void GameObject::SetRigidBodyDynamic(void) {
     assert(mRigidBodyCache != nullptr);
     mRigidBodyCache->setType(rp3d::BodyType::DYNAMIC);
     return;
 }
-
-

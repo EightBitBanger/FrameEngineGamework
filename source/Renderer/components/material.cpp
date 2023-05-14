@@ -60,7 +60,6 @@ void Material::BindTextureSlot(unsigned int slot) {
     glActiveTexture(GL_TEXTURE0 + slot);
 }
 
-
 void Material::UpdateTextureBuffer(void* textureData) {
     
     glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
@@ -68,4 +67,3 @@ void Material::UpdateTextureBuffer(void* textureData) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
     return;
 }
-

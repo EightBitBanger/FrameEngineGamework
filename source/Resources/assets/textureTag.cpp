@@ -10,4 +10,3 @@ TextureTag::TextureTag() {
     buffer = nullptr;
     return;
 }
-

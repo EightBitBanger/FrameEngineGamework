@@ -23,7 +23,6 @@ void ApplicationLayer::Pause(void) {
     return;
 }
 
-
 HWND ApplicationLayer::CreateWindowHandle(std::string className, std::string windowName, HWND parentHandle) {
     assert(windowHandle == NULL);
     
@@ -131,9 +130,3 @@ void ApplicationLayer::ShowWindowHandle(void) {
     ShowWindow(windowHandle, false);
     return;
 }
-
-
-
-
-
-

@@ -29,4 +29,3 @@ bool ScriptSystem::DestroyScript(Script* scriptPtr) {
     bool ret = mScript.Destroy(scriptPtr);
     return ret;
 }
-

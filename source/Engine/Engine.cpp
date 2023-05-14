@@ -18,7 +18,6 @@ EngineSystemManager   Engine;
 
 
 
-
 EngineSystemManager::EngineSystemManager(void) {
     
     // Preallocate some buffer space
@@ -27,13 +26,11 @@ EngineSystemManager::EngineSystemManager(void) {
     return;
 }
 
-
 GameObject* EngineSystemManager::CreateGameObject(void) {
     GameObject* newGameObject = mGameObject.Create();
     AddGameObjectToActiveList(newGameObject);
     return newGameObject;
 }
-
 
 void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
@@ -51,24 +48,19 @@ void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     return;
 }
 
-
-
-
-
-
 GameObject* EngineSystemManager::CreateCameraController(float x, float y, float z) {
     
     GameObject* cameraController = CreateGameObject();
     cameraController->name = "camera";
     
-    // Camera component
+    // Add a camera component
     Component* cameraComponent = CreateComponent(ComponentType::Camera);
     Camera* cameraMain = (Camera*)cameraComponent->GetComponent();
     Renderer.cameraMain = cameraMain;
     cameraMain->EnableMouseLook();
     cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
-    //Add a rigid body component
+    // Add a rigid body component
     Component* rigidBodyComponent = CreateComponent(ComponentType::RigidBody);
     rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
     rigidBody->setLinearDamping(4);
@@ -93,7 +85,6 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
     return cameraController;
 }
 
-
 Component* EngineSystemManager::CreateComponentEntityRenderer(Mesh* meshPtr, Material* materialPtr) {
     Component* newComponent = CreateComponent(ComponentType::Renderer);
     Entity* entityRenderer = (Entity*)newComponent->GetComponent();
@@ -103,8 +94,6 @@ Component* EngineSystemManager::CreateComponentEntityRenderer(Mesh* meshPtr, Mat
     
     return newComponent;
 }
-
-
 
 Entity* EngineSystemManager::CreateEntityRenderer(Mesh* meshPtr, Material* materialPtr) {
     Entity* entityPtr = Renderer.CreateEntity();
@@ -120,9 +109,6 @@ void EngineSystemManager::DestroyEntityRenderer(Entity* entityPtr) {
     Renderer.DestroyEntity(entityPtr);
     return;
 }
-
-
-
 
 void EngineSystemManager::AddGameObjectToActiveList(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
@@ -158,11 +144,10 @@ void EngineSystemManager::Initiate() {
     return;
 }
 
-
-
 Component* EngineSystemManager::CreateComponent(ComponentType type) {
     void* component_object = nullptr;
     
+    // Attach a component of a defined type
     switch (type) {
         
         case ComponentType::Renderer:
@@ -192,7 +177,6 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
 void EngineSystemManager::DestroyComponent(Component* componentPtr) {
     assert(componentPtr != nullptr);
     
-    // Destroy attached component object
     Entity* componentEntityRenderer;
     rp3d::RigidBody* componentRigidBody;
     Script* componentScript;
@@ -200,6 +184,7 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
     
     ComponentType componentType = componentPtr->GetType();
     
+    // Destroy attached component type
     switch (componentType) {
         
         case ComponentType::Renderer:
@@ -229,64 +214,45 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
     return;
 }
 
-
-
-
 void EngineSystemManager::Update(void) {
     
     // Run through the game objects
     for (int i=0; i < mGameObject.Size(); i++ ) {
-        
-        // Component references
-        Camera*           componentCamera = nullptr;
-        rp3d::RigidBody*  componentRigidBody = nullptr;
-        Entity*           componentEntityRenderer = nullptr;
         
         GameObject* objectPtr = mGameObject[i];
         
         if (!objectPtr->isActive) 
             continue;
         
-        // Run through the components
-        for (unsigned int c=0; c < objectPtr->GetComponentCount(); c++) {
-            
-            Component* componentPtr = objectPtr->GetComponent(c);
-            
-            switch (componentPtr->GetType()) {
-                
-                case ComponentType::Renderer:
-                    componentEntityRenderer = (Entity*)componentPtr->GetComponent();
-                    break;
-                    
-                case ComponentType::RigidBody:
-                    componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
-                    break;
-                    
-                case ComponentType::Camera: 
-                    componentCamera = (Camera*)componentPtr->GetComponent();
-                    break;
-                default:
-                    break;
-            }
-            
-            continue;
-        }
+        // Component references
+        Camera*           componentCamera         = objectPtr->GetCachedCamera();
+        rp3d::RigidBody*  componentRigidBody      = objectPtr->GetCachedRigidBody();
+        Entity*           componentEntityRenderer = objectPtr->GetCachedEntity();
         
+        //
+        // Nothing to update, no attached rigid body
         
-        // Nothing further to update
         if (componentRigidBody == nullptr) {
             
-            // No rigid body just a renderer, update the matrix from position and rotation
+            //
+            // Update the entity`s transform matrix from the entity`s position and rotation
+            
             if (componentEntityRenderer != nullptr) {
+                
                 glm::mat4 modleMatrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
+                
                 componentEntityRenderer->transform.matrix = modleMatrix;
             }
+            
             continue;
         }
         
         
-        // Sync with the rigid body
         rp3d::Transform bodyTransform = componentRigidBody->getTransform();
+        
+        //
+        // Sync the position of the entity renderer
+        //
         
         if (componentEntityRenderer != nullptr) {
             bodyTransform.getOpenGLMatrix(&componentEntityRenderer->transform.matrix[0][0]);
@@ -306,6 +272,10 @@ void EngineSystemManager::Update(void) {
             
         }
         
+        //
+        // Sync the position of the camera
+        //
+        
         if (componentCamera != nullptr) {
             bodyTransform.getOpenGLMatrix(&componentCamera->transform.matrix[0][0]);
             
@@ -315,7 +285,7 @@ void EngineSystemManager::Update(void) {
             componentCamera->transform.position.y = bodyPos.y;
             componentCamera->transform.position.z = bodyPos.z;
             
-            // Orientation if NOT mouse looking
+            // Set the orientation if NOT mouse looking
             if (!componentCamera->useMouseLook) {
                 rp3d::Quaternion quaterion = bodyTransform.getOrientation();
                 componentCamera->transform.rotation.x = quaterion.x;
@@ -332,14 +302,14 @@ void EngineSystemManager::Update(void) {
     return;
 }
 
-
 void EngineSystemManager::Shutdown(void) {
     
     while (GetGameObjectCount() > 0) {
         DestroyGameObject( GetGameObject(0) );
     }
+    
+    assert(GetGameObjectCount() == 0);
+    assert(mComponents.Size() == 0);
+    
     return;
 }
-
-
-

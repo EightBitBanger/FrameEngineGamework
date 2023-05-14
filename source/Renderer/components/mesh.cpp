@@ -27,7 +27,6 @@ Mesh::~Mesh() {
     return;
 }
 
-
 void Mesh::SetPrimitive(int primitiveType) {
     mPrimitive = primitiveType;
     return;
@@ -46,8 +45,6 @@ void Mesh::DisableAttribute(int index) {
     return;
 }
 
-
-
 void Mesh::LoadVertexBuffer(Vertex* bufferData, int vertexCount) {
     glBindVertexArray(mVertexArray);
     glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
@@ -62,12 +59,10 @@ void Mesh::LoadIndexBuffer(Index* bufferData, int indexCount) {
     return;
 }
 
-
 void Mesh::Bind() {
     glBindVertexArray(mVertexArray);
     return;
 }
-
 
 void Mesh::AllocateBuffers(unsigned int maxBufferSize) {
     mMaxSize = maxBufferSize;
@@ -120,7 +115,6 @@ void Mesh::SetDefaultAttributes(void) {
     SetAttribute(2, 2, sizeof(Vertex), 24);
     return;
 }
-
 
 void Mesh::AddPlain(float x, float y, float z, float width, float height, Color color) {
     
@@ -350,7 +344,6 @@ bool Mesh::CopySubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std:
     return true;
 }
 
-
 bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) {
     if (index >= mSubMesh.size()) return false;
     
@@ -376,7 +369,6 @@ bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) 
     return true;
 }
 
-
 bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
     if (index >= mSubMesh.size()) return false;
     
@@ -397,7 +389,6 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
     return true;
 }
 
-
 void Mesh::UpdateMesh(void) {
     mVertexBufferSz = mVertexBuffer.size();
     mIndexBufferSz  = mIndexBuffer.size();
@@ -411,5 +402,3 @@ void Mesh::UpdateMesh(void) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0], GL_DYNAMIC_DRAW);
     return;
 }
-
-

@@ -12,8 +12,6 @@ Transform::Transform() {
     return;
 }
 
-
-
 void Transform::SetPosition(float x, float y, float z) {
     position = glm::vec3(x, y, z);
     UpdateMatrix();
@@ -26,13 +24,11 @@ void Transform::SetRotation(float x, float y, float z) {
     return;
 }
 
-
 void Transform::SetScale(float x, float y, float z) {
     scale = glm::vec3(x, y, z);
     UpdateMatrix();
     return;
 }
-
 
 void Transform::ChildAdd(Transform* transform) {
     mChildList.push_back(transform);
@@ -50,7 +46,6 @@ bool Transform::ChildRemove(Transform* transform) {
     return false;    
 }
 
-
 void Transform::SetParentTransform(Transform* parentTransform) {
     mParent = parentTransform;
     return;
@@ -59,7 +54,6 @@ void Transform::SetParentTransform(Transform* parentTransform) {
 Transform* Transform::GetParentTransform(void) {
     return mParent;
 }
-
 
 Transform Transform::Identity(void) {
     Transform identity = Transform();
@@ -81,4 +75,3 @@ void Transform::UpdateMatrix(void) {
     matrix = modelPosition * modelRotation * modelScale;
     return;
 }
-

@@ -23,10 +23,8 @@ void Vertex::operator= (const Vertex& vertex) {
     return;
 }
 
-
 Index::Index(unsigned int value) {
     
     index = value;
     return;
 }
-

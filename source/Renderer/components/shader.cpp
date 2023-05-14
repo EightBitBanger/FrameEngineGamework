@@ -18,7 +18,6 @@ Shader::~Shader() {
     return;
 }
 
-
 void Shader::SetModelMatrix(glm::mat4 &ModelMatrix) {
     glUniformMatrix4fv(mModelMatrixLocation, 1, 0, &ModelMatrix[0][0]);
     return;
@@ -38,7 +37,6 @@ void Shader::SetTextureSampler(unsigned int index) {
     glUniform1i(mSamplerLocation, index);
     return;
 }
-
 
 void Shader::SetUniformLocations(void) {
     
@@ -111,12 +109,10 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
     return ShaderID;
 }
 
-
 void Shader::Bind(void) {
     glUseProgram(mShaderProgram);
     return;
 }
-
 
 bool Shader::BuildDefault(void) {
     
@@ -169,5 +165,3 @@ bool Shader::BuildDefault(void) {
     
     return false;
 }
-
-

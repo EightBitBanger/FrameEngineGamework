@@ -7,4 +7,3 @@ Sky::Sky() {
 }
 
 void Sky::SetColor(Color newColor) {background = newColor;}
-

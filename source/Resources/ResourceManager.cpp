@@ -34,8 +34,6 @@ bool ResourceManager::LoadScene(std::string path) {
     return true;
 }
 
-
-
 bool ResourceManager::LoadDefinitions(std::string path) {
     
     FileLoader definitionsLoader(path);
@@ -90,8 +88,6 @@ bool ResourceManager::LoadDefinitions(std::string path) {
     
     return true;
 }
-
-
 
 bool ResourceManager::LoadLocations(std::string path) {
     
@@ -158,8 +154,6 @@ bool ResourceManager::LoadLocations(std::string path) {
     return true;
 }
 
-
-
 void ResourceManager::Initiate(void) {
     
     sceneMain = Renderer.CreateScene();
@@ -169,12 +163,9 @@ void ResourceManager::Initiate(void) {
     return;
 }
 
-
 unsigned char* ResourceManager::LoadImageRaw(char const* path, int* width, int* height, int* channels, int req_channels) {
     return stbi_load(path, width, height, channels, req_channels);
 }
-
-
 
 MeshTag* ResourceManager::FindMeshTag(std::string resourceName) {
     for (std::vector<MeshTag>::iterator it = mMeshTags.begin(); it != mMeshTags.end(); ++it) 
@@ -203,7 +194,6 @@ ColliderTag* ResourceManager::FindColliderTag(std::string resourceName) {
             return &it[0];
     return nullptr;
 }
-
 
 Mesh* ResourceManager::CreateMeshFromTag(std::string resourceName) {
     MeshTag* meshTag = FindMeshTag(resourceName);
@@ -234,7 +224,6 @@ Shader* ResourceManager::CreateShaderFromTag(std::string resourceName) {
     return shaderPtr;
 }
 
-
 rp3d::BoxShape* ResourceManager::CreateColliderFromTag(std::string resourceName) {
     for (std::vector<ColliderTag>::iterator it = mColliderTags.begin(); it != mColliderTags.end(); ++it) 
         if (it->name == resourceName) 
@@ -250,17 +239,6 @@ void ResourceManager::DestroyAssets(void) {
     
     return;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 bool ResourceManager::LoadTexture(std::string path, std::string resourceName="texDefault") {
     
@@ -283,8 +261,6 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName="te
     std::cout << logstr << std::endl;
     return true;
 }
-
-
 
 bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="meshDefault") {
     
@@ -330,8 +306,6 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="
     return true;
 }
 
-
-
 bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName="shaDefault") {
     
     FileLoader loader(path);
@@ -364,10 +338,6 @@ bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName=
     return true;
 }
 
-
-
-
-
 bool ResourceManager::UnloadMeshTag(std::string resourceName) {
     for (std::vector<MeshTag>::iterator it = mMeshTags.begin(); it != mMeshTags.end(); ++it) {
         if (it->name == resourceName) {
@@ -397,5 +367,3 @@ bool ResourceManager::UnloadShaderTag(std::string resourceName) {
     }
     return false;
 }
-
-

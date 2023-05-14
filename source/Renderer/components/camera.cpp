@@ -27,7 +27,6 @@ void Camera::SetMouseCenter(int mouseResetX, int mouseResetY) {CursorSetPosition
 void Camera::EnableMouseLook(void)  {ShowCursor(false); useMouseLook = true;}
 void Camera::DisableMouseLook(void) {ShowCursor(true); useMouseLook = false;}
 
-
 void Camera::MouseLook(float deltaTime, int mouseResetX, int mouseResetY) {
     
     glm::vec2 MousePos = CursorGetPosition();
@@ -50,7 +49,6 @@ void Camera::MouseLook(float deltaTime, int mouseResetX, int mouseResetY) {
     return;
 }
 
-
 float Camera::GetPitch(void) {
     return glm::degrees(glm::asin(transform.rotation.y));
 }
@@ -58,4 +56,3 @@ float Camera::GetPitch(void) {
 float Camera::GetYaw(float pitch) {
     return glm::degrees(glm::acos(transform.rotation.x / cos(glm::radians(pitch))));
 }
-

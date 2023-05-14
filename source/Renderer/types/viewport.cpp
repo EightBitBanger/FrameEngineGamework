@@ -14,4 +14,3 @@ Viewport::Viewport(int left, int top, int width, int height) {
     w = width;
     h = height;
 }
-

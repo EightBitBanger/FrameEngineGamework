@@ -17,7 +17,6 @@ glm::vec2 CursorGetPosition(void) {
     return MousePos;
 }
 
-
 extern InputSystem::InputSystem(void)    {
     
     for (int i=0; i <= 255; i++) {mKeyPressed[i] = 0; mKeyReleased[i] = 0; mKeyCurrent[i] = 0;}
@@ -67,4 +66,3 @@ void  InputSystem::ClearKeys(void)         {for (int i=0; i <= 255; i++) {mKeyPr
 void  InputSystem::ClearKeysPressed(void)  {for (int i=0; i <= 255; i++) {mKeyPressed[i] = 0;}}
 void  InputSystem::ClearKeysReleased(void) {for (int i=0; i <= 255; i++) {mKeyReleased[i] = 0;}}
 void  InputSystem::ClearKeysCurrent(void)  {for (int i=0; i <= 255; i++) {mKeyCurrent[i] = 0;}}
-

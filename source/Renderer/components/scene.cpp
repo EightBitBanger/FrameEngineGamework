@@ -1,5 +1,6 @@
 #include "scene.h"
 
+
 Entity* Scene::GetEntity(unsigned int index) {
     if (index > mEntityList.size()) 
         return nullptr;
@@ -22,8 +23,6 @@ bool Scene::RemoveFromSceneRoot(Entity* entity) {
     return false;    
 }
 
-
 unsigned int Scene::GetRenderQueueSize(void) {
     return mEntityList.size();
 }
-

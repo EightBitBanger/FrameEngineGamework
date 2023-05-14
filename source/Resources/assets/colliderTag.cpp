@@ -8,4 +8,3 @@ ColliderTag::ColliderTag() {
     colliderShape = nullptr;
     return;
 }
-

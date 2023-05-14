@@ -19,4 +19,3 @@ Component::Component() {
     mObject = nullptr;
     return;
 }
-

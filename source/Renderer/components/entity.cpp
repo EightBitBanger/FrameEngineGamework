@@ -37,4 +37,3 @@ void Entity::DetachMaterial(void) {
 Material* Entity::GetAttachedMaterial(void) {
     return mMaterial;
 }
-

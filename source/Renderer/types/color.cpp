@@ -62,4 +62,3 @@ Color& ColorPreset::MakeRandom(void) {
     mRandom.b = ((float)(rand() % (int)100) + 1) * 0.01;
     return mRandom;
 }
-

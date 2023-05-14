@@ -35,7 +35,6 @@ void PhysicsSystem::Shutdown(void) {
     return;
 }
 
-
 void PhysicsSystem::SetWorldGravity(float x, float y, float z) {
     assert(world != nullptr);
     world->setGravity(rp3d::Vector3(x, y, z));
@@ -82,8 +81,6 @@ rp3d::CapsuleShape* PhysicsSystem::CreateColliderCapsule(float radius, float hei
     return common.createCapsuleShape(radius, height);
 }
 
-
-
 void PhysicsSystem::AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr) {
     mRigidBodyFreeList.push_back(rigidBodyPtr);
     rigidBodyPtr->setIsActive(false);
@@ -97,4 +94,3 @@ rp3d::RigidBody* PhysicsSystem::RemoveRigidBodyFromFreeList(void) {
     mRigidBodyFreeList.erase( mRigidBodyFreeList.end()-1 );
     return bodyPtr;
 }
-

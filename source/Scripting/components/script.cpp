@@ -1,5 +1,6 @@
 #include "script.h"
 
+
 Script::Script() {
     
     isActive         = false;
@@ -15,5 +16,3 @@ Script::Script() {
 void DefaultFunctionPtr(void* dummyObjectPtr) {
     return;
 }
-
-

@@ -9,4 +9,3 @@ ShaderTag::ShaderTag() {
     fragmentScript = "";
     return;
 }
-

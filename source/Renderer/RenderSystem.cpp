@@ -16,7 +16,6 @@ RenderSystem::RenderSystem() {
     return;
 }
 
-
 Entity* RenderSystem::CreateEntity(void) {
     Entity* entityPtr = mEntity.Create();
     entityPtr->AttachMaterial(defaultMaterial);
@@ -27,7 +26,6 @@ bool RenderSystem::DestroyEntity(Entity* entityPtr) {
     return mEntity.Destroy(entityPtr);
 }
 
-
 Mesh* RenderSystem::CreateMesh(void) {
     Mesh* meshPtr = mMesh.Create();
     return meshPtr;
@@ -36,7 +34,6 @@ bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
     assert(meshPtr != nullptr);
     return mMesh.Destroy(meshPtr);
 }
-
 
 Shader* RenderSystem::CreateShader(void) {
     Shader* shaderPtr = mShader.Create();
@@ -47,7 +44,6 @@ bool RenderSystem::DestroyShader(Shader* shaderPtr) {
     return mShader.Destroy(shaderPtr);
 }
 
-
 Camera* RenderSystem::CreateCamera(void) {
     Camera* cameraPtr = mCamera.Create();
     return cameraPtr;
@@ -56,7 +52,6 @@ bool RenderSystem::DestroyCamera(Camera* cameraPtr) {
     assert(cameraPtr != nullptr);
     return mCamera.Destroy(cameraPtr);
 }
-
 
 Material* RenderSystem::CreateMaterial(void) {
     Material* materialPtr = mMaterial.Create();
@@ -67,7 +62,6 @@ bool RenderSystem::DestroyMaterial(Material* materialPtr) {
     return mMaterial.Destroy(materialPtr);
 }
 
-
 Sky* RenderSystem::CreateSky(void) {
     Sky* skyPtr = mSky.Create();
     return skyPtr;
@@ -76,7 +70,6 @@ bool RenderSystem::DestroySky(Sky* skyPtr) {
     assert(skyPtr != nullptr);
     return mSky.Destroy(skyPtr);
 }
-
 
 Scene* RenderSystem::CreateScene(void) {
     Scene* scenePtr = mScene.Create();
@@ -96,11 +89,6 @@ bool RenderSystem::DestroyRenderPipeline(RenderPipeline* renderPipelinePtr) {
     return mPipeline.Destroy(renderPipelinePtr);
 }
 
-
-
-
-
-
 void RenderSystem :: Initiate(void) {
     
     defaultShader = CreateShader();
@@ -118,8 +106,6 @@ void RenderSystem :: Initiate(void) {
     
     return;
 }
-
-
 
 void RenderSystem :: AddToRenderQueue(Scene* scenePtr) {
     assert(scenePtr != nullptr);
@@ -147,10 +133,6 @@ Scene* RenderSystem :: GetRenderQueueScene(unsigned int index) {
     assert(index <= mRenderQueue.size());
     return mRenderQueue[index];
 }
-
-
-
-
 
 GLenum RenderSystem :: SetRenderTarget(HWND wHndl) {
     
@@ -242,7 +224,6 @@ void RenderSystem :: ReleaseRenderTarget(void) {
     return;
 }
 
-
 void RenderSystem :: SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
     viewport.x = x;
     viewport.y = y;
@@ -250,7 +231,6 @@ void RenderSystem :: SetViewport(unsigned int x, unsigned int y, unsigned int w,
     viewport.h = h;
     return;
 }
-
 
 glm::mat4 RenderSystem :: CalculateModelMatrix(Transform& model) {
     
@@ -267,9 +247,6 @@ glm::mat4 RenderSystem :: CalculateModelMatrix(Transform& model) {
     return modelTranslation * modelRotation * modelScale;
 }
 
-
-
-// Log openGL errors
 std::vector<std::string> RenderSystem :: GetGLErrorCodes(std::string errorLocationString) {
     
     GLenum glError;
@@ -307,9 +284,6 @@ std::vector<std::string> RenderSystem :: GetGLErrorCodes(std::string errorLocati
     
     return ErrorList;
 }
-
-
-
 
 
 //
@@ -445,5 +419,3 @@ void RenderSystem::RenderFrame(float deltaTime) {
     
     return;
 }
-
-

@@ -80,6 +80,13 @@ public:
     /// Make the rigid body dynamically movable.
     void SetRigidBodyDynamic(void);
     
+    /// Get the cached camera object if its component is attached.
+    Camera* GetCachedCamera(void);
+    /// Get the cached rigid body object if its component is attached.
+    rp3d::RigidBody* GetCachedRigidBody(void);
+    /// Get the cached entity object if its component is attached.
+    Entity* GetCachedEntity(void);
+    
     
 private:
     
@@ -87,6 +94,7 @@ private:
     std::vector<Component*> mComponentList;
     
     // Cached component pointers, to avoid overhead from working with components internally
+    Camera*          mCameraCache;
     rp3d::RigidBody* mRigidBodyCache;
     Entity*          mEntityCache;
     
