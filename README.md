@@ -15,15 +15,26 @@ This game engine framework aims to provides a simple interface with more complex
 <br><br/>
 ##  Building the project
 
-Building this repository will require the following libraries to be installed.
+> Downloading the repository
+```
+git pull https://github.com/RetroBytes32/GameEngineFramework
+mkdir build
+cd build
+cmake ../
+```
+
+### Dependencies
+> Building this repository will require the following libraries to be installed.
 * <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 * <a href="https://github.com/nothings/stb">STB-Image</a>⁭
 * <a href="https://github.com/Bly7/OBJ-Loader">Bly7-OBJ-loader</a>⁭
 * <a href="https://github.com/Groovounet/glm">glm</a>⁭
 * <a href="https://github.com/nigels-com/glew">glew</a>⁭
 
-#### Required exteral linkage.
+### Required exteral linkage.
 ```
+             Windows                    OpenGL           Physics
+  ============================       ============     =============
 gdi32  user32  kernel32  comctl32  glew32s  opengl32  reactphysics3d
 ```
 
