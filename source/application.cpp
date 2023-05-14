@@ -103,8 +103,8 @@ void Framework::Run() {
     
     //
     // Create some barrel objects in random positions
-    /*
-    for (int i=0; i < 300; i++) {
+    
+    for (int i=0; i < 400; i++) {
         
         // Create a game object
         GameObject* particle = Engine.CreateGameObject();
@@ -156,9 +156,9 @@ void Framework::Run() {
             continue;
         
         Engine.DestroyGameObject(gameObject);
-        
+        index = 0;
     }
-    */
+    
     
     
     
@@ -227,6 +227,7 @@ void ScriptCameraController(void* gameObjectPtr) {
     
     //
     // Shoot object from camera
+    /*
     
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
@@ -288,6 +289,7 @@ void ScriptCameraController(void* gameObjectPtr) {
         }
         
     }
+    */
     
     force *= cameraSpeed;
     
