@@ -84,6 +84,7 @@ set (ENGINE_SOURCES
     
     "source/Application/ApplicationLayer.cpp"
     "source/Application/winproc.cpp"
+    "source/Application/properties.rc"
     
     "source/Audio/AudioSystem.cpp"
     
