@@ -13,6 +13,8 @@ set(default_build_type "Release")
 # CMake modules path
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
+
 SET(CMAKE_CXX_FLAGS "-std=c++11")
 
 # Headers files
@@ -112,9 +114,10 @@ set (ENGINE_SOURCES
     
 )
 
-# Create the library
-add_executable(Build ${ENGINE_HEADERS} ${ENGINE_SOURCES})
 
-target_link_libraries(Build glew32s.lib)
-target_link_libraries(Build libopengl32.a)
-target_link_libraries(Build ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
+add_executable(release ${ENGINE_HEADERS} ${ENGINE_SOURCES})
+
+target_link_libraries(release glew32s.lib)
+target_link_libraries(release libopengl32.a)
+target_link_libraries(release ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
+

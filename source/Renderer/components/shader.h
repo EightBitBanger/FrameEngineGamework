@@ -6,7 +6,7 @@
 #include <iostream>
 
 #define GLEW_STATIC
-#include "../../../vendor/gl/glew.h"
+#include <gl/glew.h>
 
 #include "../types/transform.h"
 
