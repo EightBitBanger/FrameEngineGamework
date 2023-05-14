@@ -34,7 +34,7 @@ cmake ../
 ### Required exteral linkage.
 ```
              Windows                    OpenGL           Physics
-  ============================       ============     =============
+ _______________________________    _______________    ____________
 gdi32  user32  kernel32  comctl32  glew32s  opengl32  reactphysics3d
 ```
 
