@@ -38,7 +38,11 @@ You can find the API documentation <a href="https://github.com/RetroBytes32/Game
 The framework contains many sub systems which can be accessed though the following singletons.
 
 
+> The source file "Application.cpp" is the application layer entry point.
+
 ```c++
+
+
 #include "Engine/Engine.h"
 
 extern RandomGen            Random;
@@ -59,8 +63,8 @@ extern InputSystem          Input;
 
 <br><br/>
 ## Application entry point
-> You must provide the framework with the functions `Start()` and `Run()`. These functions will act as an entry point for your application.
-> The function `Start()` will be called once during application initiation.
+> The framework will provide you with the functions `Framework::Start()` and `Framework::Run()`. These functions will act as an entry point for your application.
+> The start function will be called once during application initiation.
 
 ```c++
 // This example will load a model and a texture and display it centered on screen.
@@ -100,7 +104,7 @@ void Framework::Start() {
 
 <br><br/>
 ### Main loop
-> The `Run()` function will be called once per frame.
+> The `Framework::Run()` function will be called once per frame.
 
 ```c++
 // This example will apply force to the camera`s rigid body on key presses.
