@@ -5,7 +5,7 @@
 #include <SDKDDKVer.h>
 #include <windows.h>
 
-#include <glm/glm.hpp>
+#include "../../vendor/glm/glm.hpp"
 
 #include "Keys.h"
 

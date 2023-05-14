@@ -2,7 +2,7 @@
 #define __COMPONENT_MATERIAL
 
 #define GLEW_STATIC
-#include <gl/glew.h>
+#include "../../../vendor/gl/glew.h"
 
 #include "../types/color.h"
 #include "../enumerators.h"
