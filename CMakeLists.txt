@@ -134,7 +134,3 @@ add_executable(Build ${ENGINE_HEADERS} ${ENGINE_SOURCES})
 target_link_libraries(Build glew32s.lib)
 target_link_libraries(Build libopengl32.a)
 target_link_libraries(Build librp3d.a)
-
-
-
-
