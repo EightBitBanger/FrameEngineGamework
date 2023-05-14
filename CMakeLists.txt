@@ -7,15 +7,13 @@ project(GameEngineFramework VERSION 0.1.0 LANGUAGES CXX)
 # In order to install libraries into correct locations on all platforms.
 include(GNUInstallDirs)
 
-# Set default build type
-set(default_build_type "Release")
-
 # CMake modules path
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 
-SET(CMAKE_CXX_FLAGS "-std=c++11")
+
+
 
 # Headers files
 set (ENGINE_HEADERS
@@ -116,6 +114,18 @@ set (ENGINE_SOURCES
 
 
 add_executable(release ${ENGINE_HEADERS} ${ENGINE_SOURCES})
+
+# Set default build type
+set(default_build_type "release")
+
+target_compile_features(release PUBLIC cxx_std_11)
+set_target_properties(release PROPERTIES CXX_EXTENSIONS OFF)
+
+
+target_include_directories(release PUBLIC
+              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+              $<INSTALL_INTERFACE:include>
+)
 
 target_link_libraries(release glew32s.lib)
 target_link_libraries(release libopengl32.a)
