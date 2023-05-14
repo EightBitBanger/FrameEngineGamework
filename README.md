@@ -1,6 +1,6 @@
 ## Introduction
 
-This game engine framework aims to provides a simple interface with more complex systems. The application layer provides APIs for rendering, physics, resource management, scene management, input, timing and random number generation. 
+This game engine framework aims to provide a simple interface with more complex systems. The application layer provides APIs for rendering, physics, resource management, scene management, input, timing and random number generation. 
 
 
 <br><br/>
