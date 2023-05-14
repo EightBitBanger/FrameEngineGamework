@@ -24,7 +24,7 @@ Building this repository will require the following libraries to be installed.
 
 #### Required exteral linkage.
 ```
-glew32s glu32 gdi32 user32 kernel32 comctl32 opengl32 reactphysics3d
+glew32s opengl32 reactphysics3d
 ```
 
 
