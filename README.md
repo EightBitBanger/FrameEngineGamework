@@ -49,7 +49,7 @@ You can find the API documentation <a href="https://github.com/RetroBytes32/Game
 The framework contains many sub systems which can be accessed though the following singletons.
 
 
-> The source file "Application.cpp" is the application layer entry point.
+> The source file "Application.cpp" is the application layer entry point and the starting point for your application code.
 
 ```c++
 
@@ -74,7 +74,7 @@ extern InputSystem          Input;
 
 <br><br/>
 ## Application entry point
-> The framework will provide you with the functions `Framework::Start()` and `Framework::Run()`. These functions will act as an entry point for your application.
+> The framework will provide you with the functions `Start()` and `Run()`. These functions will serve as an entry point for your application.
 > The start function will be called once during application initiation.
 
 ```c++
@@ -115,7 +115,7 @@ void Framework::Start() {
 
 <br><br/>
 ### Main loop
-> The `Framework::Run()` function will be called once per frame.
+> The `Run()` function will be called once per frame.
 
 ```c++
 // This example will apply force to the camera`s rigid body on key presses.
