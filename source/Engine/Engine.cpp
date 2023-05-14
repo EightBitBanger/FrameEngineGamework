@@ -180,7 +180,8 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
         case ComponentType::Camera:
             component_object = (void*)Renderer.CreateCamera();
             break;
-        
+        default:
+            break;
     }
     
     Component* newComponent = mComponents.Create();
@@ -220,7 +221,9 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
             componentCamera = (Camera*)componentPtr->GetComponent();
             Renderer.DestroyCamera(componentCamera);
             break;
-            
+        
+        default:
+            break;
     }
     mComponents.Destroy(componentPtr);
     return;
@@ -262,7 +265,8 @@ void EngineSystemManager::Update(void) {
                 case ComponentType::Camera: 
                     componentCamera = (Camera*)componentPtr->GetComponent();
                     break;
-                    
+                default:
+                    break;
             }
             
             continue;

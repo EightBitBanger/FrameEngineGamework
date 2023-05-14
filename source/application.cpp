@@ -57,6 +57,7 @@ void Framework::Start() {
     projectileMesh->ChangeSubMeshColor(0, Colors.red);
     
     
+    
     // Create a game object
     GameObject* barrel = Engine.CreateGameObject();
     
