@@ -62,14 +62,14 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
     cameraController->name = "camera";
     
     // Camera component
-    Component* cameraComponent = CreateComponent(COMPONENT_TYPE_CAMERA);
+    Component* cameraComponent = CreateComponent(ComponentType::Camera);
     Camera* cameraMain = (Camera*)cameraComponent->GetComponent();
     Renderer.cameraMain = cameraMain;
     cameraMain->EnableMouseLook();
     cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     //Add a rigid body component
-    Component* rigidBodyComponent = CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+    Component* rigidBodyComponent = CreateComponent(ComponentType::RigidBody);
     rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
     rigidBody->setLinearDamping(4);
     rigidBody->enableGravity(false);
@@ -81,7 +81,7 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
     rigidBody->setTransform(bodyTransform);
     
     // Add a scripting component
-    Component* scriptComponent = CreateComponent(COMPONENT_TYPE_SCRIPT);
+    Component* scriptComponent = CreateComponent(ComponentType::Script);
     Script* script = (Script*)scriptComponent->GetComponent();
     script->gameObject = cameraController;
     script->isActive = true;
@@ -95,7 +95,7 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
 
 
 Component* EngineSystemManager::CreateComponentEntityRenderer(Mesh* meshPtr, Material* materialPtr) {
-    Component* newComponent = CreateComponent(COMPONENT_TYPE_RENDERER);
+    Component* newComponent = CreateComponent(ComponentType::Renderer);
     Entity* entityRenderer = (Entity*)newComponent->GetComponent();
     entityRenderer->AttachMesh(meshPtr);
     entityRenderer->AttachMaterial(materialPtr);
@@ -160,31 +160,31 @@ void EngineSystemManager::Initiate() {
 
 
 
-Component* EngineSystemManager::CreateComponent(unsigned int component_type) {
+Component* EngineSystemManager::CreateComponent(ComponentType type) {
     void* component_object = nullptr;
     
-    switch (component_type) {
+    switch (type) {
         
-        case COMPONENT_TYPE_RENDERER:
+        case ComponentType::Renderer:
             component_object = (void*)this->CreateEntityRenderer(nullptr, nullptr);
             break;
             
-        case COMPONENT_TYPE_RIGIDBODY: {
+        case ComponentType::RigidBody: {
             component_object = (void*)Physics.CreateRigidBody();
             break;
         }
-        case COMPONENT_TYPE_SCRIPT:
+        case ComponentType::Script:
             component_object = (void*)Scripting.CreateScript();
             break;
             
-        case COMPONENT_TYPE_CAMERA:
+        case ComponentType::Camera:
             component_object = (void*)Renderer.CreateCamera();
             break;
         
     }
     
     Component* newComponent = mComponents.Create();
-    newComponent->SetComponent(component_type, component_object);
+    newComponent->SetComponent(type, component_object);
     return newComponent;
 }
 
@@ -197,26 +197,26 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
     Script* componentScript;
     Camera* componentCamera;
     
-    unsigned int componentType = componentPtr->GetType();
+    ComponentType componentType = componentPtr->GetType();
     
     switch (componentType) {
         
-        case COMPONENT_TYPE_RENDERER:
+        case ComponentType::Renderer:
             componentEntityRenderer = (Entity*)componentPtr->GetComponent();
             DestroyEntityRenderer(componentEntityRenderer);
             break;
           
-        case COMPONENT_TYPE_RIGIDBODY:
+        case ComponentType::RigidBody:
             componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
             Physics.DestroyRigidBody(componentRigidBody);
             break;
             
-        case COMPONENT_TYPE_SCRIPT: 
+        case ComponentType::Script: 
             componentScript = (Script*)componentPtr->GetComponent();
             Scripting.DestroyScript(componentScript);
             break;
             
-        case COMPONENT_TYPE_CAMERA: 
+        case ComponentType::Camera: 
             componentCamera = (Camera*)componentPtr->GetComponent();
             Renderer.DestroyCamera(componentCamera);
             break;
@@ -251,15 +251,15 @@ void EngineSystemManager::Update(void) {
             
             switch (componentPtr->GetType()) {
                 
-                case COMPONENT_TYPE_RENDERER:
+                case ComponentType::Renderer:
                     componentEntityRenderer = (Entity*)componentPtr->GetComponent();
                     break;
                     
-                case COMPONENT_TYPE_RIGIDBODY:
+                case ComponentType::RigidBody:
                     componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
                     break;
                     
-                case COMPONENT_TYPE_CAMERA: 
+                case ComponentType::Camera: 
                     componentCamera = (Camera*)componentPtr->GetComponent();
                     break;
                     

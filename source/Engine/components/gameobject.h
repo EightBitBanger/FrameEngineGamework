@@ -34,7 +34,7 @@ public:
     /// Remove a component from the game object.
     bool RemoveComponent(Component* component);
     /// Find a component by its type.
-    Component* FindComponent(unsigned int component_type);
+    Component* FindComponent(ComponentType type);
     
     /// Get a component by its index position.
     Component* GetComponent(unsigned int index);
@@ -75,7 +75,7 @@ public:
     /// Calculate the physical weight proportions by the size and offset of attached colliders.
     void CalculatePhysics(void);
     
-    /// Make the rigid body non movable.
+    /// Make the rigid body statically non movable.
     void SetRigidBodyStatic(void);
     /// Make the rigid body dynamically movable.
     void SetRigidBodyDynamic(void);

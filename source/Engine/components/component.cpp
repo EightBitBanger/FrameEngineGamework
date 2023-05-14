@@ -4,18 +4,18 @@ void* Component::GetComponent(void) {
     return mObject;
 }
 
-componentENUM Component::GetType(void) {
+ComponentType Component::GetType(void) {
     return mType;
 }
 
-void Component::SetComponent(componentENUM component_type, void* component_object) {
+void Component::SetComponent(ComponentType component_type, void* component_object) {
     mType = component_type;
     mObject = component_object;
     return;
 }
 
 Component::Component() {
-    mType = COMPONENT_TYPE_UNDEFINED;
+    mType = ComponentType::Undefined;
     mObject = nullptr;
     return;
 }

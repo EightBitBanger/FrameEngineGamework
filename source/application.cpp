@@ -65,17 +65,18 @@ void Framework::Start() {
     barrel->AddComponent(entityRenderer);
     
     // Add a physics component
-    Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+    Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
     barrel->AddComponent(rigidBodyComponent);
     
     
     
     // Create a camera controller
     cameraController = Engine.CreateCameraController(-50, 0, 0);
-    Component* componentPtr = cameraController->FindComponent(COMPONENT_TYPE_SCRIPT);
+    Component* componentPtr = cameraController->FindComponent(ComponentType::Script);
     
     Script* cameraScript = (Script*)componentPtr->GetComponent();
     cameraScript->OnUpdate = ScriptCameraController;
+    
     
     return;
 }
@@ -100,10 +101,9 @@ float torqueMul  = 1;
 
 void Framework::Run() {
     
-    
     //
     // Create some barrel objects in random positions
-    
+    /*
     for (int i=0; i < 400; i++) {
         
         // Create a game object
@@ -114,7 +114,7 @@ void Framework::Run() {
         particle->AddComponent( Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial) );
         
         // Add a physics component
-        particle->AddComponent( Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY) );
+        particle->AddComponent( Engine.CreateComponent(ComponentType::RigidBody) );
         
         
         // Apply some random physical forces
@@ -139,7 +139,6 @@ void Framework::Run() {
         continue;
     }
     
-    
     // Remove extra objects
     
     unsigned int index=0;
@@ -161,6 +160,7 @@ void Framework::Run() {
     
     
     
+    */
     
     //
     // Escape key pause
@@ -225,16 +225,17 @@ void ScriptCameraController(void* gameObjectPtr) {
     if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
+    
+    
     //
     // Shoot object from camera
-    /*
     
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
         
         float spreadMul = 0.001;
         
-        for (int i=0; i < 30; i++) {
+        for (int i=0; i < 15; i++) {
             
             // Apply some random physical forces
             float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -245,7 +246,7 @@ void ScriptCameraController(void* gameObjectPtr) {
             projectile->name = "projectile";
             
             // Add a render component
-            Component* entityRenderer = Engine.CreateComponent(COMPONENT_TYPE_RENDERER);
+            Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
             projectile->AddComponent(entityRenderer);
             
             Entity* entity = (Entity*)entityRenderer->GetComponent();
@@ -254,7 +255,7 @@ void ScriptCameraController(void* gameObjectPtr) {
             
             
             // Add a physics component
-            Component* rigidBodyComponent = Engine.CreateComponent(COMPONENT_TYPE_RIGIDBODY);
+            Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
             projectile->AddComponent(rigidBodyComponent);
             rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
             
@@ -289,7 +290,7 @@ void ScriptCameraController(void* gameObjectPtr) {
         }
         
     }
-    */
+    
     
     force *= cameraSpeed;
     

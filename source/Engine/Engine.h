@@ -32,7 +32,7 @@ public:
     
     // Components
     /// Create a component object with initial type information and return its pointer.
-    Component* CreateComponent(unsigned int component_type);
+    Component* CreateComponent(ComponentType component_type);
     /// Destroy a component object.
     void DestroyComponent(Component* componentPtr);
     

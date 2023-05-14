@@ -19,15 +19,15 @@ void GameObject::AddComponent(Component* component) {
     assert(component != nullptr);
     
     // Set the shortcut pointers
-    if (component->GetType() == COMPONENT_TYPE_RIGIDBODY) {
+    if (component->GetType() == ComponentType::RigidBody) {
         mRigidBodyCache = (rp3d::RigidBody*)component->GetComponent();
         // Update the rigid body position on attach
         if (mEntityCache != nullptr) SetPosition(mEntityCache->transform.position.x,
                                                 mEntityCache->transform.position.y,
                                                 mEntityCache->transform.position.z);
     }
-    if (component->GetType() == COMPONENT_TYPE_RENDERER) mEntityCache = (Entity*)component->GetComponent();
-    if (component->GetType() == COMPONENT_TYPE_SCRIPT) {
+    if (component->GetType() == ComponentType::Renderer) mEntityCache = (Entity*)component->GetComponent();
+    if (component->GetType() == ComponentType::Script) {
         Script* scriptPtr = (Script*)component->GetComponent();
         scriptPtr->isActive = true;
     }
@@ -43,9 +43,9 @@ bool GameObject::RemoveComponent(Component* component) {
         if (component == thisComponentPtr) {
             
             // Null the shortcut pointers
-            if (component->GetType() == COMPONENT_TYPE_RIGIDBODY) mRigidBodyCache = nullptr;
-            if (component->GetType() == COMPONENT_TYPE_RENDERER) mEntityCache = nullptr;
-            if (component->GetType() == COMPONENT_TYPE_SCRIPT) {
+            if (component->GetType() == ComponentType::RigidBody) mRigidBodyCache = nullptr;
+            if (component->GetType() == ComponentType::Renderer) mEntityCache = nullptr;
+            if (component->GetType() == ComponentType::Script) {
                 Script* scriptPtr = (Script*)component->GetComponent();
                 scriptPtr->isActive = false;
             }
@@ -57,7 +57,7 @@ bool GameObject::RemoveComponent(Component* component) {
     return false;
 }
 
-Component* GameObject::FindComponent(unsigned int component_type) {
+Component* GameObject::FindComponent(ComponentType component_type) {
     for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
         Component* thisComponentPtr = *it;
         if (component_type == thisComponentPtr->GetType()) {
