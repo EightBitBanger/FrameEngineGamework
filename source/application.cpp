@@ -69,8 +69,8 @@ void Framework::Start() {
     groundMesh->AddPlainSubDivided(0, 0, 0, 10, 10, Colors.white, 10, 10);
     groundMesh->AddWallSubDivided(0, 0, 0, 10, 10, Colors.white, 10, 10);
     
-    
     GameObject* ground = Engine.CreateGameObject();
+    ground->name = "world";
     
     // Add a render component
     Component* groundRenderer = Engine.CreateComponentEntityRenderer(groundMesh, groundMaterial);
@@ -178,15 +178,17 @@ void Framework::Run() {
     
     // Remove extra objects
     
+    */
+    
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 1000) {
+    while (Engine.GetGameObjectCount() > 100) {
         
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;
         
         // Ignore cameras and projectiles
-        if (gameObject->name == "projectile") 
+        if (gameObject->name == "world") 
             continue;
         if (gameObject->name == "camera") 
             continue;
@@ -196,8 +198,6 @@ void Framework::Run() {
     }
     
     
-    
-    */
     
     //
     // Escape key pause
@@ -271,9 +271,9 @@ void ScriptCameraController(void* gameObjectPtr) {
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
         
-        float spreadMul = 0.0003;
+        float spreadMul = 0.0007;
         
-        for (int i=0; i < 1; i++) {
+        for (int i=0; i < 13; i++) {
             
             // Apply some random physical forces
             float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -300,6 +300,17 @@ void ScriptCameraController(void* gameObjectPtr) {
             // Projectile collider
             projectile->AddColliderBox(projectileCollider, 0, 0, 0);
             
+            projectile->CalculatePhysics();
+            
+            //body->updateMassFromColliders();
+            //body->updateLocalCenterOfMassFromColliders();
+            //body->updateLocalInertiaTensorFromColliders();
+            
+            projectile->SetLinearAxisLockFactor(1, 1, 1);
+            projectile->SetAngularAxisLockFactor(1, 1, 1);
+            projectile->SetMass(1);
+            
+            
             
             //
             // Calculate projectile force
@@ -310,11 +321,11 @@ void ScriptCameraController(void* gameObjectPtr) {
             
             glm::vec3 pos = Renderer.cameraMain->transform.position;
             pos += fwd;
-            fwd *= 2500; // Total forward force + camera offset
+            fwd *= 20500; // Total forward force + camera offset
             
-            float startx = pos.x + (offsetx * 10);
-            float starty = pos.y + (offsety * 10);
-            float startz = pos.z + (offsetz * 10);
+            float startx = pos.x + (offsetx * 0);
+            float starty = pos.y + (offsety * 0);
+            float startz = pos.z + (offsetz * 0);
             
             // Transform the rigid body
             rp3d::Transform newTransform;
