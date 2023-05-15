@@ -76,9 +76,9 @@ public:
     void AddWallSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
     
     /// Add a sub mesh into this vertex buffer.
-    bool AddSubMesh(float x, float y, float z, SubMesh& mesh);
+    bool AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu=true);
     /// Add a vertex buffer directly into this vertex buffer.
-    bool AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer);
+    bool AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu=true);
     
     /// Remove a sub mesh from this vertex buffer.
     bool RemoveSubMesh(unsigned int index);

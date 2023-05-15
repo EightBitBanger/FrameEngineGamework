@@ -140,7 +140,7 @@ void Mesh::AddPlain(float x, float y, float z, float width, float height, Color 
     subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(3);
     
-    AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer);
+    AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
     return;
 }
 
@@ -151,6 +151,7 @@ void Mesh::AddPlainSubDivided(float x, float y, float z, float width, float heig
             AddPlain( w * width, y, h * height, width, height, color);
         }
     }
+    UpdateMesh();
     return;
 }
 
@@ -178,7 +179,7 @@ void Mesh::AddWall(float x, float y, float z, float width, float height, Color c
     subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(3);
     
-    AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer);
+    AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
     return;
 }
 
@@ -189,14 +190,15 @@ void Mesh::AddWallSubDivided(float x, float y, float z, float width, float heigh
             AddWall( w * width, h * height, z, width, height, color);
         }
     }
+    UpdateMesh();
     return;
 }
 
-bool Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh) {
-    return AddSubMesh(x, y, z, mesh.vertexBuffer, mesh.indexBuffer);
+bool Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu) {
+    return AddSubMesh(x, y, z, mesh.vertexBuffer, mesh.indexBuffer, doUploadToGpu);
 }
 
-bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer) {
+bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu) {
     
     if (mFreeMesh.size() > 0) {
         
@@ -232,11 +234,13 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
                 i++;
             }
             
-            glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
-            glBufferSubData(GL_ARRAY_BUFFER, freeMeshPtr.vertexBegin * sizeof(Vertex), freeMeshPtr.vertexCount * sizeof(Vertex), &mVertexBuffer[freeMeshPtr.vertexBegin]);
-            
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, freeMeshPtr.indexBegin * sizeof(Index),  freeMeshPtr.indexCount * sizeof(Index), &mIndexBuffer[freeMeshPtr.indexBegin]);
+            if (doUploadToGpu) {
+                glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
+                glBufferSubData(GL_ARRAY_BUFFER, freeMeshPtr.vertexBegin * sizeof(Vertex), freeMeshPtr.vertexCount * sizeof(Vertex), &mVertexBuffer[freeMeshPtr.vertexBegin]);
+                
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
+                glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, freeMeshPtr.indexBegin * sizeof(Index),  freeMeshPtr.indexCount * sizeof(Index), &mIndexBuffer[freeMeshPtr.indexBegin]);
+            }
             
             return false;
         }
@@ -272,6 +276,9 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
     
     mVertexBufferSz = mVertexBuffer.size();
     mIndexBufferSz  = mIndexBuffer.size();
+    
+    if (!doUploadToGpu) 
+        return true;
     
     // Check to allocate new GPU memory
     if ((mVertexBufferSz > mMaxSize) | (mIndexBufferSz > mMaxSize)) {
