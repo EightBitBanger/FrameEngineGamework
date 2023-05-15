@@ -15,13 +15,11 @@ This game engine framework aims to provide simpler interfaces with more complex 
 <br><br/>
 ##  Building the project
 
-> Downloading the repository
+> Download the repository with git. You can then use cmake to generate the project files of your choice.
 ```
 git pull https://github.com/RetroBytes32/GameEngineFramework
-mkdir build
-cd build
-cmake ../
 ```
+
 
 ### Dependencies
 > Building this repository will require the following libraries to be installed.
