@@ -118,6 +118,9 @@ void Mesh::SetDefaultAttributes(void) {
 
 void Mesh::AddPlain(float x, float y, float z, float width, float height, Color color) {
     
+    // Align the mesh
+    z = (z * 2) - x;
+    
     Vertex vertex[4];
     vertex[0] = Vertex( x-width, y, z+height,  color.r, color.g, color.b, 0, 1 );
     vertex[1] = Vertex( x+width, y, z+height,  color.r, color.g, color.b, 1, 1 );
@@ -142,18 +145,19 @@ void Mesh::AddPlain(float x, float y, float z, float width, float height, Color 
 }
 
 void Mesh::AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub) {
-    for (unsigned int xx=0; xx < widthSub; xx++) {
-        for (unsigned int zz=0; zz < heightSub; zz++) {
-            float xxx = x + (xx * height);
-            float zzz = z + ((zz * (width * 2)) - xxx);
-            AddPlain(xxx, y, zzz, width, height, color);
+    for (unsigned int h=0; h < heightSub; h++) {
+        for (unsigned int w=0; w < widthSub; w++) {
+            
+            AddPlain( w * width, y, h * height, width, height, color);
         }
     }
     return;
 }
 
-
 void Mesh::AddWall(float x, float y, float z, float width, float height, Color color) {
+    
+    // Align the mesh
+    z -= x;
     
     Vertex vertex[4];
     vertex[0] = Vertex( x-width, y+height, z,  color.r, color.g, color.b, 0, 1 );
@@ -179,16 +183,14 @@ void Mesh::AddWall(float x, float y, float z, float width, float height, Color c
 }
 
 void Mesh::AddWallSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub) {
-    for (unsigned int xx=0; xx < widthSub; xx++) {
-        for (unsigned int zz=0; zz < heightSub; zz++) {
-            float xxx = x + (xx * height);
-            float zzz = z + ((zz * (width * 2)) - xxx);
-            AddWall(xxx, y, zzz, width, height, color);
+    for (unsigned int h=0; h < heightSub; h++) {
+        for (unsigned int w=0; w < widthSub; w++) {
+            
+            AddWall( w * width, h * height, z, width, height, color);
         }
     }
     return;
 }
-
 
 bool Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh) {
     return AddSubMesh(x, y, z, mesh.vertexBuffer, mesh.indexBuffer);
