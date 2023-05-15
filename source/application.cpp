@@ -30,6 +30,8 @@ Material* barrelMaterial;
 
 GameObject* cameraController;
 
+rp3d::BoxShape* projectileCollider;
+
 
 
 
@@ -43,11 +45,13 @@ void Framework::Start() {
     // Load some external files
     Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
     Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
+    Resources.LoadTexture("data/grassy.png", "mat_grassy");
     
     // Set the gravity vector for the simulation
     Physics.SetWorldGravity(0, -90, 0);
     
     // Create objects from resource tags
+    Material* groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
     
     barrelMesh     = Resources.CreateMeshFromTag("barrel");
@@ -55,6 +59,37 @@ void Framework::Start() {
     
     projectileMesh = Resources.CreateMeshFromTag("barrel");
     projectileMesh->ChangeSubMeshColor(0, Colors.red);
+    
+    
+    
+    
+    //
+    // Create a ground base
+    Mesh* groundMesh = Renderer.CreateMesh();
+    groundMesh->AddPlainSubDivided(0, 0, 0, 10, 10, Colors.white, 10, 10);
+    groundMesh->AddWallSubDivided(0, 0, 0, 10, 10, Colors.white, 10, 10);
+    
+    
+    GameObject* ground = Engine.CreateGameObject();
+    
+    // Add a render component
+    Component* groundRenderer = Engine.CreateComponentEntityRenderer(groundMesh, groundMaterial);
+    ground->AddComponent(groundRenderer);
+    
+    // Add a physics component
+    Component* groundRigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
+    ground->AddComponent(groundRigidBodyComponent);
+    ground->SetRigidBodyStatic();
+    
+    // Lock the ground
+    ground->SetLinearAxisLockFactor(0, 0, 0);
+    ground->SetAngularAxisLockFactor(0, 0, 0);
+    
+    // Ground collider
+    rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(1000, 100, 1000);
+    ground->AddColliderBox(groundCollider, 500, -100, 500);
+    
+    
     
     
     
@@ -72,12 +107,13 @@ void Framework::Start() {
     
     
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(-50, 0, 0);
+    cameraController = Engine.CreateCameraController(0, 50, 0);
     Component* componentPtr = cameraController->FindComponent(ComponentType::Script);
     
     Script* cameraScript = (Script*)componentPtr->GetComponent();
     cameraScript->OnUpdate = ScriptCameraController;
     
+    projectileCollider = Physics.CreateColliderBox(1.45, 2.1, 1.45);
     
     return;
 }
@@ -212,6 +248,7 @@ void Framework::Shutdown(void) {
 
 
 
+
 float cameraSpeed = 900;
 
 void ScriptCameraController(void* gameObjectPtr) {
@@ -234,9 +271,9 @@ void ScriptCameraController(void* gameObjectPtr) {
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
         
-        float spreadMul = 0.001;
+        float spreadMul = 0.0003;
         
-        for (int i=0; i < 15; i++) {
+        for (int i=0; i < 1; i++) {
             
             // Apply some random physical forces
             float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -260,22 +297,28 @@ void ScriptCameraController(void* gameObjectPtr) {
             projectile->AddComponent(rigidBodyComponent);
             rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
             
+            // Projectile collider
+            projectile->AddColliderBox(projectileCollider, 0, 0, 0);
+            
             
             //
             // Calculate projectile force
             
             glm::vec3 fwd = Renderer.cameraMain->forward;
             glm::vec3 fwdAngle = Renderer.cameraMain->forward;
-            fwd *= 10; // Start offset from camera
+            fwd *= 8; // Start offset from camera
             
             glm::vec3 pos = Renderer.cameraMain->transform.position;
             pos += fwd;
-            fwd *= 3000; // Total forward force + camera offset
+            fwd *= 2500; // Total forward force + camera offset
             
+            float startx = pos.x + (offsetx * 10);
+            float starty = pos.y + (offsety * 10);
+            float startz = pos.z + (offsetz * 10);
             
             // Transform the rigid body
             rp3d::Transform newTransform;
-            newTransform.setPosition(rp3d::Vector3(pos.x, pos.y, pos.z));
+            newTransform.setPosition(rp3d::Vector3(startx, starty, startz));
             
             rp3d::Quaternion quat;
             quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, 0);
@@ -285,7 +328,6 @@ void ScriptCameraController(void* gameObjectPtr) {
             body->setTransform(newTransform);
             
             projectile->AddForce(fwd.x, fwd.y, fwd.z);
-            projectile->EnableGravity(false);
             
             continue;
         }
