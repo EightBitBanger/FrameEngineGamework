@@ -187,7 +187,7 @@ void Mesh::AddWallSubDivided(float x, float y, float z, float width, float heigh
     for (unsigned int h=0; h < heightSub; h++) {
         for (unsigned int w=0; w < widthSub; w++) {
             
-            AddWall( w * width, h * height, z, width, height, color);
+            AddWall( x + (w * width), y + (h * height), z, width, height, color);
         }
     }
     UpdateMesh();
