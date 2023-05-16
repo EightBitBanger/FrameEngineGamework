@@ -148,7 +148,7 @@ void Mesh::AddPlainSubDivided(float x, float y, float z, float width, float heig
     for (unsigned int h=0; h < heightSub; h++) {
         for (unsigned int w=0; w < widthSub; w++) {
             
-            AddPlain( w * width, y, h * height, width, height, color);
+            AddPlain( x + (w * width), y, z + (h * height), width, height, color);
         }
     }
     UpdateMesh();
