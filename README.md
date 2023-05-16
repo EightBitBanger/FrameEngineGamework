@@ -51,8 +51,6 @@ The framework contains many sub systems which can be accessed though the followi
 > The source file "Application.cpp" is the application layer entry point and the starting point for your application code.
 
 ```c++
-
-
 #include "Engine/Engine.h"
 
 extern RandomGen            Random;
@@ -77,9 +75,13 @@ extern InputSystem          Input;
 > The `Start()` function will be called once during application initiation.
 
 ```c++
-// This example will load a model and a texture and render it with a camera controller.
+// This example will create a plain mesh, apply a texture and setup a camera controller.
 
+// Global resource pointers
+Mesh*       projectileMesh;
+Material*   barrelMaterial;
 GameObject* cameraController;
+rp3d::BoxShape* projectileCollider;
 
 void Framework::Start() {
     
@@ -88,15 +90,19 @@ void Framework::Start() {
     Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
     Resources.LoadTexture("data/grassy.png", "mat_grassy");
     
-    // Set the gravity for the simulation
+    // Set the gravity vector for the simulation
     Physics.SetWorldGravity(0, -90, 0);
     
     // Create objects from resource tags
     Material* groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
     
-    barrelMesh = Resources.CreateMeshFromTag("barrel");
+    Mesh* barrelMesh = Resources.CreateMeshFromTag("barrel");
     barrelMesh->ChangeSubMeshColor(0, Colors.white);
+    
+    projectileMesh = Resources.CreateMeshFromTag("barrel");
+    projectileMesh->ChangeSubMeshColor(0, Colors.white);
+    
     
     
     // Create a ground plain
@@ -124,6 +130,7 @@ void Framework::Start() {
     ground->AddColliderBox(groundCollider, 0, -100, 0);
     
     
+    
     // Create a game object
     GameObject* barrel = Engine.CreateGameObject();
     
@@ -136,9 +143,14 @@ void Framework::Start() {
     barrel->AddComponent(rigidBodyComponent);
     
     
+    
     // Create a camera controller
     cameraController = Engine.CreateCameraController(0, 30, 0);
-    Component* componentPtr = cameraController->FindComponent(ComponentType::Script);
+    
+    
+    // Create a projectile collider
+    projectileCollider = Physics.CreateColliderBox(1.45, 2.1, 1.45);
+    
 }
 ```
 
@@ -147,23 +159,151 @@ void Framework::Start() {
 > The `Run()` function will be called once per frame.
 
 ```c++
-// This example will apply force to the camera`s rigid body on key presses.
+// This example will apply force to the camera`s rigid body on key presses and allow you to throw objects along the direction angle of the camera.
 
 void Framework::Run() {
     
     glm::vec3 force(0);
     
+    // Keyboard movement, WASD keys
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
     if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
     
+    // Space and shift for elevation
     if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
-    // Camera speed
-    force *= 100;
+    // Camera speed multiplier
+    force *= 700;
     
     cameraController->AddForce(force.x, force.y, force.z);
+    
+    
+    
+    // Shoot objects from camera
+    
+    if (Input.CheckMouseLeftPressed()) {
+        
+        // Spread offset effect on projectile angle
+        float spreadMul = 0.0007;
+        
+        for (int i=0; i < 3; i++) {
+            
+            // Apply some random physical forces
+            float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+            float offsety = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+            float offsetz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+            
+            GameObject* projectile = Engine.CreateGameObject();
+            projectile->name = "projectile";
+            
+            // Add a render component
+            Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
+            projectile->AddComponent(entityRenderer);
+            
+            Entity* entity = (Entity*)entityRenderer->GetComponent();
+            entity->AttachMesh(projectileMesh);
+            entity->AttachMaterial(barrelMaterial);
+            
+            // Add a physics component
+            Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
+            projectile->AddComponent(rigidBodyComponent);
+            rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+            
+            // Projectile collider
+            projectile->AddColliderBox(projectileCollider, 0, 0, 0);
+            
+            projectile->CalculatePhysics();
+            
+            projectile->SetLinearAxisLockFactor(1, 1, 1);
+            projectile->SetAngularAxisLockFactor(1, 1, 1);
+            projectile->SetMass(1);
+            
+            //
+            // Calculate projectile force from camera forward angle
+            
+            glm::vec3 fwd = Renderer.cameraMain->forward;
+            glm::vec3 fwdAngle = Renderer.cameraMain->forward;
+            
+            // Offset starting distance from camera
+            fwd *= 8;
+            
+            glm::vec3 pos = Renderer.cameraMain->transform.position;
+            pos += fwd;
+            
+            // Total forward force + camera offset distance
+            fwd *= 7000;
+            
+            float startx = pos.x + (offsetx * 0);
+            float starty = pos.y + (offsety * 0) - 7;
+            float startz = pos.z + (offsetz * 0);
+            
+            // Transform the rigid body
+            rp3d::Transform newTransform;
+            newTransform.setPosition(rp3d::Vector3(startx, starty, startz));
+            
+            rp3d::Quaternion quat;
+            quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, 0);
+            
+            newTransform.setOrientation(quat);
+            
+            body->setTransform(newTransform);
+            
+            projectile->AddForce(fwd.x, fwd.y, fwd.z);
+            
+            continue;
+        }
+        
+    }
+    
+    
+    
+    // Purge extra objects
+    
+    unsigned int index=0;
+    while (Engine.GetGameObjectCount() > 700) {
+        
+        GameObject* gameObject = Engine.GetGameObject(index);
+        index++;
+        
+        // Ignore cameras and world objects
+        if ((gameObject->name == "world") | (gameObject->name == "camera")) 
+            continue;
+        
+        Engine.DestroyGameObject(gameObject);
+        index = 0;
+    }
+    
+    
+    
+    // Escape key pause
+    
+    if (Input.CheckKeyPressed(VK_ESCAPE)) {
+        // Uncomment to make the escape key close the application
+        //Application.isActive = false;
+        
+        Application.Pause();
+        
+        if (Application.isPaused) {
+            
+            if (Renderer.cameraMain != nullptr) 
+                Renderer.cameraMain->DisableMouseLook();
+            
+            Input.ClearKeys();
+        } else {
+            
+            if (Renderer.cameraMain != nullptr) {
+                // Reset the camera`s mouse reset position
+                Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+                Renderer.cameraMain->EnableMouseLook();
+            }
+            
+            Time.Update();
+            PhysicsTime.Update();
+        }
+    }
+    
 }
 ```
