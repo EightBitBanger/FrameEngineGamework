@@ -23,13 +23,10 @@ void ScriptCameraController(void* gameObject);
 
 
 
-// Cached resources
-Mesh*     barrelMesh;
-Mesh*     projectileMesh;
-Material* barrelMaterial;
-
+// Global resource pointers
+Mesh*       projectileMesh;
+Material*   barrelMaterial;
 GameObject* cameraController;
-
 rp3d::BoxShape* projectileCollider;
 
 
@@ -54,20 +51,17 @@ void Framework::Start() {
     Material* groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
     
-    barrelMesh     = Resources.CreateMeshFromTag("barrel");
+    Mesh* barrelMesh = Resources.CreateMeshFromTag("barrel");
     barrelMesh->ChangeSubMeshColor(0, Colors.white);
     
     projectileMesh = Resources.CreateMeshFromTag("barrel");
-    projectileMesh->ChangeSubMeshColor(0, Colors.red);
+    projectileMesh->ChangeSubMeshColor(0, Colors.white);
     
     
     
-    
-    //
-    // Create a ground base
+    // Create a ground plain
     Mesh* groundMesh = Renderer.CreateMesh();
-    groundMesh->AddPlainSubDivided(0, 0, 0, 10, 10, Colors.white, 10, 10);
-    groundMesh->AddWallSubDivided(0, 0, 0, 10, 10, Colors.white, 10, 10);
+    groundMesh->AddPlainSubDivided(-50, 0, -50, 10, 10, Colors.white, 10, 10);
     
     GameObject* ground = Engine.CreateGameObject();
     ground->name = "world";
@@ -81,15 +75,13 @@ void Framework::Start() {
     ground->AddComponent(groundRigidBodyComponent);
     ground->SetRigidBodyStatic();
     
-    // Lock the ground
+    // Lock the ground plain in place
     ground->SetLinearAxisLockFactor(0, 0, 0);
     ground->SetAngularAxisLockFactor(0, 0, 0);
     
     // Ground collider
-    rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(1000, 100, 1000);
-    ground->AddColliderBox(groundCollider, 500, -100, 500);
-    
-    
+    rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(100, 100, 100);
+    ground->AddColliderBox(groundCollider, 0, -100, 0);
     
     
     
@@ -107,12 +99,10 @@ void Framework::Start() {
     
     
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(0, 50, 0);
-    Component* componentPtr = cameraController->FindComponent(ComponentType::Script);
+    cameraController = Engine.CreateCameraController(0, 30, 0);
     
-    Script* cameraScript = (Script*)componentPtr->GetComponent();
-    cameraScript->OnUpdate = ScriptCameraController;
     
+    // Create a projectile collider
     projectileCollider = Physics.CreateColliderBox(1.45, 2.1, 1.45);
     
     return;
@@ -123,14 +113,6 @@ void Framework::Start() {
 
 
 
-float spreadMul    = 0.1;
-float spawnHeight  = 70;
-
-float forceMul   = 10;
-float torqueMul  = 1;
-
-
-
 
 //
 // Application main loop
@@ -138,142 +120,33 @@ float torqueMul  = 1;
 
 void Framework::Run() {
     
-    //
-    // Create some barrel objects in random positions
-    /*
-    for (int i=0; i < 400; i++) {
-        
-        // Create a game object
-        GameObject* particle = Engine.CreateGameObject();
-        particle->name = "particle";
-        
-        // Add a renderer component
-        particle->AddComponent( Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial) );
-        
-        // Add a physics component
-        particle->AddComponent( Engine.CreateComponent(ComponentType::RigidBody) );
-        
-        
-        // Apply some random physical forces
-        float startx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-        float starty = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-        float startz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-        
-        particle->SetPosition(startx, starty + spawnHeight, startz);
-        
-        float forcex = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
-        float forcey = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
-        float forcez = (Random.Range(0, 100) - Random.Range(0, 100)) * forceMul;
-        
-        particle->AddForce(forcex, forcey, forcez);
-        
-        float torquex = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
-        float torquey = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
-        float torquez = (Random.Range(0, 100) - Random.Range(0, 100)) * torqueMul;
-        
-        particle->AddTorque(torquex, torquey, torquez);
-        
-        continue;
-    }
-    
-    // Remove extra objects
-    
-    */
-    
-    unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 100) {
-        
-        
-        GameObject* gameObject = Engine.GetGameObject(index);
-        index++;
-        
-        // Ignore cameras and projectiles
-        if (gameObject->name == "world") 
-            continue;
-        if (gameObject->name == "camera") 
-            continue;
-        
-        Engine.DestroyGameObject(gameObject);
-        index = 0;
-    }
-    
-    
-    
-    //
-    // Escape key pause
-    
-    if (Input.CheckKeyPressed(VK_ESCAPE)) {
-        //Application.isActive = false;
-        
-        Application.Pause();
-        
-        if (Application.isPaused) {
-            
-            if (Renderer.cameraMain != nullptr) 
-                Renderer.cameraMain->DisableMouseLook();
-            
-            Input.ClearKeys();
-        } else {
-            
-            if (Renderer.cameraMain != nullptr) {
-                Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
-                Renderer.cameraMain->EnableMouseLook();
-            }
-            
-            Time.Update();
-            PhysicsTime.Update();
-        }
-        
-    }
-    
-    
-    return;
-}
-
-
-
-
-void Framework::Shutdown(void) {
-    
-    return;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-float cameraSpeed = 900;
-
-void ScriptCameraController(void* gameObjectPtr) {
-    GameObject* gameObject = (GameObject*)gameObjectPtr;
-    
     glm::vec3 force(0);
+    
+    // Keyboard movement, WASD keys
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
     if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
     
+    // Space and shift for elevation
     if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
+    // Camera speed multiplier
+    force *= 700;
+    
+    cameraController->AddForce(force.x, force.y, force.z);
     
     
-    //
+    
     // Shoot object from camera
     
     if (Input.CheckMouseLeftPressed()) {
-        Input.SetMouseLeftPressed(false);
         
+        // Spread offset effect on projectile angle
         float spreadMul = 0.0007;
         
-        for (int i=0; i < 13; i++) {
+        for (int i=0; i < 3; i++) {
             
             // Apply some random physical forces
             float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -291,7 +164,6 @@ void ScriptCameraController(void* gameObjectPtr) {
             entity->AttachMesh(projectileMesh);
             entity->AttachMaterial(barrelMaterial);
             
-            
             // Add a physics component
             Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
             projectile->AddComponent(rigidBodyComponent);
@@ -302,29 +174,27 @@ void ScriptCameraController(void* gameObjectPtr) {
             
             projectile->CalculatePhysics();
             
-            //body->updateMassFromColliders();
-            //body->updateLocalCenterOfMassFromColliders();
-            //body->updateLocalInertiaTensorFromColliders();
-            
             projectile->SetLinearAxisLockFactor(1, 1, 1);
             projectile->SetAngularAxisLockFactor(1, 1, 1);
             projectile->SetMass(1);
             
-            
-            
             //
-            // Calculate projectile force
+            // Calculate projectile force from camera forward angle
             
             glm::vec3 fwd = Renderer.cameraMain->forward;
             glm::vec3 fwdAngle = Renderer.cameraMain->forward;
-            fwd *= 8; // Start offset from camera
+            
+            // Offset starting distance from camera
+            fwd *= 8;
             
             glm::vec3 pos = Renderer.cameraMain->transform.position;
             pos += fwd;
-            fwd *= 20500; // Total forward force + camera offset
+            
+            // Total forward force + camera offset distance
+            fwd *= 7000;
             
             float startx = pos.x + (offsetx * 0);
-            float starty = pos.y + (offsety * 0);
+            float starty = pos.y + (offsety * 0) - 7;
             float startz = pos.z + (offsetz * 0);
             
             // Transform the rigid body
@@ -346,15 +216,65 @@ void ScriptCameraController(void* gameObjectPtr) {
     }
     
     
-    force *= cameraSpeed;
     
-    gameObject->AddForce(force.x, force.y, force.z);
+    // Purge extra objects
+    
+    unsigned int index=0;
+    while (Engine.GetGameObjectCount() > 700) {
+        
+        GameObject* gameObject = Engine.GetGameObject(index);
+        index++;
+        
+        // Ignore cameras and world objects
+        if ((gameObject->name == "world") | (gameObject->name == "camera")) 
+            continue;
+        
+        Engine.DestroyGameObject(gameObject);
+        index = 0;
+    }
+    
+    
+    
+    // Escape key pause
+    
+    if (Input.CheckKeyPressed(VK_ESCAPE)) {
+        // Uncomment to make the escape key close the application
+        //Application.isActive = false;
+        
+        Application.Pause();
+        
+        if (Application.isPaused) {
+            
+            if (Renderer.cameraMain != nullptr) 
+                Renderer.cameraMain->DisableMouseLook();
+            
+            Input.ClearKeys();
+        } else {
+            
+            if (Renderer.cameraMain != nullptr) {
+                // Reset the camera`s mouse reset position
+                Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+                Renderer.cameraMain->EnableMouseLook();
+            }
+            
+            Time.Update();
+            PhysicsTime.Update();
+        }
+        
+    }
+    
+    
     
     return;
 }
 
 
 
+
+void Framework::Shutdown(void) {
+    
+    return;
+}
 
 
 
