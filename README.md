@@ -47,9 +47,6 @@ You can find the API documentation <a href="https://github.com/RetroBytes32/Game
 ## Singleton access pointers
 The framework contains many sub systems which can be accessed though the following singletons.
 
-
-> The source file "Application.cpp" is the application layer entry point and the starting point for your application code.
-
 ```c++
 #include "Engine/Engine.h"
 
@@ -71,13 +68,14 @@ extern InputSystem          Input;
 
 <br><br/>
 ## Application entry point
+> The source file "Application.cpp" is the application layer entry point and the starting point for your application code.
 > The framework will provide you with the functions `Start()` and `Run()`. These functions will serve as an entry point for your application.
 > The `Start()` function will be called once during application initiation.
 
 ```c++
-// This example will create a plain mesh, apply a texture and setup a camera controller.
+// This example will load required resources and initiate the scene
 
-// Global resource pointers
+// Global resources that run() must know about
 Mesh*       projectileMesh;
 Material*   barrelMaterial;
 GameObject* cameraController;
@@ -143,12 +141,10 @@ void Framework::Start() {
     barrel->AddComponent(rigidBodyComponent);
     
     
-    
-    // Create a camera controller
+    // Create a game object with a camera and a rigid body component
     cameraController = Engine.CreateCameraController(0, 30, 0);
     
-    
-    // Create a projectile collider
+    // Create a collider for the projectile objects
     projectileCollider = Physics.CreateColliderBox(1.45, 2.1, 1.45);
     
 }
@@ -159,7 +155,8 @@ void Framework::Start() {
 > The `Run()` function will be called once per frame.
 
 ```c++
-// This example will apply force to the camera`s rigid body on key presses and allow you to throw objects along the direction angle of the camera.
+// This example will apply force to the camera`s rigid body on key presses
+// and allow you to throw objects along the direction angle of the camera.
 
 void Framework::Run() {
     
@@ -245,7 +242,9 @@ void Framework::Run() {
             newTransform.setPosition(rp3d::Vector3(startx, starty, startz));
             
             rp3d::Quaternion quat;
-            quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, 0);
+            quat.setAllValues(fwdAngle.x + offsetx, 
+                              fwdAngle.y + offsety, 
+                              fwdAngle.z + offsetz, 0);
             
             newTransform.setOrientation(quat);
             
@@ -296,7 +295,8 @@ void Framework::Run() {
             
             if (Renderer.cameraMain != nullptr) {
                 // Reset the camera`s mouse reset position
-                Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+                Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x,
+                                                    Renderer.displayCenter.y);
                 Renderer.cameraMain->EnableMouseLook();
             }
             
