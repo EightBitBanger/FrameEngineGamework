@@ -9,10 +9,10 @@
 #include "assets/shaderTag.h"
 #include "assets/colliderTag.h"
 
-#include "../my-std-lib/fileloader.h"
+#include "../../vendor/my-std-lib/fileloader.h"
 
-#include "../my-std-lib/poolallocator.h"
-#include "../my-std-lib/strings.h"
+#include "../../vendor/my-std-lib/poolallocator.h"
+#include "../../vendor/my-std-lib/strings.h"
 
 
 class ResourceManager {

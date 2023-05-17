@@ -8,8 +8,6 @@ Camera::Camera() {
     
     useMouseLook = false;
     
-    cameraSpeed = 100;
-    
     fov       = 60;
     aspect    = 1.33;
     clipNear  = 0.03;

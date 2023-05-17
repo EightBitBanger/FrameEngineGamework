@@ -9,9 +9,9 @@
 #include "../Scripting/components/script.h"
 #include "../Renderer/components/camera.h"
 
-#include "../my-std-lib/timer.h"
-#include "../my-std-lib/logging.h"
-#include "../my-std-lib/random.h"
+#include "../../vendor/my-std-lib/timer.h"
+#include "../../vendor/my-std-lib/logging.h"
+#include "../../vendor/my-std-lib/random.h"
 
 class EngineSystemManager {
     
@@ -32,7 +32,7 @@ public:
     
     // Components
     /// Create a component object with initial type information and return its pointer.
-    Component* CreateComponent(ComponentType component_type);
+    Component* CreateComponent(ComponentType type);
     /// Destroy a component object.
     void DestroyComponent(Component* componentPtr);
     

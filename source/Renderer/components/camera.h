@@ -23,9 +23,6 @@ public:
     /// Whether mouse look is calculated on update.
     bool useMouseLook;
     
-    /// Speed of mo
-    float cameraSpeed;
-    
     /// Field of view.
     float fov;
     /// View aspect ratio.
