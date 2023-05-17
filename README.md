@@ -13,7 +13,7 @@ This game engine framework aims to provide simpler interfaces with more complex 
 
 <br><br/>
 ## Platform
-While this framework currently only supports windows, I look forward to porting to linix in the future.
+While this framework currently only supports windows, I look forward to porting to linux in the future.
 - Windows
 
 
