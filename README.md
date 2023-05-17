@@ -108,10 +108,11 @@ void Framework::Start() {
     
     
     
-    // Create a ground plain
+    // Create a ground plain mesh
     Mesh* groundMesh = Renderer.CreateMesh();
     groundMesh->AddPlainSubDivided(-50, 0, -50, 10, 10, Colors.white, 10, 10);
     
+    // Create a game object named world
     GameObject* ground = Engine.CreateGameObject();
     ground->name = "world";
     
@@ -122,28 +123,15 @@ void Framework::Start() {
     // Add a physics component
     Component* groundRigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
     ground->AddComponent(groundRigidBodyComponent);
-    ground->SetRigidBodyStatic();
     
     // Lock the ground plain in place
+    ground->SetRigidBodyStatic();
     ground->SetLinearAxisLockFactor(0, 0, 0);
     ground->SetAngularAxisLockFactor(0, 0, 0);
     
     // Ground collider
     rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(100, 100, 100);
     ground->AddColliderBox(groundCollider, 0, -100, 0);
-    
-    
-    
-    // Create a game object
-    GameObject* barrel = Engine.CreateGameObject();
-    
-    // Add a render component
-    Component* entityRenderer = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
-    barrel->AddComponent(entityRenderer);
-    
-    // Add a physics component
-    Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
-    barrel->AddComponent(rigidBodyComponent);
     
     
     // Create a game object with a camera and a rigid body component
