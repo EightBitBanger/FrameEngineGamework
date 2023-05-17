@@ -11,6 +11,11 @@ This game engine framework aims to provide simpler interfaces with more complex 
 - Resource management
 - Window input handling
 
+<br><br/>
+## Platform
+While this framework currently only supports windows, I look forward to porting to linix in the future.
+- Windows
+
 
 <br><br/>
 ##  Building the project
