@@ -71,6 +71,15 @@ bool RenderSystem::DestroySky(Sky* skyPtr) {
     return mSky.Destroy(skyPtr);
 }
 
+Light* RenderSystem::CreateLight(void) {
+    Light* lightPtr = mLight.Create();
+    return lightPtr;
+}
+bool RenderSystem::DestroyLight(Light* lightPtr) {
+    assert(lightPtr != nullptr);
+    return mLight.Destroy(lightPtr);
+}
+
 Scene* RenderSystem::CreateScene(void) {
     Scene* scenePtr = mScene.Create();
     return scenePtr;
@@ -106,6 +115,7 @@ void RenderSystem :: Initiate(void) {
     
     return;
 }
+
 
 void RenderSystem :: AddToRenderQueue(Scene* scenePtr) {
     assert(scenePtr != nullptr);

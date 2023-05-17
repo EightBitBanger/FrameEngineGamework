@@ -15,6 +15,7 @@ extern Logger Log;
 #include "components/material.h"
 #include "components/mesh.h"
 #include "components/camera.h"
+#include "components/light.h"
 #include "components/entity.h"
 #include "components/sky.h"
 #include "components/scene.h"
@@ -80,6 +81,11 @@ public:
     /// Destroy a sky object and return true on success.
     bool DestroySky(Sky* skyPtr);
     
+    /// Create a light object and return its pointer.
+    Light* CreateLight(void);
+    /// Destroy a light object and return true on success.
+    bool DestroyLight(Light* lightPtr);
+    
     /// Create a scene object and return its pointer.
     Scene* CreateScene(void);
     /// Destroy a scene object and return true on success.
@@ -139,12 +145,17 @@ private:
     
     // Render component allocators
     PoolAllocator<Entity>   mEntity;
+    
     PoolAllocator<Mesh>     mMesh;
-    PoolAllocator<Shader>   mShader;
-    PoolAllocator<Camera>   mCamera;
     PoolAllocator<Material> mMaterial;
+    PoolAllocator<Shader>   mShader;
+    
+    PoolAllocator<Camera>   mCamera;
     PoolAllocator<Sky>      mSky;
+    PoolAllocator<Light>    mLight;
+    
     PoolAllocator<Scene>    mScene;
+    
     PoolAllocator<RenderPipeline>  mPipeline;
     
 };
