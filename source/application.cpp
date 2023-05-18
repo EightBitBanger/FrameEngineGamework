@@ -16,9 +16,6 @@ extern InputSystem          Input;
 
 
 
-// User scripts
-void ScriptCameraController(GameObject* gameObject);
-
 
 
 
@@ -87,8 +84,6 @@ void Framework::Start() {
     
     // Create a camera controller
     cameraController = Engine.CreateCameraController(0, 30, 0);
-    Script* cameraScript = (Script*)cameraController->FindComponent(ComponentType::Script)->GetComponent();
-    cameraScript->OnUpdate = ScriptCameraController;
     
     // Create a projectile collider
     projectileCollider = Physics.CreateColliderBox(1.45, 2.1, 1.45);
