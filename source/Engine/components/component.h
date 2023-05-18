@@ -1,7 +1,15 @@
 #ifndef ENGINE_COMPONENT
 #define ENGINE_COMPONENT
 
-enum struct ComponentType {Undefined=0, Renderer, RigidBody, Script, Camera};
+enum struct ComponentType {
+    Undefined=0,
+    // Render system
+    Renderer, Camera, Light,
+    // scripting
+    Script,
+    // Physics
+    RigidBody
+};
 
 
 #include <string>
