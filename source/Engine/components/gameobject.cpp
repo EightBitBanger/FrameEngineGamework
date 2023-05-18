@@ -201,13 +201,13 @@ void GameObject::AddCollider(ColliderTag* colliderTag, float x, float y, float z
     return;
 }
 
-void GameObject::SetRigidBodyStatic(void) {
+void GameObject::SetStatic(void) {
     assert(mRigidBodyCache != nullptr);
     mRigidBodyCache->setType(rp3d::BodyType::STATIC);
     return;
 }
 
-void GameObject::SetRigidBodyDynamic(void) {
+void GameObject::SetDynamic(void) {
     assert(mRigidBodyCache != nullptr);
     mRigidBodyCache->setType(rp3d::BodyType::DYNAMIC);
     return;

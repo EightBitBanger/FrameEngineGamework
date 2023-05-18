@@ -76,9 +76,9 @@ public:
     void CalculatePhysics(void);
     
     /// Make the rigid body statically non movable.
-    void SetRigidBodyStatic(void);
+    void SetStatic(void);
     /// Make the rigid body dynamically movable.
-    void SetRigidBodyDynamic(void);
+    void SetDynamic(void);
     
     /// Get the cached camera object if its component is attached.
     Camera* GetCachedCamera(void);
