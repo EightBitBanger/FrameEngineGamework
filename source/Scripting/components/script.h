@@ -1,11 +1,11 @@
 #ifndef __COMPONENT_SCRIPT
 #define __COMPONENT_SCRIPT
 
-void DefaultFunctionPtr(void* gameObject);
+#include "../../Engine/components/gameobject.h"
+
+void DefaultFunctionPtr(GameObject* gameObject);
 
 #define  nullfunc  DefaultFunctionPtr
-
-
 
 struct Script {
     
@@ -16,14 +16,13 @@ struct Script {
     bool hasBeenInitiated;
     
     /// Pointer to the game object who owns this script.
-    void* gameObject;
-    
+    GameObject* gameObject;
     
     /// This function will be called on object creation.
-    void(*OnCreate)(void* gameObjectPtr);
+    void(*OnCreate)(GameObject* gameObjectPtr);
     
     /// This function will be called once per frame.
-    void(*OnUpdate)(void* gameObjectPtr);
+    void(*OnUpdate)(GameObject* gameObjectPtr);
     
     
     Script();

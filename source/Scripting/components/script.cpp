@@ -1,6 +1,5 @@
 #include "script.h"
 
-
 Script::Script() {
     
     isActive         = false;
@@ -13,6 +12,6 @@ Script::Script() {
 }
 
 // Dummy landing function
-void DefaultFunctionPtr(void* dummyObjectPtr) {
+void DefaultFunctionPtr(GameObject* dummyObjectPtr) {
     return;
 }

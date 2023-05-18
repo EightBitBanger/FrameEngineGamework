@@ -17,7 +17,7 @@ extern InputSystem          Input;
 
 
 // User scripts
-void ScriptCameraController(void* gameObject);
+void ScriptCameraController(GameObject* gameObject);
 
 
 
@@ -73,7 +73,7 @@ void Framework::Start() {
     // Add a physics component
     Component* groundRigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
     ground->AddComponent(groundRigidBodyComponent);
-    ground->SetRigidBodyStatic();
+    ground->SetStatic();
     
     // Lock the ground plain in place
     ground->SetLinearAxisLockFactor(0, 0, 0);
@@ -85,22 +85,10 @@ void Framework::Start() {
     
     
     
-    // Create a game object
-    GameObject* barrel = Engine.CreateGameObject();
-    
-    // Add a render component
-    Component* entityRenderer = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
-    barrel->AddComponent(entityRenderer);
-    
-    // Add a physics component
-    Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
-    barrel->AddComponent(rigidBodyComponent);
-    
-    
-    
     // Create a camera controller
     cameraController = Engine.CreateCameraController(0, 30, 0);
-    
+    Script* cameraScript = (Script*)cameraController->FindComponent(ComponentType::Script)->GetComponent();
+    cameraScript->OnUpdate = ScriptCameraController;
     
     // Create a projectile collider
     projectileCollider = Physics.CreateColliderBox(1.45, 2.1, 1.45);

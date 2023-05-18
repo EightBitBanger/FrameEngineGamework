@@ -32,12 +32,6 @@ void GameObject::AddComponent(Component* component) {
         mEntityCache = (Entity*)component->GetComponent();
     }
     
-    // Initiate the script component
-    if (component->GetType() == ComponentType::Script) {
-        Script* scriptPtr = (Script*)component->GetComponent();
-        scriptPtr->isActive = true;
-    }
-    
     // Cache the camera component
     if (component->GetType() == ComponentType::Camera) {
         mCameraCache = (Camera*)component->GetComponent();
@@ -54,13 +48,9 @@ bool GameObject::RemoveComponent(Component* component) {
         Component* thisComponentPtr = *it;
         if (component == thisComponentPtr) {
             
-            // Null the shortcut pointers
+            // Null the cache pointers
             if (component->GetType() == ComponentType::RigidBody) mRigidBodyCache = nullptr;
             if (component->GetType() == ComponentType::Renderer) mEntityCache = nullptr;
-            if (component->GetType() == ComponentType::Script) {
-                Script* scriptPtr = (Script*)component->GetComponent();
-                scriptPtr->isActive = false;
-            }
             
             mComponentList.erase(it);
             return true;

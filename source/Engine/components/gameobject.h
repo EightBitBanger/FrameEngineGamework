@@ -3,7 +3,6 @@
 
 #include "../../Renderer/components/entity.h"
 #include "../../Renderer/components/camera.h"
-#include "../../Scripting/components/script.h"
 #include "../../Physics/PhysicsSystem.h"
 
 #include "../../Resources/assets/colliderTag.h"

@@ -141,21 +141,15 @@ private:
     Material*  mCurrentMaterial;
     
     
-    // Allocators
-    
     // Render component allocators
     PoolAllocator<Entity>   mEntity;
-    
     PoolAllocator<Mesh>     mMesh;
     PoolAllocator<Material> mMaterial;
     PoolAllocator<Shader>   mShader;
-    
     PoolAllocator<Camera>   mCamera;
     PoolAllocator<Sky>      mSky;
     PoolAllocator<Light>    mLight;
-    
     PoolAllocator<Scene>    mScene;
-    
     PoolAllocator<RenderPipeline>  mPipeline;
     
 };
