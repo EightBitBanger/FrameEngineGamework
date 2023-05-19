@@ -306,22 +306,20 @@ void RenderSystem::RenderFrame(float deltaTime) {
         return;
     
     // Clear the screen
-    
     glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    
+    // Fill out the sky
     if (skyMain != nullptr) {
         Color& color = skyMain->background;
         glClearColor(color.r, color.g, color.b, 1);
     }
     
-    
+    // Camera mouse looking
     if (cameraMain->useMouseLook) 
         cameraMain->MouseLook(deltaTime, displayCenter.x, displayCenter.y);
     
     glm::mat4 projection = glm::perspective( glm::radians( cameraMain->fov ), cameraMain->aspect, cameraMain->clipNear, cameraMain->clipFar);
-    
     
     // Calculate viewing angle
     glm::vec3 pos;
@@ -353,11 +351,27 @@ void RenderSystem::RenderFrame(float deltaTime) {
     currentPipeline->currentShader->Bind();
     currentPipeline->currentShader->SetProjectionMatrix( viewProjection );
     
-    // Draw entity meshes
+    
+    
+    // Run through the scenes
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
         
         Scene* scenePtr = *it;
         
+        // Check to update the scene light list
+        if (scenePtr->doUpdateLights) {
+            scenePtr->doUpdateLights = false;
+            unsigned int lightListSz = scenePtr->GetLightQueueSize();
+            
+            for (unsigned int i=0; i < lightListSz; i++) {
+                
+                // Update the lights on a light change
+                
+            }
+            
+        }
+        
+        // Render entities
         unsigned int entityListSz = scenePtr->GetEntityQueueSize();
         
         for (unsigned int i=0; i < entityListSz; i++) {

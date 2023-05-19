@@ -1,14 +1,12 @@
 #include "gameobject.h"
 
-GameObject::GameObject() {
-    
-    name = "";
-    
-    isActive = true;
-    
-    mCameraCache = nullptr;
-    mRigidBodyCache = nullptr;
-    mEntityCache = nullptr;
+GameObject::GameObject() : 
+    name(""),
+    isActive(true),
+    mCameraCache(nullptr),
+    mRigidBodyCache(nullptr),
+    mEntityCache(nullptr),
+    mLightCache(nullptr) {
 }
 
 //

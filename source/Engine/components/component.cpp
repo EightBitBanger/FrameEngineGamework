@@ -14,8 +14,8 @@ void Component::SetComponent(ComponentType component_type, void* component_objec
     return;
 }
 
-Component::Component() {
-    mType = ComponentType::Undefined;
-    mObject = nullptr;
-    return;
+Component::Component() : 
+    name(""),
+    mType(ComponentType::Undefined),
+    mObject(nullptr) {
 }

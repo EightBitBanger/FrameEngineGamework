@@ -207,9 +207,8 @@ void Framework::Run() {
     
     
     // Purge extra objects
-    
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 700) {
+    while (Engine.GetGameObjectCount() > 2000) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;

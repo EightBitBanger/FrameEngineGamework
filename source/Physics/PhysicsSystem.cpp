@@ -1,11 +1,11 @@
 #include "PhysicsSystem.h"
 
 
-PhysicsSystem::PhysicsSystem() {
+PhysicsSystem::PhysicsSystem() : 
+    world(nullptr) {
     
     mRigidBodyFreeList.reserve(512);
     
-    world = nullptr;
     return;
 }
 

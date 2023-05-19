@@ -11,6 +11,10 @@ class Scene {
     
 public:
     
+    bool doUpdateLights;
+    
+    Scene();
+    
     /// Add an entity to this scene.
     void AddEntityToSceneRoot(Entity* entity);
     /// Remove an entity from this scene.

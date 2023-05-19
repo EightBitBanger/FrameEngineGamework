@@ -17,8 +17,6 @@ class EngineSystemManager {
     
 public:
     
-    EngineSystemManager();
-    
     // Game objects
     /// Create a game object and return its pointer.
     GameObject* CreateGameObject(void);
@@ -43,6 +41,8 @@ public:
     /// Create an entity renderer component and return its pointer.
     Component* CreateComponentEntityRenderer(Mesh* meshPtr, Material* materialPtr);
     
+    
+    EngineSystemManager();
     
     /// Initiate the engine.
     void Initiate(void);

@@ -1,6 +1,10 @@
 #include "scene.h"
 
 
+Scene::Scene() : doUpdateLights(false) {
+    
+}
+
 void Scene::AddEntityToSceneRoot(Entity* entity) {
     mEntityList.push_back( entity );
     return;
