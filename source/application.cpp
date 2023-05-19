@@ -64,6 +64,7 @@ void Framework::Start() {
     ground->name = "world";
     
     
+    // Add a light component
     Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
     ground->AddComponent(lightComponent);
     

@@ -117,13 +117,13 @@ void RenderSystem :: Initiate(void) {
 }
 
 
-void RenderSystem :: AddToRenderQueue(Scene* scenePtr) {
+void RenderSystem :: AddSceneToRenderQueue(Scene* scenePtr) {
     assert(scenePtr != nullptr);
     mRenderQueue.push_back( scenePtr );
     return;
 }
 
-bool RenderSystem :: RemoveFromRenderQueue(Scene* scenePtr) {
+bool RenderSystem :: RemoveSceneFromRenderQueue(Scene* scenePtr) {
     assert(scenePtr != nullptr);
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
         Scene* thisScenePtr = *it;

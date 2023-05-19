@@ -140,7 +140,7 @@ unsigned int EngineSystemManager::GetGameObjectCount(void) {
 
 void EngineSystemManager::Initiate() {
     mSceneMain = Renderer.CreateScene();
-    Renderer.AddToRenderQueue(mSceneMain);
+    Renderer.AddSceneToRenderQueue(mSceneMain);
     return;
 }
 
@@ -215,7 +215,7 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
             componentCamera = (Camera*)componentPtr->GetComponent();
             Renderer.DestroyCamera(componentCamera);
             break;
-        
+            
         case ComponentType::Light: {
             componentLight = (Light*)componentPtr->GetComponent();
             mSceneMain->RemoveLightFromSceneRoot(componentLight);

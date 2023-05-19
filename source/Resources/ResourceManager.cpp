@@ -157,7 +157,7 @@ bool ResourceManager::LoadLocations(std::string path) {
 void ResourceManager::Initiate(void) {
     
     sceneMain = Renderer.CreateScene();
-    Renderer.AddToRenderQueue(sceneMain);
+    Renderer.AddSceneToRenderQueue(sceneMain);
     
     stbi_set_flip_vertically_on_load(true);
     return;
