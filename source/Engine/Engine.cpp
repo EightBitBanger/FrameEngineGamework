@@ -166,9 +166,12 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
             component_object = (void*)Renderer.CreateCamera();
             break;
         
-        case ComponentType::Light:
-            component_object = (void*)Renderer.CreateLight();
+        case ComponentType::Light: {
+            Light* lightPtr = Renderer.CreateLight();
+            mSceneMain->AddLightToSceneRoot(lightPtr);
+            component_object = (void*)lightPtr;
             break;
+        }
         
         default:
             break;
@@ -213,10 +216,12 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
             Renderer.DestroyCamera(componentCamera);
             break;
         
-        case ComponentType::Light:
+        case ComponentType::Light: {
             componentLight = (Light*)componentPtr->GetComponent();
+            mSceneMain->RemoveLightFromSceneRoot(componentLight);
             Renderer.DestroyLight(componentLight);
             break;
+        }
         
         default:
             break;
