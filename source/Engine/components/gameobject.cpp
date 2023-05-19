@@ -18,7 +18,10 @@ GameObject::GameObject() {
 void GameObject::AddComponent(Component* component) {
     assert(component != nullptr);
     
-    // Cache the rigid body component
+    //
+    // Cache the component objects
+    
+    // Rigid body component
     if (component->GetType() == ComponentType::RigidBody) {
         mRigidBodyCache = (rp3d::RigidBody*)component->GetComponent();
         // Update the rigid body position on attach
@@ -27,16 +30,20 @@ void GameObject::AddComponent(Component* component) {
                                                  mEntityCache->transform.position.z);
     }
     
-    // Cache the entity renderer component
+    // Entity renderer component
     if (component->GetType() == ComponentType::Renderer) {
         mEntityCache = (Entity*)component->GetComponent();
     }
     
-    // Cache the camera component
+    // Camera component
     if (component->GetType() == ComponentType::Camera) {
         mCameraCache = (Camera*)component->GetComponent();
     }
     
+    // Light component
+    if (component->GetType() == ComponentType::Light) {
+        mLightCache = (Light*)component->GetComponent();
+    }
     
     mComponentList.push_back(component);
     return;
@@ -50,7 +57,9 @@ bool GameObject::RemoveComponent(Component* component) {
             
             // Null the cache pointers
             if (component->GetType() == ComponentType::RigidBody) mRigidBodyCache = nullptr;
-            if (component->GetType() == ComponentType::Renderer) mEntityCache = nullptr;
+            if (component->GetType() == ComponentType::Renderer)  mEntityCache = nullptr;
+            if (component->GetType() == ComponentType::Camera)    mCameraCache = nullptr;
+            if (component->GetType() == ComponentType::Light)     mLightCache = nullptr;
             
             mComponentList.erase(it);
             return true;

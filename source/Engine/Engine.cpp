@@ -186,6 +186,7 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
     rp3d::RigidBody* componentRigidBody;
     Script* componentScript;
     Camera* componentCamera;
+    Light* componentLight;
     
     ComponentType componentType = componentPtr->GetType();
     
@@ -213,7 +214,7 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
             break;
         
         case ComponentType::Light:
-            Light* componentLight = (Light*)componentPtr->GetComponent();
+            componentLight = (Light*)componentPtr->GetComponent();
             Renderer.DestroyLight(componentLight);
             break;
         

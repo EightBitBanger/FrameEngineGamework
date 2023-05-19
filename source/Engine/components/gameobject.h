@@ -3,6 +3,7 @@
 
 #include "../../Renderer/components/entity.h"
 #include "../../Renderer/components/camera.h"
+#include "../../Renderer/components/light.h"
 #include "../../Physics/PhysicsSystem.h"
 
 #include "../../Resources/assets/colliderTag.h"
@@ -96,6 +97,7 @@ private:
     Camera*          mCameraCache;
     rp3d::RigidBody* mRigidBodyCache;
     Entity*          mEntityCache;
+    Light*           mLightCache;
     
 };
 
