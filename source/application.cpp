@@ -63,6 +63,11 @@ void Framework::Start() {
     GameObject* ground = Engine.CreateGameObject();
     ground->name = "world";
     
+    
+    Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
+    ground->AddComponent(lightComponent);
+    
+    
     // Add a render component
     Component* groundRenderer = Engine.CreateComponentEntityRenderer(groundMesh, groundMaterial);
     ground->AddComponent(groundRenderer);

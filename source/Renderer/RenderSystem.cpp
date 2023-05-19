@@ -358,7 +358,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
         
         Scene* scenePtr = *it;
         
-        unsigned int entityListSz = scenePtr->GetRenderQueueSize();
+        unsigned int entityListSz = scenePtr->GetEntityQueueSize();
         
         for (unsigned int i=0; i < entityListSz; i++) {
             

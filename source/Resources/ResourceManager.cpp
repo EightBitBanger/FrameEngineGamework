@@ -105,7 +105,7 @@ bool ResourceManager::LoadLocations(std::string path) {
         
         // Create a new entity
         Entity* newEntity = Renderer.CreateEntity();
-        sceneMain->AddToSceneRoot(newEntity);
+        sceneMain->AddEntityToSceneRoot(newEntity);
         
         strexp.clear();
         strexp = StringExplode(locationsLoader.rawData[i], ' ');

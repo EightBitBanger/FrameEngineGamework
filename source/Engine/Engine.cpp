@@ -99,13 +99,13 @@ Entity* EngineSystemManager::CreateEntityRenderer(Mesh* meshPtr, Material* mater
     Entity* entityPtr = Renderer.CreateEntity();
     entityPtr->AttachMesh( meshPtr );
     entityPtr->AttachMaterial( materialPtr );
-    mSceneMain->AddToSceneRoot(entityPtr);
+    mSceneMain->AddEntityToSceneRoot(entityPtr);
     return entityPtr;
 }
 
 void EngineSystemManager::DestroyEntityRenderer(Entity* entityPtr) {
     assert(entityPtr != nullptr);
-    mSceneMain->RemoveFromSceneRoot(entityPtr);
+    mSceneMain->RemoveEntityFromSceneRoot(entityPtr);
     Renderer.DestroyEntity(entityPtr);
     return;
 }
