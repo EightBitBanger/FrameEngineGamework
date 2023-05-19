@@ -111,9 +111,9 @@ public:
     void RenderFrame(float deltaTime);
     
     /// Add a scene to the render queue for drawing.
-    void AddToRenderQueue(Scene* scene);
+    void AddSceneToRenderQueue(Scene* scene);
     /// Remove a scene from the render queue.
-    bool RemoveFromRenderQueue(Scene* scene);
+    bool RemoveSceneFromRenderQueue(Scene* scene);
     /// Get the number of scenes in the render queue.
     unsigned int GetRenderQueueSize(void);
     /// Return a scene pointer at the index position within the render queue.
