@@ -163,7 +163,10 @@ void Framework::Run() {
             Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
             projectile->AddComponent(entityRenderer);
             
+            
             Entity* entity = (Entity*)entityRenderer->GetComponent();
+            
+            // Copy the sub mesh
             entity->AttachMesh(projectileMesh);
             entity->AttachMaterial(barrelMaterial);
             
@@ -177,9 +180,8 @@ void Framework::Run() {
             // Projectile collider
             projectile->AddColliderBox(projectileCollider, 0, 0, 0);
             
-            projectile->CalculatePhysics();
-            
             projectile->SetMass(200);
+            projectile->CalculatePhysics();
             
             //
             // Calculate projectile force from camera forward angle
@@ -223,7 +225,7 @@ void Framework::Run() {
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 200) {
+    while (Engine.GetGameObjectCount() > 10) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;

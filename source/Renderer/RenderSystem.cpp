@@ -352,7 +352,6 @@ void RenderSystem::RenderFrame(float deltaTime) {
     currentPipeline->currentShader->SetProjectionMatrix( viewProjection );
     
     
-    
     // Run through the scenes
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
         
@@ -363,10 +362,16 @@ void RenderSystem::RenderFrame(float deltaTime) {
             scenePtr->doUpdateLights = false;
             unsigned int lightListSz = scenePtr->GetLightQueueSize();
             
+            // Run the light list
             for (unsigned int i=0; i < lightListSz; i++) {
+                if (currentLightIndex > lightListSz) 
+                    break;
                 
-                // Update the lights on a light change
                 
+                
+                
+                currentLightIndex++;
+                continue;
             }
             
         }

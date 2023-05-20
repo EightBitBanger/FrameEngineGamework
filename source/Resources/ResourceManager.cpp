@@ -200,7 +200,6 @@ Mesh* ResourceManager::CreateMeshFromTag(std::string resourceName) {
     assert(meshTag != nullptr);
     Mesh* meshPtr = Renderer.CreateMesh();
     meshPtr->AddSubMesh(0,0,0, meshTag->mesh.vertexBuffer, meshTag->mesh.indexBuffer);
-    //meshPtr->SetDefaultAttributes();
     return meshPtr;
 }
 
@@ -285,8 +284,14 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="
         vertex.r = 1;
         vertex.g = 1;
         vertex.b = 1;
+        vertex.nx = objlVertex.Normal.X;
+        vertex.ny = objlVertex.Normal.Y;
+        vertex.nz = objlVertex.Normal.Z;
         vertex.u = objlVertex.TextureCoordinate.X;
         vertex.v = objlVertex.TextureCoordinate.Y;
+        vertex.lr = 1;
+        vertex.lg = 1;
+        vertex.lb = 1;
         
         newAsset.mesh.vertexBuffer.push_back(vertex);
     }
