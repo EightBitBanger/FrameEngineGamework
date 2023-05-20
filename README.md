@@ -73,9 +73,9 @@ extern InputSystem          Input;
 
 <br><br/>
 ## Application entry point
-> The source file "Application.cpp" is the application layer entry point and the starting point for your application code.
-> The framework will provide you with the functions `Start()` and `Run()`. These functions will serve as an entry point for your application.
-> The `Start()` function will be called once during application initiation.
+The source file "Application.cpp" is the application layer entry point and the starting point for your application code.
+The framework will provide you with the functions `Start()` and `Run()`. These functions will serve as an entry point for your application.
+The `Start()` function will be called once during application initiation.
 
 ```c++
 // This example will load required resources and initiate the scene
@@ -145,7 +145,7 @@ void Framework::Start() {
 
 <br><br/>
 ### Main loop
-> The `Run()` function will be called once per frame.
+The `Run()` function will be called once per frame.
 
 ```c++
 // This example will apply force to the camera`s rigid body on key presses
