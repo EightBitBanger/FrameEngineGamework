@@ -42,7 +42,7 @@ void Framework::Start() {
     Resources.LoadTexture("data/grassy.png", "mat_grassy");
     
     // Set the gravity vector for the simulation
-    Physics.SetWorldGravity(0, -90, 0);
+    Physics.SetWorldGravity(0, -9.81, 0);
     
     // Create objects from resource tags
     Material* groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
@@ -83,16 +83,29 @@ void Framework::Start() {
     ground->SetAngularAxisLockFactor(0, 0, 0);
     
     // Ground collider
-    rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(100, 100, 100);
-    ground->AddColliderBox(groundCollider, 0, -100, 0);
+    rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(1000, 10, 1000);
+    ground->AddColliderBox(groundCollider, 0, -10, 0);
     
     
     
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(0, 30, 0);
+    cameraController = Engine.CreateCameraController(-50, 20, 0);
+    cameraController->SetLinearDamping(2);
+    cameraController->SetMass(100);
+    
+    cameraController->CalculatePhysics();
+    cameraController->EnableGravity(true);
+    
+    
+    
+    rp3d::BoxShape* boxShape = Physics.CreateColliderBox(1, 8, 1);
+    cameraController->AddColliderBox(boxShape, 0, 0, 0);
+    
+    cameraController->CalculatePhysics();
+    
     
     // Create a projectile collider
-    projectileCollider = Physics.CreateColliderBox(1.45, 2.1, 1.45);
+    projectileCollider = Physics.CreateColliderBox(2, 4, 2);
     
     return;
 }
@@ -122,7 +135,7 @@ void Framework::Run() {
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
     // Camera speed multiplier
-    force *= 700;
+    force *= 5000;
     
     cameraController->AddForce(force.x, force.y, force.z);
     
@@ -130,12 +143,13 @@ void Framework::Run() {
     
     // Shoot object from camera
     
-    if (Input.CheckMouseLeftPressed()) {
-        
+    //if (Input.CheckMouseLeftPressed()) {
+    
+    if (Random.Range(0, 10) > 8) {
         // Spread offset effect on projectile angle
-        float spreadMul = 0.0007;
+        float spreadMul = 0.1;
         
-        for (int i=0; i < 3; i++) {
+        //for (int i=0; i < 300; i++) {
             
             // Apply some random physical forces
             float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -153,6 +167,8 @@ void Framework::Run() {
             entity->AttachMesh(projectileMesh);
             entity->AttachMaterial(barrelMaterial);
             
+            projectile->SetPosition(offsetx, offsety, offsetz);
+            
             // Add a physics component
             Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
             projectile->AddComponent(rigidBodyComponent);
@@ -163,9 +179,7 @@ void Framework::Run() {
             
             projectile->CalculatePhysics();
             
-            projectile->SetLinearAxisLockFactor(1, 1, 1);
-            projectile->SetAngularAxisLockFactor(1, 1, 1);
-            projectile->SetMass(1);
+            projectile->SetMass(200);
             
             //
             // Calculate projectile force from camera forward angle
@@ -176,14 +190,15 @@ void Framework::Run() {
             // Offset starting distance from camera
             fwd *= 8;
             
-            glm::vec3 pos = Renderer.cameraMain->transform.position;
-            pos += fwd;
+            //glm::vec3 pos = Renderer.cameraMain->transform.position;
+            glm::vec3 pos(0);
+            //pos += fwd;
             
             // Total forward force + camera offset distance
-            fwd *= 7000;
+            //fwd *= 7000;
             
             float startx = pos.x + (offsetx * 0);
-            float starty = pos.y + (offsety * 0) - 7;
+            float starty = pos.y + (offsety * 0) + 50;
             float startz = pos.z + (offsetz * 0);
             
             // Transform the rigid body
@@ -199,8 +214,8 @@ void Framework::Run() {
             
             projectile->AddForce(fwd.x, fwd.y, fwd.z);
             
-            continue;
-        }
+            //continue;
+        //}
         
     }
     
@@ -208,7 +223,7 @@ void Framework::Run() {
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 2000) {
+    while (Engine.GetGameObjectCount() > 200) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;
@@ -228,6 +243,7 @@ void Framework::Run() {
     if (Input.CheckKeyPressed(VK_ESCAPE)) {
         // Uncomment to make the escape key close the application
         //Application.isActive = false;
+        //return;
         
         Application.Pause();
         
@@ -250,8 +266,6 @@ void Framework::Run() {
         }
         
     }
-    
-    
     
     return;
 }

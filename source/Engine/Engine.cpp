@@ -63,8 +63,6 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
     // Add a rigid body component
     Component* rigidBodyComponent = CreateComponent(ComponentType::RigidBody);
     rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
-    rigidBody->setLinearDamping(4);
-    rigidBody->enableGravity(false);
     
     rp3d::Vector3 position(x, y, z);
     rp3d::Quaternion quat = rp3d::Quaternion::identity();
@@ -81,6 +79,9 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
     cameraController->AddComponent(cameraComponent);
     cameraController->AddComponent(rigidBodyComponent);
     cameraController->AddComponent(scriptComponent);
+    
+    cameraController->EnableGravity(false);
+    cameraController->SetAngularAxisLockFactor(0, 0, 0);
     
     return cameraController;
 }

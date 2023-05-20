@@ -200,9 +200,7 @@ Mesh* ResourceManager::CreateMeshFromTag(std::string resourceName) {
     assert(meshTag != nullptr);
     Mesh* meshPtr = Renderer.CreateMesh();
     meshPtr->AddSubMesh(0,0,0, meshTag->mesh.vertexBuffer, meshTag->mesh.indexBuffer);
-    meshPtr->SetAttribute(0, 3, sizeof(Vertex), 0);
-    meshPtr->SetAttribute(1, 3, sizeof(Vertex), 12);
-    meshPtr->SetAttribute(2, 2, sizeof(Vertex), 24);
+    //meshPtr->SetDefaultAttributes();
     return meshPtr;
 }
 

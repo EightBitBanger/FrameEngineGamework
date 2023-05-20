@@ -71,7 +71,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         
         // Physics timer
         if (PhysicsTime.Update()) 
-            Physics.world->update( PhysicsTime.delta );
+            Physics.world->update( 1.0 / PHYSICS_UPDATES_PER_SECOND );
         
         // Application and render timer
         if (Time.Update()) {

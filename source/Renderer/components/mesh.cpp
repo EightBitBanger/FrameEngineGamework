@@ -112,7 +112,10 @@ void Mesh::SetDefaultAttributes(void) {
     
     SetAttribute(0, 3, sizeof(Vertex), 0);
     SetAttribute(1, 3, sizeof(Vertex), 12);
-    SetAttribute(2, 2, sizeof(Vertex), 24);
+    SetAttribute(2, 3, sizeof(Vertex), 24);
+    SetAttribute(3, 2, sizeof(Vertex), 36);
+    SetAttribute(4, 3, sizeof(Vertex), 44);
+    
     return;
 }
 
@@ -389,6 +392,26 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
         vertex.r = newColor.r;
         vertex.g = newColor.g;
         vertex.b = newColor.b;
+        destMesh.push_back(vertex);
+    }
+    
+    glBindVertexArray(mVertexArray);
+    glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
+    
+    return true;
+}
+
+bool Mesh::ChangeSubMeshLightingValue(unsigned int index, Color newColor) {
+    if (index >= mSubMesh.size()) return false;
+    
+    std::vector<Vertex> destMesh;
+    SubMesh sourceMesh = mSubMesh[index];
+    
+    for (std::vector<Vertex>::iterator it = mVertexBuffer.begin() + sourceMesh.vertexBegin; it != mVertexBuffer.begin() + sourceMesh.vertexBegin + sourceMesh.vertexCount; ++it) {
+        Vertex& vertex = *it;
+        vertex.lr = newColor.r;
+        vertex.lg = newColor.g;
+        vertex.lb = newColor.b;
         destMesh.push_back(vertex);
     }
     
