@@ -380,6 +380,11 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 continue;
             }
             
+            // Send the lights into the shader
+            currentPipeline->currentShader->SetLightCount(numberOfLights);
+            currentPipeline->currentShader->SetLightPositions(numberOfLights, lightPosition);
+            currentPipeline->currentShader->SetLightIntensity(numberOfLights, lightIntensity);
+            
         }
         
         // Render entities

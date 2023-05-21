@@ -40,7 +40,11 @@ void Shader::SetLightCount(unsigned int numberOfLights) {
 }
 
 void Shader::SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPositions) {
-    glUniform3fv(mLightCount, numberOfLights, &lightPositions[0][0]);
+    glUniform3fv(mLightPosition, numberOfLights, &lightPositions[0][0]);
+}
+
+void Shader::SetLightIntensity(unsigned int numberOfLights, float* lightIntensity) {
+    glUniform1fv(mLightIntensity, numberOfLights, &lightIntensity[0]);
 }
 
 void Shader::SetUniformLocations(void) {
@@ -50,7 +54,7 @@ void Shader::SetUniformLocations(void) {
     std::string colorUniformName    = "m_color";
     std::string samplerUniformName  = "u_sampler";
     std::string lightCountUniformName      = "u_light_count";
-    std::string lightPositionUniformName   = "u_light_pos";
+    std::string lightPositionUniformName   = "u_light_position";
     std::string lightIntensityUniformName  = "u_light_intensity";
     
     // Model projection
@@ -144,7 +148,7 @@ bool Shader::BuildDefault(void) {
         "varying vec3 v_color;"
         ""
         "uniform unsigned int  u_light_count;"
-        "uniform vec3          u_light_pos[16];"
+        "uniform vec3          u_light_position[16];"
         "uniform float         u_light_intensity[16];"
         ""
         "void main() "
