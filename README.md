@@ -15,8 +15,8 @@ This game engine framework aims to provide simpler interfaces with more complex 
 ## Screenshots
 You can find more screenshots [here](https://github.com/RetroBytes32/GameEngineFramework/wiki/Screenshots).
 
-### Vertex lighting
-<img src="https://github.com/RetroBytes32/GameEngineFramework/blob/main/demo/vertex_lighting_demo.jpg"  width="640" height="480">
+### Vertex lighting demo
+<img src="https://github.com/RetroBytes32/GameEngineFramework/blob/main/demo/glowing.jpg"  width="800" height="600">
 
 
 <br><br/>
