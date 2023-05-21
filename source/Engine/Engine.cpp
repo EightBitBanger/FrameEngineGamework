@@ -225,6 +225,8 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
         }
         
         default:
+            std::cout<<"Destroying a component with an incorrect type."<<std::endl;
+            assert(0);
             break;
     }
     mComponents.Destroy(componentPtr);
@@ -247,96 +249,85 @@ void EngineSystemManager::Update(void) {
         Entity*           componentEntityRenderer = objectPtr->GetCachedEntity();
         Light*            componentLight          = objectPtr->GetCachedLight();
         
+        
         //
-        // Nothing to update, no attached rigid body
-        
-        if (componentRigidBody == nullptr) {
-            
-            //
-            // Update the entity`s transform matrix from the entity`s position and rotation
-            
-            if (componentEntityRenderer != nullptr) {
-                
-                glm::mat4 modleMatrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
-                
-                componentEntityRenderer->transform.matrix = modleMatrix;
-            }
-            
-            continue;
-        }
-        
+        // Synchronize component transforms
+        //
         
         rp3d::Transform bodyTransform = componentRigidBody->getTransform();
         
+        rp3d::Vector3    bodyPos = rp3d::Vector3(0, 0, 0);
+        rp3d::Quaternion quaterion = rp3d::Quaternion::identity();
         
-        //
-        // Sync the position of the entity renderer
-        //
+        
+        
+        
+        if (componentEntityRenderer != nullptr) {
+            
+            glm::mat4 modleMatrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
+            
+            componentEntityRenderer->transform.matrix = modleMatrix;
+            
+            bodyPos.x = componentEntityRenderer->transform.position.x;
+            bodyPos.y = componentEntityRenderer->transform.position.y;
+            bodyPos.z = componentEntityRenderer->transform.position.z;
+            
+            quaterion.x = componentEntityRenderer->transform.rotation.x;
+            quaterion.y = componentEntityRenderer->transform.rotation.y;
+            quaterion.z = componentEntityRenderer->transform.rotation.z;
+            quaterion.w = componentEntityRenderer->transform.rotation.w;
+            
+        }
+        
+        
+        if (componentRigidBody != nullptr) {
+            
+            bodyPos   = bodyTransform.getPosition();
+            quaterion = bodyTransform.getOrientation();
+        }
+        
         
         if (componentEntityRenderer != nullptr) {
             bodyTransform.getOpenGLMatrix(&componentEntityRenderer->transform.matrix[0][0]);
             
-            // Translation
-            rp3d::Vector3 bodyPos = bodyTransform.getPosition();
             componentEntityRenderer->transform.position.x = bodyPos.x;
             componentEntityRenderer->transform.position.y = bodyPos.y;
             componentEntityRenderer->transform.position.z = bodyPos.z;
             
-            // Orientation
-            rp3d::Quaternion quaterion = bodyTransform.getOrientation();
             componentEntityRenderer->transform.rotation.x = quaterion.x;
             componentEntityRenderer->transform.rotation.y = quaterion.y;
             componentEntityRenderer->transform.rotation.z = quaterion.z;
             componentEntityRenderer->transform.rotation.w = quaterion.w;
-            
         }
         
-        
-        //
-        // Sync the position of the light
-        //
         
         if (componentLight != nullptr) {
             bodyTransform.getOpenGLMatrix(&componentLight->transform.matrix[0][0]);
             
-            // Translation
-            rp3d::Vector3 bodyPos = bodyTransform.getPosition();
             componentLight->transform.position.x = bodyPos.x;
             componentLight->transform.position.y = bodyPos.y;
             componentLight->transform.position.z = bodyPos.z;
             
-            // Orientation
-            rp3d::Quaternion quaterion = bodyTransform.getOrientation();
             componentLight->transform.rotation.x = quaterion.x;
             componentLight->transform.rotation.y = quaterion.y;
             componentLight->transform.rotation.z = quaterion.z;
             componentLight->transform.rotation.w = quaterion.w;
-            
         }
         
-        
-        //
-        // Sync the position of the camera
-        //
         
         if (componentCamera != nullptr) {
             bodyTransform.getOpenGLMatrix(&componentCamera->transform.matrix[0][0]);
             
-            // Translation
-            rp3d::Vector3 bodyPos = bodyTransform.getPosition();
             componentCamera->transform.position.x = bodyPos.x;
             componentCamera->transform.position.y = bodyPos.y;
             componentCamera->transform.position.z = bodyPos.z;
             
-            // Set the orientation if NOT mouse looking
             if (!componentCamera->useMouseLook) {
-                rp3d::Quaternion quaterion = bodyTransform.getOrientation();
                 componentCamera->transform.rotation.x = quaterion.x;
                 componentCamera->transform.rotation.y = quaterion.y;
                 componentCamera->transform.rotation.z = quaterion.z;
                 componentCamera->transform.rotation.w = quaterion.w;
             }
-            
         }
         
         continue;

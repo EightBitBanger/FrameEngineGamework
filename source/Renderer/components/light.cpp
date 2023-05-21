@@ -7,8 +7,8 @@ Light::Light() {
     
     color = Colors.white;
     
-    intensity   = 1;
-    range       = 20;
+    intensity   = 0.87;
+    range       = 30;
     attenuation = 0;
     
 }

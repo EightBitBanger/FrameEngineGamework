@@ -356,8 +356,8 @@ void RenderSystem::RenderFrame(float deltaTime) {
     
     // Light list
     unsigned int numberOfLights=0;
-    glm::vec3  lightPosition[16];
-    glm::vec3  lightAttenuation[16];
+    glm::vec3  lightPosition[RENDER_NUMBER_OF_LIGHTS];
+    glm::vec3  lightAttenuation[RENDER_NUMBER_OF_LIGHTS];
     
     // Run through the scenes
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
@@ -367,7 +367,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
         // Check to update the scene light list
         if (scenePtr->doUpdateLights) {
             numberOfLights = scenePtr->GetLightQueueSize();
-            if (numberOfLights > 16) numberOfLights = 16;
+            if (numberOfLights > RENDER_NUMBER_OF_LIGHTS) numberOfLights = RENDER_NUMBER_OF_LIGHTS;
             
             // Run the light list
             for (unsigned int i=0; i < numberOfLights; i++) {

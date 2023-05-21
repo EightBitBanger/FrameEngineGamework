@@ -1,7 +1,6 @@
 #ifndef OPENGL_RENDERER_SYSTEM
 #define OPENGL_RENDERER_SYSTEM
 
-
 #include "../../vendor/my-std-lib/poolallocator.h"
 #include "../../vendor/my-std-lib/types.h"
 #include "../../vendor/my-std-lib/logging.h"

@@ -84,19 +84,19 @@ void Framework::Start() {
     
     // Create a camera controller
     cameraController = Engine.CreateCameraController(-50, 20, 0);
-    cameraController->SetLinearDamping(2);
+    cameraController->SetLinearDamping(1.5);
     cameraController->SetMass(100);
     
     cameraController->CalculatePhysics();
-    cameraController->EnableGravity(true);
+    cameraController->EnableGravity(false);
     
     
     // Add a light component for light testing
     Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
     cameraController->AddComponent(lightComponent);
     Light* lightPtr = (Light*)lightComponent->GetComponent();
-    lightPtr->intensity = 0.7;
-    lightPtr->range = 80;
+    lightPtr->intensity = 0.2;
+    lightPtr->range = 30;
     
     
     
@@ -145,12 +145,13 @@ void Framework::Run() {
     
     // Shoot object from camera
     
-    //if (Input.CheckMouseLeftPressed()) {
+    if (Input.CheckMouseLeftPressed()) {
+        Input.SetKeyPressed(false);
         
         // Spread offset effect on projectile angle
-        float spreadMul = 0.1;
+        float spreadMul = 0.001;
         
-        //for (int i=0; i < 300; i++) {
+        //for (int i=0; i < 1; i++) {
             
             // Apply some random physical forces
             float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -170,12 +171,11 @@ void Framework::Run() {
             entity->AttachMesh(projectileMesh);
             entity->AttachMaterial(barrelMaterial);
             
+            
             // Light component test
             Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
             projectile->AddComponent(lightComponent);
             Light* lightPtr = (Light*)lightComponent->GetComponent();
-            lightPtr->intensity = 10;
-            lightPtr->range = 100;
             
             
             // Add a physics component
@@ -196,17 +196,16 @@ void Framework::Run() {
             glm::vec3 fwdAngle = Renderer.cameraMain->forward;
             
             // Offset starting distance from camera
-            fwd *= 8;
+            fwd *= 13;
             
-            //glm::vec3 pos = Renderer.cameraMain->transform.position;
-            glm::vec3 pos(0);
-            //pos += fwd;
+            glm::vec3 pos = Renderer.cameraMain->transform.position;
+            pos += fwd;
             
             // Total forward force + camera offset distance
-            //fwd *= 7000;
+            fwd *= 4000;
             
             float startx = pos.x + (offsetx * 0);
-            float starty = pos.y + (offsety * 0) + 50;
+            float starty = pos.y + (offsety * 0);
             float startz = pos.z + (offsetz * 0);
             
             // Transform the rigid body
@@ -226,13 +225,13 @@ void Framework::Run() {
         //}
         
         
-    //}
+    }
     
     
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 100) {
+    while (Engine.GetGameObjectCount() > 1000) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;

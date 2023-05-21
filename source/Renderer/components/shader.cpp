@@ -41,7 +41,7 @@ void Shader::SetTextureSampler(unsigned int index) {
 }
 
 void Shader::SetLightCount(unsigned int numberOfLights) {
-    glUniform1ui(mLightCount, numberOfLights);
+    glUniform1i(mLightCount, numberOfLights);
 }
 
 void Shader::SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPositions) {
@@ -156,8 +156,8 @@ bool Shader::BuildDefault(void) {
         "varying vec3 v_color;"
         ""
         "uniform int   u_light_count;"
-        "uniform vec3  u_light_position[16];"
-        "uniform vec3  u_light_attenuation[16];"
+        "uniform vec3  u_light_position["+IntToString(RENDER_NUMBER_OF_LIGHTS)+"];"
+        "uniform vec3  u_light_attenuation["+IntToString(RENDER_NUMBER_OF_LIGHTS)+"];"
         ""
         "void main() "
         "{"
