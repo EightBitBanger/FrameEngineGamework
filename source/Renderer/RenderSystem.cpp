@@ -104,7 +104,6 @@ void RenderSystem :: Initiate(void) {
     defaultShader->BuildDefault();
     
     defaultMaterial = CreateMaterial();
-    defaultMaterial->color = Color(0, 0, 0, 1);
     
     currentPipeline = CreateRenderPipeline();
     currentPipeline->currentShader = defaultShader;
@@ -358,6 +357,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
     unsigned int numberOfLights=0;
     glm::vec3  lightPosition[RENDER_NUMBER_OF_LIGHTS];
     glm::vec3  lightAttenuation[RENDER_NUMBER_OF_LIGHTS];
+    glm::vec3  lightColor[RENDER_NUMBER_OF_LIGHTS];
     
     // Run through the scenes
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
@@ -383,6 +383,11 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 lightAttenuation[i].y = lightPtr->range;
                 lightAttenuation[i].z = lightPtr->attenuation;
                 
+                // Color
+                lightColor[i].r = lightPtr->color.r;
+                lightColor[i].g = lightPtr->color.g;
+                lightColor[i].b = lightPtr->color.b;
+                
                 continue;
             }
             
@@ -390,6 +395,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
             currentPipeline->currentShader->SetLightCount(numberOfLights);
             currentPipeline->currentShader->SetLightPositions(numberOfLights, lightPosition);
             currentPipeline->currentShader->SetLightAttenuation(numberOfLights, lightAttenuation);
+            currentPipeline->currentShader->SetLightColors(numberOfLights, lightColor);
             
         }
         
@@ -444,7 +450,8 @@ void RenderSystem::RenderFrame(float deltaTime) {
                     glDisable(GL_BLEND);
                 }
                 
-                currentPipeline->currentShader->SetMaterialColor(mCurrentMaterial->color);
+                currentPipeline->currentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
+                currentPipeline->currentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
                 currentPipeline->currentShader->SetTextureSampler(0);
             }
             

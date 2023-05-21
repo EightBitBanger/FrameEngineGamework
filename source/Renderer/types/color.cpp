@@ -9,6 +9,41 @@ Color Color::operator+ (const Color& color) {
     return newColor;
 }
 
+Color Color::operator- (const Color& color) {
+    Color newColor;
+    newColor.r = r - color.r;
+    newColor.g = g - color.g;
+    newColor.b = b - color.b;
+    newColor.a = a - color.a;
+    return newColor;
+}
+
+Color Color::operator-= (const Color& color) {
+    Color newColor;
+    r -= color.r;
+    g -= color.g;
+    b -= color.b;
+    a -= color.a;
+    newColor.r=r;
+    newColor.g=g;
+    newColor.b=b;
+    newColor.a=a;
+    return newColor;
+}
+
+Color Color::operator+= (const Color& color) {
+    Color newColor;
+    r += color.r;
+    g += color.g;
+    b += color.b;
+    a += color.a;
+    newColor.r=r;
+    newColor.g=g;
+    newColor.b=b;
+    newColor.a=a;
+    return newColor;
+}
+
 void Color::operator= (const Color& color) {
     r = color.r;
     g = color.g;

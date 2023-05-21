@@ -5,7 +5,8 @@ Material::Material() {
     width  = 0;
     height = 0;
     
-    color = Color(0, 0, 0, 1);
+    ambient = Color(0.01, 0.01, 0.01, 1);
+    diffuse = Color(0.87, 0.87, 0.87, 1);
     
     doDepthTest   = true;
     doBlending    = false;

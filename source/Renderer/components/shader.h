@@ -30,8 +30,11 @@ public:
     /// Set the uniform camera position.
     void SetCameraPosition(glm::vec3 cameraPosition);
     
-    /// Set the color of the material.
-    void SetMaterialColor(Color color);
+    /// Set the global lighting color of the material.
+    void SetMaterialAmbient(Color color);
+    /// Set the diffuse color of the material.
+    void SetMaterialDiffuse(Color color);
+    
     /// Set the texture sampler index.
     void SetTextureSampler(unsigned int index);
     
@@ -41,6 +44,8 @@ public:
     void SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPositions);
     /// Set the array of light attenuation.
     void SetLightAttenuation(unsigned int numberOfLights, glm::vec3* lightAttenuation);
+    /// Set the array of light colors.
+    void SetLightColors(unsigned int numberOfLights, glm::vec3* lightColors);
     
     /// Set default uniform locations.
     void SetUniformLocations(void);
@@ -64,10 +69,13 @@ private:
     int mModelMatrixLocation;
     int mCameraPosition;
     int mMaterialColorLocation;
+    int mMaterialAmbientLocation;
+    int mMaterialDiffuseLocation;
     int mSamplerLocation;
     int mLightCount;
     int mLightPosition;
     int mLightAttenuation;
+    int mLightColor;
     
     bool  mIsShaderLoaded;
     

@@ -9,7 +9,7 @@ Light::Light() {
     
     intensity   = 0.87;
     range       = 30;
-    attenuation = 0;
+    attenuation = 0.8;
     
 }
 

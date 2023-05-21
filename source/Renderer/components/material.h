@@ -15,7 +15,8 @@ public:
     unsigned int width;
     unsigned int height;
     
-    Color color;
+    Color ambient;
+    Color diffuse;
     
     bool doDepthTest;
     bool doBlending;

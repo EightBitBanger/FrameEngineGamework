@@ -18,7 +18,10 @@ public:
     float a;
     
     Color operator+ (const Color& color);
+    Color operator- (const Color& color);
     void operator= (const Color& color);
+    Color operator+= (const Color& color);
+    Color operator-= (const Color& color);
     
     Color();
     Color(Color& color);

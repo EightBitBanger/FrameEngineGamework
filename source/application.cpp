@@ -58,7 +58,7 @@ void Framework::Start() {
     
     // Create a ground plain
     Mesh* groundMesh = Renderer.CreateMesh();
-    groundMesh->AddPlainSubDivided(-50, 0, -50, 10, 10, Colors.white, 10, 10);
+    groundMesh->AddPlainSubDivided(-1000, 0, -1000, 10, 10, Colors.white, 100, 100);
     
     GameObject* ground = Engine.CreateGameObject();
     ground->name = "world";
@@ -77,26 +77,19 @@ void Framework::Start() {
     ground->SetAngularAxisLockFactor(0, 0, 0);
     
     // Ground collider
-    rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(1000, 10, 1000);
-    ground->AddColliderBox(groundCollider, 0, -10, 0);
+    rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(100000, 10, 100000);
+    ground->AddColliderBox(groundCollider, -10000, -10, -10000);
     
     
     
     // Create a camera controller
     cameraController = Engine.CreateCameraController(-50, 20, 0);
-    cameraController->SetLinearDamping(1.5);
+    cameraController->SetLinearDamping(3);
     cameraController->SetMass(100);
     
     cameraController->CalculatePhysics();
     cameraController->EnableGravity(false);
     
-    
-    // Add a light component for light testing
-    Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
-    cameraController->AddComponent(lightComponent);
-    Light* lightPtr = (Light*)lightComponent->GetComponent();
-    lightPtr->intensity = 0.2;
-    lightPtr->range = 30;
     
     
     
@@ -137,7 +130,7 @@ void Framework::Run() {
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
     // Camera speed multiplier
-    force *= 5000;
+    force *= 100000;
     
     cameraController->AddForce(force.x, force.y, force.z);
     
@@ -146,7 +139,7 @@ void Framework::Run() {
     // Shoot object from camera
     
     if (Input.CheckMouseLeftPressed()) {
-        Input.SetKeyPressed(false);
+        //Input.SetMouseLeftPressed(false);
         
         // Spread offset effect on projectile angle
         float spreadMul = 0.001;
@@ -176,6 +169,10 @@ void Framework::Run() {
             Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
             projectile->AddComponent(lightComponent);
             Light* lightPtr = (Light*)lightComponent->GetComponent();
+            lightPtr->color = Colors.MakeRandom();
+            lightPtr->intensity    = 10;
+            lightPtr->range        = 80;
+            lightPtr->attenuation  = 0.7;
             
             
             // Add a physics component
@@ -186,7 +183,9 @@ void Framework::Run() {
             // Projectile collider
             projectile->AddColliderBox(projectileCollider, 0, 0, 0);
             
-            projectile->SetMass(200);
+            projectile->SetMass(1);
+            projectile->SetLinearDamping(0.01);
+            projectile->SetAngularDamping(0.003);
             projectile->CalculatePhysics();
             
             //
@@ -202,11 +201,11 @@ void Framework::Run() {
             pos += fwd;
             
             // Total forward force + camera offset distance
-            fwd *= 4000;
+            fwd *= 100000;
             
-            float startx = pos.x + (offsetx * 0);
-            float starty = pos.y + (offsety * 0);
-            float startz = pos.z + (offsetz * 0);
+            float startx = pos.x + offsetx;
+            float starty = pos.y + offsety - 5;
+            float startz = pos.z + offsetz;
             
             // Transform the rigid body
             rp3d::Transform newTransform;
@@ -231,7 +230,7 @@ void Framework::Run() {
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 1000) {
+    while (Engine.GetGameObjectCount() > 120) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;
