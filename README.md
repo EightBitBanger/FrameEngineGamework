@@ -12,7 +12,7 @@ This game engine framework aims to provide simpler interfaces with more complex 
 - Window input handling
 
 <br><br/>
-## Demo screenshots
+## Screenshots
 
 
 ### Physical objects
