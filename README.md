@@ -13,10 +13,7 @@ This game engine framework aims to provide simpler interfaces with more complex 
 
 <br><br/>
 ## Screenshots
-
-
-### Physical objects
-<img src="https://github.com/RetroBytes32/GameEngineFramework/blob/main/demo/pile_of_physics_objects.jpg"  width="640" height="480">
+You can find more screenshots [here](https://github.com/RetroBytes32/GameEngineFramework/wiki/Screenshots).
 
 ### Vertex lighting
 <img src="https://github.com/RetroBytes32/GameEngineFramework/blob/main/demo/vertex_lighting_demo.jpg"  width="640" height="480">
@@ -37,7 +34,7 @@ git pull https://github.com/RetroBytes32/GameEngineFramework
 ```
 
 
-## Dependencies
+### Dependencies
 Building this repository will require the following libraries to be installed.
 
 * <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
