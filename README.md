@@ -15,7 +15,7 @@ This game engine framework aims to provide simpler interfaces with more complex 
 ## Demo screenshots
 
 
-### Pile of physical objects
+### Physical objects
 <img src="https://github.com/RetroBytes32/GameEngineFramework/blob/main/demo/pile_of_physics_objects.jpg"  width="640" height="480">
 
 ### Vertex lighting
