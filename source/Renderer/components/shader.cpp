@@ -5,6 +5,7 @@ Shader::Shader() {
     
     mProjectionMatrixLocation=0;
     mModelMatrixLocation=0;
+    mCameraPosition=0;
     mMaterialColorLocation=0;
     mSamplerLocation=0;
     mLightCount=0;
@@ -25,6 +26,10 @@ void Shader::SetModelMatrix(glm::mat4 &ModelMatrix) {
 
 void Shader::SetProjectionMatrix(glm::mat4 &projectionMatrix) {
     glUniformMatrix4fv(mProjectionMatrixLocation, 1, 0, &projectionMatrix[0][0]);
+}
+
+void Shader::SetCameraPosition(glm::vec3 cameraPosition) {
+    glUniform3f(mCameraPosition, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 }
 
 void Shader::SetMaterialColor(Color color) {
@@ -51,6 +56,7 @@ void Shader::SetUniformLocations(void) {
     
     std::string projUniformName     = "u_proj";
     std::string modelUniformName    = "u_model";
+    std::string eyeUniformName      = "u_eye";
     std::string colorUniformName    = "m_color";
     std::string samplerUniformName  = "u_sampler";
     std::string lightCountUniformName      = "u_light_count";
@@ -60,6 +66,7 @@ void Shader::SetUniformLocations(void) {
     // Model projection
     mProjectionMatrixLocation  = glGetUniformLocation(mShaderProgram, projUniformName.c_str());;
     mModelMatrixLocation       = glGetUniformLocation(mShaderProgram, modelUniformName.c_str());
+    mCameraPosition            = glGetUniformLocation(mShaderProgram, eyeUniformName.c_str());
     // Material
     mMaterialColorLocation     = glGetUniformLocation(mShaderProgram, colorUniformName.c_str());
     mSamplerLocation           = glGetUniformLocation(mShaderProgram, samplerUniformName.c_str());
@@ -118,7 +125,7 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
     int vResult;
     glGetShaderiv(ShaderID, GL_COMPILE_STATUS, &vResult);
     if (!vResult) {
-        std::cout << " ! Shader compilation error" << std::endl;
+        std::cout << std::endl << " ! Shader compilation error" << std::endl << std::endl << std::endl;
         assert(0);
         return 0;
     }
@@ -143,21 +150,31 @@ bool Shader::BuildDefault(void) {
         ""
         "uniform mat4 u_proj;"
         "uniform mat4 u_model;"
+        "uniform vec3 u_eye;"
         ""
         "varying vec2 v_coord;"
         "varying vec3 v_color;"
         ""
-        "uniform unsigned int  u_light_count;"
-        "uniform vec3          u_light_position[16];"
-        "uniform float         u_light_intensity[16];"
+        "uniform int    u_light_count;"
+        "uniform vec3   u_light_position[16];"
+        "uniform float  u_light_intensity[16];"
         ""
         "void main() "
         "{"
         " "
-        " v_color = l_color;"
+        " vec4 modelPosition = u_model * vec4(l_position, 1);"
+        " "
+        " vec3 finalColor = vec3(0.1, 0.1, 0.1);"
+        " for (int i=0; i<=u_light_count; i++) {"
+        "  "
+        "  float dist = distance( vec3(modelPosition), u_light_position[i] );"
+        "  if (dist < 50) finalColor = l_color;"
+        " }"
+        " "
+        " v_color = finalColor;"
         " v_coord = l_uv;"
         " "
-        " gl_Position = u_proj * u_model * vec4(l_position, 1);"
+        " gl_Position = u_proj * modelPosition;"
         " "
         "};";
     

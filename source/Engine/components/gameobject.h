@@ -80,12 +80,14 @@ public:
     /// Make the rigid body dynamically movable.
     void SetDynamic(void);
     
-    /// Get the cached camera object if its component is attached.
+    /// Get the cached camera object pointer.
     Camera* GetCachedCamera(void);
-    /// Get the cached rigid body object if its component is attached.
+    /// Get the cached rigid body object pointer.
     rp3d::RigidBody* GetCachedRigidBody(void);
-    /// Get the cached entity object if its component is attached.
+    /// Get the cached entity object pointer.
     Entity* GetCachedEntity(void);
+    /// Get the cached light object pointer.
+    Light* GetCachedLight(void);
     
     
 private:

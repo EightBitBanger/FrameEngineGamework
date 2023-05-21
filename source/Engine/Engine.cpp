@@ -245,6 +245,7 @@ void EngineSystemManager::Update(void) {
         Camera*           componentCamera         = objectPtr->GetCachedCamera();
         rp3d::RigidBody*  componentRigidBody      = objectPtr->GetCachedRigidBody();
         Entity*           componentEntityRenderer = objectPtr->GetCachedEntity();
+        Light*            componentLight          = objectPtr->GetCachedLight();
         
         //
         // Nothing to update, no attached rigid body
@@ -267,6 +268,7 @@ void EngineSystemManager::Update(void) {
         
         rp3d::Transform bodyTransform = componentRigidBody->getTransform();
         
+        
         //
         // Sync the position of the entity renderer
         //
@@ -288,6 +290,30 @@ void EngineSystemManager::Update(void) {
             componentEntityRenderer->transform.rotation.w = quaterion.w;
             
         }
+        
+        
+        //
+        // Sync the position of the light
+        //
+        
+        if (componentLight != nullptr) {
+            bodyTransform.getOpenGLMatrix(&componentLight->transform.matrix[0][0]);
+            
+            // Translation
+            rp3d::Vector3 bodyPos = bodyTransform.getPosition();
+            componentLight->transform.position.x = bodyPos.x;
+            componentLight->transform.position.y = bodyPos.y;
+            componentLight->transform.position.z = bodyPos.z;
+            
+            // Orientation
+            rp3d::Quaternion quaterion = bodyTransform.getOrientation();
+            componentLight->transform.rotation.x = quaterion.x;
+            componentLight->transform.rotation.y = quaterion.y;
+            componentLight->transform.rotation.z = quaterion.z;
+            componentLight->transform.rotation.w = quaterion.w;
+            
+        }
+        
         
         //
         // Sync the position of the camera

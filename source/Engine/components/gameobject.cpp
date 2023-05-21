@@ -97,6 +97,11 @@ Entity* GameObject::GetCachedEntity(void) {
     return mEntityCache;
 }
 
+Light* GameObject::GetCachedLight(void) {
+    return mLightCache;
+}
+
+
 //
 // Physics functions
 //

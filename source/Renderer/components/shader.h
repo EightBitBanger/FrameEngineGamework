@@ -24,6 +24,8 @@ public:
     void SetModelMatrix(glm::mat4 &ModelMatrix);
     /// Set the uniform projection matrix.
     void SetProjectionMatrix(glm::mat4 &projectionMatrix);
+    /// Set the uniform camera position.
+    void SetCameraPosition(glm::vec3 cameraPosition);
     
     /// Set the color of the material.
     void SetMaterialColor(Color color);
@@ -57,6 +59,7 @@ private:
     // Uniform locations
     int mProjectionMatrixLocation;
     int mModelMatrixLocation;
+    int mCameraPosition;
     int mMaterialColorLocation;
     int mSamplerLocation;
     int mLightCount;

@@ -322,10 +322,10 @@ void RenderSystem::RenderFrame(float deltaTime) {
     glm::mat4 projection = glm::perspective( glm::radians( cameraMain->fov ), cameraMain->aspect, cameraMain->clipNear, cameraMain->clipFar);
     
     // Calculate viewing angle
-    glm::vec3 pos;
-    pos.x = cameraMain->transform.position.x;
-    pos.y = cameraMain->transform.position.y;
-    pos.z = cameraMain->transform.position.z;
+    glm::vec3 eye;
+    eye.x = cameraMain->transform.position.x;
+    eye.y = cameraMain->transform.position.y;
+    eye.z = cameraMain->transform.position.z;
     
     // Forward looking angle
     cameraMain->forward.x = cos( cameraMain->transform.rotation.x * 180 / glm::pi<float>() );
@@ -338,7 +338,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
     angle.x = cameraMain->transform.position.x + cameraMain->forward.x;
     angle.y = cameraMain->transform.position.y + cameraMain->forward.y;
     angle.z = cameraMain->transform.position.z + cameraMain->forward.z;
-    glm::mat4 view = glm::lookAt(pos, angle, cameraMain->up);
+    glm::mat4 view = glm::lookAt(eye, angle, cameraMain->up);
     glm::mat4 viewProjection = projection * view;
     
     // Right angle to the looking angle
@@ -350,6 +350,9 @@ void RenderSystem::RenderFrame(float deltaTime) {
     
     currentPipeline->currentShader->Bind();
     currentPipeline->currentShader->SetProjectionMatrix( viewProjection );
+    
+    currentPipeline->currentShader->SetCameraPosition(eye);
+    
     
     // Light list
     unsigned int numberOfLights=0;
