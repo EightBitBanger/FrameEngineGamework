@@ -94,7 +94,9 @@ void Framework::Start() {
     // Add a light component for light testing
     Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
     cameraController->AddComponent(lightComponent);
-    
+    Light* lightPtr = (Light*)lightComponent->GetComponent();
+    lightPtr->intensity = 0.7;
+    lightPtr->range = 80;
     
     
     
@@ -144,8 +146,7 @@ void Framework::Run() {
     // Shoot object from camera
     
     //if (Input.CheckMouseLeftPressed()) {
-    
-    if (Random.Range(0, 10) > 8) {
+        
         // Spread offset effect on projectile angle
         float spreadMul = 0.1;
         
@@ -168,6 +169,13 @@ void Framework::Run() {
             Entity* entity = (Entity*)entityRenderer->GetComponent();
             entity->AttachMesh(projectileMesh);
             entity->AttachMaterial(barrelMaterial);
+            
+            // Light component test
+            Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
+            projectile->AddComponent(lightComponent);
+            Light* lightPtr = (Light*)lightComponent->GetComponent();
+            lightPtr->intensity = 10;
+            lightPtr->range = 100;
             
             
             // Add a physics component
@@ -217,13 +225,14 @@ void Framework::Run() {
             //continue;
         //}
         
-    }
+        
+    //}
     
     
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 10) {
+    while (Engine.GetGameObjectCount() > 100) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;

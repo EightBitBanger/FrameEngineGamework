@@ -10,7 +10,7 @@ Shader::Shader() {
     mSamplerLocation=0;
     mLightCount=0;
     mLightPosition=0;
-    mLightIntensity=0;
+    mLightAttenuation=0;
     
     mIsShaderLoaded = false;
 }
@@ -48,8 +48,8 @@ void Shader::SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPosi
     glUniform3fv(mLightPosition, numberOfLights, &lightPositions[0][0]);
 }
 
-void Shader::SetLightIntensity(unsigned int numberOfLights, float* lightIntensity) {
-    glUniform1fv(mLightIntensity, numberOfLights, &lightIntensity[0]);
+void Shader::SetLightAttenuation(unsigned int numberOfLights, glm::vec3* lightAttenuation) {
+    glUniform3fv(mLightAttenuation, numberOfLights, &lightAttenuation[0][0]);
 }
 
 void Shader::SetUniformLocations(void) {
@@ -59,9 +59,9 @@ void Shader::SetUniformLocations(void) {
     std::string eyeUniformName      = "u_eye";
     std::string colorUniformName    = "m_color";
     std::string samplerUniformName  = "u_sampler";
-    std::string lightCountUniformName      = "u_light_count";
-    std::string lightPositionUniformName   = "u_light_position";
-    std::string lightIntensityUniformName  = "u_light_intensity";
+    std::string lightCountUniformName        = "u_light_count";
+    std::string lightPositionUniformName     = "u_light_position";
+    std::string lightAttenuationUniformName  = "u_light_attenuation";
     
     // Model projection
     mProjectionMatrixLocation  = glGetUniformLocation(mShaderProgram, projUniformName.c_str());;
@@ -73,7 +73,7 @@ void Shader::SetUniformLocations(void) {
     // Lighting
     mLightCount                = glGetUniformLocation(mShaderProgram, lightCountUniformName.c_str());
     mLightPosition             = glGetUniformLocation(mShaderProgram, lightPositionUniformName.c_str());
-    mLightIntensity            = glGetUniformLocation(mShaderProgram, lightIntensityUniformName.c_str());
+    mLightAttenuation          = glGetUniformLocation(mShaderProgram, lightAttenuationUniformName.c_str());
 }
 
 int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentScript) {
@@ -155,27 +155,37 @@ bool Shader::BuildDefault(void) {
         "varying vec2 v_coord;"
         "varying vec3 v_color;"
         ""
-        "uniform int    u_light_count;"
-        "uniform vec3   u_light_position[16];"
-        "uniform float  u_light_intensity[16];"
+        "uniform int   u_light_count;"
+        "uniform vec3  u_light_position[16];"
+        "uniform vec3  u_light_attenuation[16];"
         ""
         "void main() "
         "{"
-        " "
-        " vec4 modelPosition = u_model * vec4(l_position, 1);"
-        " "
-        " vec3 finalColor = vec3(0.1, 0.1, 0.1);"
-        " for (int i=0; i<=u_light_count; i++) {"
+        "  vec4 modelPosition = u_model * vec4(l_position, 1);"
         "  "
-        "  float dist = distance( vec3(modelPosition), u_light_position[i] );"
-        "  if (dist < 50) finalColor = l_color;"
-        " }"
-        " "
-        " v_color = finalColor;"
-        " v_coord = l_uv;"
-        " "
-        " gl_Position = u_proj * modelPosition;"
-        " "
+        "  "
+        "  vec3 finalColor = vec3(0.01, 0.01, 0.01);"
+        "  for (int i=0; i<=u_light_count; i++) {"
+        "    "
+        "    float intensity = u_light_attenuation[i].r;"
+        "    float range     = u_light_attenuation[i].g;"
+        "    "
+        //"    vec3 lightDir = normalize(u_light_position[i] - vec3(modelPosition));"
+        "    "
+        //"    float diff = max(dot(l_normal, lightDir), 0.0);"
+        "    "
+        "    "
+        "    float dist = length( u_light_position[i] - vec3(modelPosition) );"
+        "    if (dist < range) finalColor = vec3(1, 1, 1);"
+        "    "
+        "    "
+        "  }"
+        "  "
+        "  v_color = finalColor;"
+        "  v_coord = l_uv;"
+        "  "
+        "  gl_Position = u_proj * modelPosition;"
+        "  "
         "};";
     
     std::string fragmentShader = 

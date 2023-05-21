@@ -357,7 +357,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
     // Light list
     unsigned int numberOfLights=0;
     glm::vec3  lightPosition[16];
-    float      lightIntensity[16];
+    glm::vec3  lightAttenuation[16];
     
     // Run through the scenes
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
@@ -367,6 +367,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
         // Check to update the scene light list
         if (scenePtr->doUpdateLights) {
             numberOfLights = scenePtr->GetLightQueueSize();
+            if (numberOfLights > 16) numberOfLights = 16;
             
             // Run the light list
             for (unsigned int i=0; i < numberOfLights; i++) {
@@ -377,8 +378,10 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 lightPosition[i].y = lightPtr->transform.position.y;
                 lightPosition[i].z = lightPtr->transform.position.z;
                 
-                // light intensity
-                lightIntensity[i] = lightPtr->intensity;
+                // Attenuation
+                lightAttenuation[i].x = lightPtr->intensity;
+                lightAttenuation[i].y = lightPtr->range;
+                lightAttenuation[i].z = lightPtr->attenuation;
                 
                 continue;
             }
@@ -386,7 +389,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
             // Send the lights into the shader
             currentPipeline->currentShader->SetLightCount(numberOfLights);
             currentPipeline->currentShader->SetLightPositions(numberOfLights, lightPosition);
-            currentPipeline->currentShader->SetLightIntensity(numberOfLights, lightIntensity);
+            currentPipeline->currentShader->SetLightAttenuation(numberOfLights, lightAttenuation);
             
         }
         

@@ -37,7 +37,7 @@ public:
     /// Set the array of light positions.
     void SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPositions);
     /// Set the array of light attenuation.
-    void SetLightIntensity(unsigned int numberOfLights, float* lightIntensity);
+    void SetLightAttenuation(unsigned int numberOfLights, glm::vec3* lightAttenuation);
     
     /// Set default uniform locations.
     void SetUniformLocations(void);
@@ -64,7 +64,7 @@ private:
     int mSamplerLocation;
     int mLightCount;
     int mLightPosition;
-    int mLightIntensity;
+    int mLightAttenuation;
     
     bool  mIsShaderLoaded;
     
