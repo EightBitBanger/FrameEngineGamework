@@ -128,12 +128,6 @@ public:
     
 private:
     
-    // Light iterator - process a batch of lights per frame and update the vertex buffer accordingly.
-    // The light data will be stored in the vertex buffer increasing buffer size but as a result we can have
-    // many more lights with less of a performance hit.
-    unsigned int currentLightIndex;
-    
-    
     // Device render context
     HWND  mWindowHandle;
     HDC   mDeviceContext;

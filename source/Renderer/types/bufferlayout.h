@@ -7,7 +7,6 @@ struct Vertex {
     float r, g, b;     // Color
     float nx, ny, nz;  // Normals
     float u, v;        // Texture coordinate
-    float lr, lg, lb;  // Light color
     
     Vertex();
     

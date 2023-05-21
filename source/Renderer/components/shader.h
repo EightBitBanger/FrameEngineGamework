@@ -52,6 +52,9 @@ private:
     int mModelMatrixLocation;
     int mMaterialColorLocation;
     int mSamplerLocation;
+    int mLightCount;
+    int mLightPosition;
+    int mLightIntensity;
     
     bool  mIsShaderLoaded;
     

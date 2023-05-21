@@ -289,9 +289,6 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="
         vertex.nz = objlVertex.Normal.Z;
         vertex.u = objlVertex.TextureCoordinate.X;
         vertex.v = objlVertex.TextureCoordinate.Y;
-        vertex.lr = 1;
-        vertex.lg = 1;
-        vertex.lb = 1;
         
         newAsset.mesh.vertexBuffer.push_back(vertex);
     }

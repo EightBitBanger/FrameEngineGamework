@@ -1,7 +1,7 @@
 #include "scene.h"
 
 
-Scene::Scene() : doUpdateLights(false) {
+Scene::Scene() : doUpdateLights(true) {
     
 }
 

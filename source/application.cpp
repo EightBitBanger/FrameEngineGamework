@@ -63,12 +63,6 @@ void Framework::Start() {
     GameObject* ground = Engine.CreateGameObject();
     ground->name = "world";
     
-    
-    // Add a light component
-    Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
-    ground->AddComponent(lightComponent);
-    
-    
     // Add a render component
     Component* groundRenderer = Engine.CreateComponentEntityRenderer(groundMesh, groundMaterial);
     ground->AddComponent(groundRenderer);
@@ -95,6 +89,12 @@ void Framework::Start() {
     
     cameraController->CalculatePhysics();
     cameraController->EnableGravity(true);
+    
+    
+    // Add a light component for light testing
+    Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
+    cameraController->AddComponent(lightComponent);
+    
     
     
     
@@ -158,19 +158,17 @@ void Framework::Run() {
             
             GameObject* projectile = Engine.CreateGameObject();
             projectile->name = "projectile";
+            projectile->SetPosition(offsetx, offsety, offsetz);
             
             // Add a render component
             Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
             projectile->AddComponent(entityRenderer);
             
-            
+            // Set the render component to a loaded resource
             Entity* entity = (Entity*)entityRenderer->GetComponent();
-            
-            // Copy the sub mesh
             entity->AttachMesh(projectileMesh);
             entity->AttachMaterial(barrelMaterial);
             
-            projectile->SetPosition(offsetx, offsety, offsetz);
             
             // Add a physics component
             Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);

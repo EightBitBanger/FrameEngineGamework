@@ -91,8 +91,6 @@ public:
     bool ChangeSubMeshColor(unsigned int index, Color newColor);
     /// Update the position of a sub mesh.
     bool ChangeSubMeshPosition(unsigned int index, float x, float y, float z);
-    /// Update the position of a sub mesh.
-    bool ChangeSubMeshLightingValue(unsigned int index, Color newColor);
     
     /// Fully re-upload the vertex buffer into the GPU buffer.
     void UpdateMesh(void);

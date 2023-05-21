@@ -351,6 +351,10 @@ void RenderSystem::RenderFrame(float deltaTime) {
     currentPipeline->currentShader->Bind();
     currentPipeline->currentShader->SetProjectionMatrix( viewProjection );
     
+    // Light list
+    unsigned int numberOfLights=0;
+    glm::vec3  lightPosition[16];
+    float      lightIntensity[16];
     
     // Run through the scenes
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
@@ -359,18 +363,18 @@ void RenderSystem::RenderFrame(float deltaTime) {
         
         // Check to update the scene light list
         if (scenePtr->doUpdateLights) {
-            scenePtr->doUpdateLights = false;
-            unsigned int lightListSz = scenePtr->GetLightQueueSize();
+            numberOfLights = scenePtr->GetLightQueueSize();
             
             // Run the light list
-            for (unsigned int i=0; i < lightListSz; i++) {
-                if (currentLightIndex > lightListSz) 
-                    break;
+            for (unsigned int i=0; i < numberOfLights; i++) {
+                Light* lightPtr = scenePtr->GetLight(i);
                 
+                lightPosition[i].x = lightPtr->transform.position.x;
+                lightPosition[i].y = lightPtr->transform.position.y;
+                lightPosition[i].z = lightPtr->transform.position.z;
                 
+                lightIntensity[i] = lightPtr->intensity;
                 
-                
-                currentLightIndex++;
                 continue;
             }
             
