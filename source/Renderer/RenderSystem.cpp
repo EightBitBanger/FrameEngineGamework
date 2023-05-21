@@ -369,10 +369,12 @@ void RenderSystem::RenderFrame(float deltaTime) {
             for (unsigned int i=0; i < numberOfLights; i++) {
                 Light* lightPtr = scenePtr->GetLight(i);
                 
+                // Get the light position
                 lightPosition[i].x = lightPtr->transform.position.x;
                 lightPosition[i].y = lightPtr->transform.position.y;
                 lightPosition[i].z = lightPtr->transform.position.z;
                 
+                // light intensity
                 lightIntensity[i] = lightPtr->intensity;
                 
                 continue;

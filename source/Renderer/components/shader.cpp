@@ -12,33 +12,35 @@ Shader::Shader() {
     mLightIntensity=0;
     
     mIsShaderLoaded = false;
-    return;
 }
 
 Shader::~Shader() {
     
     if (mIsShaderLoaded) glDeleteProgram(mShaderProgram);
-    return;
 }
 
 void Shader::SetModelMatrix(glm::mat4 &ModelMatrix) {
     glUniformMatrix4fv(mModelMatrixLocation, 1, 0, &ModelMatrix[0][0]);
-    return;
 }
 
 void Shader::SetProjectionMatrix(glm::mat4 &projectionMatrix) {
     glUniformMatrix4fv(mProjectionMatrixLocation, 1, 0, &projectionMatrix[0][0]);
-    return;
 }
 
 void Shader::SetMaterialColor(Color color) {
     glUniform4f(mMaterialColorLocation, color.r, color.g, color.b, color.a);
-    return;
 }
 
 void Shader::SetTextureSampler(unsigned int index) {
     glUniform1i(mSamplerLocation, index);
-    return;
+}
+
+void Shader::SetLightCount(unsigned int numberOfLights) {
+    glUniform1ui(mLightCount, numberOfLights);
+}
+
+void Shader::SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPositions) {
+    glUniform3fv(mLightCount, numberOfLights, &lightPositions[0][0]);
 }
 
 void Shader::SetUniformLocations(void) {
@@ -61,8 +63,6 @@ void Shader::SetUniformLocations(void) {
     mLightCount                = glGetUniformLocation(mShaderProgram, lightCountUniformName.c_str());
     mLightPosition             = glGetUniformLocation(mShaderProgram, lightPositionUniformName.c_str());
     mLightIntensity            = glGetUniformLocation(mShaderProgram, lightIntensityUniformName.c_str());
-    
-    return;
 }
 
 int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentScript) {
@@ -124,7 +124,7 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
 
 void Shader::Bind(void) {
     glUseProgram(mShaderProgram);
-    return;
+    
 }
 
 bool Shader::BuildDefault(void) {
@@ -143,9 +143,9 @@ bool Shader::BuildDefault(void) {
         "varying vec2 v_coord;"
         "varying vec3 v_color;"
         ""
-        "uniform int   u_light_count;"
-        "uniform vec3  u_light_pos[16];"
-        "uniform float u_light_intensity[16];"
+        "uniform unsigned int  u_light_count;"
+        "uniform vec3          u_light_pos[16];"
+        "uniform float         u_light_intensity[16];"
         ""
         "void main() "
         "{"

@@ -30,6 +30,13 @@ public:
     /// Set the texture sampler index.
     void SetTextureSampler(unsigned int index);
     
+    /// Set the number of lights
+    void SetLightCount(unsigned int numberOfLights);
+    /// Set the array of light positions
+    void SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPositions);
+    /// Set the array of light positions
+    void SetLightIntensity(unsigned int numberOfLights, glm::vec3* lightIntensity);
+    
     /// Set default uniform locations.
     void SetUniformLocations(void);
     
