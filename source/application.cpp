@@ -179,6 +179,8 @@ void Framework::Run() {
             GameObject* projectile = Engine.CreateGameObject();
             projectile->name = "projectile";
             
+            
+            
             // Add a render component
             Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
             projectile->AddComponent(entityRenderer);
@@ -189,6 +191,7 @@ void Framework::Run() {
             entity->transform.position = glm::vec3(startx, starty, startz);
             
             
+            
             // Light component test
             Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
             projectile->AddComponent(lightComponent);
@@ -197,11 +200,12 @@ void Framework::Run() {
             lightPtr->intensity    = 10;
             lightPtr->range        = 80;
             lightPtr->attenuation  = 0.1;
-            lightPtr->transform.position = glm::vec3(startx, starty, startz);
+            //lightPtr->transform.position = glm::vec3(startx, starty, startz);
             
             //projectile->SetPosition(startx, starty, startz);
             
-            /*
+            
+            
             // Add a physics component
             Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
             projectile->AddComponent(rigidBodyComponent);
@@ -225,8 +229,10 @@ void Framework::Run() {
             newTransform.setOrientation(quat);
             
             //body->setTransform(newTransform);
+            projectile->SetPosition(startx, starty, startz);
             projectile->AddForce(fwd.x, fwd.y, fwd.z);
-            */
+            
+            
             //continue;
         //}
         

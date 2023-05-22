@@ -5,10 +5,13 @@
 #include "../../Renderer/components/camera.h"
 #include "../../Renderer/components/light.h"
 #include "../../Physics/PhysicsSystem.h"
+#include "../../Renderer/RenderSystem.h"
 
 #include "../../Resources/assets/colliderTag.h"
 
 #include "component.h"
+
+extern RenderSystem Renderer;
 
 
 class GameObject {

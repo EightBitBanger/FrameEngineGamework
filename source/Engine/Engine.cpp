@@ -233,18 +233,15 @@ void EngineSystemManager::Update(void) {
         if (!objectPtr->isActive) 
             continue;
         
-        rp3d::Quaternion identity = rp3d::Quaternion::identity();
+        // Current transformation to which the components will be synchronized
+        rp3d::Transform bodyTransform = rp3d::Transform::identity();
         glm::vec3 position(0, 0, 0);
+        rp3d::Quaternion identity = rp3d::Quaternion::identity();
         glm::vec4 rotation(identity.x, identity.y, identity.z, identity.w);
         
         
         // Get the entity renderer transform
         Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
-        
-        rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
-        rp3d::Transform bodyTransform = rp3d::Transform::identity();
-        
-        // Calculate entity transform
         if (componentEntityRenderer != nullptr) {
             
             glm::mat4 matrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
@@ -252,22 +249,10 @@ void EngineSystemManager::Update(void) {
             
             position = componentEntityRenderer->transform.position;
             rotation = componentEntityRenderer->transform.rotation;
-            
         }
-        
-        // Calculate light transform
-        Light* componentLight = objectPtr->GetCachedLight();
-        if (componentLight != nullptr) {
-            
-            glm::mat4 matrix = Renderer.CalculateModelMatrix(componentLight->transform);
-            componentLight->transform.matrix = matrix;
-            
-            componentLight->transform.position = position;
-            componentLight->transform.rotation = rotation;
-        }
-        
         
         // Otherwise, get the rigid body transform
+        rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
         if (componentRigidBody != nullptr) {
            
             rp3d::Vector3 bodyPosition;
@@ -296,15 +281,26 @@ void EngineSystemManager::Update(void) {
         
         // Sync the entity renderer component
         if (componentEntityRenderer != nullptr) {
-            bodyTransform.getOpenGLMatrix(&componentEntityRenderer->transform.matrix[0][0]);
             
-            componentEntityRenderer->transform.position = position;
-            componentEntityRenderer->transform.rotation = rotation;
+            if (componentRigidBody != nullptr) {
+                bodyTransform.getOpenGLMatrix(&componentEntityRenderer->transform.matrix[0][0]);
+                
+                componentEntityRenderer->transform.position = position;
+                componentEntityRenderer->transform.rotation = rotation;
+            } else {
+                glm::mat4 matrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
+                componentEntityRenderer->transform.matrix = matrix;
+            }
+            
         }
         
         // Sync the light component
+        Light* componentLight = objectPtr->GetCachedLight();
         if (componentLight != nullptr) {
-            bodyTransform.getOpenGLMatrix(&componentLight->transform.matrix[0][0]);
+            
+            if (componentRigidBody != nullptr) {
+                bodyTransform.getOpenGLMatrix(&componentLight->transform.matrix[0][0]);
+            }
             
             componentLight->transform.position = position;
             componentLight->transform.rotation = rotation;
@@ -313,7 +309,10 @@ void EngineSystemManager::Update(void) {
         // Sync camera components
         Camera* componentCamera = objectPtr->GetCachedCamera();
         if (componentCamera != nullptr) {
-            bodyTransform.getOpenGLMatrix(&componentCamera->transform.matrix[0][0]);
+            
+            if (componentRigidBody != nullptr) {
+                bodyTransform.getOpenGLMatrix(&componentCamera->transform.matrix[0][0]);
+            }
             
             componentCamera->transform.position = position;
             if (!componentCamera->useMouseLook) 
