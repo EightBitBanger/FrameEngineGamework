@@ -200,9 +200,8 @@ void Framework::Run() {
             lightPtr->intensity    = 10;
             lightPtr->range        = 80;
             lightPtr->attenuation  = 0.1;
-            //lightPtr->transform.position = glm::vec3(startx, starty, startz);
+            lightPtr->transform.position = glm::vec3(startx, starty, startz);
             
-            //projectile->SetPosition(startx, starty, startz);
             
             
             

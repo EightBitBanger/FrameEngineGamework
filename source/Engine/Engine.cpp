@@ -235,12 +235,12 @@ void EngineSystemManager::Update(void) {
         
         // Current transformation to which the components will be synchronized
         rp3d::Transform bodyTransform = rp3d::Transform::identity();
-        glm::vec3 position(0, 0, 0);
         rp3d::Quaternion identity = rp3d::Quaternion::identity();
+        glm::vec3 position(0, 0, 0);
         glm::vec4 rotation(identity.x, identity.y, identity.z, identity.w);
         
         
-        // Get the entity renderer transform
+        // Get the entity renderer as the source transform
         Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
         if (componentEntityRenderer != nullptr) {
             
@@ -251,7 +251,8 @@ void EngineSystemManager::Update(void) {
             rotation = componentEntityRenderer->transform.rotation;
         }
         
-        // Otherwise, get the rigid body transform
+        // Otherwise, get the rigid body as the source transform
+        // Rigid bodies should be last to trump other source components
         rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
         if (componentRigidBody != nullptr) {
            
@@ -271,15 +272,15 @@ void EngineSystemManager::Update(void) {
         }
         
         
+        //
+        // Do not update anything if no sync source component exists (rigid body | entity renderer)
         
-        
-        // Do not update anything if no sync source component exists
         if ((componentRigidBody == nullptr) & (componentEntityRenderer == nullptr)) 
             continue;
         
         
         
-        // Sync the entity renderer component
+        // Sync the entity renderer component to the source component
         if (componentEntityRenderer != nullptr) {
             
             if (componentRigidBody != nullptr) {
@@ -294,7 +295,7 @@ void EngineSystemManager::Update(void) {
             
         }
         
-        // Sync the light component
+        // Sync the light component to the source component
         Light* componentLight = objectPtr->GetCachedLight();
         if (componentLight != nullptr) {
             
@@ -306,7 +307,7 @@ void EngineSystemManager::Update(void) {
             componentLight->transform.rotation = rotation;
         }
         
-        // Sync camera components
+        // Sync camera component to the source component
         Camera* componentCamera = objectPtr->GetCachedCamera();
         if (componentCamera != nullptr) {
             
