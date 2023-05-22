@@ -148,25 +148,24 @@ void EngineSystemManager::Initiate() {
 Component* EngineSystemManager::CreateComponent(ComponentType type) {
     void* component_object = nullptr;
     
-    // Attach a component of a defined type
     switch (type) {
         
-        case ComponentType::Renderer:
+        case ComponentType::Renderer: {
             component_object = (void*)this->CreateEntityRenderer(nullptr, nullptr);
             break;
-            
+        }
         case ComponentType::RigidBody: {
             component_object = (void*)Physics.CreateRigidBody();
             break;
         }
-        case ComponentType::Script:
+        case ComponentType::Script: {
             component_object = (void*)Scripting.CreateScript();
             break;
-            
-        case ComponentType::Camera:
+        }
+        case ComponentType::Camera: {
             component_object = (void*)Renderer.CreateCamera();
             break;
-        
+        }
         case ComponentType::Light: {
             Light* lightPtr = Renderer.CreateLight();
             mSceneMain->AddLightToSceneRoot(lightPtr);
@@ -186,47 +185,38 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
 void EngineSystemManager::DestroyComponent(Component* componentPtr) {
     assert(componentPtr != nullptr);
     
-    Entity* componentEntityRenderer;
-    rp3d::RigidBody* componentRigidBody;
-    Script* componentScript;
-    Camera* componentCamera;
-    Light* componentLight;
-    
     ComponentType componentType = componentPtr->GetType();
     
-    // Destroy attached component type
     switch (componentType) {
         
-        case ComponentType::Renderer:
-            componentEntityRenderer = (Entity*)componentPtr->GetComponent();
+        case ComponentType::Renderer: {
+            Entity* componentEntityRenderer = (Entity*)componentPtr->GetComponent();
             DestroyEntityRenderer(componentEntityRenderer);
             break;
-          
-        case ComponentType::RigidBody:
-            componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
+        }
+        case ComponentType::RigidBody: {
+            rp3d::RigidBody* componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
             Physics.DestroyRigidBody(componentRigidBody);
             break;
-            
-        case ComponentType::Script: 
-            componentScript = (Script*)componentPtr->GetComponent();
+        }
+        case ComponentType::Script: {
+            Script* componentScript = (Script*)componentPtr->GetComponent();
             Scripting.DestroyScript(componentScript);
             break;
-            
-        case ComponentType::Camera: 
-            componentCamera = (Camera*)componentPtr->GetComponent();
+        }
+        case ComponentType::Camera: {
+            Camera* componentCamera = (Camera*)componentPtr->GetComponent();
             Renderer.DestroyCamera(componentCamera);
             break;
-            
+        }
         case ComponentType::Light: {
-            componentLight = (Light*)componentPtr->GetComponent();
+            Light* componentLight = (Light*)componentPtr->GetComponent();
             mSceneMain->RemoveLightFromSceneRoot(componentLight);
             Renderer.DestroyLight(componentLight);
             break;
         }
         
         default:
-            std::cout<<"Destroying a component with an incorrect type."<<std::endl;
-            assert(0);
             break;
     }
     mComponents.Destroy(componentPtr);
@@ -243,91 +233,74 @@ void EngineSystemManager::Update(void) {
         if (!objectPtr->isActive) 
             continue;
         
-        // Component references
-        Camera*           componentCamera         = objectPtr->GetCachedCamera();
-        rp3d::RigidBody*  componentRigidBody      = objectPtr->GetCachedRigidBody();
-        Entity*           componentEntityRenderer = objectPtr->GetCachedEntity();
-        Light*            componentLight          = objectPtr->GetCachedLight();
+        rp3d::Quaternion identity = rp3d::Quaternion::identity();
+        glm::vec3 position(0, 0, 0);
+        glm::vec4 rotation(identity.x, identity.y, identity.z, identity.w);
         
         
-        //
-        // Synchronize component transforms
-        //
+        // Get the entity renderer transform
+        Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
         
+        rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
         rp3d::Transform bodyTransform = componentRigidBody->getTransform();
         
-        rp3d::Vector3    bodyPos = rp3d::Vector3(0, 0, 0);
-        rp3d::Quaternion quaterion = rp3d::Quaternion::identity();
-        
-        
-        
-        
-        if (componentEntityRenderer != nullptr) {
+        if ((componentEntityRenderer != nullptr) & (componentRigidBody == nullptr)) {
             
             glm::mat4 modleMatrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
             
             componentEntityRenderer->transform.matrix = modleMatrix;
             
-            bodyPos.x = componentEntityRenderer->transform.position.x;
-            bodyPos.y = componentEntityRenderer->transform.position.y;
-            bodyPos.z = componentEntityRenderer->transform.position.z;
+            position = componentEntityRenderer->transform.position;
+            rotation = componentEntityRenderer->transform.rotation;
             
-            quaterion.x = componentEntityRenderer->transform.rotation.x;
-            quaterion.y = componentEntityRenderer->transform.rotation.y;
-            quaterion.z = componentEntityRenderer->transform.rotation.z;
-            quaterion.w = componentEntityRenderer->transform.rotation.w;
+        // Otherwise, get the rigid body transform
+        } else {
             
+            rp3d::Vector3 bodyPosition;
+            bodyPosition = bodyTransform.getPosition();
+            rp3d::Quaternion quaterion = bodyTransform.getOrientation();
+            
+            position.x = bodyPosition.x;
+            position.y = bodyPosition.y;
+            position.z = bodyPosition.z;
+            
+            rotation.x = quaterion.x;
+            rotation.y = quaterion.y;
+            rotation.z = quaterion.z;
+            rotation.w = quaterion.w;
         }
         
         
-        if (componentRigidBody != nullptr) {
-            
-            bodyPos   = bodyTransform.getPosition();
-            quaterion = bodyTransform.getOrientation();
-        }
+        // Do not update anything if no sync source component exists
+        if ((componentRigidBody == nullptr) & (componentEntityRenderer == nullptr)) 
+            continue;
         
-        
+        // Sync the entity renderer component
         if (componentEntityRenderer != nullptr) {
             bodyTransform.getOpenGLMatrix(&componentEntityRenderer->transform.matrix[0][0]);
             
-            componentEntityRenderer->transform.position.x = bodyPos.x;
-            componentEntityRenderer->transform.position.y = bodyPos.y;
-            componentEntityRenderer->transform.position.z = bodyPos.z;
-            
-            componentEntityRenderer->transform.rotation.x = quaterion.x;
-            componentEntityRenderer->transform.rotation.y = quaterion.y;
-            componentEntityRenderer->transform.rotation.z = quaterion.z;
-            componentEntityRenderer->transform.rotation.w = quaterion.w;
+            componentEntityRenderer->transform.position = position;
+            componentEntityRenderer->transform.rotation = rotation;
         }
         
-        
+        // Sync the light component
+        Light* componentLight = objectPtr->GetCachedLight();
         if (componentLight != nullptr) {
             bodyTransform.getOpenGLMatrix(&componentLight->transform.matrix[0][0]);
             
-            componentLight->transform.position.x = bodyPos.x;
-            componentLight->transform.position.y = bodyPos.y;
-            componentLight->transform.position.z = bodyPos.z;
-            
-            componentLight->transform.rotation.x = quaterion.x;
-            componentLight->transform.rotation.y = quaterion.y;
-            componentLight->transform.rotation.z = quaterion.z;
-            componentLight->transform.rotation.w = quaterion.w;
+            componentLight->transform.position = position;
+            componentLight->transform.rotation = rotation;
         }
         
-        
+        // Sync camera components
+        Camera* componentCamera = objectPtr->GetCachedCamera();
         if (componentCamera != nullptr) {
             bodyTransform.getOpenGLMatrix(&componentCamera->transform.matrix[0][0]);
             
-            componentCamera->transform.position.x = bodyPos.x;
-            componentCamera->transform.position.y = bodyPos.y;
-            componentCamera->transform.position.z = bodyPos.z;
+            componentCamera->transform.position = position;
+            if (!componentCamera->useMouseLook) 
+                componentCamera->transform.rotation = rotation;
             
-            if (!componentCamera->useMouseLook) {
-                componentCamera->transform.rotation.x = quaterion.x;
-                componentCamera->transform.rotation.y = quaterion.y;
-                componentCamera->transform.rotation.z = quaterion.z;
-                componentCamera->transform.rotation.w = quaterion.w;
-            }
         }
         
         continue;

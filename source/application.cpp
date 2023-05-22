@@ -58,7 +58,7 @@ void Framework::Start() {
     
     // Create a ground plain
     Mesh* groundMesh = Renderer.CreateMesh();
-    groundMesh->AddPlainSubDivided(-1000, 0, -1000, 10, 10, Colors.white, 100, 100);
+    groundMesh->AddPlainSubDivided(-500, 0, -500, 10, 10, Colors.white, 100, 100);
     
     GameObject* ground = Engine.CreateGameObject();
     ground->name = "world";
@@ -139,7 +139,7 @@ void Framework::Run() {
     // Shoot object from camera
     
     if (Input.CheckMouseLeftPressed()) {
-        //Input.SetMouseLeftPressed(false);
+        Input.SetMouseLeftPressed(false);
         
         // Spread offset effect on projectile angle
         float spreadMul = 0.001;
@@ -172,7 +172,7 @@ void Framework::Run() {
             lightPtr->color = Colors.MakeRandom();
             lightPtr->intensity    = 10;
             lightPtr->range        = 80;
-            lightPtr->attenuation  = 0.7;
+            lightPtr->attenuation  = 0.1;
             
             
             // Add a physics component
@@ -197,7 +197,8 @@ void Framework::Run() {
             // Offset starting distance from camera
             fwd *= 13;
             
-            glm::vec3 pos = Renderer.cameraMain->transform.position;
+            glm::vec3 pos(0);
+            pos = Renderer.cameraMain->transform.position;
             pos += fwd;
             
             // Total forward force + camera offset distance
