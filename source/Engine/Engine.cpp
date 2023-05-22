@@ -242,21 +242,36 @@ void EngineSystemManager::Update(void) {
         Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
         
         rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
-        rp3d::Transform bodyTransform = componentRigidBody->getTransform();
+        rp3d::Transform bodyTransform = rp3d::Transform::identity();
         
-        if ((componentEntityRenderer != nullptr) & (componentRigidBody == nullptr)) {
+        // Calculate entity transform
+        if (componentEntityRenderer != nullptr) {
             
-            glm::mat4 modleMatrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
-            
-            componentEntityRenderer->transform.matrix = modleMatrix;
+            glm::mat4 matrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
+            componentEntityRenderer->transform.matrix = matrix;
             
             position = componentEntityRenderer->transform.position;
             rotation = componentEntityRenderer->transform.rotation;
             
-        // Otherwise, get the rigid body transform
-        } else {
+        }
+        
+        // Calculate light transform
+        Light* componentLight = objectPtr->GetCachedLight();
+        if (componentLight != nullptr) {
             
+            glm::mat4 matrix = Renderer.CalculateModelMatrix(componentLight->transform);
+            componentLight->transform.matrix = matrix;
+            
+            componentLight->transform.position = position;
+            componentLight->transform.rotation = rotation;
+        }
+        
+        
+        // Otherwise, get the rigid body transform
+        if (componentRigidBody != nullptr) {
+           
             rp3d::Vector3 bodyPosition;
+            bodyTransform = componentRigidBody->getTransform();
             bodyPosition = bodyTransform.getPosition();
             rp3d::Quaternion quaterion = bodyTransform.getOrientation();
             
@@ -271,9 +286,13 @@ void EngineSystemManager::Update(void) {
         }
         
         
+        
+        
         // Do not update anything if no sync source component exists
         if ((componentRigidBody == nullptr) & (componentEntityRenderer == nullptr)) 
             continue;
+        
+        
         
         // Sync the entity renderer component
         if (componentEntityRenderer != nullptr) {
@@ -284,7 +303,6 @@ void EngineSystemManager::Update(void) {
         }
         
         // Sync the light component
-        Light* componentLight = objectPtr->GetCachedLight();
         if (componentLight != nullptr) {
             bodyTransform.getOpenGLMatrix(&componentLight->transform.matrix[0][0]);
             

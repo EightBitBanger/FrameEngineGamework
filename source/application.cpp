@@ -47,6 +47,8 @@ void Framework::Start() {
     // Create objects from resource tags
     Material* groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
+    barrelMaterial->diffuse = Color(0.01, 0.01, 0.01);
+    groundMaterial->diffuse = Color(0.01, 0.01, 0.01);
     
     Mesh* barrelMesh = Resources.CreateMeshFromTag("barrel");
     barrelMesh->ChangeSubMeshColor(0, Colors.white);
@@ -142,7 +144,7 @@ void Framework::Run() {
         Input.SetMouseLeftPressed(false);
         
         // Spread offset effect on projectile angle
-        float spreadMul = 0.001;
+        float spreadMul = 0.0008;
         
         //for (int i=0; i < 1; i++) {
             
@@ -151,42 +153,6 @@ void Framework::Run() {
             float offsety = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
             float offsetz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
             
-            GameObject* projectile = Engine.CreateGameObject();
-            projectile->name = "projectile";
-            projectile->SetPosition(offsetx, offsety, offsetz);
-            
-            // Add a render component
-            Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
-            projectile->AddComponent(entityRenderer);
-            
-            // Set the render component to a loaded resource
-            Entity* entity = (Entity*)entityRenderer->GetComponent();
-            entity->AttachMesh(projectileMesh);
-            entity->AttachMaterial(barrelMaterial);
-            
-            
-            // Light component test
-            Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
-            projectile->AddComponent(lightComponent);
-            Light* lightPtr = (Light*)lightComponent->GetComponent();
-            lightPtr->color = Colors.MakeRandom();
-            lightPtr->intensity    = 10;
-            lightPtr->range        = 80;
-            lightPtr->attenuation  = 0.1;
-            
-            
-            // Add a physics component
-            Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
-            projectile->AddComponent(rigidBodyComponent);
-            rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
-            
-            // Projectile collider
-            projectile->AddColliderBox(projectileCollider, 0, 0, 0);
-            
-            projectile->SetMass(1);
-            projectile->SetLinearDamping(0.01);
-            projectile->SetAngularDamping(0.003);
-            projectile->CalculatePhysics();
             
             //
             // Calculate projectile force from camera forward angle
@@ -208,7 +174,48 @@ void Framework::Run() {
             float starty = pos.y + offsety - 5;
             float startz = pos.z + offsetz;
             
-            // Transform the rigid body
+            
+            
+            GameObject* projectile = Engine.CreateGameObject();
+            projectile->name = "projectile";
+            
+            // Add a render component
+            Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
+            projectile->AddComponent(entityRenderer);
+            // Set the render component to a loaded resource
+            Entity* entity = (Entity*)entityRenderer->GetComponent();
+            entity->AttachMesh(projectileMesh);
+            entity->AttachMaterial(barrelMaterial);
+            entity->transform.position = glm::vec3(startx, starty, startz);
+            
+            
+            // Light component test
+            Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
+            projectile->AddComponent(lightComponent);
+            Light* lightPtr = (Light*)lightComponent->GetComponent();
+            lightPtr->color = Colors.MakeRandom();
+            lightPtr->intensity    = 10;
+            lightPtr->range        = 80;
+            lightPtr->attenuation  = 0.1;
+            lightPtr->transform.position = glm::vec3(startx, starty, startz);
+            
+            //projectile->SetPosition(startx, starty, startz);
+            
+            /*
+            // Add a physics component
+            Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
+            projectile->AddComponent(rigidBodyComponent);
+            rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+            
+            // Projectile collider
+            projectile->AddColliderBox(projectileCollider, 0, 0, 0);
+            
+            projectile->SetMass(1);
+            projectile->SetLinearDamping(0.01);
+            projectile->SetAngularDamping(0.003);
+            projectile->CalculatePhysics();
+            
+            // Transform the rigid body and apply force
             rp3d::Transform newTransform;
             newTransform.setPosition(rp3d::Vector3(startx, starty, startz));
             
@@ -217,10 +224,9 @@ void Framework::Run() {
             
             newTransform.setOrientation(quat);
             
-            body->setTransform(newTransform);
-            
+            //body->setTransform(newTransform);
             projectile->AddForce(fwd.x, fwd.y, fwd.z);
-            
+            */
             //continue;
         //}
         

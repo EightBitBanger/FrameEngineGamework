@@ -204,7 +204,7 @@ bool Shader::BuildDefault(void) {
         "    "
         "  }"
         "  "
-        "  v_color = finalColor;"
+        "  v_color = finalColor + m_diffuse;"
         "  v_coord = l_uv;"
         "  "
         "  gl_Position = u_proj * vertPos;"

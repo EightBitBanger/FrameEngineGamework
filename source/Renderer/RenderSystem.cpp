@@ -369,7 +369,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
             numberOfLights = scenePtr->GetLightQueueSize();
             if (numberOfLights > RENDER_NUMBER_OF_LIGHTS) numberOfLights = RENDER_NUMBER_OF_LIGHTS;
             
-            // Run the light list
+            // Accumulate a list of lights
             for (unsigned int i=0; i < numberOfLights; i++) {
                 Light* lightPtr = scenePtr->GetLight(i);
                 
@@ -404,10 +404,12 @@ void RenderSystem::RenderFrame(float deltaTime) {
         
         for (unsigned int i=0; i < entityListSz; i++) {
             
+            // Mesh binding
             Entity* currentEntity = scenePtr->GetEntity(i);
             
             Mesh* mesh = currentEntity->GetAttachedMesh();
-            assert(mesh != nullptr);
+            if (mesh == nullptr) 
+                continue;
             
             // Mesh binding
             if (mCurrentMesh != mesh) {
@@ -416,8 +418,11 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 mCurrentMesh->Bind();
             }
             
-            // Material binding
             Material* materialPtr = currentEntity->GetAttachedMaterial();
+            if (materialPtr == nullptr) 
+                continue;
+            
+            // Material binding
             if (mCurrentMaterial != materialPtr) {
                 mCurrentMaterial = materialPtr;
                 
