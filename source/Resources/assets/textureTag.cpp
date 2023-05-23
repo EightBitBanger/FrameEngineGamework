@@ -1,12 +1,13 @@
 #include "textureTag.h"
 
 
-TextureTag::TextureTag() {
+TextureTag::TextureTag() : 
     
-    width = 0;
-    height = 0;
-    channels = 0;
+    width(0),
+    height(0),
     
-    buffer = nullptr;
-    return;
+    channels(0),
+    
+    buffer(nullptr)
+{
 }

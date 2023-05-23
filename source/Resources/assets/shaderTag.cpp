@@ -1,11 +1,11 @@
 #include "shaderTag.h"
 
 
-ShaderTag::ShaderTag() {
+ShaderTag::ShaderTag() : 
     
-    name = "";
+    name(""),
     
-    vertexScript   = "";
-    fragmentScript = "";
-    return;
+    vertexScript(""),
+    fragmentScript("")
+{
 }

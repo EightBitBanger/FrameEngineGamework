@@ -12,23 +12,39 @@ class Material {
     
 public:
     
+    /// Texture image width.
     unsigned int width;
+    /// Texture image height.
     unsigned int height;
     
+    /// Global illumination value.
     Color ambient;
+    /// The color with which the texture will be rendered.
     Color diffuse;
     
+    /// State whether depth testing will be used.
     bool doDepthTest;
+    /// State whether blending will be used.
     bool doBlending;
+    /// State whether face culling will be used.
     bool doFaceCulling;
     
+    /// Depth function used for rendering with the depth buffer.
     GLint depthFunc;
+    /// The direction in which the triangles will be rendered.
     GLint faceWinding;
+    /// The side of the triangle to skip drawing.
     GLint faceCullSide;
+    
+    /// Blending source.
     GLint blendSource;
+    /// Blending destination.
     GLint blendDestination;
+    /// The alpha blend source.
     GLint blendAlphaSource;
+    /// The alpha blend destination.
     GLint blendAlphaDestination;
+    /// The function used to blend colors.
     GLint blendFunction;
     
     Material();

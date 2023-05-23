@@ -1,10 +1,10 @@
 #include "pipeline.h"
 
 
-RenderPipeline::RenderPipeline() {
+RenderPipeline::RenderPipeline() : 
     
-    currentShader = nullptr;
-    return;
+    currentShader(nullptr)
+{
 }
 
 void RenderPipeline::Bind(void) {

@@ -2,20 +2,19 @@
 
 #define IDI_ICON  101
 
-ApplicationLayer::ApplicationLayer() {
+ApplicationLayer::ApplicationLayer() : 
     
-    windowHandle  = NULL;
-    deviceContext = NULL;
+    windowHandle(NULL),
+    deviceContext(NULL),
     
-    displayWidth  = 1024;
-    displayHeight = 800;
+    displayWidth(1024),
+    displayHeight(800),
     
-    mIsWindowRunning = false;
+    isPaused(false),
+    isActive(true),
     
-    isPaused = false;
-    isActive = true;
-    
-    return;
+    mIsWindowRunning(false)
+{
 }
 
 void ApplicationLayer::Pause(void) {

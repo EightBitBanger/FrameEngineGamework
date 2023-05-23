@@ -1,5 +1,13 @@
 #include "component.h"
 
+
+Component::Component() : 
+    name(""),
+    mType(ComponentType::Undefined),
+    mObject(nullptr)
+{
+}
+
 void* Component::GetComponent(void) {
     return mObject;
 }
@@ -12,10 +20,4 @@ void Component::SetComponent(ComponentType component_type, void* component_objec
     mType = component_type;
     mObject = component_object;
     return;
-}
-
-Component::Component() : 
-    name(""),
-    mType(ComponentType::Undefined),
-    mObject(nullptr) {
 }

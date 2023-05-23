@@ -1,12 +1,11 @@
 #include "entity.h"
 
 
-Entity::Entity() {
+Entity::Entity() : 
     
-    mMesh       = nullptr;
-    mMaterial   = nullptr;
-    
-    return;
+    mMesh(nullptr),
+    mMaterial(nullptr)
+{
 }
 
 void Entity::AttachMesh(Mesh* meshPtr) {

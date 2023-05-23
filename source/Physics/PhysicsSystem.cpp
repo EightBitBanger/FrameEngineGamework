@@ -2,8 +2,9 @@
 
 
 PhysicsSystem::PhysicsSystem() : 
-    world(nullptr) {
     
+    world(nullptr)
+{
     mRigidBodyFreeList.reserve(512);
     
     return;

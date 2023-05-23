@@ -1,8 +1,8 @@
 #include "meshTag.h"
 
 
-MeshTag::MeshTag() {
+MeshTag::MeshTag() : 
     
-    name = "";
-    return;
+    name("")
+{
 }

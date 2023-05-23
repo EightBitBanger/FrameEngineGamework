@@ -1,25 +1,25 @@
 #include "material.h"
 
-Material::Material() {
+Material::Material() : 
     
-    width  = 0;
-    height = 0;
+    width(0),
+    height(0),
     
+    doDepthTest(true),
+    doBlending(false),
+    doFaceCulling(true),
+    
+    depthFunc(MATERIAL_DEPTH_LESS),
+    faceWinding(GL_CCW),
+    faceCullSide(GL_BACK),
+    blendSource(BLEND_SRC_COLOR),
+    blendDestination(BLEND_SRC_ALPHA),
+    blendAlphaSource(BLEND_ONE_MINUS_SRC_COLOR),
+    blendAlphaDestination(BLEND_ONE_MINUS_SRC_ALPHA),
+    blendFunction(BLEND_EQUATION_ADD)
+{
     ambient = Color(0.01, 0.01, 0.01, 1);
     diffuse = Color(0.87, 0.87, 0.87, 1);
-    
-    doDepthTest   = true;
-    doBlending    = false;
-    doFaceCulling = true;
-    
-    depthFunc             = MATERIAL_DEPTH_LESS;
-    faceWinding           = GL_CCW;
-    faceCullSide          = GL_BACK;
-    blendSource           = BLEND_SRC_COLOR;
-    blendDestination      = BLEND_SRC_ALPHA;
-    blendAlphaSource      = BLEND_ONE_MINUS_SRC_COLOR;
-    blendAlphaDestination = BLEND_ONE_MINUS_SRC_ALPHA;
-    blendFunction         = BLEND_EQUATION_ADD;
     
     glGenTextures(1, &mTextureBuffer);
     glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
@@ -31,11 +31,12 @@ Material::Material() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     
     glGenerateMipmap(GL_TEXTURE_2D);
-    
+    return;
 }
 
 Material::~Material() {
     glDeleteTextures(1, &mTextureBuffer);
+    return;
 }
 
 void Material::EnableDepthTest(void)  {doDepthTest = true;}
@@ -55,10 +56,12 @@ void Material::SetBlendingFunction(GLint func)  {blendFunction = func;}
 
 void Material::Bind(void) {
     glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
+    return;
 }
 
 void Material::BindTextureSlot(unsigned int slot) {
     glActiveTexture(GL_TEXTURE0 + slot);
+    return;
 }
 
 void Material::UpdateTextureBuffer(void* textureData) {

@@ -3,14 +3,13 @@
 extern ColorPreset Colors;
 
 
-Light::Light() {
+Light::Light() : 
     
-    color = Colors.white;
+    color(Colors.white),
     
-    intensity   = 0.87;
-    range       = 30;
-    attenuation = 0.8;
-    
+    intensity(100),
+    range(300),
+    attenuation(0.008) 
+{
 }
-
 

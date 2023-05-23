@@ -1,10 +1,10 @@
 #include "colliderTag.h"
 
 
-ColliderTag::ColliderTag() {
+ColliderTag::ColliderTag() : 
     
-    name = "";
+    name(""),
     
-    colliderShape = nullptr;
-    return;
+    colliderShape(nullptr)
+{
 }

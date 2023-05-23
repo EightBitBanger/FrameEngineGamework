@@ -1,21 +1,13 @@
 #include "mesh.h"
 
 
-void Mesh::Reallocate(unsigned int newBufferSize) {
-    FreeBuffers();
-    AllocateBuffers(newBufferSize);
+Mesh::Mesh() : 
     
-    SetDefaultAttributes();
-    return;
-}
-
-Mesh::Mesh() {
-    
-    mPrimitive = GL_TRIANGLES;
-    mVertexBufferSz = 0;
-    mIndexBufferSz = 0;
-    
-    AllocateBuffers(32);
+    mPrimitive(GL_TRIANGLES),
+    mVertexBufferSz(0),
+    mIndexBufferSz(0)
+{
+    AllocateBuffers(1024);
     
     SetDefaultAttributes();
     return;
@@ -24,6 +16,14 @@ Mesh::Mesh() {
 Mesh::~Mesh() {
     
     FreeBuffers();
+    return;
+}
+
+void Mesh::Reallocate(unsigned int newBufferSize) {
+    FreeBuffers();
+    AllocateBuffers(newBufferSize);
+    
+    SetDefaultAttributes();
     return;
 }
 
@@ -124,10 +124,10 @@ void Mesh::AddPlain(float x, float y, float z, float width, float height, Color 
     z = (z * 2) - x;
     
     Vertex vertex[4];
-    vertex[0] = Vertex( x-width, y, z+height,  color.r, color.g, color.b, 0, 1 );
-    vertex[1] = Vertex( x+width, y, z+height,  color.r, color.g, color.b, 1, 1 );
-    vertex[2] = Vertex( x+width, y, z-height,  color.r, color.g, color.b, 1, 0 );
-    vertex[3] = Vertex( x-width, y, z-height,  color.r, color.g, color.b, 0, 0 );
+    vertex[0] = Vertex( x-width, y, z+height,   color.r, color.g, color.b,   0, 1, 0,   0, 1 );
+    vertex[1] = Vertex( x+width, y, z+height,   color.r, color.g, color.b,   0, 1, 0,   1, 1 );
+    vertex[2] = Vertex( x+width, y, z-height,   color.r, color.g, color.b,   0, 1, 0,   1, 0 );
+    vertex[3] = Vertex( x-width, y, z-height,   color.r, color.g, color.b,   0, 1, 0,   0, 0 );
     
     SubMesh subBuffer;
     subBuffer.vertexBuffer.push_back(vertex[0]);
@@ -163,10 +163,10 @@ void Mesh::AddWall(float x, float y, float z, float width, float height, Color c
     z -= x;
     
     Vertex vertex[4];
-    vertex[0] = Vertex( x-width, y+height, z,  color.r, color.g, color.b, 0, 1 );
-    vertex[1] = Vertex( x+width, y+height, z,  color.r, color.g, color.b, 1, 1 );
-    vertex[2] = Vertex( x+width, y-height, z,  color.r, color.g, color.b, 1, 0 );
-    vertex[3] = Vertex( x-width, y-height, z,  color.r, color.g, color.b, 0, 0 );
+    vertex[0] = Vertex( x-width, y+height, z,   color.r, color.g, color.b,   0,0,1,  0, 1 );
+    vertex[1] = Vertex( x+width, y+height, z,   color.r, color.g, color.b,   0,0,1,  1, 1 );
+    vertex[2] = Vertex( x+width, y-height, z,   color.r, color.g, color.b,   0,0,1,  1, 0 );
+    vertex[3] = Vertex( x-width, y-height, z,   color.r, color.g, color.b,   0,0,1,  0, 0 );
     
     SubMesh subBuffer;
     subBuffer.vertexBuffer.push_back(vertex[0]);

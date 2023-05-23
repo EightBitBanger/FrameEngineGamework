@@ -1,19 +1,17 @@
 #include "rendersystem.h"
 
 
-RenderSystem::RenderSystem() {
+RenderSystem::RenderSystem() : 
     
-    mWindowHandle   = NULL;
-    mDeviceContext  = NULL;
-    mRenderContext  = NULL;
+    cameraMain(nullptr),
     
-    mRenderQueue.clear();
+    mWindowHandle(NULL),
+    mDeviceContext(NULL),
+    mRenderContext(NULL),
     
-    mCurrentMesh      = nullptr;
-    mCurrentMaterial  = nullptr;
-    
-    cameraMain = nullptr;
-    return;
+    mCurrentMesh(nullptr),
+    mCurrentMaterial(nullptr)
+{
 }
 
 Entity* RenderSystem::CreateEntity(void) {

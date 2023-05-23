@@ -1,14 +1,15 @@
 #include "script.h"
 
-Script::Script() {
+Script::Script() : 
     
-    isActive         = false;
-    hasBeenInitiated = false;
+    isActive(false),
+    hasBeenInitiated(false),
     
-    gameObject = nullptr;
+    gameObject(nullptr),
     
-    OnCreate = nullfunc;
-    OnUpdate = nullfunc;
+    OnCreate(nullfunc),
+    OnUpdate(nullfunc)
+{
 }
 
 // Dummy landing function

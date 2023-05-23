@@ -18,10 +18,12 @@ EngineSystemManager   Engine;
 
 
 
-EngineSystemManager::EngineSystemManager(void) : mSceneMain(nullptr) {
+EngineSystemManager::EngineSystemManager(void) : 
     
+    mSceneMain(nullptr) 
+{
     // Preallocate some buffer space
-    mGameObjectActive.reserve(512);
+    mGameObjectActive.reserve(64);
     
     return;
 }

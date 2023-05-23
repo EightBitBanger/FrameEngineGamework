@@ -1,20 +1,23 @@
 #include "shader.h"
 
-Shader::Shader() {
-    mShaderProgram = 0;
+Shader::Shader() : 
+    mShaderProgram(0),
     
-    mProjectionMatrixLocation=0;
-    mModelMatrixLocation=0;
-    mCameraPosition=0;
-    mMaterialAmbientLocation=0;
-    mMaterialDiffuseLocation=0;
-    mSamplerLocation=0;
-    mLightCount=0;
-    mLightPosition=0;
-    mLightAttenuation=0;
-    mLightColor=0;
+    mProjectionMatrixLocation(0),
+    mModelMatrixLocation(0),
+    mCameraPosition(0),
     
-    mIsShaderLoaded = false;
+    mMaterialAmbientLocation(0),
+    mMaterialDiffuseLocation(0),
+    mSamplerLocation(0),
+    
+    mLightCount(0),
+    mLightPosition(0),
+    mLightAttenuation(0),
+    mLightColor(0),
+    
+    mIsShaderLoaded(false)
+{
 }
 
 Shader::~Shader() {
@@ -160,29 +163,35 @@ bool Shader::BuildDefault(void) {
         "layout(location = 1) in vec3 l_color;"
         "layout(location = 2) in vec3 l_normal;"
         "layout(location = 3) in vec2 l_uv;"
-        ""
+        
         "uniform mat4 u_proj;"
         "uniform mat4 u_model;"
         "uniform vec3 u_eye;"
-        ""
+        
         "varying vec2 v_coord;"
         "varying vec3 v_color;"
-        ""
+        
         "uniform vec3 m_ambient;"
         "uniform vec3 m_diffuse;"
-        ""
+        
         "uniform int   u_light_count;"
         "uniform vec3  u_light_position["+numberOfLights+"];"
         "uniform vec3  u_light_attenuation["+numberOfLights+"];"
         "uniform vec3  u_light_color["+numberOfLights+"];"
-        ""
+        
         "void main() "
         "{"
-        "  "
+        
         "  vec4 vertPos = u_model * vec4(l_position, 1);"
         "  float diff = 1.0;"
-        "  "
-        "  vec3 finalColor = m_ambient;"
+        "  vec3 finalColor = m_ambient;";
+    
+    
+    //
+    // Crude but quick vertex lighting implementation
+    //
+    
+    vertexShader += 
         "  for (int i=0; i<=u_light_count; i++) {"
         "    "
         "    float intensity    = u_light_attenuation[i].r;"
@@ -191,25 +200,25 @@ bool Shader::BuildDefault(void) {
         "    "
         "    vec3 lightDir = normalize(u_light_position[i] - vec3(vertPos));"
         "    "
-        //"    diff = max(dot(normalize(l_normal), lightDir), 0.0);"
+        "    diff = max(dot(normalize(l_normal), lightDir), 0.0);"
         "    "
         "    "
         "    float dist = length( u_light_position[i] - vec3(vertPos));"
         "    if (dist < range) {"
         "      "
-        "      finalColor += ((diff * u_light_color[i]) * intensity) / (1.0 + (dist * attenuation));"
-        "      finalColor = clamp(finalColor, 0.0, 2.0);"
+        "      finalColor += ((diff * u_light_color[i]) * intensity) / (dist * (attenuation * range));"
         "      "
         "    }"
         "    "
-        "  }"
-        "  "
+        "  }";
+    
+    
+    vertexShader += 
         "  v_color = finalColor + m_diffuse;"
         "  v_coord = l_uv;"
-        "  "
         "  gl_Position = u_proj * vertPos;"
-        "  "
         "};";
+    
     
     std::string fragmentShader = 
         "#version 330 core\n"

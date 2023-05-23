@@ -67,6 +67,7 @@ public:
     /// Purge all assets loaded in the resource system.
     void DestroyAssets(void);
     
+    ResourceManager();
     
 private:
     

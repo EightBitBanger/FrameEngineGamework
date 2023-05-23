@@ -1,15 +1,15 @@
 #include "transform.h"
 
-Transform::Transform() {
+Transform::Transform() : 
     
-    position = glm::vec3(0, 0, 0);
-    rotation = glm::vec4(0, 0, 0, 1);
-    scale    = glm::vec3(1, 1, 1);
+    position(glm::vec3(0, 0, 0)),
+    rotation(glm::vec4(0, 0, 0, 1)),
+    scale(glm::vec3(1, 1, 1)),
     
-    matrix = glm::mat4(1);
+    matrix(glm::mat4(1)),
     
-    mParent = nullptr;
-    return;
+    mParent(nullptr)
+{
 }
 
 void Transform::SetPosition(float x, float y, float z) {

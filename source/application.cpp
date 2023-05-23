@@ -188,7 +188,7 @@ void Framework::Run() {
             Entity* entity = (Entity*)entityRenderer->GetComponent();
             entity->AttachMesh(projectileMesh);
             entity->AttachMaterial(barrelMaterial);
-            entity->transform.position = glm::vec3(startx, starty, startz);
+            //entity->transform.position = glm::vec3(startx, starty, startz);
             
             
             
@@ -197,10 +197,10 @@ void Framework::Run() {
             projectile->AddComponent(lightComponent);
             Light* lightPtr = (Light*)lightComponent->GetComponent();
             lightPtr->color = Colors.MakeRandom();
-            lightPtr->intensity    = 10;
-            lightPtr->range        = 80;
-            lightPtr->attenuation  = 0.1;
-            lightPtr->transform.position = glm::vec3(startx, starty, startz);
+            lightPtr->intensity    = 100;
+            lightPtr->range        = 300;
+            lightPtr->attenuation  = 0.008;
+            //lightPtr->transform.position = glm::vec3(startx, starty, startz);
             
             
             
@@ -213,7 +213,7 @@ void Framework::Run() {
             // Projectile collider
             projectile->AddColliderBox(projectileCollider, 0, 0, 0);
             
-            projectile->SetMass(1);
+            projectile->SetMass(100);
             projectile->SetLinearDamping(0.01);
             projectile->SetAngularDamping(0.003);
             projectile->CalculatePhysics();

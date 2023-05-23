@@ -1,24 +1,24 @@
 #include "camera.h"
 
-Camera::Camera() {
+Camera::Camera() : 
     
-    up      = glm::vec3(0, 1, 0);
-    forward = glm::vec3(0, 0, 0);
-    right   = glm::vec3(0, 0, 0);
+    up(glm::vec3(0, 1, 0)),
+    forward(glm::vec3(0, 0, 0)),
+    right(glm::vec3(0, 0, 0)),
     
-    useMouseLook = false;
+    useMouseLook(false),
     
-    fov       = 60;
-    aspect    = 1.33;
-    clipNear  = 0.03;
-    clipFar   = 1000000;
+    fov(60),
+    aspect(1.33),
+    clipNear(0.03),
+    clipFar(1000000),
     
-    MouseLimitPitchMax = 180;
-    MouseLimitPitchMin = 180;
+    MouseLimitPitchMax(180),
+    MouseLimitPitchMin(180),
     
-    MouseSensitivityYaw   = 0.004;
-    MouseSensitivityPitch = 0.0038;
-    
+    MouseSensitivityYaw(0.004),
+    MouseSensitivityPitch(0.0038)
+{
 }
 
 void Camera::SetMouseCenter(int mouseResetX, int mouseResetY) {CursorSetPosition(mouseResetX, mouseResetY);}

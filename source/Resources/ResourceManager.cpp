@@ -5,6 +5,11 @@
 extern RenderSystem Renderer;
 extern PhysicsSystem Physics;
 
+ResourceManager::ResourceManager() :
+    
+    sceneMain(nullptr)
+{
+}
 
 bool ResourceManager::LoadScene(std::string path) {
     

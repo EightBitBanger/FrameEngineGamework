@@ -1,8 +1,9 @@
 #include "scene.h"
 
 
-Scene::Scene() : doUpdateLights(true) {
-    
+Scene::Scene() : 
+    doUpdateLights(true)
+{
 }
 
 void Scene::AddEntityToSceneRoot(Entity* entity) {

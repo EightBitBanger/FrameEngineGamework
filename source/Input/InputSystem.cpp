@@ -17,17 +17,16 @@ glm::vec2 CursorGetPosition(void) {
     return MousePos;
 }
 
-extern InputSystem::InputSystem(void)    {
+extern InputSystem::InputSystem(void) : 
     
+    LastKeyPressed(-1),
+    
+    mMouseLeftPressed(false),
+    mMouseRightPressed(false),
+    mMouseLeftReleased(false),
+    mMouseRightReleased(false)
+{
     for (int i=0; i <= 255; i++) {mKeyPressed[i] = 0; mKeyReleased[i] = 0; mKeyCurrent[i] = 0;}
-    
-    LastKeyPressed = -1;
-    
-    mMouseLeftPressed = false;
-    mMouseRightPressed = false;
-    mMouseLeftReleased = false;
-    mMouseRightReleased = false;
-    
 }
 
 // Set key state

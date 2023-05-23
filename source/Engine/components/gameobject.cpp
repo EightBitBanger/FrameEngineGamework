@@ -1,13 +1,18 @@
 #include "gameobject.h"
 
+
 GameObject::GameObject() : 
+    
     name(""),
     isActive(true),
+    
     mCameraCache(nullptr),
     mRigidBodyCache(nullptr),
     mEntityCache(nullptr),
-    mLightCache(nullptr) {
+    mLightCache(nullptr)
+{
 }
+
 
 //
 // Component functions

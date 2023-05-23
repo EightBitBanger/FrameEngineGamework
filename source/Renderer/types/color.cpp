@@ -52,36 +52,36 @@ void Color::operator= (const Color& color) {
     return;
 }
 
-Color::Color() {
-    r = 0;
-    g = 0;
-    b = 0;
-    a = 1;
-    return;
+Color::Color() : 
+    r(0),
+    g(0),
+    b(0),
+    a(1)
+{
 }
 
-Color::Color(Color& color) {
-    r = color.r;
-    g = color.g;
-    b = color.b;
-    a = color.a;
-    return;
+Color::Color(Color& color) : 
+    r(color.r),
+    g(color.g),
+    b(color.b),
+    a(color.a)
+{
 }
 
-Color::Color(float red, float green, float blue, float alpha) {
-    r = red;
-    g = green;
-    b = blue;
-    a = alpha;
-    return;
+Color::Color(float red, float green, float blue, float alpha) : 
+    r(red),
+    g(green),
+    b(blue),
+    a(alpha)
+{
 }
 
-Color::Color(float red, float green, float blue) {
-    r = red;
-    g = green;
-    b = blue;
-    a = 1;
-    return;
+Color::Color(float red, float green, float blue) : 
+    r(red),
+    g(green),
+    b(blue),
+    a(1)
+{
 }
 
 Color& ColorPreset::Make(float r, float g, float b) {
