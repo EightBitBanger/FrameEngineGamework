@@ -197,9 +197,9 @@ void Framework::Run() {
             projectile->AddComponent(lightComponent);
             Light* lightPtr = (Light*)lightComponent->GetComponent();
             lightPtr->color = Colors.MakeRandom();
-            lightPtr->intensity    = 100;
-            lightPtr->range        = 300;
-            lightPtr->attenuation  = 0.008;
+            lightPtr->intensity    = 20;
+            lightPtr->range        = 100;
+            lightPtr->attenuation  = 0.01;
             //lightPtr->transform.position = glm::vec3(startx, starty, startz);
             
             

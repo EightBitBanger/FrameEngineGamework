@@ -238,26 +238,25 @@ void EngineSystemManager::Update(void) {
         // Current transformation to which the components will be synchronized
         rp3d::Transform bodyTransform = rp3d::Transform::identity();
         rp3d::Quaternion identity = rp3d::Quaternion::identity();
+        
         glm::vec3 position(0, 0, 0);
         glm::vec4 rotation(identity.x, identity.y, identity.z, identity.w);
         
         
-        // Get the entity renderer as the source transform
-        Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
-        if (componentEntityRenderer != nullptr) {
-            
-            glm::mat4 matrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
-            componentEntityRenderer->transform.matrix = matrix;
-            
-            position = componentEntityRenderer->transform.position;
-            rotation = componentEntityRenderer->transform.rotation;
-        }
+        // Get the source transform from the game object
+        objectPtr->transform.matrix = Renderer.CalculateModelMatrix(objectPtr->transform);
         
-        // Otherwise, get the rigid body as the source transform
-        // Rigid bodies should be last to trump other source components
+        position = objectPtr->transform.position;
+        rotation = objectPtr->transform.rotation;
+        
+        
+        // Check to get the rigid body as the source transform
+        // Rigid bodies should be checked last in order
+        // to trump other source components.
         rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
         if (componentRigidBody != nullptr) {
-           
+            
+            // Get the source transform from the rigid body
             rp3d::Vector3 bodyPosition;
             bodyTransform = componentRigidBody->getTransform();
             bodyPosition = bodyTransform.getPosition();
@@ -271,55 +270,58 @@ void EngineSystemManager::Update(void) {
             rotation.y = quaterion.y;
             rotation.z = quaterion.z;
             rotation.w = quaterion.w;
-        }
-        
-        
-        //
-        // Do not update anything if no sync source component exists (rigid body | entity renderer)
-        
-        if ((componentRigidBody == nullptr) & (componentEntityRenderer == nullptr)) 
-            continue;
-        
-        
-        
-        // Sync the entity renderer component to the source component
-        if (componentEntityRenderer != nullptr) {
             
-            if (componentRigidBody != nullptr) {
+            
+            //
+            // Sync with the rigid body
+            //
+            
+            Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
+            if (componentEntityRenderer != nullptr) {
                 bodyTransform.getOpenGLMatrix(&componentEntityRenderer->transform.matrix[0][0]);
-                
                 componentEntityRenderer->transform.position = position;
                 componentEntityRenderer->transform.rotation = rotation;
-            } else {
+            }
+            
+            Light* componentLight = objectPtr->GetCachedLight();
+            if (componentLight != nullptr) {
+                bodyTransform.getOpenGLMatrix(&componentLight->transform.matrix[0][0]);
+                componentLight->transform.position = position;
+                componentLight->transform.rotation = rotation;
+            }
+            
+            Camera* componentCamera = objectPtr->GetCachedCamera();
+            if (componentCamera != nullptr) {
+                bodyTransform.getOpenGLMatrix(&componentCamera->transform.matrix[0][0]);
+                componentCamera->transform.position = position;
+                if (!componentCamera->useMouseLook) 
+                    componentCamera->transform.rotation = rotation;
+            }
+            
+        } else {
+            
+            //
+            // Sync with the game object
+            //
+            
+            Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
+            if (componentEntityRenderer != nullptr) {
                 glm::mat4 matrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
                 componentEntityRenderer->transform.matrix = matrix;
             }
             
-        }
-        
-        // Sync the light component to the source component
-        Light* componentLight = objectPtr->GetCachedLight();
-        if (componentLight != nullptr) {
-            
-            if (componentRigidBody != nullptr) {
-                bodyTransform.getOpenGLMatrix(&componentLight->transform.matrix[0][0]);
+            Light* componentLight = objectPtr->GetCachedLight();
+            if (componentLight != nullptr) {
+                componentLight->transform.position = position;
+                componentLight->transform.rotation = rotation;
             }
             
-            componentLight->transform.position = position;
-            componentLight->transform.rotation = rotation;
-        }
-        
-        // Sync camera component to the source component
-        Camera* componentCamera = objectPtr->GetCachedCamera();
-        if (componentCamera != nullptr) {
-            
-            if (componentRigidBody != nullptr) {
-                bodyTransform.getOpenGLMatrix(&componentCamera->transform.matrix[0][0]);
+            Camera* componentCamera = objectPtr->GetCachedCamera();
+            if (componentCamera != nullptr) {
+                componentCamera->transform.position = position;
+                if (!componentCamera->useMouseLook) 
+                    componentCamera->transform.rotation = rotation;
             }
-            
-            componentCamera->transform.position = position;
-            if (!componentCamera->useMouseLook) 
-                componentCamera->transform.rotation = rotation;
             
         }
         
