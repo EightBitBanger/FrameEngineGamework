@@ -21,9 +21,10 @@ extern InputSystem          Input;
 
 
 // Global resource pointers
-Mesh*       projectileMesh;
-Material*   barrelMaterial;
-GameObject* cameraController;
+Mesh*           projectileMesh;
+Material*       barrelMaterial;
+GameObject*     cameraController;
+GameObject*     skyObject;
 rp3d::BoxShape* projectileCollider;
 
 
@@ -57,24 +58,27 @@ void Framework::Start() {
     projectileMesh->ChangeSubMeshColor(0, Colors.white);
     
     
-    // Create a sky
-    Renderer.skyMain = Renderer.CreateSky();
-    Renderer.skyMain->SetColor(Colors.Make(0.3451, 0.6118, 0.7882));
     
+    
+    // Create a sky
     Resources.LoadWaveFront("data/sky/sky.obj", "skyBox");
     Resources.LoadTexture(  "data/sky/sky.png", "skyMaterial");
-    
-    
-    
     
     Mesh* skyMesh = Resources.CreateMeshFromTag("skyBox");
     Material* skyMaterial = Resources.CreateMaterialFromTag("skyMaterial");
     
-    GameObject* skyObject = Engine.CreateGameObject();
+    skyObject = Engine.CreateGameObject();
     Component* skyComponent = Engine.CreateComponentEntityRenderer(skyMesh, skyMaterial);
     skyObject->AddComponent(skyComponent);
     
-    skyObject->transform.scale = glm::vec3(10,10,10);
+    skyObject->transform.scale = glm::vec3(10000,10000,10000);
+    skyObject->transform.position = glm::vec3(1000,0,0);
+    
+    //Component* rigidBodyTest = Engine.CreateComponent(ComponentType::RigidBody);
+    //skyObject->AddComponent(rigidBodyTest);
+    
+    
+    
     
     
     // Create a ground plain
@@ -155,17 +159,18 @@ void Framework::Run() {
     
     cameraController->AddForce(force.x, force.y, force.z);
     
-    
+    // Update the sky object
+    skyObject->transform.position = cameraController->transform.position;
     
     // Shoot object from camera
     
     if (Input.CheckMouseLeftPressed()) {
-        Input.SetMouseLeftPressed(false);
+        //Input.SetMouseLeftPressed(false);
         
         // Spread offset effect on projectile angle
         float spreadMul = 0.0008;
         
-        //for (int i=0; i < 1; i++) {
+        for (int i=0; i < 1; i++) {
             
             // Apply some random physical forces
             float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -207,8 +212,6 @@ void Framework::Run() {
             Entity* entity = (Entity*)entityRenderer->GetComponent();
             entity->AttachMesh(projectileMesh);
             entity->AttachMaterial(barrelMaterial);
-            //entity->transform.position = glm::vec3(startx, starty, startz);
-            
             
             
             // Light component test
@@ -219,23 +222,23 @@ void Framework::Run() {
             lightPtr->intensity    = 20;
             lightPtr->range        = 100;
             lightPtr->attenuation  = 0.01;
-            //lightPtr->transform.position = glm::vec3(startx, starty, startz);
-            
-            
-            
             
             // Add a physics component
             Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
             projectile->AddComponent(rigidBodyComponent);
             rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
             
+            /*
             // Projectile collider
             projectile->AddColliderBox(projectileCollider, 0, 0, 0);
             
-            projectile->SetMass(100);
-            projectile->SetLinearDamping(0.01);
+            projectile->SetMass(0.001);
+            projectile->SetLinearDamping(0.001);
             projectile->SetAngularDamping(0.003);
             projectile->CalculatePhysics();
+            
+            
+            */
             
             // Transform the rigid body and apply force
             rp3d::Transform newTransform;
@@ -246,13 +249,15 @@ void Framework::Run() {
             
             newTransform.setOrientation(quat);
             
-            //body->setTransform(newTransform);
-            projectile->SetPosition(startx, starty, startz);
+            body->setTransform(newTransform);
             projectile->AddForce(fwd.x, fwd.y, fwd.z);
             
             
-            //continue;
-        //}
+            
+            projectile->SetPosition(startx, starty, startz);
+            
+            continue;
+        }
         
         
     }
@@ -261,7 +266,7 @@ void Framework::Run() {
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 120) {
+    while (Engine.GetGameObjectCount() > 200) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;

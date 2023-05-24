@@ -235,31 +235,39 @@ void EngineSystemManager::Update(void) {
         if (!objectPtr->isActive) 
             continue;
         
-        // Get the source transform from the game object
-        objectPtr->transform.matrix = Renderer.CalculateModelMatrix(objectPtr->transform);
-        
-        glm::vec3 position = objectPtr->transform.position;
-        glm::vec4 rotation = objectPtr->transform.rotation;
-        
         
         // Check to get the rigid body as the source transform
         rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
         if (componentRigidBody != nullptr) {
             
-            // Get the source transform from the rigid body
+            // Get the rigid body as the source transformation
             rp3d::Vector3 bodyPosition;
             rp3d::Transform bodyTransform = componentRigidBody->getTransform();
             bodyPosition = bodyTransform.getPosition();
             rp3d::Quaternion quaterion = bodyTransform.getOrientation();
             
+            // Source position, rotation and scale
+            glm::vec3 position;
             position.x = bodyPosition.x;
             position.y = bodyPosition.y;
             position.z = bodyPosition.z;
             
+            glm::vec4 rotation;
             rotation.x = quaterion.x;
             rotation.y = quaterion.y;
             rotation.z = quaterion.z;
             rotation.w = quaterion.w;
+            
+            glm::vec3 scale = objectPtr->transform.scale;
+            
+            // Source matrix
+            glm::mat4 sourceTransform;
+            bodyTransform.getOpenGLMatrix(&sourceTransform[0][0]);
+            
+            // Update the game object transform
+            objectPtr->transform.matrix = sourceTransform;
+            objectPtr->transform.position = position;
+            objectPtr->transform.rotation = rotation;
             
             
             //
@@ -268,21 +276,23 @@ void EngineSystemManager::Update(void) {
             
             Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
             if (componentEntityRenderer != nullptr) {
-                bodyTransform.getOpenGLMatrix(&componentEntityRenderer->transform.matrix[0][0]);
+                
+                componentEntityRenderer->transform.matrix = sourceTransform;
                 componentEntityRenderer->transform.position = position;
                 componentEntityRenderer->transform.rotation = rotation;
+                componentEntityRenderer->transform.scale    = scale;
             }
             
             Light* componentLight = objectPtr->GetCachedLight();
             if (componentLight != nullptr) {
-                bodyTransform.getOpenGLMatrix(&componentLight->transform.matrix[0][0]);
+                componentLight->transform.matrix = sourceTransform;
                 componentLight->transform.position = position;
                 componentLight->transform.rotation = rotation;
             }
             
             Camera* componentCamera = objectPtr->GetCachedCamera();
             if (componentCamera != nullptr) {
-                bodyTransform.getOpenGLMatrix(&componentCamera->transform.matrix[0][0]);
+                componentCamera->transform.matrix = sourceTransform;
                 componentCamera->transform.position = position;
                 if (!componentCamera->useMouseLook) 
                     componentCamera->transform.rotation = rotation;
@@ -290,14 +300,21 @@ void EngineSystemManager::Update(void) {
             
         } else {
             
+            // Source position, rotation and scale
+            glm::vec3 position = objectPtr->transform.position;
+            glm::vec4 rotation = objectPtr->transform.rotation;
+            glm::vec3 scale    = objectPtr->transform.scale;
+            
             //
-            // Sync with the game object
+            // No rigid body, sync with the game object
             //
             
             Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
             if (componentEntityRenderer != nullptr) {
-                glm::mat4 matrix = Renderer.CalculateModelMatrix(componentEntityRenderer->transform);
-                componentEntityRenderer->transform.matrix = matrix;
+                componentEntityRenderer->transform.position = position;
+                componentEntityRenderer->transform.rotation = rotation;
+                componentEntityRenderer->transform.scale    = scale;
+                componentEntityRenderer->transform.matrix   = Renderer.CalculateModelMatrix(objectPtr->transform);
             }
             
             Light* componentLight = objectPtr->GetCachedLight();
@@ -308,6 +325,7 @@ void EngineSystemManager::Update(void) {
             
             Camera* componentCamera = objectPtr->GetCachedCamera();
             if (componentCamera != nullptr) {
+                componentCamera->transform.matrix = objectPtr->transform.matrix;
                 componentCamera->transform.position = position;
                 if (!componentCamera->useMouseLook) 
                     componentCamera->transform.rotation = rotation;

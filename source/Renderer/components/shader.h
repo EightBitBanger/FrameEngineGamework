@@ -13,8 +13,6 @@
 #include "../types/transform.h"
 #include "../types/color.h"
 
-#define RENDER_NUMBER_OF_LIGHTS    120
-
 
 class Shader {
     
