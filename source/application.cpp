@@ -68,14 +68,11 @@ void Framework::Start() {
     Material* skyMaterial = Resources.CreateMaterialFromTag("skyMaterial");
     
     skyObject = Engine.CreateGameObject();
+    skyObject->name = "sky";
     Component* skyComponent = Engine.CreateComponentEntityRenderer(skyMesh, skyMaterial);
     skyObject->AddComponent(skyComponent);
     
     skyObject->transform.scale = glm::vec3(10000,10000,10000);
-    skyObject->transform.position = glm::vec3(1000,0,0);
-    
-    //Component* rigidBodyTest = Engine.CreateComponent(ComponentType::RigidBody);
-    //skyObject->AddComponent(rigidBodyTest);
     
     
     
@@ -168,7 +165,7 @@ void Framework::Run() {
         //Input.SetMouseLeftPressed(false);
         
         // Spread offset effect on projectile angle
-        float spreadMul = 0.0008;
+        float spreadMul = 0.0001;
         
         for (int i=0; i < 1; i++) {
             
@@ -219,16 +216,16 @@ void Framework::Run() {
             projectile->AddComponent(lightComponent);
             Light* lightPtr = (Light*)lightComponent->GetComponent();
             lightPtr->color = Colors.MakeRandom();
-            lightPtr->intensity    = 20;
-            lightPtr->range        = 100;
-            lightPtr->attenuation  = 0.01;
+            lightPtr->intensity    = 70.0;
+            lightPtr->range        = 800.0;
+            lightPtr->attenuation  = 0.008;
+            
             
             // Add a physics component
             Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
             projectile->AddComponent(rigidBodyComponent);
             rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
             
-            /*
             // Projectile collider
             projectile->AddColliderBox(projectileCollider, 0, 0, 0);
             
@@ -237,8 +234,6 @@ void Framework::Run() {
             projectile->SetAngularDamping(0.003);
             projectile->CalculatePhysics();
             
-            
-            */
             
             // Transform the rigid body and apply force
             rp3d::Transform newTransform;
@@ -266,13 +261,13 @@ void Framework::Run() {
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 200) {
+    while (Engine.GetGameObjectCount() > 100) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;
         
         // Ignore cameras and world objects
-        if ((gameObject->name == "world") | (gameObject->name == "camera")) 
+        if ((gameObject->name == "world") | (gameObject->name == "camera") | (gameObject->name == "sky")) 
             continue;
         
         Engine.DestroyGameObject(gameObject);
