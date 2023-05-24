@@ -202,7 +202,7 @@ ColliderTag* ResourceManager::FindColliderTag(std::string resourceName) {
 
 Mesh* ResourceManager::CreateMeshFromTag(std::string resourceName) {
     MeshTag* meshTag = FindMeshTag(resourceName);
-    assert(meshTag != nullptr);
+    if (meshTag == nullptr) return nullptr;
     Mesh* meshPtr = Renderer.CreateMesh();
     meshPtr->AddSubMesh(0,0,0, meshTag->mesh.vertexBuffer, meshTag->mesh.indexBuffer);
     return meshPtr;
@@ -210,7 +210,7 @@ Mesh* ResourceManager::CreateMeshFromTag(std::string resourceName) {
 
 Material* ResourceManager::CreateMaterialFromTag(std::string resourceName) {
     TextureTag* texTag = FindTextureTag(resourceName);
-    assert(texTag != nullptr);
+    if (texTag == nullptr) return nullptr;
     Material* materialPtr = Renderer.CreateMaterial();
     materialPtr->width  = texTag->width;
     materialPtr->height = texTag->height;
@@ -220,7 +220,7 @@ Material* ResourceManager::CreateMaterialFromTag(std::string resourceName) {
 
 Shader* ResourceManager::CreateShaderFromTag(std::string resourceName) {
     ShaderTag* shaderTag = FindShaderTag(resourceName);
-    assert(shaderTag != nullptr);
+    if (shaderTag == nullptr) return nullptr;
     Shader* shaderPtr = Renderer.CreateShader();
     shaderPtr->CreateShaderProgram(shaderTag->vertexScript, shaderTag->fragmentScript);
     return shaderPtr;
@@ -234,7 +234,6 @@ rp3d::BoxShape* ResourceManager::CreateColliderFromTag(std::string resourceName)
 }
 
 void ResourceManager::DestroyAssets(void) {
-    
     for (std::vector<TextureTag>::iterator it = mTextureTags.begin(); it != mTextureTags.end(); ++it) 
         if (it->buffer != nullptr) 
             stbi_image_free(it->buffer);
@@ -267,7 +266,9 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName="te
 bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="meshDefault") {
     
     objl::Loader loader;
-    assert(loader.LoadFile(path));
+    if (!loader.LoadFile(path)) {
+        Log.Write("!! File not found - " + path); Log.WriteLn();
+    }
     
     unsigned int numberOfMeshes = loader.LoadedMeshes.size();
     if (numberOfMeshes == 0) return false;

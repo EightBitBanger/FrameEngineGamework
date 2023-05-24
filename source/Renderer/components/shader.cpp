@@ -158,7 +158,7 @@ bool Shader::BuildDefault(void) {
     
     std::string vertexShader = 
         "#version 330 core\n"
-        ""
+        
         "layout(location = 0) in vec3 l_position;"
         "layout(location = 1) in vec3 l_color;"
         "layout(location = 2) in vec3 l_normal;"
@@ -183,7 +183,6 @@ bool Shader::BuildDefault(void) {
         "{"
         
         "  vec4 vertPos = u_model * vec4(l_position, 1);"
-        "  float diff = 1.0;"
         "  vec3 finalColor = m_ambient;";
     
     
@@ -193,23 +192,20 @@ bool Shader::BuildDefault(void) {
     
     vertexShader += 
         "  for (int i=0; i<=u_light_count; i++) {"
-        "    "
-        "    float intensity    = u_light_attenuation[i].r;"
-        "    float range        = u_light_attenuation[i].g;"
-        "    float attenuation  = u_light_attenuation[i].b;"
-        "    "
-        "    vec3 lightDir = normalize(u_light_position[i] - vec3(vertPos));"
-        "    "
-        "    diff = max(dot(normalize(l_normal), lightDir), 0.0);"
-        "    "
-        "    "
-        "    float dist = length( u_light_position[i] - vec3(vertPos));"
-        "    if (dist < range) {"
-        "      "
-        "      finalColor += ((diff * u_light_color[i]) * intensity) / (dist * (attenuation * range));"
-        "      "
+        
+        "    float l_intensity    = u_light_attenuation[i].r;"
+        "    float l_range        = u_light_attenuation[i].g;"
+        "    float l_attenuation  = u_light_attenuation[i].b;"
+        
+        "    vec3 l_direction     = normalize(u_light_position[i] - vec3(vertPos));"
+        
+        "    float l_diff = max(dot(normalize(l_normal), l_direction), 0.0);"
+        "    float l_dist = length( u_light_position[i] - vec3(vertPos));"
+        
+        "    if (l_dist < l_range) {"
+        "      float f_attenuation = (l_attenuation * l_range * l_dist);"
+        "      finalColor += (l_diff * u_light_color[i] * l_intensity) / f_attenuation;"
         "    }"
-        "    "
         "  }";
     
     

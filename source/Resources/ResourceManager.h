@@ -10,6 +10,7 @@
 #include "assets/colliderTag.h"
 
 #include "../../vendor/my-std-lib/fileloader.h"
+#include "../../vendor/my-std-lib/logging.h"
 
 #include "../../vendor/my-std-lib/poolallocator.h"
 #include "../../vendor/my-std-lib/strings.h"

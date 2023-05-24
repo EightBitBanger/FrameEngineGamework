@@ -57,6 +57,25 @@ void Framework::Start() {
     projectileMesh->ChangeSubMeshColor(0, Colors.white);
     
     
+    // Create a sky
+    Renderer.skyMain = Renderer.CreateSky();
+    Renderer.skyMain->SetColor(Colors.Make(0.3451, 0.6118, 0.7882));
+    
+    Resources.LoadWaveFront("data/sky/sky.obj", "skyBox");
+    Resources.LoadTexture(  "data/sky/sky.png", "skyMaterial");
+    
+    
+    
+    
+    Mesh* skyMesh = Resources.CreateMeshFromTag("skyBox");
+    Material* skyMaterial = Resources.CreateMaterialFromTag("skyMaterial");
+    
+    GameObject* skyObject = Engine.CreateGameObject();
+    Component* skyComponent = Engine.CreateComponentEntityRenderer(skyMesh, skyMaterial);
+    skyObject->AddComponent(skyComponent);
+    
+    skyObject->transform.scale = glm::vec3(10,10,10);
+    
     
     // Create a ground plain
     Mesh* groundMesh = Renderer.CreateMesh();

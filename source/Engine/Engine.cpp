@@ -235,30 +235,20 @@ void EngineSystemManager::Update(void) {
         if (!objectPtr->isActive) 
             continue;
         
-        // Current transformation to which the components will be synchronized
-        rp3d::Transform bodyTransform = rp3d::Transform::identity();
-        rp3d::Quaternion identity = rp3d::Quaternion::identity();
-        
-        glm::vec3 position(0, 0, 0);
-        glm::vec4 rotation(identity.x, identity.y, identity.z, identity.w);
-        
-        
         // Get the source transform from the game object
         objectPtr->transform.matrix = Renderer.CalculateModelMatrix(objectPtr->transform);
         
-        position = objectPtr->transform.position;
-        rotation = objectPtr->transform.rotation;
+        glm::vec3 position = objectPtr->transform.position;
+        glm::vec4 rotation = objectPtr->transform.rotation;
         
         
         // Check to get the rigid body as the source transform
-        // Rigid bodies should be checked last in order
-        // to trump other source components.
         rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
         if (componentRigidBody != nullptr) {
             
             // Get the source transform from the rigid body
             rp3d::Vector3 bodyPosition;
-            bodyTransform = componentRigidBody->getTransform();
+            rp3d::Transform bodyTransform = componentRigidBody->getTransform();
             bodyPosition = bodyTransform.getPosition();
             rp3d::Quaternion quaterion = bodyTransform.getOrientation();
             
