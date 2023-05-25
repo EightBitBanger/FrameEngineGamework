@@ -13,6 +13,9 @@
 #include "../types/transform.h"
 #include "../types/color.h"
 
+#include "../../configuration.h"
+
+
 
 class Shader {
     
