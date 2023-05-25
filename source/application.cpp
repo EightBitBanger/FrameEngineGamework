@@ -216,9 +216,9 @@ void Framework::Run() {
             projectile->AddComponent(lightComponent);
             Light* lightPtr = (Light*)lightComponent->GetComponent();
             lightPtr->color = Colors.MakeRandom();
-            lightPtr->intensity    = 70.0;
-            lightPtr->range        = 800.0;
-            lightPtr->attenuation  = 0.008;
+            lightPtr->intensity    = 40.0;
+            lightPtr->range        = 100.0;
+            lightPtr->attenuation  = 0.002;
             
             
             // Add a physics component
@@ -261,7 +261,7 @@ void Framework::Run() {
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 100) {
+    while (Engine.GetGameObjectCount() > RENDER_NUMBER_OF_LIGHTS) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;

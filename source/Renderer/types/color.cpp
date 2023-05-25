@@ -44,12 +44,17 @@ Color Color::operator+= (const Color& color) {
     return newColor;
 }
 
-void Color::operator= (const Color& color) {
+Color Color::operator= (const Color& color) {
+    Color newColor;
     r = color.r;
     g = color.g;
     b = color.b;
     a = color.a;
-    return;
+    newColor.r = r;
+    newColor.g = g;
+    newColor.b = b;
+    newColor.a = a;
+    return newColor;
 }
 
 Color::Color() : 

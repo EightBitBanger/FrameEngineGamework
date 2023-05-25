@@ -140,6 +140,13 @@ private:
     Material*  mCurrentMaterial;
     
     
+    // Light list
+    unsigned int numberOfLights=0;
+    glm::vec3  lightPosition[RENDER_NUMBER_OF_LIGHTS];
+    glm::vec3  lightAttenuation[RENDER_NUMBER_OF_LIGHTS];
+    glm::vec3  lightColor[RENDER_NUMBER_OF_LIGHTS];
+    
+    
     // Render component allocators
     PoolAllocator<Entity>   mEntity;
     PoolAllocator<Mesh>     mMesh;

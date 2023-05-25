@@ -351,12 +351,6 @@ void RenderSystem::RenderFrame(float deltaTime) {
     currentPipeline->currentShader->SetCameraPosition(eye);
     
     
-    // Light list
-    unsigned int numberOfLights=0;
-    glm::vec3  lightPosition[RENDER_NUMBER_OF_LIGHTS];
-    glm::vec3  lightAttenuation[RENDER_NUMBER_OF_LIGHTS];
-    glm::vec3  lightColor[RENDER_NUMBER_OF_LIGHTS];
-    
     // Run through the scenes
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
         
@@ -372,9 +366,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 Light* lightPtr = scenePtr->GetLight(i);
                 
                 // Get the light position
-                lightPosition[i].x = lightPtr->transform.position.x;
-                lightPosition[i].y = lightPtr->transform.position.y;
-                lightPosition[i].z = lightPtr->transform.position.z;
+                lightPosition[i] = lightPtr->transform.position;
                 
                 // Attenuation
                 lightAttenuation[i].x = lightPtr->intensity;

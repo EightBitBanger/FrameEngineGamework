@@ -197,13 +197,15 @@ bool Shader::BuildDefault(void) {
         "    float l_range        = u_light_attenuation[i].g;"
         "    float l_attenuation  = u_light_attenuation[i].b;"
         
-        "    vec3 l_direction     = normalize(u_light_position[i] - vec3(vertPos));"
+        "    vec3 l_direction = normalize(u_light_position[i] - vec3(vertPos));"
         
-        "    float l_diff = max(dot(normalize(l_normal), l_direction), 0.0);"
+        "    vec3 normal = normalize(l_normal);"
+        
+        "    float l_diff = max(dot(normal, l_direction), 0.0);"
         "    float l_dist = length( u_light_position[i] - vec3(vertPos));"
         
         "    if (l_dist < l_range) {"
-        "      float f_attenuation = (l_attenuation * l_range * l_dist);"
+        "      float f_attenuation = l_attenuation * l_range * l_dist;"
         "      finalColor += (l_diff * u_light_color[i] * l_intensity) / f_attenuation;"
         "    }"
         "  }";

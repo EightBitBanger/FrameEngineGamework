@@ -29,7 +29,7 @@
 #define  RENDER_FRAMES_PER_SECOND          100
 #define  RENDERER_CHECK_OPENGL_ERRORS
 
-#define RENDER_NUMBER_OF_LIGHTS    200
+#define RENDER_NUMBER_OF_LIGHTS    120
 
 
 // Physics simulation
