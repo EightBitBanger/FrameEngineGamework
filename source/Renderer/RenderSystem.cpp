@@ -344,11 +344,11 @@ void RenderSystem::RenderFrame(float deltaTime) {
     
     // Bind the render pipeline
     assert(currentPipeline != nullptr);
+    Shader* currentShader = currentPipeline->currentShader;
+    currentShader->Bind();
+    currentShader->SetProjectionMatrix( viewProjection );
     
-    currentPipeline->currentShader->Bind();
-    currentPipeline->currentShader->SetProjectionMatrix( viewProjection );
-    
-    currentPipeline->currentShader->SetCameraPosition(eye);
+    currentShader->SetCameraPosition(eye);
     
     
     // Run through the scenes
@@ -365,15 +365,13 @@ void RenderSystem::RenderFrame(float deltaTime) {
             for (unsigned int i=0; i < numberOfLights; i++) {
                 Light* lightPtr = scenePtr->GetLight(i);
                 
-                // Get the light position
+                // Get the light position, attenuation and color
                 lightPosition[i] = lightPtr->transform.position;
                 
-                // Attenuation
                 lightAttenuation[i].x = lightPtr->intensity;
                 lightAttenuation[i].y = lightPtr->range;
                 lightAttenuation[i].z = lightPtr->attenuation;
                 
-                // Color
                 lightColor[i].r = lightPtr->color.r;
                 lightColor[i].g = lightPtr->color.g;
                 lightColor[i].b = lightPtr->color.b;
@@ -382,10 +380,10 @@ void RenderSystem::RenderFrame(float deltaTime) {
             }
             
             // Send the lights into the shader
-            currentPipeline->currentShader->SetLightCount(numberOfLights);
-            currentPipeline->currentShader->SetLightPositions(numberOfLights, lightPosition);
-            currentPipeline->currentShader->SetLightAttenuation(numberOfLights, lightAttenuation);
-            currentPipeline->currentShader->SetLightColors(numberOfLights, lightColor);
+            currentShader->SetLightCount(numberOfLights);
+            currentShader->SetLightPositions(numberOfLights, lightPosition);
+            currentShader->SetLightAttenuation(numberOfLights, lightAttenuation);
+            currentShader->SetLightColors(numberOfLights, lightColor);
             
         }
         
@@ -445,12 +443,12 @@ void RenderSystem::RenderFrame(float deltaTime) {
                     glDisable(GL_BLEND);
                 }
                 
-                currentPipeline->currentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
-                currentPipeline->currentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
-                currentPipeline->currentShader->SetTextureSampler(0);
+                currentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
+                currentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
+                currentShader->SetTextureSampler(0);
             }
             
-            currentPipeline->currentShader->SetModelMatrix(currentEntity->transform.matrix);
+            currentShader->SetModelMatrix(currentEntity->transform.matrix);
             
             mesh->DrawIndexArray();
             

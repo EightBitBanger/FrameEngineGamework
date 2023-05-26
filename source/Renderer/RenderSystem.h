@@ -139,7 +139,6 @@ private:
     Mesh*      mCurrentMesh;
     Material*  mCurrentMaterial;
     
-    
     // Light list
     unsigned int numberOfLights=0;
     glm::vec3  lightPosition[RENDER_NUMBER_OF_LIGHTS];
