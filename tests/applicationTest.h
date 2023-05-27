@@ -8,13 +8,21 @@ class ApplicationTest {
     
 public:
     
+    ApplicationTest();
     
     void Initiate(void);
+    void Complete(void);
     
     void TestGameObject(void);
     
+    int GetFailureCount(void);
+    
+    void LogFail(std::string message);
     
     
+private:
+    
+    int mFailureCount;
     
 };
 

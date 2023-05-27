@@ -55,6 +55,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     PhysicsTime.Update();
     Time.Update();
     
+#ifdef RUN_UNIT_TESTS
+    ApplicationTest Test;
+    Test.Initiate();
+    Test.TestGameObject();
+    
+    if (Test.CheckFailed() > 0) {
+        ShowWindow(wHndl, SW_HIDE);
+        std::string freezeOnFail;
+        std::cin >> freezeOnFail;
+    } else {
+        Test.Complete();
+    }
+    
+#endif    
+    
     MSG messages;
     
     while (Application.isActive) {

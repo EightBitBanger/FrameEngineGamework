@@ -141,6 +141,10 @@ unsigned int EngineSystemManager::GetGameObjectCount(void) {
     return mGameObjectActive.size();
 }
 
+unsigned int EngineSystemManager::GetComponentCount(void) {
+    return mComponents.Size();
+}
+
 void EngineSystemManager::Initiate() {
     mSceneMain = Renderer.CreateScene();
     Renderer.AddSceneToRenderQueue(mSceneMain);

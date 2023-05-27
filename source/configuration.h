@@ -44,10 +44,10 @@
 
 
 //
-// Testing
+// Unit testing
 //
 
-#define RUN_APPLICATION_TESTS
+#define RUN_UNIT_TESTS
 
 
 

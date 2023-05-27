@@ -19,6 +19,7 @@ class EngineSystemManager {
 public:
     
     // Game objects
+    
     /// Create a game object and return its pointer.
     GameObject* CreateGameObject(void);
     /// Destroy a game object.
@@ -30,12 +31,17 @@ public:
     GameObject* GetGameObject(unsigned int index);
     
     // Components
+    
     /// Create a component object with initial type information and return its pointer.
     Component* CreateComponent(ComponentType type);
     /// Destroy a component object.
     void DestroyComponent(Component* componentPtr);
     
+    /// Get the number of component objects.
+    unsigned int GetComponentCount(void);
+    
     // Specially built components and game objects
+    
     /// Create a camera controller game object and return its pointer.
     GameObject* CreateCameraController(float x=0, float y=0, float z=0);
     
