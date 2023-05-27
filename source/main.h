@@ -8,6 +8,9 @@
 #include "configuration.h"
 #include "plugins.h"
 
+#ifdef RUN_APPLICATION_TESTS
+ #include "../tests/applicationTest.h"
+#endif
 
 // My standard includes
 #include "my-std-lib/poolallocator.h"

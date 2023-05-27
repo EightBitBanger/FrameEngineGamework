@@ -37,6 +37,11 @@ rp3d::BoxShape* projectileCollider;
 
 void Framework::Start() {
     
+    
+    
+    
+    return;
+    
     // Load some external files
     Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
     Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
