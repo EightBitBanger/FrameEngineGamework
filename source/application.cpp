@@ -14,7 +14,7 @@ extern RenderSystem         Renderer;
 extern PhysicsSystem        Physics;
 extern InputSystem          Input;
 
-
+extern ApplicationTest      Test;
 
 
 
@@ -37,10 +37,9 @@ rp3d::BoxShape* projectileCollider;
 
 void Framework::Start() {
     
+    Test.Initiate();
+    Test.TestGameObject();
     
-    
-    
-    return;
     
     // Load some external files
     Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");

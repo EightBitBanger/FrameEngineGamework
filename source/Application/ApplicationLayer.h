@@ -8,6 +8,7 @@
 #include "../Physics/PhysicsSystem.h"
 #include "../Resources/ResourceManager.h"
 #include "../Scripting/ScriptSystem.h"
+#include "../Audio/AudioSystem.h"
 
 #include "winproc.h"
 
@@ -20,7 +21,7 @@ namespace Framework {
     
     void Shutdown(void);
     
-};
+}
 
 
 

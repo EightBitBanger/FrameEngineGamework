@@ -4,6 +4,7 @@
 #include "components/gameobject.h"
 
 #include "../application/applicationlayer.h"
+#include "../../tests/applicationTest.h"
 
 #include "../Renderer/components/entity.h"
 #include "../Scripting/components/script.h"

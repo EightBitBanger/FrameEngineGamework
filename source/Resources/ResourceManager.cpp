@@ -85,7 +85,6 @@ bool ResourceManager::LoadDefinitions(std::string path) {
             
             std::string logstr = "  + " + strexp[1];
             Log.Write(logstr);
-            std::cout << logstr << std::endl;
             return true;
         }
         
@@ -259,7 +258,6 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName="te
     
     std::string logstr = "  + " + assetName + "  " + name;
     Log.Write(logstr);
-    std::cout << logstr << std::endl;
     return true;
 }
 
@@ -307,7 +305,6 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="
     
     std::string logstr = "  + " + newAsset.name + "  " + path;
     Log.Write(logstr);
-    std::cout << logstr << std::endl;
     
     return true;
 }
@@ -318,7 +315,6 @@ bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName=
     if (!loader.CheckIsFileLoaded()) {
         std::string logstr = "! " + path;
         Log.Write(logstr);
-        std::cout << logstr << std::endl;
         return false;
     }
     
@@ -339,7 +335,6 @@ bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName=
     
     std::string logstr = "  + " + newAsset.name + "  " + name;
     Log.Write(logstr);
-    std::cout << logstr << std::endl;
     
     return true;
 }

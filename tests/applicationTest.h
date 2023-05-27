@@ -1,5 +1,7 @@
 //
 // Application test framework
+#ifndef APPLICATION_TEST_FRAMEWORK
+#define APPLICATION_TEST_FRAMEWORK
 
 
 class ApplicationTest {
@@ -7,9 +9,13 @@ class ApplicationTest {
 public:
     
     
-    void Test(void);
+    void Initiate(void);
+    
+    void TestGameObject(void);
+    
     
     
     
 };
 
+#endif
