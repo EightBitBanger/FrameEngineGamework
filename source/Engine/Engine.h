@@ -4,7 +4,7 @@
 #include "components/gameobject.h"
 
 #include "../application/applicationlayer.h"
-#include "../../tests/applicationTest.h"
+#include "../../tests/unitTest.h"
 
 #include "../Renderer/components/entity.h"
 #include "../Scripting/components/script.h"
@@ -23,7 +23,7 @@ public:
     /// Create a game object and return its pointer.
     GameObject* CreateGameObject(void);
     /// Destroy a game object.
-    void DestroyGameObject(GameObject* gameObjectPtr);
+    bool DestroyGameObject(GameObject* gameObjectPtr);
     
     /// Get the number of game objects.
     unsigned int GetGameObjectCount(void);
@@ -35,7 +35,7 @@ public:
     /// Create a component object with initial type information and return its pointer.
     Component* CreateComponent(ComponentType type);
     /// Destroy a component object.
-    void DestroyComponent(Component* componentPtr);
+    bool DestroyComponent(Component* componentPtr);
     
     /// Get the number of component objects.
     unsigned int GetComponentCount(void);

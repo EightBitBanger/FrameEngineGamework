@@ -55,11 +55,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Test.Initiate();
     
     // Run test suite
-    Test.TestEngineFunctionality();
-    Test.TestGameObject();
-    Test.TestComponentObject();
+    Test.RunTestSuite();
     
-    Test.Complete();
+    // Finish the test
+    if (!Test.hasTestFailed) {
+        Test.Complete();
+    } else {
+        DestroyWindow(wHndl);
+        std::string freeze;
+        std::cin >> freeze;
+    }
 #endif    
     
     Framework::Start();

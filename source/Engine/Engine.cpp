@@ -34,9 +34,9 @@ GameObject* EngineSystemManager::CreateGameObject(void) {
     return newGameObject;
 }
 
-void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
+bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
-    RemoveGameObjectFromActiveList(gameObjectPtr);
+    if (!RemoveGameObjectFromActiveList(gameObjectPtr)) return false;
     
     // Remove all components
     for (unsigned int i=0; i < gameObjectPtr->GetComponentCount(); i++) {
@@ -47,7 +47,7 @@ void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     }
     
     mGameObjects.Destroy(gameObjectPtr);
-    return;
+    return true;
 }
 
 GameObject* EngineSystemManager::CreateCameraController(float x, float y, float z) {
@@ -186,7 +186,7 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
     return newComponent;
 }
 
-void EngineSystemManager::DestroyComponent(Component* componentPtr) {
+bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
     assert(componentPtr != nullptr);
     
     ComponentType componentType = componentPtr->GetType();
@@ -221,10 +221,10 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
         }
         
         default:
-            break;
+            return false;
     }
     mComponents.Destroy(componentPtr);
-    return;
+    return true;
 }
 
 void EngineSystemManager::Update(void) {
