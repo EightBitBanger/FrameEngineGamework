@@ -58,16 +58,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #ifdef RUN_UNIT_TESTS
     ApplicationTest Test;
     Test.Initiate();
+    
+    // Run test suite
+    Test.TestEngineFunctionality();
     Test.TestGameObject();
+    Test.TestComponentObject();
     
-    if (Test.CheckFailed() > 0) {
-        ShowWindow(wHndl, SW_HIDE);
-        std::string freezeOnFail;
-        std::cin >> freezeOnFail;
-    } else {
-        Test.Complete();
-    }
-    
+    Test.Complete();
 #endif    
     
     MSG messages;
