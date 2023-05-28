@@ -53,6 +53,7 @@ set (ENGINE_HEADERS
     "source/Resources/assets/textureTag.h"
     "source/Scripting/ScriptSystem.h"
     "source/Scripting/components/script.h"
+    "tests/applicationTest.h"
     
     "vendor/Bly7/OBJ_Loader.h"
     "vendor/my-std-lib/fileloader.h"
@@ -104,6 +105,7 @@ set (ENGINE_SOURCES
     "source/Resources/assets/textureTag.cpp"
     "source/Scripting/ScriptSystem.cpp"
     "source/Scripting/components/script.cpp"
+    "tests/applicationTest.cpp"
     
     "vendor/my-std-lib/fileloader.cpp"
     "vendor/my-std-lib/logging.cpp"
