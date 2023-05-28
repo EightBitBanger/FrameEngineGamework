@@ -20,7 +20,6 @@ Entity* RenderSystem::CreateEntity(void) {
     return entityPtr;
 }
 bool RenderSystem::DestroyEntity(Entity* entityPtr) {
-    assert(entityPtr != nullptr);
     return mEntity.Destroy(entityPtr);
 }
 
@@ -29,7 +28,6 @@ Mesh* RenderSystem::CreateMesh(void) {
     return meshPtr;
 }
 bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
-    assert(meshPtr != nullptr);
     return mMesh.Destroy(meshPtr);
 }
 
@@ -38,7 +36,6 @@ Shader* RenderSystem::CreateShader(void) {
     return shaderPtr;
 }
 bool RenderSystem::DestroyShader(Shader* shaderPtr) {
-    assert(shaderPtr != nullptr);
     return mShader.Destroy(shaderPtr);
 }
 
@@ -47,7 +44,6 @@ Camera* RenderSystem::CreateCamera(void) {
     return cameraPtr;
 }
 bool RenderSystem::DestroyCamera(Camera* cameraPtr) {
-    assert(cameraPtr != nullptr);
     return mCamera.Destroy(cameraPtr);
 }
 
@@ -56,7 +52,6 @@ Material* RenderSystem::CreateMaterial(void) {
     return materialPtr;
 }
 bool RenderSystem::DestroyMaterial(Material* materialPtr) {
-    assert(materialPtr != nullptr);
     return mMaterial.Destroy(materialPtr);
 }
 
@@ -65,7 +60,6 @@ Sky* RenderSystem::CreateSky(void) {
     return skyPtr;
 }
 bool RenderSystem::DestroySky(Sky* skyPtr) {
-    assert(skyPtr != nullptr);
     return mSky.Destroy(skyPtr);
 }
 
@@ -74,7 +68,6 @@ Light* RenderSystem::CreateLight(void) {
     return lightPtr;
 }
 bool RenderSystem::DestroyLight(Light* lightPtr) {
-    assert(lightPtr != nullptr);
     return mLight.Destroy(lightPtr);
 }
 
@@ -83,7 +76,6 @@ Scene* RenderSystem::CreateScene(void) {
     return scenePtr;
 }
 bool RenderSystem::DestroyScene(Scene* scenePtr) {
-    assert(scenePtr != nullptr);
     return mScene.Destroy(scenePtr);
 }
 
@@ -92,11 +84,10 @@ RenderPipeline* RenderSystem::CreateRenderPipeline(void) {
 }
 
 bool RenderSystem::DestroyRenderPipeline(RenderPipeline* renderPipelinePtr) {
-    assert(renderPipelinePtr != nullptr);
     return mPipeline.Destroy(renderPipelinePtr);
 }
 
-void RenderSystem :: Initiate(void) {
+void RenderSystem::Initiate(void) {
     
     defaultShader = CreateShader();
     defaultShader->BuildDefault();
@@ -114,14 +105,13 @@ void RenderSystem :: Initiate(void) {
 }
 
 
-void RenderSystem :: AddSceneToRenderQueue(Scene* scenePtr) {
+void RenderSystem::AddSceneToRenderQueue(Scene* scenePtr) {
     assert(scenePtr != nullptr);
     mRenderQueue.push_back( scenePtr );
     return;
 }
 
-bool RenderSystem :: RemoveSceneFromRenderQueue(Scene* scenePtr) {
-    assert(scenePtr != nullptr);
+bool RenderSystem::RemoveSceneFromRenderQueue(Scene* scenePtr) {
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
         Scene* thisScenePtr = *it;
         if (scenePtr == thisScenePtr) {
@@ -132,16 +122,20 @@ bool RenderSystem :: RemoveSceneFromRenderQueue(Scene* scenePtr) {
     return false;
 }
 
-unsigned int RenderSystem :: GetRenderQueueSize(void) {
+unsigned int RenderSystem::GetRenderQueueSize(void) {
     return mRenderQueue.size();
 }
 
-Scene* RenderSystem :: GetRenderQueueScene(unsigned int index) {
-    assert(index <= mRenderQueue.size());
+Scene* RenderSystem::GetRenderQueueScene(unsigned int index) {
+    assert(index < mRenderQueue.size());
     return mRenderQueue[index];
 }
 
-GLenum RenderSystem :: SetRenderTarget(HWND wHndl) {
+unsigned int RenderSystem::GetEntityCount(void) {
+    return mEntity.Size();
+}
+
+GLenum RenderSystem::SetRenderTarget(HWND wHndl) {
     
     int iFormat;
     std::string gcVendor, gcRenderer, gcExtensions, gcVersion, Line;
@@ -221,7 +215,7 @@ GLenum RenderSystem :: SetRenderTarget(HWND wHndl) {
     return glpassed;
 }
 
-void RenderSystem :: ReleaseRenderTarget(void) {
+void RenderSystem::ReleaseRenderTarget(void) {
     
     wglMakeCurrent (NULL, NULL);
     wglDeleteContext(mRenderContext);
@@ -231,7 +225,7 @@ void RenderSystem :: ReleaseRenderTarget(void) {
     return;
 }
 
-void RenderSystem :: SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
+void RenderSystem::SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
     viewport.x = x;
     viewport.y = y;
     viewport.w = w;
@@ -239,7 +233,7 @@ void RenderSystem :: SetViewport(unsigned int x, unsigned int y, unsigned int w,
     return;
 }
 
-glm::mat4 RenderSystem :: CalculateModelMatrix(Transform& model) {
+glm::mat4 RenderSystem::CalculateModelMatrix(Transform& model) {
     
     glm::mat4 modelTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( model.position.x, model.position.y, model.position.z ));
     
@@ -254,7 +248,7 @@ glm::mat4 RenderSystem :: CalculateModelMatrix(Transform& model) {
     return modelTranslation * modelRotation * modelScale;
 }
 
-std::vector<std::string> RenderSystem :: GetGLErrorCodes(std::string errorLocationString) {
+std::vector<std::string> RenderSystem::GetGLErrorCodes(std::string errorLocationString) {
     
     GLenum glError;
     std::string ErrorMsg = errorLocationString;
@@ -343,7 +337,9 @@ void RenderSystem::RenderFrame(float deltaTime) {
     
     
     // Bind the render pipeline
-    assert(currentPipeline != nullptr);
+    if (currentPipeline == nullptr) 
+        return;
+    
     Shader* currentShader = currentPipeline->currentShader;
     currentShader->Bind();
     currentShader->SetProjectionMatrix( viewProjection );

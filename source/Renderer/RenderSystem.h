@@ -118,6 +118,9 @@ public:
     /// Return a scene pointer at the index position within the render queue.
     Scene* GetRenderQueueScene(unsigned int index);
     
+    /// Return the number of entities that have been created.
+    unsigned int GetEntityCount(void);
+    
     /// Calculate the model matrix from a given transform.
     glm::mat4 CalculateModelMatrix(Transform& modelTransform);
     

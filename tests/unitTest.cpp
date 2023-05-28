@@ -1,14 +1,6 @@
 #include <iostream>
 #include <string>
 
-
-#include "../source/Engine/Engine.h"
-#include "../source/Application/ApplicationLayer.h"
-#include "../source/Renderer/RenderSystem.h"
-extern EngineSystemManager  Engine;
-extern RenderSystem         Renderer;
-extern ApplicationLayer     Application;
-
 #include "unitTest.h"
 
 
@@ -26,8 +18,9 @@ void ApplicationTest::Complete(void) {
 }
 
 void ApplicationTest::RunTestSuite(void) {
+    TestEngineFunctionality();
+    TestRenderer();
     TestGameObject();
     TestComponentObject();
-    TestEngineFunctionality();
 }
 
