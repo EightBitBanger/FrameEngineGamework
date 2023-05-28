@@ -13,16 +13,18 @@ public:
     void Initiate(void);
     void Complete(void);
     
+    // Test suite
     void TestGameObject(void);
-    
-    int GetFailureCount(void);
-    
-    void LogFail(std::string message);
+    void TestComponentObject(void);
+    void TestEngineFunctionality(void);
     
     
 private:
     
-    int mFailureCount;
+    std::string mLogString;
+    
+    const std::string msgPassed = "passed";
+    const std::string msgFailed = "failed";
     
 };
 

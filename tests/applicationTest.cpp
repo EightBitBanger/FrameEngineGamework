@@ -10,38 +10,26 @@ extern ApplicationLayer     Application;
 #include "applicationTest.h"
 
 ApplicationTest::ApplicationTest() : 
-    mFailureCount(0)
+    mLogString("")
 {}
 
 void ApplicationTest::Initiate(void) {
-    std::cout << "Running tests" << std::endl << std::endl;
-    
+    std::cout << "Running tests" << std::endl;
 }
 
 void ApplicationTest::Complete(void) {
     std::cout << std::endl << "Complete" << std::endl << std::endl;
 }
 
-int ApplicationTest::GetFailureCount(void) {
-    return mFailureCount;
-}
-
-void ApplicationTest::LogFail(std::string message) {
-    std::cout << "failed :: " << message << std::endl;
-    mFailureCount++;
-}
 
 void ApplicationTest::TestGameObject(void) {
     
-    std::string failMessage="";
-    int mFailureCount=0;
+    std::string msgFailedToCreateObject    = "object creation\n";
+    std::string msgFailedToAttachComponent = "component attachment\n";
+    std::string msgFailedToDetachComponent = "component detachment\n";
+    std::string msgFailedToCreateComponent = "component creation\n";
     
-    std::string msgFailedToCreateObject    = "object creation";
-    std::string msgFailedToAttachComponent = "component attachment";
-    std::string msgFailedToDetachComponent = "component detachment";
-    std::string msgFailedToCreateComponent = "component creation";
-    
-    std::cout << "Game object construction... " << std::endl;
+    std::cout << "Game objects... ";
     
     GameObject* gameObject = Engine.CreateGameObject();
     
@@ -52,14 +40,14 @@ void ApplicationTest::TestGameObject(void) {
     Component* componentLight     = Engine.CreateComponent(ComponentType::Light);
     
     // Check object creation
-    if (gameObject == nullptr) LogFail(msgFailedToCreateObject);
+    if (gameObject == nullptr) mLogString += msgFailedToCreateObject;
     
     // Check component creation
-    if (componentEntity    == nullptr) LogFail(msgFailedToCreateComponent);
-    if (componentRigidBody == nullptr) LogFail(msgFailedToCreateComponent);
-    if (componentCamera    == nullptr) LogFail(msgFailedToCreateComponent);
-    if (componentScript    == nullptr) LogFail(msgFailedToCreateComponent);
-    if (componentLight     == nullptr) LogFail(msgFailedToCreateComponent);
+    if (componentEntity    == nullptr) mLogString += msgFailedToCreateComponent;
+    if (componentRigidBody == nullptr) mLogString += msgFailedToCreateComponent;
+    if (componentCamera    == nullptr) mLogString += msgFailedToCreateComponent;
+    if (componentScript    == nullptr) mLogString += msgFailedToCreateComponent;
+    if (componentLight     == nullptr) mLogString += msgFailedToCreateComponent;
     
     gameObject->AddComponent(componentEntity);
     gameObject->AddComponent(componentRigidBody);
@@ -80,11 +68,11 @@ void ApplicationTest::TestGameObject(void) {
     Script*          getScript    = (Script*)         componentScript->GetComponent();
     Light*           getLight     = (Light*)          componentLight->GetComponent();
     
-    if (getRenderer  == nullptr) LogFail(msgFailedToAttachComponent);
-    if (getRigidBody == nullptr) LogFail(msgFailedToAttachComponent);
-    if (getCamera    == nullptr) LogFail(msgFailedToAttachComponent);
-    if (getScript    == nullptr) LogFail(msgFailedToAttachComponent);
-    if (getLight     == nullptr) LogFail(msgFailedToAttachComponent);
+    if (getRenderer  == nullptr) mLogString += msgFailedToAttachComponent;
+    if (getRigidBody == nullptr) mLogString += msgFailedToAttachComponent;
+    if (getCamera    == nullptr) mLogString += msgFailedToAttachComponent;
+    if (getScript    == nullptr) mLogString += msgFailedToAttachComponent;
+    if (getLight     == nullptr) mLogString += msgFailedToAttachComponent;
     
     gameObject->RemoveComponent(componentEntity);
     gameObject->RemoveComponent(componentRigidBody);
@@ -93,11 +81,11 @@ void ApplicationTest::TestGameObject(void) {
     gameObject->RemoveComponent(componentLight);
     
     // Check component detachment
-    if (gameObject->FindComponent(ComponentType::Renderer)  != nullptr) LogFail(msgFailedToDetachComponent);
-    if (gameObject->FindComponent(ComponentType::RigidBody) != nullptr) LogFail(msgFailedToDetachComponent);
-    if (gameObject->FindComponent(ComponentType::Camera)    != nullptr) LogFail(msgFailedToDetachComponent);
-    if (gameObject->FindComponent(ComponentType::Script)    != nullptr) LogFail(msgFailedToDetachComponent);
-    if (gameObject->FindComponent(ComponentType::Light)     != nullptr) LogFail(msgFailedToDetachComponent);
+    if (gameObject->FindComponent(ComponentType::Renderer)  != nullptr) mLogString += msgFailedToDetachComponent;
+    if (gameObject->FindComponent(ComponentType::RigidBody) != nullptr) mLogString += msgFailedToDetachComponent;
+    if (gameObject->FindComponent(ComponentType::Camera)    != nullptr) mLogString += msgFailedToDetachComponent;
+    if (gameObject->FindComponent(ComponentType::Script)    != nullptr) mLogString += msgFailedToDetachComponent;
+    if (gameObject->FindComponent(ComponentType::Light)     != nullptr) mLogString += msgFailedToDetachComponent;
     
     // Destroy components
     Engine.DestroyComponent(componentEntity);
@@ -108,8 +96,89 @@ void ApplicationTest::TestGameObject(void) {
     
     Engine.DestroyGameObject(gameObject);
     
-    if (GetFailureCount() ) {
-        
+    // Finalize the test
+    if (mLogString != "") {
+        std::cout  << msgFailed << std::endl;
+        std::cout << mLogString << std::endl;
+        mLogString="";
+    } else {
+        std::cout << msgPassed << std::endl;
+    }
+    
+    return;
+}
+
+void ApplicationTest::TestComponentObject(void) {
+    
+    std::string msgFailedNullptr = "component internal pointer is null\n";
+    
+    std::cout << "Component objects... ";
+    
+    // Create components
+    Component* componentEntity    = Engine.CreateComponent(ComponentType::Renderer);
+    Component* componentRigidBody = Engine.CreateComponent(ComponentType::RigidBody);
+    Component* componentCamera    = Engine.CreateComponent(ComponentType::Camera);
+    Component* componentScript    = Engine.CreateComponent(ComponentType::Script);
+    Component* componentLight     = Engine.CreateComponent(ComponentType::Light);
+    
+    void* entityObject    = componentEntity->GetComponent();
+    void* rigidBodyObject = componentRigidBody->GetComponent();
+    void* cameraObject    = componentCamera->GetComponent();
+    void* scriptObject    = componentScript->GetComponent();
+    void* lightObject     = componentLight->GetComponent();
+    
+    // Check components
+    if (entityObject    == nullptr) mLogString += msgFailedNullptr;
+    if (rigidBodyObject == nullptr) mLogString += msgFailedNullptr;
+    if (cameraObject    == nullptr) mLogString += msgFailedNullptr;
+    if (scriptObject    == nullptr) mLogString += msgFailedNullptr;
+    if (lightObject     == nullptr) mLogString += msgFailedNullptr;
+    
+    // Destroy components
+    Engine.DestroyComponent(componentEntity);
+    Engine.DestroyComponent(componentRigidBody);
+    Engine.DestroyComponent(componentCamera);
+    Engine.DestroyComponent(componentScript);
+    Engine.DestroyComponent(componentLight);
+    
+    // Finalize the test
+    if (mLogString != "") {
+        std::cout  << msgFailed << std::endl;
+        std::cout << mLogString << std::endl;
+        mLogString="";
+    } else {
+        std::cout << msgPassed << std::endl;
+    }
+    
+    return;
+}
+
+void ApplicationTest::TestEngineFunctionality(void) {
+    
+    std::string msgFailedObjectCreation = "engine-object creation\n";
+    std::string msgFailedObjectDestruction = "engine-object destruction\n";
+    
+    std::cout << "Engine functionality... ";
+    
+    // Create game object
+    GameObject* gameObject = Engine.CreateGameObject();
+    if (gameObject == nullptr) mLogString += msgFailedObjectCreation;
+    Engine.DestroyGameObject(gameObject);
+    if (Engine.GetGameObjectCount() > 0) mLogString += msgFailedObjectDestruction;
+    
+    // Create component
+    Component* component = Engine.CreateComponent(ComponentType::Renderer);
+    if (component == nullptr) mLogString += msgFailedObjectCreation;
+    Engine.DestroyComponent(component);
+    if (Engine.GetComponentCount() > 0) mLogString += msgFailedObjectDestruction;
+    
+    // Finalize the test
+    if (mLogString != "") {
+        std::cout  << msgFailed << std::endl;
+        std::cout << mLogString << std::endl;
+        mLogString="";
+    } else {
+        std::cout << msgPassed << std::endl;
     }
     
     return;
