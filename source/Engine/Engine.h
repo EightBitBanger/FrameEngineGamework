@@ -80,7 +80,7 @@ private:
     std::vector<GameObject*> mGameObjectActive;
     
     // Engine allocators
-    PoolAllocator<GameObject> mGameObject;
+    PoolAllocator<GameObject> mGameObjects;
     PoolAllocator<Component>  mComponents;
     
 };

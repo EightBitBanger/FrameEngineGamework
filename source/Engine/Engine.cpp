@@ -29,7 +29,7 @@ EngineSystemManager::EngineSystemManager(void) :
 }
 
 GameObject* EngineSystemManager::CreateGameObject(void) {
-    GameObject* newGameObject = mGameObject.Create();
+    GameObject* newGameObject = mGameObjects.Create();
     AddGameObjectToActiveList(newGameObject);
     return newGameObject;
 }
@@ -46,7 +46,7 @@ void EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
         continue;
     }
     
-    mGameObject.Destroy(gameObjectPtr);
+    mGameObjects.Destroy(gameObjectPtr);
     return;
 }
 
@@ -93,8 +93,6 @@ Component* EngineSystemManager::CreateComponentEntityRenderer(Mesh* meshPtr, Mat
     Entity* entityRenderer = (Entity*)newComponent->GetComponent();
     entityRenderer->AttachMesh(meshPtr);
     entityRenderer->AttachMaterial(materialPtr);
-    
-    
     return newComponent;
 }
 
@@ -132,13 +130,13 @@ bool EngineSystemManager::RemoveGameObjectFromActiveList(GameObject* gameObjectP
 }
 
 GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
-    if (index <= mGameObjectActive.size()) 
+    if (index < mGameObjectActive.size()) 
         return mGameObjectActive[index];
     return nullptr;
 }
 
 unsigned int EngineSystemManager::GetGameObjectCount(void) {
-    return mGameObjectActive.size();
+    return mGameObjects.Size();
 }
 
 unsigned int EngineSystemManager::GetComponentCount(void) {
@@ -232,9 +230,9 @@ void EngineSystemManager::DestroyComponent(Component* componentPtr) {
 void EngineSystemManager::Update(void) {
     
     // Run through the game objects
-    for (int i=0; i < mGameObject.Size(); i++ ) {
+    for (int i=0; i < mGameObjects.Size(); i++ ) {
         
-        GameObject* objectPtr = mGameObject[i];
+        GameObject* objectPtr = mGameObjects[i];
         
         if (!objectPtr->isActive) 
             continue;

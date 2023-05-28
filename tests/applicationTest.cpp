@@ -4,22 +4,59 @@
 
 #include "../source/Engine/Engine.h"
 #include "../source/Application/ApplicationLayer.h"
+#include "../source/Renderer/RenderSystem.h"
 extern EngineSystemManager  Engine;
+extern RenderSystem         Renderer;
 extern ApplicationLayer     Application;
 
 #include "applicationTest.h"
+
 
 ApplicationTest::ApplicationTest() : 
     mLogString("")
 {}
 
 void ApplicationTest::Initiate(void) {
-    std::cout << "Running tests" << std::endl;
+    std::cout << "Running unit tests" << std::endl;
 }
 
 void ApplicationTest::Complete(void) {
     std::cout << std::endl << "Complete" << std::endl << std::endl;
 }
+
+
+
+void ApplicationTest::TestEngineFunctionality(void) {
+    
+    std::string msgFailedObjectCreation = "engine-object creation\n";
+    std::string msgFailedObjectDestruction = "engine-object destruction\n";
+    
+    std::cout << "Engine functionality.... ";
+    
+    // Create game object
+    GameObject* gameObject = Engine.CreateGameObject();
+    if (gameObject == nullptr) mLogString += msgFailedObjectCreation;
+    Engine.DestroyGameObject(gameObject);
+    if (Engine.GetGameObjectCount() > 0) mLogString += msgFailedObjectDestruction;
+    
+    // Create component
+    Component* component = Engine.CreateComponent(ComponentType::Renderer);
+    if (component == nullptr) mLogString += msgFailedObjectCreation;
+    Engine.DestroyComponent(component);
+    if (Engine.GetComponentCount() > 0) mLogString += msgFailedObjectDestruction;
+    
+    // Finalize the test
+    if (mLogString != "") {
+        std::cout  << msgFailed << std::endl;
+        std::cout << mLogString << std::endl;
+        mLogString="";
+    } else {
+        std::cout << msgPassed << std::endl;
+    }
+    
+    return;
+}
+
 
 
 void ApplicationTest::TestGameObject(void) {
@@ -29,7 +66,7 @@ void ApplicationTest::TestGameObject(void) {
     std::string msgFailedToDetachComponent = "component detachment\n";
     std::string msgFailedToCreateComponent = "component creation\n";
     
-    std::cout << "Game objects... ";
+    std::cout << "Game objects............ ";
     
     GameObject* gameObject = Engine.CreateGameObject();
     
@@ -108,11 +145,13 @@ void ApplicationTest::TestGameObject(void) {
     return;
 }
 
+
+
 void ApplicationTest::TestComponentObject(void) {
     
     std::string msgFailedNullptr = "component internal pointer is null\n";
     
-    std::cout << "Component objects... ";
+    std::cout << "Component objects....... ";
     
     // Create components
     Component* componentEntity    = Engine.CreateComponent(ComponentType::Renderer);
@@ -153,34 +192,4 @@ void ApplicationTest::TestComponentObject(void) {
     return;
 }
 
-void ApplicationTest::TestEngineFunctionality(void) {
-    
-    std::string msgFailedObjectCreation = "engine-object creation\n";
-    std::string msgFailedObjectDestruction = "engine-object destruction\n";
-    
-    std::cout << "Engine functionality... ";
-    
-    // Create game object
-    GameObject* gameObject = Engine.CreateGameObject();
-    if (gameObject == nullptr) mLogString += msgFailedObjectCreation;
-    Engine.DestroyGameObject(gameObject);
-    if (Engine.GetGameObjectCount() > 0) mLogString += msgFailedObjectDestruction;
-    
-    // Create component
-    Component* component = Engine.CreateComponent(ComponentType::Renderer);
-    if (component == nullptr) mLogString += msgFailedObjectCreation;
-    Engine.DestroyComponent(component);
-    if (Engine.GetComponentCount() > 0) mLogString += msgFailedObjectDestruction;
-    
-    // Finalize the test
-    if (mLogString != "") {
-        std::cout  << msgFailed << std::endl;
-        std::cout << mLogString << std::endl;
-        mLogString="";
-    } else {
-        std::cout << msgPassed << std::endl;
-    }
-    
-    return;
-}
 

@@ -50,11 +50,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Initiate the engine last
     Engine.Initiate();
     
-    Framework::Start();
-    
-    PhysicsTime.Update();
-    Time.Update();
-    
 #ifdef RUN_UNIT_TESTS
     ApplicationTest Test;
     Test.Initiate();
@@ -66,6 +61,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Test.Complete();
 #endif    
+    
+    Framework::Start();
+    
+    PhysicsTime.Update();
+    Time.Update();
     
     MSG messages;
     

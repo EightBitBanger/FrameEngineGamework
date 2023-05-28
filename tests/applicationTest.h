@@ -14,17 +14,20 @@ public:
     void Complete(void);
     
     // Test suite
+    
     void TestGameObject(void);
     void TestComponentObject(void);
     void TestEngineFunctionality(void);
+    
+    void TestRenderer(void);
     
     
 private:
     
     std::string mLogString;
     
-    const std::string msgPassed = "passed";
-    const std::string msgFailed = "failed";
+    const std::string msgPassed = "PASS";
+    const std::string msgFailed = "FAIL";
     
 };
 
