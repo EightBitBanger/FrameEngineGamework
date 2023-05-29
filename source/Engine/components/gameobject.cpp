@@ -115,15 +115,15 @@ void GameObject::SetPosition(float x, float y, float z) {
         mRigidBodyCache->setTransform(bodyTransform);
     }
     if (mEntityCache != nullptr) {
-        mEntityCache->transform.position = glm::vec3(x, y, z);
+        mEntityCache->transform.SetPosition(x, y, z);
         mEntityCache->transform.matrix = Renderer.CalculateModelMatrix(mEntityCache->transform);
     }
     if (mCameraCache != nullptr) {
-        mCameraCache->transform.position = glm::vec3(x, y, z);
+        mCameraCache->transform.SetPosition(x, y, z);
         mCameraCache->transform.matrix = Renderer.CalculateModelMatrix(mCameraCache->transform);
     }
     if (mLightCache != nullptr) {
-        mLightCache->transform.position = glm::vec3(x, y, z);
+        mLightCache->transform.SetPosition(x, y, z);
         mLightCache->transform.matrix = Renderer.CalculateModelMatrix(mLightCache->transform);
     }
     return;

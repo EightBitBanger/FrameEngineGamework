@@ -18,8 +18,20 @@ void Transform::SetPosition(float x, float y, float z) {
     return;
 }
 
-void Transform::SetRotation(float x, float y, float z) {
-    rotation = glm::vec4(x, y, z, 1);
+void Transform::SetPosition(glm::vec3 newPosition) {
+    position = glm::vec3(newPosition.x, newPosition.y, newPosition.z);
+    UpdateMatrix();
+    return;
+}
+
+void Transform::SetRotation(float x, float y, float z, float w) {
+    rotation = glm::vec4(x, y, z, w);
+    UpdateMatrix();
+    return;
+}
+
+void Transform::SetRotation(glm::vec4 newRotation) {
+    rotation = glm::vec4(newRotation.x, newRotation.y, newRotation.z, newRotation.w);
     UpdateMatrix();
     return;
 }
@@ -28,6 +40,24 @@ void Transform::SetScale(float x, float y, float z) {
     scale = glm::vec3(x, y, z);
     UpdateMatrix();
     return;
+}
+
+void Transform::SetScale(glm::vec3 newScale) {
+    scale = glm::vec3(newScale.x, newScale.y, newScale.z);
+    UpdateMatrix();
+    return;
+}
+
+glm::vec3 Transform::GetPosition(void) {
+    return position;
+}
+
+glm::vec4 Transform::GetRotation(void) {
+    return rotation;
+}
+
+glm::vec3 Transform::GetScale(void){
+    return scale;
 }
 
 void Transform::ChildAdd(Transform* transform) {

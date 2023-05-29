@@ -69,7 +69,7 @@ void Framework::Start() {
     Component* skyComponent = Engine.CreateComponentEntityRenderer(skyMesh, skyMaterial);
     skyObject->AddComponent(skyComponent);
     
-    skyObject->transform.scale = glm::vec3(10000,10000,10000);
+    skyObject->transform.SetScale(10000,10000,10000);
     
     //
     // Create a ground plain
@@ -175,7 +175,7 @@ void Framework::Run() {
     cameraController->AddForce(force.x, force.y, force.z);
     
     // Update the sky object
-    skyObject->transform.position = cameraController->transform.position;
+    skyObject->transform.SetPosition(cameraController->transform.GetPosition());
     
     // Shoot object from camera
     
@@ -203,7 +203,7 @@ void Framework::Run() {
             fwd *= 13;
             
             glm::vec3 pos(0);
-            pos = Renderer.cameraMain->transform.position;
+            pos = Renderer.cameraMain->transform.GetPosition();
             pos += fwd;
             
             // Total forward force + camera offset distance

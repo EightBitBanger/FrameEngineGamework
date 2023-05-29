@@ -12,10 +12,14 @@ class Transform {
     
 public:
     
+    /// Local translation
     glm::vec3 position;
+    /// Local rotation
     glm::vec4 rotation;
+    /// Local scale
     glm::vec3 scale;
     
+    /// Local transform matrix
     glm::mat4 matrix;
     
     Transform();
@@ -23,12 +27,26 @@ public:
     /// Update the model matrix from the current position, rotation and scale.
     void UpdateMatrix(void);
     
-    /// Set the position and update the transform matrix.
+    /// Set the position of the transform matrix.
     void SetPosition(float x, float y, float z);
-    /// Set the rotation and update the transform matrix.
-    void SetRotation(float x, float y, float z);
-    /// Set the scale and update the transform matrix.
+    /// Set the rotation of the transform matrix.
+    void SetRotation(float x, float y, float z, float w);
+    /// Set the scale of the transform matrix.
     void SetScale(float x, float y, float z);
+    
+    /// Set the position of the transform matrix.
+    void SetPosition(glm::vec3 newPosition);
+    /// Set the rotation of the transform matrix.
+    void SetRotation(glm::vec4 newRotation);
+    /// Set the scale of the transform matrix.
+    void SetScale(glm::vec3 newScale);
+    
+    /// Get the position of the transform matrix.
+    glm::vec3 GetPosition(void);
+    /// Get the rotation of the transform matrix.
+    glm::vec4 GetRotation(void);
+    /// Get the scale of the transform matrix.
+    glm::vec3 GetScale(void);
     
     /// Add a transform to this transform as a child transform.
     void ChildAdd(Transform* transform);
