@@ -62,18 +62,6 @@ public:
     
 private:
     
-    // Create an entity renderer and return its pointer.
-    Entity* CreateEntityRenderer(Mesh* meshPtr, Material* materialPtr);
-    // Destroy an entity renderer.
-    void DestroyEntityRenderer(Entity* entityPtr);
-    
-    
-    // Add a game object to the internal list of active objects
-    void AddGameObjectToActiveList(GameObject* gameObjectPtr);
-    // Remove a game object from the internal list of active objects
-    bool RemoveGameObjectFromActiveList(GameObject* gameObjectPtr);
-    
-    
     Scene* mSceneMain;
     
     // List of active game objects

@@ -21,6 +21,9 @@ public:
     /// Call update on all active script objects.
     void Update(void);
     
+    /// Return the number of scripts that are currently allocated.
+    unsigned int GetScriptCount(void);
+    
 private:
     
     PoolAllocator<Script> mScript;

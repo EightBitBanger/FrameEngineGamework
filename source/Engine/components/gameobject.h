@@ -23,7 +23,7 @@ public:
     /// Object name.
     std::string name;
     
-    /// Game object transform
+    /// Object transform.
     Transform transform;
     
     /// State whether the object is active.

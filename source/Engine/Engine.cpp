@@ -30,13 +30,22 @@ EngineSystemManager::EngineSystemManager(void) :
 
 GameObject* EngineSystemManager::CreateGameObject(void) {
     GameObject* newGameObject = mGameObjects.Create();
-    AddGameObjectToActiveList(newGameObject);
+    // Add object to the active objects list
+    mGameObjectActive.push_back(newGameObject);
     return newGameObject;
 }
 
 bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     assert(gameObjectPtr != nullptr);
-    if (!RemoveGameObjectFromActiveList(gameObjectPtr)) return false;
+    
+    // Remove the game object from the active list
+    for (std::vector<GameObject*>::iterator it = mGameObjectActive.begin(); it != mGameObjectActive.end(); ++it) {
+        GameObject* thisGameObjectPtr = *it;
+        if (gameObjectPtr == thisGameObjectPtr) {
+            mGameObjectActive.erase(it);
+            break;
+        }
+    }
     
     // Remove all components
     for (unsigned int i=0; i < gameObjectPtr->GetComponentCount(); i++) {
@@ -96,39 +105,6 @@ Component* EngineSystemManager::CreateComponentEntityRenderer(Mesh* meshPtr, Mat
     return newComponent;
 }
 
-Entity* EngineSystemManager::CreateEntityRenderer(Mesh* meshPtr, Material* materialPtr) {
-    Entity* entityPtr = Renderer.CreateEntity();
-    entityPtr->AttachMesh( meshPtr );
-    entityPtr->AttachMaterial( materialPtr );
-    mSceneMain->AddEntityToSceneRoot(entityPtr);
-    return entityPtr;
-}
-
-void EngineSystemManager::DestroyEntityRenderer(Entity* entityPtr) {
-    assert(entityPtr != nullptr);
-    mSceneMain->RemoveEntityFromSceneRoot(entityPtr);
-    Renderer.DestroyEntity(entityPtr);
-    return;
-}
-
-void EngineSystemManager::AddGameObjectToActiveList(GameObject* gameObjectPtr) {
-    assert(gameObjectPtr != nullptr);
-    mGameObjectActive.push_back( gameObjectPtr );
-    return;
-}
-
-bool EngineSystemManager::RemoveGameObjectFromActiveList(GameObject* gameObjectPtr) {
-    assert(gameObjectPtr != nullptr);
-    for (std::vector<GameObject*>::iterator it = mGameObjectActive.begin(); it != mGameObjectActive.end(); ++it) {
-        GameObject* thisGameObjectPtr = *it;
-        if (gameObjectPtr == thisGameObjectPtr) {
-            mGameObjectActive.erase(it);
-            return true;
-        }
-    }
-    return false;
-}
-
 GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
     if (index < mGameObjectActive.size()) 
         return mGameObjectActive[index];
@@ -155,7 +131,9 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
     switch (type) {
         
         case ComponentType::Renderer: {
-            component_object = (void*)this->CreateEntityRenderer(nullptr, nullptr);
+            Entity* entityPtr = Renderer.CreateEntity();
+            mSceneMain->AddEntityToSceneRoot(entityPtr);
+            component_object = (void*)entityPtr;
             break;
         }
         case ComponentType::RigidBody: {
@@ -195,7 +173,8 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
         
         case ComponentType::Renderer: {
             Entity* componentEntityRenderer = (Entity*)componentPtr->GetComponent();
-            DestroyEntityRenderer(componentEntityRenderer);
+            mSceneMain->RemoveEntityFromSceneRoot(componentEntityRenderer);
+            Renderer.DestroyEntity(componentEntityRenderer);
             break;
         }
         case ComponentType::RigidBody: {

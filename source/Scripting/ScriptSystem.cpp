@@ -29,3 +29,7 @@ bool ScriptSystem::DestroyScript(Script* scriptPtr) {
     bool ret = mScript.Destroy(scriptPtr);
     return ret;
 }
+
+unsigned int ScriptSystem::GetScriptCount(void) {
+    return mScript.Size();
+}

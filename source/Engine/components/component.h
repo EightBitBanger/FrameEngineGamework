@@ -1,6 +1,9 @@
 #ifndef ENGINE_COMPONENT
 #define ENGINE_COMPONENT
 
+#include <string>
+
+
 enum struct ComponentType {
     Undefined=0,
     // Render system
@@ -11,8 +14,6 @@ enum struct ComponentType {
     RigidBody
 };
 
-
-#include <string>
 
 class Component {
     
@@ -42,8 +43,6 @@ private:
     void* mObject;
     
 };
-
-
 
 
 #endif

@@ -9,11 +9,6 @@ extern EngineSystemManager  Engine;
 void ApplicationTest::TestGameObject(void) {
     if (hasTestFailed) return;
     
-    std::string msgFailedToCreateObject    = "object creation\n";
-    std::string msgFailedToAttachComponent = "component attachment\n";
-    std::string msgFailedToDetachComponent = "component detachment\n";
-    std::string msgFailedToCreateComponent = "component creation\n";
-    
     std::cout << "Game objects............ ";
     
     GameObject* gameObject = Engine.CreateGameObject();
@@ -25,14 +20,14 @@ void ApplicationTest::TestGameObject(void) {
     Component* componentLight     = Engine.CreateComponent(ComponentType::Light);
     
     // Check object creation
-    if (gameObject == nullptr) mLogString += msgFailedToCreateObject;
+    if (gameObject == nullptr) mLogString += msgFailedObjectAllocator;
     
     // Check component creation
-    if (componentEntity    == nullptr) mLogString += msgFailedToCreateComponent;
-    if (componentRigidBody == nullptr) mLogString += msgFailedToCreateComponent;
-    if (componentCamera    == nullptr) mLogString += msgFailedToCreateComponent;
-    if (componentScript    == nullptr) mLogString += msgFailedToCreateComponent;
-    if (componentLight     == nullptr) mLogString += msgFailedToCreateComponent;
+    if (componentEntity    == nullptr) mLogString += msgFailedObjectAllocator;
+    if (componentRigidBody == nullptr) mLogString += msgFailedObjectAllocator;
+    if (componentCamera    == nullptr) mLogString += msgFailedObjectAllocator;
+    if (componentScript    == nullptr) mLogString += msgFailedObjectAllocator;
+    if (componentLight     == nullptr) mLogString += msgFailedObjectAllocator;
     
     gameObject->AddComponent(componentEntity);
     gameObject->AddComponent(componentRigidBody);
@@ -46,13 +41,13 @@ void ApplicationTest::TestGameObject(void) {
     componentScript    = gameObject->FindComponent(ComponentType::Script);
     componentLight     = gameObject->FindComponent(ComponentType::Light);
     
-    // Check component attachment
     Entity*          getRenderer  = (Entity*)         componentEntity->GetComponent();
     rp3d::RigidBody* getRigidBody = (rp3d::RigidBody*)componentRigidBody->GetComponent();
     Camera*          getCamera    = (Camera*)         componentCamera->GetComponent();
     Script*          getScript    = (Script*)         componentScript->GetComponent();
     Light*           getLight     = (Light*)          componentLight->GetComponent();
     
+    // Check component attachment
     if (getRenderer  == nullptr) mLogString += msgFailedToAttachComponent;
     if (getRigidBody == nullptr) mLogString += msgFailedToAttachComponent;
     if (getCamera    == nullptr) mLogString += msgFailedToAttachComponent;
@@ -80,15 +75,6 @@ void ApplicationTest::TestGameObject(void) {
     Engine.DestroyComponent(componentLight);
     
     Engine.DestroyGameObject(gameObject);
-    
-    // Finalize the test
-    if (mLogString != "") {
-        std::cout  << msgFailed << std::endl;
-        std::cout << mLogString << std::endl;
-        mLogString="";
-    } else {
-        std::cout << msgPassed << std::endl;
-    }
     
     return;
 }

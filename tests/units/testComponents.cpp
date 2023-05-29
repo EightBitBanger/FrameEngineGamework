@@ -9,8 +9,6 @@ extern EngineSystemManager  Engine;
 void ApplicationTest::TestComponentObject(void) {
     if (hasTestFailed) return;
     
-    std::string msgFailedNullptr = "component internal pointer is null\n";
-    
     std::cout << "Component objects....... ";
     
     // Create components
@@ -39,15 +37,6 @@ void ApplicationTest::TestComponentObject(void) {
     Engine.DestroyComponent(componentCamera);
     Engine.DestroyComponent(componentScript);
     Engine.DestroyComponent(componentLight);
-    
-    // Finalize the test
-    if (mLogString != "") {
-        std::cout  << msgFailed << std::endl;
-        std::cout << mLogString << std::endl;
-        mLogString="";
-    } else {
-        std::cout << msgPassed << std::endl;
-    }
     
     return;
 }

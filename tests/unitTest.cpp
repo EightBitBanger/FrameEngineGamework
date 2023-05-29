@@ -17,10 +17,23 @@ void ApplicationTest::Complete(void) {
     std::cout << std::endl << "Complete" << std::endl << std::endl;
 }
 
+void ApplicationTest::Finalize(void) {
+    if (mLogString != "") {
+        std::cout  << msgFailed << std::endl;
+        std::cout << mLogString << std::endl;
+        mLogString="";
+    } else {
+        std::cout << msgPassed << std::endl;
+    }
+}
+
 void ApplicationTest::RunTestSuite(void) {
-    TestEngineFunctionality();
-    TestRenderer();
-    TestGameObject();
-    TestComponentObject();
+    TestEngineFunctionality(); Finalize();
+    
+    TestGameObject();      Finalize();
+    TestComponentObject(); Finalize();
+    
+    TestRenderSystem();  Finalize();
+    TestScriptSystem();  Finalize();
 }
 
