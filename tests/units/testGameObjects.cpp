@@ -20,14 +20,14 @@ void ApplicationTest::TestGameObject(void) {
     Component* componentLight     = Engine.CreateComponent(ComponentType::Light);
     
     // Check object creation
-    if (gameObject == nullptr) mLogString += msgFailedObjectAllocator;
+    if (gameObject == nullptr) mLogString += msgFailedObjectCreate;
     
     // Check component creation
-    if (componentEntity    == nullptr) mLogString += msgFailedObjectAllocator;
-    if (componentRigidBody == nullptr) mLogString += msgFailedObjectAllocator;
-    if (componentCamera    == nullptr) mLogString += msgFailedObjectAllocator;
-    if (componentScript    == nullptr) mLogString += msgFailedObjectAllocator;
-    if (componentLight     == nullptr) mLogString += msgFailedObjectAllocator;
+    if (componentEntity    == nullptr) mLogString += msgFailedObjectCreate;
+    if (componentRigidBody == nullptr) mLogString += msgFailedObjectCreate;
+    if (componentCamera    == nullptr) mLogString += msgFailedObjectCreate;
+    if (componentScript    == nullptr) mLogString += msgFailedObjectCreate;
+    if (componentLight     == nullptr) mLogString += msgFailedObjectCreate;
     
     gameObject->AddComponent(componentEntity);
     gameObject->AddComponent(componentRigidBody);

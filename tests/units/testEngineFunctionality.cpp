@@ -13,15 +13,15 @@ void ApplicationTest::TestEngineFunctionality(void) {
     
     // Create game object
     GameObject* gameObject = Engine.CreateGameObject();
-    if (gameObject == nullptr) mLogString += msgFailedObjectCreation;
-    if (!Engine.DestroyGameObject(gameObject)) mLogString += msgFailedObjectDestruction;
-    if (Engine.GetGameObjectCount() > 0) mLogString += msgFailedObjectAllocator;
+    if (gameObject == nullptr) mLogString += msgFailedObjectCreate;
+    if (!Engine.DestroyGameObject(gameObject)) mLogString += msgFailedObjectDestroy;
+    if (Engine.GetGameObjectCount() > 0) mLogString += msgFailedAllocatorNotZero;
     
     // Create component
     Component* component = Engine.CreateComponent(ComponentType::Renderer);
-    if (component == nullptr) mLogString += msgFailedObjectCreation;
-    if (!Engine.DestroyComponent(component)) mLogString += msgFailedObjectDestruction;
-    if (Engine.GetComponentCount() > 0) mLogString += msgFailedObjectAllocator;
+    if (component == nullptr) mLogString += msgFailedObjectCreate;
+    if (!Engine.DestroyComponent(component)) mLogString += msgFailedObjectDestroy;
+    if (Engine.GetComponentCount() > 0) mLogString += msgFailedAllocatorNotZero;
     
     return;
 }

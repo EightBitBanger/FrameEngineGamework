@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 
+typedef void(*TestFunc)();
+
 #include "unitTest.h"
 
 
@@ -30,10 +32,10 @@ void ApplicationTest::Finalize(void) {
 void ApplicationTest::RunTestSuite(void) {
     TestEngineFunctionality(); Finalize();
     
-    TestGameObject();      Finalize();
+    TestGameObject(); Finalize();
     TestComponentObject(); Finalize();
     
-    TestRenderSystem();  Finalize();
-    TestScriptSystem();  Finalize();
+    TestRenderSystem(); Finalize();
+    TestScriptSystem(); Finalize();
 }
 
