@@ -55,14 +55,6 @@ bool RenderSystem::DestroyMaterial(Material* materialPtr) {
     return mMaterial.Destroy(materialPtr);
 }
 
-Sky* RenderSystem::CreateSky(void) {
-    Sky* skyPtr = mSky.Create();
-    return skyPtr;
-}
-bool RenderSystem::DestroySky(Sky* skyPtr) {
-    return mSky.Destroy(skyPtr);
-}
-
 Light* RenderSystem::CreateLight(void) {
     Light* lightPtr = mLight.Create();
     return lightPtr;
@@ -296,15 +288,10 @@ void RenderSystem::RenderFrame(float deltaTime) {
     if (cameraMain == nullptr) 
         return;
     
-    // Clear the screen
+    // Clear the view port
     glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    // Fill out the sky
-    if (skyMain != nullptr) {
-        Color& color = skyMain->background;
-        glClearColor(color.r, color.g, color.b, 1);
-    }
+    glClearColor(0, 0, 0, 1);
     
     // Camera mouse looking
     if (cameraMain->useMouseLook) 

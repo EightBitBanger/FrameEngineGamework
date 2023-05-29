@@ -3,7 +3,6 @@
 extern RandomGen            Random;
 extern ColorPreset          Colors;
 extern Timer                Time;
-extern Timer                PhysicsTime;
 extern Logger               Log;
 
 extern EngineSystemManager  Engine;
@@ -36,7 +35,7 @@ rp3d::BoxShape* projectileCollider;
 
 void Framework::Start() {
     
-    // Load some external files
+    // Load some external resources
     Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
     Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
     Resources.LoadTexture("data/grassy.png", "mat_grassy");
@@ -56,10 +55,8 @@ void Framework::Start() {
     projectileMesh = Resources.CreateMeshFromTag("barrel");
     projectileMesh->ChangeSubMeshColor(0, Colors.white);
     
-    
-    
-    
-    // Create a sky
+    //
+    // Create a sky object
     Resources.LoadWaveFront("data/sky/sky.obj", "skyBox");
     Resources.LoadTexture(  "data/sky/sky.png", "skyMaterial");
     
@@ -73,10 +70,7 @@ void Framework::Start() {
     
     skyObject->transform.scale = glm::vec3(10000,10000,10000);
     
-    
-    
-    
-    
+    //
     // Create a ground plain
     Mesh* groundMesh = Renderer.CreateMesh();
     groundMesh->AddPlainSubDivided(-500, 0, -500, 10, 10, Colors.white, 100, 100);
@@ -101,8 +95,7 @@ void Framework::Start() {
     rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(100000, 10, 100000);
     ground->AddColliderBox(groundCollider, -10000, -10, -10000);
     
-    
-    
+    //
     // Create a camera controller
     cameraController = Engine.CreateCameraController(-50, 20, 0);
     cameraController->SetLinearDamping(3);
@@ -111,16 +104,13 @@ void Framework::Start() {
     cameraController->CalculatePhysics();
     cameraController->EnableGravity(false);
     
-    
-    
-    
     rp3d::BoxShape* boxShape = Physics.CreateColliderBox(1, 8, 1);
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
     cameraController->CalculatePhysics();
     
-    
-    // Create a projectile collider
+    //
+    // Create the projectile collider
     projectileCollider = Physics.CreateColliderBox(2, 4, 2);
     
     return;
@@ -256,8 +246,6 @@ void Framework::Run() {
         
     }
     
-    
-    
     // Purge extra objects
     unsigned int index=0;
     while (Engine.GetGameObjectCount() > RENDER_NUMBER_OF_LIGHTS) {
@@ -272,8 +260,6 @@ void Framework::Run() {
         Engine.DestroyGameObject(gameObject);
         index = 0;
     }
-    
-    
     
     // Escape key pause
     

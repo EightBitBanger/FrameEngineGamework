@@ -58,13 +58,6 @@ public:
     /// Create a physics collision shape from a collider resource tag.
     rp3d::BoxShape* CreateColliderFromTag(std::string resourceName);
     
-    /// Load a ".scene" file. Scene files construct scenes on load from definition and location files.
-    bool LoadScene(std::string path);
-    /// Definition files initiate and define resources for use within the engine.
-    bool LoadDefinitions(std::string path);
-    /// Locations files place and structure objects within the scene.
-    bool LoadLocations(std::string path);
-    
     /// Purge all assets loaded in the resource system.
     void DestroyAssets(void);
     

@@ -16,7 +16,6 @@ extern Logger Log;
 #include "components/camera.h"
 #include "components/light.h"
 #include "components/entity.h"
-#include "components/sky.h"
 #include "components/scene.h"
 
 #include "pipeline.h"
@@ -32,8 +31,6 @@ public:
     /// Default GLSL shader object.
     Shader*   defaultShader;
     
-    /// Current sky object used for rendering.
-    Sky*      skyMain;
     /// Current camera object used for rendering.
     Camera*   cameraMain;
     /// Current pipeline used for rendering.
@@ -74,11 +71,6 @@ public:
     Material* CreateMaterial(void);
     /// Destroy a material object and return true on success.
     bool DestroyMaterial(Material* materialPtr);
-    
-    /// Create a sky object and return its pointer.
-    Sky* CreateSky(void);
-    /// Destroy a sky object and return true on success.
-    bool DestroySky(Sky* skyPtr);
     
     /// Create a light object and return its pointer.
     Light* CreateLight(void);
@@ -155,7 +147,6 @@ private:
     PoolAllocator<Material> mMaterial;
     PoolAllocator<Shader>   mShader;
     PoolAllocator<Camera>   mCamera;
-    PoolAllocator<Sky>      mSky;
     PoolAllocator<Light>    mLight;
     PoolAllocator<Scene>    mScene;
     PoolAllocator<RenderPipeline>  mPipeline;

@@ -38,6 +38,26 @@ void ApplicationTest::TestRenderSystem(void) {
     // Check entity was not left over
     if (Renderer.GetEntityCount() > 0) mLogString += msgFailedAllocatorNotZero;
     
+    // Check cameras
+    Camera* cameraPtr = Renderer.CreateCamera();
+    if (cameraPtr == nullptr) mLogString += msgFailedObjectCreate;
+    if (!Renderer.DestroyCamera(cameraPtr)) mLogString += msgFailedObjectDestroy;
+    
+    // Check lights
+    Light* lightPtr = Renderer.CreateLight();
+    if (lightPtr == nullptr) mLogString += msgFailedObjectCreate;
+    if (!Renderer.DestroyLight(lightPtr)) mLogString += msgFailedObjectDestroy;
+    
+    // Check scene
+    Scene* scenePtr = Renderer.CreateScene();
+    if (scenePtr == nullptr) mLogString += msgFailedObjectCreate;
+    if (!Renderer.DestroyScene(scenePtr)) mLogString += msgFailedObjectDestroy;
+    
+    // Check shader
+    Shader* shaderPtr = Renderer.CreateShader();
+    if (shaderPtr == nullptr) mLogString += msgFailedObjectCreate;
+    if (!Renderer.DestroyShader(shaderPtr)) mLogString += msgFailedObjectDestroy;
+    
     return;
 }
 
