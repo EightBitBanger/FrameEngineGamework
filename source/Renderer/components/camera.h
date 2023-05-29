@@ -1,7 +1,7 @@
 #ifndef __COMPONENT_CAMERA
 #define __COMPONENT_CAMERA
 
-#include "../types/transform.h"
+#include "../../engine/types/transform.h"
 
 #include "../../Input/InputSystem.h"
 

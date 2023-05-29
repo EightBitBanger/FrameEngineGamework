@@ -4,7 +4,7 @@
 #define GLEW_STATIC
 #include <gl/glew.h>
 
-#include "../types/color.h"
+#include "../../engine/types/color.h"
 #include "../enumerators.h"
 
 

@@ -21,15 +21,26 @@ set (ENGINE_HEADERS
     "source/configuration.h"
     "source/main.h"
     "source/plugins.h"
+    
     "source/Application/applicationlayer.h"
     "source/Application/winproc.h"
+    
     "source/Audio/AudioSystem.h"
+    
     "source/Engine/Engine.h"
     "source/Engine/components/component.h"
     "source/Engine/components/gameobject.h"
+    
+    "source/Engine/types/bufferlayout.h"
+    "source/Engine/types/color.h"
+    "source/Engine/types/transform.h"
+    "source/Engine/types/viewport.h"
+    
     "source/Input/InputSystem.h"
     "source/Input/keys.h"
+    
     "source/Physics/PhysicsSystem.h"
+    
     "source/Renderer/enumerators.h"
     "source/Renderer/pipeline.h"
     "source/Renderer/RenderSystem.h"
@@ -40,21 +51,21 @@ set (ENGINE_HEADERS
     "source/Renderer/components/scene.h"
     "source/Renderer/components/light.h"
     "source/Renderer/components/shader.h"
-    "source/Renderer/types/bufferlayout.h"
-    "source/Renderer/types/color.h"
-    "source/Renderer/types/transform.h"
-    "source/Renderer/types/viewport.h"
+    
     "source/Resources/plugins.h"
     "source/Resources/ResourceManager.h"
     "source/Resources/assets/colliderTag.h"
     "source/Resources/assets/meshTag.h"
     "source/Resources/assets/shaderTag.h"
     "source/Resources/assets/textureTag.h"
+    
     "source/Scripting/ScriptSystem.h"
     "source/Scripting/components/script.h"
+    
     "tests/unitTest.h"
     
     "vendor/Bly7/OBJ_Loader.h"
+    
     "vendor/my-std-lib/fileloader.h"
     "vendor/my-std-lib/logging.h"
     "vendor/my-std-lib/poolallocator.h"
@@ -62,6 +73,7 @@ set (ENGINE_HEADERS
     "vendor/my-std-lib/strings.h"
     "vendor/my-std-lib/timer.h"
     "vendor/my-std-lib/types.h"
+    
     "vendor/stb/stb_image.h"
     "vendor/stb/stb_perlin.h"
     "vendor/stb/stb_truetype.h"
@@ -75,14 +87,25 @@ set (ENGINE_SOURCES
     
     "source/application.cpp"
     "source/main.cpp"
+    
     "source/Application/ApplicationLayer.cpp"
     "source/Application/winproc.cpp"
+    
     "source/Audio/AudioSystem.cpp"
     "source/Engine/Engine.cpp"
+    
     "source/Engine/components/component.cpp"
     "source/Engine/components/gameobject.cpp"
+    
+    "source/Engine/types/bufferlayout.cpp"
+    "source/Engine/types/color.cpp"
+    "source/Engine/types/transform.cpp"
+    "source/Engine/types/viewport.cpp"
+    
     "source/Input/InputSystem.cpp"
+    
     "source/Physics/PhysicsSystem.cpp"
+    
     "source/Renderer/pipeline.cpp"
     "source/Renderer/RenderSystem.cpp"
     "source/Renderer/components/camera.cpp"
@@ -92,15 +115,13 @@ set (ENGINE_SOURCES
     "source/Renderer/components/scene.cpp"
     "source/Renderer/components/light.cpp"
     "source/Renderer/components/shader.cpp"
-    "source/Renderer/types/bufferlayout.cpp"
-    "source/Renderer/types/color.cpp"
-    "source/Renderer/types/transform.cpp"
-    "source/Renderer/types/viewport.cpp"
+    
     "source/Resources/ResourceManager.cpp"
     "source/Resources/assets/colliderTag.cpp"
     "source/Resources/assets/meshTag.cpp"
     "source/Resources/assets/shaderTag.cpp"
     "source/Resources/assets/textureTag.cpp"
+    
     "source/Scripting/ScriptSystem.cpp"
     "source/Scripting/components/script.cpp"
     

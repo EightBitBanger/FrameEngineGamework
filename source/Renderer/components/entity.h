@@ -1,7 +1,7 @@
 #ifndef __COMPONENT_ENTITY
 #define __COMPONENT_ENTITY
 
-#include "../types/transform.h"
+#include "../../engine/types/transform.h"
 
 #include "material.h"
 #include "mesh.h"

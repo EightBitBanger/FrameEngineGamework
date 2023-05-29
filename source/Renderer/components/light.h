@@ -1,8 +1,8 @@
 #ifndef __COMPONENT_LIGHT
 #define __COMPONENT_LIGHT
 
-#include "../types/transform.h"
-#include "../types/color.h"
+#include "../../engine/types/transform.h"
+#include "../../engine/types/color.h"
 
 
 class Light {

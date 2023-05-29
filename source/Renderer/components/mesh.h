@@ -6,7 +6,7 @@
 
 #include <vector>
 
-#include "../types/bufferlayout.h"
+#include "../../engine/types/bufferlayout.h"
 
 #include "material.h"
 #include "shader.h"

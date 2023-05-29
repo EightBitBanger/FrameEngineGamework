@@ -10,8 +10,8 @@
 
 #include "../../../vendor/my-std-lib/types.h"
 
-#include "../types/transform.h"
-#include "../types/color.h"
+#include "../../engine/types/transform.h"
+#include "../../engine/types/color.h"
 
 #include "../../configuration.h"
 
