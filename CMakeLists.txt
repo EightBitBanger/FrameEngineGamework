@@ -109,6 +109,7 @@ set (ENGINE_SOURCES
     "tests/units/testEngineFunctionality.cpp"
     "tests/units/testGameObjects.cpp"
     "tests/units/testRenderSystem.cpp"
+    "tests/units/testScriptSystem.cpp"
     
     "vendor/my-std-lib/fileloader.cpp"
     "vendor/my-std-lib/logging.cpp"
