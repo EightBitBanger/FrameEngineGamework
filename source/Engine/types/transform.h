@@ -30,7 +30,7 @@ public:
     /// Set the position of the transform matrix.
     void SetPosition(float x, float y, float z);
     /// Set the rotation of the transform matrix.
-    void SetRotation(float x, float y, float z, float w);
+    void SetRotation(float w, float x, float y, float z);
     /// Set the scale of the transform matrix.
     void SetScale(float x, float y, float z);
     

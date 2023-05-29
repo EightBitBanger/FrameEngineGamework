@@ -24,14 +24,14 @@ void Transform::SetPosition(glm::vec3 newPosition) {
     return;
 }
 
-void Transform::SetRotation(float x, float y, float z, float w) {
-    rotation = glm::vec4(x, y, z, w);
+void Transform::SetRotation(float w, float x, float y, float z) {
+    rotation = glm::vec4(w, x, y, z);
     UpdateMatrix();
     return;
 }
 
 void Transform::SetRotation(glm::vec4 newRotation) {
-    rotation = glm::vec4(newRotation.x, newRotation.y, newRotation.z, newRotation.w);
+    rotation = glm::vec4(newRotation.w, newRotation.x, newRotation.y, newRotation.z);
     UpdateMatrix();
     return;
 }
