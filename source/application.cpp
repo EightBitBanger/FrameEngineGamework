@@ -3,6 +3,7 @@
 extern RandomGen            Random;
 extern ColorPreset          Colors;
 extern Timer                Time;
+extern Timer                PhysicsTime;
 extern Logger               Log;
 
 extern EngineSystemManager  Engine;
@@ -112,6 +113,34 @@ void Framework::Start() {
     //
     // Create the projectile collider
     projectileCollider = Physics.CreateColliderBox(2, 4, 2);
+    
+    
+    // Body A
+    GameObject* objectA = Engine.CreateGameObject();
+    Component* entityRendererA = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
+    objectA->AddComponent(entityRendererA);
+    
+    // RigidBody
+    Component* rigidBody = Engine.CreateComponent(ComponentType::RigidBody);
+    objectA->AddComponent(rigidBody);
+    rp3d::RigidBody* bodyPtr = (rp3d::RigidBody*)rigidBody->GetComponent();
+    
+    rp3d::Transform transform(rp3d::Vector3(10, 10, 10), rp3d::Quaternion::identity());
+    bodyPtr->setTransform(transform);
+    
+    
+    // Body B
+    GameObject* objectB = Engine.CreateGameObject();
+    Component* entityRendererB = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
+    objectB->AddComponent(entityRendererB);
+    
+    objectB->transform.SetPosition(10, 10, 10);
+    
+    
+    
+    
+    
+    
     
     return;
 }
