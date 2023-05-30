@@ -228,13 +228,7 @@ void RenderSystem::SetViewport(unsigned int x, unsigned int y, unsigned int w, u
 glm::mat4 RenderSystem::CalculateModelMatrix(Transform& model) {
     
     glm::mat4 modelTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( model.position.x, model.position.y, model.position.z ));
-    
-    glm::mat4 
-    modelRotation = glm::rotate (glm::mat4(1.0f), glm::radians( 0.0f ), glm::vec3(0, 1, 0));
-    modelRotation = glm::rotate(modelRotation, model.rotation.x, glm::vec3( 0.0f, 1.0f, 0.0f ) );
-    modelRotation = glm::rotate(modelRotation, model.rotation.y, glm::vec3( 1.0f, 0.0f, 0.0f ) );
-    modelRotation = glm::rotate(modelRotation, model.rotation.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
-    
+    glm::mat4 modelRotation = glm::toMat4(model.orientation);
     glm::mat4 modelScale = glm::scale(glm::mat4(1.0f), glm::vec3( model.scale.x, model.scale.y, model.scale.z ));
     
     return modelTranslation * modelRotation * modelScale;
@@ -306,9 +300,9 @@ void RenderSystem::RenderFrame(float deltaTime) {
     eye.z = cameraMain->transform.position.z;
     
     // Forward looking angle
-    cameraMain->forward.x = cos( cameraMain->transform.rotation.x * 180 / glm::pi<float>() );
-    cameraMain->forward.y = tan( cameraMain->transform.rotation.y * 180 / glm::pi<float>() );
-    cameraMain->forward.z = sin( cameraMain->transform.rotation.x * 180 / glm::pi<float>() );
+    cameraMain->forward.x = cos( cameraMain->transform.orientation.x * 180 / glm::pi<float>() );
+    cameraMain->forward.y = tan( cameraMain->transform.orientation.y * 180 / glm::pi<float>() );
+    cameraMain->forward.z = sin( cameraMain->transform.orientation.x * 180 / glm::pi<float>() );
     cameraMain->forward = glm::normalize(cameraMain->forward);
     
     // Calculate view point

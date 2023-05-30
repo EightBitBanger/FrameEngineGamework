@@ -1,9 +1,10 @@
 #include "transform.h"
 
+
 Transform::Transform() : 
     
     position(glm::vec3(0, 0, 0)),
-    rotation(glm::vec4(0, 0, 0, 1)),
+    orientation(glm::quat(0, 0, 0, 1)),
     scale(glm::vec3(1, 1, 1)),
     
     matrix(glm::mat4(1)),
@@ -25,13 +26,13 @@ void Transform::SetPosition(glm::vec3 newPosition) {
 }
 
 void Transform::SetRotation(float w, float x, float y, float z) {
-    rotation = glm::vec4(w, x, y, z);
+    orientation = glm::quat(w, x, y, z);
     UpdateMatrix();
     return;
 }
 
-void Transform::SetRotation(glm::vec4 newRotation) {
-    rotation = glm::vec4(newRotation.w, newRotation.x, newRotation.y, newRotation.z);
+void Transform::SetRotation(glm::quat newRotation) {
+    orientation = newRotation;
     UpdateMatrix();
     return;
 }
@@ -52,8 +53,8 @@ glm::vec3 Transform::GetPosition(void) {
     return position;
 }
 
-glm::vec4 Transform::GetRotation(void) {
-    return rotation;
+glm::quat Transform::GetRotation(void) {
+    return orientation;
 }
 
 glm::vec3 Transform::GetScale(void){
@@ -92,16 +93,10 @@ Transform Transform::Identity(void) {
 
 void Transform::UpdateMatrix(void) {
     
-    glm::mat4 modelPosition = glm::translate(glm::mat4(1.0f), glm::vec3( position.x, position.y, position.z ));
-    
-    glm::mat4 
-    modelRotation = glm::rotate (glm::mat4(1.0f), glm::radians( 0.0f ), glm::vec3(0, 1, 0));
-    modelRotation = glm::rotate(modelRotation, rotation.x, glm::vec3( 0.0f, 1.0f, 0.0f ) );
-    modelRotation = glm::rotate(modelRotation, rotation.y, glm::vec3( 1.0f, 0.0f, 0.0f ) );
-    modelRotation = glm::rotate(modelRotation, rotation.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
-    
+    glm::mat4 modelTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( position.x, position.y, position.z ));
+    glm::mat4 modelRotation = glm::toMat4(orientation);
     glm::mat4 modelScale = glm::scale(glm::mat4(1.0f), glm::vec3( scale.x, scale.y, scale.z ));
     
-    matrix = modelPosition * modelRotation * modelScale;
+    matrix = modelTranslation * modelRotation * modelScale;
     return;
 }

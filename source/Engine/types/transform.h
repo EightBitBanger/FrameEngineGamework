@@ -1,12 +1,12 @@
 #ifndef _TRANSFORM_TYPE__
 #define _TRANSFORM_TYPE__
 
-#include <vector>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 
+#include <vector>
 
 class Transform {
     
@@ -15,7 +15,7 @@ public:
     /// Local translation
     glm::vec3 position;
     /// Local rotation
-    glm::vec4 rotation;
+    glm::quat orientation;
     /// Local scale
     glm::vec3 scale;
     
@@ -37,14 +37,14 @@ public:
     /// Set the position of the transform matrix.
     void SetPosition(glm::vec3 newPosition);
     /// Set the rotation of the transform matrix.
-    void SetRotation(glm::vec4 newRotation);
+    void SetRotation(glm::quat newRotation);
     /// Set the scale of the transform matrix.
     void SetScale(glm::vec3 newScale);
     
     /// Get the position of the transform matrix.
     glm::vec3 GetPosition(void);
     /// Get the rotation of the transform matrix.
-    glm::vec4 GetRotation(void);
+    glm::quat GetRotation(void);
     /// Get the scale of the transform matrix.
     glm::vec3 GetScale(void);
     
@@ -68,6 +68,7 @@ private:
     // List of child transforms
     std::vector<Transform*> mChildList;
     
+    // Parent transform
     Transform* mParent;
     
 };

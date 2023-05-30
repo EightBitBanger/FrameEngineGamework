@@ -233,11 +233,11 @@ void EngineSystemManager::Update(void) {
             position.y = bodyPosition.y;
             position.z = bodyPosition.z;
             
-            glm::vec4 rotation;
+            glm::quat rotation;
+            rotation.w = quaterion.w;
             rotation.x = quaterion.x;
             rotation.y = quaterion.y;
             rotation.z = quaterion.z;
-            rotation.w = quaterion.w;
             
             glm::vec3 scale = objectPtr->transform.scale;
             
@@ -248,8 +248,7 @@ void EngineSystemManager::Update(void) {
             // Update the game object transform
             objectPtr->transform.matrix = sourceTransform;
             objectPtr->transform.position = position;
-            objectPtr->transform.rotation = rotation;
-            
+            objectPtr->transform.orientation = rotation;
             
             //
             // Sync with the rigid body
@@ -260,7 +259,7 @@ void EngineSystemManager::Update(void) {
                 
                 componentEntityRenderer->transform.matrix = sourceTransform;
                 componentEntityRenderer->transform.position = position;
-                componentEntityRenderer->transform.rotation = rotation;
+                componentEntityRenderer->transform.orientation = rotation;
                 componentEntityRenderer->transform.scale    = scale;
             }
             
@@ -268,7 +267,7 @@ void EngineSystemManager::Update(void) {
             if (componentLight != nullptr) {
                 componentLight->transform.matrix = sourceTransform;
                 componentLight->transform.position = position;
-                componentLight->transform.rotation = rotation;
+                componentLight->transform.orientation = rotation;
             }
             
             Camera* componentCamera = objectPtr->GetCachedCamera();
@@ -276,14 +275,14 @@ void EngineSystemManager::Update(void) {
                 componentCamera->transform.matrix = sourceTransform;
                 componentCamera->transform.position = position;
                 if (!componentCamera->useMouseLook) 
-                    componentCamera->transform.rotation = rotation;
+                    componentCamera->transform.orientation = rotation;
             }
             
         } else {
             
             // Source position, rotation and scale
             glm::vec3 position = objectPtr->transform.position;
-            glm::vec4 rotation = objectPtr->transform.rotation;
+            glm::quat rotation = objectPtr->transform.orientation;
             glm::vec3 scale    = objectPtr->transform.scale;
             
             //
@@ -293,7 +292,7 @@ void EngineSystemManager::Update(void) {
             Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
             if (componentEntityRenderer != nullptr) {
                 componentEntityRenderer->transform.position = position;
-                componentEntityRenderer->transform.rotation = rotation;
+                componentEntityRenderer->transform.orientation = rotation;
                 componentEntityRenderer->transform.scale    = scale;
                 componentEntityRenderer->transform.matrix   = Renderer.CalculateModelMatrix(objectPtr->transform);
             }
@@ -301,7 +300,7 @@ void EngineSystemManager::Update(void) {
             Light* componentLight = objectPtr->GetCachedLight();
             if (componentLight != nullptr) {
                 componentLight->transform.position = position;
-                componentLight->transform.rotation = rotation;
+                componentLight->transform.orientation = rotation;
             }
             
             Camera* componentCamera = objectPtr->GetCachedCamera();
@@ -309,7 +308,7 @@ void EngineSystemManager::Update(void) {
                 componentCamera->transform.matrix = objectPtr->transform.matrix;
                 componentCamera->transform.position = position;
                 if (!componentCamera->useMouseLook) 
-                    componentCamera->transform.rotation = rotation;
+                    componentCamera->transform.orientation = rotation;
             }
             
         }

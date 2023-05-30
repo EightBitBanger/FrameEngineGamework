@@ -33,24 +33,24 @@ void Camera::MouseLook(float deltaTime, int mouseResetX, int mouseResetY) {
     float MouseDiffX = (MousePos.x - mouseResetX) * MouseSensitivityYaw * deltaTime;
     float MouseDiffY = (MousePos.y - mouseResetY) * MouseSensitivityPitch * deltaTime;
     
-    transform.rotation.x += (float)MouseDiffX;
-    transform.rotation.y -= (float)MouseDiffY;
+    transform.orientation.x += (float)MouseDiffX;
+    transform.orientation.y -= (float)MouseDiffY;
     
     // Yaw limit
-    if (transform.rotation.x >= 0.109655)  {transform.rotation.x -= 0.109655;}
-    if (transform.rotation.x <= 0.109655)  {transform.rotation.x += 0.109655;}
+    if (transform.orientation.x >= 0.109655)  {transform.orientation.x -= 0.109655;}
+    if (transform.orientation.x <= 0.109655)  {transform.orientation.x += 0.109655;}
     
     // Pitch limit
-    if (transform.rotation.y >  0.0274f) transform.rotation.y =  0.0274f;
-    if (transform.rotation.y < -0.0274f) transform.rotation.y = -0.0274f;
+    if (transform.orientation.y >  0.0274f) transform.orientation.y =  0.0274f;
+    if (transform.orientation.y < -0.0274f) transform.orientation.y = -0.0274f;
     
     return;
 }
 
 float Camera::GetPitch(void) {
-    return glm::degrees(glm::asin(transform.rotation.y));
+    return glm::degrees(glm::asin(transform.orientation.y));
 }
 
 float Camera::GetYaw(float pitch) {
-    return glm::degrees(glm::acos(transform.rotation.x / cos(glm::radians(pitch))));
+    return glm::degrees(glm::acos(transform.orientation.x / cos(glm::radians(pitch))));
 }
