@@ -256,7 +256,6 @@ void EngineSystemManager::Update(void) {
             
             Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
             if (componentEntityRenderer != nullptr) {
-                
                 componentEntityRenderer->transform.matrix = sourceTransform;
                 componentEntityRenderer->transform.position = position;
                 componentEntityRenderer->transform.orientation = rotation;
@@ -281,34 +280,34 @@ void EngineSystemManager::Update(void) {
         } else {
             
             // Source position, rotation and scale
-            glm::vec3 position = objectPtr->transform.position;
-            glm::quat rotation = objectPtr->transform.orientation;
-            glm::vec3 scale    = objectPtr->transform.scale;
+            glm::vec3 position    = objectPtr->transform.position;
+            glm::quat orientation = objectPtr->transform.orientation;
+            glm::vec3 scale       = objectPtr->transform.scale;
             
             //
-            // No rigid body, sync with the game object
+            // No rigid body, sync with the game object transform
             //
             
             Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
             if (componentEntityRenderer != nullptr) {
                 componentEntityRenderer->transform.position = position;
-                componentEntityRenderer->transform.orientation = rotation;
+                componentEntityRenderer->transform.orientation = orientation;
                 componentEntityRenderer->transform.scale    = scale;
                 componentEntityRenderer->transform.matrix   = Renderer.CalculateModelMatrix(objectPtr->transform);
             }
             
             Light* componentLight = objectPtr->GetCachedLight();
             if (componentLight != nullptr) {
-                componentLight->transform.position = position;
-                componentLight->transform.orientation = rotation;
+                componentLight->transform.position    = position;
+                componentLight->transform.orientation = orientation;
             }
             
             Camera* componentCamera = objectPtr->GetCachedCamera();
             if (componentCamera != nullptr) {
-                componentCamera->transform.matrix = objectPtr->transform.matrix;
+                componentCamera->transform.matrix   = objectPtr->transform.matrix;
                 componentCamera->transform.position = position;
                 if (!componentCamera->useMouseLook) 
-                    componentCamera->transform.orientation = rotation;
+                    componentCamera->transform.orientation = orientation;
             }
             
         }

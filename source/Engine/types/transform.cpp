@@ -25,13 +25,13 @@ void Transform::SetPosition(glm::vec3 newPosition) {
     return;
 }
 
-void Transform::SetRotation(float w, float x, float y, float z) {
+void Transform::SetOrientation(float w, float x, float y, float z) {
     orientation = glm::quat(w, x, y, z);
     UpdateMatrix();
     return;
 }
 
-void Transform::SetRotation(glm::quat newRotation) {
+void Transform::SetOrientation(glm::quat newRotation) {
     orientation = newRotation;
     UpdateMatrix();
     return;
@@ -59,6 +59,19 @@ glm::quat Transform::GetRotation(void) {
 
 glm::vec3 Transform::GetScale(void){
     return scale;
+}
+
+void Transform::Translate(glm::vec3 translation) {
+    matrix = glm::translate(matrix, translation);
+}
+
+void Transform::RotateAxis(float angle, glm::vec3 axis) {
+    matrix = glm::rotate(matrix, glm::radians(angle), glm::normalize(axis));
+}
+
+void Transform::RotateEuler(glm::vec3 eulerAngle) {
+    orientation = glm::quat(glm::radians(eulerAngle));
+    UpdateMatrix();
 }
 
 void Transform::ChildAdd(Transform* transform) {
