@@ -197,6 +197,30 @@ void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, floa
     return;
 }
 
+void GameObject::AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z) {
+    if (mRigidBodyCache == nullptr) return;
+    assert(capsuleShape != nullptr);
+    
+    rp3d::Transform offsetTransform;
+    offsetTransform.setPosition(rp3d::Vector3(x, y, z));
+    
+    mRigidBodyCache->addCollider(capsuleShape, offsetTransform);
+    
+    return;
+}
+
+void GameObject::AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z) {
+    if (mRigidBodyCache == nullptr) return;
+    assert(sphereShape != nullptr);
+    
+    rp3d::Transform offsetTransform;
+    offsetTransform.setPosition(rp3d::Vector3(x, y, z));
+    
+    mRigidBodyCache->addCollider(sphereShape, offsetTransform);
+    
+    return;
+}
+
 void GameObject::AddCollider(ColliderTag* colliderTag, float x, float y, float z) {
     if (mRigidBodyCache == nullptr) return;
     assert(colliderTag != nullptr);

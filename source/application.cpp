@@ -21,13 +21,14 @@ extern InputSystem          Input;
 
 // Global resource pointers
 Mesh*           projectileMesh;
+Material*       projectionMaterial;
+
 Material*       barrelMaterial;
 GameObject*     cameraController;
 GameObject*     skyObject;
-rp3d::BoxShape* projectileCollider;
 
-
-
+rp3d::SphereShape* projectileCollider;
+GameObject* objectB;
 
 
 //
@@ -41,20 +42,29 @@ void Framework::Start() {
     Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
     Resources.LoadTexture("data/grassy.png", "mat_grassy");
     
+    Resources.LoadWaveFront("data/projectile/projectile.obj", "bullet");
+    Resources.LoadTexture("data/projectile/projectile.png", "mat_bullet");
+    
     // Set the gravity vector for the simulation
-    Physics.SetWorldGravity(0, -9.81, 0);
+    Physics.SetWorldGravity(0, -9.81 * 2 * 2, 0);
     
     // Create objects from resource tags
     Material* groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
-    barrelMaterial->diffuse = Color(0.01, 0.01, 0.01);
-    groundMaterial->diffuse = Color(0.01, 0.01, 0.01);
+    barrelMaterial->diffuse = Color(0.08, 0.08, 0.08);
+    groundMaterial->diffuse = Color(0.08, 0.08, 0.08);
     
     Mesh* barrelMesh = Resources.CreateMeshFromTag("barrel");
     barrelMesh->ChangeSubMeshColor(0, Colors.white);
     
-    projectileMesh = Resources.CreateMeshFromTag("barrel");
-    projectileMesh->ChangeSubMeshColor(0, Colors.white);
+    projectileMesh = Resources.CreateMeshFromTag("bullet");
+    projectileMesh->ChangeSubMeshColor(0, Colors.yellow);
+    
+    projectionMaterial = Resources.CreateMaterialFromTag("mat_bullet");
+    projectionMaterial->diffuse = Colors.red;
+    projectionMaterial->ambient = Colors.white;
+    projectileCollider = Physics.CreateColliderSphere(1);
+    
     
     //
     // Create a sky object
@@ -74,7 +84,7 @@ void Framework::Start() {
     //
     // Create a ground plain
     Mesh* groundMesh = Renderer.CreateMesh();
-    groundMesh->AddPlainSubDivided(-500, 0, -500, 10, 10, Colors.white, 100, 100);
+    groundMesh->AddPlainSubDivided(-100, 0, -100, 10, 10, Colors.white, 100, 100);
     
     GameObject* ground = Engine.CreateGameObject();
     ground->name = "world";
@@ -93,51 +103,50 @@ void Framework::Start() {
     ground->SetAngularAxisLockFactor(0, 0, 0);
     
     // Ground collider
-    rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(100000, 10, 100000);
-    ground->AddColliderBox(groundCollider, -10000, -10, -10000);
+    rp3d::Vector3 groundScale = rp3d::Vector3(100000, 10, 100000);
+    rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(groundScale.x, groundScale.y, groundScale.z);
+    ground->AddColliderBox(groundCollider, -(groundScale.x / 2), -10, -(groundScale.z / 2));
     
     //
     // Create a camera controller
     cameraController = Engine.CreateCameraController(-50, 20, 0);
-    cameraController->SetLinearDamping(3);
-    cameraController->SetMass(100);
+    cameraController->SetLinearDamping(1);
+    cameraController->SetMass(40);
     
     cameraController->CalculatePhysics();
-    cameraController->EnableGravity(false);
+    cameraController->EnableGravity(true);
     
     rp3d::BoxShape* boxShape = Physics.CreateColliderBox(1, 8, 1);
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
     cameraController->CalculatePhysics();
     
+    
     //
-    // Create the projectile collider
-    projectileCollider = Physics.CreateColliderBox(2, 4, 2);
+    // Testing transformation matrix parent chain
+    //
     
     
-    // Body A
+    // Object A - child
     GameObject* objectA = Engine.CreateGameObject();
+    objectA->name = "TEST object";
     Component* entityRendererA = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
     objectA->AddComponent(entityRendererA);
     
-    // RigidBody
-    Component* rigidBody = Engine.CreateComponent(ComponentType::RigidBody);
-    objectA->AddComponent(rigidBody);
-    rp3d::RigidBody* bodyPtr = (rp3d::RigidBody*)rigidBody->GetComponent();
-    
-    rp3d::Transform transform(rp3d::Vector3(10, 10, 10), rp3d::Quaternion::identity());
-    bodyPtr->setTransform(transform);
     
     
-    // Body B
-    GameObject* objectB = Engine.CreateGameObject();
+    // Object B - parent
+    objectB = Engine.CreateGameObject();
+    objectB->name = "TEST object";
     Component* entityRendererB = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
     objectB->AddComponent(entityRendererB);
     
     objectB->transform.SetPosition(10, 10, 10);
+    objectB->transform.RotateEuler(90, 90, 0);
     
+    objectB->transform.Scale(10, 10, 10);
     
-    
+    objectA->transform.parent = &objectB->transform;
     
     
     
@@ -155,9 +164,14 @@ void Framework::Start() {
 // Application main loop
 //
 
+float rotate = 0;
+
 void Framework::Run() {
     
     glm::vec3 force(0);
+    
+    objectB->transform.RotateEuler(rotate, -rotate, rotate);
+    rotate += 0.4;
     
     // Keyboard movement, WASD keys
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
@@ -170,7 +184,7 @@ void Framework::Run() {
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
     // Camera speed multiplier
-    force *= 100000;
+    force *= 8000;
     
     cameraController->AddForce(force.x, force.y, force.z);
     
@@ -200,24 +214,27 @@ void Framework::Run() {
             glm::vec3 fwdAngle = Renderer.cameraMain->forward;
             
             // Offset starting distance from camera
-            fwd *= 13;
+            fwd *= 9;
             
             glm::vec3 pos(0);
             pos = Renderer.cameraMain->transform.GetPosition();
             pos += fwd;
             
             // Total forward force + camera offset distance
-            fwd *= 100000;
+            fwd *= 1500;
+            
+            // Camera height offset
+            float fireFromHeightOffset = -2;
             
             float startx = pos.x + offsetx;
-            float starty = pos.y + offsety - 5;
+            float starty = pos.y + offsety + fireFromHeightOffset;
             float startz = pos.z + offsetz;
             
             
             
             GameObject* projectile = Engine.CreateGameObject();
             projectile->name = "projectile";
-            
+            projectile->transform.SetScale(2, 2, 2);
             
             
             // Add a render component
@@ -226,18 +243,19 @@ void Framework::Run() {
             // Set the render component to a loaded resource
             Entity* entity = (Entity*)entityRenderer->GetComponent();
             entity->AttachMesh(projectileMesh);
-            entity->AttachMaterial(barrelMaterial);
+            entity->AttachMaterial(projectionMaterial);
             
             
             // Light component test
-            Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
-            projectile->AddComponent(lightComponent);
-            Light* lightPtr = (Light*)lightComponent->GetComponent();
-            lightPtr->color = Colors.MakeRandom();
-            lightPtr->intensity    = 40.0;
-            lightPtr->range        = 100.0;
-            lightPtr->attenuation  = 0.002;
-            
+            if (Random.Range(0, 10) > 2) {
+                Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
+                projectile->AddComponent(lightComponent);
+                Light* lightPtr = (Light*)lightComponent->GetComponent();
+                lightPtr->color = Colors.MakeRandom();
+                lightPtr->intensity    = 80.0;
+                lightPtr->range        = 1000.0;
+                lightPtr->attenuation  = 0.013;
+            }
             
             // Add a physics component
             Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
@@ -245,11 +263,11 @@ void Framework::Run() {
             rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
             
             // Projectile collider
-            projectile->AddColliderBox(projectileCollider, 0, 0, 0);
+            projectile->AddColliderSphere(projectileCollider, 0, 0, 0);
             
-            projectile->SetMass(0.001);
-            projectile->SetLinearDamping(0.001);
-            projectile->SetAngularDamping(0.003);
+            projectile->SetMass(0.0001);
+            projectile->SetLinearDamping(0.003);
+            projectile->SetAngularDamping(0.005);
             projectile->CalculatePhysics();
             
             
@@ -277,13 +295,13 @@ void Framework::Run() {
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > RENDER_NUMBER_OF_LIGHTS) {
+    while (Engine.GetGameObjectCount() > 120) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;
         
-        // Ignore cameras and world objects
-        if ((gameObject->name == "world") | (gameObject->name == "camera") | (gameObject->name == "sky")) 
+        // Cull projectile objects
+        if (gameObject->name != "projectile") 
             continue;
         
         Engine.DestroyGameObject(gameObject);

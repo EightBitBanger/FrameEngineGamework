@@ -9,7 +9,7 @@ Transform::Transform() :
     
     matrix(glm::mat4(1)),
     
-    mParent(nullptr)
+    parent(nullptr)
 {
 }
 
@@ -65,6 +65,10 @@ void Transform::Translate(glm::vec3 translation) {
     matrix = glm::translate(matrix, translation);
 }
 
+void Transform::Translate(float x, float y, float z) {
+    matrix = glm::translate(matrix, glm::vec3(x, y, z));
+}
+
 void Transform::RotateAxis(float angle, glm::vec3 axis) {
     matrix = glm::rotate(matrix, glm::radians(angle), glm::normalize(axis));
 }
@@ -74,29 +78,17 @@ void Transform::RotateEuler(glm::vec3 eulerAngle) {
     UpdateMatrix();
 }
 
-void Transform::ChildAdd(Transform* transform) {
-    mChildList.push_back(transform);
-    return;
+void Transform::RotateEuler(float yaw, float pitch, float roll) {
+    orientation = glm::quat( glm::radians( glm::vec3(yaw, pitch, roll) ) );
+    UpdateMatrix();
 }
 
-bool Transform::ChildRemove(Transform* transform) {
-    for (std::vector<Transform*>::iterator it = mChildList.begin(); it != mChildList.end(); ++it) {
-        Transform* transformPtr = *it;
-        if (transform == transformPtr) {
-            mChildList.erase(it);
-            return true;
-        }
-    }
-    return false;    
+void Transform::Scale(glm::vec3 scaler) {
+    matrix = glm::scale(matrix, scaler);
 }
 
-void Transform::SetParentTransform(Transform* parentTransform) {
-    mParent = parentTransform;
-    return;
-}
-
-Transform* Transform::GetParentTransform(void) {
-    return mParent;
+void Transform::Scale(float x, float y, float z) {
+    matrix = glm::scale(matrix, glm::vec3(x, y, z) );
 }
 
 Transform Transform::Identity(void) {

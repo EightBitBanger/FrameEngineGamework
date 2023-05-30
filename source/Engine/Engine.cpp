@@ -216,6 +216,20 @@ void EngineSystemManager::Update(void) {
         if (!objectPtr->isActive) 
             continue;
         
+        // TODO  Calculate transform chain
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         // Check to get the rigid body as the source transform
         rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
@@ -259,19 +273,19 @@ void EngineSystemManager::Update(void) {
                 componentEntityRenderer->transform.matrix = sourceTransform;
                 componentEntityRenderer->transform.position = position;
                 componentEntityRenderer->transform.orientation = rotation;
-                componentEntityRenderer->transform.scale    = scale;
+                componentEntityRenderer->transform.Scale(scale);
             }
             
             Light* componentLight = objectPtr->GetCachedLight();
             if (componentLight != nullptr) {
-                componentLight->transform.matrix = sourceTransform;
+                //componentLight->transform.matrix = sourceTransform;
                 componentLight->transform.position = position;
                 componentLight->transform.orientation = rotation;
             }
             
             Camera* componentCamera = objectPtr->GetCachedCamera();
             if (componentCamera != nullptr) {
-                componentCamera->transform.matrix = sourceTransform;
+                //componentCamera->transform.matrix = sourceTransform;
                 componentCamera->transform.position = position;
                 if (!componentCamera->useMouseLook) 
                     componentCamera->transform.orientation = rotation;
@@ -304,7 +318,6 @@ void EngineSystemManager::Update(void) {
             
             Camera* componentCamera = objectPtr->GetCachedCamera();
             if (componentCamera != nullptr) {
-                componentCamera->transform.matrix   = objectPtr->transform.matrix;
                 componentCamera->transform.position = position;
                 if (!componentCamera->useMouseLook) 
                     componentCamera->transform.orientation = orientation;

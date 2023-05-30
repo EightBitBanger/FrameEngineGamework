@@ -24,6 +24,9 @@ public:
     /// Local transform matrix
     glm::mat4 matrix;
     
+    /// Parent transform. This is a root object if set to NULLPTR.
+    Transform* parent;
+    
     Transform();
     
     /// Update the model matrix from the current position, rotation and scale.
@@ -51,36 +54,22 @@ public:
     glm::vec3 GetScale(void);
     
     /// Translate the transform by the given amount.
+    void Translate(float x, float y, float z);
+    /// Translate the transform by the given amount.
     void Translate(glm::vec3 translation);
     /// Rotate the transform on the axis by the given angle amount.
     void RotateAxis(float angle, glm::vec3 axis);
-    /// Rotate the transform by the given Euler anglers.
+    /// Rotate the transform by the given Euler angles.
+    void RotateEuler(float yaw, float pitch, float roll);
+    /// Rotate the transform by the given Euler angles.
     void RotateEuler(glm::vec3 eulerAngle);
+    /// Scale the transform by the given amount.
+    void Scale(float x, float y, float z);
     /// Scale the transform by the given amount.
     void Scale(glm::vec3 eulerAngle);
     
-    /// Add a transform to this transform as a child transform.
-    void ChildAdd(Transform* transform);
-    /// Remove a child transform from this transform.
-    bool ChildRemove(Transform* transform);
-    
-    /// Set the parent transform.
-    void SetParentTransform(Transform* parentTransform);
-    /// Return the parent transform pointer.
-    Transform* GetParentTransform(void);
-    
-    
     /// Return an identity transform.
     Transform Identity(void);
-    
-    
-private:
-    
-    // List of child transforms
-    std::vector<Transform*> mChildList;
-    
-    // Parent transform
-    Transform* mParent;
     
 };
 

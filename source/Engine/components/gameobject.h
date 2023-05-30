@@ -58,10 +58,14 @@ public:
     /// Add rotational torque to the rigid body.
     void AddTorque(float x, float y, float z);
     
-    /// Add a collider from a resource tag at the offset position x, y, z.
+    /// Add a collider from a resource tag at the offset position x, y and z.
     void AddCollider(ColliderTag* colliderTag, float x, float y, float z);
-    /// Add a box collider shape at the offset position x, y, z.
+    /// Add a box collider shape at the offset position x, y and z.
     void AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z);
+    /// Add a capsule collider shape at the offset position x, y and z.
+    void AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z);
+    /// Add a sphere collider shape at the offset position x, y and z.
+    void AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z);
     
     /// Set the rigid body mass.
     void SetMass(float mass);

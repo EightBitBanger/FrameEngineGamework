@@ -179,13 +179,16 @@ bool Shader::BuildDefault(void) {
         "uniform vec3  u_light_attenuation["+numberOfLights+"];"
         "uniform vec3  u_light_color["+numberOfLights+"];"
         
+        "float l_diff = 1.0;"
+        "float l_dist = 1.0;"
+        
         "void main() "
         "{"
         
         "  vec4 vertPos = u_model * vec4(l_position, 1);"
         "  vec3 finalColor = m_ambient;";
-    
-    
+        
+        
     //
     // Crude but quick vertex lighting implementation
     //
@@ -201,8 +204,8 @@ bool Shader::BuildDefault(void) {
         
         "    vec3 normal = normalize(l_normal);"
         
-        "    float l_diff = max(dot(normal, l_direction), 0.0);"
-        "    float l_dist = length( u_light_position[i] - vec3(vertPos));"
+        "    l_diff = max(dot(normal, l_direction), 0.0);"
+        "    l_dist = length( u_light_position[i] - vec3(vertPos));"
         
         "    if (l_dist < l_range) {"
         "      float f_attenuation = l_attenuation * l_range * l_dist;"
@@ -211,6 +214,7 @@ bool Shader::BuildDefault(void) {
         "  }";
     
     
+    // Finalize vertex colors
     vertexShader += 
         "  v_color = finalColor + m_diffuse;"
         "  v_coord = l_uv;"
