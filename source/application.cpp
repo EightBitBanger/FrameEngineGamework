@@ -28,7 +28,7 @@ GameObject*     cameraController;
 GameObject*     skyObject;
 
 rp3d::SphereShape* projectileCollider;
-GameObject* objectB;
+GameObject* objectA;
 
 
 //
@@ -127,30 +127,38 @@ void Framework::Start() {
     //
     
     
-    // Object A - child
-    GameObject* objectA = Engine.CreateGameObject();
-    objectA->name = "TEST object";
+    // Object A
+    objectA = Engine.CreateGameObject();
+    objectA->name = "testobject";
     Component* entityRendererA = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
     objectA->AddComponent(entityRendererA);
     
-    
-    
-    // Object B - parent
-    objectB = Engine.CreateGameObject();
-    objectB->name = "TEST object";
+    // Object B
+    GameObject* objectB = Engine.CreateGameObject();
+    objectB->name = "testobject";
     Component* entityRendererB = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
     objectB->AddComponent(entityRendererB);
     
-    objectB->transform.SetPosition(10, 10, 10);
-    objectB->transform.RotateEuler(90, 90, 0);
+    // Object C
+    GameObject* objectC = Engine.CreateGameObject();
+    objectC->name = "testobject";
+    Component* entityRendererC = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
+    objectC->AddComponent(entityRendererC);
     
-    objectB->transform.Scale(10, 10, 10);
     
     
     
-    objectA->parent = objectB;
-    objectA->transform.position = glm::vec3(0, 8, 0);
+    objectA->transform.SetPosition(0, 10, 0);
+    //objectA->transform.RotateEuler(90, 90, 0);
+    //objectA->transform.Scale(10, 10, 10);
     
+    
+    
+    objectB->parent = objectA;
+    objectB->transform.position = glm::vec3(0, 8, 0);
+    
+    objectC->parent = objectB;
+    objectC->transform.position = glm::vec3(0, 8, 0);
     
     
     return;
@@ -172,7 +180,7 @@ void Framework::Run() {
     
     glm::vec3 force(0);
     
-    objectB->transform.RotateEuler(rotate, 0, 0);
+    objectA->transform.RotateEuler(rotate, 0, 0);
     rotate += 0.4;
     
     // Keyboard movement, WASD keys
