@@ -13,13 +13,13 @@
 #endif
 
 // My standard includes
-#include "my-std-lib/poolallocator.h"
-#include "my-std-lib/strings.h"
-#include "my-std-lib/types.h"
-#include "my-std-lib/random.h"
-#include "my-std-lib/logging.h"
-#include "my-std-lib/fileloader.h"
-#include "my-std-lib/timer.h"
+#include "../vendor/my-std-lib/poolallocator.h"
+#include "../vendor/my-std-lib/strings.h"
+#include "../vendor/my-std-lib/types.h"
+#include "../vendor/my-std-lib/random.h"
+#include "../vendor/my-std-lib/logging.h"
+#include "../vendor/my-std-lib/fileloader.h"
+#include "../vendor/my-std-lib/timer.h"
 
 #include "Input/InputSystem.h"
 #include "Physics/PhysicsSystem.h"
