@@ -5,6 +5,7 @@ GameObject::GameObject() :
     
     name(""),
     isActive(true),
+    parent(nullptr),
     
     mCameraCache(nullptr),
     mRigidBodyCache(nullptr),

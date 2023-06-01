@@ -29,6 +29,8 @@ public:
     /// State whether the object is active.
     bool isActive;
     
+    /// Pointer to a parent object. Nullptr represents the root parent object.
+    GameObject* parent;
     
     GameObject();
     

@@ -146,8 +146,10 @@ void Framework::Start() {
     
     objectB->transform.Scale(10, 10, 10);
     
-    objectA->transform.parent = &objectB->transform;
     
+    
+    objectA->parent = objectB;
+    objectA->transform.position = glm::vec3(0, 8, 0);
     
     
     
@@ -170,7 +172,7 @@ void Framework::Run() {
     
     glm::vec3 force(0);
     
-    objectB->transform.RotateEuler(rotate, -rotate, rotate);
+    objectB->transform.RotateEuler(rotate, 0, 0);
     rotate += 0.4;
     
     // Keyboard movement, WASD keys

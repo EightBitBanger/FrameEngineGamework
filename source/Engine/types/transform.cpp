@@ -7,9 +7,7 @@ Transform::Transform() :
     orientation(glm::quat(0, 0, 0, 1)),
     scale(glm::vec3(1, 1, 1)),
     
-    matrix(glm::mat4(1)),
-    
-    parent(nullptr)
+    matrix(glm::mat4(1))
 {
 }
 

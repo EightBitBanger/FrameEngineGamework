@@ -24,9 +24,6 @@ public:
     /// Local transform matrix
     glm::mat4 matrix;
     
-    /// Parent transform. This is a root object if set to NULLPTR.
-    Transform* parent;
-    
     Transform();
     
     /// Update the model matrix from the current position, rotation and scale.

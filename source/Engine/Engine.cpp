@@ -216,19 +216,22 @@ void EngineSystemManager::Update(void) {
         if (!objectPtr->isActive) 
             continue;
         
-        // TODO  Calculate transform chain
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        // Calculate parent transform chain
+        GameObject* parent = objectPtr->parent;
+        glm::mat4 parentTransformChain(1);
+        if (parent != nullptr) {
+            parentTransformChain = parent->transform.matrix;
+            
+            while (true) {
+                parent = parent->parent;
+                if (parent == nullptr) 
+                    break;
+                
+                parentTransformChain *= parent->transform.matrix;
+            }
+            
+        }
         
         
         // Check to get the rigid body as the source transform
@@ -278,14 +281,12 @@ void EngineSystemManager::Update(void) {
             
             Light* componentLight = objectPtr->GetCachedLight();
             if (componentLight != nullptr) {
-                //componentLight->transform.matrix = sourceTransform;
                 componentLight->transform.position = position;
                 componentLight->transform.orientation = rotation;
             }
             
             Camera* componentCamera = objectPtr->GetCachedCamera();
             if (componentCamera != nullptr) {
-                //componentCamera->transform.matrix = sourceTransform;
                 componentCamera->transform.position = position;
                 if (!componentCamera->useMouseLook) 
                     componentCamera->transform.orientation = rotation;
@@ -307,7 +308,8 @@ void EngineSystemManager::Update(void) {
                 componentEntityRenderer->transform.position = position;
                 componentEntityRenderer->transform.orientation = orientation;
                 componentEntityRenderer->transform.scale    = scale;
-                componentEntityRenderer->transform.matrix   = Renderer.CalculateModelMatrix(objectPtr->transform);
+                componentEntityRenderer->transform.matrix   = parentTransformChain;
+                componentEntityRenderer->transform.matrix  *= Renderer.CalculateModelMatrix(objectPtr->transform);
             }
             
             Light* componentLight = objectPtr->GetCachedLight();
