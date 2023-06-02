@@ -29,6 +29,9 @@ GameObject*     skyObject;
 
 rp3d::SphereShape* projectileCollider;
 GameObject* objectA;
+GameObject* objectB;
+GameObject* objectC;
+GameObject* objectD;
 
 
 //
@@ -90,8 +93,8 @@ void Framework::Start() {
     ground->name = "world";
     
     // Add a render component
-    Component* groundRenderer = Engine.CreateComponentEntityRenderer(groundMesh, groundMaterial);
-    ground->AddComponent(groundRenderer);
+    //Component* groundRenderer = Engine.CreateComponentEntityRenderer(groundMesh, groundMaterial);
+    //ground->AddComponent(groundRenderer);
     
     // Add a physics component
     Component* groundRigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
@@ -134,24 +137,29 @@ void Framework::Start() {
     objectA->AddComponent(entityRendererA);
     
     // Object B
-    GameObject* objectB = Engine.CreateGameObject();
+    objectB = Engine.CreateGameObject();
     objectB->name = "testobject";
     Component* entityRendererB = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
     objectB->AddComponent(entityRendererB);
     
     // Object C
-    GameObject* objectC = Engine.CreateGameObject();
+    objectC = Engine.CreateGameObject();
     objectC->name = "testobject";
     Component* entityRendererC = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
     objectC->AddComponent(entityRendererC);
     
+    // Object D
+    objectD = Engine.CreateGameObject();
+    objectD->name = "testobject";
+    Component* entityRendererD = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
+    objectD->AddComponent(entityRendererD);
     
     
     
-    objectA->transform.SetPosition(0, 10, 0);
+    
     //objectA->transform.RotateEuler(90, 90, 0);
-    //objectA->transform.Scale(10, 10, 10);
-    
+    objectA->transform.position = glm::vec3(0, 0, 0);
+    objectA->transform.scale    = glm::vec3(1, 1, 1);
     
     
     objectB->parent = objectA;
@@ -160,6 +168,8 @@ void Framework::Start() {
     objectC->parent = objectB;
     objectC->transform.position = glm::vec3(0, 8, 0);
     
+    objectD->parent = objectC;
+    objectD->transform.position = glm::vec3(0, 8, 0);
     
     return;
 }
@@ -174,14 +184,22 @@ void Framework::Start() {
 // Application main loop
 //
 
-float rotate = 0;
+float rotateA = 0;
+float rotateC = 0;
 
 void Framework::Run() {
     
     glm::vec3 force(0);
     
-    objectA->transform.RotateEuler(rotate, 0, 0);
-    rotate += 0.4;
+    objectA->transform.RotateEuler(rotateA, 0, 0);
+    if (rotateA > 90) {
+        rotateA = 90;
+    } else {
+        rotateA += 0.25;
+    }
+    
+    //objectB->transform.RotateEuler(rotateC, 0, 0);
+    //rotateC += 0.7;
     
     // Keyboard movement, WASD keys
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}

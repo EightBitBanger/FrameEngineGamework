@@ -218,9 +218,12 @@ void EngineSystemManager::Update(void) {
         
         
         // Calculate parent transform chain
-        GameObject* parent = objectPtr->parent;
         glm::mat4 parentTransformChain(1);
+        
+        GameObject* parent = objectPtr->parent;
+        
         if (parent != nullptr) {
+            
             parentTransformChain = parent->transform.matrix;
             
             while (true) {
@@ -228,6 +231,7 @@ void EngineSystemManager::Update(void) {
                 if (parent == nullptr) 
                     break;
                 
+                glm::translate(parentTransformChain, parent->transform.position);
                 parentTransformChain *= parent->transform.matrix;
             }
             
@@ -305,7 +309,8 @@ void EngineSystemManager::Update(void) {
             
             Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
             if (componentEntityRenderer != nullptr) {
-                componentEntityRenderer->transform.position = position;
+                
+                componentEntityRenderer->transform.position  = position;
                 componentEntityRenderer->transform.orientation = orientation;
                 componentEntityRenderer->transform.scale    = scale;
                 componentEntityRenderer->transform.matrix   = parentTransformChain;
