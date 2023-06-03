@@ -62,7 +62,7 @@ set (ENGINE_HEADERS
     "source/Scripting/ScriptSystem.h"
     "source/Scripting/components/script.h"
     
-    "tests/unitTest.h"
+    "tests/framework.h"
     
     "vendor/Bly7/OBJ_Loader.h"
     
@@ -125,7 +125,7 @@ set (ENGINE_SOURCES
     "source/Scripting/ScriptSystem.cpp"
     "source/Scripting/components/script.cpp"
     
-    "tests/unitTest.cpp"
+    "tests/framework.cpp"
     "tests/units/testComponents.cpp"
     "tests/units/testEngineFunctionality.cpp"
     "tests/units/testGameObjects.cpp"
