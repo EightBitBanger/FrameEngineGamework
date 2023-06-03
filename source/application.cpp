@@ -93,8 +93,8 @@ void Framework::Start() {
     ground->name = "world";
     
     // Add a render component
-    //Component* groundRenderer = Engine.CreateComponentEntityRenderer(groundMesh, groundMaterial);
-    //ground->AddComponent(groundRenderer);
+    Component* groundRenderer = Engine.CreateComponentEntityRenderer(groundMesh, groundMaterial);
+    ground->AddComponent(groundRenderer);
     
     // Add a physics component
     Component* groundRigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
@@ -323,7 +323,7 @@ void Framework::Run() {
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 120) {
+    while (Engine.GetGameObjectCount() > 300) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;
