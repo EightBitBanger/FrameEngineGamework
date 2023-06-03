@@ -8,9 +8,10 @@
 #include "configuration.h"
 #include "plugins.h"
 
-#ifdef RUN_APPLICATION_TESTS
- #include "../tests/applicationTest.h"
+#ifdef RUN_UNIT_TESTS
+ #include "../tests/framework.h"
 #endif
+
 
 // My standard includes
 #include "../vendor/my-std-lib/poolallocator.h"

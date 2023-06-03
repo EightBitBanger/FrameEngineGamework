@@ -6,7 +6,7 @@
 extern EngineSystemManager  Engine;
 
 
-void ApplicationTest::TestGameObject(void) {
+void TestFramework::TestGameObject(void) {
     if (hasTestFailed) return;
     
     std::cout << "Game objects............ ";

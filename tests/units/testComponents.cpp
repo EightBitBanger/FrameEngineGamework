@@ -6,7 +6,7 @@
 extern EngineSystemManager  Engine;
 
 
-void ApplicationTest::TestComponentObject(void) {
+void TestFramework::TestComponentObject(void) {
     if (hasTestFailed) return;
     
     std::cout << "Component objects....... ";

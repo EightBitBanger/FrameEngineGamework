@@ -6,7 +6,7 @@
 extern RenderSystem Renderer;
 
 
-void ApplicationTest::TestRenderSystem(void) {
+void TestFramework::TestRenderSystem(void) {
     if (hasTestFailed) return;
     
     std::cout << "Render system........... ";

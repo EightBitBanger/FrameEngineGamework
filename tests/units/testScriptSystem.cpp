@@ -6,7 +6,7 @@
 extern ScriptSystem Scripting;
 
 
-void ApplicationTest::TestScriptSystem(void) {
+void TestFramework::TestScriptSystem(void) {
     if (hasTestFailed) return;
     
     std::cout << "Script system........... ";

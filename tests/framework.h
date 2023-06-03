@@ -3,14 +3,18 @@
 #ifndef APPLICATION_UNIT_TESTS
 #define APPLICATION_UNIT_TESTS
 
+#include <iostream>
+#include <string>
+#include <vector>
 
-class ApplicationTest {
+
+class TestFramework {
     
 public:
     
     bool hasTestFailed;
     
-    ApplicationTest();
+    TestFramework();
     
     /// Initiate the unit testing framework
     void Initiate(void);
@@ -27,12 +31,11 @@ public:
     // Test suite
     //
     
-    // Test engine API
+    void AddTest(void(TestFramework::*testFunction)());
+    
     void TestEngineFunctionality(void);
     void TestGameObject(void);
     void TestComponentObject(void);
-    
-    // Test lower level systems
     void TestRenderSystem(void);
     void TestScriptSystem(void);
     
@@ -50,6 +53,8 @@ private:
     const std::string msgFailedAllocatorNotZero   = "object allocator still contains objects\n";
     
     std::string mLogString;
+    
+    std::vector<void(TestFramework::*)()> mTestList;
     
 };
 

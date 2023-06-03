@@ -50,15 +50,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Engine.Initiate();
     
 #ifdef RUN_UNIT_TESTS
-    ApplicationTest Test;
-    Test.Initiate();
+    TestFramework testFrameWork;
+    testFrameWork.Initiate();
+    
+    testFrameWork.AddTest( &testFrameWork.TestEngineFunctionality );
+    testFrameWork.AddTest( &testFrameWork.TestComponentObject );
+    testFrameWork.AddTest( &testFrameWork.TestComponentObject );
+    testFrameWork.AddTest( &testFrameWork.TestComponentObject );
+    testFrameWork.AddTest( &testFrameWork.TestComponentObject );
     
     // Run test suite
-    Test.RunTestSuite();
+    testFrameWork.RunTestSuite();
     
     // Finish the test
-    if (!Test.hasTestFailed) {
-        Test.Complete();
+    if (!testFrameWork.hasTestFailed) {
+        testFrameWork.Complete();
     } else {
         DestroyWindow(wHndl);
         std::string freeze;

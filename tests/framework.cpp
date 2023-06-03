@@ -1,25 +1,20 @@
-#include <iostream>
-#include <string>
-
-typedef void(*TestFunc)();
-
 #include "framework.h"
 
 
-ApplicationTest::ApplicationTest() : 
+TestFramework::TestFramework() : 
     hasTestFailed(false),
     mLogString("")
 {}
 
-void ApplicationTest::Initiate(void) {
+void TestFramework::Initiate(void) {
     std::cout << "Running unit tests" << std::endl << std::endl;
 }
 
-void ApplicationTest::Complete(void) {
+void TestFramework::Complete(void) {
     std::cout << std::endl << "Complete" << std::endl << std::endl;
 }
 
-void ApplicationTest::Finalize(void) {
+void TestFramework::Finalize(void) {
     if (mLogString != "") {
         std::cout  << msgFailed << std::endl;
         std::cout << mLogString << std::endl;
@@ -29,13 +24,14 @@ void ApplicationTest::Finalize(void) {
     }
 }
 
-void ApplicationTest::RunTestSuite(void) {
-    TestEngineFunctionality(); Finalize();
-    
-    TestGameObject(); Finalize();
-    TestComponentObject(); Finalize();
-    
-    TestRenderSystem(); Finalize();
-    TestScriptSystem(); Finalize();
+void TestFramework::AddTest(void(TestFramework::*testFunction)()) {
+    mTestList.push_back(testFunction);
+}
+
+void TestFramework::RunTestSuite(void) {
+    for (unsigned int i=0; i < mTestList.size(); i++) {
+        void(TestFramework::*functionPtr)() = (void(TestFramework::*)())mTestList[i];
+        (*this.*functionPtr)(); Finalize();
+    }
 }
 

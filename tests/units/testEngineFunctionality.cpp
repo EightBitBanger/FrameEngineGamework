@@ -6,7 +6,7 @@
 extern EngineSystemManager  Engine;
 
 
-void ApplicationTest::TestEngineFunctionality(void) {
+void TestFramework::TestEngineFunctionality(void) {
     if (hasTestFailed) return;
     
     std::cout << "Engine functionality.... ";
