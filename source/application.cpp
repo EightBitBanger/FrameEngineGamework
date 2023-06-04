@@ -172,9 +172,9 @@ void Framework::Start() {
     objectD->parent = objectC;
     
     objectA->transform.position = glm::vec3(0, 10, 0);
-    objectB->transform.position = glm::vec3(0, 10, 0);
-    objectC->transform.position = glm::vec3(0, 10, 0);
-    objectD->transform.position = glm::vec3(0, 10, 0);
+    objectB->transform.position = glm::vec3(10, 10, 0);
+    objectC->transform.position = glm::vec3(10, 10, 0);
+    objectD->transform.position = glm::vec3(10, 10, 0);
     
     return;
 }
@@ -193,8 +193,11 @@ float rotate = 0;
 
 void Framework::Run() {
     
-    objectA->transform.RotateEuler(rotate, 0, 0);
-    rotate += 2;
+    rotate += 10;
+    
+    //objectB->transform.RotateEuler(  rotate, 0, 0);
+    //objectC->transform.RotateEuler(  0, 0, rotate);
+    objectC->transform.RotateEuler(  0, rotate, 0);
     
     
     //objectC->transform.position.z += 0.1;
