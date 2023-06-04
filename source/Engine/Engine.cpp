@@ -221,6 +221,12 @@ void EngineSystemManager::Update(void) {
         currentTransform.position    = objectPtr->transform.position;
         currentTransform.orientation = objectPtr->transform.orientation;
         currentTransform.scale       = objectPtr->transform.scale;
+        currentTransform.matrix      = Renderer.CalculateModelMatrix(objectPtr->transform);
+        
+        currentTransform.matrix  = glm::translate(objectPtr->transform.matrix, glm::vec3(objectPtr->transform.position));
+        currentTransform.matrix *= glm::toMat4(objectPtr->transform.orientation);
+        currentTransform.matrix  = glm::scale(currentTransform.matrix, glm::vec3(objectPtr->transform.scale));
+        //currentTransform.matrix  = Renderer.CalculateModelMatrix(currentTransform);
         
         // Calculate parent transforms
         if (objectPtr->parent != nullptr) {
@@ -230,13 +236,19 @@ void EngineSystemManager::Update(void) {
             // Roll over the parent matrix transform chain
             for (unsigned int i=0; i < 100; i++) {
                 
-                //currentTransform.position    += parent->transform.position;
-                //currentTransform.orientation *= parent->transform.orientation;
-                //currentTransform.scale       *= parent->transform.scale;
                 
-                currentTransform.matrix  = glm::translate(currentTransform.matrix, glm::vec3(currentTransform.position));
-                currentTransform.matrix *= glm::toMat4(currentTransform.orientation);
-                currentTransform.matrix  = glm::scale(currentTransform.matrix, glm::vec3(currentTransform.scale));
+                if (i % 2 == 0) {
+                    currentTransform.orientation *= glm::inverse(parent->transform.orientation);
+                } else {
+                    currentTransform.orientation *= parent->transform.orientation;
+                }
+                
+                currentTransform.position    += parent->transform.position;
+                currentTransform.scale       *= parent->transform.scale;
+                
+                currentTransform.matrix  = glm::translate(currentTransform.matrix, glm::vec3(parent->transform.position));
+                currentTransform.matrix *= glm::toMat4(parent->transform.orientation);
+                currentTransform.matrix  = glm::scale(currentTransform.matrix, glm::vec3(parent->transform.scale));
                 
                 parent = parent->parent;
                 if (parent == nullptr) 
@@ -281,10 +293,16 @@ void EngineSystemManager::Update(void) {
         
         Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
         if (componentEntityRenderer != nullptr) {
+            
             componentEntityRenderer->transform.position    = currentTransform.position;
             componentEntityRenderer->transform.orientation = currentTransform.orientation;
             componentEntityRenderer->transform.scale       = currentTransform.scale;
-            componentEntityRenderer->transform.matrix      = currentTransform.matrix;
+            
+            if (componentRigidBody == nullptr) {
+                componentEntityRenderer->transform.UpdateMatrix();
+            } else {
+                componentEntityRenderer->transform.matrix = currentTransform.matrix;
+            }
         }
         
         Light* componentLight = objectPtr->GetCachedLight();
