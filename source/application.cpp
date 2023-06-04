@@ -40,6 +40,7 @@ GameObject* objectD;
 
 void Framework::Start() {
     
+    
     // Load some external resources
     Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
     Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
@@ -48,8 +49,6 @@ void Framework::Start() {
     Resources.LoadWaveFront("data/projectile/projectile.obj", "bullet");
     Resources.LoadTexture("data/projectile/projectile.png", "mat_bullet");
     
-    // Set the gravity vector for the simulation
-    Physics.SetWorldGravity(0, -9.81 * 2 * 2, 0);
     
     // Create objects from resource tags
     Material* groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
@@ -69,8 +68,10 @@ void Framework::Start() {
     projectileCollider = Physics.CreateColliderSphere(1);
     
     
+    // Set the gravity vector for the simulation
+    Physics.SetWorldGravity(0, -9.81 * 2 * 2, 0);
     
-    //
+    
     // Create a sky object
     Resources.LoadWaveFront("data/sky/sky.obj", "skyBox");
     Resources.LoadTexture(  "data/sky/sky.png", "skyMaterial");
@@ -86,8 +87,6 @@ void Framework::Start() {
     skyObject->transform.SetScale(10000,10000,10000);
     
     
-    
-    //
     // Create a ground plain
     Mesh* groundMesh = Renderer.CreateMesh();
     groundMesh->AddPlainSubDivided(-100, 0, -100, 10, 10, Colors.white, 100, 100);
@@ -193,14 +192,11 @@ float rotate = 0;
 
 void Framework::Run() {
     
-    rotate += 10;
+    rotate += 1;
     
+    //objectA->transform.RotateEuler(  rotate, 0, 0);
     //objectB->transform.RotateEuler(  rotate, 0, 0);
-    //objectC->transform.RotateEuler(  0, 0, rotate);
-    objectC->transform.RotateEuler(  0, rotate, 0);
-    
-    
-    //objectC->transform.position.z += 0.1;
+    //objectD->transform.RotateEuler(  rotate*2, 0, 0);
     
     
     
@@ -276,15 +272,15 @@ void Framework::Run() {
             entity->AttachMaterial(projectionMaterial);
             
             
-            // Light component test
+            // Light component
             if (Random.Range(0, 10) > 2) {
                 Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
                 projectile->AddComponent(lightComponent);
                 Light* lightPtr = (Light*)lightComponent->GetComponent();
                 lightPtr->color = Colors.MakeRandom();
-                lightPtr->intensity    = 80.0;
+                lightPtr->intensity    = 120.0;
                 lightPtr->range        = 800.0;
-                lightPtr->attenuation  = 0.007;
+                lightPtr->attenuation  = 0.004;
             }
             
             // Add a physics component

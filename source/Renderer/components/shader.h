@@ -8,7 +8,7 @@
 #define GLEW_STATIC
 #include <gl/glew.h>
 
-#include "../../../vendor/my-std-lib/types.h"
+#include "../../../vendor/CodeBaseLibrary/types.h"
 
 #include "../../engine/types/transform.h"
 #include "../../engine/types/color.h"

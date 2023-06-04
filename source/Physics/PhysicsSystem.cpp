@@ -33,6 +33,9 @@ void PhysicsSystem::Shutdown(void) {
     while (mRigidBodyFreeList.size() > 0) {
         DestroyRigidBody( RemoveRigidBodyFromFreeList() );
     }
+    
+    common.destroyPhysicsWorld(world);
+    
     return;
 }
 

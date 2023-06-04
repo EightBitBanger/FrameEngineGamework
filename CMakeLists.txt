@@ -66,13 +66,13 @@ set (ENGINE_HEADERS
     
     "vendor/Bly7/OBJ_Loader.h"
     
-    "vendor/my-std-lib/fileloader.h"
-    "vendor/my-std-lib/logging.h"
-    "vendor/my-std-lib/poolallocator.h"
-    "vendor/my-std-lib/random.h"
-    "vendor/my-std-lib/strings.h"
-    "vendor/my-std-lib/timer.h"
-    "vendor/my-std-lib/types.h"
+    "vendor/CodeBaseLibrary/fileloader.h"
+    "vendor/CodeBaseLibrary/logging.h"
+    "vendor/CodeBaseLibrary/poolallocator.h"
+    "vendor/CodeBaseLibrary/random.h"
+    "vendor/CodeBaseLibrary/strings.h"
+    "vendor/CodeBaseLibrary/timer.h"
+    "vendor/CodeBaseLibrary/types.h"
     
     "vendor/stb/stb_image.h"
     "vendor/stb/stb_perlin.h"
@@ -132,12 +132,12 @@ set (ENGINE_SOURCES
     "tests/units/testRenderSystem.cpp"
     "tests/units/testScriptSystem.cpp"
     
-    "vendor/my-std-lib/fileloader.cpp"
-    "vendor/my-std-lib/logging.cpp"
-    "vendor/my-std-lib/random.cpp"
-    "vendor/my-std-lib/strings.cpp"
-    "vendor/my-std-lib/timer.cpp"
-    "vendor/my-std-lib/types.cpp"
+    "vendor/CodeBaseLibrary/fileloader.cpp"
+    "vendor/CodeBaseLibrary/logging.cpp"
+    "vendor/CodeBaseLibrary/random.cpp"
+    "vendor/CodeBaseLibrary/strings.cpp"
+    "vendor/CodeBaseLibrary/timer.cpp"
+    "vendor/CodeBaseLibrary/types.cpp"
     
 )
 

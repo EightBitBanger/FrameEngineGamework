@@ -1,9 +1,9 @@
 #ifndef OPENGL_RENDERER_SYSTEM
 #define OPENGL_RENDERER_SYSTEM
 
-#include "../../vendor/my-std-lib/poolallocator.h"
-#include "../../vendor/my-std-lib/types.h"
-#include "../../vendor/my-std-lib/logging.h"
+#include "../../vendor/CodeBaseLibrary/poolallocator.h"
+#include "../../vendor/CodeBaseLibrary/types.h"
+#include "../../vendor/CodeBaseLibrary/logging.h"
 extern Logger Log;
 
 #include "enumerators.h"
@@ -23,8 +23,6 @@ extern Logger Log;
 class RenderSystem {
     
 public:
-    
-    Scene* operator[] (unsigned int const i) {return mRenderQueue[i];}
     
     /// Default material object.
     Material* defaultMaterial;
@@ -46,6 +44,7 @@ public:
     
     RenderSystem();
     
+    Scene* operator[] (unsigned int const i) {return mRenderQueue[i];}
     
     /// Create an entity object and return its pointer.
     Entity* CreateEntity(void);

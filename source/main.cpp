@@ -122,7 +122,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Resources.DestroyAssets();
     
-    Physics.common.destroyPhysicsWorld(Physics.world);
+    Physics.Shutdown();
     
     Audio.Shutdown();
     

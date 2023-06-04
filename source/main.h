@@ -14,13 +14,13 @@
 
 
 // My standard includes
-#include "../vendor/my-std-lib/poolallocator.h"
-#include "../vendor/my-std-lib/strings.h"
-#include "../vendor/my-std-lib/types.h"
-#include "../vendor/my-std-lib/random.h"
-#include "../vendor/my-std-lib/logging.h"
-#include "../vendor/my-std-lib/fileloader.h"
-#include "../vendor/my-std-lib/timer.h"
+#include "../vendor/CodeBaseLibrary/poolallocator.h"
+#include "../vendor/CodeBaseLibrary/strings.h"
+#include "../vendor/CodeBaseLibrary/types.h"
+#include "../vendor/CodeBaseLibrary/random.h"
+#include "../vendor/CodeBaseLibrary/logging.h"
+#include "../vendor/CodeBaseLibrary/fileloader.h"
+#include "../vendor/CodeBaseLibrary/timer.h"
 
 #include "Input/InputSystem.h"
 #include "Physics/PhysicsSystem.h"

@@ -230,8 +230,8 @@ void EngineSystemManager::Update(void) {
             // Roll over the parent matrix transform chain
             for (unsigned int i=0; i < 100; i++) {
                 
-                currentTransform.position    += parent->transform.position;
-                currentTransform.scale       *= parent->transform.scale;
+                currentTransform.position  += parent->transform.position;
+                currentTransform.scale     *= parent->transform.scale;
                 
                 // Sus O_o
                 if (i % 2 == 0) {
