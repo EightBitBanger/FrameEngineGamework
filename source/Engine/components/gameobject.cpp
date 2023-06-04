@@ -109,6 +109,7 @@ Light* GameObject::GetCachedLight(void) {
 //
 
 void GameObject::SetPosition(float x, float y, float z) {
+    transform.position = glm::vec3(x, y, z);
     if (mRigidBodyCache != nullptr) {
         rp3d::Vector3 position(x, y, z);
         rp3d::Transform bodyTransform = mRigidBodyCache->getTransform();
@@ -116,16 +117,13 @@ void GameObject::SetPosition(float x, float y, float z) {
         mRigidBodyCache->setTransform(bodyTransform);
     }
     if (mEntityCache != nullptr) {
-        mEntityCache->transform.SetPosition(x, y, z);
-        mEntityCache->transform.matrix = Renderer.CalculateModelMatrix(mEntityCache->transform);
+        mEntityCache->transform.position = glm::vec3(x, y, z);
     }
     if (mCameraCache != nullptr) {
-        mCameraCache->transform.SetPosition(x, y, z);
-        mCameraCache->transform.matrix = Renderer.CalculateModelMatrix(mCameraCache->transform);
+        mCameraCache->transform.position = glm::vec3(x, y, z);
     }
     if (mLightCache != nullptr) {
-        mLightCache->transform.SetPosition(x, y, z);
-        mLightCache->transform.matrix = Renderer.CalculateModelMatrix(mLightCache->transform);
+        mLightCache->transform.position = glm::vec3(x, y, z);
     }
     return;
 }

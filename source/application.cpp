@@ -69,6 +69,7 @@ void Framework::Start() {
     projectileCollider = Physics.CreateColliderSphere(1);
     
     
+    
     //
     // Create a sky object
     Resources.LoadWaveFront("data/sky/sky.obj", "skyBox");
@@ -83,6 +84,8 @@ void Framework::Start() {
     skyObject->AddComponent(skyComponent);
     
     skyObject->transform.SetScale(10000,10000,10000);
+    
+    
     
     //
     // Create a ground plain
@@ -110,6 +113,8 @@ void Framework::Start() {
     rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(groundScale.x, groundScale.y, groundScale.z);
     ground->AddColliderBox(groundCollider, -(groundScale.x / 2), -10, -(groundScale.z / 2));
     
+    
+    
     //
     // Create a camera controller
     cameraController = Engine.CreateCameraController(-50, 20, 0);
@@ -123,6 +128,10 @@ void Framework::Start() {
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
     cameraController->CalculatePhysics();
+    
+    // Sky will follow the camera parent object
+    skyObject->parent = cameraController;
+    
     
     
     //
@@ -157,19 +166,15 @@ void Framework::Start() {
     
     
     
-    //objectA->transform.RotateEuler(90, 90, 0);
-    objectA->transform.position = glm::vec3(0, 0, 0);
-    objectA->transform.scale    = glm::vec3(1, 1, 1);
-    
     
     objectB->parent = objectA;
-    objectB->transform.position = glm::vec3(0, 8, 0);
-    
     objectC->parent = objectB;
-    objectC->transform.position = glm::vec3(0, 8, 0);
-    
     objectD->parent = objectC;
-    objectD->transform.position = glm::vec3(0, 8, 0);
+    
+    objectA->transform.position = glm::vec3(0, 0, 0);
+    objectB->transform.position = glm::vec3(0, 5, 0);
+    objectC->transform.position = glm::vec3(0, 5, 0);
+    objectD->transform.position = glm::vec3(0, 5, 0);
     
     return;
 }
@@ -184,22 +189,20 @@ void Framework::Start() {
 // Application main loop
 //
 
-float rotateA = 0;
-float rotateC = 0;
+float rotate = 0;
 
 void Framework::Run() {
     
+    objectD->transform.RotateEuler(rotate, 0, 0);
+    rotate += 1;
+    
+    
+    //objectC->transform.position.z += 0.1;
+    
+    
+    
+    
     glm::vec3 force(0);
-    
-    objectA->transform.RotateEuler(rotateA, 0, 0);
-    if (rotateA > 90) {
-        rotateA = 90;
-    } else {
-        rotateA += 0.25;
-    }
-    
-    //objectB->transform.RotateEuler(rotateC, 0, 0);
-    //rotateC += 0.7;
     
     // Keyboard movement, WASD keys
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
@@ -215,9 +218,6 @@ void Framework::Run() {
     force *= 8000;
     
     cameraController->AddForce(force.x, force.y, force.z);
-    
-    // Update the sky object
-    skyObject->transform.SetPosition(cameraController->transform.GetPosition());
     
     // Shoot object from camera
     
@@ -262,8 +262,7 @@ void Framework::Run() {
             
             GameObject* projectile = Engine.CreateGameObject();
             projectile->name = "projectile";
-            projectile->transform.SetScale(2, 2, 2);
-            
+            projectile->transform.scale = glm::vec3(2, 2, 2);
             
             // Add a render component
             Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
@@ -281,8 +280,8 @@ void Framework::Run() {
                 Light* lightPtr = (Light*)lightComponent->GetComponent();
                 lightPtr->color = Colors.MakeRandom();
                 lightPtr->intensity    = 80.0;
-                lightPtr->range        = 1000.0;
-                lightPtr->attenuation  = 0.013;
+                lightPtr->range        = 800.0;
+                lightPtr->attenuation  = 0.007;
             }
             
             // Add a physics component
@@ -294,7 +293,7 @@ void Framework::Run() {
             projectile->AddColliderSphere(projectileCollider, 0, 0, 0);
             
             projectile->SetMass(0.0001);
-            projectile->SetLinearDamping(0.003);
+            projectile->SetLinearDamping(0.001);
             projectile->SetAngularDamping(0.005);
             projectile->CalculatePhysics();
             

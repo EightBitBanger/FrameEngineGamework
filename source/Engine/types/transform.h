@@ -54,8 +54,8 @@ public:
     void Translate(float x, float y, float z);
     /// Translate the transform by the given amount.
     void Translate(glm::vec3 translation);
-    /// Rotate the transform on the axis by the given angle amount.
-    void RotateAxis(float angle, glm::vec3 axis);
+    // Rotate the transform on the axis by the given angle amount.
+    //void RotateAxis(float angle, glm::vec3 axis);
     /// Rotate the transform by the given Euler angles.
     void RotateEuler(float yaw, float pitch, float roll);
     /// Rotate the transform by the given Euler angles.
@@ -66,7 +66,7 @@ public:
     void Scale(glm::vec3 eulerAngle);
     
     /// Return an identity transform.
-    Transform Identity(void);
+    void Identity(void);
     
 };
 

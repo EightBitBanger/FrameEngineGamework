@@ -54,10 +54,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     testFrameWork.Initiate();
     
     testFrameWork.AddTest( &testFrameWork.TestEngineFunctionality );
+    
+    testFrameWork.AddTest( &testFrameWork.TestRenderSystem );
+    testFrameWork.AddTest( &testFrameWork.TestScriptSystem );
+    
+    testFrameWork.AddTest( &testFrameWork.TestGameObject );
     testFrameWork.AddTest( &testFrameWork.TestComponentObject );
-    testFrameWork.AddTest( &testFrameWork.TestComponentObject );
-    testFrameWork.AddTest( &testFrameWork.TestComponentObject );
-    testFrameWork.AddTest( &testFrameWork.TestComponentObject );
+    
     
     // Run test suite
     testFrameWork.RunTestSuite();

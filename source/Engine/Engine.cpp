@@ -216,120 +216,88 @@ void EngineSystemManager::Update(void) {
         if (!objectPtr->isActive) 
             continue;
         
+        // Current transform
+        Transform currentTransform;
+        currentTransform.position    = objectPtr->transform.position;
+        currentTransform.orientation = objectPtr->transform.orientation;
+        currentTransform.scale       = objectPtr->transform.scale;
         
-        // Calculate parent transform chain
-        glm::mat4 parentTransformChain(1);
-        
-        GameObject* parent = objectPtr->parent;
-        
-        if (parent != nullptr) {
+        // Calculate parent transforms
+        if (objectPtr->parent != nullptr) {
             
-            parentTransformChain = parent->transform.matrix;
+            GameObject* parent = objectPtr->parent;
             
-            while (true) {
+            // Roll over the parent matrix transform chain
+            for (unsigned int i=0; i < 100; i++) {
+                
+                //currentTransform.position    += parent->transform.position;
+                //currentTransform.orientation *= parent->transform.orientation;
+                //currentTransform.scale       *= parent->transform.scale;
+                
+                currentTransform.matrix  = glm::translate(currentTransform.matrix, glm::vec3(currentTransform.position));
+                currentTransform.matrix *= glm::toMat4(currentTransform.orientation);
+                currentTransform.matrix  = glm::scale(currentTransform.matrix, glm::vec3(currentTransform.scale));
+                
                 parent = parent->parent;
                 if (parent == nullptr) 
                     break;
-                
-                glm::translate(parentTransformChain, parent->transform.position);
-                parentTransformChain *= parent->transform.matrix;
             }
             
         }
         
         
-        // Check to get the rigid body as the source transform
+        //
+        // Sync with the rigid body
+        //
+        
         rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
         if (componentRigidBody != nullptr) {
             
-            // Get the rigid body as the source transformation
-            rp3d::Vector3 bodyPosition;
+            // Use the rigid body as the source transform
             rp3d::Transform bodyTransform = componentRigidBody->getTransform();
-            bodyPosition = bodyTransform.getPosition();
+            rp3d::Vector3 bodyPosition = bodyTransform.getPosition();
             rp3d::Quaternion quaterion = bodyTransform.getOrientation();
             
-            // Source position, rotation and scale
-            glm::vec3 position;
-            position.x = bodyPosition.x;
-            position.y = bodyPosition.y;
-            position.z = bodyPosition.z;
+            currentTransform.position.x = bodyPosition.x;
+            currentTransform.position.y = bodyPosition.y;
+            currentTransform.position.z = bodyPosition.z;
             
-            glm::quat rotation;
-            rotation.w = quaterion.w;
-            rotation.x = quaterion.x;
-            rotation.y = quaterion.y;
-            rotation.z = quaterion.z;
-            
-            glm::vec3 scale = objectPtr->transform.scale;
+            currentTransform.orientation.w = quaterion.w;
+            currentTransform.orientation.x = quaterion.x;
+            currentTransform.orientation.y = quaterion.y;
+            currentTransform.orientation.z = quaterion.z;
             
             // Source matrix
-            glm::mat4 sourceTransform;
-            bodyTransform.getOpenGLMatrix(&sourceTransform[0][0]);
+            bodyTransform.getOpenGLMatrix(&currentTransform.matrix[0][0]);
             
             // Update the game object transform
-            objectPtr->transform.matrix = sourceTransform;
-            objectPtr->transform.position = position;
-            objectPtr->transform.orientation = rotation;
+            objectPtr->transform.position    = currentTransform.position;
+            objectPtr->transform.orientation = currentTransform.orientation;
             
-            //
-            // Sync with the rigid body
-            //
-            
-            Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
-            if (componentEntityRenderer != nullptr) {
-                componentEntityRenderer->transform.matrix = sourceTransform;
-                componentEntityRenderer->transform.position = position;
-                componentEntityRenderer->transform.orientation = rotation;
-                componentEntityRenderer->transform.Scale(scale);
-            }
-            
-            Light* componentLight = objectPtr->GetCachedLight();
-            if (componentLight != nullptr) {
-                componentLight->transform.position = position;
-                componentLight->transform.orientation = rotation;
-            }
-            
-            Camera* componentCamera = objectPtr->GetCachedCamera();
-            if (componentCamera != nullptr) {
-                componentCamera->transform.position = position;
-                if (!componentCamera->useMouseLook) 
-                    componentCamera->transform.orientation = rotation;
-            }
-            
-        } else {
-            
-            // Source position, rotation and scale
-            glm::vec3 position    = objectPtr->transform.position;
-            glm::quat orientation = objectPtr->transform.orientation;
-            glm::vec3 scale       = objectPtr->transform.scale;
-            
-            //
-            // No rigid body, sync with the game object transform
-            //
-            
-            Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
-            if (componentEntityRenderer != nullptr) {
-                
-                componentEntityRenderer->transform.position  = position;
-                componentEntityRenderer->transform.orientation = orientation;
-                componentEntityRenderer->transform.scale    = scale;
-                componentEntityRenderer->transform.matrix   = parentTransformChain;
-                componentEntityRenderer->transform.matrix  *= Renderer.CalculateModelMatrix(objectPtr->transform);
-            }
-            
-            Light* componentLight = objectPtr->GetCachedLight();
-            if (componentLight != nullptr) {
-                componentLight->transform.position    = position;
-                componentLight->transform.orientation = orientation;
-            }
-            
-            Camera* componentCamera = objectPtr->GetCachedCamera();
-            if (componentCamera != nullptr) {
-                componentCamera->transform.position = position;
-                if (!componentCamera->useMouseLook) 
-                    componentCamera->transform.orientation = orientation;
-            }
-            
+            // Scale the transform
+            currentTransform.matrix = glm::scale(currentTransform.matrix, objectPtr->transform.scale);
+        }
+        
+        
+        Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
+        if (componentEntityRenderer != nullptr) {
+            componentEntityRenderer->transform.position    = currentTransform.position;
+            componentEntityRenderer->transform.orientation = currentTransform.orientation;
+            componentEntityRenderer->transform.scale       = currentTransform.scale;
+            componentEntityRenderer->transform.matrix      = currentTransform.matrix;
+        }
+        
+        Light* componentLight = objectPtr->GetCachedLight();
+        if (componentLight != nullptr) {
+            componentLight->transform.position    = currentTransform.position;
+            componentLight->transform.orientation = currentTransform.orientation;
+        }
+        
+        Camera* componentCamera = objectPtr->GetCachedCamera();
+        if (componentCamera != nullptr) {
+            componentCamera->transform.position = currentTransform.position;
+            if (!componentCamera->useMouseLook) 
+                componentCamera->transform.orientation = currentTransform.orientation;
         }
         
         continue;

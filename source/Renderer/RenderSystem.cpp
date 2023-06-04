@@ -227,11 +227,11 @@ void RenderSystem::SetViewport(unsigned int x, unsigned int y, unsigned int w, u
 
 glm::mat4 RenderSystem::CalculateModelMatrix(Transform& model) {
     
-    glm::mat4 modelTranslation = glm::translate(glm::mat4(1.0f), glm::vec3( model.position.x, model.position.y, model.position.z ));
-    glm::mat4 modelRotation = glm::toMat4(model.orientation);
-    glm::mat4 modelScale = glm::scale(glm::mat4(1.0f), glm::vec3( model.scale.x, model.scale.y, model.scale.z ));
+    glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3( model.position.x, model.position.y, model.position.z ));
+    glm::mat4 rotation = glm::toMat4(model.orientation);
+    glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3( model.scale.x, model.scale.y, model.scale.z ));
     
-    return modelTranslation * modelRotation * modelScale;
+    return translation * rotation * scale;
 }
 
 std::vector<std::string> RenderSystem::GetGLErrorCodes(std::string errorLocationString) {
