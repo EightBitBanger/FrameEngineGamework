@@ -30,6 +30,7 @@ public:
     /// Return a pointer to a game object at the index position.
     GameObject* GetGameObject(unsigned int index);
     
+    
     // Components
     
     /// Create a component object with initial type information and return its pointer.
@@ -40,13 +41,17 @@ public:
     /// Get the number of component objects.
     unsigned int GetComponentCount(void);
     
+    
     // Specially built components and game objects
     
     /// Create a camera controller game object and return its pointer.
-    GameObject* CreateCameraController(float x=0, float y=0, float z=0);
+    GameObject* CreateCameraController(glm::vec3 position=glm::vec3(0));
     
     /// Create an entity renderer component and return its pointer.
     Component* CreateComponentEntityRenderer(Mesh* meshPtr, Material* materialPtr);
+    
+    /// Create a point light component and return its pointer.
+    Component* CreateComponentLight(glm::vec3 position=glm::vec3(0));
     
     
     EngineSystemManager();

@@ -59,7 +59,7 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     return true;
 }
 
-GameObject* EngineSystemManager::CreateCameraController(float x, float y, float z) {
+GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position) {
     
     GameObject* cameraController = CreateGameObject();
     cameraController->name = "camera";
@@ -75,10 +75,10 @@ GameObject* EngineSystemManager::CreateCameraController(float x, float y, float 
     Component* rigidBodyComponent = CreateComponent(ComponentType::RigidBody);
     rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
     
-    rp3d::Vector3 position(x, y, z);
+    rp3d::Vector3 bodyPosition(position.x, position.y, position.z);
     rp3d::Quaternion quat = rp3d::Quaternion::identity();
     
-    rp3d::Transform bodyTransform(position, quat);
+    rp3d::Transform bodyTransform(bodyPosition, quat);
     rigidBody->setTransform(bodyTransform);
     
     // Add a scripting component
@@ -102,6 +102,13 @@ Component* EngineSystemManager::CreateComponentEntityRenderer(Mesh* meshPtr, Mat
     Entity* entityRenderer = (Entity*)newComponent->GetComponent();
     entityRenderer->AttachMesh(meshPtr);
     entityRenderer->AttachMaterial(materialPtr);
+    return newComponent;
+}
+
+Component* EngineSystemManager::CreateComponentLight(glm::vec3 position) {
+    Component* newComponent = CreateComponent(ComponentType::Light);
+    Light* lightPoint = (Light*)newComponent->GetComponent();
+    lightPoint->transform.position = position;
     return newComponent;
 }
 

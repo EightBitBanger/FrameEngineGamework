@@ -27,7 +27,7 @@ Material*       barrelMaterial;
 GameObject*     cameraController;
 GameObject*     skyObject;
 
-rp3d::SphereShape* projectileCollider;
+rp3d::BoxShape* projectileCollider;
 GameObject* objectA;
 GameObject* objectB;
 GameObject* objectC;
@@ -40,38 +40,44 @@ GameObject* objectD;
 
 void Framework::Start() {
     
-    
     // Load some external resources
     Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
     Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
     Resources.LoadTexture("data/grassy.png", "mat_grassy");
+    Resources.LoadTexture("data/skull.png",  "mat_skull");
     
+    Resources.LoadWaveFront("data/marine.obj", "marine");
     Resources.LoadWaveFront("data/projectile/projectile.obj", "bullet");
+    Resources.LoadWaveFront("data/skull.obj", "skull");
+    
     Resources.LoadTexture("data/projectile/projectile.png", "mat_bullet");
     
-    
+    //
     // Create objects from resource tags
     Material* groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
-    barrelMaterial->diffuse = Color(0.08, 0.08, 0.08);
-    groundMaterial->diffuse = Color(0.08, 0.08, 0.08);
+    barrelMaterial->diffuse = Color(0.02, 0.02, 0.02);
+    groundMaterial->diffuse = Color(0.02, 0.02, 0.02);
     
     Mesh* barrelMesh = Resources.CreateMeshFromTag("barrel");
     barrelMesh->ChangeSubMeshColor(0, Colors.white);
     
-    projectileMesh = Resources.CreateMeshFromTag("bullet");
+    //
+    // Projectile object
+    
+    projectileMesh = Resources.CreateMeshFromTag("skull");
     projectileMesh->ChangeSubMeshColor(0, Colors.yellow);
     
-    projectionMaterial = Resources.CreateMaterialFromTag("mat_bullet");
-    projectionMaterial->diffuse = Colors.red;
-    projectionMaterial->ambient = Colors.white;
-    projectileCollider = Physics.CreateColliderSphere(1);
+    projectionMaterial = Resources.CreateMaterialFromTag("mat_skull");
+    projectionMaterial->diffuse = Color(0.02, 0.02, 0.02);
+    projectileCollider = Physics.CreateColliderBox(2, 2, 2);
     
     
+    //
     // Set the gravity vector for the simulation
     Physics.SetWorldGravity(0, -9.81 * 2 * 2, 0);
     
-    
+    //
     // Create a sky object
     Resources.LoadWaveFront("data/sky/sky.obj", "skyBox");
     Resources.LoadTexture(  "data/sky/sky.png", "skyMaterial");
@@ -86,7 +92,7 @@ void Framework::Start() {
     
     skyObject->transform.SetScale(10000,10000,10000);
     
-    
+    //
     // Create a ground plain
     Mesh* groundMesh = Renderer.CreateMesh();
     groundMesh->AddPlainSubDivided(-100, 0, -100, 10, 10, Colors.white, 100, 100);
@@ -116,17 +122,19 @@ void Framework::Start() {
     
     //
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(-50, 20, 0);
+    cameraController = Engine.CreateCameraController(glm::vec3(-50, 20, 0));
     cameraController->SetLinearDamping(1);
     cameraController->SetMass(40);
     
+    // Camera physics
     cameraController->CalculatePhysics();
-    cameraController->EnableGravity(true);
+    cameraController->EnableGravity(false);
     
     rp3d::BoxShape* boxShape = Physics.CreateColliderBox(1, 8, 1);
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
     cameraController->CalculatePhysics();
+    cameraController->SetLinearDamping(3);
     
     // Sky will follow the camera parent object
     skyObject->parent = cameraController;
@@ -162,6 +170,13 @@ void Framework::Start() {
     Component* entityRendererD = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
     objectD->AddComponent(entityRendererD);
     
+    Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
+    objectD->AddComponent(lightComponent);
+    Light* lightPtr = (Light*)lightComponent->GetComponent();
+    lightPtr->color = Colors.white;
+    lightPtr->intensity    = 300.0;
+    lightPtr->range        = 10000.0;
+    lightPtr->attenuation  = 0.001;
     
     
     
@@ -258,10 +273,9 @@ void Framework::Run() {
             float startz = pos.z + offsetz;
             
             
-            
             GameObject* projectile = Engine.CreateGameObject();
             projectile->name = "projectile";
-            projectile->transform.scale = glm::vec3(2, 2, 2);
+            projectile->transform.scale = glm::vec3(3, 3, 3);
             
             // Add a render component
             Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
@@ -273,14 +287,14 @@ void Framework::Run() {
             
             
             // Light component
-            if (Random.Range(0, 10) > 2) {
+            if (Random.Range(0, 10) > 3) {
                 Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
                 projectile->AddComponent(lightComponent);
                 Light* lightPtr = (Light*)lightComponent->GetComponent();
-                lightPtr->color = Colors.MakeRandom();
-                lightPtr->intensity    = 120.0;
-                lightPtr->range        = 800.0;
-                lightPtr->attenuation  = 0.004;
+                lightPtr->color = Colors.black;
+                lightPtr->intensity    = 10.0;
+                lightPtr->range        = 40.0;
+                lightPtr->attenuation  = 0.01;
             }
             
             // Add a physics component
@@ -289,11 +303,11 @@ void Framework::Run() {
             rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
             
             // Projectile collider
-            projectile->AddColliderSphere(projectileCollider, 0, 0, 0);
+            projectile->AddColliderBox(projectileCollider, 0, 0, 0);
             
-            projectile->SetMass(0.0001);
+            projectile->SetMass(10);
             projectile->SetLinearDamping(0.001);
-            projectile->SetAngularDamping(0.005);
+            projectile->SetAngularDamping(2);
             projectile->CalculatePhysics();
             
             
@@ -302,14 +316,12 @@ void Framework::Run() {
             newTransform.setPosition(rp3d::Vector3(startx, starty, startz));
             
             rp3d::Quaternion quat;
-            quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, 0);
+            quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, -0.5);
             
             newTransform.setOrientation(quat);
             
             body->setTransform(newTransform);
             projectile->AddForce(fwd.x, fwd.y, fwd.z);
-            
-            
             
             projectile->SetPosition(startx, starty, startz);
             

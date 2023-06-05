@@ -3,10 +3,17 @@
 
 struct Vertex {
     
-    float x, y, z;     // Position
-    float r, g, b;     // Color
-    float nx, ny, nz;  // Normals
-    float u, v;        // Texture coordinate
+    /// Position
+    float x, y, z;
+    
+    /// Color
+    float r, g, b;
+    
+    /// Normal
+    float nx, ny, nz;
+    
+    /// Texture coordinates
+    float u, v;
     
     Vertex();
     
