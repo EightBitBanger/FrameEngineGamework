@@ -14,16 +14,22 @@
 
 #include <string>
 
-std::string FloatToString(float Float);
+/// Return a string containing the number in the float.
+std::string FloatToString(float value);
 
-float StringToFloat(std::string String);
+/// Return a float containing the number in the string.
+float StringToFloat(std::string str);
 
-std::string DoubleToString(double Double);
+/// Return a string containing the number in the double.
+std::string DoubleToString(double value);
 
-double StringToDouble(std::string String);
+/// Return a double containing the number in the string.
+double StringToDouble(std::string str);
 
-std::string IntToString(int Integer);
+/// Return a string containing the number in the integer.
+std::string IntToString(int value);
 
-int StringToInt(std::string String);
+/// Return an integer containing the number in the string.
+int StringToInt(std::string str);
 
 #endif
