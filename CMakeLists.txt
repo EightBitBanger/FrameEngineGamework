@@ -19,11 +19,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 set (ENGINE_HEADERS
     
     "source/configuration.h"
-    "source/main.h"
     "source/plugins.h"
     
     "source/Application/applicationlayer.h"
     "source/Application/winproc.h"
+    "source/Application/main.h"
     
     "source/Audio/AudioSystem.h"
     
@@ -84,16 +84,15 @@ set (ENGINE_HEADERS
 set (ENGINE_SOURCES
     
     "source/Application/properties.rc"
-    
-    "source/application.cpp"
-    "source/main.cpp"
-    
     "source/Application/ApplicationLayer.cpp"
     "source/Application/winproc.cpp"
+    "source/Application/main.cpp"
+    
+    "source/application.cpp"
     
     "source/Audio/AudioSystem.cpp"
-    "source/Engine/Engine.cpp"
     
+    "source/Engine/Engine.cpp"
     "source/Engine/components/component.cpp"
     "source/Engine/components/gameobject.cpp"
     
@@ -142,12 +141,16 @@ set (ENGINE_SOURCES
 )
 
 
+#
+# Compile as an executable
+#
+
 add_executable(release ${ENGINE_HEADERS} ${ENGINE_SOURCES})
 
-# Set default build type
 set(default_build_type "release")
 
 target_compile_features(release PUBLIC cxx_std_11)
+
 set_target_properties(release PROPERTIES CXX_EXTENSIONS OFF)
 
 
