@@ -5,11 +5,11 @@ This game engine framework aims to provide simpler interfaces with more complex 
 
 <br><br/>
 ### Core Features
-- OpenGL render system  (in progress..)
+- <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Render%E2%80%89System">Render system</a>⁭
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 - ⁯⁮⁭Audio (Considering openAL)
-- Resource management
-- Window input handling
+- <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Resource%E2%80%89Management">Resource management</a>⁭
+- <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Input%E2%80%89System">Input handling</a>⁭
 
 <br><br/>
 ## Screenshots
