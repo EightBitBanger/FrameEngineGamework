@@ -30,7 +30,7 @@ While this framework currently only supports windows, I look forward to porting 
 First, clone the repository with git. You can then use cmake to generate the project files of your choice.
 
 ```
-git clone https://github.com/RetroBytes32/GameEngineFramework
+git clone https://github.com/RetroBytes32/FrameEngineGamework
 ```
 
 
