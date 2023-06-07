@@ -10,19 +10,14 @@ class AudioSystem {
     
 public:
     
-    //ALCdevice* device;
-    
-    
-    
     void Initiate(void);
     void Shutdown(void);
     
     
-    
-    
 private:
     
-    
+    //ALCdevice*  mDevice  = NULL;
+    //ALCcontext* mContext = alcGetCurrentContext();
     
 };
 

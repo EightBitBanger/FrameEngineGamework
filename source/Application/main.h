@@ -13,7 +13,7 @@
 #endif
 
 
-// My standard includes
+// Code base library
 #include "../../vendor/CodeBaseLibrary/poolallocator.h"
 #include "../../vendor/CodeBaseLibrary/strings.h"
 #include "../../vendor/CodeBaseLibrary/types.h"

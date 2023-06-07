@@ -16,22 +16,23 @@ extern InputSystem          Input;
 
 
 
-
-
-
 // Global resource pointers
 Mesh*           projectileMesh;
-Material*       projectionMaterial;
 
+Material*       projectionMaterial;
 Material*       barrelMaterial;
+Material*       groundMaterial;
+
 GameObject*     cameraController;
 GameObject*     skyObject;
 
 rp3d::BoxShape* projectileCollider;
+
 GameObject* objectA;
 GameObject* objectB;
 GameObject* objectC;
 GameObject* objectD;
+
 
 
 //
@@ -54,9 +55,9 @@ void Framework::Start() {
     
     //
     // Create objects from resource tags
-    Material* groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
     barrelMaterial->diffuse = Color(0.02, 0.02, 0.02);
+    groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
     groundMaterial->diffuse = Color(0.02, 0.02, 0.02);
     
     Mesh* barrelMesh = Resources.CreateMeshFromTag("barrel");
@@ -65,10 +66,10 @@ void Framework::Start() {
     //
     // Projectile object
     
-    projectileMesh = Resources.CreateMeshFromTag("skull");
+    projectileMesh = Resources.CreateMeshFromTag("bullet");
     projectileMesh->ChangeSubMeshColor(0, Colors.yellow);
     
-    projectionMaterial = Resources.CreateMaterialFromTag("mat_skull");
+    projectionMaterial = Resources.CreateMaterialFromTag("mat_bullet");
     projectionMaterial->diffuse = Color(0.02, 0.02, 0.02);
     projectileCollider = Physics.CreateColliderBox(2, 2, 2);
     
@@ -207,12 +208,12 @@ float rotate = 0;
 
 void Framework::Run() {
     
+    // Rotation chain test
     rotate += 1;
     
     //objectA->transform.RotateEuler(  rotate, 0, 0);
     //objectB->transform.RotateEuler(  rotate, 0, 0);
     //objectD->transform.RotateEuler(  rotate*2, 0, 0);
-    
     
     
     
