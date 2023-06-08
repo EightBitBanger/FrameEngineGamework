@@ -47,8 +47,8 @@ public:
     /// Create a camera controller game object and return its pointer.
     GameObject* CreateCameraController(glm::vec3 position=glm::vec3(0));
     
-    /// Create an entity renderer component and return its pointer.
-    Component* CreateComponentEntityRenderer(Mesh* meshPtr, Material* materialPtr);
+    /// Create a mesh renderer component and return its pointer.
+    Component* CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr);
     
     /// Create a point light component and return its pointer.
     Component* CreateComponentLight(glm::vec3 position=glm::vec3(0));

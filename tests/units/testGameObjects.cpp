@@ -11,71 +11,55 @@ void TestFramework::TestGameObject(void) {
     
     std::cout << "Game objects............ ";
     
-    GameObject* gameObject = Engine.CreateGameObject();
-    
-    Component* componentEntity    = Engine.CreateComponent(ComponentType::Renderer);
-    Component* componentRigidBody = Engine.CreateComponent(ComponentType::RigidBody);
-    Component* componentCamera    = Engine.CreateComponent(ComponentType::Camera);
-    Component* componentScript    = Engine.CreateComponent(ComponentType::Script);
-    Component* componentLight     = Engine.CreateComponent(ComponentType::Light);
+    GameObject* gameObject1     = Engine.CreateGameObject();
+    Component*  componentEntity = Engine.CreateComponent(ComponentType::Renderer);
     
     // Check object creation
-    if (gameObject == nullptr) mLogString += msgFailedObjectCreate;
+    if (gameObject1 == nullptr) mLogString += msgFailedObjectCreate;
     
-    // Check component creation
-    if (componentEntity    == nullptr) mLogString += msgFailedObjectCreate;
-    if (componentRigidBody == nullptr) mLogString += msgFailedObjectCreate;
-    if (componentCamera    == nullptr) mLogString += msgFailedObjectCreate;
-    if (componentScript    == nullptr) mLogString += msgFailedObjectCreate;
-    if (componentLight     == nullptr) mLogString += msgFailedObjectCreate;
-    
-    gameObject->AddComponent(componentEntity);
-    gameObject->AddComponent(componentRigidBody);
-    gameObject->AddComponent(componentCamera);
-    gameObject->AddComponent(componentScript);
-    gameObject->AddComponent(componentLight);
-    
-    componentEntity    = gameObject->FindComponent(ComponentType::Renderer);
-    componentRigidBody = gameObject->FindComponent(ComponentType::RigidBody);
-    componentCamera    = gameObject->FindComponent(ComponentType::Camera);
-    componentScript    = gameObject->FindComponent(ComponentType::Script);
-    componentLight     = gameObject->FindComponent(ComponentType::Light);
-    
-    Entity*          getRenderer  = (Entity*)         componentEntity->GetComponent();
-    rp3d::RigidBody* getRigidBody = (rp3d::RigidBody*)componentRigidBody->GetComponent();
-    Camera*          getCamera    = (Camera*)         componentCamera->GetComponent();
-    Script*          getScript    = (Script*)         componentScript->GetComponent();
-    Light*           getLight     = (Light*)          componentLight->GetComponent();
-    
-    // Check component attachment
+    // Test component attachment
+    gameObject1->AddComponent(componentEntity);
+    componentEntity = gameObject1->FindComponent(ComponentType::Renderer);
+    Entity* getRenderer  = (Entity*)componentEntity->GetComponent();
     if (getRenderer  == nullptr) mLogString += msgFailedToAttachComponent;
-    if (getRigidBody == nullptr) mLogString += msgFailedToAttachComponent;
-    if (getCamera    == nullptr) mLogString += msgFailedToAttachComponent;
-    if (getScript    == nullptr) mLogString += msgFailedToAttachComponent;
-    if (getLight     == nullptr) mLogString += msgFailedToAttachComponent;
     
-    gameObject->RemoveComponent(componentEntity);
-    gameObject->RemoveComponent(componentRigidBody);
-    gameObject->RemoveComponent(componentCamera);
-    gameObject->RemoveComponent(componentScript);
-    gameObject->RemoveComponent(componentLight);
+    // Test component detachment
+    gameObject1->RemoveComponent(componentEntity);
+    if (gameObject1->FindComponent(ComponentType::Renderer)  != nullptr) mLogString += msgFailedToDetachComponent;
     
-    // Check component detachment
-    if (gameObject->FindComponent(ComponentType::Renderer)  != nullptr) mLogString += msgFailedToDetachComponent;
-    if (gameObject->FindComponent(ComponentType::RigidBody) != nullptr) mLogString += msgFailedToDetachComponent;
-    if (gameObject->FindComponent(ComponentType::Camera)    != nullptr) mLogString += msgFailedToDetachComponent;
-    if (gameObject->FindComponent(ComponentType::Script)    != nullptr) mLogString += msgFailedToDetachComponent;
-    if (gameObject->FindComponent(ComponentType::Light)     != nullptr) mLogString += msgFailedToDetachComponent;
+    // Test game object should destroy its components
+    gameObject1->AddComponent(componentEntity);
+    Engine.DestroyGameObject(gameObject1);
+    if (Engine.GetComponentCount() > 0) mLogString += msgFailedToDestroyAttachment;
     
-    // Destroy components
-    Engine.DestroyComponent(componentEntity);
-    Engine.DestroyComponent(componentRigidBody);
-    Engine.DestroyComponent(componentCamera);
-    Engine.DestroyComponent(componentScript);
-    Engine.DestroyComponent(componentLight);
+    // Check game object`s get and set functions
+    GameObject* gameObject2     = Engine.CreateGameObject();
+    Component*  componentRigidBody = Engine.CreateComponent(ComponentType::RigidBody);
+    gameObject2->AddComponent(componentRigidBody);
+    rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)componentRigidBody->GetComponent();
     
-    Engine.DestroyGameObject(gameObject);
+    // Test mass
+    gameObject2->SetMass(2.0);
+    if (rigidBody->getMass() != 2.0) mLogString += msgFailedSetGet;
+    
+    // Test damping
+    gameObject2->SetLinearDamping(8.0);
+    if (rigidBody->getLinearDamping() != 8.0) mLogString += msgFailedSetGet;
+    gameObject2->SetAngularDamping(4.0);
+    if (rigidBody->getAngularDamping() != 4.0) mLogString += msgFailedSetGet;
+    
+    // Test axial locks
+    gameObject2->SetLinearAxisLockFactor(1.0, 3.0, 5.0);
+    if (rigidBody->getLinearLockAxisFactor() != rp3d::Vector3(1.0, 3.0, 5.0)) mLogString += msgFailedSetGet;
+    gameObject2->SetAngularAxisLockFactor(2.0, 4.0, 6.0);
+    if (rigidBody->getAngularLockAxisFactor() != rp3d::Vector3(2.0, 4.0, 6.0)) mLogString += msgFailedSetGet;
+    
+    Engine.DestroyGameObject(gameObject2);
     
     return;
 }
+
+
+
+
 

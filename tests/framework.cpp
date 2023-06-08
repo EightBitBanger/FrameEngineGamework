@@ -24,6 +24,10 @@ void TestFramework::Finalize(void) {
     }
 }
 
+void TestFramework::WriteError(std::string message, unsigned int line) {
+    mLogString += IntToString((int)line) + message;
+}
+
 void TestFramework::AddTest(void(TestFramework::*testFunction)()) {
     mTestList.push_back(testFunction);
 }

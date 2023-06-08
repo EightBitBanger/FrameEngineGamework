@@ -63,6 +63,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position) {
     
     GameObject* cameraController = CreateGameObject();
     cameraController->name = "camera";
+    cameraController->transform.position = position;
     
     // Add a camera component
     Component* cameraComponent = CreateComponent(ComponentType::Camera);
@@ -97,7 +98,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position) {
     return cameraController;
 }
 
-Component* EngineSystemManager::CreateComponentEntityRenderer(Mesh* meshPtr, Material* materialPtr) {
+Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr) {
     Component* newComponent = CreateComponent(ComponentType::Renderer);
     Entity* entityRenderer = (Entity*)newComponent->GetComponent();
     entityRenderer->AttachMesh(meshPtr);

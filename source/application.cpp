@@ -88,7 +88,7 @@ void Framework::Start() {
     
     skyObject = Engine.CreateGameObject();
     skyObject->name = "sky";
-    Component* skyComponent = Engine.CreateComponentEntityRenderer(skyMesh, skyMaterial);
+    Component* skyComponent = Engine.CreateComponentMeshRenderer(skyMesh, skyMaterial);
     skyObject->AddComponent(skyComponent);
     
     skyObject->transform.SetScale(10000,10000,10000);
@@ -102,7 +102,7 @@ void Framework::Start() {
     ground->name = "world";
     
     // Add a render component
-    Component* groundRenderer = Engine.CreateComponentEntityRenderer(groundMesh, groundMaterial);
+    Component* groundRenderer = Engine.CreateComponentMeshRenderer(groundMesh, groundMaterial);
     ground->AddComponent(groundRenderer);
     
     // Add a physics component
@@ -150,25 +150,25 @@ void Framework::Start() {
     // Object A
     objectA = Engine.CreateGameObject();
     objectA->name = "testobject";
-    Component* entityRendererA = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
+    Component* entityRendererA = Engine.CreateComponentMeshRenderer(barrelMesh, barrelMaterial);
     objectA->AddComponent(entityRendererA);
     
     // Object B
     objectB = Engine.CreateGameObject();
     objectB->name = "testobject";
-    Component* entityRendererB = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
+    Component* entityRendererB = Engine.CreateComponentMeshRenderer(barrelMesh, barrelMaterial);
     objectB->AddComponent(entityRendererB);
     
     // Object C
     objectC = Engine.CreateGameObject();
     objectC->name = "testobject";
-    Component* entityRendererC = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
+    Component* entityRendererC = Engine.CreateComponentMeshRenderer(barrelMesh, barrelMaterial);
     objectC->AddComponent(entityRendererC);
     
     // Object D
     objectD = Engine.CreateGameObject();
     objectD->name = "testobject";
-    Component* entityRendererD = Engine.CreateComponentEntityRenderer(barrelMesh, barrelMaterial);
+    Component* entityRendererD = Engine.CreateComponentMeshRenderer(barrelMesh, barrelMaterial);
     objectD->AddComponent(entityRendererD);
     
     Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
