@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../vendor/CodeBaseLibrary/types.h"
+#include "../vendor/CodeBaseLibrary/strings.h"
 
 
 class TestFramework {
@@ -30,7 +31,7 @@ public:
     void Finalize(void);
     
     /// Log a message string to the output console.
-    void Throw(std::string message, unsigned int line);
+    void Throw(std::string message, std::string sourceFile, int line);
     
     
     //
@@ -51,14 +52,14 @@ private:
     const std::string msgPassed = "PASS";
     const std::string msgFailed = "FAIL\n";
     
-    const std::string msgFailedNullptr             = "object pointer is null\n";
-    const std::string msgFailedObjectCreate        = "failed to create an object\n";
-    const std::string msgFailedObjectDestroy       = "failed to destroy an object\n";
-    const std::string msgFailedToAttachComponent   = "component not attaching to game object\n";
-    const std::string msgFailedToDetachComponent   = "component not detaching from game object\n";
-    const std::string msgFailedToDestroyAttachment = "attachment not destroying when parent is destroyed\n";
-    const std::string msgFailedAllocatorNotZero    = "object allocator still contains objects\n";
-    const std::string msgFailedSetGet              = "set/get not returning correct value\n";
+    const std::string msgFailedNullptr             = "object pointer is null";
+    const std::string msgFailedObjectCreate        = "failed to create an object";
+    const std::string msgFailedObjectDestroy       = "failed to destroy an object";
+    const std::string msgFailedToAttachComponent   = "component not attaching to game object";
+    const std::string msgFailedToDetachComponent   = "component not detaching from game object";
+    const std::string msgFailedToDestroyAttachment = "attachment not destroying when parent is destroyed";
+    const std::string msgFailedAllocatorNotZero    = "object allocator still contains objects";
+    const std::string msgFailedSetGet              = "set/get not returning correct value";
     
     std::string mLogString;
     

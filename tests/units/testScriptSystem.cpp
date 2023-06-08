@@ -13,11 +13,11 @@ void TestFramework::TestScriptSystem(void) {
     
     Script* scriptObject = Scripting.CreateScript();
     // Check create script
-    if (scriptObject == nullptr) mLogString += msgFailedObjectCreate;
+    if (scriptObject == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     // Check destroy script
-    if (!Scripting.DestroyScript(scriptObject)) mLogString += msgFailedObjectDestroy;
+    if (!Scripting.DestroyScript(scriptObject)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
     // Check no scripts left over after destruction
-    if (Scripting.GetScriptCount() > 0) mLogString += msgFailedAllocatorNotZero;
+    if (Scripting.GetScriptCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     return;
 }

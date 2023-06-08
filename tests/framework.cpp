@@ -24,8 +24,11 @@ void TestFramework::Finalize(void) {
     }
 }
 
-void TestFramework::Throw(std::string message, unsigned int line) {
-    mLogString += IntToString((int)line) + message;
+void TestFramework::Throw(std::string message, std::string sourceFile, int line) {
+    
+    std::string sourceFileName = StringGetNameFromFilename(sourceFile);
+    
+    mLogString += sourceFileName + " @ Line " + IntToString((int)line) + " : " + message + "\n";
 }
 
 void TestFramework::AddTest(void(TestFramework::*testFunction)()) {

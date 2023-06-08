@@ -13,31 +13,31 @@ void TestFramework::TestEngineFunctionality(void) {
     
     // Test game object
     GameObject* gameObject = Engine.CreateGameObject();
-    if (gameObject == nullptr) mLogString += msgFailedObjectCreate;
-    if (!Engine.DestroyGameObject(gameObject)) mLogString += msgFailedObjectDestroy;
-    if (Engine.GetGameObjectCount() > 0) mLogString += msgFailedAllocatorNotZero;
+    if (gameObject == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
+    if (!Engine.DestroyGameObject(gameObject)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
+    if (Engine.GetGameObjectCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     // Test mesh renderer component
     Component* component = Engine.CreateComponentMeshRenderer(nullptr, nullptr);
-    if (component == nullptr) mLogString += msgFailedObjectCreate;
-    if (!Engine.DestroyComponent(component)) mLogString += msgFailedObjectDestroy;
-    if (Engine.GetComponentCount() > 0) mLogString += msgFailedAllocatorNotZero;
+    if (component == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
+    if (!Engine.DestroyComponent(component)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
+    if (Engine.GetComponentCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     // Test light component
     component = Engine.CreateComponentLight(glm::vec3(1, -2, 3));
     Light* lightPoint = (Light*)component->GetComponent();
-    if (lightPoint->transform.position != glm::vec3(1, -2, 3)) mLogString += msgFailedObjectCreate;
-    if (component == nullptr) mLogString += msgFailedObjectCreate;
-    if (!Engine.DestroyComponent(component)) mLogString += msgFailedObjectDestroy;
-    if (Engine.GetComponentCount() > 0) mLogString += msgFailedAllocatorNotZero;
+    if (lightPoint->transform.position != glm::vec3(1, -2, 3)) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
+    if (component == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
+    if (!Engine.DestroyComponent(component)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
+    if (Engine.GetComponentCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     // Test camera controller object
     gameObject = Engine.CreateCameraController(glm::vec3(1, -2, 3));
-    if (gameObject->transform.position != glm::vec3(1, -2, 3)) mLogString += msgFailedObjectCreate;
-    if (gameObject == nullptr) mLogString += msgFailedObjectCreate;
-    if (!Engine.DestroyGameObject(gameObject)) mLogString += msgFailedObjectDestroy;
-    if (Engine.GetGameObjectCount() > 0) mLogString += msgFailedAllocatorNotZero;
-    if (Engine.GetComponentCount() > 0) mLogString += msgFailedAllocatorNotZero;
+    if (gameObject->transform.position != glm::vec3(1, -2, 3)) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
+    if (gameObject == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
+    if (!Engine.DestroyGameObject(gameObject)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
+    if (Engine.GetGameObjectCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
+    if (Engine.GetComponentCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     return;
 }

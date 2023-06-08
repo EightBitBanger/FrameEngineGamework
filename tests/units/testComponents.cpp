@@ -3,8 +3,8 @@
 
 #include "../framework.h"
 #include "../../source/Engine/Engine.h"
-extern EngineSystemManager  Engine;
 
+extern EngineSystemManager  Engine;
 
 void TestFramework::TestComponentObject(void) {
     if (hasTestFailed) return;
@@ -25,11 +25,11 @@ void TestFramework::TestComponentObject(void) {
     void* lightObject     = componentLight->GetComponent();
     
     // Check components
-    if (entityObject    == nullptr) mLogString += msgFailedNullptr;
-    if (rigidBodyObject == nullptr) mLogString += msgFailedNullptr;
-    if (cameraObject    == nullptr) mLogString += msgFailedNullptr;
-    if (scriptObject    == nullptr) mLogString += msgFailedNullptr;
-    if (lightObject     == nullptr) mLogString += msgFailedNullptr;
+    if (entityObject    == nullptr) Throw(msgFailedNullptr, __FILE__, __LINE__);
+    if (rigidBodyObject == nullptr) Throw(msgFailedNullptr, __FILE__, __LINE__);
+    if (cameraObject    == nullptr) Throw(msgFailedNullptr, __FILE__, __LINE__);
+    if (scriptObject    == nullptr) Throw(msgFailedNullptr, __FILE__, __LINE__);
+    if (lightObject     == nullptr) Throw(msgFailedNullptr, __FILE__, __LINE__);
     
     // Destroy components
     Engine.DestroyComponent(componentEntity);
@@ -38,7 +38,7 @@ void TestFramework::TestComponentObject(void) {
     Engine.DestroyComponent(componentScript);
     Engine.DestroyComponent(componentLight);
     
-    if (Engine.GetComponentCount() > 0) mLogString += msgFailedAllocatorNotZero;
+    if (Engine.GetComponentCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     return;
 }

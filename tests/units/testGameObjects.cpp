@@ -15,22 +15,22 @@ void TestFramework::TestGameObject(void) {
     Component*  componentEntity = Engine.CreateComponent(ComponentType::Renderer);
     
     // Check object creation
-    if (gameObject1 == nullptr) mLogString += msgFailedObjectCreate;
+    if (gameObject1 == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     
     // Test component attachment
     gameObject1->AddComponent(componentEntity);
     componentEntity = gameObject1->FindComponent(ComponentType::Renderer);
     Entity* getRenderer  = (Entity*)componentEntity->GetComponent();
-    if (getRenderer  == nullptr) mLogString += msgFailedToAttachComponent;
+    if (getRenderer  == nullptr) Throw(msgFailedToAttachComponent, __FILE__, __LINE__);
     
     // Test component detachment
     gameObject1->RemoveComponent(componentEntity);
-    if (gameObject1->FindComponent(ComponentType::Renderer)  != nullptr) mLogString += msgFailedToDetachComponent;
+    if (gameObject1->FindComponent(ComponentType::Renderer)  != nullptr) Throw(msgFailedToDetachComponent, __FILE__, __LINE__);
     
     // Test game object should destroy its components
     gameObject1->AddComponent(componentEntity);
     Engine.DestroyGameObject(gameObject1);
-    if (Engine.GetComponentCount() > 0) mLogString += msgFailedToDestroyAttachment;
+    if (Engine.GetComponentCount() > 0) Throw(msgFailedToDestroyAttachment, __FILE__, __LINE__);
     
     // Check game object`s get and set functions
     GameObject* gameObject2     = Engine.CreateGameObject();
@@ -40,19 +40,19 @@ void TestFramework::TestGameObject(void) {
     
     // Test mass
     gameObject2->SetMass(2.0);
-    if (rigidBody->getMass() != 2.0) mLogString += msgFailedSetGet;
+    if (rigidBody->getMass() != 2.0) Throw(msgFailedSetGet, __FILE__, __LINE__);
     
     // Test damping
     gameObject2->SetLinearDamping(8.0);
-    if (rigidBody->getLinearDamping() != 8.0) mLogString += msgFailedSetGet;
+    if (rigidBody->getLinearDamping() != 8.0) Throw(msgFailedSetGet, __FILE__, __LINE__);
     gameObject2->SetAngularDamping(4.0);
-    if (rigidBody->getAngularDamping() != 4.0) mLogString += msgFailedSetGet;
+    if (rigidBody->getAngularDamping() != 4.0) Throw(msgFailedSetGet, __FILE__, __LINE__);
     
     // Test axial locks
     gameObject2->SetLinearAxisLockFactor(1.0, 3.0, 5.0);
-    if (rigidBody->getLinearLockAxisFactor() != rp3d::Vector3(1.0, 3.0, 5.0)) mLogString += msgFailedSetGet;
+    if (rigidBody->getLinearLockAxisFactor() != rp3d::Vector3(1.0, 3.0, 5.0)) Throw(msgFailedSetGet, __FILE__, __LINE__);
     gameObject2->SetAngularAxisLockFactor(2.0, 4.0, 6.0);
-    if (rigidBody->getAngularLockAxisFactor() != rp3d::Vector3(2.0, 4.0, 6.0)) mLogString += msgFailedSetGet;
+    if (rigidBody->getAngularLockAxisFactor() != rp3d::Vector3(2.0, 4.0, 6.0)) Throw(msgFailedSetGet, __FILE__, __LINE__);
     
     Engine.DestroyGameObject(gameObject2);
     
