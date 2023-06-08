@@ -24,7 +24,7 @@ void TestFramework::Finalize(void) {
     }
 }
 
-void TestFramework::WriteError(std::string message, unsigned int line) {
+void TestFramework::Throw(std::string message, unsigned int line) {
     mLogString += IntToString((int)line) + message;
 }
 
