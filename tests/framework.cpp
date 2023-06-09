@@ -28,7 +28,7 @@ void TestFramework::Throw(std::string message, std::string sourceFile, int line)
     
     std::string sourceFileName = StringGetNameFromFilename(sourceFile);
     
-    mLogString += sourceFileName + " @ Line " + IntToString((int)line) + " : " + message + "\n";
+    mLogString += sourceFileName + "\n @ Line " + IntToString((int)line) + " : " + message + "\n\n";
 }
 
 void TestFramework::AddTest(void(TestFramework::*testFunction)()) {

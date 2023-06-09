@@ -16,6 +16,7 @@
 //#define  STBI_ONLY_HDR
 //#define  STBI_ONLY_PIC
 //#define  STBI_ONLY_PNM // (.ppm and .pgm)
+#define STB_IMAGE_IMPLEMENTATION
 #include "../../vendor/stb/stb_image.h"
 
 

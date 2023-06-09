@@ -45,7 +45,7 @@ public:
     void TestComponentObject(void);
     void TestRenderSystem(void);
     void TestScriptSystem(void);
-    
+    void TestPhysicsSystem(void);
     
 private:
     
