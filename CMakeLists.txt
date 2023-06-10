@@ -130,6 +130,7 @@ set (ENGINE_SOURCES
     "tests/units/testGameObjects.cpp"
     "tests/units/testRenderSystem.cpp"
     "tests/units/testScriptSystem.cpp"
+    "tests/units/testPhysicsSystem.cpp"
     
     "vendor/CodeBaseLibrary/fileloader.cpp"
     "vendor/CodeBaseLibrary/logging.cpp"
