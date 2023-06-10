@@ -1,5 +1,4 @@
-<br><br/>
-### Core Features
+## Core Engine Features
 - <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Render%E2%80%89System">Render system</a>⁭
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 - ⁯⁮⁭Audio (Considering openAL)
