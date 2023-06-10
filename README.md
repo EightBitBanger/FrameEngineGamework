@@ -1,8 +1,3 @@
-## Introduction
-
-This game engine framework aims to provide simpler interfaces with more complex systems. The application layer contains an entry point function and numerous APIs for rendering, physics, resource management, scene management, input, timing and random number generation.
-
-
 <br><br/>
 ### Core Features
 - <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Render%E2%80%89System">Render system</a>⁭
