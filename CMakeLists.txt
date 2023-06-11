@@ -131,6 +131,7 @@ set (ENGINE_SOURCES
     "tests/units/testRenderSystem.cpp"
     "tests/units/testScriptSystem.cpp"
     "tests/units/testPhysicsSystem.cpp"
+    "tests/units/testTransform.cpp"
     
     "vendor/CodeBaseLibrary/fileloader.cpp"
     "vendor/CodeBaseLibrary/logging.cpp"
