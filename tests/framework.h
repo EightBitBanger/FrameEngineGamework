@@ -46,6 +46,7 @@ public:
     void TestRenderSystem(void);
     void TestScriptSystem(void);
     void TestPhysicsSystem(void);
+    void TestTransform(void);
     
 private:
     
@@ -53,6 +54,7 @@ private:
     const std::string msgFailed = "FAIL\n";
     
     const std::string msgFailedNullptr             = "object pointer is null";
+    const std::string msgFailedConstructor         = "failed to construct an object instance";
     const std::string msgFailedObjectCreate        = "failed to create an object";
     const std::string msgFailedObjectDestroy       = "failed to destroy an object";
     const std::string msgFailedToAttachComponent   = "component not attaching to game object";

@@ -46,7 +46,7 @@ public:
     /// Get the position of the transform matrix.
     glm::vec3 GetPosition(void);
     /// Get the rotation of the transform matrix.
-    glm::quat GetRotation(void);
+    glm::quat GetOrientation(void);
     /// Get the scale of the transform matrix.
     glm::vec3 GetScale(void);
     

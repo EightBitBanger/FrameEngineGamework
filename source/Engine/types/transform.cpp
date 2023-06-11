@@ -45,7 +45,7 @@ glm::vec3 Transform::GetPosition(void) {
     return position;
 }
 
-glm::quat Transform::GetRotation(void) {
+glm::quat Transform::GetOrientation(void) {
     return orientation;
 }
 
