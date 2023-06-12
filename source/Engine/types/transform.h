@@ -28,18 +28,12 @@ public:
     
     /// Assignment
     void operator= (const Transform& transform);
-    
     /// Evaluation equal
     bool operator== (const Transform& transform);
-    
     /// Evaluation not equal
     bool operator!= (const Transform& transform);
-    
     /// Multiply two transforms into a resulting transform.
     Transform operator* (const Transform& transform);
-    
-    /// Update the model matrix from the current position, rotation and scale.
-    void UpdateMatrix(void);
     
     /// Set the position of the transform matrix.
     void SetPosition(float x, float y, float z);
@@ -66,12 +60,14 @@ public:
     void Translate(float x, float y, float z);
     /// Translate the transform by the given amount.
     void Translate(glm::vec3 translation);
+    
     /// Rotate the transform on the axis by the given angle amount.
     void RotateAxis(float angle, glm::vec3 axis);
     /// Rotate the transform by the given Euler angles.
     void RotateEuler(float yaw, float pitch, float roll);
     /// Rotate the transform by the given Euler angles.
     void RotateEuler(glm::vec3 eulerAngle);
+    
     /// Scale the transform by the given amount.
     void Scale(float x, float y, float z);
     /// Scale the transform by the given amount.
@@ -79,6 +75,9 @@ public:
     
     /// Return an identity transform.
     void SetIdentity(void);
+    
+    /// Update the model matrix from the current position, rotation and scale.
+    void UpdateMatrix(void);
     
 };
 

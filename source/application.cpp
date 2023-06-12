@@ -26,7 +26,7 @@ Material*       groundMaterial;
 GameObject*     cameraController;
 GameObject*     skyObject;
 
-rp3d::BoxShape* projectileCollider;
+rp3d::SphereShape* projectileCollider;
 
 GameObject* objectA;
 GameObject* objectB;
@@ -71,7 +71,7 @@ void Framework::Start() {
     
     projectionMaterial = Resources.CreateMaterialFromTag("mat_bullet");
     projectionMaterial->diffuse = Color(0.02, 0.02, 0.02);
-    projectileCollider = Physics.CreateColliderBox(2, 2, 2);
+    projectileCollider = Physics.CreateColliderSphere(1);
     
     
     //
@@ -208,18 +208,14 @@ float rotate = 0;
 
 void Framework::Run() {
     
-    // Rotation chain test
-    rotate += 1;
+    // Projectile shoot force
+    float projectileSpeed = 1000;
+    // Camera movement force
+    float cameraSpeed     = 13000;
     
-    //objectA->transform.RotateEuler(  rotate, 0, 0);
-    //objectB->transform.RotateEuler(  rotate, 0, 0);
-    //objectD->transform.RotateEuler(  rotate*2, 0, 0);
-    
-    
-    
-    glm::vec3 force(0);
     
     // Keyboard movement, WASD keys
+    glm::vec3 force(0);
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
@@ -230,19 +226,19 @@ void Framework::Run() {
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
     // Camera speed multiplier
-    force *= 8000;
+    force *= cameraSpeed;
     
     cameraController->AddForce(force.x, force.y, force.z);
     
     // Shoot object from camera
     
-    //if (Input.CheckMouseLeftPressed()) {
-        //Input.SetMouseLeftPressed(false);
+    if (Input.CheckMouseLeftPressed()) {
+        Input.SetMouseLeftPressed(false);
         
         // Spread offset effect on projectile angle
         float spreadMul = 0.0001;
         
-        for (int i=0; i < 100; i++) {
+        //for (int i=0; i < 10; i++) {
             
             // Apply some random physical forces
             float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -264,14 +260,14 @@ void Framework::Run() {
             pos += fwd;
             
             // Total forward force + camera offset distance
-            fwd *= 1500;
+            fwd *= projectileSpeed;
             
             // Camera height offset
             float fireFromHeightOffset = -2;
             
-            float startx = 0;//pos.x + offsetx;
-            float starty = 20;//pos.y + offsety + fireFromHeightOffset;
-            float startz = 0;//pos.z + offsetz;
+            float startx = pos.x + offsetx;
+            float starty = pos.y + offsety + fireFromHeightOffset;
+            float startz = pos.z + offsetz;
             
             
             GameObject* projectile = Engine.CreateGameObject();
@@ -289,13 +285,13 @@ void Framework::Run() {
             
             
             // Light component
-            if (Random.Range(0, 10) > 3) {
+            if (Random.Range(0, 10) > 1) {
                 Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
                 projectile->AddComponent(lightComponent);
                 Light* lightPtr = (Light*)lightComponent->GetComponent();
-                lightPtr->color = Colors.black;
-                lightPtr->intensity    = 10.0;
-                lightPtr->range        = 40.0;
+                lightPtr->color = Colors.MakeRandom();
+                lightPtr->intensity    = 70.0;
+                lightPtr->range        = 100.0;
                 lightPtr->attenuation  = 0.01;
             }
             
@@ -307,7 +303,7 @@ void Framework::Run() {
             rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
             
             // Projectile collider
-            //projectile->AddColliderBox(projectileCollider, 0, 0, 0);
+            projectile->AddColliderSphere(projectileCollider, 0, 0, 0);
             
             projectile->SetMass(10);
             projectile->SetLinearDamping(0.001);
@@ -331,11 +327,11 @@ void Framework::Run() {
             
             
             
-            continue;
-        }
+            //continue;
+        //}
         
         
-    //}
+    }
     
     // Purge extra objects
     unsigned int index=0;
