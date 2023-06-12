@@ -11,6 +11,30 @@ Transform::Transform() :
 {
 }
 
+void Transform::operator= (const Transform& transform) {
+    this->position    = transform.position;
+    this->orientation = transform.orientation;
+    this->scale       = transform.scale;
+    this->matrix      = transform.matrix;
+}
+
+Transform Transform::operator* (const Transform& transform) {
+    Transform result;
+    result.position    = this->position    + transform.position;
+    result.orientation = this->orientation * transform.orientation;
+    result.scale       = this->scale       * transform.scale;
+    result.matrix      = this->matrix      * transform.matrix;
+    return result;
+}
+
+bool Transform::operator== (const Transform& transform) {
+    return ((this->position == transform.position) && (this->orientation == transform.orientation));
+}
+
+bool Transform::operator!= (const Transform& transform) {
+    return ((this->position != transform.position) || (this->orientation != transform.orientation));
+}
+
 void Transform::SetPosition(float x, float y, float z) {
     position = glm::vec3(x, y, z);
     return;
@@ -55,37 +79,42 @@ glm::vec3 Transform::GetScale(void){
 
 void Transform::Translate(glm::vec3 translation) {
     matrix = glm::translate(matrix, translation);
+    position += translation;
 }
 
 void Transform::Translate(float x, float y, float z) {
     matrix = glm::translate(matrix, glm::vec3(x, y, z));
+    position += glm::vec3(x, y, z);
 }
 
 void Transform::RotateAxis(float angle, glm::vec3 axis) {
     matrix = glm::rotate(matrix, glm::radians(angle), glm::normalize(axis));
+    orientation = glm::quat_cast(matrix);
 }
 
 void Transform::RotateEuler(glm::vec3 eulerAngle) {
     orientation = glm::quat(glm::radians(eulerAngle));
-    matrix *= glm::toMat4( glm::quat( glm::radians(eulerAngle) ) );
+    matrix *= glm::toMat4(orientation);
 }
 
 void Transform::RotateEuler(float yaw, float pitch, float roll) {
     orientation = glm::quat( glm::radians( glm::vec3(yaw, pitch, roll) ) );
-    matrix *= glm::toMat4( glm::quat( glm::radians( glm::vec3(yaw, pitch, roll) ) ) );
+    matrix *= glm::toMat4(orientation);
 }
 
 void Transform::Scale(glm::vec3 scaler) {
     matrix = glm::scale(matrix, scaler);
+    scale *= scaler;
 }
 
 void Transform::Scale(float x, float y, float z) {
     matrix = glm::scale(matrix, glm::vec3(x, y, z) );
+    scale *= glm::vec3(x, y, z);
 }
 
-void Transform::Identity(void) {
+void Transform::SetIdentity(void) {
     position     = glm::vec3(0, 0, 0);
-    orientation  = glm::quat(0, 0, 0, 1);
+    orientation  = glm::identity<glm::quat>();
     scale        = glm::vec3(1, 1, 1);
     matrix       = glm::mat4(1);
 }

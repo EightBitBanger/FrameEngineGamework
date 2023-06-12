@@ -26,6 +26,18 @@ public:
     
     Transform();
     
+    /// Assignment
+    void operator= (const Transform& transform);
+    
+    /// Evaluation equal
+    bool operator== (const Transform& transform);
+    
+    /// Evaluation not equal
+    bool operator!= (const Transform& transform);
+    
+    /// Multiply two transforms into a resulting transform.
+    Transform operator* (const Transform& transform);
+    
     /// Update the model matrix from the current position, rotation and scale.
     void UpdateMatrix(void);
     
@@ -66,7 +78,7 @@ public:
     void Scale(glm::vec3 eulerAngle);
     
     /// Return an identity transform.
-    void Identity(void);
+    void SetIdentity(void);
     
 };
 

@@ -236,13 +236,13 @@ void Framework::Run() {
     
     // Shoot object from camera
     
-    if (Input.CheckMouseLeftPressed()) {
+    //if (Input.CheckMouseLeftPressed()) {
         //Input.SetMouseLeftPressed(false);
         
         // Spread offset effect on projectile angle
         float spreadMul = 0.0001;
         
-        for (int i=0; i < 1; i++) {
+        for (int i=0; i < 100; i++) {
             
             // Apply some random physical forces
             float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -269,9 +269,9 @@ void Framework::Run() {
             // Camera height offset
             float fireFromHeightOffset = -2;
             
-            float startx = pos.x + offsetx;
-            float starty = pos.y + offsety + fireFromHeightOffset;
-            float startz = pos.z + offsetz;
+            float startx = 0;//pos.x + offsetx;
+            float starty = 20;//pos.y + offsety + fireFromHeightOffset;
+            float startz = 0;//pos.z + offsetz;
             
             
             GameObject* projectile = Engine.CreateGameObject();
@@ -281,6 +281,7 @@ void Framework::Run() {
             // Add a render component
             Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
             projectile->AddComponent(entityRenderer);
+            
             // Set the render component to a loaded resource
             Entity* entity = (Entity*)entityRenderer->GetComponent();
             entity->AttachMesh(projectileMesh);
@@ -298,13 +299,15 @@ void Framework::Run() {
                 lightPtr->attenuation  = 0.01;
             }
             
+            
+            
             // Add a physics component
             Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
             projectile->AddComponent(rigidBodyComponent);
             rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
             
             // Projectile collider
-            projectile->AddColliderBox(projectileCollider, 0, 0, 0);
+            //projectile->AddColliderBox(projectileCollider, 0, 0, 0);
             
             projectile->SetMass(10);
             projectile->SetLinearDamping(0.001);
@@ -326,15 +329,18 @@ void Framework::Run() {
             
             projectile->SetPosition(startx, starty, startz);
             
+            
+            
             continue;
         }
         
         
-    }
+    //}
     
     // Purge extra objects
     unsigned int index=0;
-    while (Engine.GetGameObjectCount() > 300) {
+    
+    while (Engine.GetGameObjectCount() > 200) {
         
         GameObject* gameObject = Engine.GetGameObject(index);
         index++;
@@ -346,6 +352,7 @@ void Framework::Run() {
         Engine.DestroyGameObject(gameObject);
         index = 0;
     }
+    
     
     // Escape key pause
     
