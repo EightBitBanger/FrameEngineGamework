@@ -41,26 +41,58 @@ void TestFramework::TestTransform(void) {
     transform.SetIdentity();
     transform.RotateAxis(10.0, glm::vec3(0, 1, 0));
     
-    glm::quat answereQuat = glm::quat(0.996195, 0.0, 0.0871557, 0.0);
+    glm::quat targetValue = glm::quat(0.996195, 0.0, 0.0871557, 0.0);
+    float quatDiffX = transform.orientation.x - targetValue.x;
+    float quatDiffY = transform.orientation.y - targetValue.y;
+    float quatDiffZ = transform.orientation.z - targetValue.z;
+    float quatDiffW = transform.orientation.w - targetValue.w;
     
-    float diffThresh = 0.00001;
-    float quatDiffX = transform.orientation.x - answereQuat.x;
-    float quatDiffY = transform.orientation.y - answereQuat.y;
-    float quatDiffZ = transform.orientation.z - answereQuat.z;
-    float quatDiffW = transform.orientation.w - answereQuat.w;
-    
-    if ((quatDiffX > diffThresh) | (quatDiffX < -diffThresh)) Throw(msgFailedSetGet, __FILE__, __LINE__);
-    if ((quatDiffY > diffThresh) | (quatDiffY < -diffThresh)) Throw(msgFailedSetGet, __FILE__, __LINE__);
-    if ((quatDiffZ > diffThresh) | (quatDiffZ < -diffThresh)) Throw(msgFailedSetGet, __FILE__, __LINE__);
-    if ((quatDiffW > diffThresh) | (quatDiffW < -diffThresh)) Throw(msgFailedSetGet, __FILE__, __LINE__);
-    
+    float margin = 0.0001;
+    if ((quatDiffX > margin) | (quatDiffX < -margin)) Throw(msgFailedSetGet, __FILE__, __LINE__);
+    if ((quatDiffY > margin) | (quatDiffY < -margin)) Throw(msgFailedSetGet, __FILE__, __LINE__);
+    if ((quatDiffZ > margin) | (quatDiffZ < -margin)) Throw(msgFailedSetGet, __FILE__, __LINE__);
+    if ((quatDiffW > margin) | (quatDiffW < -margin)) Throw(msgFailedSetGet, __FILE__, __LINE__);
     
     // Test scaling
+    transform.SetIdentity();
+    transform.Scale(20.0, 40.0, 60.0);
+    if (transform.scale != glm::vec3(20.0, 40.0, 60.0)) Throw(msgFailedSetGet, __FILE__, __LINE__);
     
+    // Test assignment operator
+    Transform transformA;
+    Transform transformB;
+    Transform transformC;
+    transformA.SetIdentity();
+    transformB.SetIdentity();
+    transformC.SetIdentity();
     
+    transformB.position    = glm::vec3(10.0, 10.0, 10.0);
+    transformB.orientation = glm::quat(2.0, 2.0, 2.0, 2.0);
+    transformB.scale       = glm::vec3(10.0, 10.0, 10.0);
     
+    transformA = transformB;
     
+    if (transformA.position    != glm::vec3(10.0, 10.0, 10.0))   Throw(msgFailedOperator, __FILE__, __LINE__);
+    if (transformA.orientation != glm::quat(2.0, 2.0, 2.0, 2.0)) Throw(msgFailedOperator, __FILE__, __LINE__);
+    if (transformA.scale       != glm::vec3(10.0, 10.0, 10.0))   Throw(msgFailedOperator, __FILE__, __LINE__);
+    
+    // Test multiplication operator
+    transformB.position    = glm::vec3(10.0, 10.0, 10.0);
+    transformB.orientation = glm::quat(2.0, 2.0, 2.0, 2.0);
+    transformB.scale       = glm::vec3(2.0, 2.0, 2.0);
+    
+    transformC = transformA * transformB;
+    
+    if (transformC.position    != glm::vec3(20.0, 20.0, 20.0))     Throw(msgFailedOperator, __FILE__, __LINE__);
+    if (transformC.orientation != glm::quat(-8.0, 8.0, 8.0, 8.0))  Throw(msgFailedOperator, __FILE__, __LINE__);
+    if (transformC.scale       != glm::vec3(20.0, 20.0, 20.0))     Throw(msgFailedOperator, __FILE__, __LINE__);
+    
+    // Test equivalence operators
+    if (transformA == transformC) Throw(msgFailedOperator, __FILE__, __LINE__);
+    transformA = transformC;
+    if (transformA != transformC) Throw(msgFailedOperator, __FILE__, __LINE__);
     
     return;
 }
+
 

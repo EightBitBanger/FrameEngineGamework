@@ -62,6 +62,7 @@ private:
     const std::string msgFailedToDestroyAttachment = "attachment not destroying when parent is destroyed";
     const std::string msgFailedAllocatorNotZero    = "object allocator still contains objects";
     const std::string msgFailedSetGet              = "set/get not returning correct value";
+    const std::string msgFailedOperator            = "operator failed to operate";
     
     std::string mLogString;
     
