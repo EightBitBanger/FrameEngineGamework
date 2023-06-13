@@ -3,6 +3,12 @@
 
 #include <ReactPhysics3d/ReactPhysics3d.h>
 
+typedef rp3d::RigidBody    RigidBody;
+typedef rp3d::BoxShape     BoxShape;
+typedef rp3d::SphereShape  SphereShape;
+typedef rp3d::CapsuleShape CapsuleShape;
+
+
 class PhysicsSystem {
     
 public:

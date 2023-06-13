@@ -116,7 +116,7 @@ void Framework::Start() {
     
     // Ground collider
     rp3d::Vector3 groundScale = rp3d::Vector3(100000, 10, 100000);
-    rp3d::BoxShape* groundCollider = Physics.CreateColliderBox(groundScale.x, groundScale.y, groundScale.z);
+    BoxShape* groundCollider = Physics.CreateColliderBox(groundScale.x, groundScale.y, groundScale.z);
     ground->AddColliderBox(groundCollider, -(groundScale.x / 2), -10, -(groundScale.z / 2));
     
     
@@ -131,7 +131,7 @@ void Framework::Start() {
     cameraController->CalculatePhysics();
     cameraController->EnableGravity(false);
     
-    rp3d::BoxShape* boxShape = Physics.CreateColliderBox(1, 8, 1);
+    BoxShape* boxShape = Physics.CreateColliderBox(1, 8, 1);
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
     cameraController->CalculatePhysics();
@@ -300,7 +300,7 @@ void Framework::Run() {
             // Add a physics component
             Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
             projectile->AddComponent(rigidBodyComponent);
-            rp3d::RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+            RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
             
             // Projectile collider
             projectile->AddColliderSphere(projectileCollider, 0, 0, 0);
