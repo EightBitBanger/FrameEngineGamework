@@ -204,15 +204,17 @@ void Framework::Start() {
 // Application main loop
 //
 
-float rotate = 0;
+// Projectile shoot force
+float projectileSpeed = 700;
+
+// Camera movement force
+float cameraSpeed     = 13000;
+
+float forceBuild    = 0;
+float forceBuildMax = 1000;
+
 
 void Framework::Run() {
-    
-    // Projectile shoot force
-    float projectileSpeed = 1000;
-    // Camera movement force
-    float cameraSpeed     = 13000;
-    
     
     // Keyboard movement, WASD keys
     glm::vec3 force(0);
@@ -231,106 +233,103 @@ void Framework::Run() {
     cameraController->AddForce(force.x, force.y, force.z);
     
     // Shoot object from camera
-    
     if (Input.CheckMouseLeftPressed()) {
-        Input.SetMouseLeftPressed(false);
+        if (forceBuild < forceBuildMax) {
+            forceBuild += 0.87;
+        } else {
+            forceBuild = forceBuildMax;
+        }
+    }
+    
+    if (Input.CheckMouseLeftReleased()) {
+        Input.SetMouseLeftReleased(false);
         
         // Spread offset effect on projectile angle
         float spreadMul = 0.0001;
         
-        //for (int i=0; i < 10; i++) {
-            
-            // Apply some random physical forces
-            float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-            float offsety = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-            float offsetz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-            
-            
-            //
-            // Calculate projectile force from camera forward angle
-            
-            glm::vec3 fwd = Renderer.cameraMain->forward;
-            glm::vec3 fwdAngle = Renderer.cameraMain->forward;
-            
-            // Offset starting distance from camera
-            fwd *= 9;
-            
-            glm::vec3 pos(0);
-            pos = Renderer.cameraMain->transform.GetPosition();
-            pos += fwd;
-            
-            // Total forward force + camera offset distance
-            fwd *= projectileSpeed;
-            
-            // Camera height offset
-            float fireFromHeightOffset = -2;
-            
-            float startx = pos.x + offsetx;
-            float starty = pos.y + offsety + fireFromHeightOffset;
-            float startz = pos.z + offsetz;
-            
-            
-            GameObject* projectile = Engine.CreateGameObject();
-            projectile->name = "projectile";
-            projectile->transform.scale = glm::vec3(3, 3, 3);
-            
-            // Add a render component
-            Component* entityRenderer = Engine.CreateComponent(ComponentType::Renderer);
-            projectile->AddComponent(entityRenderer);
-            
-            // Set the render component to a loaded resource
-            Entity* entity = (Entity*)entityRenderer->GetComponent();
-            entity->AttachMesh(projectileMesh);
-            entity->AttachMaterial(projectionMaterial);
-            
-            
-            // Light component
-            if (Random.Range(0, 10) > 1) {
-                Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
-                projectile->AddComponent(lightComponent);
-                Light* lightPtr = (Light*)lightComponent->GetComponent();
-                lightPtr->color = Colors.MakeRandom();
-                lightPtr->intensity    = 70.0;
-                lightPtr->range        = 100.0;
-                lightPtr->attenuation  = 0.01;
-            }
-            
-            
-            
-            // Add a physics component
-            Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
-            projectile->AddComponent(rigidBodyComponent);
-            RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
-            
-            // Projectile collider
-            projectile->AddColliderSphere(projectileCollider, 0, 0, 0);
-            
-            projectile->SetMass(10);
-            projectile->SetLinearDamping(0.001);
-            projectile->SetAngularDamping(2);
-            projectile->CalculatePhysics();
-            
-            
-            // Transform the rigid body and apply force
-            rp3d::Transform newTransform;
-            newTransform.setPosition(rp3d::Vector3(startx, starty, startz));
-            
-            rp3d::Quaternion quat;
-            quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, -0.5);
-            
-            newTransform.setOrientation(quat);
-            
-            body->setTransform(newTransform);
-            projectile->AddForce(fwd.x, fwd.y, fwd.z);
-            
-            projectile->SetPosition(startx, starty, startz);
-            
-            
-            
-            //continue;
-        //}
+        // Apply some random physical forces
+        float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+        float offsety = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
+        float offsetz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
         
         
+        //
+        // Calculate projectile force from camera forward angle
+        
+        glm::vec3 fwd = Renderer.cameraMain->forward;
+        glm::vec3 fwdAngle = Renderer.cameraMain->forward;
+        
+        // Offset starting distance from camera
+        fwd *= 9;
+        
+        glm::vec3 pos(0);
+        pos = Renderer.cameraMain->transform.GetPosition();
+        pos += fwd;
+        
+        // Total forward force
+        fwd *= projectileSpeed * forceBuild;
+        
+        // Camera height offset
+        float fireFromHeightOffset = -2;
+        
+        float startx = pos.x + offsetx;
+        float starty = pos.y + offsety + fireFromHeightOffset;
+        float startz = pos.z + offsetz;
+        
+        
+        GameObject* projectile = Engine.CreateGameObject();
+        projectile->name = "projectile";
+        projectile->transform.scale = glm::vec3(3, 3, 3);
+        
+        // Add a render component
+        Component* meshRenderer = Engine.CreateComponent(ComponentType::Renderer);
+        projectile->AddComponent(meshRenderer);
+        
+        // Set the render component to a loaded resource
+        Entity* entity = (Entity*)meshRenderer->GetComponent();
+        entity->AttachMesh(projectileMesh);
+        entity->AttachMaterial(projectionMaterial);
+        
+        // Light component
+        Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
+        projectile->AddComponent(lightComponent);
+        Light* lightPtr = (Light*)lightComponent->GetComponent();
+        lightPtr->color = Colors.green + Colors.Make(0, 0.3, 0);
+        lightPtr->intensity    = 70.0;
+        lightPtr->range        = 100.0;
+        lightPtr->attenuation  = 0.01;
+        
+        // Add a physics component
+        Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
+        projectile->AddComponent(rigidBodyComponent);
+        RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+        
+        // Projectile collider
+        projectile->AddColliderSphere(projectileCollider, 0, 0, 0);
+        
+        projectile->SetMass(10);
+        projectile->SetLinearDamping(0.001);
+        projectile->SetAngularDamping(2);
+        projectile->CalculatePhysics();
+        
+        
+        // Transform the rigid body and apply force
+        rp3d::Transform newTransform;
+        newTransform.setPosition(rp3d::Vector3(startx, starty, startz));
+        
+        rp3d::Quaternion quat;
+        quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, -0.5);
+        
+        newTransform.setOrientation(quat);
+        
+        body->setTransform(newTransform);
+        projectile->AddForce(fwd.x, fwd.y, fwd.z);
+        
+        projectile->SetPosition(startx, starty, startz);
+        
+        
+        // Reset built up force
+        forceBuild = 0;
     }
     
     // Purge extra objects
