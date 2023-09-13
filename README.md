@@ -210,7 +210,9 @@ void Framework::Run() {
         // Spread offset effect on projectile angle
         float spreadMul = 0.0001;
         
-        for (int i=0; i < 1; i++) {
+        int numberOfObjectsToThrow = 3;
+        
+        for (int i=0; i < numberOfObjectsToThrow; i++) {
             
             // Apply some random physical forces
             float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
