@@ -9,6 +9,8 @@ Material::Material() :
     doBlending(false),
     doFaceCulling(true),
     
+    textureFiltration(GL_LINEAR_MIPMAP_LINEAR),
+    
     depthFunc(MATERIAL_DEPTH_LESS),
     faceWinding(GL_CCW),
     faceCullSide(GL_BACK),
@@ -22,15 +24,7 @@ Material::Material() :
     diffuse = Color(0.87, 0.87, 0.87, 1);
     
     glGenTextures(1, &mTextureBuffer);
-    glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
     
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    
-    glGenerateMipmap(GL_TEXTURE_2D);
     return;
 }
 
@@ -65,9 +59,15 @@ void Material::BindTextureSlot(unsigned int slot) {
 }
 
 void Material::UpdateTextureBuffer(void* textureData) {
-    
     glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
-    
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFiltration);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    glGenerateMipmap(GL_TEXTURE_2D);
     return;
 }

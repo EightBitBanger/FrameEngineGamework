@@ -29,6 +29,9 @@ public:
     /// State whether face culling will be used.
     bool doFaceCulling;
     
+    /// Texture interpolation
+    int textureFiltration;
+    
     /// Depth function used for rendering with the depth buffer.
     GLint depthFunc;
     /// The direction in which the triangles will be rendered.
