@@ -159,7 +159,8 @@ GLenum RenderSystem::SetRenderTarget(HWND wHndl) {
     pfd.cColorBits  = 32;
     pfd.cDepthBits  = 16;
     pfd.iLayerType  = PFD_MAIN_PLANE;
-    
+    int numberOfObjectsToThrow = 3;
+        
     // Setup pixel format
     iFormat = ChoosePixelFormat(mDeviceContext, &pfd);
     SetPixelFormat(mDeviceContext, iFormat, &pfd);
@@ -288,8 +289,14 @@ void RenderSystem::RenderFrame(float deltaTime) {
     glClearColor(0, 0, 0, 1);
     
     // Camera mouse looking
-    if (cameraMain->useMouseLook) 
+    if (cameraMain->useMouseLook) {
         cameraMain->MouseLook(deltaTime, displayCenter.x, displayCenter.y);
+    } else {
+        // Restore camera looking angle
+        cameraMain->transform.orientation.x = cameraMain->lookAngle.x;
+        cameraMain->transform.orientation.y = cameraMain->lookAngle.y;
+    }
+    
     
     glm::mat4 projection = glm::perspective( glm::radians( cameraMain->fov ), cameraMain->aspect, cameraMain->clipNear, cameraMain->clipFar);
     
@@ -342,7 +349,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
             for (unsigned int i=0; i < numberOfLights; i++) {
                 Light* lightPtr = scenePtr->GetLight(i);
                 
-                // Get the light position, attenuation and color
+                // Get the light positioncameraMain, attenuation and color
                 lightPosition[i] = lightPtr->transform.position;
                 
                 lightAttenuation[i].x = lightPtr->intensity;
@@ -369,7 +376,6 @@ void RenderSystem::RenderFrame(float deltaTime) {
         
         for (unsigned int i=0; i < entityListSz; i++) {
             
-            // Mesh binding
             Entity* currentEntity = scenePtr->GetEntity(i);
             
             Mesh* mesh = currentEntity->GetAttachedMesh();
@@ -394,7 +400,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 mCurrentMaterial->Bind();
                 mCurrentMaterial->BindTextureSlot(0);
                 
-                // Check depth testing
+                // Depth testing
                 if (mCurrentMaterial->doDepthTest) {
                     glEnable(GL_DEPTH_TEST);
                     glDepthMask(mCurrentMaterial->doDepthTest);
@@ -403,7 +409,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
                     glDisable(GL_DEPTH_TEST);
                 }
                 
-                // Check face culling and winding
+                // Face culling and winding
                 if (mCurrentMaterial->doFaceCulling) {
                     glEnable(GL_CULL_FACE);
                     glCullFace(mCurrentMaterial->faceCullSide);
@@ -412,7 +418,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
                     glDisable(GL_CULL_FACE);
                 }
                 
-                // Check blending
+                // Blending
                 if (mCurrentMaterial->doBlending) {
                     glEnable(GL_BLEND);
                     glBlendFuncSeparate(mCurrentMaterial->blendSource, mCurrentMaterial->blendDestination, mCurrentMaterial->blendAlphaSource, mCurrentMaterial->blendAlphaDestination);
