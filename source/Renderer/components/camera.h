@@ -22,6 +22,8 @@ public:
     
     /// Whether mouse look is calculated on update.
     bool useMouseLook;
+    /// Camera looking angle.
+    glm::vec2 lookAngle;
     
     /// Field of view.
     float fov;
@@ -57,7 +59,7 @@ public:
     /// Get the camera pitch angle.
     float GetPitch(void);
     /// Get the camera yaw angle.
-    float GetYaw(float pitch);
+    float GetYaw(void);
     
     
 private:

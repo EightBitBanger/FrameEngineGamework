@@ -7,6 +7,7 @@ Camera::Camera() :
     right(glm::vec3(0, 0, 0)),
     
     useMouseLook(false),
+    lookAngle(glm::vec2(0, 0)),
     
     fov(60),
     aspect(1.33),
@@ -33,16 +34,20 @@ void Camera::MouseLook(float deltaTime, int mouseResetX, int mouseResetY) {
     float MouseDiffX = (MousePos.x - mouseResetX) * MouseSensitivityYaw * deltaTime;
     float MouseDiffY = (MousePos.y - mouseResetY) * MouseSensitivityPitch * deltaTime;
     
-    transform.orientation.x += (float)MouseDiffX;
-    transform.orientation.y -= (float)MouseDiffY;
+    lookAngle.x += (float)MouseDiffX;
+    lookAngle.y -= (float)MouseDiffY;
     
     // Yaw limit
-    if (transform.orientation.x >= 0.109655)  {transform.orientation.x -= 0.109655;}
-    if (transform.orientation.x <= 0.109655)  {transform.orientation.x += 0.109655;}
+    if (lookAngle.x >= 0.109655)  {lookAngle.x -= 0.109655;}
+    if (lookAngle.x <= 0.109655)  {lookAngle.x += 0.109655;}
     
     // Pitch limit
-    if (transform.orientation.y >  0.0274f) transform.orientation.y =  0.0274f;
-    if (transform.orientation.y < -0.0274f) transform.orientation.y = -0.0274f;
+    if (lookAngle.y >  0.0274f) lookAngle.y =  0.0274f;
+    if (lookAngle.y < -0.0274f) lookAngle.y = -0.0274f;
+    
+    // Apply rotation to the transform
+    transform.orientation.x = lookAngle.x;
+    transform.orientation.y = lookAngle.y;
     
     return;
 }
@@ -51,6 +56,6 @@ float Camera::GetPitch(void) {
     return glm::degrees(glm::asin(transform.orientation.y));
 }
 
-float Camera::GetYaw(float pitch) {
-    return glm::degrees(glm::acos(transform.orientation.x / cos(glm::radians(pitch))));
+float Camera::GetYaw(void) {
+    return glm::degrees(glm::acos(transform.orientation.x / cos(glm::radians( glm::degrees(glm::asin(transform.orientation.y)) ))));
 }
