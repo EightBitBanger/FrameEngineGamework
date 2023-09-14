@@ -9,10 +9,14 @@ extern Logger               Log;
 extern EngineSystemManager  Engine;
 extern ApplicationLayer     Application;
 extern ResourceManager      Resources;
+extern Serialization        Serializer;
 extern ScriptSystem         Scripting;
 extern RenderSystem         Renderer;
 extern PhysicsSystem        Physics;
 extern InputSystem          Input;
+
+
+
 
 
 
@@ -56,9 +60,9 @@ void Framework::Start() {
     //
     // Create objects from resource tags
     barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
-    barrelMaterial->diffuse = Color(0.02, 0.02, 0.02);
+    barrelMaterial->diffuse = Color(0.02f, 0.02f, 0.02f);
     groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
-    groundMaterial->diffuse = Color(0.02, 0.02, 0.02);
+    groundMaterial->diffuse = Color(0.02f, 0.02f, 0.02f);
     
     Mesh* barrelMesh = Resources.CreateMeshFromTag("barrel");
     barrelMesh->ChangeSubMeshColor(0, Colors.white);
@@ -70,18 +74,18 @@ void Framework::Start() {
     projectileMesh->ChangeSubMeshColor(0, Colors.yellow);
     
     projectionMaterial = Resources.CreateMaterialFromTag("mat_bullet");
-    projectionMaterial->diffuse = Color(0.02, 0.02, 0.02);
+    projectionMaterial->diffuse = Color(0.02f, 0.02f, 0.02f);
     projectileCollider = Physics.CreateColliderSphere(1);
     
     
     //
     // Set the gravity vector for the simulation
-    Physics.SetWorldGravity(0, -9.81 * 2 * 2, 0);
+    Physics.SetWorldGravity(0.0f, -9.81f * 2 * 2, 0);
     
     //
     // Create a sky object
     Resources.LoadWaveFront("data/sky/sky.obj", "skyBox");
-    Resources.LoadTexture(  "data/sky/sky.png", "skyMaterial");
+    Resources.LoadTexture("data/sky/sky.png",   "skyMaterial");
     
     Mesh* skyMesh = Resources.CreateMeshFromTag("skyBox");
     Material* skyMaterial = Resources.CreateMaterialFromTag("skyMaterial");
@@ -141,56 +145,6 @@ void Framework::Start() {
     skyObject->parent = cameraController;
     
     
-    
-    //
-    // Testing transformation matrix parent chain
-    //
-    
-    
-    // Object A
-    objectA = Engine.CreateGameObject();
-    objectA->name = "testobject";
-    Component* entityRendererA = Engine.CreateComponentMeshRenderer(barrelMesh, barrelMaterial);
-    objectA->AddComponent(entityRendererA);
-    
-    // Object B
-    objectB = Engine.CreateGameObject();
-    objectB->name = "testobject";
-    Component* entityRendererB = Engine.CreateComponentMeshRenderer(barrelMesh, barrelMaterial);
-    objectB->AddComponent(entityRendererB);
-    
-    // Object C
-    objectC = Engine.CreateGameObject();
-    objectC->name = "testobject";
-    Component* entityRendererC = Engine.CreateComponentMeshRenderer(barrelMesh, barrelMaterial);
-    objectC->AddComponent(entityRendererC);
-    
-    // Object D
-    objectD = Engine.CreateGameObject();
-    objectD->name = "testobject";
-    Component* entityRendererD = Engine.CreateComponentMeshRenderer(barrelMesh, barrelMaterial);
-    objectD->AddComponent(entityRendererD);
-    
-    Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
-    objectD->AddComponent(lightComponent);
-    Light* lightPtr = (Light*)lightComponent->GetComponent();
-    lightPtr->color = Colors.white;
-    lightPtr->intensity    = 300.0;
-    lightPtr->range        = 10000.0;
-    lightPtr->attenuation  = 0.001;
-    
-    
-    
-    
-    objectB->parent = objectA;
-    objectC->parent = objectB;
-    objectD->parent = objectC;
-    
-    objectA->transform.position = glm::vec3(0, 10, 0);
-    objectB->transform.position = glm::vec3(10, 10, 0);
-    objectC->transform.position = glm::vec3(10, 10, 0);
-    objectD->transform.position = glm::vec3(10, 10, 0);
-    
     return;
 }
 
@@ -201,7 +155,7 @@ void Framework::Start() {
 
 
 //
-// Application main loop
+// Application loop
 //
 
 // Projectile shoot force
@@ -212,6 +166,10 @@ float cameraSpeed     = 13000;
 
 float forceBuild    = 0;
 float forceBuildMax = 1000;
+
+float cameraDirection=0;
+float cameraPitch=0;
+
 
 
 void Framework::Run() {
@@ -245,7 +203,7 @@ void Framework::Run() {
         Input.SetMouseLeftReleased(false);
         
         // Spread offset effect on projectile angle
-        float spreadMul = 0.0001;
+        float spreadMul = 0.0001f;
         
         // Apply some random physical forces
         float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
@@ -294,10 +252,10 @@ void Framework::Run() {
         Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
         projectile->AddComponent(lightComponent);
         Light* lightPtr = (Light*)lightComponent->GetComponent();
-        lightPtr->color = Colors.green + Colors.Make(0, 0.3, 0);
-        lightPtr->intensity    = 70.0;
-        lightPtr->range        = 100.0;
-        lightPtr->attenuation  = 0.01;
+        lightPtr->color = Colors.green + Colors.Make(0.0f, 0.3f, 0.0f);
+        lightPtr->intensity    = 70.0f;
+        lightPtr->range        = 100.0f;
+        lightPtr->attenuation  = 0.01f;
         
         // Add a physics component
         Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
@@ -318,7 +276,7 @@ void Framework::Run() {
         newTransform.setPosition(rp3d::Vector3(startx, starty, startz));
         
         rp3d::Quaternion quat;
-        quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, -0.5);
+        quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, -0.5f);
         
         newTransform.setOrientation(quat);
         
@@ -352,25 +310,20 @@ void Framework::Run() {
     // Escape key pause
     
     if (Input.CheckKeyPressed(VK_ESCAPE)) {
-        // Uncomment to make the escape key close the application
-        //Application.isActive = false;
-        //return;
         
         Application.Pause();
         
         if (Application.isPaused) {
             
-            if (Renderer.cameraMain != nullptr) 
-                Renderer.cameraMain->DisableMouseLook();
+            Renderer.cameraMain->DisableMouseLook();
+            ShowCursor(true);
             
             Input.ClearKeys();
         } else {
             
-            if (Renderer.cameraMain != nullptr) {
-                // Reset the camera`s mouse reset position
-                Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
-                Renderer.cameraMain->EnableMouseLook();
-            }
+            Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            Renderer.cameraMain->EnableMouseLook();
+            ShowCursor(false);
             
             Time.Update();
             PhysicsTime.Update();
@@ -388,8 +341,6 @@ void Framework::Shutdown(void) {
     
     return;
 }
-
-
 
 
 

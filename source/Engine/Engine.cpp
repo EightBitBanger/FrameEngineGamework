@@ -6,6 +6,7 @@ Logger            Log;
 Timer             PhysicsTime;
 Timer             Time;
 
+Serialization     Serializer;
 ResourceManager   Resources;
 PhysicsSystem     Physics;
 RenderSystem      Renderer;

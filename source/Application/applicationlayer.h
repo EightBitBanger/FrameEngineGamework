@@ -6,6 +6,7 @@
 #include "../Renderer/RenderSystem.h"
 #include "../Input/InputSystem.h"
 #include "../Physics/PhysicsSystem.h"
+#include "../Serialization/Serialization.h"
 #include "../Resources/ResourceManager.h"
 #include "../Scripting/ScriptSystem.h"
 #include "../Audio/AudioSystem.h"
@@ -46,7 +47,7 @@ public:
     /// Toggle freezing the application loop.
     void Pause(void);
     
-    /// Create the window handle and return its handle.
+    /// Create the window and return its handle.
     HWND CreateWindowHandle(std::string className, std::string windowName, HWND parentHandle = NULL);
     
     /// Destroy the window handle.

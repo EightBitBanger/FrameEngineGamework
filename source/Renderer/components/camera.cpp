@@ -23,8 +23,8 @@ Camera::Camera() :
 }
 
 void Camera::SetMouseCenter(int mouseResetX, int mouseResetY) {CursorSetPosition(mouseResetX, mouseResetY);}
-void Camera::EnableMouseLook(void)  {ShowCursor(false); useMouseLook = true;}
-void Camera::DisableMouseLook(void) {ShowCursor(true); useMouseLook = false;}
+void Camera::EnableMouseLook(void)  {useMouseLook = true;}
+void Camera::DisableMouseLook(void) {useMouseLook = false;}
 
 void Camera::MouseLook(float deltaTime, int mouseResetX, int mouseResetY) {
     
