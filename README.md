@@ -4,7 +4,7 @@
 - ⁯⁮⁭Audio (Considering openAL)
 - <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Resource%E2%80%89Management">Resource management</a>⁭
 - <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Input%E2%80%89System">Input handling</a>⁭
-- <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Serialization%E2%80%89System">Serialization</a>⁭
+- <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Serialzation%E2%80%89System">Serialization</a>⁭
 
 <br><br/>
 ## Screenshots
