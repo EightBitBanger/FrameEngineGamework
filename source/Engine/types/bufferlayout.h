@@ -19,7 +19,8 @@ struct Vertex {
     
     Vertex(float xx, float yy, float zz, float rr, float gg, float bb, float nxx, float nyy, float nzz, float uu, float vv);
     
-    void operator= (const Vertex& vertex);
+    void operator=  (const Vertex& vertex);
+    void operator+= (const Vertex& vertex);
     
 };
 

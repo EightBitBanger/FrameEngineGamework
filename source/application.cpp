@@ -114,44 +114,85 @@ void Framework::Start() {
     skyObject->parent = cameraController;
     
     
+    
+    
+    Resources.LoadShaderGLSL("data/color.shader", "surface");
+    Shader* chunkShader = Resources.CreateShaderFromTag("surface");
+    if (chunkShader == nullptr) {
+        Application.isActive = false;
+    }
+    
+    
+    
+    
+    
+    
     float chunkSz = 100;
     
     
     
     
+    float noiseX    = 0.02f;
+    float noiseZ    = 0.02f;
+    float noiseMul  = 30.0;
     
-    
-    
-    
-    
-    
-    
-    
-    float noiseWidth  = 0.1f;
-    float noiseHeight = 0.1f;
-    float noiseMul    = 2.0;
-    
-    int areaWidth  = 50;
-    int areaHeight = 50;
+    int areaWidth  = 10;
+    int areaHeight = 10;
     
     
     for (int z=0; z < areaHeight; z++) {
         
         for (int x=0; x < areaWidth; x++) {
             
+            //
+            // Generate chunk
+            //
+            
             Mesh* chunkMesh = Resources.CreateMeshFromTag("chunk");
-            Material* chunkMaterial = Resources.CreateMaterialFromTag("mat_chunk");
             
-            float noiseX = x * noiseWidth;
-            float noiseZ = z * noiseHeight;
-            
+            Material* chunkMaterial = Renderer.CreateMaterial();
+            chunkMaterial->SetShader( chunkShader );
             
             
-            float newColor = Random.Perlin(x * noiseWidth, 0, z * noiseHeight) * noiseMul;
+            float chunkX = x;
+            float chunkZ = z;
+            
+            unsigned int numberOfVerts = chunkMesh->GetNumberOfVertices();
+            Color colorBuffer[numberOfVerts];
+            
+            for (unsigned int i=0; i < numberOfVerts; i++) {
+                
+                Color colorTotal;
+                float noiseTotal = 0;
+                
+                Vertex vertex = chunkMesh->GetVertex(i);
+                
+                float xCoord = (vertex.x * noiseX) + (chunkX * noiseX);
+                float zCoord = (vertex.z * noiseZ) + (chunkZ * noiseZ);
+                
+                noiseTotal = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
+                
+                vertex.y = noiseTotal;
+                
+                
+                //colorBuffer[i] = Colors.MakeRandom();
+                
+                vertex.r = Random.Range(0, 10) * 0.07;
+                vertex.g = Random.Range(0, 10) * 0.07;
+                vertex.b = Random.Range(0, 10) * 0.07;
+                
+                
+                chunkMesh->SetVertex(i, vertex);
+            }
+            
+            chunkMesh->UpdateMesh();
+            
+            //chunkMaterial->diffuse = Colors.MakeRandom();
+            //chunkMaterial->width  = 100;
+            //chunkMaterial->height = 100;
+            //chunkMaterial->UpdateTextureBuffer( (void*)colorBuffer );
             
             
-            
-            chunkMaterial->diffuse = Color(newColor, newColor, newColor);
             
             GameObject* newChunk = Engine.CreateGameObject();
             newChunk->AddComponent( Engine.CreateComponentMeshRenderer(chunkMesh, chunkMaterial) );

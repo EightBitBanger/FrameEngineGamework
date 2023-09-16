@@ -423,3 +423,14 @@ unsigned int Mesh::GetNumberOfIndices(void) {
 unsigned int Mesh::GetNumberOfVertices(void) {
     return mVertexBuffer.size();
 }
+
+
+Vertex Mesh::GetVertex(unsigned int index) {
+    return mVertexBuffer[index];
+}
+
+void Mesh::SetVertex(unsigned int index, Vertex vertex) {
+    mVertexBuffer[index] = vertex;
+    return;
+}
+

@@ -4,6 +4,7 @@
 #define GLEW_STATIC
 #include <gl/glew.h>
 
+#include "shader.h"
 #include "../../engine/types/color.h"
 #include "../enumerators.h"
 
@@ -87,9 +88,16 @@ public:
     /// Reupload the texture buffer onto the GPU.
     void UpdateTextureBuffer(void* textureData);
     
+    /// Set the current shader for this material.
+    Shader* GetShader(void);
+    /// Set the current shader for this material.
+    void SetShader(Shader* shader);
+    
 private:
     
     unsigned int mTextureBuffer;
+    
+    Shader* shader;
     
 };
 

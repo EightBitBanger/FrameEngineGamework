@@ -31,6 +31,21 @@ void Vertex::operator= (const Vertex& vertex) {
     return;
 }
 
+void Vertex::operator+= (const Vertex& vertex) {
+    x += vertex.x;    // Position
+    y += vertex.y;
+    z += vertex.z;
+    r += vertex.r;    // Color
+    g += vertex.g;
+    b += vertex.b;
+    nx += vertex.nx;  // Normals
+    ny += vertex.ny;
+    nz += vertex.nz;
+    u += vertex.u;    // Texture UV
+    v += vertex.v;
+    return;
+}
+
 Index::Index(unsigned int value) : 
     
     index(value)

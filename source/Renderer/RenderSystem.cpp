@@ -329,7 +329,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
     if (currentPipeline == nullptr) 
         return;
     
-    // Prepare the shader
+    // Set the default shader
     Shader* currentShader = currentPipeline->currentShader;
     currentShader->Bind();
     currentShader->SetProjectionMatrix( viewProjection );
@@ -400,8 +400,9 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 mCurrentMesh->Bind();
             }
             
-            
+            //
             // Material binding
+            //
             Material* materialPtr = currentEntity->GetAttachedMaterial();
             if (materialPtr == nullptr) 
                 continue;
@@ -438,11 +439,27 @@ void RenderSystem::RenderFrame(float deltaTime) {
                     glDisable(GL_BLEND);
                 }
                 
+                
+                //
+                // Shader binding
+                //
+                Shader* shaderPtr = materialPtr->GetShader();
+                if (shaderPtr != nullptr) {
+                    if (currentShader != shaderPtr) {
+                        currentShader = shaderPtr;
+                        currentShader->Bind();
+                        
+                        currentShader->SetProjectionMatrix( viewProjection );
+                        currentShader->SetCameraPosition(eye);
+                    }
+                }
+                
                 // Apply material to shader
                 currentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
                 currentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
                 currentShader->SetTextureSampler(0);
             }
+            
             
             currentShader->SetModelMatrix(currentEntity->transform.matrix);
             
