@@ -31,7 +31,6 @@ EngineSystemManager::EngineSystemManager(void) :
 
 GameObject* EngineSystemManager::CreateGameObject(void) {
     GameObject* newGameObject = mGameObjects.Create();
-    // Add object to the active objects list
     mGameObjectActive.push_back(newGameObject);
     return newGameObject;
 }
@@ -239,15 +238,9 @@ void EngineSystemManager::Update(void) {
             // Roll over the parent matrix transform chain
             for (unsigned int i=0; i < 100; i++) {
                 
-                currentTransform.position  += parent->transform.position;
-                currentTransform.scale     *= parent->transform.scale;
-                
-                // Sus O_o
-                if (i % 2 == 0) {
-                    currentTransform.orientation *= glm::inverse(parent->transform.orientation);
-                } else {
-                    currentTransform.orientation *= parent->transform.orientation;
-                }
+                currentTransform.position    += parent->transform.position;
+                currentTransform.scale       *= parent->transform.scale;
+                currentTransform.orientation *= parent->transform.orientation;
                 
                 parent = parent->parent;
                 if (parent == nullptr) 

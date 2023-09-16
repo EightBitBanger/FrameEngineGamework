@@ -1,5 +1,6 @@
 #include "Engine/Engine.h"
 
+
 extern RandomGen            Random;
 extern ColorPreset          Colors;
 extern Timer                Time;
@@ -16,16 +17,10 @@ extern PhysicsSystem        Physics;
 extern InputSystem          Input;
 
 
-
-
-
-
 // Global resource pointers
 Mesh*           projectileMesh;
 
 Material*       projectionMaterial;
-Material*       barrelMaterial;
-Material*       groundMaterial;
 
 GameObject*     cameraController;
 GameObject*     skyObject;
@@ -43,29 +38,24 @@ GameObject* objectD;
 // Application entry point
 //
 
+
+
 void Framework::Start() {
     
     // Load some external resources
-    Resources.LoadWaveFront("data/barrel/barrel.obj", "barrel");
-    Resources.LoadTexture("data/barrel/barrel.png", "mat_barrel");
-    Resources.LoadTexture("data/grassy.png", "mat_grassy");
-    Resources.LoadTexture("data/skull.png",  "mat_skull");
+    Resources.LoadWaveFront("data/chunk.obj", "chunk");
+    Resources.LoadTexture("data/chunk.png", "mat_chunk");
     
-    Resources.LoadWaveFront("data/marine.obj", "marine");
     Resources.LoadWaveFront("data/projectile/projectile.obj", "bullet");
-    Resources.LoadWaveFront("data/skull.obj", "skull");
-    
     Resources.LoadTexture("data/projectile/projectile.png", "mat_bullet");
     
-    //
-    // Create objects from resource tags
-    barrelMaterial = Resources.CreateMaterialFromTag("mat_barrel");
-    barrelMaterial->diffuse = Color(0.02f, 0.02f, 0.02f);
-    groundMaterial = Resources.CreateMaterialFromTag("mat_grassy");
-    groundMaterial->diffuse = Color(0.02f, 0.02f, 0.02f);
     
-    Mesh* barrelMesh = Resources.CreateMeshFromTag("barrel");
-    barrelMesh->ChangeSubMeshColor(0, Colors.white);
+    
+    
+    
+    
+    
+    
     
     //
     // Projectile object
@@ -75,12 +65,17 @@ void Framework::Start() {
     
     projectionMaterial = Resources.CreateMaterialFromTag("mat_bullet");
     projectionMaterial->diffuse = Color(0.02f, 0.02f, 0.02f);
+    
     projectileCollider = Physics.CreateColliderSphere(1);
+    
+    
     
     
     //
     // Set the gravity vector for the simulation
     Physics.SetWorldGravity(0.0f, -9.81f * 2 * 2, 0);
+    
+    
     
     //
     // Create a sky object
@@ -97,52 +92,104 @@ void Framework::Start() {
     
     skyObject->transform.SetScale(10000,10000,10000);
     
-    //
-    // Create a ground plain
-    Mesh* groundMesh = Renderer.CreateMesh();
-    groundMesh->AddPlainSubDivided(-100, 0, -100, 10, 10, Colors.white, 100, 100);
-    
-    GameObject* ground = Engine.CreateGameObject();
-    ground->name = "world";
-    
-    // Add a render component
-    Component* groundRenderer = Engine.CreateComponentMeshRenderer(groundMesh, groundMaterial);
-    ground->AddComponent(groundRenderer);
-    
-    // Add a physics component
-    Component* groundRigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
-    ground->AddComponent(groundRigidBodyComponent);
-    ground->SetStatic();
-    
-    // Lock the ground plain in place
-    ground->SetLinearAxisLockFactor(0, 0, 0);
-    ground->SetAngularAxisLockFactor(0, 0, 0);
-    
-    // Ground collider
-    rp3d::Vector3 groundScale = rp3d::Vector3(100000, 10, 100000);
-    BoxShape* groundCollider = Physics.CreateColliderBox(groundScale.x, groundScale.y, groundScale.z);
-    ground->AddColliderBox(groundCollider, -(groundScale.x / 2), -10, -(groundScale.z / 2));
     
     
     
     //
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(glm::vec3(-50, 20, 0));
+    cameraController = Engine.CreateCameraController(glm::vec3(0, 10, 0));
     cameraController->SetLinearDamping(1);
     cameraController->SetMass(40);
     
-    // Camera physics
-    cameraController->CalculatePhysics();
-    cameraController->EnableGravity(false);
     
+    // Camera physics
     BoxShape* boxShape = Physics.CreateColliderBox(1, 8, 1);
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
-    
     cameraController->CalculatePhysics();
+    
+    cameraController->EnableGravity(false);
     cameraController->SetLinearDamping(3);
     
     // Sky will follow the camera parent object
     skyObject->parent = cameraController;
+    
+    
+    float chunkSz = 100;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    float noiseWidth  = 0.1f;
+    float noiseHeight = 0.1f;
+    float noiseMul    = 2.0;
+    
+    int areaWidth  = 50;
+    int areaHeight = 50;
+    
+    
+    for (int z=0; z < areaHeight; z++) {
+        
+        for (int x=0; x < areaWidth; x++) {
+            
+            Mesh* chunkMesh = Resources.CreateMeshFromTag("chunk");
+            Material* chunkMaterial = Resources.CreateMaterialFromTag("mat_chunk");
+            
+            float noiseX = x * noiseWidth;
+            float noiseZ = z * noiseHeight;
+            
+            
+            
+            float newColor = Random.Perlin(x * noiseWidth, 0, z * noiseHeight) * noiseMul;
+            
+            
+            
+            chunkMaterial->diffuse = Color(newColor, newColor, newColor);
+            
+            GameObject* newChunk = Engine.CreateGameObject();
+            newChunk->AddComponent( Engine.CreateComponentMeshRenderer(chunkMesh, chunkMaterial) );
+            
+            newChunk->isActive = true;
+            
+            // Add a physics component
+            newChunk->AddComponent( Engine.CreateComponent(ComponentType::RigidBody) );
+            
+            // Lock in place
+            newChunk->SetStatic();
+            newChunk->SetLinearAxisLockFactor(0, 0, 0);
+            newChunk->SetAngularAxisLockFactor(0, 0, 0);
+            
+            // Collider
+            BoxShape* chunkCollider = Physics.CreateColliderBox(chunkSz, 10, chunkSz);
+            newChunk->AddColliderBox(chunkCollider, 0, -10, 0);
+            
+            
+            newChunk->SetPosition((x * chunkSz) - ((areaWidth/2) * chunkSz), 0.0f, (z * chunkSz) - ((areaHeight/2) * chunkSz));
+            newChunk->transform.SetScale(1, 1, 1);
+            
+            
+            //const int nbVertices = 8;
+            //const int nbTriangles = 12;
+            //float vertices [3 * nbVertices ] = ...;
+            //int indices [3 * nbTriangles ] = ...;
+            //TriangleVertexArray * triangleArray =
+            //new TriangleVertexArray ( nbVertices , vertices , 3 * sizeof (
+            //float ) , nbTriangles ,
+            //indices , 3 * sizeof ( int ) ,
+            //TriangleVertexArray :: VertexDataType :: VERTEX_FLOAT_TYPE ,
+            //TriangleVertexArray :: IndexDataType :: INDEX_INTEGER_TYPE ) ;
+            
+        }
+    }
+    
+    
     
     
     return;
@@ -154,23 +201,23 @@ void Framework::Start() {
 
 
 
-//
-// Application loop
-//
+
+
 
 // Projectile shoot force
 float projectileSpeed = 700;
 
 // Camera movement force
-float cameraSpeed     = 13000;
+float cameraSpeed     = 80000;
 
 float forceBuild    = 0;
 float forceBuildMax = 1000;
 
-float cameraDirection=0;
-float cameraPitch=0;
 
 
+//
+// Application loop
+//
 
 void Framework::Run() {
     
@@ -190,7 +237,14 @@ void Framework::Run() {
     
     cameraController->AddForce(force.x, force.y, force.z);
     
+    
+    
+    
+    
+    //
     // Shoot object from camera
+    //
+    
     if (Input.CheckMouseLeftPressed()) {
         if (forceBuild < forceBuildMax) {
             forceBuild += 0.87;
@@ -290,21 +344,6 @@ void Framework::Run() {
         forceBuild = 0;
     }
     
-    // Purge extra objects
-    unsigned int index=0;
-    
-    while (Engine.GetGameObjectCount() > 200) {
-        
-        GameObject* gameObject = Engine.GetGameObject(index);
-        index++;
-        
-        // Cull projectile objects
-        if (gameObject->name != "projectile") 
-            continue;
-        
-        Engine.DestroyGameObject(gameObject);
-        index = 0;
-    }
     
     
     // Escape key pause

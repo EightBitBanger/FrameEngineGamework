@@ -317,6 +317,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
     angle.x = cameraMain->transform.position.x + cameraMain->forward.x;
     angle.y = cameraMain->transform.position.y + cameraMain->forward.y;
     angle.z = cameraMain->transform.position.z + cameraMain->forward.z;
+    
     glm::mat4 view = glm::lookAt(eye, angle, cameraMain->up);
     glm::mat4 viewProjection = projection * view;
     
@@ -328,19 +329,25 @@ void RenderSystem::RenderFrame(float deltaTime) {
     if (currentPipeline == nullptr) 
         return;
     
+    // Prepare the shader
     Shader* currentShader = currentPipeline->currentShader;
     currentShader->Bind();
     currentShader->SetProjectionMatrix( viewProjection );
     
     currentShader->SetCameraPosition(eye);
     
-    
+    //
     // Run through the scenes
+    //
+    
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
         
         Scene* scenePtr = *it;
         
+        //
         // Check to update the scene light list
+        //
+        
         if (scenePtr->doUpdateLights) {
             numberOfLights = scenePtr->GetLightQueueSize();
             if (numberOfLights > RENDER_NUMBER_OF_LIGHTS) numberOfLights = RENDER_NUMBER_OF_LIGHTS;
@@ -349,7 +356,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
             for (unsigned int i=0; i < numberOfLights; i++) {
                 Light* lightPtr = scenePtr->GetLight(i);
                 
-                // Get the light positioncameraMain, attenuation and color
+                // Get the light position, attenuation and color
                 lightPosition[i] = lightPtr->transform.position;
                 
                 lightAttenuation[i].x = lightPtr->intensity;
@@ -371,29 +378,34 @@ void RenderSystem::RenderFrame(float deltaTime) {
             
         }
         
+        //
         // Render entities
+        //
+        
         unsigned int entityListSz = scenePtr->GetEntityQueueSize();
         
         for (unsigned int i=0; i < entityListSz; i++) {
             
             Entity* currentEntity = scenePtr->GetEntity(i);
             
+            
+            // Mesh binding
             Mesh* mesh = currentEntity->GetAttachedMesh();
             if (mesh == nullptr) 
                 continue;
             
-            // Mesh binding
             if (mCurrentMesh != mesh) {
                 mCurrentMesh = mesh;
                 
                 mCurrentMesh->Bind();
             }
             
+            
+            // Material binding
             Material* materialPtr = currentEntity->GetAttachedMaterial();
             if (materialPtr == nullptr) 
                 continue;
             
-            // Material binding
             if (mCurrentMaterial != materialPtr) {
                 mCurrentMaterial = materialPtr;
                 
@@ -426,6 +438,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
                     glDisable(GL_BLEND);
                 }
                 
+                // Apply material to shader
                 currentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
                 currentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
                 currentShader->SetTextureSampler(0);

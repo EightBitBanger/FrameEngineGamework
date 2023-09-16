@@ -415,3 +415,11 @@ void Mesh::UpdateMesh(void) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0], GL_DYNAMIC_DRAW);
     return;
 }
+
+unsigned int Mesh::GetNumberOfIndices(void) {
+    return mIndexBuffer.size();
+}
+
+unsigned int Mesh::GetNumberOfVertices(void) {
+    return mVertexBuffer.size();
+}

@@ -3,12 +3,10 @@
 
 Transform::Transform() : 
     
-    position(glm::vec3(0, 0, 0)),
-    orientation(glm::quat(0, 0, 0, 1)),
-    scale(glm::vec3(1, 1, 1)),
-    
-    matrix(glm::mat4(1))
+    matrix(glm::mat4(1)) 
 {
+    
+    SetIdentity();
 }
 
 void Transform::operator= (const Transform& transform) {

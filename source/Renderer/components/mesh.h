@@ -95,6 +95,11 @@ public:
     /// Fully re-upload the vertex buffer into the GPU buffer.
     void UpdateMesh(void);
     
+    /// Get the number of index locations in the index buffer.
+    unsigned int GetNumberOfIndices(void);
+    /// Get the number of vertex locations in the vertex buffer.
+    unsigned int GetNumberOfVertices(void);
+    
     
 private:
     

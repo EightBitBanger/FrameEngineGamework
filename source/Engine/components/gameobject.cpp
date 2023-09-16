@@ -22,7 +22,6 @@ GameObject::GameObject() :
 void GameObject::AddComponent(Component* component) {
     assert(component != nullptr);
     
-    //
     // Cache the component objects
     
     // Rigid body component
@@ -81,6 +80,7 @@ Component* GameObject::FindComponent(ComponentType component_type) {
 Component* GameObject::GetComponent(unsigned int index) {
     assert(index < mComponentList.size());
     return mComponentList[index];
+    
 }
 
 unsigned int GameObject::GetComponentCount(void) {
