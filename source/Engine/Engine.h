@@ -6,6 +6,7 @@
 #include "../application/applicationlayer.h"
 #include "../../tests/framework.h"
 
+#include "../Math/Math.h"
 #include "../Renderer/components/entity.h"
 #include "../Scripting/components/script.h"
 #include "../Renderer/components/camera.h"

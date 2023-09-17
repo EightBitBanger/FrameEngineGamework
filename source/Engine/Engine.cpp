@@ -13,6 +13,7 @@ RenderSystem      Renderer;
 AudioSystem       Audio;
 ScriptSystem      Scripting;
 InputSystem       Input;
+MathCore          Math;
 
 ApplicationLayer      Application;
 EngineSystemManager   Engine;

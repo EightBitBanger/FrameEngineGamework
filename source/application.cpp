@@ -15,7 +15,7 @@ extern ScriptSystem         Scripting;
 extern RenderSystem         Renderer;
 extern PhysicsSystem        Physics;
 extern InputSystem          Input;
-
+extern MathCore             Math;
 
 // Global resource pointers
 Mesh*           projectileMesh;
@@ -27,18 +27,23 @@ GameObject*     skyObject;
 
 rp3d::SphereShape* projectileCollider;
 
-GameObject* objectA;
-GameObject* objectB;
-GameObject* objectC;
-GameObject* objectD;
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 //
 // Application entry point
 //
-
-
 
 void Framework::Start() {
     
@@ -132,12 +137,22 @@ void Framework::Start() {
     
     
     
-    float noiseX    = 0.02f;
-    float noiseZ    = 0.02f;
-    float noiseMul  = 30.0;
+    float noiseX    = 0.008;
+    float noiseZ    = 0.008;
+    float noiseMul  = 70.0;
     
-    int areaWidth  = 10;
-    int areaHeight = 10;
+    int areaWidth  = 30;
+    int areaHeight = 30;
+    
+    Color biomeHigh = Colors.green;
+    Color biomeLow  = Colors.green;
+    
+    biomeHigh *= Color(0.1, 0.1, 0.1);
+    biomeLow  *= Color(0.03, 0.03, 0.03);
+    
+    
+    
+    
     
     
     for (int z=0; z < areaHeight; z++) {
@@ -145,7 +160,7 @@ void Framework::Start() {
         for (int x=0; x < areaWidth; x++) {
             
             //
-            // Generate chunk
+            // Generate new chunk
             //
             
             Mesh* chunkMesh = Resources.CreateMeshFromTag("chunk");
@@ -153,44 +168,61 @@ void Framework::Start() {
             Material* chunkMaterial = Renderer.CreateMaterial();
             chunkMaterial->SetShader( chunkShader );
             
+            // Chunk position
+            float chunkX = x * 100;
+            float chunkZ = z * 100;
             
-            float chunkX = x;
-            float chunkZ = z;
+            unsigned int vertexCount = chunkMesh->GetNumberOfVertices();
             
-            unsigned int numberOfVerts = chunkMesh->GetNumberOfVertices();
-            Color colorBuffer[numberOfVerts];
             
-            for (unsigned int i=0; i < numberOfVerts; i++) {
-                
-                Color colorTotal;
-                float noiseTotal = 0;
+            //biomeHigh = Colors.MakeRandom();
+            //biomeLow  = Colors.MakeRandom();
+            
+            
+            //
+            // Perlin noise generation
+            //
+            
+            for (unsigned int i=0; i < vertexCount; i++) {
                 
                 Vertex vertex = chunkMesh->GetVertex(i);
                 
                 float xCoord = (vertex.x * noiseX) + (chunkX * noiseX);
                 float zCoord = (vertex.z * noiseZ) + (chunkZ * noiseZ);
                 
-                noiseTotal = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
-                
-                vertex.y = noiseTotal;
+                float noiseTotal = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
                 
                 
-                //colorBuffer[i] = Colors.MakeRandom();
+                if (noiseTotal < 0) noiseTotal  = 0;
+                if (noiseTotal > 50) noiseTotal = 50;
                 
-                vertex.r = Random.Range(0, 10) * 0.07;
-                vertex.g = Random.Range(0, 10) * 0.07;
-                vertex.b = Random.Range(0, 10) * 0.07;
                 
+                vertex.y = Math.Round(noiseTotal);
+                
+                Color colorTotal;
+                colorTotal.r = Math.Lerp(biomeLow.r, biomeHigh.r, noiseTotal * 0.01);
+                colorTotal.g = Math.Lerp(biomeLow.g, biomeHigh.g, noiseTotal * 0.01);
+                colorTotal.b = Math.Lerp(biomeLow.b, biomeHigh.b, noiseTotal * 0.01);
+                
+                
+                vertex.r = colorTotal.r;
+                vertex.g = colorTotal.g;
+                vertex.b = colorTotal.b;
                 
                 chunkMesh->SetVertex(i, vertex);
+                
+                continue;
             }
+            
+            
+            
             
             chunkMesh->UpdateMesh();
             
-            //chunkMaterial->diffuse = Colors.MakeRandom();
-            //chunkMaterial->width  = 100;
-            //chunkMaterial->height = 100;
-            //chunkMaterial->UpdateTextureBuffer( (void*)colorBuffer );
+            SubMesh newColliderMesh;
+            chunkMesh->CopySubMesh(0, newColliderMesh);
+            
+            
             
             
             
@@ -215,17 +247,19 @@ void Framework::Start() {
             newChunk->SetPosition((x * chunkSz) - ((areaWidth/2) * chunkSz), 0.0f, (z * chunkSz) - ((areaHeight/2) * chunkSz));
             newChunk->transform.SetScale(1, 1, 1);
             
+            /*
             
-            //const int nbVertices = 8;
-            //const int nbTriangles = 12;
-            //float vertices [3 * nbVertices ] = ...;
-            //int indices [3 * nbTriangles ] = ...;
-            //TriangleVertexArray * triangleArray =
-            //new TriangleVertexArray ( nbVertices , vertices , 3 * sizeof (
-            //float ) , nbTriangles ,
-            //indices , 3 * sizeof ( int ) ,
-            //TriangleVertexArray :: VertexDataType :: VERTEX_FLOAT_TYPE ,
-            //TriangleVertexArray :: IndexDataType :: INDEX_INTEGER_TYPE ) ;
+            rp3d::TriangleVertexArray* triangleArray;
+            triangleArray = new rp3d::TriangleVertexArray(nbVertices,
+                                                          vertices,
+                                                          3 * sizeof(float),
+                                                          nbTriangles,
+                                                          indices,
+                                                          sizeof(unsigned int),
+                                                          rp3d::TriangleVertexArray :: VertexDataType :: VERTEX_FLOAT_TYPE,
+                                                          rp3d::TriangleVertexArray :: IndexDataType :: INDEX_INTEGER_TYPE);
+            
+            */
             
         }
     }
@@ -249,7 +283,7 @@ void Framework::Start() {
 float projectileSpeed = 700;
 
 // Camera movement force
-float cameraSpeed     = 80000;
+float cameraSpeed     = 40000;
 
 float forceBuild    = 0;
 float forceBuildMax = 1000;
@@ -279,111 +313,6 @@ void Framework::Run() {
     cameraController->AddForce(force.x, force.y, force.z);
     
     
-    
-    
-    
-    //
-    // Shoot object from camera
-    //
-    
-    if (Input.CheckMouseLeftPressed()) {
-        if (forceBuild < forceBuildMax) {
-            forceBuild += 0.87;
-        } else {
-            forceBuild = forceBuildMax;
-        }
-    }
-    
-    if (Input.CheckMouseLeftReleased()) {
-        Input.SetMouseLeftReleased(false);
-        
-        // Spread offset effect on projectile angle
-        float spreadMul = 0.0001f;
-        
-        // Apply some random physical forces
-        float offsetx = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-        float offsety = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-        float offsetz = (Random.Range(0, 100) - Random.Range(0, 100)) * spreadMul;
-        
-        
-        //
-        // Calculate projectile force from camera forward angle
-        
-        glm::vec3 fwd = Renderer.cameraMain->forward;
-        glm::vec3 fwdAngle = Renderer.cameraMain->forward;
-        
-        // Offset starting distance from camera
-        fwd *= 9;
-        
-        glm::vec3 pos(0);
-        pos = Renderer.cameraMain->transform.GetPosition();
-        pos += fwd;
-        
-        // Total forward force
-        fwd *= projectileSpeed * forceBuild;
-        
-        // Camera height offset
-        float fireFromHeightOffset = -2;
-        
-        float startx = pos.x + offsetx;
-        float starty = pos.y + offsety + fireFromHeightOffset;
-        float startz = pos.z + offsetz;
-        
-        
-        GameObject* projectile = Engine.CreateGameObject();
-        projectile->name = "projectile";
-        projectile->transform.scale = glm::vec3(3, 3, 3);
-        
-        // Add a render component
-        Component* meshRenderer = Engine.CreateComponent(ComponentType::Renderer);
-        projectile->AddComponent(meshRenderer);
-        
-        // Set the render component to a loaded resource
-        Entity* entity = (Entity*)meshRenderer->GetComponent();
-        entity->AttachMesh(projectileMesh);
-        entity->AttachMaterial(projectionMaterial);
-        
-        // Light component
-        Component* lightComponent = Engine.CreateComponent(ComponentType::Light);
-        projectile->AddComponent(lightComponent);
-        Light* lightPtr = (Light*)lightComponent->GetComponent();
-        lightPtr->color = Colors.green + Colors.Make(0.0f, 0.3f, 0.0f);
-        lightPtr->intensity    = 70.0f;
-        lightPtr->range        = 100.0f;
-        lightPtr->attenuation  = 0.01f;
-        
-        // Add a physics component
-        Component* rigidBodyComponent = Engine.CreateComponent(ComponentType::RigidBody);
-        projectile->AddComponent(rigidBodyComponent);
-        RigidBody* body = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
-        
-        // Projectile collider
-        projectile->AddColliderSphere(projectileCollider, 0, 0, 0);
-        
-        projectile->SetMass(10);
-        projectile->SetLinearDamping(0.001);
-        projectile->SetAngularDamping(2);
-        projectile->CalculatePhysics();
-        
-        
-        // Transform the rigid body and apply force
-        rp3d::Transform newTransform;
-        newTransform.setPosition(rp3d::Vector3(startx, starty, startz));
-        
-        rp3d::Quaternion quat;
-        quat.setAllValues(fwdAngle.x + offsetx, fwdAngle.y + offsety, fwdAngle.z + offsetz, -0.5f);
-        
-        newTransform.setOrientation(quat);
-        
-        body->setTransform(newTransform);
-        projectile->AddForce(fwd.x, fwd.y, fwd.z);
-        
-        projectile->SetPosition(startx, starty, startz);
-        
-        
-        // Reset built up force
-        forceBuild = 0;
-    }
     
     
     

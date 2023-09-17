@@ -12,6 +12,7 @@
 //
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/compatibility.hpp>
 
 
 // Graphical user interfacing by ImGUI

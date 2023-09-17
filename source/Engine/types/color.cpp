@@ -57,6 +57,19 @@ Color Color::operator= (const Color& color) {
     return newColor;
 }
 
+Color Color::operator*= (const Color& color) {
+    Color newColor;
+    r *= color.r;
+    g *= color.g;
+    b *= color.b;
+    a *= color.a;
+    newColor.r *= r;
+    newColor.g *= g;
+    newColor.b *= b;
+    newColor.a *= a;
+    return newColor;
+}
+
 Color::Color() : 
     r(0),
     g(0),
