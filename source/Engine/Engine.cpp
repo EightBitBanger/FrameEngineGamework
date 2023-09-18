@@ -13,6 +13,7 @@ RenderSystem      Renderer;
 AudioSystem       Audio;
 ScriptSystem      Scripting;
 InputSystem       Input;
+ActorSystem       AI;
 MathCore          Math;
 
 

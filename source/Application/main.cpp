@@ -8,6 +8,7 @@ extern AudioSystem          Audio;
 extern ScriptSystem         Scripting;
 extern ResourceManager      Resources;
 extern ApplicationLayer     Application;
+extern ActorSystem          AI;
 extern EngineSystemManager  Engine;
 
 
@@ -115,9 +116,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         // Update any extra accumulated ticks
         if (tickAccumulator > tickUpdateTimeout) {
             for (int i=0; i < 2; i++) {
-                std::cout << "Tick " << tickAccumulator << std::endl;
-                
                 tickAccumulator -= tickUpdateTimeout;
+                
+                AI.Update();
                 
                 Framework::TickUpdate();
                 

@@ -19,16 +19,11 @@ extern RenderSystem         Renderer;
 extern PhysicsSystem        Physics;
 extern InputSystem          Input;
 extern MathCore             Math;
+extern ActorSystem          AI;
 
 
 // Globals
 GameObject*  cameraController;
-
-
-
-
-
-
 
 
 
@@ -85,6 +80,9 @@ void Framework::Start() {
     
     
     
+    // AI testing
+    Actor* actor = AI.CreateActor();
+    
     
     
     
@@ -111,6 +109,9 @@ void Framework::Start() {
     
     
     
+    //
+    // Generate some perlin noise chunks
+    //
     
     for (int z=0; z < areaHeight; z++) {
         

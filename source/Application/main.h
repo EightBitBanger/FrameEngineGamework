@@ -28,6 +28,7 @@
 #include "../Resources/ResourceManager.h"
 #include "../Scripting/ScriptSystem.h"
 #include "../Serialization/Serialization.h"
+#include "../AI/ActorSystem.h"
 
 #include "../application/applicationlayer.h"
 

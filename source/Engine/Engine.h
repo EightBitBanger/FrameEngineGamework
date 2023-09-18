@@ -10,6 +10,7 @@
 #include "../Renderer/components/entity.h"
 #include "../Scripting/components/script.h"
 #include "../Renderer/components/camera.h"
+#include "../AI/ActorSystem.h"
 
 #include "../../vendor/CodeBaseLibrary/timer.h"
 #include "../../vendor/CodeBaseLibrary/logging.h"

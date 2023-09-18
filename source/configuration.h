@@ -28,7 +28,7 @@
 // Tick update
 //
 
-#define  TICK_UPDATES_PER_SECOND           100
+#define  TICK_UPDATES_PER_SECOND           3
 
 
 
