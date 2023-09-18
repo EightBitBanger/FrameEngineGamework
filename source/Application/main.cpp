@@ -87,7 +87,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     // Tick update accumulator
     Timer tickTimer;
-    float tickUpdateTimeout = 1000 / 20;
+    float tickUpdateTimeout = 1000 / TICK_UPDATES_PER_SECOND;
     float tickAccumulator=0;
     tickTimer.Update();
     
@@ -105,7 +105,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             Application.isActive = false;
 #endif
         
-        // Physics timer
         if (PhysicsTime.Update()) 
             Physics.world->update( 1.0f / PHYSICS_UPDATES_PER_SECOND );
         
@@ -116,6 +115,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         // Update any extra accumulated ticks
         if (tickAccumulator > tickUpdateTimeout) {
             for (int i=0; i < 2; i++) {
+                std::cout << "Tick " << tickAccumulator << std::endl;
+                
                 tickAccumulator -= tickUpdateTimeout;
                 
                 Framework::TickUpdate();

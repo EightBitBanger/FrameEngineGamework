@@ -25,6 +25,14 @@
 
 
 //
+// Tick update
+//
+
+#define  TICK_UPDATES_PER_SECOND           100
+
+
+
+//
 // Rendering
 //
 
