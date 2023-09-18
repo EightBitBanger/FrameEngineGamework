@@ -1,5 +1,8 @@
-#include "Engine/Engine.h"
+//
+// User application code space
+//
 
+#include "Engine/Engine.h"
 
 extern RandomGen            Random;
 extern ColorPreset          Colors;
@@ -17,14 +20,9 @@ extern PhysicsSystem        Physics;
 extern InputSystem          Input;
 extern MathCore             Math;
 
-// Global resource pointers
-Mesh*           projectileMesh;
 
-Material*       projectionMaterial;
-
-GameObject*     cameraController;
-
-rp3d::SphereShape* projectileCollider;
+// Globals
+GameObject*  cameraController;
 
 
 
@@ -291,7 +289,16 @@ void Framework::Run() {
 
 void Framework::TickUpdate(void) {
     
+    
+    
+    
+    
+    
+    
+    
 }
+
+
 
 
 
