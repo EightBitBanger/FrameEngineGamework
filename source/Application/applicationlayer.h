@@ -20,6 +20,8 @@ namespace Framework {
     
     void Run(void);
     
+    void TickUpdate(void);
+    
     void Shutdown(void);
     
 }

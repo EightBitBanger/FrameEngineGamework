@@ -57,7 +57,6 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
     //    body->setTransform(physicsTransform);
     //    return body;
     //}
-    //body = world->createRigidBody(physicsTransform);
     
     return world->createRigidBody(physicsTransform);
 }
@@ -83,6 +82,51 @@ rp3d::SphereShape* PhysicsSystem::CreateColliderSphere(float radius) {
 
 rp3d::CapsuleShape* PhysicsSystem::CreateColliderCapsule(float radius, float height) {
     return common.createCapsuleShape(radius, height);
+}
+
+MeshCollider* PhysicsSystem::CreateColliderFromMesh(Mesh* sourceMesh) {
+    
+    MeshCollider* newMeshCollider = meshCollider.Create();
+    
+    unsigned int vertexCount = sourceMesh->GetNumberOfVertices();
+    unsigned int indexCount  = sourceMesh->GetNumberOfIndices();
+    
+    for (int i=0; i < vertexCount; i++) {
+        Vertex vertex = sourceMesh->GetVertex(i);
+        newMeshCollider->vertexBuffer.push_back(vertex.x);
+        newMeshCollider->vertexBuffer.push_back(vertex.y);
+        newMeshCollider->vertexBuffer.push_back(vertex.z);
+    }
+    
+    for (int i=0; i < indexCount; i++) {
+        unsigned int index = sourceMesh->GetIndex(i).index;
+        
+        newMeshCollider->indexBuffer.push_back( index );
+    }
+    
+    unsigned int sizeOfVertexBuffer = newMeshCollider->vertexBuffer.size() - 1;
+    unsigned int sizeOfIndexBuffer  = newMeshCollider->indexBuffer.size() - 1;
+    
+    newMeshCollider->triangleArray = new rp3d::TriangleVertexArray(
+                                                            sizeOfVertexBuffer,
+                                                            newMeshCollider->vertexBuffer.data(),
+                                                            3 * sizeof(float),
+                                                            
+                                                            sizeOfIndexBuffer,
+                                                            newMeshCollider->indexBuffer.data(),
+                                                            sizeof (int),
+                                                            
+                                                            rp3d::TriangleVertexArray::VertexDataType::VERTEX_FLOAT_TYPE,
+                                                            rp3d::TriangleVertexArray::IndexDataType::INDEX_INTEGER_TYPE);
+    
+    
+    
+    newMeshCollider->triangleMesh = common.createTriangleMesh();
+    newMeshCollider->triangleMesh->addSubpart( newMeshCollider->triangleArray );
+    
+    newMeshCollider->concaveMeshShape = common.createConcaveMeshShape( newMeshCollider->triangleMesh );
+    
+    return newMeshCollider;
 }
 
 void PhysicsSystem::AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr) {

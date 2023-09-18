@@ -28,7 +28,7 @@
 // Rendering
 //
 
-#define  RENDER_FRAMES_PER_SECOND          100
+#define  RENDER_FRAMES_PER_SECOND          60
 #define  RENDERER_CHECK_OPENGL_ERRORS
 
 #define RENDER_NUMBER_OF_LIGHTS    120

@@ -416,14 +416,13 @@ void Mesh::UpdateMesh(void) {
     return;
 }
 
-unsigned int Mesh::GetNumberOfIndices(void) {
-    return mIndexBuffer.size();
-}
-
 unsigned int Mesh::GetNumberOfVertices(void) {
     return mVertexBuffer.size();
 }
 
+unsigned int Mesh::GetNumberOfIndices(void) {
+    return mIndexBuffer.size();
+}
 
 Vertex Mesh::GetVertex(unsigned int index) {
     return mVertexBuffer[index];
@@ -431,6 +430,15 @@ Vertex Mesh::GetVertex(unsigned int index) {
 
 void Mesh::SetVertex(unsigned int index, Vertex vertex) {
     mVertexBuffer[index] = vertex;
+    return;
+}
+
+Index Mesh::GetIndex(unsigned int index) {
+    return mIndexBuffer[index];
+}
+
+void Mesh::SetIndex(unsigned int index, Index position) {
+    mIndexBuffer[index] = position;
     return;
 }
 

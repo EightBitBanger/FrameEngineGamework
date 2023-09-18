@@ -100,11 +100,15 @@ public:
     /// Get the number of vertex locations in the vertex buffer.
     unsigned int GetNumberOfVertices(void);
     
-    /// Get the pointer to the internal vertex array
+    /// Get a vertex from the internal vertex array.
     Vertex GetVertex(unsigned int index);
-    
-    /// Set a vertex to a position in the vertex array
+    /// Set a vertex to the internal vertex array.
     void SetVertex(unsigned int index, Vertex vertex);
+    
+    /// Get an index from the internal index array.
+    Index GetIndex(unsigned int index);
+    /// Set an index to the internal index array.
+    void SetIndex(unsigned int index, Index position);
     
 private:
     

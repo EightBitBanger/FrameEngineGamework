@@ -31,7 +31,7 @@ public:
     bool doFaceCulling;
     
     /// Texture interpolation
-    int textureFiltration;
+    GLint textureFiltration;
     
     /// Depth function used for rendering with the depth buffer.
     GLint depthFunc;
@@ -70,6 +70,11 @@ public:
     /// Set the winding direction for drawing triangles.
     void SetFaceWindingOrder(GLint direction);
     
+    /// Get texture filtration.
+    GLint GetTextureFiltration(void);
+    /// Set texture filtration.
+    void SetTextureFiltration(GLint filtration);
+    
     /// Enable blending.
     void EnableBlending(void);
     /// Disable blending.
@@ -87,6 +92,9 @@ public:
     void BindTextureSlot(unsigned int slot);
     /// Reupload the texture buffer onto the GPU.
     void UpdateTextureBuffer(void* textureData);
+    
+    /// Generate mipmaps for the current texture.
+    void GenerateMipMaps(void);
     
     /// Set the current shader for this material.
     Shader* GetShader(void);

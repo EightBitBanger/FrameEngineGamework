@@ -39,6 +39,9 @@ void Material::EnableDepthTest(void)  {doDepthTest = true;}
 void Material::DisableDepthTest(void) {doDepthTest = false;}
 void Material::SetDepthFunction(GLint func) {depthFunc = func;}
 
+GLint Material::GetTextureFiltration(void) {return textureFiltration;}
+void Material::SetTextureFiltration(GLint filtration) {textureFiltration = filtration;}
+
 void Material::EnableCulling(void) {doFaceCulling = true;}
 void Material::DisableCulling(void) {doFaceCulling = false;}
 void Material::SetFaceCullingSide(GLint side) {faceCullSide = side;}
@@ -70,10 +73,15 @@ void Material::UpdateTextureBuffer(void* textureData) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFiltration);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    glGenerateMipmap(GL_TEXTURE_2D);
     return;
 }
 
+void Material::GenerateMipMaps(void) {
+    glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    return;
+}
+    
 Shader* Material::GetShader(void) {
     return shader;
 }

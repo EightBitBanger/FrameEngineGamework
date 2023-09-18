@@ -23,7 +23,6 @@ Mesh*           projectileMesh;
 Material*       projectionMaterial;
 
 GameObject*     cameraController;
-GameObject*     skyObject;
 
 rp3d::SphereShape* projectileCollider;
 
@@ -51,29 +50,14 @@ void Framework::Start() {
     Resources.LoadWaveFront("data/chunk.obj", "chunk");
     Resources.LoadTexture("data/chunk.png", "mat_chunk");
     
-    Resources.LoadWaveFront("data/projectile/projectile.obj", "bullet");
-    Resources.LoadTexture("data/projectile/projectile.png", "mat_bullet");
+    Resources.LoadShaderGLSL("data/color.shader", "surface");
+    Resources.LoadShaderGLSL("data/texture.shader", "texture");
     
+    Resources.LoadWaveFront("data/sky/sky.obj", "skyBox");
+    //Resources.LoadTexture("data/sky/sky.png",   "skyMaterial");
     
-    
-    
-    
-    
-    
-    
-    
-    //
-    // Projectile object
-    
-    projectileMesh = Resources.CreateMeshFromTag("bullet");
-    projectileMesh->ChangeSubMeshColor(0, Colors.yellow);
-    
-    projectionMaterial = Resources.CreateMaterialFromTag("mat_bullet");
-    projectionMaterial->diffuse = Color(0.02f, 0.02f, 0.02f);
-    
-    projectileCollider = Physics.CreateColliderSphere(1);
-    
-    
+    Shader* chunkShader = Resources.CreateShaderFromTag("surface");
+    Shader* skyShader   = Resources.CreateShaderFromTag("texture");
     
     
     //
@@ -82,50 +66,26 @@ void Framework::Start() {
     
     
     
+    
     //
     // Create a sky object
-    Resources.LoadWaveFront("data/sky/sky.obj", "skyBox");
-    Resources.LoadTexture("data/sky/sky.png",   "skyMaterial");
+    Color skyLow  = Colors.ltgray;
+    Color skyHigh = Colors.blue;
+    skyHigh *= Colors.white;
     
-    Mesh* skyMesh = Resources.CreateMeshFromTag("skyBox");
-    Material* skyMaterial = Resources.CreateMaterialFromTag("skyMaterial");
-    
-    skyObject = Engine.CreateGameObject();
-    skyObject->name = "sky";
-    Component* skyComponent = Engine.CreateComponentMeshRenderer(skyMesh, skyMaterial);
-    skyObject->AddComponent(skyComponent);
-    
-    skyObject->transform.SetScale(10000,10000,10000);
+    GameObject* skyObject = Engine.CreateSky("skyBox", "surface", skyLow, skyHigh, 0.127);
     
     
     
     
     //
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(glm::vec3(0, 10, 0));
-    cameraController->SetLinearDamping(1);
-    cameraController->SetMass(40);
-    
-    
-    // Camera physics
-    BoxShape* boxShape = Physics.CreateColliderBox(1, 8, 1);
-    cameraController->AddColliderBox(boxShape, 0, 0, 0);
-    cameraController->CalculatePhysics();
-    
-    cameraController->EnableGravity(false);
-    cameraController->SetLinearDamping(3);
-    
-    // Sky will follow the camera parent object
+    cameraController = Engine.CreateCameraController(glm::vec3(0, 10, 0), glm::vec3(1, 8, 1));
+    cameraController->transform.position = glm::vec3(0);
+    // Attach sky to the camera
     skyObject->parent = cameraController;
     
     
-    
-    
-    Resources.LoadShaderGLSL("data/color.shader", "surface");
-    Shader* chunkShader = Resources.CreateShaderFromTag("surface");
-    if (chunkShader == nullptr) {
-        Application.isActive = false;
-    }
     
     
     
@@ -154,7 +114,6 @@ void Framework::Start() {
     
     
     
-    
     for (int z=0; z < areaHeight; z++) {
         
         for (int x=0; x < areaWidth; x++) {
@@ -165,8 +124,14 @@ void Framework::Start() {
             
             Mesh* chunkMesh = Resources.CreateMeshFromTag("chunk");
             
-            Material* chunkMaterial = Renderer.CreateMaterial();
+            //Material* chunkMaterial = Renderer.CreateMaterial();
+            Material* chunkMaterial = Resources.CreateMaterialFromTag("mat_chunk");
+            
             chunkMaterial->SetShader( chunkShader );
+            chunkMaterial->SetTextureFiltration(MATERIAL_FILTER_NONE);
+            
+            //chunkMaterial->SetTextureFiltration(MATERIAL_FILTER_ANISOTROPIC);
+            //chunkMaterial->GenerateMipMaps();
             
             // Chunk position
             float chunkX = x * 100;
@@ -174,9 +139,6 @@ void Framework::Start() {
             
             unsigned int vertexCount = chunkMesh->GetNumberOfVertices();
             
-            
-            //biomeHigh = Colors.MakeRandom();
-            //biomeLow  = Colors.MakeRandom();
             
             
             //
@@ -214,18 +176,12 @@ void Framework::Start() {
                 continue;
             }
             
-            
-            
-            
             chunkMesh->UpdateMesh();
             
-            SubMesh newColliderMesh;
-            chunkMesh->CopySubMesh(0, newColliderMesh);
             
             
-            
-            
-            
+            //
+            // Create chunk object
             GameObject* newChunk = Engine.CreateGameObject();
             newChunk->AddComponent( Engine.CreateComponentMeshRenderer(chunkMesh, chunkMaterial) );
             
@@ -239,27 +195,15 @@ void Framework::Start() {
             newChunk->SetLinearAxisLockFactor(0, 0, 0);
             newChunk->SetAngularAxisLockFactor(0, 0, 0);
             
-            // Collider
+            // Chunk collider
             BoxShape* chunkCollider = Physics.CreateColliderBox(chunkSz, 10, chunkSz);
             newChunk->AddColliderBox(chunkCollider, 0, -10, 0);
             
+            //MeshCollider* meshCollider = Physics.CreateColliderFromMesh(chunkMesh);
+            //newChunk->AddColliderMesh(meshCollider);
             
             newChunk->SetPosition((x * chunkSz) - ((areaWidth/2) * chunkSz), 0.0f, (z * chunkSz) - ((areaHeight/2) * chunkSz));
             newChunk->transform.SetScale(1, 1, 1);
-            
-            /*
-            
-            rp3d::TriangleVertexArray* triangleArray;
-            triangleArray = new rp3d::TriangleVertexArray(nbVertices,
-                                                          vertices,
-                                                          3 * sizeof(float),
-                                                          nbTriangles,
-                                                          indices,
-                                                          sizeof(unsigned int),
-                                                          rp3d::TriangleVertexArray :: VertexDataType :: VERTEX_FLOAT_TYPE,
-                                                          rp3d::TriangleVertexArray :: IndexDataType :: INDEX_INTEGER_TYPE);
-            
-            */
             
         }
     }
@@ -343,6 +287,11 @@ void Framework::Run() {
     return;
 }
 
+
+
+void Framework::TickUpdate(void) {
+    
+}
 
 
 

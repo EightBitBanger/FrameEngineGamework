@@ -48,11 +48,11 @@ public:
     // Specially built components and game objects
     
     /// Create a camera controller game object and return its pointer.
-    GameObject* CreateCameraController(glm::vec3 position=glm::vec3(0));
-    
+    GameObject* CreateCameraController(glm::vec3 position, glm::vec3 scale);
+    /// Generate a sky object and return its pointer.
+    GameObject* CreateSky(std::string meshTagName, std::string shaderTagName, Color colorLow, Color colorHigh, float biasMul);
     /// Create a mesh renderer component and return its pointer.
     Component* CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr);
-    
     /// Create a point light component and return its pointer.
     Component* CreateComponentLight(glm::vec3 position=glm::vec3(0));
     

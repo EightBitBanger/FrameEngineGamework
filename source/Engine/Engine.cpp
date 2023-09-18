@@ -15,6 +15,7 @@ ScriptSystem      Scripting;
 InputSystem       Input;
 MathCore          Math;
 
+
 ApplicationLayer      Application;
 EngineSystemManager   Engine;
 
@@ -60,7 +61,7 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     return true;
 }
 
-GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position) {
+GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm::vec3 scale) {
     
     GameObject* cameraController = CreateGameObject();
     cameraController->name = "camera";
@@ -93,10 +94,51 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position) {
     cameraController->AddComponent(rigidBodyComponent);
     cameraController->AddComponent(scriptComponent);
     
-    cameraController->EnableGravity(false);
     cameraController->SetAngularAxisLockFactor(0, 0, 0);
+    cameraController->SetMass(40);
+    
+    // Collider
+    BoxShape* boxShape = Physics.CreateColliderBox(1, 8, 1);
+    cameraController->AddColliderBox(boxShape, 0, 0, 0);
+    cameraController->CalculatePhysics();
+    cameraController->EnableGravity(false);
+    cameraController->SetLinearDamping(3);
     
     return cameraController;
+}
+
+GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string shaderTagName, Color colorLow, Color colorHigh, float biasMul) {
+    
+    Mesh* skyMesh = Resources.CreateMeshFromTag(meshTagName);
+    if (skyMesh == nullptr) return nullptr;
+    
+    Material* skyMaterial = Renderer.CreateMaterial();
+    
+    skyMaterial->diffuse = Color(1, 1, 1);
+    
+    for (int i=0; i < skyMesh->GetNumberOfVertices(); i++) {
+        Vertex vertex = skyMesh->GetVertex(i);
+        
+        vertex.r = Math.Lerp(colorLow.r, colorHigh.r, vertex.y * biasMul);
+        vertex.g = Math.Lerp(colorLow.g, colorHigh.g, vertex.y * biasMul);
+        vertex.b = Math.Lerp(colorLow.b, colorHigh.b, vertex.y * biasMul);
+        
+        skyMesh->SetVertex(i, vertex);
+    }
+    skyMesh->UpdateMesh();
+    
+    GameObject* skyObject = Engine.CreateGameObject();
+    skyObject->name = "sky";
+    Component* skyComponent = CreateComponentMeshRenderer(skyMesh, skyMaterial);
+    skyObject->AddComponent(skyComponent);
+    
+    skyObject->transform.SetScale(10000, 2000, 10000);
+    
+    Shader* skyShader = Resources.CreateShaderFromTag(shaderTagName);
+    if (skyShader != nullptr) 
+        skyMaterial->SetShader(skyShader);
+    
+    return skyObject;
 }
 
 Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr) {

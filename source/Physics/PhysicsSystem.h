@@ -3,6 +3,11 @@
 
 #include <ReactPhysics3d/ReactPhysics3d.h>
 
+#include "../../vendor/CodeBaseLibrary/poolallocator.h"
+
+#include "components/meshcollider.h"
+#include "../Renderer/components/mesh.h"
+
 typedef rp3d::RigidBody    RigidBody;
 typedef rp3d::BoxShape     BoxShape;
 typedef rp3d::SphereShape  SphereShape;
@@ -40,19 +45,21 @@ public:
     rp3d::SphereShape* CreateColliderSphere(float radius);
     /// Create a capsule collider scaled by radius and height.
     rp3d::CapsuleShape* CreateColliderCapsule(float radius, float height);
+    /// Create a concave mesh shape collider.
+    MeshCollider* CreateColliderFromMesh(Mesh* sourceMesh);
     
     
 private:
+    
+    PoolAllocator<MeshCollider> meshCollider;
     
     // Add a rigid body to the free list
     void AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr);
     // Remove a rigid body from the free list
     rp3d::RigidBody* RemoveRigidBodyFromFreeList(void);
     
-    
     // Free list of rigid bodies
     std::vector<rp3d::RigidBody*> mRigidBodyFreeList;
-    
     
 };
 

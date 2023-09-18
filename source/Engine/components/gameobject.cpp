@@ -186,7 +186,6 @@ void GameObject::SetAngularAxisLockFactor(float x, float y, float z) {
 
 void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z) {
     if (mRigidBodyCache == nullptr) return;
-    assert(boxShape != nullptr);
     
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
@@ -198,7 +197,6 @@ void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, floa
 
 void GameObject::AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z) {
     if (mRigidBodyCache == nullptr) return;
-    assert(capsuleShape != nullptr);
     
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
@@ -210,12 +208,22 @@ void GameObject::AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, f
 
 void GameObject::AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z) {
     if (mRigidBodyCache == nullptr) return;
-    assert(sphereShape != nullptr);
     
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
     
     mRigidBodyCache->addCollider(sphereShape, offsetTransform);
+    
+    return;
+}
+
+void GameObject::AddColliderMesh(MeshCollider* meshCollider) {
+    if (mRigidBodyCache == nullptr) return;
+    
+    rp3d::Transform offsetTransform;
+    offsetTransform.setPosition(rp3d::Vector3(0, 0, 0));
+    
+    mRigidBodyCache->addCollider(meshCollider->concaveMeshShape, offsetTransform);
     
     return;
 }

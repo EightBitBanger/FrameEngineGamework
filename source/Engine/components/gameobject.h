@@ -68,6 +68,8 @@ public:
     void AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z);
     /// Add a sphere collider shape at the offset position x, y and z.
     void AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z);
+    /// Add a mesh collider.
+    void AddColliderMesh(MeshCollider* meshCollider);
     
     /// Set the rigid body mass.
     void SetMass(float mass);
