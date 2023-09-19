@@ -80,8 +80,14 @@ void Framework::Start() {
     
     
     
+    
+    //
     // AI testing
+    //
+    
     Actor* actor = AI.CreateActor();
+    
+    
     
     
     
@@ -95,10 +101,10 @@ void Framework::Start() {
     
     float noiseX    = 0.008;
     float noiseZ    = 0.008;
-    float noiseMul  = 70.0;
+    float noiseMul  = 100.0;
     
-    int areaWidth  = 30;
-    int areaHeight = 30;
+    int areaWidth  = 8;
+    int areaHeight = 8;
     
     Color biomeHigh = Colors.green;
     Color biomeLow  = Colors.green;
@@ -123,18 +129,17 @@ void Framework::Start() {
             
             Mesh* chunkMesh = Resources.CreateMeshFromTag("chunk");
             
-            //Material* chunkMaterial = Renderer.CreateMaterial();
-            Material* chunkMaterial = Resources.CreateMaterialFromTag("mat_chunk");
+            Material* chunkMaterial = Renderer.CreateMaterial();
+            //Material* chunkMaterial = Resources.CreateMaterialFromTag("mat_chunk");
             
             chunkMaterial->SetShader( chunkShader );
-            chunkMaterial->SetTextureFiltration(MATERIAL_FILTER_NONE);
             
-            //chunkMaterial->SetTextureFiltration(MATERIAL_FILTER_ANISOTROPIC);
-            //chunkMaterial->GenerateMipMaps();
+            chunkMaterial->SetTextureFiltration(MATERIAL_FILTER_ANISOTROPIC);
+            chunkMaterial->GenerateMipMaps();
             
             // Chunk position
-            float chunkX = x * 100;
-            float chunkZ = z * 100;
+            float chunkX = x * chunkSz;
+            float chunkZ = z * chunkSz;
             
             unsigned int vertexCount = chunkMesh->GetNumberOfVertices();
             
@@ -183,6 +188,7 @@ void Framework::Start() {
             // Create chunk object
             GameObject* newChunk = Engine.CreateGameObject();
             newChunk->AddComponent( Engine.CreateComponentMeshRenderer(chunkMesh, chunkMaterial) );
+            Component* meshRenderer = newChunk->GetComponent(ComponentType::MeshRenderer);
             
             newChunk->isActive = true;
             
@@ -222,14 +228,8 @@ void Framework::Start() {
 
 
 
-// Projectile shoot force
-float projectileSpeed = 700;
-
 // Camera movement force
 float cameraSpeed     = 40000;
-
-float forceBuild    = 0;
-float forceBuildMax = 1000;
 
 
 

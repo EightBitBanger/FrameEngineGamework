@@ -15,6 +15,10 @@ enum struct ComponentType {
 };
 
 
+
+
+
+
 class Component {
     
 public:

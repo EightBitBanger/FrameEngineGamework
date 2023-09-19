@@ -41,9 +41,8 @@ public:
     void AddComponent(Component* component);
     /// Remove a component from the game object.
     bool RemoveComponent(Component* component);
-    /// Find a component by its type.
-    Component* FindComponent(ComponentType type);
-    
+    /// Get a component by its type.
+    Component* GetComponent(ComponentType type);
     /// Get a component by its index position.
     Component* GetComponent(unsigned int index);
     /// Get the number of components attached to the game object.

@@ -67,7 +67,7 @@ bool GameObject::RemoveComponent(Component* component) {
     return false;
 }
 
-Component* GameObject::FindComponent(ComponentType component_type) {
+Component* GameObject::GetComponent(ComponentType component_type) {
     for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
         Component* thisComponentPtr = *it;
         if (component_type == thisComponentPtr->GetType()) {
