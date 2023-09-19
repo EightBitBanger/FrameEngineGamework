@@ -30,7 +30,7 @@ void GameObject::AddComponent(Component* component) {
     }
     
     // Mesh renderer renderer component
-    if (component->GetType() == ComponentType::Renderer) {
+    if (component->GetType() == ComponentType::MeshRenderer) {
         mMeshRendererCache = (MeshRenderer*)component->GetComponent();
     }
     
@@ -55,10 +55,10 @@ bool GameObject::RemoveComponent(Component* component) {
         if (component == thisComponentPtr) {
             
             // Null the cache pointers
-            if (component->GetType() == ComponentType::RigidBody) mRigidBodyCache = nullptr;
-            if (component->GetType() == ComponentType::Renderer)  mMeshRendererCache = nullptr;
-            if (component->GetType() == ComponentType::Camera)    mCameraCache = nullptr;
-            if (component->GetType() == ComponentType::Light)     mLightCache = nullptr;
+            if (component->GetType() == ComponentType::Light)         mLightCache = nullptr;
+            if (component->GetType() == ComponentType::Camera)        mCameraCache = nullptr;
+            if (component->GetType() == ComponentType::RigidBody)     mRigidBodyCache = nullptr;
+            if (component->GetType() == ComponentType::MeshRenderer)  mMeshRendererCache = nullptr;
             
             mComponentList.erase(it);
             return true;

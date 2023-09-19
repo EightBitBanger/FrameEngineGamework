@@ -143,7 +143,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
 }
 
 Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr) {
-    Component* newComponent = CreateComponent(ComponentType::Renderer);
+    Component* newComponent = CreateComponent(ComponentType::MeshRenderer);
     MeshRenderer* entityRenderer = (MeshRenderer*)newComponent->GetComponent();
     entityRenderer->AttachMesh(meshPtr);
     entityRenderer->AttachMaterial(materialPtr);
@@ -182,7 +182,7 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
     
     switch (type) {
         
-        case ComponentType::Renderer: {
+        case ComponentType::MeshRenderer: {
             MeshRenderer* meshRendererPtr = Renderer.CreateMeshRenderer();
             mSceneMain->AddMeshRendererToSceneRoot(meshRendererPtr);
             component_object = (void*)meshRendererPtr;
@@ -223,7 +223,7 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
     
     switch (componentType) {
         
-        case ComponentType::Renderer: {
+        case ComponentType::MeshRenderer: {
             MeshRenderer* componentEntityRenderer = (MeshRenderer*)componentPtr->GetComponent();
             mSceneMain->RemoveMeshRendererFromSceneRoot(componentEntityRenderer);
             Renderer.DestroyMeshRenderer(componentEntityRenderer);
