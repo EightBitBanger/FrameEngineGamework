@@ -27,6 +27,13 @@ set (ENGINE_HEADERS
     
     "source/Audio/AudioSystem.h"
     
+    "source/AI/ActorSystem.h"
+    "source/AI/components/actor.h"
+    
+    "source/Serialization/Serialization.h"
+    
+    "source/Math/Math.cpp"
+    
     "source/Engine/Engine.h"
     "source/Engine/components/component.h"
     "source/Engine/components/gameobject.h"
@@ -40,12 +47,13 @@ set (ENGINE_HEADERS
     "source/Input/keys.h"
     
     "source/Physics/PhysicsSystem.h"
+    "source/Physics/components/meshcollider.h"
     
     "source/Renderer/enumerators.h"
     "source/Renderer/pipeline.h"
     "source/Renderer/RenderSystem.h"
     "source/Renderer/components/camera.h"
-    "source/Renderer/components/entity.h"
+    "source/Renderer/components/meshrenderer.h"
     "source/Renderer/components/material.h"
     "source/Renderer/components/mesh.h"
     "source/Renderer/components/scene.h"
@@ -96,6 +104,13 @@ set (ENGINE_SOURCES
     "source/Engine/components/component.cpp"
     "source/Engine/components/gameobject.cpp"
     
+    "source/AI/ActorSystem.cpp"
+    "source/AI/components/actor.cpp"
+    
+    "source/Serialization/Serialization.cpp"
+    
+    "source/Math/Math.cpp"
+    
     "source/Engine/types/bufferlayout.cpp"
     "source/Engine/types/color.cpp"
     "source/Engine/types/transform.cpp"
@@ -104,11 +119,12 @@ set (ENGINE_SOURCES
     "source/Input/InputSystem.cpp"
     
     "source/Physics/PhysicsSystem.cpp"
+    "source/Physics/components/meshcollider.cpp"
     
     "source/Renderer/pipeline.cpp"
     "source/Renderer/RenderSystem.cpp"
     "source/Renderer/components/camera.cpp"
-    "source/Renderer/components/entity.cpp"
+    "source/Renderer/components/meshrenderer.cpp"
     "source/Renderer/components/material.cpp"
     "source/Renderer/components/mesh.cpp"
     "source/Renderer/components/scene.cpp"
@@ -131,6 +147,7 @@ set (ENGINE_SOURCES
     "tests/units/testRenderSystem.cpp"
     "tests/units/testScriptSystem.cpp"
     "tests/units/testPhysicsSystem.cpp"
+    "tests/units/testSerializer.cpp"
     "tests/units/testTransform.cpp"
     
     "vendor/CodeBaseLibrary/fileloader.cpp"
