@@ -43,6 +43,7 @@ public:
     void TestEngineFunctionality(void);
     void TestGameObject(void);
     void TestComponentObject(void);
+    void TestSerializerSystem(void);
     void TestRenderSystem(void);
     void TestScriptSystem(void);
     void TestPhysicsSystem(void);
@@ -63,6 +64,7 @@ private:
     const std::string msgFailedAllocatorNotZero    = "object allocator still contains objects";
     const std::string msgFailedSetGet              = "set/get not returning correct value";
     const std::string msgFailedOperator            = "operator failed to operate";
+    const std::string msgFailedSerialization       = "serialization failed";
     
     std::string mLogString;
     

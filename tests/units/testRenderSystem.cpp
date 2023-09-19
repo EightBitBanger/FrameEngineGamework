@@ -11,32 +11,32 @@ void TestFramework::TestRenderSystem(void) {
     
     std::cout << "Render system........... ";
     
-    Entity* entityPtr = Renderer.CreateEntity();
+    MeshRenderer* meshRendererPtr = Renderer.CreateMeshRenderer();
     Mesh* meshPtr = Renderer.CreateMesh();
     Material* materialPtr = Renderer.CreateMaterial();
     
     // Check render objects where created
-    if (entityPtr == nullptr)   Throw(msgFailedObjectCreate, __FILE__, __LINE__);
+    if (meshRendererPtr == nullptr)   Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     if (meshPtr == nullptr)     Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     if (materialPtr == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     
-    entityPtr->AttachMesh(meshPtr);
-    entityPtr->AttachMaterial(materialPtr);
+    meshRendererPtr->AttachMesh(meshPtr);
+    meshRendererPtr->AttachMaterial(materialPtr);
     
-    Mesh*     checkMeshPtr     = entityPtr->GetAttachedMesh();
-    Material* checkMaterialPtr = entityPtr->GetAttachedMaterial();
+    Mesh*     checkMeshPtr     = meshRendererPtr->GetAttachedMesh();
+    Material* checkMaterialPtr = meshRendererPtr->GetAttachedMaterial();
     
     // Check object attachment
     if (checkMeshPtr == nullptr)     Throw(msgFailedToAttachComponent, __FILE__, __LINE__);
     if (checkMaterialPtr == nullptr) Throw(msgFailedToAttachComponent, __FILE__, __LINE__);
     
     // Check render objects where destroyed
-    if (!Renderer.DestroyMaterial(materialPtr)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
-    if (!Renderer.DestroyMesh(meshPtr))         Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
-    if (!Renderer.DestroyEntity(entityPtr))     Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
+    if (!Renderer.DestroyMaterial(materialPtr))   Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
+    if (!Renderer.DestroyMesh(meshPtr))           Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
+    if (!Renderer.DestroyMeshRenderer(meshRendererPtr)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
     
     // Check entity was not left over
-    if (Renderer.GetEntityCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
+    if (Renderer.GetMeshRendererCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     // Check cameras
     Camera* cameraPtr = Renderer.CreateCamera();

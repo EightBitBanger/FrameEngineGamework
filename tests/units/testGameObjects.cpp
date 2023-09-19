@@ -4,6 +4,7 @@
 #include "../framework.h"
 #include "../../source/Engine/Engine.h"
 extern EngineSystemManager  Engine;
+extern EngineComponents     Components;
 
 
 void TestFramework::TestGameObject(void) {
@@ -12,20 +13,20 @@ void TestFramework::TestGameObject(void) {
     std::cout << "Game objects............ ";
     
     GameObject* gameObject1     = Engine.CreateGameObject();
-    Component*  componentEntity = Engine.CreateComponent(ComponentType::Renderer);
+    Component*  componentEntity = Engine.CreateComponent(Components.MeshRenderer);
     
     // Check object creation
     if (gameObject1 == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     
     // Test component attachment
     gameObject1->AddComponent(componentEntity);
-    componentEntity = gameObject1->FindComponent(ComponentType::Renderer);
-    Entity* getRenderer  = (Entity*)componentEntity->GetComponent();
+    MeshRenderer* getRenderer = (MeshRenderer*)gameObject1->GetComponent(COMPONENT_TYPE_MESH_RENDERER);
+    
     if (getRenderer  == nullptr) Throw(msgFailedToAttachComponent, __FILE__, __LINE__);
     
     // Test component detachment
     gameObject1->RemoveComponent(componentEntity);
-    if (gameObject1->FindComponent(ComponentType::Renderer)  != nullptr) Throw(msgFailedToDetachComponent, __FILE__, __LINE__);
+    if (gameObject1->GetComponent(Components.MeshRenderer)  != nullptr) Throw(msgFailedToDetachComponent, __FILE__, __LINE__);
     
     // Test game object should destroy its components
     gameObject1->AddComponent(componentEntity);
@@ -34,7 +35,7 @@ void TestFramework::TestGameObject(void) {
     
     // Check game object`s get and set functions
     GameObject* gameObject2     = Engine.CreateGameObject();
-    Component*  componentRigidBody = Engine.CreateComponent(ComponentType::RigidBody);
+    Component*  componentRigidBody = Engine.CreateComponent(Components.RigidBody);
     gameObject2->AddComponent(componentRigidBody);
     rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)componentRigidBody->GetComponent();
     

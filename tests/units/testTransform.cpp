@@ -12,9 +12,9 @@ void TestFramework::TestTransform(void) {
     Transform transform;
     
     // Test constructor
-    if (transform.position    != glm::vec3(0, 0, 0))    Throw(msgFailedConstructor, __FILE__, __LINE__);
-    if (transform.orientation != glm::quat(0, 0, 0, 1)) Throw(msgFailedConstructor, __FILE__, __LINE__);
-    if (transform.scale       != glm::vec3(1, 1, 1))    Throw(msgFailedConstructor, __FILE__, __LINE__);
+    if (transform.position    != glm::vec3(0, 0, 0))         Throw(msgFailedConstructor, __FILE__, __LINE__);
+    if (transform.orientation != glm::identity<glm::quat>()) Throw(msgFailedConstructor, __FILE__, __LINE__);
+    if (transform.scale       != glm::vec3(1, 1, 1))         Throw(msgFailedConstructor, __FILE__, __LINE__);
     
     // Test set/gets
     transform.SetPosition(10.0, 20.0, 30.0);
@@ -25,12 +25,11 @@ void TestFramework::TestTransform(void) {
     if (transform.GetOrientation() != glm::quat(90.0, 80.0, 70.0, 60.0)) Throw(msgFailedSetGet, __FILE__, __LINE__);
     if (transform.GetScale()       != glm::vec3(20.0, 30.0, 40.0))       Throw(msgFailedSetGet, __FILE__, __LINE__);
     
-    
     // Test identity
     transform.SetIdentity();
-    if (transform.position    != glm::vec3(0, 0, 0))    Throw(msgFailedConstructor, __FILE__, __LINE__);
+    if (transform.position    != glm::vec3(0, 0, 0))         Throw(msgFailedConstructor, __FILE__, __LINE__);
     if (transform.orientation != glm::identity<glm::quat>()) Throw(msgFailedConstructor, __FILE__, __LINE__);
-    if (transform.scale       != glm::vec3(1, 1, 1))    Throw(msgFailedConstructor, __FILE__, __LINE__);
+    if (transform.scale       != glm::vec3(1, 1, 1))         Throw(msgFailedConstructor, __FILE__, __LINE__);
     
     // Test translation
     transform.SetIdentity();
