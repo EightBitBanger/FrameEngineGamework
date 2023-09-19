@@ -7,7 +7,7 @@
 #include "../../tests/framework.h"
 
 #include "../Math/Math.h"
-#include "../Renderer/components/entity.h"
+#include "../Renderer/components/meshrenderer.h"
 #include "../Scripting/components/script.h"
 #include "../Renderer/components/camera.h"
 #include "../AI/ActorSystem.h"

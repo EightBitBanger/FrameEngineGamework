@@ -14,13 +14,13 @@ RenderSystem::RenderSystem() :
 {
 }
 
-Entity* RenderSystem::CreateEntity(void) {
-    Entity* entityPtr = mEntity.Create();
-    entityPtr->AttachMaterial(defaultMaterial);
-    return entityPtr;
+MeshRenderer* RenderSystem::CreateMeshRenderer(void) {
+    MeshRenderer* meshRendererPtr = mEntity.Create();
+    meshRendererPtr->AttachMaterial(defaultMaterial);
+    return meshRendererPtr;
 }
-bool RenderSystem::DestroyEntity(Entity* entityPtr) {
-    return mEntity.Destroy(entityPtr);
+bool RenderSystem::DestroyMeshRenderer(MeshRenderer* meshRendererPtr) {
+    return mEntity.Destroy(meshRendererPtr);
 }
 
 Mesh* RenderSystem::CreateMesh(void) {
@@ -123,7 +123,7 @@ Scene* RenderSystem::GetRenderQueueScene(unsigned int index) {
     return mRenderQueue[index];
 }
 
-unsigned int RenderSystem::GetEntityCount(void) {
+unsigned int RenderSystem::GetMeshRendererCount(void) {
     return mEntity.Size();
 }
 
@@ -382,12 +382,11 @@ void RenderSystem::RenderFrame(float deltaTime) {
         // Render entities
         //
         
-        unsigned int entityListSz = scenePtr->GetEntityQueueSize();
+        unsigned int entityListSz = scenePtr->GetMeshRendererQueueSize();
         
         for (unsigned int i=0; i < entityListSz; i++) {
             
-            Entity* currentEntity = scenePtr->GetEntity(i);
-            
+            MeshRenderer* currentEntity = scenePtr->GetMeshRenderer(i);
             
             // Mesh binding
             Mesh* mesh = currentEntity->GetAttachedMesh();

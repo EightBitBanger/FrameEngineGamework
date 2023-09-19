@@ -15,7 +15,7 @@ extern Logger Log;
 #include "components/mesh.h"
 #include "components/camera.h"
 #include "components/light.h"
-#include "components/entity.h"
+#include "components/meshrenderer.h"
 #include "components/scene.h"
 
 #include "pipeline.h"
@@ -46,10 +46,10 @@ public:
     
     Scene* operator[] (unsigned int const i) {return mRenderQueue[i];}
     
-    /// Create an entity object and return its pointer.
-    Entity* CreateEntity(void);
-    /// Destroy an entity object and return true on success.
-    bool DestroyEntity(Entity* entityPtr);
+    /// Create a mesh renderer object and return its pointer.
+    MeshRenderer* CreateMeshRenderer(void);
+    /// Destroy a mesh renderer object and return true on success.
+    bool DestroyMeshRenderer(MeshRenderer* meshRendererPtr);
     
     /// Create a mesh object and return its pointer.
     Mesh* CreateMesh(void);
@@ -110,7 +110,7 @@ public:
     Scene* GetRenderQueueScene(unsigned int index);
     
     /// Return the number of entities that have been created.
-    unsigned int GetEntityCount(void);
+    unsigned int GetMeshRendererCount(void);
     
     /// Calculate the model matrix from a given transform.
     glm::mat4 CalculateModelMatrix(Transform& modelTransform);
@@ -141,14 +141,14 @@ private:
     
     
     // Render component allocators
-    PoolAllocator<Entity>   mEntity;
-    PoolAllocator<Mesh>     mMesh;
-    PoolAllocator<Material> mMaterial;
-    PoolAllocator<Shader>   mShader;
-    PoolAllocator<Camera>   mCamera;
-    PoolAllocator<Light>    mLight;
-    PoolAllocator<Scene>    mScene;
     PoolAllocator<RenderPipeline>  mPipeline;
+    PoolAllocator<MeshRenderer>    mEntity;
+    PoolAllocator<Mesh>            mMesh;
+    PoolAllocator<Material>        mMaterial;
+    PoolAllocator<Shader>          mShader;
+    PoolAllocator<Camera>          mCamera;
+    PoolAllocator<Light>           mLight;
+    PoolAllocator<Scene>           mScene;
     
 };
 

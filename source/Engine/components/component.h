@@ -7,7 +7,7 @@
 enum struct ComponentType {
     Undefined=0,
     // Render system
-    Renderer, Camera, Light,
+    MeshRenderer, Camera, Light,
     // scripting
     Script,
     // Physics

@@ -9,7 +9,7 @@ GameObject::GameObject() :
     
     mCameraCache(nullptr),
     mRigidBodyCache(nullptr),
-    mEntityCache(nullptr),
+    mMeshRendererCache(nullptr),
     mLightCache(nullptr)
 {
 }
@@ -29,9 +29,9 @@ void GameObject::AddComponent(Component* component) {
         mRigidBodyCache = (rp3d::RigidBody*)component->GetComponent();
     }
     
-    // Entity renderer component
+    // Mesh renderer renderer component
     if (component->GetType() == ComponentType::Renderer) {
-        mEntityCache = (Entity*)component->GetComponent();
+        mMeshRendererCache = (MeshRenderer*)component->GetComponent();
     }
     
     // Camera component
@@ -56,7 +56,7 @@ bool GameObject::RemoveComponent(Component* component) {
             
             // Null the cache pointers
             if (component->GetType() == ComponentType::RigidBody) mRigidBodyCache = nullptr;
-            if (component->GetType() == ComponentType::Renderer)  mEntityCache = nullptr;
+            if (component->GetType() == ComponentType::Renderer)  mMeshRendererCache = nullptr;
             if (component->GetType() == ComponentType::Camera)    mCameraCache = nullptr;
             if (component->GetType() == ComponentType::Light)     mLightCache = nullptr;
             
@@ -95,8 +95,8 @@ rp3d::RigidBody* GameObject::GetCachedRigidBody(void) {
     return mRigidBodyCache;
 }
 
-Entity* GameObject::GetCachedEntity(void) {
-    return mEntityCache;
+MeshRenderer* GameObject::GetCachedMeshRenderer(void) {
+    return mMeshRendererCache;
 }
 
 Light* GameObject::GetCachedLight(void) {
@@ -116,8 +116,8 @@ void GameObject::SetPosition(float x, float y, float z) {
         bodyTransform.setPosition(position);
         mRigidBodyCache->setTransform(bodyTransform);
     }
-    if (mEntityCache != nullptr) {
-        mEntityCache->transform.position = glm::vec3(x, y, z);
+    if (mMeshRendererCache != nullptr) {
+        mMeshRendererCache->transform.position = glm::vec3(x, y, z);
     }
     if (mCameraCache != nullptr) {
         mCameraCache->transform.position = glm::vec3(x, y, z);

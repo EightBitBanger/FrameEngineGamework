@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "entity.h"
+#include "meshrenderer.h"
 #include "light.h"
 
 
@@ -15,32 +15,32 @@ public:
     
     Scene();
     
-    /// Add an entity to this scene.
-    void AddEntityToSceneRoot(Entity* entity);
-    /// Remove an entity from this scene.
-    bool RemoveEntityFromSceneRoot(Entity* entity);
+    /// Add a mesh renderer to this scene.
+    void AddMeshRendererToSceneRoot(MeshRenderer* MeshRenderer);
+    /// Remove a mesh renderer from this scene.
+    bool RemoveMeshRendererFromSceneRoot(MeshRenderer* MeshRenderer);
     
     /// Add a light to this scene.
     void AddLightToSceneRoot(Light* light);
-    /// Remove an entity from this scene.
+    /// Remove a light from this scene.
     bool RemoveLightFromSceneRoot(Light* light);
     
-    /// Return the number of entities in this scene.
-    unsigned int GetEntityQueueSize(void);
+    /// Return the number of mesh renderers in this scene.
+    unsigned int GetMeshRendererQueueSize(void);
     
-    /// Return the number of entities in this scene.
+    /// Return the number of lights in this scene.
     unsigned int GetLightQueueSize(void);
     
-    /// Return an entity from an index location in the entity list.
-    Entity* GetEntity(unsigned int index);
+    /// Return a mesh renderer from an index location in the entity list.
+    MeshRenderer* GetMeshRenderer(unsigned int index);
     
     /// Return a light from an index location in the light list.
     Light* GetLight(unsigned int index);
     
 private:
     
-    /// List of entities in this scene.
-    std::vector<Entity*>  mEntityList;
+    /// List of mesh renderers in this scene.
+    std::vector<MeshRenderer*>  mMeshRendererList;
     
     /// List of lights in this scene.
     std::vector<Light*>  mLightList;

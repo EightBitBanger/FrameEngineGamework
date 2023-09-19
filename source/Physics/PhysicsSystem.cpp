@@ -114,7 +114,7 @@ MeshCollider* PhysicsSystem::CreateColliderFromMesh(Mesh* sourceMesh) {
                                                             
                                                             sizeOfIndexBuffer,
                                                             newMeshCollider->indexBuffer.data(),
-                                                            sizeof (int),
+                                                            3 * sizeof (int),
                                                             
                                                             rp3d::TriangleVertexArray::VertexDataType::VERTEX_FLOAT_TYPE,
                                                             rp3d::TriangleVertexArray::IndexDataType::INDEX_INTEGER_TYPE);

@@ -144,7 +144,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
 
 Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr) {
     Component* newComponent = CreateComponent(ComponentType::Renderer);
-    Entity* entityRenderer = (Entity*)newComponent->GetComponent();
+    MeshRenderer* entityRenderer = (MeshRenderer*)newComponent->GetComponent();
     entityRenderer->AttachMesh(meshPtr);
     entityRenderer->AttachMaterial(materialPtr);
     return newComponent;
@@ -183,9 +183,9 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
     switch (type) {
         
         case ComponentType::Renderer: {
-            Entity* entityPtr = Renderer.CreateEntity();
-            mSceneMain->AddEntityToSceneRoot(entityPtr);
-            component_object = (void*)entityPtr;
+            MeshRenderer* meshRendererPtr = Renderer.CreateMeshRenderer();
+            mSceneMain->AddMeshRendererToSceneRoot(meshRendererPtr);
+            component_object = (void*)meshRendererPtr;
             break;
         }
         case ComponentType::RigidBody: {
@@ -224,9 +224,9 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
     switch (componentType) {
         
         case ComponentType::Renderer: {
-            Entity* componentEntityRenderer = (Entity*)componentPtr->GetComponent();
-            mSceneMain->RemoveEntityFromSceneRoot(componentEntityRenderer);
-            Renderer.DestroyEntity(componentEntityRenderer);
+            MeshRenderer* componentEntityRenderer = (MeshRenderer*)componentPtr->GetComponent();
+            mSceneMain->RemoveMeshRendererFromSceneRoot(componentEntityRenderer);
+            Renderer.DestroyMeshRenderer(componentEntityRenderer);
             break;
         }
         case ComponentType::RigidBody: {
@@ -332,7 +332,7 @@ void EngineSystemManager::Update(void) {
             currentTransform.matrix = glm::scale(currentTransform.matrix, objectPtr->transform.scale);
         }
         
-        Entity* componentEntityRenderer = objectPtr->GetCachedEntity();
+        MeshRenderer* componentEntityRenderer = objectPtr->GetCachedMeshRenderer();
         if (componentEntityRenderer != nullptr) {
             componentEntityRenderer->transform.position    = currentTransform.position;
             componentEntityRenderer->transform.orientation = currentTransform.orientation;

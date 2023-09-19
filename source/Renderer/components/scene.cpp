@@ -6,16 +6,16 @@ Scene::Scene() :
 {
 }
 
-void Scene::AddEntityToSceneRoot(Entity* entity) {
-    mEntityList.push_back( entity );
+void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer) {
+    mMeshRendererList.push_back( meshRenderer );
     return;
 }
 
-bool Scene::RemoveEntityFromSceneRoot(Entity* entity) {
-    for (std::vector<Entity*>::iterator it = mEntityList.begin(); it != mEntityList.end(); ++it) {
-        Entity* entityPtr = *it;
-        if (entity == entityPtr) {
-            mEntityList.erase(it);
+bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer) {
+    for (std::vector<MeshRenderer*>::iterator it = mMeshRendererList.begin(); it != mMeshRendererList.end(); ++it) {
+        MeshRenderer* entityPtr = *it;
+        if (meshRenderer == entityPtr) {
+            mMeshRendererList.erase(it);
             return true;
         }
     }
@@ -38,18 +38,18 @@ bool Scene::RemoveLightFromSceneRoot(Light* light) {
     return false;    
 }
 
-unsigned int Scene::GetEntityQueueSize(void) {
-    return mEntityList.size();
+unsigned int Scene::GetMeshRendererQueueSize(void) {
+    return mMeshRendererList.size();
 }
 
 unsigned int Scene::GetLightQueueSize(void) {
     return mLightList.size();
 }
 
-Entity* Scene::GetEntity(unsigned int index) {
-    if (index > mEntityList.size()) 
+MeshRenderer* Scene::GetMeshRenderer(unsigned int index) {
+    if (index > mMeshRendererList.size()) 
         return nullptr;
-    return mEntityList[index];
+    return mMeshRendererList[index];
 }
 
 Light* Scene::GetLight(unsigned int index) {

@@ -1,7 +1,7 @@
 #ifndef ENGINE_GAME_OBJECT
 #define ENGINE_GAME_OBJECT
 
-#include "../../Renderer/components/entity.h"
+#include "../../Renderer/components/meshrenderer.h"
 #include "../../Renderer/components/camera.h"
 #include "../../Renderer/components/light.h"
 #include "../../Physics/PhysicsSystem.h"
@@ -29,7 +29,7 @@ public:
     /// State whether the object is active.
     bool isActive;
     
-    /// Pointer to a parent object. Nullptr represents the root parent object.
+    /// Pointer to a parent object. nullptr represents the root parent object.
     GameObject* parent;
     
     GameObject();
@@ -98,8 +98,8 @@ public:
     Camera* GetCachedCamera(void);
     /// Get the cached rigid body object pointer.
     rp3d::RigidBody* GetCachedRigidBody(void);
-    /// Get the cached entity object pointer.
-    Entity* GetCachedEntity(void);
+    /// Get the cached mesh renderer object pointer.
+    MeshRenderer* GetCachedMeshRenderer(void);
     /// Get the cached light object pointer.
     Light* GetCachedLight(void);
     
@@ -112,7 +112,7 @@ private:
     // Cached component pointers, to avoid overhead from working with components internally
     Camera*          mCameraCache;
     rp3d::RigidBody* mRigidBodyCache;
-    Entity*          mEntityCache;
+    MeshRenderer*    mMeshRendererCache;
     Light*           mLightCache;
     
 };
