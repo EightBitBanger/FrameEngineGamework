@@ -25,22 +25,22 @@ void GameObject::AddComponent(Component* component) {
     // Cache the component objects
     
     // Rigid body component
-    if (component->GetType() == ComponentType::RigidBody) {
+    if (component->GetType() == Components.RigidBody) {
         mRigidBodyCache = (rp3d::RigidBody*)component->GetComponent();
     }
     
     // Mesh renderer renderer component
-    if (component->GetType() == ComponentType::MeshRenderer) {
+    if (component->GetType() == Components.MeshRenderer) {
         mMeshRendererCache = (MeshRenderer*)component->GetComponent();
     }
     
     // Camera component
-    if (component->GetType() == ComponentType::Camera) {
+    if (component->GetType() == Components.Camera) {
         mCameraCache = (Camera*)component->GetComponent();
     }
     
     // Light component
-    if (component->GetType() == ComponentType::Light) {
+    if (component->GetType() == Components.Light) {
         mLightCache = (Light*)component->GetComponent();
     }
     
@@ -55,10 +55,10 @@ bool GameObject::RemoveComponent(Component* component) {
         if (component == thisComponentPtr) {
             
             // Null the cache pointers
-            if (component->GetType() == ComponentType::Light)         mLightCache = nullptr;
-            if (component->GetType() == ComponentType::Camera)        mCameraCache = nullptr;
-            if (component->GetType() == ComponentType::RigidBody)     mRigidBodyCache = nullptr;
-            if (component->GetType() == ComponentType::MeshRenderer)  mMeshRendererCache = nullptr;
+            if (component->GetType() == Components.Light)         mLightCache = nullptr;
+            if (component->GetType() == Components.Camera)        mCameraCache = nullptr;
+            if (component->GetType() == Components.RigidBody)     mRigidBodyCache = nullptr;
+            if (component->GetType() == Components.MeshRenderer)  mMeshRendererCache = nullptr;
             
             mComponentList.erase(it);
             return true;
@@ -67,17 +67,17 @@ bool GameObject::RemoveComponent(Component* component) {
     return false;
 }
 
-Component* GameObject::GetComponent(ComponentType component_type) {
+void* GameObject::GetComponent(ComponentType component_type) {
     for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
         Component* thisComponentPtr = *it;
         if (component_type == thisComponentPtr->GetType()) {
-            return thisComponentPtr;
+            return (void*)thisComponentPtr->GetComponent();
         }
     }
     return nullptr;
 }
 
-Component* GameObject::GetComponent(unsigned int index) {
+Component* GameObject::GetComponentIndex(unsigned int index) {
     assert(index < mComponentList.size());
     return mComponentList[index];
     

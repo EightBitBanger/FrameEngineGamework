@@ -39,7 +39,7 @@ public:
     
     /// Create a component object with initial type information and return its pointer.
     Component* CreateComponent(ComponentType type);
-    /// Destroy a component object.
+    /// Destroy a component object.z
     bool DestroyComponent(Component* componentPtr);
     
     /// Get the number of component objects.

@@ -86,6 +86,7 @@ rp3d::CapsuleShape* PhysicsSystem::CreateColliderCapsule(float radius, float hei
 
 MeshCollider* PhysicsSystem::CreateColliderFromMesh(Mesh* sourceMesh) {
     
+    // Storage for the pointers and buffers associated with reactphysics3D
     MeshCollider* newMeshCollider = meshCollider.Create();
     
     unsigned int vertexCount = sourceMesh->GetNumberOfVertices();
@@ -114,7 +115,7 @@ MeshCollider* PhysicsSystem::CreateColliderFromMesh(Mesh* sourceMesh) {
                                                             
                                                             sizeOfIndexBuffer,
                                                             newMeshCollider->indexBuffer.data(),
-                                                            3 * sizeof (int),
+                                                            sizeof (int),
                                                             
                                                             rp3d::TriangleVertexArray::VertexDataType::VERTEX_FLOAT_TYPE,
                                                             rp3d::TriangleVertexArray::IndexDataType::INDEX_INTEGER_TYPE);

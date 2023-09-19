@@ -1,14 +1,14 @@
-//
 // User application code space
 //
 
 #include "Engine/Engine.h"
 
-extern RandomGen            Random;
+extern EngineComponents     Components;
 extern ColorPreset          Colors;
-extern Timer                Time;
-extern Timer                PhysicsTime;
+extern RandomGen            Random;
 extern Logger               Log;
+extern Timer                PhysicsTime;
+extern Timer                Time;
 
 extern EngineSystemManager  Engine;
 extern ApplicationLayer     Application;
@@ -22,7 +22,7 @@ extern MathCore             Math;
 extern ActorSystem          AI;
 
 
-// Globals
+// User globals
 GameObject*  cameraController;
 
 
@@ -33,7 +33,6 @@ GameObject*  cameraController;
 
 
 
-//
 // Application entry point
 //
 
@@ -43,11 +42,12 @@ void Framework::Start() {
     Resources.LoadWaveFront("data/chunk.obj", "chunk");
     Resources.LoadTexture("data/chunk.png", "mat_chunk");
     
-    Resources.LoadShaderGLSL("data/color.shader", "surface");
-    Resources.LoadShaderGLSL("data/texture.shader", "texture");
     
     Resources.LoadWaveFront("data/sky/sky.obj", "skyBox");
-    //Resources.LoadTexture("data/sky/sky.png",   "skyMaterial");
+    //Resources.LoadTexture("data/sky/sky.png", "skyMaterial");
+    
+    Resources.LoadShaderGLSL("data/color.shader", "surface");
+    Resources.LoadShaderGLSL("data/texture.shader", "texture");
     
     Shader* chunkShader = Resources.CreateShaderFromTag("surface");
     Shader* skyShader   = Resources.CreateShaderFromTag("texture");
@@ -56,8 +56,6 @@ void Framework::Start() {
     //
     // Set the gravity vector for the simulation
     Physics.SetWorldGravity(0.0f, -9.81f * 2 * 2, 0);
-    
-    
     
     
     //
@@ -69,8 +67,6 @@ void Framework::Start() {
     GameObject* skyObject = Engine.CreateSky("skyBox", "surface", skyLow, skyHigh, 0.127);
     
     
-    
-    
     //
     // Create a camera controller
     cameraController = Engine.CreateCameraController(glm::vec3(0, 10, 0), glm::vec3(1, 8, 1));
@@ -80,24 +76,17 @@ void Framework::Start() {
     
     
     
-    
     //
-    // AI testing
+    // AI system currently being implemented (possible state machine)
     //
     
     Actor* actor = AI.CreateActor();
     
     
     
-    
-    
-    
-    
+    // Basic chunk generation parameters
     
     float chunkSz = 100;
-    
-    
-    
     
     float noiseX    = 0.008;
     float noiseZ    = 0.008;
@@ -116,61 +105,61 @@ void Framework::Start() {
     
     
     //
-    // Generate some perlin noise chunks
+    // Generate a few perlin noise chunks
     //
     
     for (int z=0; z < areaHeight; z++) {
         
         for (int x=0; x < areaWidth; x++) {
             
-            //
-            // Generate new chunk
-            //
+            GameObject* newChunk = Engine.CreateGameObject();
             
             Mesh* chunkMesh = Resources.CreateMeshFromTag("chunk");
-            
             Material* chunkMaterial = Renderer.CreateMaterial();
-            //Material* chunkMaterial = Resources.CreateMaterialFromTag("mat_chunk");
+            
+            newChunk->AddComponent( Engine.CreateComponentMeshRenderer(chunkMesh, chunkMaterial) );
+            
             
             chunkMaterial->SetShader( chunkShader );
             
-            chunkMaterial->SetTextureFiltration(MATERIAL_FILTER_ANISOTROPIC);
-            chunkMaterial->GenerateMipMaps();
-            
-            // Chunk position
-            float chunkX = x * chunkSz;
-            float chunkZ = z * chunkSz;
-            
-            unsigned int vertexCount = chunkMesh->GetNumberOfVertices();
-            
+            chunkMaterial->SetTextureFiltration(MATERIAL_FILTER_LINEAR);
+            //chunkMaterial->GenerateMipMaps();
             
             
             //
             // Perlin noise generation
             //
             
+            float chunkX = x * chunkSz;
+            float chunkZ = z * chunkSz;
+            
+            unsigned int vertexCount = chunkMesh->GetNumberOfVertices();
+            
             for (unsigned int i=0; i < vertexCount; i++) {
                 
                 Vertex vertex = chunkMesh->GetVertex(i);
                 
+                // Base noise
                 float xCoord = (vertex.x * noiseX) + (chunkX * noiseX);
                 float zCoord = (vertex.z * noiseZ) + (chunkZ * noiseZ);
                 
                 float noiseTotal = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
                 
-                
+                // Height caps
                 if (noiseTotal < 0) noiseTotal  = 0;
                 if (noiseTotal > 50) noiseTotal = 50;
                 
-                
+                // Height steps
                 vertex.y = Math.Round(noiseTotal);
                 
+                // Fade color by height
                 Color colorTotal;
                 colorTotal.r = Math.Lerp(biomeLow.r, biomeHigh.r, noiseTotal * 0.01);
                 colorTotal.g = Math.Lerp(biomeLow.g, biomeHigh.g, noiseTotal * 0.01);
                 colorTotal.b = Math.Lerp(biomeLow.b, biomeHigh.b, noiseTotal * 0.01);
                 
                 
+                // Apply changes to the mesh buffer
                 vertex.r = colorTotal.r;
                 vertex.g = colorTotal.g;
                 vertex.b = colorTotal.b;
@@ -182,18 +171,8 @@ void Framework::Start() {
             
             chunkMesh->UpdateMesh();
             
-            
-            
-            //
-            // Create chunk object
-            GameObject* newChunk = Engine.CreateGameObject();
-            newChunk->AddComponent( Engine.CreateComponentMeshRenderer(chunkMesh, chunkMaterial) );
-            Component* meshRenderer = newChunk->GetComponent(ComponentType::MeshRenderer);
-            
-            newChunk->isActive = true;
-            
             // Add a physics component
-            newChunk->AddComponent( Engine.CreateComponent(ComponentType::RigidBody) );
+            newChunk->AddComponent( Engine.CreateComponent(Components.RigidBody) );
             
             // Lock in place
             newChunk->SetStatic();
@@ -203,6 +182,10 @@ void Framework::Start() {
             // Chunk collider
             BoxShape* chunkCollider = Physics.CreateColliderBox(chunkSz, 10, chunkSz);
             newChunk->AddColliderBox(chunkCollider, 0, -10, 0);
+            
+            //
+            // Too stupid to figure out convex/concave mesh colliders...
+            //
             
             //MeshCollider* meshCollider = Physics.CreateColliderFromMesh(chunkMesh);
             //newChunk->AddColliderMesh(meshCollider);

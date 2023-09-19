@@ -1,9 +1,9 @@
 #include "component.h"
-
+extern EngineComponents Components;
 
 Component::Component() : 
     name(""),
-    mType(ComponentType::Undefined),
+    mType(Components.Undefined),
     mObject(nullptr)
 {
 }

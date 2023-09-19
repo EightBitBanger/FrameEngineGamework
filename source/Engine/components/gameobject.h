@@ -12,6 +12,7 @@
 #include "component.h"
 
 extern RenderSystem Renderer;
+extern EngineComponents Components;
 
 
 class GameObject {
@@ -42,9 +43,9 @@ public:
     /// Remove a component from the game object.
     bool RemoveComponent(Component* component);
     /// Get a component by its type.
-    Component* GetComponent(ComponentType type);
+    void* GetComponent(ComponentType type);
     /// Get a component by its index position.
-    Component* GetComponent(unsigned int index);
+    Component* GetComponentIndex(unsigned int index);
     /// Get the number of components attached to the game object.
     unsigned int GetComponentCount(void);
     

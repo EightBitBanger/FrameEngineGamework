@@ -1,5 +1,6 @@
 #include "engine.h"
 
+EngineComponents  Components;
 ColorPreset       Colors;
 RandomGen         Random;
 Logger            Log;
@@ -8,14 +9,13 @@ Timer             Time;
 
 Serialization     Serializer;
 ResourceManager   Resources;
-PhysicsSystem     Physics;
-RenderSystem      Renderer;
-AudioSystem       Audio;
 ScriptSystem      Scripting;
+RenderSystem      Renderer;
+PhysicsSystem     Physics;
+AudioSystem       Audio;
 InputSystem       Input;
-ActorSystem       AI;
 MathCore          Math;
-
+ActorSystem       AI;
 
 ApplicationLayer      Application;
 EngineSystemManager   Engine;
@@ -53,7 +53,7 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     // Remove all components
     for (unsigned int i=0; i < gameObjectPtr->GetComponentCount(); i++) {
         
-        Component* componentPtr = gameObjectPtr->GetComponent(i);
+        Component* componentPtr = gameObjectPtr->GetComponentIndex(i);
         DestroyComponent(componentPtr);
         continue;
     }
@@ -69,14 +69,14 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     cameraController->transform.position = position;
     
     // Add a camera component
-    Component* cameraComponent = CreateComponent(ComponentType::Camera);
+    Component* cameraComponent = CreateComponent(Components.Camera);
     Camera* cameraMain = (Camera*)cameraComponent->GetComponent();
     Renderer.cameraMain = cameraMain;
     cameraMain->EnableMouseLook();
     cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     // Add a rigid body component
-    Component* rigidBodyComponent = CreateComponent(ComponentType::RigidBody);
+    Component* rigidBodyComponent = CreateComponent(Components.RigidBody);
     rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
     
     rp3d::Vector3 bodyPosition(position.x, position.y, position.z);
@@ -86,7 +86,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     rigidBody->setTransform(bodyTransform);
     
     // Add a scripting component
-    Component* scriptComponent = CreateComponent(ComponentType::Script);
+    Component* scriptComponent = CreateComponent(Components.Script);
     Script* script = (Script*)scriptComponent->GetComponent();
     script->gameObject = cameraController;
     script->isActive = true;
@@ -143,7 +143,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
 }
 
 Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr) {
-    Component* newComponent = CreateComponent(ComponentType::MeshRenderer);
+    Component* newComponent = CreateComponent(Components.MeshRenderer);
     MeshRenderer* entityRenderer = (MeshRenderer*)newComponent->GetComponent();
     entityRenderer->AttachMesh(meshPtr);
     entityRenderer->AttachMaterial(materialPtr);
@@ -151,7 +151,7 @@ Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Mater
 }
 
 Component* EngineSystemManager::CreateComponentLight(glm::vec3 position) {
-    Component* newComponent = CreateComponent(ComponentType::Light);
+    Component* newComponent = CreateComponent(Components.Light);
     Light* lightPoint = (Light*)newComponent->GetComponent();
     lightPoint->transform.position = position;
     return newComponent;
@@ -182,25 +182,25 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
     
     switch (type) {
         
-        case ComponentType::MeshRenderer: {
+        case COMPONENT_TYPE_MESH_RENDERER: {
             MeshRenderer* meshRendererPtr = Renderer.CreateMeshRenderer();
             mSceneMain->AddMeshRendererToSceneRoot(meshRendererPtr);
             component_object = (void*)meshRendererPtr;
             break;
         }
-        case ComponentType::RigidBody: {
+        case COMPONENT_TYPE_RIGID_BODY: {
             component_object = (void*)Physics.CreateRigidBody();
             break;
         }
-        case ComponentType::Script: {
+        case COMPONENT_TYPE_SCRIPT: {
             component_object = (void*)Scripting.CreateScript();
             break;
         }
-        case ComponentType::Camera: {
+        case COMPONENT_TYPE_CAMERA: {
             component_object = (void*)Renderer.CreateCamera();
             break;
         }
-        case ComponentType::Light: {
+        case COMPONENT_TYPE_LIGHT: {
             Light* lightPtr = Renderer.CreateLight();
             mSceneMain->AddLightToSceneRoot(lightPtr);
             component_object = (void*)lightPtr;
@@ -223,28 +223,28 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
     
     switch (componentType) {
         
-        case ComponentType::MeshRenderer: {
+        case COMPONENT_TYPE_MESH_RENDERER: {
             MeshRenderer* componentEntityRenderer = (MeshRenderer*)componentPtr->GetComponent();
             mSceneMain->RemoveMeshRendererFromSceneRoot(componentEntityRenderer);
             Renderer.DestroyMeshRenderer(componentEntityRenderer);
             break;
         }
-        case ComponentType::RigidBody: {
+        case COMPONENT_TYPE_RIGID_BODY: {
             rp3d::RigidBody* componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
             Physics.DestroyRigidBody(componentRigidBody);
             break;
         }
-        case ComponentType::Script: {
+        case COMPONENT_TYPE_SCRIPT: {
             Script* componentScript = (Script*)componentPtr->GetComponent();
             Scripting.DestroyScript(componentScript);
             break;
         }
-        case ComponentType::Camera: {
+        case COMPONENT_TYPE_CAMERA: {
             Camera* componentCamera = (Camera*)componentPtr->GetComponent();
             Renderer.DestroyCamera(componentCamera);
             break;
         }
-        case ComponentType::Light: {
+        case COMPONENT_TYPE_LIGHT: {
             Light* componentLight = (Light*)componentPtr->GetComponent();
             mSceneMain->RemoveLightFromSceneRoot(componentLight);
             Renderer.DestroyLight(componentLight);
