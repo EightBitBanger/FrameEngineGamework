@@ -12,57 +12,58 @@ FileLoader::FileLoader(std::string FileName)
     
     // Load the file data
     FileStream.open( FileName );
-    if (FileStream.is_open()) {
+    if (!FileStream.is_open()) 
+        return;
+    
+    std::string String;
+    
+    // Load the data from file
+    while ( getline(FileStream, String) ) {
         
-        std::string String;
+        if (String == "") continue;
+        if (String.find("//") == 0) continue;
         
-        // Load the data from file
-        while ( getline(FileStream, String) ) {
+        rawData.push_back(String);
+        
+        // Split string by spaces
+        std::vector<std::string> ArrayData = StringExplode(String, ' ');
+        int MaxSz = ArrayData.size();
+        if (MaxSz < 1) continue;
+        
+        // Check data block
+        if (ArrayData[0] == "[begin]") {
             
-            if (String == "") continue;
-            if (String.find("//") == 0) continue;
+            // Get block name
+            std::string BlockName = ArrayData[1];
+            std::string BlockString = "";
             
-            rawData.push_back(String);
-            
-            // Split string by spaces
-            std::vector<std::string> ArrayData = StringExplode(String, ' ');
-            int MaxSz = ArrayData.size();
-            if (MaxSz < 1) continue;
-            
-            // Check data block
-            if (ArrayData[0] == "[begin]") {
+            for (int i=0; i < 512; i++) {
                 
-                // Get block name
-                std::string BlockName = ArrayData[1];
-                std::string BlockString = "";
+                getline(FileStream, String);
+                if (String == "[end]") break;
                 
-                for (int i=0; i < 512; i++) {
-                    
-                    getline(FileStream, String);
-                    if (String == "[end]") break;
-                    
-                    BlockString += String + "\n";
-                    
-                }
-                
-                this ->dataBlocks.emplace(BlockName, BlockString);
-            }
-            
-            std::vector<std::string> ValueList;
-            
-            for (int i=1; i < MaxSz; i++) {
-                
-                ValueList.push_back(ArrayData[i]);
+                BlockString += String + "\n";
                 
             }
             
-            this ->assetData.insert( std::pair<std::string, std::vector<std::string>>(ArrayData[0], ValueList) );
+            this ->dataBlocks.emplace(BlockName, BlockString);
+        }
+        
+        std::vector<std::string> ValueList;
+        
+        for (int i=1; i < MaxSz; i++) {
+            
+            ValueList.push_back(ArrayData[i]);
             
         }
         
-        FileStream.close();
-        isFileLoaded = true;
+        this ->assetData.insert( std::pair<std::string, std::vector<std::string>>(ArrayData[0], ValueList) );
+        
     }
+    
+    FileStream.close();
+    isFileLoaded = true;
+    
     return;
 }
 
