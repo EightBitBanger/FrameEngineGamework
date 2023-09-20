@@ -20,13 +20,13 @@ void TestFramework::TestGameObject(void) {
     
     // Test component attachment
     gameObject1->AddComponent(componentEntity);
-    MeshRenderer* getRenderer = (MeshRenderer*)gameObject1->GetComponent(COMPONENT_TYPE_MESH_RENDERER);
+    MeshRenderer* getRenderer = gameObject1->GetComponent<MeshRenderer>();
     
     if (getRenderer  == nullptr) Throw(msgFailedToAttachComponent, __FILE__, __LINE__);
     
     // Test component detachment
     gameObject1->RemoveComponent(componentEntity);
-    if (gameObject1->GetComponent(Components.MeshRenderer)  != nullptr) Throw(msgFailedToDetachComponent, __FILE__, __LINE__);
+    if (gameObject1->GetComponent<MeshRenderer>() != nullptr) Throw(msgFailedToDetachComponent, __FILE__, __LINE__);
     
     // Test game object should destroy its components
     gameObject1->AddComponent(componentEntity);
