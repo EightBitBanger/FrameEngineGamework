@@ -2,6 +2,8 @@
 
 Script::Script() : 
     
+    name(""),
+    
     isActive(false),
     hasBeenInitiated(false),
     
@@ -13,6 +15,4 @@ Script::Script() :
 }
 
 // Dummy landing function
-void DefaultFunctionPtr(GameObject* dummyObjectPtr) {
-    return;
-}
+void DefaultFunctionPtr(void* dummyObjectPtr) {}

@@ -74,6 +74,10 @@ void Framework::Start() {
     // Attach sky to the camera
     skyObject->parent = cameraController;
     
+    Script* scriptPtr = cameraController->GetComponent<Script>("controller");
+    
+    if (scriptPtr == nullptr) 
+        Application.isActive = false;
     
     
     //

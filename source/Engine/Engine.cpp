@@ -88,6 +88,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     // Add a scripting component
     Component* scriptComponent = CreateComponent(Components.Script);
     Script* script = (Script*)scriptComponent->GetComponent();
+    script->name = "controller";
     script->gameObject = cameraController;
     script->isActive = true;
     

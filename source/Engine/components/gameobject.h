@@ -1,9 +1,12 @@
 #ifndef ENGINE_GAME_OBJECT
 #define ENGINE_GAME_OBJECT
 
+#include <type_traits>
+
 #include "../../Renderer/components/meshrenderer.h"
 #include "../../Renderer/components/camera.h"
 #include "../../Renderer/components/light.h"
+#include "../../Scripting/components/script.h"
 #include "../../Physics/PhysicsSystem.h"
 #include "../../Renderer/RenderSystem.h"
 
@@ -42,12 +45,40 @@ public:
     void AddComponent(Component* component);
     /// Remove a component from the game object.
     bool RemoveComponent(Component* component);
-    /// Get a component by its type.
-    void* GetComponent(ComponentType type);
+    /// Get a script component by its name.
+    Script* GetComponentScript(std::string scriptName);
     /// Get a component by its index position.
     Component* GetComponentIndex(unsigned int index);
     /// Get the number of components attached to the game object.
     unsigned int GetComponentCount(void);
+    
+    /// Get a component of a given type.
+    template <class T> T* GetComponent(void) {
+        
+        if (std::is_same<T, Camera>::value)           return (T*)mCameraCache;
+        if (std::is_same<T, Light>::value)            return (T*)mLightCache;
+        if (std::is_same<T, MeshRenderer>::value)     return (T*)mMeshRendererCache;
+        if (std::is_same<T, rp3d::RigidBody>::value)  return (T*)mCameraCache;
+        
+        return nullptr;
+    }
+    
+    /// Get a script component by a given name.
+    template <class T> T* GetComponent(std::string scriptName) {
+        for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
+            Component* thisComponentPtr = *it;
+            
+            if (thisComponentPtr->GetType() == Components.Script) {
+                T* componentPtr = (T*)thisComponentPtr->GetComponent();
+                
+                if (componentPtr->name == scriptName) {
+                    return componentPtr;
+                }
+            }
+        }
+        return nullptr;
+    }
+    
     
     //
     // Physics
