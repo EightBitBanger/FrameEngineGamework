@@ -39,6 +39,8 @@ GameObject*  cameraController;
 void Framework::Start() {
     
     // Load some external resources
+    Resources.LoadWaveFront("data/cube.obj", "cube");
+    
     Resources.LoadWaveFront("data/chunk.obj", "chunk");
     Resources.LoadTexture("data/chunk.png", "mat_chunk");
     
@@ -69,7 +71,7 @@ void Framework::Start() {
     
     //
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(glm::vec3(0, 10, 0), glm::vec3(1, 8, 1));
+    cameraController = Engine.CreateCameraController(glm::vec3(0, 50, 0), glm::vec3(1, 8, 1));
     cameraController->transform.position = glm::vec3(0);
     // Attach sky to the camera
     skyObject->parent = cameraController;
@@ -137,6 +139,8 @@ void Framework::Start() {
             float chunkX = x * chunkSz;
             float chunkZ = z * chunkSz;
             
+            //MeshCollider* meshCollider = Physics.meshCollider.Create();
+            
             unsigned int vertexCount = chunkMesh->GetNumberOfVertices();
             
             for (unsigned int i=0; i < vertexCount; i++) {
@@ -155,6 +159,7 @@ void Framework::Start() {
                 
                 // Height steps
                 vertex.y = Math.Round(noiseTotal);
+                vertex.y = 0;
                 
                 // Fade color by height
                 Color colorTotal;
@@ -170,6 +175,8 @@ void Framework::Start() {
                 
                 chunkMesh->SetVertex(i, vertex);
                 
+                //meshCollider->heightMapBuffer[i] = vertex.y;
+                
                 continue;
             }
             
@@ -183,16 +190,46 @@ void Framework::Start() {
             newChunk->SetLinearAxisLockFactor(0, 0, 0);
             newChunk->SetAngularAxisLockFactor(0, 0, 0);
             
-            // Chunk collider
+            
             BoxShape* chunkCollider = Physics.CreateColliderBox(chunkSz, 10, chunkSz);
             newChunk->AddColliderBox(chunkCollider, 0, -10, 0);
+            
+            
+            
+            // Height field test
+            
+            //meshCollider->heightFieldShape = 
+            //Physics.common.createHeightFieldShape(10, 10, 100, 500, meshCollider->heightMapBuffer, rp3d::HeightFieldShape::HeightDataType::HEIGHT_FLOAT_TYPE);
+            
+            /*
+            rp3d::Transform offsetTransform;
+            offsetTransform.setPosition(rp3d::Vector3(0, 0, 0));
+            
+            newChunk->GetComponent<rp3d::RigidBody>()->addCollider(meshCollider->heightFieldShape, offsetTransform);
+            */
+            
+            
+            /*
+            rp3d::HeightFieldShape* heightFieldShape = 
+            Physics.common.createHeightFieldShape(10, 10, 100, 500,gridArray, rp3d::HeightFieldShape::HeightDataType::HEIGHT_FLOAT_TYPE);
+            
+            
+            
+            // Chunk collider
             
             //
             // Too stupid to figure out convex/concave mesh colliders...
             //
-            
             //MeshCollider* meshCollider = Physics.CreateColliderFromMesh(chunkMesh);
             //newChunk->AddColliderMesh(meshCollider);
+            
+            //MeshCollider* meshCollider = Physics.CreateColliderHeightMapFromMesh(chunkMesh);
+            //newChunk->AddColliderMesh(meshCollider);
+            */
+            
+            
+            
+            
             
             newChunk->SetPosition((x * chunkSz) - ((areaWidth/2) * chunkSz), 0.0f, (z * chunkSz) - ((areaHeight/2) * chunkSz));
             newChunk->transform.SetScale(1, 1, 1);
@@ -216,7 +253,7 @@ void Framework::Start() {
 
 
 // Camera movement force
-float cameraSpeed     = 40000;
+float cameraSpeed     = 80000;
 
 
 
@@ -226,20 +263,20 @@ float cameraSpeed     = 40000;
 
 void Framework::Run() {
     
-    // Keyboard movement, WASD keys
     glm::vec3 force(0);
+    
+    // Directional movement
     if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
     if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
     if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
     
-    // Space and shift for elevation
+    // Elevation
     if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
     if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
     
-    // Camera speed multiplier
-    force *= cameraSpeed;
     
+    force *= cameraSpeed;
     cameraController->AddForce(force.x, force.y, force.z);
     
     
@@ -253,16 +290,16 @@ void Framework::Run() {
         Application.Pause();
         
         if (Application.isPaused) {
-            
             Renderer.cameraMain->DisableMouseLook();
-            ShowCursor(true);
-            
             Input.ClearKeys();
-        } else {
             
+            Application.ShowMouseCursor();
+            
+        } else {
             Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
             Renderer.cameraMain->EnableMouseLook();
-            ShowCursor(false);
+            
+            Application.HideMouseCursor();
             
             Time.Update();
             PhysicsTime.Update();
@@ -274,6 +311,9 @@ void Framework::Run() {
 }
 
 
+//
+// Called once every tick
+//
 
 void Framework::TickUpdate(void) {
     

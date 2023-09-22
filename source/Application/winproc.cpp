@@ -60,6 +60,10 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             break;
         }
         
+        case WM_SETCURSOR: 
+            SetCursor(Application.hCursor);
+            break;
+        
         // Close button handling
         case WM_CLOSE:
             

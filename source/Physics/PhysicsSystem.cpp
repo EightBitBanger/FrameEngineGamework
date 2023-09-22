@@ -92,6 +92,7 @@ MeshCollider* PhysicsSystem::CreateColliderFromMesh(Mesh* sourceMesh) {
     unsigned int vertexCount = sourceMesh->GetNumberOfVertices();
     unsigned int indexCount  = sourceMesh->GetNumberOfIndices();
     
+    
     for (int i=0; i < vertexCount; i++) {
         Vertex vertex = sourceMesh->GetVertex(i);
         newMeshCollider->vertexBuffer.push_back(vertex.x);
@@ -99,14 +100,22 @@ MeshCollider* PhysicsSystem::CreateColliderFromMesh(Mesh* sourceMesh) {
         newMeshCollider->vertexBuffer.push_back(vertex.z);
     }
     
+    
     for (int i=0; i < indexCount; i++) {
         unsigned int index = sourceMesh->GetIndex(i).index;
         
         newMeshCollider->indexBuffer.push_back( index );
+        
+        //Vertex vertex = sourceMesh->GetVertex( index );
+        
+        //newMeshColliPhysicsSystem::der->vertexBuffer.push_back(vertex.x);
+        //newMeshCollider->vertexBuffer.push_back(vertex.y);
+        //newMeshCollider->vertexBuffer.push_back(vertex.z);
+        
     }
     
     unsigned int sizeOfVertexBuffer = newMeshCollider->vertexBuffer.size() - 1;
-    unsigned int sizeOfIndexBuffer  = newMeshCollider->indexBuffer.size() - 1;
+    unsigned int sizeOfIndexBuffer  = newMeshCollider->indexBuffer.size() / 3;
     
     newMeshCollider->triangleArray = new rp3d::TriangleVertexArray(
                                                             sizeOfVertexBuffer,
@@ -129,6 +138,39 @@ MeshCollider* PhysicsSystem::CreateColliderFromMesh(Mesh* sourceMesh) {
     
     return newMeshCollider;
 }
+
+
+
+MeshCollider* PhysicsSystem::CreateColliderHeightMapFromMesh(Mesh* sourceMesh) {
+    
+    MeshCollider* newMeshCollider = meshCollider.Create();
+    
+    //unsigned int vertexCount = sourceMesh->GetNumberOfVertices();
+    //unsigned int indexCount  = sourceMesh->GetNumberOfIndices();
+    
+    for (int i=0; i < (10 * 10); i++) {
+        Vertex vertex = sourceMesh->GetVertex(i);
+        
+        newMeshCollider->heightMapBuffer[i] = vertex.y;
+    }
+    
+    
+    newMeshCollider->heightFieldShape = 
+    common.createHeightFieldShape(10,
+                                  10,
+                                  100,
+                                  200,
+                                  newMeshCollider->heightMapBuffer,
+                                  rp3d::HeightFieldShape::HeightDataType::HEIGHT_FLOAT_TYPE);
+    
+    newMeshCollider->heightFieldShape->setScale(rp3d::Vector3(10, 10, 10));
+    
+    return newMeshCollider;
+}
+
+
+
+
 
 void PhysicsSystem::AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr) {
     mRigidBodyFreeList.push_back(rigidBodyPtr);

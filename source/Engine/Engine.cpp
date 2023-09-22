@@ -305,7 +305,7 @@ void EngineSystemManager::Update(void) {
         // Sync with the rigid body
         //
         
-        rp3d::RigidBody* componentRigidBody = objectPtr->GetCachedRigidBody();
+        rp3d::RigidBody* componentRigidBody = objectPtr->GetComponent<rp3d::RigidBody>();
         if (componentRigidBody != nullptr) {
             
             // Use the rigid body as the source transform
@@ -333,21 +333,21 @@ void EngineSystemManager::Update(void) {
             currentTransform.matrix = glm::scale(currentTransform.matrix, objectPtr->transform.scale);
         }
         
-        MeshRenderer* componentEntityRenderer = objectPtr->GetCachedMeshRenderer();
-        if (componentEntityRenderer != nullptr) {
-            componentEntityRenderer->transform.position    = currentTransform.position;
-            componentEntityRenderer->transform.orientation = currentTransform.orientation;
-            componentEntityRenderer->transform.scale       = currentTransform.scale;
-            componentEntityRenderer->transform.matrix      = currentTransform.matrix;
+        MeshRenderer* componentMeshRenderer = objectPtr->GetComponent<MeshRenderer>();
+        if (componentMeshRenderer != nullptr) {
+            componentMeshRenderer->transform.position    = currentTransform.position;
+            componentMeshRenderer->transform.orientation = currentTransform.orientation;
+            componentMeshRenderer->transform.scale       = currentTransform.scale;
+            componentMeshRenderer->transform.matrix      = currentTransform.matrix;
         }
         
-        Light* componentLight = objectPtr->GetCachedLight();
+        Light* componentLight = objectPtr->GetComponent<Light>();
         if (componentLight != nullptr) {
             componentLight->transform.position    = currentTransform.position;
             componentLight->transform.orientation = currentTransform.orientation;
         }
         
-        Camera* componentCamera = objectPtr->GetCachedCamera();
+        Camera* componentCamera = objectPtr->GetComponent<Camera>();
         if (componentCamera != nullptr) {
             componentCamera->transform.position = currentTransform.position;
             if (!componentCamera->useMouseLook) 

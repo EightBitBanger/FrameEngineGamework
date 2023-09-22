@@ -16,6 +16,9 @@ Actor::Actor() :
     distanceToLookAtEntity(0),
     distanceToStopMoving(0)
     
+    
+    
+    
 {
 }
 

@@ -6,6 +6,7 @@
 #include "../Renderer/RenderSystem.h"
 #include "../Input/InputSystem.h"
 #include "../Physics/PhysicsSystem.h"
+#include "../Serialization/Serialization.h"
 #include "../Resources/ResourceManager.h"
 #include "../Scripting/ScriptSystem.h"
 #include "../Audio/AudioSystem.h"
@@ -18,6 +19,8 @@ namespace Framework {
     void Start(void);
     
     void Run(void);
+    
+    void TickUpdate(void);
     
     void Shutdown(void);
     
@@ -40,6 +43,8 @@ public:
     
     bool isPaused;
     bool isActive;
+    
+    HICON__* hCursor;
     
     ApplicationLayer();
     
@@ -68,6 +73,12 @@ public:
     
     /// Hide the window.
     void HideWindowHandle(void);
+    
+    /// Show the mouse cursor.
+    void ShowMouseCursor(void);
+    
+    /// Hide the mouse cursor.
+    void HideMouseCursor(void);
     
     
 private:

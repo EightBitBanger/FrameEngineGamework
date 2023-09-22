@@ -10,12 +10,19 @@ public:
     
     MeshCollider();
     
+    // Height field collider
+    rp3d::HeightFieldShape* heightFieldShape;
+    
+    float* heightMapBuffer;
+    
+    
+    // Mesh collider
     rp3d::ConcaveMeshShape*    concaveMeshShape;
     rp3d::TriangleVertexArray* triangleArray;
     rp3d::TriangleMesh*        triangleMesh;
     
     std::vector<float> vertexBuffer;
-    std::vector<unsigned int> indexBuffer;
+    std::vector<uint32_t> indexBuffer;
     
 };
 

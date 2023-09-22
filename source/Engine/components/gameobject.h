@@ -22,8 +22,6 @@ class GameObject {
     
 public:
     
-    // Object elements
-    
     /// Object name.
     std::string name;
     
@@ -45,8 +43,6 @@ public:
     void AddComponent(Component* component);
     /// Remove a component from the game object.
     bool RemoveComponent(Component* component);
-    /// Get a script component by its name.
-    Script* GetComponentScript(std::string scriptName);
     /// Get a component by its index position.
     Component* GetComponentIndex(unsigned int index);
     /// Get the number of components attached to the game object.
@@ -58,7 +54,7 @@ public:
         if (std::is_same<T, Camera>::value)           return (T*)mCameraCache;
         if (std::is_same<T, Light>::value)            return (T*)mLightCache;
         if (std::is_same<T, MeshRenderer>::value)     return (T*)mMeshRendererCache;
-        if (std::is_same<T, rp3d::RigidBody>::value)  return (T*)mCameraCache;
+        if (std::is_same<T, rp3d::RigidBody>::value)  return (T*)mRigidBodyCache;
         
         return nullptr;
     }
@@ -66,10 +62,10 @@ public:
     /// Get a script component by a given name.
     template <class T> T* GetComponent(std::string scriptName) {
         for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
-            Component* thisComponentPtr = *it;
+            Component* currentComponentPtr = *it;
             
-            if (thisComponentPtr->GetType() == Components.Script) {
-                T* componentPtr = (T*)thisComponentPtr->GetComponent();
+            if (currentComponentPtr->GetType() == Components.Script) {
+                T* componentPtr = (T*)currentComponentPtr->GetComponent();
                 
                 if (componentPtr->name == scriptName) {
                     return componentPtr;
@@ -124,15 +120,6 @@ public:
     void SetStatic(void);
     /// Make the rigid body dynamically movable.
     void SetDynamic(void);
-    
-    /// Get the cached camera object pointer.
-    Camera* GetCachedCamera(void);
-    /// Get the cached rigid body object pointer.
-    rp3d::RigidBody* GetCachedRigidBody(void);
-    /// Get the cached mesh renderer object pointer.
-    MeshRenderer* GetCachedMeshRenderer(void);
-    /// Get the cached light object pointer.
-    Light* GetCachedLight(void);
     
     
 private:

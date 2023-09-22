@@ -13,6 +13,8 @@ ApplicationLayer::ApplicationLayer() :
     isPaused(false),
     isActive(true),
     
+    hCursor(nullptr),
+    
     mIsWindowRunning(false)
 {
 }
@@ -28,6 +30,8 @@ HWND ApplicationLayer::CreateWindowHandle(std::string className, std::string win
     isPaused = false;
     isActive = true;
     
+    hCursor = LoadCursor(NULL, IDC_ARROW);
+    
     wClassEx.lpszClassName   = className.c_str();
     wClassEx.cbSize          = sizeof(WNDCLASSEX);
     wClassEx.style           = CS_OWNDC;
@@ -36,7 +40,7 @@ HWND ApplicationLayer::CreateWindowHandle(std::string className, std::string win
     wClassEx.cbWndExtra      = 0;
     wClassEx.hInstance       = hInstance;
     wClassEx.lpszMenuName    = NULL;
-    wClassEx.hCursor         = LoadCursor(NULL, IDC_ARROW);
+    wClassEx.hCursor         = hCursor;
     wClassEx.hIcon           = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
     wClassEx.hIconSm         = LoadIcon(hInstance, IDI_APPLICATION);
     wClassEx.hbrBackground   = (HBRUSH)GetStockObject(BLACK_BRUSH);
@@ -44,8 +48,14 @@ HWND ApplicationLayer::CreateWindowHandle(std::string className, std::string win
     assert( RegisterClassEx(&wClassEx) );
     
     windowHandle = CreateWindowEx(0, className.c_str(), windowName.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, parentHandle, NULL, hInstance, NULL);
-    ShowWindow(windowHandle, true);
     assert(windowHandle != NULL);
+    
+    ShowWindow(windowHandle, true);
+    SetCursor(hCursor);
+    
+#ifdef WINDOW_MOUSE_HIDDEN_ON_START
+    while (ShowCursor(false) >= 0);
+#endif
     
     deviceContext = GetDC(windowHandle);
     
@@ -128,4 +138,12 @@ void ApplicationLayer::ShowWindowHandle(void) {
     assert(windowHandle != NULL);
     ShowWindow(windowHandle, false);
     return;
+}
+
+void ApplicationLayer::ShowMouseCursor(void) {
+    while (ShowCursor(true) < 0);
+}
+
+void ApplicationLayer::HideMouseCursor(void) {
+    while (ShowCursor(false) >= 0);
 }

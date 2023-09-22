@@ -28,6 +28,7 @@ set (ENGINE_HEADERS
     "source/Audio/AudioSystem.h"
     
     "source/AI/ActorSystem.h"
+    "source/AI/genetics.h"
     "source/AI/components/actor.h"
     
     "source/Serialization/Serialization.h"
@@ -105,6 +106,7 @@ set (ENGINE_SOURCES
     "source/Engine/components/gameobject.cpp"
     
     "source/AI/ActorSystem.cpp"
+    "source/AI/genetics.cpp"
     "source/AI/components/actor.cpp"
     
     "source/Serialization/Serialization.cpp"

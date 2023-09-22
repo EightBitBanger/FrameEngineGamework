@@ -5,6 +5,7 @@ GameObject::GameObject() :
     
     name(""),
     isActive(true),
+    
     parent(nullptr),
     
     mCameraCache(nullptr),
@@ -77,21 +78,6 @@ unsigned int GameObject::GetComponentCount(void) {
     return mComponentList.size();
 }
 
-Camera* GameObject::GetCachedCamera(void) {
-    return mCameraCache;
-}
-
-rp3d::RigidBody* GameObject::GetCachedRigidBody(void) {
-    return mRigidBodyCache;
-}
-
-MeshRenderer* GameObject::GetCachedMeshRenderer(void) {
-    return mMeshRendererCache;
-}
-
-Light* GameObject::GetCachedLight(void) {
-    return mLightCache;
-}
 
 
 //
@@ -213,7 +199,8 @@ void GameObject::AddColliderMesh(MeshCollider* meshCollider) {
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(0, 0, 0));
     
-    mRigidBodyCache->addCollider(meshCollider->concaveMeshShape, offsetTransform);
+    if (meshCollider->heightFieldShape != nullptr) mRigidBodyCache->addCollider(meshCollider->heightFieldShape, offsetTransform);
+    if (meshCollider->concaveMeshShape != nullptr) mRigidBodyCache->addCollider(meshCollider->concaveMeshShape, offsetTransform);
     
     return;
 }

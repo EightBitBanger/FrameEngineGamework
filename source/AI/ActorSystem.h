@@ -4,6 +4,7 @@
 #include "../../vendor/CodeBaseLibrary/poolallocator.h"
 
 #include "components/actor.h"
+#include "Genetics.h"
 
 
 class ActorSystem {

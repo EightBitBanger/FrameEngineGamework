@@ -18,6 +18,8 @@ class PhysicsSystem {
     
 public:
     
+    PoolAllocator<MeshCollider> meshCollider;
+    
     /// Physical world simulation.
     rp3d::PhysicsWorld* world;
     /// Physics library common access singleton.
@@ -47,11 +49,10 @@ public:
     rp3d::CapsuleShape* CreateColliderCapsule(float radius, float height);
     /// Create a concave mesh shape collider.
     MeshCollider* CreateColliderFromMesh(Mesh* sourceMesh);
-    
+    /// Create a height map collider from a mesh grid of heights.
+    MeshCollider* CreateColliderHeightMapFromMesh(Mesh* sourceMesh);
     
 private:
-    
-    PoolAllocator<MeshCollider> meshCollider;
     
     // Add a rigid body to the free list
     void AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr);

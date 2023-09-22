@@ -10,6 +10,7 @@ extern ResourceManager      Resources;
 extern ApplicationLayer     Application;
 extern ActorSystem          AI;
 extern EngineSystemManager  Engine;
+extern InputSystem          Input;
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
@@ -78,7 +79,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         std::string freeze;
         std::cin >> freeze;
     }
-#endif    
+#endif
     
     Framework::Start();
     

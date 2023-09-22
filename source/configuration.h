@@ -2,16 +2,18 @@
 #define APPLICATION_CONFIGURATION
 
 //
-// Window
+// Window layout
 //
 
-#define  WINDOW_NAME  "Scene view"
+#define  WINDOW_NAME  "Render view"
 // Dimensions
 #define  WINDOW_WIDTH       1330
 #define  WINDOW_HEIGHT      1000
 // MAX size
 #define  WINDOW_WIDTH_MIN   300
 #define  WINDOW_HEIGHT_MIN  200
+
+#define  WINDOW_MOUSE_HIDDEN_ON_START
 
 // Console window area
 #define     WINDOW_CONSOLE_LEFT    5
@@ -56,13 +58,6 @@
 //
 
 #define RUN_UNIT_TESTS
-
-
-
-
-
-
-
 
 
 
