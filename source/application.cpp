@@ -38,6 +38,32 @@ GameObject*  cameraController;
 
 void Framework::Start() {
     
+    
+    Gene newGene;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // Load some external resources
     Resources.LoadWaveFront("data/cube.obj", "cube");
     

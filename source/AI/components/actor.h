@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <glm/glm.hpp>
 
 #include "../Genetics.h"
 
@@ -29,9 +30,6 @@ public:
     float distanceToLookAtEntity;
     float distanceToStopMoving;
     
-    // Actor genetics
-    
-    
     
     
     
@@ -41,11 +39,17 @@ public:
     
     void Update(void);
     
+    /// Add a new gene to the actors genome. The index will return.
+    unsigned int AddGene(Gene& newGene);
+    /// Remove a gene from the actors genome.
+    void RemoveGene(unsigned int index);
     
     
     
 private:
     
+    // Actor genome
+    std::vector<Gene> mGenes;
     
 };
 
