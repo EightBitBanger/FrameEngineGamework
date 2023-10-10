@@ -83,13 +83,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Framework::Start();
     
-    // Main timers
-    PhysicsTime.Update();
+    // Render timer
+    float renderUpdateTimeout = 1000.0f / RENDER_FRAMES_PER_SECOND;
+    float renderAccumulator=0;
     Time.Update();
     
-    // Tick update accumulator
+    // Physics timer
+    float physicsUpdateTimeout = 1000.0f / PHYSICS_UPDATES_PER_SECOND;
+    float physicsAccumulator=0;
+    PhysicsTime.Update();
+    
+    // Tick update timer
     Timer tickTimer;
-    float tickUpdateTimeout = 1000 / TICK_UPDATES_PER_SECOND;
+    float tickUpdateTimeout = 1000.0f / TICK_UPDATES_PER_SECOND;
     float tickAccumulator=0;
     tickTimer.Update();
     
@@ -107,8 +113,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             Application.isActive = false;
 #endif
         
-        if (PhysicsTime.Update()) 
-            Physics.world->update( 1.0f / PHYSICS_UPDATES_PER_SECOND );
+        // Physics timer
+        physicsAccumulator += PhysicsTime.GetCurrentDelta();
+        PhysicsTime.Update();
+        
+        if (physicsAccumulator > physicsUpdateTimeout) {
+            physicsAccumulator = 0;
+            Physics.world->update( physicsUpdateTimeout );
+        }
         
         // Tick update timer
         tickAccumulator += tickTimer.GetCurrentDelta();
@@ -130,7 +142,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         }
         
         // Application and render timer
-        if (Time.Update()) {
+        renderAccumulator += Time.GetCurrentDelta();
+        Time.Update();
+        
+        
+        if (renderAccumulator > renderUpdateTimeout) {
+            
+            renderAccumulator = 0;
             
             Framework::Run();
             
@@ -138,8 +156,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             Engine.Update();
             
-            Renderer.RenderFrame( Time.delta );
-            
+            Renderer.RenderFrame( renderUpdateTimeout );
         }
         
         continue;

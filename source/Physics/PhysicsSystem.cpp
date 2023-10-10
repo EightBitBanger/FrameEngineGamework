@@ -17,13 +17,16 @@ void PhysicsSystem::Initiate(void) {
     worldSettings.defaultFrictionCoefficient   = 0.7;
     worldSettings.restitutionVelocityThreshold = 0.9;
     
+    worldSettings.isSleepingEnabled = true;
+    worldSettings.gravity = rp3d::Vector3(0 , -9.81 , 0);
+    
     world = common.createPhysicsWorld(worldSettings);
     
-    SetWorldGravity(0, -9.98 * 3 * 3, 0);
+    world->setSleepLinearVelocity(0.01);
+    world->setSleepAngularVelocity(0.01);
     
-    world->enableSleeping(true);
-    world->setSleepLinearVelocity(0.1);
-    world->setSleepAngularVelocity(0.1);
+    world->setNbIterationsVelocitySolver(15);
+    world->setNbIterationsPositionSolver(8);
     
     return;
 }

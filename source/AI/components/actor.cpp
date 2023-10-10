@@ -1,5 +1,7 @@
 #include "actor.h"
 
+extern PhysicsSystem        Physics;
+
 
 Actor::Actor() : 
     name(""),
@@ -17,13 +19,12 @@ Actor::Actor() :
     distanceToStopMoving(0)
     
     
-    
-    
 {
 }
 
 void Actor::Update(void) {
     
-    std::cout << "age " << age << std::endl;
+    
+    
     
 }

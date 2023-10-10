@@ -81,6 +81,8 @@ public:
     
     /// Set the position of the object.
     void SetPosition(float x, float y, float z);
+    /// Set the position of the object from a vector3.
+    void SetPosition(glm::vec3 newPosition);
     
     /// Add directional force to the rigid body.
     void AddForce(float x, float y, float z);

@@ -34,8 +34,8 @@ void Camera::MouseLook(float deltaTime, int mouseResetX, int mouseResetY) {
     float MouseDiffX = (MousePos.x - mouseResetX) * MouseSensitivityYaw * deltaTime;
     float MouseDiffY = (MousePos.y - mouseResetY) * MouseSensitivityPitch * deltaTime;
     
-    lookAngle.x += (float)MouseDiffX;
-    lookAngle.y -= (float)MouseDiffY;
+    lookAngle.x += MouseDiffX * 0.001f;
+    lookAngle.y -= MouseDiffY * 0.001f;
     
     // Yaw limit
     if (lookAngle.x >= 0.109655)  {lookAngle.x -= 0.109655;}

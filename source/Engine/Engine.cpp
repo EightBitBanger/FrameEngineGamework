@@ -1,5 +1,6 @@
 #include "engine.h"
 
+
 EngineComponents  Components;
 ColorPreset       Colors;
 RandomGen         Random;
@@ -26,6 +27,7 @@ EngineSystemManager::EngineSystemManager(void) :
     
     mSceneMain(nullptr) 
 {
+    
     // Preallocate some buffer space
     mGameObjectActive.reserve(64);
     
@@ -129,7 +131,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
     }
     skyMesh->UpdateMesh();
     
-    GameObject* skyObject = Engine.CreateGameObject();
+    GameObject* skyObject = CreateGameObject();
     skyObject->name = "sky";
     Component* skyComponent = CreateComponentMeshRenderer(skyMesh, skyMaterial);
     skyObject->AddComponent(skyComponent);
@@ -144,18 +146,67 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
 }
 
 Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr) {
-    Component* newComponent = CreateComponent(Components.MeshRenderer);
-    MeshRenderer* entityRenderer = (MeshRenderer*)newComponent->GetComponent();
+    Component* rendererComponent = CreateComponent(Components.MeshRenderer);
+    MeshRenderer* entityRenderer = (MeshRenderer*)rendererComponent->GetComponent();
     entityRenderer->AttachMesh(meshPtr);
     entityRenderer->AttachMaterial(materialPtr);
-    return newComponent;
+    return rendererComponent;
 }
 
 Component* EngineSystemManager::CreateComponentLight(glm::vec3 position) {
-    Component* newComponent = CreateComponent(Components.Light);
-    Light* lightPoint = (Light*)newComponent->GetComponent();
+    Component* lightComponent = CreateComponent(Components.Light);
+    Light* lightPoint = (Light*)lightComponent->GetComponent();
     lightPoint->transform.position = position;
-    return newComponent;
+    return lightComponent;
+}
+
+GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
+    
+    GameObject* newGameObject = CreateGameObject();
+    newGameObject->AddComponent( CreateComponent(Components.Actor) );
+    newGameObject->AddComponent( CreateComponent(Components.RigidBody) );
+    newGameObject->AddComponent( CreateComponent(Components.MeshRenderer) );
+    
+    // Actor component
+    Actor* ActorObject = newGameObject->GetComponent<Actor>();
+    
+    // Mesh renderer component
+    MeshRenderer* entityRenderer = newGameObject->GetComponent<MeshRenderer>();
+    
+    Mesh* meshPtr = Resources.CreateMeshFromTag("cube");
+    Material* materialPtr = Renderer.CreateMaterial();
+    
+    Color newColor(0, 0, 0);
+    meshPtr->ChangeSubMeshColor(0, newColor);
+    
+    materialPtr->SetShader(Renderer.defaultShader);
+    materialPtr->diffuse = Colors.MakeRandom();
+    
+    entityRenderer->AttachMesh(meshPtr);
+    entityRenderer->AttachMaterial(materialPtr);
+    
+    // Rigid body component
+    rp3d::RigidBody* rigidBody = newGameObject->GetComponent<rp3d::RigidBody>();
+    rigidBody->setTransform( rp3d::Transform( rp3d::Vector3(position.x, position.y, position.z) , rp3d::Quaternion::identity()) );
+    
+    float randomScale = Random.Range(1, 10);
+    
+    // Collider
+    BoxShape* boxShape = Physics.CreateColliderBox(randomScale, randomScale, randomScale);
+    newGameObject->AddColliderBox(boxShape, 0, 0, 0);
+    newGameObject->EnableGravity(true);
+    
+    newGameObject->SetMass(1);
+    newGameObject->SetLinearDamping(0.1);
+    newGameObject->SetAngularDamping(0.1);
+    //newGameObject->CalculatePhysics();
+    
+    //newGameObject->SetLinearAxisLockFactor(0, 0, 0);
+    newGameObject->SetAngularAxisLockFactor(0, 1, 0);
+    
+    newGameObject->transform.SetScale(randomScale, randomScale, randomScale);
+    
+    return newGameObject;
 }
 
 GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
@@ -189,14 +240,6 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
             component_object = (void*)meshRendererPtr;
             break;
         }
-        case COMPONENT_TYPE_RIGID_BODY: {
-            component_object = (void*)Physics.CreateRigidBody();
-            break;
-        }
-        case COMPONENT_TYPE_SCRIPT: {
-            component_object = (void*)Scripting.CreateScript();
-            break;
-        }
         case COMPONENT_TYPE_CAMERA: {
             component_object = (void*)Renderer.CreateCamera();
             break;
@@ -205,6 +248,18 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
             Light* lightPtr = Renderer.CreateLight();
             mSceneMain->AddLightToSceneRoot(lightPtr);
             component_object = (void*)lightPtr;
+            break;
+        }
+        case COMPONENT_TYPE_SCRIPT: {
+            component_object = (void*)Scripting.CreateScript();
+            break;
+        }
+        case COMPONENT_TYPE_RIGID_BODY: {
+            component_object = (void*)Physics.CreateRigidBody();
+            break;
+        }
+        case COMPONENT_TYPE_ACTOR: {
+            component_object = (void*)AI.CreateActor();
             break;
         }
         
@@ -230,16 +285,6 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             Renderer.DestroyMeshRenderer(componentEntityRenderer);
             break;
         }
-        case COMPONENT_TYPE_RIGID_BODY: {
-            rp3d::RigidBody* componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
-            Physics.DestroyRigidBody(componentRigidBody);
-            break;
-        }
-        case COMPONENT_TYPE_SCRIPT: {
-            Script* componentScript = (Script*)componentPtr->GetComponent();
-            Scripting.DestroyScript(componentScript);
-            break;
-        }
         case COMPONENT_TYPE_CAMERA: {
             Camera* componentCamera = (Camera*)componentPtr->GetComponent();
             Renderer.DestroyCamera(componentCamera);
@@ -249,6 +294,21 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             Light* componentLight = (Light*)componentPtr->GetComponent();
             mSceneMain->RemoveLightFromSceneRoot(componentLight);
             Renderer.DestroyLight(componentLight);
+            break;
+        }
+        case COMPONENT_TYPE_SCRIPT: {
+            Script* componentScript = (Script*)componentPtr->GetComponent();
+            Scripting.DestroyScript(componentScript);
+            break;
+        }
+        case COMPONENT_TYPE_RIGID_BODY: {
+            rp3d::RigidBody* componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
+            Physics.DestroyRigidBody(componentRigidBody);
+            break;
+        }
+        case COMPONENT_TYPE_ACTOR: {
+            Actor* actorObject = (Actor*)componentPtr->GetComponent();
+            AI.DestroyActor(actorObject);
             break;
         }
         

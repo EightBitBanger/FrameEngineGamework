@@ -9,6 +9,7 @@
 #define  COMPONENT_TYPE_LIGHT           3
 #define  COMPONENT_TYPE_SCRIPT          4
 #define  COMPONENT_TYPE_RIGID_BODY      5
+#define  COMPONENT_TYPE_ACTOR           6
 
 
 typedef unsigned short int ComponentType;
@@ -27,6 +28,8 @@ struct EngineComponents {
     short int Script = COMPONENT_TYPE_SCRIPT;
     /// RigidBody component type.
     short int RigidBody = COMPONENT_TYPE_RIGID_BODY;
+    /// RigidBody component type.
+    short int Actor = COMPONENT_TYPE_ACTOR;
 };
 
 

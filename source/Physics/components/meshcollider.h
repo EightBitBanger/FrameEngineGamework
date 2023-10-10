@@ -9,6 +9,7 @@ class MeshCollider {
 public:
     
     MeshCollider();
+    ~MeshCollider();
     
     // Height field collider
     rp3d::HeightFieldShape* heightFieldShape;

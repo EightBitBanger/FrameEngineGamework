@@ -239,7 +239,7 @@ bool Shader::BuildDefault(void) {
         "  "
         "  vec4 vColor = vec4(v_color, 1);"
         "  "
-        "  color = vec4( pow(vColor.rgb, vec3(1.0/Gamma)), 1) * texture(u_sampler, v_coord);"
+        "  color = vec4( pow(vColor.rgb, vec3(1.0/Gamma)), 1);"
         "  "
         "}";
     

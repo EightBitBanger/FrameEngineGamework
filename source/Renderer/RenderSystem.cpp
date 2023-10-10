@@ -49,6 +49,7 @@ bool RenderSystem::DestroyCamera(Camera* cameraPtr) {
 
 Material* RenderSystem::CreateMaterial(void) {
     Material* materialPtr = mMaterial.Create();
+    materialPtr->SetShader(defaultShader);
     return materialPtr;
 }
 bool RenderSystem::DestroyMaterial(Material* materialPtr) {

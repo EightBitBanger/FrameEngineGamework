@@ -18,7 +18,7 @@
 #include "../../vendor/CodeBaseLibrary/timer.h"
 #include "../../vendor/CodeBaseLibrary/logging.h"
 #include "../../vendor/CodeBaseLibrary/random.h"
-
+#include "../../vendor/CodeBaseLibrary/directorysearch.h"
 
 
 class EngineSystemManager {
@@ -58,7 +58,9 @@ public:
     /// Create a mesh renderer component and return its pointer.
     Component* CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr);
     /// Create a point light component and return its pointer.
-    Component* CreateComponentLight(glm::vec3 position=glm::vec3(0));
+    Component* CreateComponentLight(glm::vec3 position);
+    /// Create an AI actor component and return its pointer.
+    GameObject* CreateAIActor(glm::vec3 position);
     
     
     EngineSystemManager();

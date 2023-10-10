@@ -104,6 +104,11 @@ void GameObject::SetPosition(float x, float y, float z) {
     return;
 }
 
+void GameObject::SetPosition(glm::vec3 newPosition) {
+    SetPosition(newPosition.x, newPosition.y, newPosition.z);
+    return;
+}
+
 void GameObject::AddForce(float x, float y, float z) {
     if (mRigidBodyCache == nullptr) return;
     rp3d::Vector3 nudge(x, y, z);

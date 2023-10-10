@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 
 #include "../Genetics.h"
+#include "../../Physics/PhysicsSystem.h"
+#include "../../Renderer/RenderSystem.h"
 
 class Actor {
     
@@ -31,15 +33,11 @@ public:
     float distanceToStopMoving;
     
     
-    
-    
-    
-    
     Actor();
     
     void Update(void);
     
-    /// Add a new gene to the actors genome. The index will return.
+    /// Add a new gene to the actors genome. The gene index location will returned.
     unsigned int AddGene(Gene& newGene);
     /// Remove a gene from the actors genome.
     void RemoveGene(unsigned int index);
@@ -57,4 +55,4 @@ private:
 
 
 
-#endif // _AI_ACTOR__
+#endif

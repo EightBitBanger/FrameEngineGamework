@@ -9,6 +9,15 @@ Color Color::operator+ (const Color& color) {
     return newColor;
 }
 
+Color Color::operator* (const Color& color) {
+    Color newColor;
+    newColor.r = r * color.r;
+    newColor.g = g * color.g;
+    newColor.b = b * color.b;
+    newColor.a = a * color.a;
+    return newColor;
+}
+
 Color Color::operator- (const Color& color) {
     Color newColor;
     newColor.r = r - color.r;
@@ -68,6 +77,46 @@ Color Color::operator*= (const Color& color) {
     newColor.b *= b;
     newColor.a *= a;
     return newColor;
+}
+
+bool Color::operator> (const Color& color) {
+    if ((r > color.r) && 
+        (g > color.g) && 
+        (b > color.b)) 
+        return true;
+    return false;
+}
+
+bool Color::operator>= (const Color& color) {
+    if ((r >= color.r) && 
+        (g >= color.g) && 
+        (b >= color.b)) 
+        return true;
+    return false;
+}
+
+bool Color::operator< (const Color& color) {
+    if ((r < color.r) && 
+        (g < color.g) && 
+        (b < color.b)) 
+        return true;
+    return false;
+}
+
+bool Color::operator<= (const Color& color) {
+    if ((r <= color.r) && 
+        (g <= color.g) && 
+        (b <= color.b)) 
+        return true;
+    return false;
+}
+
+bool Color::operator== (const Color& color) {
+    if ((r == color.r) && 
+        (g == color.g) && 
+        (b == color.b)) 
+        return true;
+    return false;
 }
 
 Color::Color() : 

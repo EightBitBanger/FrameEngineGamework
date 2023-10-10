@@ -11,3 +11,9 @@ MeshCollider::MeshCollider() :
     heightMapBuffer = new float[10 * 10];
 }
 
+MeshCollider::~MeshCollider() {
+    
+    delete heightMapBuffer;
+    
+}
+

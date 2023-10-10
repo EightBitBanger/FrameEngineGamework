@@ -41,9 +41,10 @@
 #define  RENDER_FRAMES_PER_SECOND          60
 #define  RENDERER_CHECK_OPENGL_ERRORS
 
-#define RENDER_NUMBER_OF_LIGHTS    120
+#define RENDER_NUMBER_OF_LIGHTS    8
 
 #define  LOG_RENDER_DETAILS_
+
 
 
 //
@@ -51,6 +52,7 @@
 //
 
 #define PHYSICS_UPDATES_PER_SECOND         60
+
 
 
 //
