@@ -75,6 +75,7 @@ set (ENGINE_HEADERS
     
     "vendor/Bly7/OBJ_Loader.h"
     
+    "vendor/CodeBaseLibrary/directorysearch.h"
     "vendor/CodeBaseLibrary/fileloader.h"
     "vendor/CodeBaseLibrary/logging.h"
     "vendor/CodeBaseLibrary/poolallocator.h"
@@ -152,6 +153,7 @@ set (ENGINE_SOURCES
     "tests/units/testSerializer.cpp"
     "tests/units/testTransform.cpp"
     
+    "vendor/CodeBaseLibrary/directorysearch.cpp"
     "vendor/CodeBaseLibrary/fileloader.cpp"
     "vendor/CodeBaseLibrary/logging.cpp"
     "vendor/CodeBaseLibrary/random.cpp"
