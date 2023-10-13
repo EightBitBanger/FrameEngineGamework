@@ -54,7 +54,7 @@ public:
         if (std::is_same<T, Camera>::value)           return (T*)mCameraCache;
         if (std::is_same<T, Light>::value)            return (T*)mLightCache;
         if (std::is_same<T, MeshRenderer>::value)     return (T*)mMeshRendererCache;
-        if (std::is_same<T, rp3d::RigidBody>::value)  return (T*)mRigidBodyCache;
+        if (std::is_same<T, RigidBody>::value)  return (T*)mRigidBodyCache;
         
         return nullptr;
     }
@@ -131,7 +131,7 @@ private:
     
     // Cached component pointers, to avoid overhead from working with components internally
     Camera*          mCameraCache;
-    rp3d::RigidBody* mRigidBodyCache;
+    RigidBody* mRigidBodyCache;
     MeshRenderer*    mMeshRendererCache;
     Light*           mLightCache;
     

@@ -17,6 +17,21 @@ void ResourceManager::Initiate(void) {
     Renderer.AddSceneToRenderQueue(sceneMain);
     
     stbi_set_flip_vertically_on_load(true);
+    
+    // Load resource directories if they exist
+    std::vector<std::string> shaderDirectoryList = DirectoryGetList(".\\core\\shaders\\");
+    std::vector<std::string> modelDirectoryList = DirectoryGetList(".\\core\\models\\");
+    std::vector<std::string> materialDirectoryList = DirectoryGetList(".\\core\\materials\\");
+    
+    for (int i=0; i < shaderDirectoryList.size(); i++) 
+        LoadShaderGLSL("core/shaders/" + shaderDirectoryList[i], StringGetNameFromFilenameNoExt( shaderDirectoryList[i] ));
+    
+    for (int i=0; i < modelDirectoryList.size(); i++) 
+        LoadWaveFront("core/models/" + modelDirectoryList[i], StringGetNameFromFilenameNoExt( modelDirectoryList[i] ));
+    
+    for (int i=0; i < materialDirectoryList.size(); i++) 
+        LoadTexture("core/materials/" + materialDirectoryList[i], StringGetNameFromFilenameNoExt( materialDirectoryList[i] ));
+    
     return;
 }
 
@@ -109,7 +124,7 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName="te
     
     mTextureTags.push_back(textureTag);
     
-    std::string logstr = "  + " + assetName + "  " + name;
+    std::string logstr = "  + " + assetName + "  " + path;
     Log.Write(logstr);
     return true;
 }
@@ -186,7 +201,7 @@ bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName=
     
     mShaderTags.push_back(newAsset);
     
-    std::string logstr = "  + " + newAsset.name + "  " + name;
+    std::string logstr = "  + " + newAsset.name + "  " + path;
     Log.Write(logstr);
     
     return true;

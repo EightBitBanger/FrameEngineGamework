@@ -73,13 +73,13 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     // Add a camera component
     Component* cameraComponent = CreateComponent(Components.Camera);
     Camera* cameraMain = (Camera*)cameraComponent->GetComponent();
-    Renderer.cameraMain = cameraMain;
+    Renderer.SetCamera(cameraMain);
     cameraMain->EnableMouseLook();
     cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     // Add a rigid body component
     Component* rigidBodyComponent = CreateComponent(Components.RigidBody);
-    rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)rigidBodyComponent->GetComponent();
+    RigidBody* rigidBody = (RigidBody*)rigidBodyComponent->GetComponent();
     
     rp3d::Vector3 bodyPosition(position.x, position.y, position.z);
     rp3d::Quaternion quat = rp3d::Quaternion::identity();
@@ -133,8 +133,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
     
     GameObject* skyObject = CreateGameObject();
     skyObject->name = "sky";
-    Component* skyComponent = CreateComponentMeshRenderer(skyMesh, skyMaterial);
-    skyObject->AddComponent(skyComponent);
+    skyObject->AddComponent( CreateComponentMeshRenderer(skyMesh, skyMaterial) );
     
     skyObject->transform.SetScale(10000, 2000, 10000);
     
@@ -148,8 +147,8 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
 Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr) {
     Component* rendererComponent = CreateComponent(Components.MeshRenderer);
     MeshRenderer* entityRenderer = (MeshRenderer*)rendererComponent->GetComponent();
-    entityRenderer->AttachMesh(meshPtr);
-    entityRenderer->AttachMaterial(materialPtr);
+    entityRenderer->SetMesh(meshPtr);
+    entityRenderer->SetMaterial(materialPtr);
     return rendererComponent;
 }
 
@@ -167,26 +166,27 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     newGameObject->AddComponent( CreateComponent(Components.RigidBody) );
     newGameObject->AddComponent( CreateComponent(Components.MeshRenderer) );
     
-    // Actor component
-    Actor* ActorObject = newGameObject->GetComponent<Actor>();
-    
-    // Mesh renderer component
-    MeshRenderer* entityRenderer = newGameObject->GetComponent<MeshRenderer>();
-    
     Mesh* meshPtr = Resources.CreateMeshFromTag("cube");
     Material* materialPtr = Renderer.CreateMaterial();
     
+    // Actor component
+    //Actor* ActorObject = newGameObject->GetComponent<Actor>();
+    
+    // Set default color
     Color newColor(0, 0, 0);
     meshPtr->ChangeSubMeshColor(0, newColor);
     
     materialPtr->SetShader(Renderer.defaultShader);
     materialPtr->diffuse = Colors.MakeRandom();
     
-    entityRenderer->AttachMesh(meshPtr);
-    entityRenderer->AttachMaterial(materialPtr);
+    // Mesh renderer component
+    MeshRenderer* entityRenderer = newGameObject->GetComponent<MeshRenderer>();
+    
+    entityRenderer->SetMesh(meshPtr);
+    entityRenderer->SetMaterial(materialPtr);
     
     // Rigid body component
-    rp3d::RigidBody* rigidBody = newGameObject->GetComponent<rp3d::RigidBody>();
+    RigidBody* rigidBody = newGameObject->GetComponent<RigidBody>();
     rigidBody->setTransform( rp3d::Transform( rp3d::Vector3(position.x, position.y, position.z) , rp3d::Quaternion::identity()) );
     
     float randomScale = Random.Range(1, 10);
@@ -302,7 +302,7 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             break;
         }
         case COMPONENT_TYPE_RIGID_BODY: {
-            rp3d::RigidBody* componentRigidBody = (rp3d::RigidBody*)componentPtr->GetComponent();
+            RigidBody* componentRigidBody = (RigidBody*)componentPtr->GetComponent();
             Physics.DestroyRigidBody(componentRigidBody);
             break;
         }
@@ -320,6 +320,11 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
 }
 
 void EngineSystemManager::Update(void) {
+    
+    // DEBUG show number of objects
+    Scene* testScene = Renderer[1];
+    std::cout << testScene->GetMeshRendererQueueSize() << std::endl;
+    
     
     // Run through the game objects
     for (int i=0; i < mGameObjects.Size(); i++ ) {
@@ -341,15 +346,13 @@ void EngineSystemManager::Update(void) {
             GameObject* parent = objectPtr->parent;
             
             // Roll over the parent matrix transform chain
-            for (unsigned int i=0; i < 100; i++) {
+            while (parent != nullptr) {
                 
                 currentTransform.position    += parent->transform.position;
                 currentTransform.scale       *= parent->transform.scale;
                 currentTransform.orientation *= parent->transform.orientation;
                 
                 parent = parent->parent;
-                if (parent == nullptr) 
-                    break;
             }
             
         }
@@ -365,7 +368,7 @@ void EngineSystemManager::Update(void) {
         // Sync with the rigid body
         //
         
-        rp3d::RigidBody* componentRigidBody = objectPtr->GetComponent<rp3d::RigidBody>();
+        RigidBody* componentRigidBody = objectPtr->GetComponent<RigidBody>();
         if (componentRigidBody != nullptr) {
             
             // Use the rigid body as the source transform

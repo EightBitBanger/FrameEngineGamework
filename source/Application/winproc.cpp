@@ -40,12 +40,12 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             
             Renderer.SetViewport(0, 0, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top);
             
-            if (Renderer.cameraMain != nullptr) {
+            if (Renderer.GetCamera() != nullptr) {
                 
-                Renderer.cameraMain->aspect = Renderer.viewport.w / Renderer.viewport.h;
+                Renderer.GetCamera()->aspect = Renderer.viewport.w / Renderer.viewport.h;
                 
-                if (Renderer.cameraMain->aspect < 1.3)
-                    Renderer.cameraMain->aspect = 1.3;
+                if (Renderer.GetCamera()->aspect < 1.3)
+                    Renderer.GetCamera()->aspect = 1.3;
             }
             
             break;

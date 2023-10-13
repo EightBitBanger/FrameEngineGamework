@@ -18,7 +18,6 @@ extern Logger Log;
 #include "components/meshrenderer.h"
 #include "components/scene.h"
 
-#include "pipeline.h"
 
 class RenderSystem {
     
@@ -28,11 +27,6 @@ public:
     Material* defaultMaterial;
     /// Default GLSL shader object.
     Shader*   defaultShader;
-    
-    /// Current camera object used for rendering.
-    Camera*   cameraMain;
-    /// Current pipeline used for rendering.
-    RenderPipeline*  currentPipeline;
     
     /// Current rendering view port
     Viewport  viewport;
@@ -81,11 +75,6 @@ public:
     /// Destroy a scene object and return true on success.
     bool DestroyScene(Scene* scenePtr);
     
-    /// Create a render pipeline object and return its pointer.
-    RenderPipeline* CreateRenderPipeline(void);
-    /// Destroy a render pipeline object and return true on success.
-    bool DestroyRenderPipeline(RenderPipeline* renderPipelinePtr);
-    
     
     /// Prepare the render system.
     void Initiate(void);
@@ -106,8 +95,11 @@ public:
     bool RemoveSceneFromRenderQueue(Scene* scene);
     /// Get the number of scenes in the render queue.
     unsigned int GetRenderQueueSize(void);
-    /// Return a scene pointer at the index position within the render queue.
-    Scene* GetRenderQueueScene(unsigned int index);
+    
+    /// Set the main camera.
+    void SetCamera(Camera* newCamera);
+    /// Get the main camera.
+    Camera* GetCamera(void);
     
     /// Return the number of entities that have been created.
     unsigned int GetMeshRendererCount(void);
@@ -133,15 +125,17 @@ private:
     Mesh*      mCurrentMesh;
     Material*  mCurrentMaterial;
     
+    // Main camera
+    Camera*   mCameraMain;
+    
     // Light list
-    unsigned int numberOfLights=0;
-    glm::vec3  lightPosition[RENDER_NUMBER_OF_LIGHTS];
-    glm::vec3  lightAttenuation[RENDER_NUMBER_OF_LIGHTS];
-    glm::vec3  lightColor[RENDER_NUMBER_OF_LIGHTS];
+    unsigned int mNumberOfLights=0;
+    glm::vec3    mLightPosition    [RENDER_NUMBER_OF_LIGHTS];
+    glm::vec3    mLightAttenuation [RENDER_NUMBER_OF_LIGHTS];
+    glm::vec3    mLightColor       [RENDER_NUMBER_OF_LIGHTS];
     
     
     // Render component allocators
-    PoolAllocator<RenderPipeline>  mPipeline;
     PoolAllocator<MeshRenderer>    mEntity;
     PoolAllocator<Mesh>            mMesh;
     PoolAllocator<Material>        mMaterial;

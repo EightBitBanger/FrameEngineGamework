@@ -8,31 +8,21 @@ MeshRenderer::MeshRenderer() :
 {
 }
 
-void MeshRenderer::AttachMesh(Mesh* meshPtr) {
+void MeshRenderer::SetMesh(Mesh* meshPtr) {
     mMesh = meshPtr;
     return;
 }
 
-void MeshRenderer::DetachMesh(void) {
-    mMesh = nullptr;
-    return;
-}
-
-Mesh* MeshRenderer::GetAttachedMesh(void) {
+Mesh* MeshRenderer::GetMesh(void) {
     return mMesh;
 }
 
 
-void MeshRenderer::AttachMaterial(Material* materialPtr) {
+void MeshRenderer::SetMaterial(Material* materialPtr) {
     mMaterial = materialPtr;
     return;
 }
 
-void MeshRenderer::DetachMaterial(void) {
-    mMaterial = nullptr;
-    return;
-}
-
-Material* MeshRenderer::GetAttachedMaterial(void) {
+Material* MeshRenderer::GetMaterial(void) {
     return mMaterial;
 }

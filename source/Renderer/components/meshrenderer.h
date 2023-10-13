@@ -16,19 +16,15 @@ public:
     
     MeshRenderer();
     
-    /// Attach a mesh object to the entity.
-    void AttachMesh(Mesh* meshPtr);
-    /// Attach the mesh object from the entity.
-    void DetachMesh(void);
+    /// Attach a mesh object to the mesh renderer.
+    void SetMesh(Mesh* meshPtr);
     /// Return the attached mesh object.
-    Mesh* GetAttachedMesh(void);
+    Mesh* GetMesh(void);
     
-    /// Attach a material object to the entity.
-    void AttachMaterial(Material* materialPtr);
-    /// Attach the material object from the entity.
-    void DetachMaterial(void);
+    /// Attach a material object to the mesh renderer.
+    void SetMaterial(Material* materialPtr);
     /// Return the attached material object.
-    Material* GetAttachedMaterial(void);
+    Material* GetMaterial(void);
     
     
 private:

@@ -99,13 +99,13 @@ public:
     /// Set the current shader for this material.
     Shader* GetShader(void);
     /// Set the current shader for this material.
-    void SetShader(Shader* shader);
+    void SetShader(Shader* newShader);
     
 private:
     
     unsigned int mTextureBuffer;
     
-    Shader* shader;
+    Shader* mShader;
     
 };
 

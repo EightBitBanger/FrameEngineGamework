@@ -38,83 +38,71 @@ Material* skyMaterial;
 
 void Framework::Start() {
     
-    std::vector<std::string> shaderDirectoryList = DirectoryGetList(".\\core\\shaders\\");
-    std::vector<std::string> modelsDirectoryList = DirectoryGetList(".\\core\\models\\");
-    
-    for (int i=0; i < shaderDirectoryList.size(); i++) 
-        Resources.LoadShaderGLSL("core/shaders/" + shaderDirectoryList[i], StringGetNameFromFilenameNoExt( shaderDirectoryList[i] ));
-    
-    for (int i=0; i < modelsDirectoryList.size(); i++) 
-        Resources.LoadWaveFront("core/models/" + modelsDirectoryList[i], StringGetNameFromFilenameNoExt( modelsDirectoryList[i] ));
-    
-    // Load some core resources
-    //Resources.LoadShaderGLSL("core/shaders/color.shader",    "surface");
-    //Resources.LoadShaderGLSL("core/shaders/texture.shader",  "texture");
-    //Resources.LoadWaveFront("core/sky/sky.obj", "skyBox");
-    //Resources.LoadWaveFront("core/chunk.obj",   "chunk");
-    //Resources.LoadWaveFront("core/cube.obj",    "cube");
-    
-    
-    // Load some external resources
-    //Resources.LoadTexture("data/chunk.png", "mat_chunk");
-    
-    
+    // Create some objects from the loaded resources
     Shader* chunkShader = Resources.CreateShaderFromTag("surface");
     Shader* skyShader   = Resources.CreateShaderFromTag("texture");
     
-    Physics.SetWorldGravity(0, 0, 0);
     
+    // World physics
+    Physics.SetWorldGravity(0, 0, 0);
     
     
     
     //
     // Create a sky object
+    Color skyTone(0.87f, 0.87f, 0.87f);
+    
+    // Calculate a gradient
     Color skyLow;
     Color skyHigh;
-    Color skyTone(0.87f, 0.87f, 0.87f);
     skyLow = Colors.ltgray * skyTone;
     skyHigh = Colors.blue * skyTone * Colors.white;
     
     GameObject* skyObject = Engine.CreateSky("sky", "surface", skyLow, skyHigh, 0.127);
-    skyMaterial = skyObject->GetComponent<MeshRenderer>()->GetAttachedMaterial();
-    skyMaterial->diffuse = Color(0.0, 0.0, 0.0);
     
+    skyMaterial = skyObject->GetComponent<MeshRenderer>()->GetMaterial();
+    
+    skyMaterial->diffuse = Color(0.0, 0.0, 0.0);
     
     //
     // Create a camera controller
     cameraController = Engine.CreateCameraController(glm::vec3(0, 50, 0), glm::vec3(1, 8, 1));
     cameraController->transform.position = glm::vec3(0);
+    cameraController->EnableGravity(true);
+    cameraController->AddComponent( Engine.CreateComponent( Components.Light ) );
+    
+    cameraController->GetComponent<Light>()->intensity   = 10.0f;
+    cameraController->GetComponent<Light>()->range       = 100.0f;
+    cameraController->GetComponent<Light>()->attenuation = 0.7f;
+    
+    
+    
+    
     // Attach sky to the camera
     skyObject->parent = cameraController;
     
-    Script* scriptPtr = cameraController->GetComponent<Script>("controller");
-    
-    cameraController->EnableGravity(true);
+    //Script* scriptPtr = cameraController->GetComponent<Script>("controller");
     
     
+    return;
     
     
     // Basic chunk generation parameters
     
     float chunkSz = 100;
     
-    float noiseX    = 0.008;
-    float noiseZ    = 0.008;
+    float noiseX    = 0.01;
+    float noiseZ    = 0.01;
     float noiseMul  = 100.0;
     
-    int areaWidth  = 20;
-    int areaHeight = 20;
+    int areaWidth  = 1;
+    int areaHeight = 1;
     
     Color biomeHigh = Colors.green;
     Color biomeLow  = Colors.green;
     
     biomeHigh *= Color(0.1, 0.1, 0.1);
     biomeLow  *= Color(0.03, 0.03, 0.03);
-    
-    
-    
-    
-    
     
     
     
@@ -188,10 +176,9 @@ void Framework::Start() {
             
             chunkMesh->UpdateMesh();
             
-            // Add a physics component
             newChunk->AddComponent( Engine.CreateComponent(Components.RigidBody) );
             
-            // Lock in place
+            // Lock the chunk in place
             newChunk->SetStatic();
             newChunk->SetLinearAxisLockFactor(0, 0, 0);
             newChunk->SetAngularAxisLockFactor(0, 0, 0);
@@ -210,22 +197,27 @@ void Framework::Start() {
             rp3d::Transform offsetTransform;
             offsetTransform.setPosition(rp3d::Vector3(0, 0, 0));
             
-            newChunk->GetComponent<rp3d::RigidBody>()->addCollider(meshCollider->heightFieldShape, offsetTransform);
+            newChunk->GetComponent<RigidBody>()->addCollider(meshCollider->heightFieldShape, offsetTransform);
             */
             
             
             /*
             // Chunk collider
             
+            
+            
+            
             //
             // Too stupid to figure out convex/concave mesh colliders...
-            //
+            // crashing
             
             //MeshCollider* meshCollider = Physics.CreateColliderFromMesh(chunkMesh);
             //newChunk->AddColliderMesh(meshCollider);
             
             //MeshCollider* meshCollider = Physics.CreateColliderHeightMapFromMesh(chunkMesh);
             //newChunk->AddColliderMesh(meshCollider);
+            
+            
             
             */
             
@@ -238,8 +230,6 @@ void Framework::Start() {
             
         }
     }
-    
-    
     
     
     return;
@@ -255,7 +245,7 @@ void Framework::Start() {
 
 
 // Camera movement force
-float cameraSpeed     = 80;
+float cameraSpeed     = 100;
 
 
 
@@ -266,22 +256,26 @@ float cameraSpeed     = 80;
 void Framework::Run() {
     
     //
-    // AI system currently being implemented (possible state machine)
+    // AI system currently being implemented
     //
+    
     if (Input.CheckMouseLeftPressed()) {
         
         //Gene newGene;
         
-        GameObject* ActorObject = Engine.CreateAIActor( (Renderer.cameraMain->transform.position + (Renderer.cameraMain->forward * 3.0f)) );
+        GameObject* actorObject = Engine.CreateAIActor( (Renderer.GetCamera()->transform.position + (Renderer.GetCamera()->forward * 3.0f)) );
         
+        Material* actorMaterial = actorObject->GetComponent<MeshRenderer>()->GetMaterial();
+        actorMaterial->ambient = Color(0, 0, 0);
         rp3d::Vector3 position;
         
         rp3d::Vector3 force;
-        force.x = Renderer.cameraMain->forward.x;
-        force.y = Renderer.cameraMain->forward.y;
-        force.z = Renderer.cameraMain->forward.z;
+        Camera* currentCamera = Renderer.GetCamera();
+        force.x = currentCamera->forward.x;
+        force.y = currentCamera->forward.y;
+        force.z = currentCamera->forward.z;
         
-        ActorObject->GetComponent<rp3d::RigidBody>()->applyLocalForceAtCenterOfMass(force);
+        actorObject->GetComponent<RigidBody>()->applyLocalForceAtCenterOfMass(force);
         
     }
     
@@ -296,7 +290,7 @@ void Framework::Run() {
     
     if (skyMaterial->diffuse < Color(1, 1, 1)) {
         
-        Color skyShift(0.01f, 0.01f, 0.01f);
+        Color skyShift(0.001f, 0.001f, 0.001f);
         skyMaterial->diffuse += skyShift;
         
         if (skyMaterial->diffuse > Color(0.87, 0.87, 0.87)) 
@@ -308,14 +302,15 @@ void Framework::Run() {
     glm::vec3 force(0);
     
     // Directional movement
-    if (Input.CheckKeyCurrent(VK_W)) {force += Renderer.cameraMain->forward;}
-    if (Input.CheckKeyCurrent(VK_S)) {force -= Renderer.cameraMain->forward;}
-    if (Input.CheckKeyCurrent(VK_A)) {force += Renderer.cameraMain->right;}
-    if (Input.CheckKeyCurrent(VK_D)) {force -= Renderer.cameraMain->right;}
+    Camera* currentCamera = Renderer.GetCamera();
+    if (Input.CheckKeyCurrent(VK_W)) {force += currentCamera->forward;}
+    if (Input.CheckKeyCurrent(VK_S)) {force -= currentCamera->forward;}
+    if (Input.CheckKeyCurrent(VK_A)) {force += currentCamera->right;}
+    if (Input.CheckKeyCurrent(VK_D)) {force -= currentCamera->right;}
     
     // Elevation
-    if (Input.CheckKeyCurrent(VK_SPACE)) {force += Renderer.cameraMain->up;}
-    if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= Renderer.cameraMain->up;}
+    if (Input.CheckKeyCurrent(VK_SPACE)) {force += currentCamera->up;}
+    if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= currentCamera->up;}
     
     if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 2;
     
@@ -331,14 +326,14 @@ void Framework::Run() {
         Application.Pause();
         
         if (Application.isPaused) {
-            Renderer.cameraMain->DisableMouseLook();
+            Renderer.GetCamera()->DisableMouseLook();
             Input.ClearKeys();
             
             Application.ShowMouseCursor();
             
         } else {
-            Renderer.cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
-            Renderer.cameraMain->EnableMouseLook();
+            Renderer.GetCamera()->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            Renderer.GetCamera()->EnableMouseLook();
             
             Application.HideMouseCursor();
             
