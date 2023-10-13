@@ -51,7 +51,6 @@ set (ENGINE_HEADERS
     "source/Physics/components/meshcollider.h"
     
     "source/Renderer/enumerators.h"
-    "source/Renderer/pipeline.h"
     "source/Renderer/RenderSystem.h"
     "source/Renderer/components/camera.h"
     "source/Renderer/components/meshrenderer.h"
@@ -124,7 +123,6 @@ set (ENGINE_SOURCES
     "source/Physics/PhysicsSystem.cpp"
     "source/Physics/components/meshcollider.cpp"
     
-    "source/Renderer/pipeline.cpp"
     "source/Renderer/RenderSystem.cpp"
     "source/Renderer/components/camera.cpp"
     "source/Renderer/components/meshrenderer.cpp"
