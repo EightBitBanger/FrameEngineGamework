@@ -20,11 +20,11 @@ void TestFramework::TestRenderSystem(void) {
     if (meshPtr == nullptr)     Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     if (materialPtr == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     
-    meshRendererPtr->AttachMesh(meshPtr);
-    meshRendererPtr->AttachMaterial(materialPtr);
+    meshRendererPtr->SetMesh(meshPtr);
+    meshRendererPtr->SetMaterial(materialPtr);
     
-    Mesh*     checkMeshPtr     = meshRendererPtr->GetAttachedMesh();
-    Material* checkMaterialPtr = meshRendererPtr->GetAttachedMaterial();
+    Mesh*     checkMeshPtr     = meshRendererPtr->GetMesh();
+    Material* checkMaterialPtr = meshRendererPtr->GetMaterial();
     
     // Check object attachment
     if (checkMeshPtr == nullptr)     Throw(msgFailedToAttachComponent, __FILE__, __LINE__);
