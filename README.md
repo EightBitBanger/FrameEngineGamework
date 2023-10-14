@@ -51,7 +51,7 @@ gdi32  user32  kernel32  comctl32  glew32s  opengl32  reactphysics3d
 
 <br><br/>
 ## Documentation
-You can find the API documentation <a href="https://github.com/RetroBytes32/GameEngine-Framework/wiki">here</a>⁭.
+You can find the API documentation <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki">here</a>⁭.
 
 
 <br><br/>
