@@ -8,6 +8,7 @@
 
 #include "../Math/Math.h"
 #include "../Renderer/components/meshrenderer.h"
+#include "../Physics/PhysicsSystem.h"
 #include "../Scripting/components/script.h"
 #include "../Renderer/components/camera.h"
 
@@ -20,6 +21,9 @@
 #include "../../vendor/CodeBaseLibrary/random.h"
 #include "../../vendor/CodeBaseLibrary/timer.h"
 
+typedef glm::vec3  Vector3;
+
+extern PhysicsSystem  Physics;
 
 
 class EngineSystemManager {
@@ -75,9 +79,66 @@ public:
     /// Shutdown the engine.
     void Shutdown(void);
     
-private:
+    /// Create an object of the type specified.
+    template <typename T> T* Create(void) {
+        // Engine
+        if (std::is_same<T, GameObject>::value)    return (T*)CreateGameObject();
+        if (std::is_same<T, Component>::value)     return (T*)CreateComponent( COMPONENT_TYPE_UNDEFINED );
+        // Render system
+        if (std::is_same<T, Mesh>::value)          return (T*)Renderer.CreateMesh();
+        if (std::is_same<T, Material>::value)      return (T*)Renderer.CreateMaterial();
+        if (std::is_same<T, Shader>::value)        return (T*)Renderer.CreateShader();
+        if (std::is_same<T, Scene>::value)         return (T*)Renderer.CreateScene();
+        if (std::is_same<T, Camera>::value)        return (T*)Renderer.CreateCamera();
+        if (std::is_same<T, MeshRenderer>::value)  return (T*)Renderer.CreateMeshRenderer();
+        // Physics system
+        if (std::is_same<T, RigidBody>::value)  return (T*)Physics.CreateRigidBody(0, 0, 0);
+        
+        return nullptr;
+    }
     
-    Scene* mSceneMain;
+    /// Destroy an object of the type specified.
+    template <typename T> bool Destroy(T* objectPtr) {
+        // Engine
+        if (std::is_same<T, GameObject>::value)    return DestroyGameObject(objectPtr);
+        if (std::is_same<T, Component>::value)     return DestroyComponent( objectPtr );
+        // Render system
+        if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh(objectPtr);
+        if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial(objectPtr);
+        if (std::is_same<T, Shader>::value)        return Renderer.DestroyShader(objectPtr);
+        if (std::is_same<T, Scene>::value)         return Renderer.DestroyScene(objectPtr);
+        if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera(objectPtr);
+        if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer(objectPtr);
+        
+        // Physics system
+        if (std::is_same<T, RigidBody>::value)  return (T*)Physics.CreateRigidBody(0, 0, 0);
+        
+        return nullptr;
+    }
+    
+    /// Create a component object containing the type specified.
+    template <typename T> Component* CreateComponent(void) {
+        if (std::is_same<T, Camera>::value)    return CreateComponent(Components.Camera);
+        if (std::is_same<T, Light>::value)     return CreateComponent(Components.Light);
+        if (std::is_same<T, Script>::value)    return CreateComponent(Components.Script);
+        if (std::is_same<T, RigidBody>::value) return CreateComponent(Components.RigidBody);
+        if (std::is_same<T, Actor>::value)     return CreateComponent(Components.Actor);
+        return nullptr;
+    }
+    
+    /// Create a mesh renderer component object.
+    template <typename T> Component* CreateComponent(Mesh* meshPtr, Material* materialPtr) {
+        if (!std::is_same<T, MeshRenderer>::value) 
+            return nullptr;
+        Component* rendererComponent = CreateComponent(Components.MeshRenderer);
+        MeshRenderer* entityRenderer = (MeshRenderer*)rendererComponent->GetComponent();
+        entityRenderer->mesh = meshPtr;
+        entityRenderer->material = materialPtr;
+        return rendererComponent;
+    }
+    
+    
+private:
     
     // List of active game objects
     std::vector<GameObject*> mGameObjectActive;

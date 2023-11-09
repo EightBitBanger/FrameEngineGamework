@@ -14,13 +14,13 @@
 
 struct SubMesh {
     
-    /// Begin offset position 
+    /// Begin offset position.
     unsigned vertexBegin;
     unsigned vertexCount;
     unsigned indexBegin;
     unsigned indexCount;
     
-    /// Current mesh position offset. (internal)
+    /// Current mesh position offset.
     glm::vec3 position;
     
     /// Vertex buffer array.

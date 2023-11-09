@@ -2,7 +2,8 @@
 
 
 Scene::Scene() : 
-    doUpdateLights(true)
+    doUpdateLights(true),
+    camera(nullptr)
 {
 }
 

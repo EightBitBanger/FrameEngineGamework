@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "meshrenderer.h"
+#include "camera.h"
 #include "light.h"
 
 
@@ -11,7 +12,11 @@ class Scene {
     
 public:
     
+    /// Light update state.
     bool doUpdateLights;
+    
+    /// Get the camera associated with this scene.
+    Camera* camera;
     
     Scene();
     
@@ -36,6 +41,7 @@ public:
     
     /// Return a light from an index location in the light list.
     Light* GetLight(unsigned int index);
+    
     
 private:
     

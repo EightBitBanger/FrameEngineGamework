@@ -19,8 +19,8 @@ void ResourceManager::Initiate(void) {
     stbi_set_flip_vertically_on_load(true);
     
     // Load resource directories if they exist
-    std::vector<std::string> shaderDirectoryList = DirectoryGetList(".\\core\\shaders\\");
-    std::vector<std::string> modelDirectoryList = DirectoryGetList(".\\core\\models\\");
+    std::vector<std::string> shaderDirectoryList   = DirectoryGetList(".\\core\\shaders\\");
+    std::vector<std::string> modelDirectoryList    = DirectoryGetList(".\\core\\models\\");
     std::vector<std::string> materialDirectoryList = DirectoryGetList(".\\core\\materials\\");
     
     for (int i=0; i < shaderDirectoryList.size(); i++) 

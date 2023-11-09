@@ -20,7 +20,7 @@ Material::Material() :
     blendAlphaDestination(BLEND_ONE_MINUS_SRC_ALPHA),
     blendFunction(BLEND_EQUATION_ADD),
     
-    mShader(nullptr)
+    shader(nullptr)
 {
     ambient = Color(0.01, 0.01, 0.01, 1);
     diffuse = Color(0.87, 0.87, 0.87, 1);
@@ -82,11 +82,3 @@ void Material::GenerateMipMaps(void) {
     return;
 }
     
-Shader* Material::GetShader(void) {
-    return mShader;
-}
-
-void Material::SetShader(Shader* newShader) {
-    mShader = newShader;
-    return;
-}

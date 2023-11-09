@@ -11,28 +11,15 @@ class MeshRenderer {
     
 public:
     
+    /// Pointer to the mesh component.
+    Mesh*     mesh;
+    /// Pointer to the material component.
+    Material* material;
+    
     /// Transformation matrix.
     Transform transform;
     
     MeshRenderer();
-    
-    /// Attach a mesh object to the mesh renderer.
-    void SetMesh(Mesh* meshPtr);
-    /// Return the attached mesh object.
-    Mesh* GetMesh(void);
-    
-    /// Attach a material object to the mesh renderer.
-    void SetMaterial(Material* materialPtr);
-    /// Return the attached material object.
-    Material* GetMaterial(void);
-    
-    
-private:
-    
-    /// Pointer to a mesh component.
-    Mesh*     mMesh;
-    /// Pointer to a material component.
-    Material* mMaterial;
     
 };
 

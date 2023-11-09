@@ -23,14 +23,18 @@ extern ActorSystem          AI;
 
 
 // User globals
+Scene* sceneMain;
+Scene* sceneOverlay;
+
 GameObject*  cameraController;
+Camera*      mainCamera;
 
 Material* skyMaterial;
 
+GameObject* plain;
+GameObject* overlayObject;
 
-
-
-
+Vector3 overlayPosition;
 
 
 // Application entry point
@@ -38,199 +42,118 @@ Material* skyMaterial;
 
 void Framework::Start() {
     
+    sceneMain = Engine.Create<Scene>();
+    Renderer.AddSceneToRenderQueue(sceneMain);
+    
     // Create some objects from the loaded resources
-    Shader* chunkShader = Resources.CreateShaderFromTag("surface");
-    Shader* skyShader   = Resources.CreateShaderFromTag("texture");
-    
-    
-    // World physics
-    Physics.SetWorldGravity(0, 0, 0);
-    
+    Shader* surfaceShader = Resources.CreateShaderFromTag("surface");
+    Shader* textureShader = Resources.CreateShaderFromTag("texture");
     
     
     //
-    // Create a sky object
-    Color skyTone(0.87f, 0.87f, 0.87f);
+    // Create a sky
     
-    // Calculate a gradient
-    Color skyLow;
-    Color skyHigh;
-    skyLow = Colors.ltgray * skyTone;
-    skyHigh = Colors.blue * skyTone * Colors.white;
+    Color skyLow(Colors.ltgray);
+    Color skyHigh(Colors.blue);
     
     GameObject* skyObject = Engine.CreateSky("sky", "surface", skyLow, skyHigh, 0.127);
+    sceneMain->AddMeshRendererToSceneRoot( skyObject->GetComponent<MeshRenderer>() );
     
-    skyMaterial = skyObject->GetComponent<MeshRenderer>()->GetMaterial();
-    
+    skyMaterial = skyObject->GetComponent<MeshRenderer>()->material;
     skyMaterial->diffuse = Color(0.0, 0.0, 0.0);
+    
+    
+    
     
     //
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(glm::vec3(0, 50, 0), glm::vec3(1, 8, 1));
+    cameraController = Engine.CreateCameraController(Vector3(0, 50, 0), Vector3(1, 8, 1));
     cameraController->transform.position = glm::vec3(0);
-    cameraController->EnableGravity(true);
-    cameraController->AddComponent( Engine.CreateComponent( Components.Light ) );
+    mainCamera = cameraController->GetComponent<Camera>();
+    sceneMain->camera = mainCamera;
     
-    cameraController->GetComponent<Light>()->intensity   = 10.0f;
-    cameraController->GetComponent<Light>()->range       = 100.0f;
-    cameraController->GetComponent<Light>()->attenuation = 0.7f;
-    
-    
-    
-    
-    // Attach sky to the camera
+    // Attach sky object to the camera object
     skyObject->parent = cameraController;
     
-    //Script* scriptPtr = cameraController->GetComponent<Script>("controller");
-    
-    
-    return;
-    
-    
-    // Basic chunk generation parameters
-    
-    float chunkSz = 100;
-    
-    float noiseX    = 0.01;
-    float noiseZ    = 0.01;
-    float noiseMul  = 100.0;
-    
-    int areaWidth  = 1;
-    int areaHeight = 1;
-    
-    Color biomeHigh = Colors.green;
-    Color biomeLow  = Colors.green;
-    
-    biomeHigh *= Color(0.1, 0.1, 0.1);
-    biomeLow  *= Color(0.03, 0.03, 0.03);
     
     
     
-    //
-    // Generate a few perlin noise chunks
-    //
+    plain = Engine.Create<GameObject>();
+    plain->AddComponent( Engine.CreateComponent<MeshRenderer>(Resources.CreateMeshFromTag("plain"), Engine.Create<Material>()) );
+    plain->transform.scale = glm::vec3(1, 1, 1);
     
-    for (int z=0; z < areaHeight; z++) {
-        
-        for (int x=0; x < areaWidth; x++) {
+    Mesh*     plainMesh     = plain->GetComponent<MeshRenderer>()->mesh;
+    Material* plainMaterial = plain->GetComponent<MeshRenderer>()->material;
+    plainMaterial->diffuse = Colors.white;
+    
+    sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
+    
+    
+    
+    SubMesh meshPart;
+    plainMesh->CopySubMesh(0, meshPart);
+    
+    int width  = 100;
+    int height = 100;
+    
+    for (int z=0; z < height; z++) {
+        for (int x=0; x < width; x++) {
             
-            GameObject* newChunk = Engine.CreateGameObject();
+            float CoordMul = 1;
+            float CoordX   = x * 0.1;
+            float CoordZ   = z * 0.1;
             
-            Mesh* chunkMesh = Resources.CreateMeshFromTag("chunk");
-            Material* chunkMaterial = Renderer.CreateMaterial();
+            float noiseTotal = Random.Perlin(CoordX, 0, CoordZ) * CoordMul;
             
-            newChunk->AddComponent( Engine.CreateComponentMeshRenderer(chunkMesh, chunkMaterial) );
+            plainMesh->AddSubMesh((float)x, noiseTotal * 10, z, meshPart, false);
             
+            if (noiseTotal < 0)   noiseTotal = 0;
+            if (noiseTotal > 0.9) noiseTotal = 0.9;
             
-            chunkMaterial->SetShader( chunkShader );
-            
-            chunkMaterial->SetTextureFiltration(MATERIAL_FILTER_LINEAR);
-            
-            
-            //
-            // Perlin noise generation
-            //
-            
-            float chunkX = x * chunkSz;
-            float chunkZ = z * chunkSz;
-            
-            //MeshCollider* meshCollider = Physics.meshCollider.Create();
-            
-            unsigned int vertexCount = chunkMesh->GetNumberOfVertices();
-            
-            for (unsigned int i=0; i < vertexCount; i++) {
-                
-                Vertex vertex = chunkMesh->GetVertex(i);
-                
-                // Base noise
-                float xCoord = (vertex.x * noiseX) + (chunkX * noiseX);
-                float zCoord = (vertex.z * noiseZ) + (chunkZ * noiseZ);
-                
-                float noiseTotal = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
-                
-                // Height caps
-                if (noiseTotal < 0) noiseTotal  = 0;
-                if (noiseTotal > 50) noiseTotal = 50;
-                
-                // Height steps
-                vertex.y = Math.Round(noiseTotal);
-                
-                // Fade color by height
-                Color colorTotal;
-                colorTotal.r = Math.Lerp(biomeLow.r, biomeHigh.r, noiseTotal * 0.01);
-                colorTotal.g = Math.Lerp(biomeLow.g, biomeHigh.g, noiseTotal * 0.01);
-                colorTotal.b = Math.Lerp(biomeLow.b, biomeHigh.b, noiseTotal * 0.01);
-                
-                // Apply changes to the mesh buffer
-                vertex.r = colorTotal.r;
-                vertex.g = colorTotal.g;
-                vertex.b = colorTotal.b;
-                
-                chunkMesh->SetVertex(i, vertex);
-                
-                // Seggy McFault
-                //meshCollider->heightMapBuffer[i] = vertex.y;
-                
-                continue;
-            }
-            
-            chunkMesh->UpdateMesh();
-            
-            newChunk->AddComponent( Engine.CreateComponent(Components.RigidBody) );
-            
-            // Lock the chunk in place
-            newChunk->SetStatic();
-            newChunk->SetLinearAxisLockFactor(0, 0, 0);
-            newChunk->SetAngularAxisLockFactor(0, 0, 0);
-            //newChunk->SetMass(100);
-            
-            BoxShape* chunkCollider = Physics.CreateColliderBox(chunkSz, 100, chunkSz);
-            newChunk->AddColliderBox(chunkCollider, 0, -100, 0);
-            
-            
-            
-            // Height field test
-            /*
-            meshCollider->heightFieldShape = 
-            Physics.common.createHeightFieldShape(10, 10, 0, 1000, meshCollider->heightMapBuffer, rp3d::HeightFieldShape::HeightDataType::HEIGHT_FLOAT_TYPE);
-            
-            rp3d::Transform offsetTransform;
-            offsetTransform.setPosition(rp3d::Vector3(0, 0, 0));
-            
-            newChunk->GetComponent<RigidBody>()->addCollider(meshCollider->heightFieldShape, offsetTransform);
-            */
-            
-            
-            /*
-            // Chunk collider
-            
-            
-            
-            
-            //
-            // Too stupid to figure out convex/concave mesh colliders...
-            // crashing
-            
-            //MeshCollider* meshCollider = Physics.CreateColliderFromMesh(chunkMesh);
-            //newChunk->AddColliderMesh(meshCollider);
-            
-            //MeshCollider* meshCollider = Physics.CreateColliderHeightMapFromMesh(chunkMesh);
-            //newChunk->AddColliderMesh(meshCollider);
-            
-            
-            
-            */
-            
-            
-            
-            
-            
-            newChunk->SetPosition((x * chunkSz) - ((areaWidth/2) * chunkSz), 0.0f, (z * chunkSz) - ((areaHeight/2) * chunkSz));
-            newChunk->transform.SetScale(1, 1, 1);
+            plainMesh->ChangeSubMeshColor(plainMesh->GetSubMeshCount() - 1, Colors.Make(noiseTotal, noiseTotal, noiseTotal));
             
         }
     }
     
+    plainMesh->UpdateMesh();
+    
+    
+    // Randomize colors
+    for (int i=0; i < plainMesh->GetSubMeshCount(); i++) 
+        plainMesh->ChangeSubMeshColor(i, Colors.MakeRandom());
+    
+    
+    plainMaterial->shader = surfaceShader;
+    
+    plainMaterial->SetTextureFiltration(MATERIAL_FILTER_LINEAR);
+    plainMaterial->DisableCulling();
+    
+    Physics.SetWorldGravity(0, 0, 0);
+    
+    
+    
+    
+    
+    // Overlay example
+    sceneOverlay = Engine.Create<Scene>();
+    sceneOverlay->camera = Engine.Create<Camera>();
+    //sceneOverlay->camera->useMouseLook = true;
+    
+    overlayObject = Engine.Create<GameObject>();
+    overlayObject->transform.RotateAxis(90, Vector3(0, 0, 1));
+    overlayObject->transform.scale = Vector3(0.1, 0.1, 0.1);
+    
+    Mesh*     overlayMesh     = Engine.Create<Mesh>();
+    Material* overlayMaterial = Engine.Create<Material>();
+    overlayMaterial->shader = surfaceShader;
+    overlayObject->AddComponent( Engine.CreateComponent<MeshRenderer>(overlayMesh, overlayMaterial) );
+    
+    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject->GetComponent<MeshRenderer>() );
+    
+    overlayMesh->AddPlainSubDivided(0, 0, 0, 1, 1, Colors.blue, 1, 1);
+    overlayMesh->UpdateMesh();
+    
+    Renderer.AddSceneToRenderQueue(sceneOverlay);
     
     return;
 }
@@ -244,8 +167,16 @@ void Framework::Start() {
 
 
 
+// Day cycle
+float dayNightMaxLight = 0.1f;
+float dayNightRate     = 0.0001f;
+
+
+
+
+
 // Camera movement force
-float cameraSpeed     = 100;
+float cameraSpeed     = 1.5f;
 
 
 
@@ -255,17 +186,29 @@ float cameraSpeed     = 100;
 
 void Framework::Run() {
     
+    if (Input.CheckKeyCurrent(VK_I)) {overlayPosition.y += 0.2;}
+    if (Input.CheckKeyCurrent(VK_K)) {overlayPosition.y -= 0.2;}
+    if (Input.CheckKeyCurrent(VK_J)) {overlayPosition.z += 0.2;}
+    if (Input.CheckKeyCurrent(VK_L)) {overlayPosition.z -= 0.2;}
+    
+    overlayPosition.x = 1.001;
+    
+    overlayObject->transform.position = overlayPosition;
+    
+    
+    
+    
     //
     // AI system currently being implemented
     //
     
+    /*
     if (Input.CheckMouseLeftPressed()) {
+        Input.ClearMouseLeft();
         
-        //Gene newGene;
+        GameObject* actorObject = Engine.CreateAIActor( (Renderer.GetCamera()->transform.position + (Renderer.GetCamera()->forward * 10.0f)) );
         
-        GameObject* actorObject = Engine.CreateAIActor( (Renderer.GetCamera()->transform.position + (Renderer.GetCamera()->forward * 3.0f)) );
-        
-        Material* actorMaterial = actorObject->GetComponent<MeshRenderer>()->GetMaterial();
+        Material* actorMaterial = actorObject->GetComponent<MeshRenderer>()->material;
         actorMaterial->ambient = Color(0, 0, 0);
         rp3d::Vector3 position;
         
@@ -277,8 +220,17 @@ void Framework::Run() {
         
         actorObject->GetComponent<RigidBody>()->applyLocalForceAtCenterOfMass(force);
         
+        actorObject->AddComponent( Engine.CreateComponent( Components.Light ) );
+        
+        Light* lightPtr = actorObject->GetComponent<Light>();
+        lightPtr->intensity   = 100.0f;
+        lightPtr->range       = 100.0f;
+        lightPtr->attenuation = 2.0f;
+        
+        //Gene newGene;
+        
     }
-    
+    */
     
     
     
@@ -287,35 +239,74 @@ void Framework::Run() {
     
     //
     // Day night cycle testing
+    float skyMax = 0.8;
     
-    if (skyMaterial->diffuse < Color(1, 1, 1)) {
+    if (skyMaterial != nullptr) {
+        if (skyMaterial->diffuse < Color(skyMax, skyMax, skyMax)) {
+            
+            Color skyShift(dayNightRate, dayNightRate, dayNightRate);
+            skyMaterial->diffuse += skyShift;
+            
+            if (skyMaterial->diffuse > Color(dayNightMaxLight, dayNightMaxLight, dayNightMaxLight)) 
+                skyMaterial->diffuse = Color(dayNightMaxLight, dayNightMaxLight, dayNightMaxLight);
+            
+        }
+    }
+    
+    
+    
+    
+    glm::vec3 force(0);
+    if (mainCamera != nullptr) {
         
-        Color skyShift(0.001f, 0.001f, 0.001f);
-        skyMaterial->diffuse += skyShift;
+        // Directional movement
+        if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward;}
+        if (Input.CheckKeyCurrent(VK_S)) {force -= mainCamera->forward;}
+        if (Input.CheckKeyCurrent(VK_A)) {force += mainCamera->right;}
+        if (Input.CheckKeyCurrent(VK_D)) {force -= mainCamera->right;}
         
-        if (skyMaterial->diffuse > Color(0.87, 0.87, 0.87)) 
-            skyMaterial->diffuse = Color(0.87, 0.87, 0.87);
+        // Elevation
+        if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
+        if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
+        
+        //if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 2;
+        
+        if (cameraController != nullptr) {
+            force *= cameraSpeed;
+            glm::vec3 velocity = cameraController->transform.GetPosition();
+            velocity += force;
+            cameraController->transform.SetPosition(velocity);
+            
+            RigidBody* rigidBody = cameraController->GetComponent<RigidBody>();
+            
+            rp3d::Transform transform = rp3d::Transform::identity();
+            transform.setPosition( rp3d::Vector3(velocity.x, velocity.y, velocity.z) );
+            
+            
+            rigidBody->setTransform( transform );
+        }
         
     }
     
     
-    glm::vec3 force(0);
+    /*
+    if (Renderer.GetCamera() != nullptr) {
+        
+        Vector3 forwardOffset = Renderer.GetCamera()->forward;
+        forwardOffset *= 100;
+        
+        plain->transform.position = velocity + forwardOffset;
+        
+    }
+    */
     
-    // Directional movement
-    Camera* currentCamera = Renderer.GetCamera();
-    if (Input.CheckKeyCurrent(VK_W)) {force += currentCamera->forward;}
-    if (Input.CheckKeyCurrent(VK_S)) {force -= currentCamera->forward;}
-    if (Input.CheckKeyCurrent(VK_A)) {force += currentCamera->right;}
-    if (Input.CheckKeyCurrent(VK_D)) {force -= currentCamera->right;}
     
-    // Elevation
-    if (Input.CheckKeyCurrent(VK_SPACE)) {force += currentCamera->up;}
-    if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= currentCamera->up;}
     
-    if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 2;
     
-    force *= cameraSpeed;
-    cameraController->AddForce(force.x, force.y, force.z);
+    
+    
+    
+    
     
     
     
@@ -326,14 +317,14 @@ void Framework::Run() {
         Application.Pause();
         
         if (Application.isPaused) {
-            Renderer.GetCamera()->DisableMouseLook();
+            mainCamera->DisableMouseLook();
             Input.ClearKeys();
             
             Application.ShowMouseCursor();
             
         } else {
-            Renderer.GetCamera()->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
-            Renderer.GetCamera()->EnableMouseLook();
+            mainCamera->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            mainCamera->EnableMouseLook();
             
             Application.HideMouseCursor();
             

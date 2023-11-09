@@ -40,12 +40,21 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             
             Renderer.SetViewport(0, 0, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top);
             
-            if (Renderer.GetCamera() != nullptr) {
+            if (Renderer.GetRenderQueueSize() == 0) 
+                break;
+            
+            // Update scene cameras
+            for (int i=0; i < Renderer.GetRenderQueueSize(); i++) {
                 
-                Renderer.GetCamera()->aspect = Renderer.viewport.w / Renderer.viewport.h;
+                if (Renderer[i]->camera == nullptr) 
+                    continue;
+                if (Renderer[i]->camera->isFixedAspect) 
+                    continue;
                 
-                if (Renderer.GetCamera()->aspect < 1.3)
-                    Renderer.GetCamera()->aspect = 1.3;
+                Renderer[i]->camera->aspect = Renderer.viewport.w / Renderer.viewport.h;
+                
+                if (Renderer[i]->camera->aspect < 1.3)
+                    Renderer[i]->camera->aspect = 1.3;
             }
             
             break;

@@ -22,6 +22,8 @@ public:
     
     /// Whether mouse look is calculated on update.
     bool useMouseLook;
+    /// Whether the camera aspect will update to the window aspect.
+    bool isFixedAspect;
     /// Camera looking angle.
     glm::vec2 lookAngle;
     

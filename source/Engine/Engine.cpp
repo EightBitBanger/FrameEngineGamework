@@ -23,14 +23,7 @@ EngineSystemManager   Engine;
 
 
 
-EngineSystemManager::EngineSystemManager(void) : 
-    
-    mSceneMain(nullptr) 
-{
-    
-    // Preallocate some buffer space
-    mGameObjectActive.reserve(64);
-    
+EngineSystemManager::EngineSystemManager(void) {
     return;
 }
 
@@ -73,7 +66,6 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     // Add a camera component
     Component* cameraComponent = CreateComponent(Components.Camera);
     Camera* cameraMain = (Camera*)cameraComponent->GetComponent();
-    Renderer.SetCamera(cameraMain);
     cameraMain->EnableMouseLook();
     cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
@@ -99,14 +91,13 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     cameraController->AddComponent(scriptComponent);
     
     cameraController->SetAngularAxisLockFactor(0, 0, 0);
-    cameraController->SetMass(40);
+    cameraController->SetLinearDamping(3);
+    cameraController->SetAngularDamping(1);
+    cameraController->SetMass(10);
     
     // Collider
-    BoxShape* boxShape = Physics.CreateColliderBox(1, 8, 1);
+    BoxShape* boxShape = Physics.CreateColliderBox(scale.x, scale.y, scale.z);
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
-    cameraController->CalculatePhysics();
-    cameraController->EnableGravity(false);
-    cameraController->SetLinearDamping(3);
     
     return cameraController;
 }
@@ -139,7 +130,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
     
     Shader* skyShader = Resources.CreateShaderFromTag(shaderTagName);
     if (skyShader != nullptr) 
-        skyMaterial->SetShader(skyShader);
+        skyMaterial->shader = skyShader;
     
     return skyObject;
 }
@@ -147,8 +138,8 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
 Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr) {
     Component* rendererComponent = CreateComponent(Components.MeshRenderer);
     MeshRenderer* entityRenderer = (MeshRenderer*)rendererComponent->GetComponent();
-    entityRenderer->SetMesh(meshPtr);
-    entityRenderer->SetMaterial(materialPtr);
+    entityRenderer->mesh = meshPtr;
+    entityRenderer->material = materialPtr;
     return rendererComponent;
 }
 
@@ -172,18 +163,14 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     // Actor component
     //Actor* ActorObject = newGameObject->GetComponent<Actor>();
     
-    // Set default color
-    Color newColor(0, 0, 0);
-    meshPtr->ChangeSubMeshColor(0, newColor);
-    
-    materialPtr->SetShader(Renderer.defaultShader);
+    materialPtr->shader = Renderer.defaultShader;
     materialPtr->diffuse = Colors.MakeRandom();
     
     // Mesh renderer component
     MeshRenderer* entityRenderer = newGameObject->GetComponent<MeshRenderer>();
     
-    entityRenderer->SetMesh(meshPtr);
-    entityRenderer->SetMaterial(materialPtr);
+    entityRenderer->mesh = meshPtr;
+    entityRenderer->material = materialPtr;
     
     // Rigid body component
     RigidBody* rigidBody = newGameObject->GetComponent<RigidBody>();
@@ -196,12 +183,13 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     newGameObject->AddColliderBox(boxShape, 0, 0, 0);
     newGameObject->EnableGravity(true);
     
+    // Physics
     newGameObject->SetMass(1);
-    newGameObject->SetLinearDamping(0.1);
-    newGameObject->SetAngularDamping(0.1);
-    //newGameObject->CalculatePhysics();
+    newGameObject->SetLinearDamping(3);
+    newGameObject->SetAngularDamping(1);
+    newGameObject->CalculatePhysics();
     
-    //newGameObject->SetLinearAxisLockFactor(0, 0, 0);
+    newGameObject->SetLinearAxisLockFactor(1, 1, 1);
     newGameObject->SetAngularAxisLockFactor(0, 1, 0);
     
     newGameObject->transform.SetScale(randomScale, randomScale, randomScale);
@@ -224,8 +212,6 @@ unsigned int EngineSystemManager::GetComponentCount(void) {
 }
 
 void EngineSystemManager::Initiate() {
-    mSceneMain = Renderer.CreateScene();
-    Renderer.AddSceneToRenderQueue(mSceneMain);
     return;
 }
 
@@ -236,7 +222,6 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
         
         case COMPONENT_TYPE_MESH_RENDERER: {
             MeshRenderer* meshRendererPtr = Renderer.CreateMeshRenderer();
-            mSceneMain->AddMeshRendererToSceneRoot(meshRendererPtr);
             component_object = (void*)meshRendererPtr;
             break;
         }
@@ -246,7 +231,6 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
         }
         case COMPONENT_TYPE_LIGHT: {
             Light* lightPtr = Renderer.CreateLight();
-            mSceneMain->AddLightToSceneRoot(lightPtr);
             component_object = (void*)lightPtr;
             break;
         }
@@ -281,7 +265,6 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
         
         case COMPONENT_TYPE_MESH_RENDERER: {
             MeshRenderer* componentEntityRenderer = (MeshRenderer*)componentPtr->GetComponent();
-            mSceneMain->RemoveMeshRendererFromSceneRoot(componentEntityRenderer);
             Renderer.DestroyMeshRenderer(componentEntityRenderer);
             break;
         }
@@ -292,7 +275,6 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
         }
         case COMPONENT_TYPE_LIGHT: {
             Light* componentLight = (Light*)componentPtr->GetComponent();
-            mSceneMain->RemoveLightFromSceneRoot(componentLight);
             Renderer.DestroyLight(componentLight);
             break;
         }
@@ -321,11 +303,6 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
 
 void EngineSystemManager::Update(void) {
     
-    // DEBUG show number of objects
-    Scene* testScene = Renderer[1];
-    std::cout << testScene->GetMeshRendererQueueSize() << std::endl;
-    
-    
     // Run through the game objects
     for (int i=0; i < mGameObjects.Size(); i++ ) {
         
@@ -341,20 +318,16 @@ void EngineSystemManager::Update(void) {
         currentTransform.scale       = objectPtr->transform.scale;
         
         // Calculate parent transforms
-        if (objectPtr->parent != nullptr) {
+        GameObject* parent = objectPtr->parent;
+        
+        // Roll over the parent matrix transform chain
+        while (parent != nullptr) {
             
-            GameObject* parent = objectPtr->parent;
+            currentTransform.position    += parent->transform.position;
+            currentTransform.scale       *= parent->transform.scale;
+            currentTransform.orientation *= parent->transform.orientation;
             
-            // Roll over the parent matrix transform chain
-            while (parent != nullptr) {
-                
-                currentTransform.position    += parent->transform.position;
-                currentTransform.scale       *= parent->transform.scale;
-                currentTransform.orientation *= parent->transform.orientation;
-                
-                parent = parent->parent;
-            }
-            
+            parent = parent->parent;
         }
         
         glm::mat4 translation = glm::translate(glm::mat4(1), currentTransform.position);
@@ -434,3 +407,4 @@ void EngineSystemManager::Shutdown(void) {
     
     return;
 }
+

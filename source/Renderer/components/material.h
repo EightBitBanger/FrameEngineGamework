@@ -51,6 +51,9 @@ public:
     /// The function used to blend colors.
     GLint blendFunction;
     
+    /// Shader used by this material for rendering.
+    Shader* shader;
+    
     Material();
     ~Material();
     
@@ -65,7 +68,7 @@ public:
     void EnableCulling(void);
     /// Disable face culling.
     void DisableCulling(void);
-    /// Set the size which will be culled during rendering.
+    /// Set the side which will be culled during rendering.
     void SetFaceCullingSide(GLint side);
     /// Set the winding direction for drawing triangles.
     void SetFaceWindingOrder(GLint direction);
@@ -96,16 +99,9 @@ public:
     /// Generate mipmaps for the current texture.
     void GenerateMipMaps(void);
     
-    /// Set the current shader for this material.
-    Shader* GetShader(void);
-    /// Set the current shader for this material.
-    void SetShader(Shader* newShader);
-    
 private:
     
     unsigned int mTextureBuffer;
-    
-    Shader* mShader;
     
 };
 
