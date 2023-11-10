@@ -49,11 +49,6 @@ gdi32  user32  kernel32  comctl32  glew32s  opengl32  reactphysics3d
 
 
 <br><br/>
-## Documentation
-You can find the API documentation <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki">here</a>⁭.
-
-
-<br><br/>
 ## Singleton access pointers
 The framework contains many sub systems which can be accessed though the following singletons.
 
