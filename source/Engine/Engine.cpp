@@ -120,7 +120,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
         
         skyMesh->SetVertex(i, vertex);
     }
-    skyMesh->UpdateMesh();
+    skyMesh->UploadToGPU();
     
     GameObject* skyObject = CreateGameObject();
     skyObject->name = "sky";
