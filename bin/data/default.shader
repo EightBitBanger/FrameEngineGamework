@@ -29,7 +29,7 @@ void main()
   float diff = 1.0;
         
   vec3 finalColor = m_ambient;
-  for (int i=0; i<=u_light_count; i++) {
+  for (int i=0; i < u_light_count; i++) {
     
     float intensity    = u_light_attenuation[i].r;
     float range        = u_light_attenuation[i].g;
