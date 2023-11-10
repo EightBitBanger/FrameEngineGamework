@@ -34,11 +34,13 @@ public:
     
     /// Create a game object and return its pointer.
     GameObject* CreateGameObject(void);
+    
     /// Destroy a game object.
     bool DestroyGameObject(GameObject* gameObjectPtr);
     
     /// Get the number of game objects.
     unsigned int GetGameObjectCount(void);
+    
     /// Return a pointer to a game object at the index position.
     GameObject* GetGameObject(unsigned int index);
     
@@ -47,6 +49,7 @@ public:
     
     /// Create a component object with initial type information and return its pointer.
     Component* CreateComponent(ComponentType type);
+    
     /// Destroy a component object.z
     bool DestroyComponent(Component* componentPtr);
     
@@ -58,14 +61,21 @@ public:
     
     /// Create a camera controller game object and return its pointer.
     GameObject* CreateCameraController(glm::vec3 position, glm::vec3 scale);
+    
     /// Generate a sky object and return its pointer.
     GameObject* CreateSky(std::string meshTagName, std::string shaderTagName, Color colorLow, Color colorHigh, float biasMul);
+    
     /// Create a mesh renderer component and return its pointer.
     Component* CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr);
+    
     /// Create a point light component and return its pointer.
     Component* CreateComponentLight(glm::vec3 position);
+    
     /// Create an AI actor component and return its pointer.
     GameObject* CreateAIActor(glm::vec3 position);
+    
+    /// Create an overlay renderer objects and return its pointer.
+    GameObject* CreateOverlayRenderer(void);
     
     
     EngineSystemManager();
@@ -100,20 +110,20 @@ public:
     /// Destroy an object of the type specified.
     template <typename T> bool Destroy(T* objectPtr) {
         // Engine
-        if (std::is_same<T, GameObject>::value)    return DestroyGameObject(objectPtr);
-        if (std::is_same<T, Component>::value)     return DestroyComponent( objectPtr );
+        if (std::is_same<T, GameObject>::value)    return DestroyGameObject( (GameObject*)objectPtr );
+        if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
         // Render system
-        if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh(objectPtr);
-        if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial(objectPtr);
-        if (std::is_same<T, Shader>::value)        return Renderer.DestroyShader(objectPtr);
-        if (std::is_same<T, Scene>::value)         return Renderer.DestroyScene(objectPtr);
-        if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera(objectPtr);
-        if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer(objectPtr);
+        if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh( (Mesh*)objectPtr );
+        if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial( (Material*)objectPtr );
+        if (std::is_same<T, Shader>::value)        return Renderer.DestroyShader( (Shader*)objectPtr );
+        if (std::is_same<T, Scene>::value)         return Renderer.DestroyScene( (Scene*)objectPtr );
+        if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera( (Camera*)objectPtr );
+        if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer( (MeshRenderer*)objectPtr );
         
         // Physics system
-        if (std::is_same<T, RigidBody>::value)  return (T*)Physics.CreateRigidBody(0, 0, 0);
+        if (std::is_same<T, RigidBody>::value)  return Physics.DestroyRigidBody( (RigidBody*)objectPtr );
         
-        return nullptr;
+        return false;
     }
     
     /// Create a component object containing the type specified.

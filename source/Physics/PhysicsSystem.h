@@ -36,7 +36,7 @@ public:
     /// Create a rigid body object and return its pointer.
     rp3d::RigidBody* CreateRigidBody(float x=0.0, float y=0.0, float z=0.0);
     /// Destroy a rigid body object.
-    void DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr);
+    bool DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr);
     
     /// Set the gravity for the world simulation.
     void SetWorldGravity(float x, float y, float z);

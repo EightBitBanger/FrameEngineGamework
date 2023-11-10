@@ -93,7 +93,7 @@ public:
     bool ChangeSubMeshPosition(unsigned int index, float x, float y, float z);
     
     /// Fully re-upload the vertex buffer into the GPU buffer.
-    void UpdateMesh(void);
+    void UploadToGPU(void);
     
     /// Get the number of index locations in the index buffer.
     unsigned int GetNumberOfIndices(void);

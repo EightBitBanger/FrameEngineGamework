@@ -64,7 +64,7 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
     return world->createRigidBody(physicsTransform);
 }
 
-void PhysicsSystem::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
+bool PhysicsSystem::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
     assert(rigidBodyPtr != nullptr);
     
     // !! Warning: leak on rigid body destroy !!
@@ -72,6 +72,7 @@ void PhysicsSystem::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
     
     // Use a free list instead...
     //AddRigidBodyToFreeList(rigidBodyPtr);
+    return true;
 }
 
 rp3d::BoxShape* PhysicsSystem::CreateColliderBox(float xscale, float yscale, float zscale) {

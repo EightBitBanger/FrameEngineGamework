@@ -77,18 +77,17 @@ void Framework::Start() {
     
     
     
-    
+    // Generate a plain
     plain = Engine.Create<GameObject>();
+    
     plain->AddComponent( Engine.CreateComponent<MeshRenderer>(Resources.CreateMeshFromTag("plain"), Engine.Create<Material>()) );
     plain->transform.scale = glm::vec3(1, 1, 1);
+    
+    sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
     
     Mesh*     plainMesh     = plain->GetComponent<MeshRenderer>()->mesh;
     Material* plainMaterial = plain->GetComponent<MeshRenderer>()->material;
     plainMaterial->diffuse = Colors.white;
-    
-    sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
-    
-    
     
     SubMesh meshPart;
     plainMesh->CopySubMesh(0, meshPart);
@@ -115,13 +114,7 @@ void Framework::Start() {
         }
     }
     
-    plainMesh->UpdateMesh();
-    
-    
-    // Randomize colors
-    for (int i=0; i < plainMesh->GetSubMeshCount(); i++) 
-        plainMesh->ChangeSubMeshColor(i, Colors.MakeRandom());
-    
+    plainMesh->UploadToGPU();
     
     plainMaterial->shader = surfaceShader;
     
@@ -137,23 +130,24 @@ void Framework::Start() {
     // Overlay example
     sceneOverlay = Engine.Create<Scene>();
     sceneOverlay->camera = Engine.Create<Camera>();
-    //sceneOverlay->camera->useMouseLook = true;
+    Renderer.AddSceneToRenderQueue(sceneOverlay);
     
-    overlayObject = Engine.Create<GameObject>();
-    overlayObject->transform.RotateAxis(90, Vector3(0, 0, 1));
-    overlayObject->transform.scale = Vector3(0.1, 0.1, 0.1);
+    overlayObject = Engine.CreateOverlayRenderer();
     
-    Mesh*     overlayMesh     = Engine.Create<Mesh>();
-    Material* overlayMaterial = Engine.Create<Material>();
-    overlayMaterial->shader = surfaceShader;
-    overlayObject->AddComponent( Engine.CreateComponent<MeshRenderer>(overlayMesh, overlayMaterial) );
+    overlayObject->transform.scale = Vector3(0.01, 0.01, 0.01);
     
+    MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject->GetComponent<MeshRenderer>() );
     
-    overlayMesh->AddPlainSubDivided(0, 0, 0, 1, 1, Colors.blue, 1, 1);
-    overlayMesh->UpdateMesh();
+    overlayRenderer->mesh->AddPlain(0, 0, 0, 1, 1, Colors.white);
+    overlayRenderer->mesh->UploadToGPU();
     
-    Renderer.AddSceneToRenderQueue(sceneOverlay);
+    Engine.Destroy<Material>( overlayRenderer->material );
+    overlayRenderer->material = Resources.CreateMaterialFromTag("grassy");
+    
+    overlayRenderer->material->diffuse = Colors.white;
+    overlayRenderer->material->shader = textureShader;
+    overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
     
     return;
 }

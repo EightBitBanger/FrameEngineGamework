@@ -197,6 +197,22 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     return newGameObject;
 }
 
+GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
+    GameObject* overlayObject = Create<GameObject>();
+    overlayObject->transform.RotateAxis(90, Vector3(0, 0, 1));
+    overlayObject->transform.scale = Vector3(0.1, 0.1, 0.1);
+    
+    Mesh*     overlayMesh     = Create<Mesh>();
+    Material* overlayMaterial = Create<Material>();
+    
+    overlayMaterial->shader = Renderer.defaultShader;
+    overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
+    
+    overlayObject->AddComponent( CreateComponent<MeshRenderer>(overlayMesh, overlayMaterial) );
+    
+    return overlayObject;
+}
+
 GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
     if (index < mGameObjectActive.size()) 
         return mGameObjectActive[index];
