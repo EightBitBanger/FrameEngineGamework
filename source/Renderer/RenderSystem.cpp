@@ -1,7 +1,15 @@
 #include "rendersystem.h"
 
-
 RenderSystem::RenderSystem() : 
+    
+    defaultMaterial(nullptr),
+    defaultShader(nullptr),
+    
+    viewport(Viewport(0, 0, 0, 0)),
+    
+    displaySize(glm::vec2(0, 0)),
+    displayCenter(glm::vec2(0, 0)),
+    
     mNumberOfDrawCalls(0),
     
     mWindowHandle(NULL),
@@ -9,7 +17,9 @@ RenderSystem::RenderSystem() :
     mRenderContext(NULL),
     
     mCurrentMesh(nullptr),
-    mCurrentMaterial(nullptr)
+    mCurrentMaterial(nullptr),
+    
+    mNumberOfLights(0)
 {
 }
 
@@ -364,16 +374,18 @@ void RenderSystem::RenderFrame(float deltaTime) {
             
             MeshRenderer* currentEntity = scenePtr->GetMeshRenderer(i);
             
+            
             // Mesh binding
             
             Mesh* mesh = currentEntity->mesh;
             if (mesh == nullptr) 
                 continue;
             
-            if (mCurrentMesh != mesh) 
+            if (mCurrentMesh != mesh) {
+                
                 mCurrentMesh = mesh;
-            
-            mCurrentMesh->Bind();
+                mCurrentMesh->Bind();
+            }
             
             
             // Material binding
@@ -382,42 +394,43 @@ void RenderSystem::RenderFrame(float deltaTime) {
             if (materialPtr == nullptr) 
                 continue;
             
-            if (mCurrentMaterial != materialPtr) 
+            if (mCurrentMaterial != materialPtr) {
                 mCurrentMaterial = materialPtr;
-            
-            mCurrentMaterial->BindTextureSlot(0);
-            mCurrentMaterial->Bind();
-            
-            
-            // Depth testing
-            
-            if (mCurrentMaterial->doDepthTest) {
-                glEnable(GL_DEPTH_TEST);
-                glDepthMask(mCurrentMaterial->doDepthTest);
-                glDepthFunc(mCurrentMaterial->depthFunc);
-            } else {
-                glDisable(GL_DEPTH_TEST);
-            }
-            
-            
-            // Face culling and winding
-            
-            if (mCurrentMaterial->doFaceCulling) {
-                glEnable(GL_CULL_FACE);
-                glCullFace(mCurrentMaterial->faceCullSide);
-                glFrontFace(mCurrentMaterial->faceWinding);
-            } else {
-                glDisable(GL_CULL_FACE);
-            }
-            
-            
-            // Blending
-            
-            if (mCurrentMaterial->doBlending) {
-                glEnable(GL_BLEND);
-                glBlendFuncSeparate(mCurrentMaterial->blendSource, mCurrentMaterial->blendDestination, mCurrentMaterial->blendAlphaSource, mCurrentMaterial->blendAlphaDestination);
-            } else {
-                glDisable(GL_BLEND);
+                
+                mCurrentMaterial->BindTextureSlot(0);
+                mCurrentMaterial->Bind();
+                
+                // Depth testing
+                
+                if (mCurrentMaterial->doDepthTest) {
+                    glEnable(GL_DEPTH_TEST);
+                    glDepthMask(mCurrentMaterial->doDepthTest);
+                    glDepthFunc(mCurrentMaterial->depthFunc);
+                } else {
+                    glDisable(GL_DEPTH_TEST);
+                }
+                
+                
+                // Face culling and winding
+                
+                if (mCurrentMaterial->doFaceCulling) {
+                    glEnable(GL_CULL_FACE);
+                    glCullFace(mCurrentMaterial->faceCullSide);
+                    glFrontFace(mCurrentMaterial->faceWinding);
+                } else {
+                    glDisable(GL_CULL_FACE);
+                }
+                
+                
+                // Blending
+                
+                if (mCurrentMaterial->doBlending) {
+                    glEnable(GL_BLEND);
+                    glBlendFuncSeparate(mCurrentMaterial->blendSource, mCurrentMaterial->blendDestination, mCurrentMaterial->blendAlphaSource, mCurrentMaterial->blendAlphaDestination);
+                } else {
+                    glDisable(GL_BLEND);
+                }
+                
             }
             
             
@@ -426,19 +439,22 @@ void RenderSystem::RenderFrame(float deltaTime) {
             Shader* shaderPtr = materialPtr->shader;
             if (shaderPtr != nullptr) {
                 
-                if (currentShader != shaderPtr) 
+                if (currentShader != shaderPtr) {
+                    
                     currentShader = shaderPtr;
+                    currentShader->Bind();
+                }
                 
             } else {
                 
                 // No shader, use the default
                 currentShader = defaultShader;
+                currentShader->Bind();
             }
-            
-            currentShader->Bind();
             
             // Set the projection
             currentShader->SetProjectionMatrix( viewProjection );
+            currentShader->SetModelMatrix( currentEntity->transform.matrix );
             currentShader->SetCameraPosition(eye);
             
             // Send in the light list
@@ -451,8 +467,6 @@ void RenderSystem::RenderFrame(float deltaTime) {
             currentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
             currentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
             currentShader->SetTextureSampler(0);
-            
-            currentShader->SetModelMatrix( currentEntity->transform.matrix );
             
             mesh->DrawIndexArray();
             

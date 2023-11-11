@@ -150,7 +150,7 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
 
 void Shader::Bind(void) {
     glUseProgram(mShaderProgram);
-    
+    return;
 }
 
 bool Shader::BuildDefault(void) {
@@ -186,14 +186,10 @@ bool Shader::BuildDefault(void) {
         "{"
         
         "  vec4 vertPos = u_model * vec4(l_position, 1);"
-        "  vec3 finalColor = m_ambient;";
+        "  vec3 finalColor = m_ambient;"
         
         
-    //
-    // Crude but quick vertex lighting implementation
-    //
-    
-    vertexShader += 
+        
         "  for (int i=0; i<=u_light_count; i++) {"
         
         "    float l_intensity    = u_light_attenuation[i].r;"
@@ -211,15 +207,15 @@ bool Shader::BuildDefault(void) {
         "      float f_attenuation = l_attenuation * l_range * l_dist;"
         "      finalColor += (l_diff * u_light_color[i] * l_intensity) / f_attenuation;"
         "    }"
-        "  }";
-    
-    
-    // Finalize vertex colors
-    vertexShader += 
+        "  }"
+        
+        
+        
         "  v_color = finalColor + l_color + m_diffuse;"
         "  v_coord = l_uv;"
         "  gl_Position = u_proj * vertPos;"
         "};";
+    
     
     
     std::string fragmentShader = 
@@ -237,9 +233,7 @@ bool Shader::BuildDefault(void) {
         "  "
         "  float Gamma = 2.2;"
         "  "
-        "  vec4 vColor = vec4(v_color, 1);"
-        "  "
-        "  color = vec4( pow(vColor.rgb, vec3(1.0/Gamma)), 1);"
+        "  color = vec4( pow(v_color, vec3(1.0/Gamma)), 1);"
         "  "
         "}";
     

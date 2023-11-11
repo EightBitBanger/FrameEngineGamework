@@ -202,10 +202,13 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     GameObject* overlayObject = Create<GameObject>();
     overlayObject->transform.RotateAxis(90, Vector3(0, 0, 1));
     overlayObject->transform.scale = Vector3(0.1, 0.1, 0.1);
-    overlayObject->transform.position = Vector3(1.01, 0, 0);
+    overlayObject->transform.position = Vector3(1.0, 0, 0);
     
     Mesh*     overlayMesh     = Create<Mesh>();
     Material* overlayMaterial = Create<Material>();
+    
+    overlayMesh->AddPlain(0, 0, 0, 1, 1, Colors.white);
+    overlayMesh->UploadToGPU();
     
     overlayMaterial->shader = Renderer.defaultShader;
     overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);

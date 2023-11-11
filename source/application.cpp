@@ -85,12 +85,12 @@ void Framework::Start() {
     
     
     GameObject* plain = Engine.Create<GameObject>();
-    plain->transform.scale = Vector3(100, 0, 100);
+    plain->transform.scale = Vector3(10, 10, 10);
     plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("plain"), Resources.CreateMaterialFromTag("grassy") ) );
+    Mesh* plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
+    plain->GetComponent<MeshRenderer>()->material->shader = surfaceShader;
+    plain->GetComponent<MeshRenderer>()->material->DisableCulling();
     sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
-    
-    plain->GetComponent<MeshRenderer>()->material->shader = textureShader;
-    
     
     
     
@@ -123,9 +123,16 @@ void Framework::Start() {
     
     
     
-    /*
+    
     SubMesh meshPart;
     plainMesh->CopySubMesh(0, meshPart);
+    
+    Engine.Destroy<Mesh>( plainMesh );
+    plainMesh = Engine.Create<Mesh>();
+    
+    float noiseMul = 1;
+    float xNoise = 0.1;
+    float zNoise = 0.1;
     
     int width  = 100;
     int height = 100;
@@ -133,27 +140,23 @@ void Framework::Start() {
     for (int z=0; z < height; z++) {
         for (int x=0; x < width; x++) {
             
-            float CoordMul = 1;
-            float CoordX   = x * 0.1;
-            float CoordZ   = z * 0.1;
+            float CoordX = x * xNoise;
+            float CoordZ = z * zNoise;
             
-            float noiseTotal = Random.Perlin(CoordX, 0, CoordZ) * CoordMul;
+            float noiseTotal = Random.Perlin(CoordX, 0, CoordZ) * noiseMul;
             
-            plainMesh->AddSubMesh((float)x, noiseTotal * 10, z, meshPart, false);
+            plainMesh->AddSubMesh((float)x, noiseTotal, z, meshPart, false);
             
             if (noiseTotal < 0)   noiseTotal = 0;
             if (noiseTotal > 0.9) noiseTotal = 0.9;
             
-            // Causes invalid OpenGL command
-            //plainMesh->ChangeSubMeshColor(plainMesh->GetSubMeshCount() - 1, Colors.Make(noiseTotal, noiseTotal, noiseTotal));
+            plainMesh->ChangeSubMeshColor(plainMesh->GetSubMeshCount() - 1, Colors.Make(noiseTotal, noiseTotal, noiseTotal));
             
         }
     }
     
     plainMesh->UploadToGPU();
     
-    
-    */
     
     
     
@@ -171,22 +174,15 @@ void Framework::Start() {
     overlayObject->transform.scale = Vector3(0.1, 0.1, 0.1);
     
     MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
-    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject->GetComponent<MeshRenderer>() );
+    sceneOverlay->AddMeshRendererToSceneRoot( overlayRenderer );
     
-    overlayRenderer->mesh->AddPlain(0, 0, 0, 1, 1, Colors.white);
-    overlayRenderer->mesh->UploadToGPU();
-    
-    Engine.Destroy<Mesh>( overlayRenderer->mesh );
     Engine.Destroy<Material>( overlayRenderer->material );
     
-    overlayRenderer->mesh = Resources.CreateMeshFromTag("plain");
-    overlayRenderer->material = Resources.CreateMaterialFromTag("cross");
-    
-    //overlayRenderer->material->diffuse = Colors.white;
-    //overlayRenderer->material->ambient = Colors.white;
+    overlayRenderer->material = Resources.CreateMaterialFromTag("barrel");
     overlayRenderer->material->shader = textureShader;
     overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
-    overlayRenderer->material->DisableCulling();
+    
+    //overlayRenderer->material->EnableBlending();
     
     
     
@@ -228,6 +224,9 @@ float cameraSpeed     = 1.5f;
 //
 
 void Framework::Run() {
+    
+    if (Input.CheckKeyCurrent(VK_I)) {overlayObject->transform.position.y += 0.1;}
+    if (Input.CheckKeyCurrent(VK_K)) {overlayObject->transform.position.y -= 0.1;}
     
     glm::vec3 force(0);
     if (mainCamera != nullptr) {
