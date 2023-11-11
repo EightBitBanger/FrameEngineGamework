@@ -50,6 +50,7 @@ void Framework::Start() {
     Shader* textureShader = Resources.CreateShaderFromTag("texture");
     
     
+    
     //
     // Create a sky
     
@@ -60,7 +61,9 @@ void Framework::Start() {
     sceneMain->AddMeshRendererToSceneRoot( skyObject->GetComponent<MeshRenderer>() );
     
     skyMaterial = skyObject->GetComponent<MeshRenderer>()->material;
-    skyMaterial->diffuse = Color(0.0, 0.0, 0.0);
+    skyMaterial->diffuse = Color(0.1, 0.1, 0.1);
+    skyMaterial->EnableDepthTest();
+    
     
     
     
@@ -73,22 +76,54 @@ void Framework::Start() {
     sceneMain->camera = mainCamera;
     
     // Attach sky object to the camera object
-    skyObject->parent = cameraController;
+    //skyObject->parent = cameraController;
+    
+    cameraController->AddComponent( Engine.CreateComponent<Light>() );
+    Light* cameraLight = cameraController->GetComponent<Light>();
+    cameraLight->intensity = 100;
     
     
     
-    // Generate a plain
-    plain = Engine.Create<GameObject>();
-    
-    plain->AddComponent( Engine.CreateComponent<MeshRenderer>(Resources.CreateMeshFromTag("plain"), Engine.Create<Material>()) );
-    plain->transform.scale = glm::vec3(1, 1, 1);
-    
+    GameObject* plain = Engine.Create<GameObject>();
+    plain->transform.scale = Vector3(100, 0, 100);
+    plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("plain"), Resources.CreateMaterialFromTag("grassy") ) );
     sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
     
-    Mesh*     plainMesh     = plain->GetComponent<MeshRenderer>()->mesh;
-    Material* plainMaterial = plain->GetComponent<MeshRenderer>()->material;
-    plainMaterial->diffuse = Colors.white;
+    plain->GetComponent<MeshRenderer>()->material->shader = textureShader;
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    GameObject* barrel = Engine.Create<GameObject>();
+    barrel->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("barrel"), Resources.CreateMaterialFromTag("barrel") ) );
+    barrel->GetComponent<MeshRenderer>()->material->shader = textureShader;
+    barrel->GetComponent<MeshRenderer>()->material->ambient = Colors.black;
+    barrel->GetComponent<MeshRenderer>()->material->diffuse = Colors.black;
+    
+    barrel->GetComponent<MeshRenderer>()->mesh->ChangeSubMeshColor(0, Colors.MakeGrayScale(0.1));
+    
+    sceneMain->AddMeshRendererToSceneRoot( barrel->GetComponent<MeshRenderer>() );
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /*
     SubMesh meshPart;
     plainMesh->CopySubMesh(0, meshPart);
     
@@ -109,19 +144,19 @@ void Framework::Start() {
             if (noiseTotal < 0)   noiseTotal = 0;
             if (noiseTotal > 0.9) noiseTotal = 0.9;
             
-            plainMesh->ChangeSubMeshColor(plainMesh->GetSubMeshCount() - 1, Colors.Make(noiseTotal, noiseTotal, noiseTotal));
+            // Causes invalid OpenGL command
+            //plainMesh->ChangeSubMeshColor(plainMesh->GetSubMeshCount() - 1, Colors.Make(noiseTotal, noiseTotal, noiseTotal));
             
         }
     }
     
     plainMesh->UploadToGPU();
     
-    plainMaterial->shader = surfaceShader;
     
-    plainMaterial->SetTextureFiltration(MATERIAL_FILTER_LINEAR);
-    plainMaterial->DisableCulling();
+    */
     
-    Physics.SetWorldGravity(0, 0, 0);
+    
+    
     
     
     
@@ -133,8 +168,7 @@ void Framework::Start() {
     Renderer.AddSceneToRenderQueue(sceneOverlay);
     
     overlayObject = Engine.CreateOverlayRenderer();
-    
-    overlayObject->transform.scale = Vector3(0.01, 0.01, 0.01);
+    overlayObject->transform.scale = Vector3(0.1, 0.1, 0.1);
     
     MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject->GetComponent<MeshRenderer>() );
@@ -142,12 +176,27 @@ void Framework::Start() {
     overlayRenderer->mesh->AddPlain(0, 0, 0, 1, 1, Colors.white);
     overlayRenderer->mesh->UploadToGPU();
     
+    Engine.Destroy<Mesh>( overlayRenderer->mesh );
     Engine.Destroy<Material>( overlayRenderer->material );
-    overlayRenderer->material = Resources.CreateMaterialFromTag("grassy");
     
-    overlayRenderer->material->diffuse = Colors.white;
+    overlayRenderer->mesh = Resources.CreateMeshFromTag("plain");
+    overlayRenderer->material = Resources.CreateMaterialFromTag("cross");
+    
+    //overlayRenderer->material->diffuse = Colors.white;
+    //overlayRenderer->material->ambient = Colors.white;
     overlayRenderer->material->shader = textureShader;
     overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
+    overlayRenderer->material->DisableCulling();
+    
+    
+    
+    
+    
+    
+    // World physics
+    
+    Physics.SetWorldGravity(0, 0, 0);
+    
     
     return;
 }
@@ -180,76 +229,6 @@ float cameraSpeed     = 1.5f;
 
 void Framework::Run() {
     
-    if (Input.CheckKeyCurrent(VK_I)) {overlayPosition.y += 0.2;}
-    if (Input.CheckKeyCurrent(VK_K)) {overlayPosition.y -= 0.2;}
-    if (Input.CheckKeyCurrent(VK_J)) {overlayPosition.z += 0.2;}
-    if (Input.CheckKeyCurrent(VK_L)) {overlayPosition.z -= 0.2;}
-    
-    overlayPosition.x = 1.001;
-    
-    overlayObject->transform.position = overlayPosition;
-    
-    
-    
-    
-    //
-    // AI system currently being implemented
-    //
-    
-    /*
-    if (Input.CheckMouseLeftPressed()) {
-        Input.ClearMouseLeft();
-        
-        GameObject* actorObject = Engine.CreateAIActor( (Renderer.GetCamera()->transform.position + (Renderer.GetCamera()->forward * 10.0f)) );
-        
-        Material* actorMaterial = actorObject->GetComponent<MeshRenderer>()->material;
-        actorMaterial->ambient = Color(0, 0, 0);
-        rp3d::Vector3 position;
-        
-        rp3d::Vector3 force;
-        Camera* currentCamera = Renderer.GetCamera();
-        force.x = currentCamera->forward.x;
-        force.y = currentCamera->forward.y;
-        force.z = currentCamera->forward.z;
-        
-        actorObject->GetComponent<RigidBody>()->applyLocalForceAtCenterOfMass(force);
-        
-        actorObject->AddComponent( Engine.CreateComponent( Components.Light ) );
-        
-        Light* lightPtr = actorObject->GetComponent<Light>();
-        lightPtr->intensity   = 100.0f;
-        lightPtr->range       = 100.0f;
-        lightPtr->attenuation = 2.0f;
-        
-        //Gene newGene;
-        
-    }
-    */
-    
-    
-    
-    
-    
-    
-    //
-    // Day night cycle testing
-    float skyMax = 0.8;
-    
-    if (skyMaterial != nullptr) {
-        if (skyMaterial->diffuse < Color(skyMax, skyMax, skyMax)) {
-            
-            Color skyShift(dayNightRate, dayNightRate, dayNightRate);
-            skyMaterial->diffuse += skyShift;
-            
-            if (skyMaterial->diffuse > Color(dayNightMaxLight, dayNightMaxLight, dayNightMaxLight)) 
-                skyMaterial->diffuse = Color(dayNightMaxLight, dayNightMaxLight, dayNightMaxLight);
-            
-        }
-    }
-    
-    
-    
-    
     glm::vec3 force(0);
     if (mainCamera != nullptr) {
         
@@ -276,31 +255,10 @@ void Framework::Run() {
             rp3d::Transform transform = rp3d::Transform::identity();
             transform.setPosition( rp3d::Vector3(velocity.x, velocity.y, velocity.z) );
             
-            
             rigidBody->setTransform( transform );
         }
         
     }
-    
-    
-    /*
-    if (Renderer.GetCamera() != nullptr) {
-        
-        Vector3 forwardOffset = Renderer.GetCamera()->forward;
-        forwardOffset *= 100;
-        
-        plain->transform.position = velocity + forwardOffset;
-        
-    }
-    */
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     

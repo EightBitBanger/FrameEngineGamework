@@ -158,6 +158,13 @@ Color& ColorPreset::Make(float r, float g, float b) {
     return mCustom;
 }
 
+Color& ColorPreset::MakeGrayScale(float grayScale) {
+    mCustom.r = grayScale;
+    mCustom.g = grayScale;
+    mCustom.b = grayScale;
+    return mCustom;
+}
+
 Color& ColorPreset::MakeRandom(void) {
     mRandom.r = ((float)(rand() % (int)100) + 1) * 0.01;
     mRandom.g = ((float)(rand() % (int)100) + 1) * 0.01;

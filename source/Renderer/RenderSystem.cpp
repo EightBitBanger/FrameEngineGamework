@@ -2,6 +2,7 @@
 
 
 RenderSystem::RenderSystem() : 
+    mNumberOfDrawCalls(0),
     
     mWindowHandle(NULL),
     mDeviceContext(NULL),
@@ -158,7 +159,7 @@ GLenum RenderSystem::SetRenderTarget(HWND wHndl) {
     
     //
     // Log hardware details
-    
+#ifdef  LOG_RENDER_DETAILS
     const char* gcVendorConst     = (const char*)glGetString(GL_VENDOR);
     const char* gcRendererConst   = (const char*)glGetString(GL_RENDERER);
     const char* gcExtensionsConst = (const char*)glGetString(GL_EXTENSIONS);
@@ -187,7 +188,7 @@ GLenum RenderSystem::SetRenderTarget(HWND wHndl) {
     Line = DetailStringHead + "Depth" + DetailStringEqu + IntToString(pfd.cDepthBits) + " bit"; Log.Write(Line);
     Log.WriteLn();
     Log.WriteLn();
-    
+#endif
     return glpassed;
 }
 
@@ -257,17 +258,26 @@ std::vector<std::string> RenderSystem::GetGLErrorCodes(std::string errorLocation
 }
 
 
+unsigned int RenderSystem::GetNumberOfDrawCalls(void) {
+    return mNumberOfDrawCalls;
+}
+
+
 //
 // Render processing
 //
 
 void RenderSystem::RenderFrame(float deltaTime) {
     
+    mNumberOfDrawCalls = 0;
+    
     // Clear the view port
     glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0, 0, 0, 1);
     
+    // Set the default shader
+    Shader* currentShader = defaultShader;
     
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
         
@@ -314,14 +324,6 @@ void RenderSystem::RenderFrame(float deltaTime) {
         // Right angle to the looking angle
         currentCamera->right = glm::normalize(glm::cross(currentCamera->up, currentCamera->forward));
         
-        // Set the default shader
-        Shader* currentShader = defaultShader;
-        
-        currentShader->Bind();
-        
-        currentShader->SetProjectionMatrix( viewProjection );
-        currentShader->SetCameraPosition(eye);
-        
         
         //
         // Check to update the scene light list
@@ -331,7 +333,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
             mNumberOfLights = scenePtr->GetLightQueueSize();
             if (mNumberOfLights > RENDER_NUMBER_OF_LIGHTS) mNumberOfLights = RENDER_NUMBER_OF_LIGHTS;
             
-            // Accumulate a list of lights
+            // Accumulate the light list for this scene
             for (unsigned int i=0; i < mNumberOfLights; i++) {
                 Light* lightPtr = scenePtr->GetLight(i);
                 
@@ -353,7 +355,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
         
         
         //
-        // Render entities
+        // Draw the mesh renderers
         //
         
         unsigned int entityListSz = scenePtr->GetMeshRendererQueueSize();
@@ -368,10 +370,10 @@ void RenderSystem::RenderFrame(float deltaTime) {
             if (mesh == nullptr) 
                 continue;
             
-            if (mCurrentMesh != mesh) {
+            if (mCurrentMesh != mesh) 
                 mCurrentMesh = mesh;
-                mCurrentMesh->Bind();
-            }
+            
+            mCurrentMesh->Bind();
             
             
             // Material binding
@@ -383,8 +385,9 @@ void RenderSystem::RenderFrame(float deltaTime) {
             if (mCurrentMaterial != materialPtr) 
                 mCurrentMaterial = materialPtr;
             
-            mCurrentMaterial->Bind();
             mCurrentMaterial->BindTextureSlot(0);
+            mCurrentMaterial->Bind();
+            
             
             // Depth testing
             
@@ -396,6 +399,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 glDisable(GL_DEPTH_TEST);
             }
             
+            
             // Face culling and winding
             
             if (mCurrentMaterial->doFaceCulling) {
@@ -405,6 +409,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
             } else {
                 glDisable(GL_CULL_FACE);
             }
+            
             
             // Blending
             
@@ -416,37 +421,42 @@ void RenderSystem::RenderFrame(float deltaTime) {
             }
             
             
-            //
             // Shader binding
-            //
             
             Shader* shaderPtr = materialPtr->shader;
             if (shaderPtr != nullptr) {
                 
-                if (currentShader != shaderPtr) {
+                if (currentShader != shaderPtr) 
                     currentShader = shaderPtr;
-                    
-                    currentShader->Bind();
-                    
-                    currentShader->SetProjectionMatrix( viewProjection );
-                    currentShader->SetCameraPosition(eye);
-                    
-                    // Send in the light list
-                    currentShader->SetLightCount(mNumberOfLights);
-                    currentShader->SetLightPositions(mNumberOfLights, mLightPosition);
-                    currentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
-                    currentShader->SetLightColors(mNumberOfLights, mLightColor);
-                }
+                
+            } else {
+                
+                // No shader, use the default
+                currentShader = defaultShader;
             }
+            
+            currentShader->Bind();
+            
+            // Set the projection
+            currentShader->SetProjectionMatrix( viewProjection );
+            currentShader->SetCameraPosition(eye);
+            
+            // Send in the light list
+            currentShader->SetLightCount(mNumberOfLights);
+            currentShader->SetLightPositions(mNumberOfLights, mLightPosition);
+            currentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
+            currentShader->SetLightColors(mNumberOfLights, mLightColor);
             
             // Apply material to shader
             currentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
             currentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
             currentShader->SetTextureSampler(0);
             
-            currentShader->SetModelMatrix(currentEntity->transform.matrix);
+            currentShader->SetModelMatrix( currentEntity->transform.matrix );
             
             mesh->DrawIndexArray();
+            
+            mNumberOfDrawCalls++;
             
             continue;
         }

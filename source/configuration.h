@@ -25,6 +25,14 @@
 //#define  ESCAPE_KEY_QUIT
 
 
+//
+// Event log
+//
+
+//#define  EVENT_LOG_DETAILED
+
+
+
 
 //
 // Tick update
@@ -43,7 +51,7 @@
 
 #define RENDER_NUMBER_OF_LIGHTS    120
 
-#define  LOG_RENDER_DETAILS_
+#define  LOG_RENDER_DETAILS
 
 
 

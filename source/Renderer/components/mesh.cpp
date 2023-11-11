@@ -153,7 +153,6 @@ void Mesh::AddPlainSubDivided(float x, float y, float z, float width, float heig
             AddPlain( x + (w * width), y, z + (h * height), width, height, color);
         }
     }
-    UploadToGPU();
     return;
 }
 
@@ -192,7 +191,6 @@ void Mesh::AddWallSubDivided(float x, float y, float z, float width, float heigh
             AddWall( x + (w * width), y + (h * height), z, width, height, color);
         }
     }
-    UploadToGPU();
     return;
 }
 

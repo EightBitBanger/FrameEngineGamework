@@ -110,6 +110,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
     Material* skyMaterial = Renderer.CreateMaterial();
     
     skyMaterial->diffuse = Color(1, 1, 1);
+    skyMaterial->DisableDepthTest();
     
     for (int i=0; i < skyMesh->GetNumberOfVertices(); i++) {
         Vertex vertex = skyMesh->GetVertex(i);
@@ -201,6 +202,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     GameObject* overlayObject = Create<GameObject>();
     overlayObject->transform.RotateAxis(90, Vector3(0, 0, 1));
     overlayObject->transform.scale = Vector3(0.1, 0.1, 0.1);
+    overlayObject->transform.position = Vector3(1.01, 0, 0);
     
     Mesh*     overlayMesh     = Create<Mesh>();
     Material* overlayMaterial = Create<Material>();

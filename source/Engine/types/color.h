@@ -65,6 +65,7 @@ public:
     
     Color& Make(float r, float g, float b);
     Color& MakeRandom(void);
+    Color& MakeGrayScale(float grayScale);
     
     
 private:

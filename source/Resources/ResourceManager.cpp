@@ -5,16 +5,11 @@
 extern RenderSystem Renderer;
 extern PhysicsSystem Physics;
 
-ResourceManager::ResourceManager() :
-    
-    sceneMain(nullptr)
-{
+ResourceManager::ResourceManager() {
+    return;
 }
 
 void ResourceManager::Initiate(void) {
-    
-    sceneMain = Renderer.CreateScene();
-    Renderer.AddSceneToRenderQueue(sceneMain);
     
     stbi_set_flip_vertically_on_load(true);
     
@@ -82,6 +77,7 @@ Material* ResourceManager::CreateMaterialFromTag(std::string resourceName) {
     materialPtr->width  = texTag->width;
     materialPtr->height = texTag->height;
     materialPtr->UpdateTextureBuffer(texTag->buffer);
+    materialPtr->GenerateMipMaps();
     return materialPtr;
 }
 
@@ -108,7 +104,7 @@ void ResourceManager::DestroyAssets(void) {
     return;
 }
 
-bool ResourceManager::LoadTexture(std::string path, std::string resourceName="texDefault") {
+bool ResourceManager::LoadTexture(std::string path, std::string resourceName) {
     
     std::string name       = StringGetNameFromFilename(path);
     std::string assetName  = StringGetNameFromFilenameNoExt(path);
@@ -126,10 +122,14 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName="te
     
     std::string logstr = "  + " + assetName + "  " + path;
     Log.Write(logstr);
+#ifdef EVENT_LOG_DETAILED
+    logstr = "    + " + IntToString(textureTag.width) + " X " + IntToString(textureTag.height);
+    Log.Write(logstr);
+#endif
     return true;
 }
 
-bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="meshDefault") {
+bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName) {
     
     objl::Loader loader;
     if (!loader.LoadFile(path)) {
@@ -174,10 +174,14 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName="
     std::string logstr = "  + " + newAsset.name + "  " + path;
     Log.Write(logstr);
     
+#ifdef EVENT_LOG_DETAILED
+    logstr = "    + " + IntToString(loader.LoadedMeshes[0].Vertices.size()) + " vertices";
+    Log.Write(logstr);
+#endif
     return true;
 }
 
-bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName="shaDefault") {
+bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName) {
     
     FileLoader loader(path);
     if (!loader.CheckIsFileLoaded()) {

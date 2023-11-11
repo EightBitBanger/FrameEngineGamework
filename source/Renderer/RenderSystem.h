@@ -118,8 +118,13 @@ public:
     /// Return a list of any and all openGL error codes.
     std::vector<std::string> GetGLErrorCodes(std::string errorLocationString);
     
+    /// Get number of draw calls made in the last frame.
+    unsigned int GetNumberOfDrawCalls(void);
     
 private:
+    
+    // Draw call counter
+    unsigned int mNumberOfDrawCalls;
     
     // Device render context
     HWND  mWindowHandle;
