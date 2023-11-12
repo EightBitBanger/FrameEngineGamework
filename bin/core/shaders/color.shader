@@ -54,16 +54,16 @@ void main() {
         
         finalColor += ((diff * u_light_color[i]) * intensity) / (1.0 + (dist * attenuation)) + specular;
         finalColor = clamp(finalColor, 0.0, 2.0);
-        continue;
+        
     }
     
-    v_color = finalColor + m_diffuse;
+    v_color = finalColor + l_color + m_diffuse;
     v_coord = l_uv;
     
     gl_Position = u_proj * vertPos;
     
     return;
-}
+};
 
 [end]
 
@@ -84,12 +84,9 @@ void main() {
     
     float Gamma = 2.2;
     
-    vec4 texColor = texture(u_sampler, v_coord);
+    vec4 vColor = vec4(v_color, 1);
     
-    if (texColor.a < 1) 
-        discard;
-    
-    color = vec4( pow(v_color, vec3(1.0/Gamma)), 1) * texColor;
+    color = vec4( pow(vColor.rgb, vec3(1.0/Gamma)), 1);
     
     return;
 }
