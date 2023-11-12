@@ -5,7 +5,6 @@ std::string FloatToString(float value) {
     std::stringstream sStream;
     sStream << value;
     std::string output = sStream.str();
-    if (output.find(".") != 0) {output += ".0";}
     return output;
 }
 
@@ -19,7 +18,6 @@ std::string DoubleToString(double value) {
     std::stringstream sStream;
     sStream << value;
     std::string output = sStream.str();
-    if (output.find(".") != 0) {output += ".0";}
     return output;
 }
 
