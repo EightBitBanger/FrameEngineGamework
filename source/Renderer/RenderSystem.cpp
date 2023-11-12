@@ -448,7 +448,6 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 
             }
             
-            
             // Set the projection
             currentShader->SetProjectionMatrix( viewProjection );
             currentShader->SetModelMatrix( currentEntity->transform.matrix );

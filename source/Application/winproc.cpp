@@ -38,27 +38,34 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             RECT WindowRect;
             GetWindowRect(wHnd, &WindowRect);
             
+            // Set window view port
             Renderer.SetViewport(0, 0, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top);
-            
-            if (Renderer.GetRenderQueueSize() == 0) 
-                break;
             
             // Update scene cameras
             for (int i=0; i < Renderer.GetRenderQueueSize(); i++) {
                 
-                if ((Renderer[i]->camera == nullptr) | (Renderer[i]->camera->isFixedAspect)) 
+                if (Renderer[i]->camera == nullptr) 
                     continue;
                 
+                if (Renderer[i]->camera->isFixedAspect) 
+                    continue;
+                
+                // Update camera aspect
                 Renderer[i]->camera->aspect = Renderer.viewport.w / Renderer.viewport.h;
                 
                 if (Renderer[i]->camera->aspect < 1.3) 
                     Renderer[i]->camera->aspect = 1.3;
                 
-                Renderer[i]->camera->viewport.x = 0;
-                Renderer[i]->camera->viewport.x = 0;
-                Renderer[i]->camera->viewport.w = WindowRect.right - WindowRect.left;
-                Renderer[i]->camera->viewport.h = WindowRect.bottom - WindowRect.top;
+                // Update view port
+                int windowWidth  = WindowRect.right - WindowRect.left;
+                int windowHeight = WindowRect.bottom - WindowRect.top;
                 
+                Renderer[i]->camera->viewport.x = 0;
+                Renderer[i]->camera->viewport.y = 0;
+                Renderer[i]->camera->viewport.w = windowWidth;
+                Renderer[i]->camera->viewport.h = windowHeight;
+                
+                continue;
             }
             
             break;

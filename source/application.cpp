@@ -149,8 +149,8 @@ void Framework::Start() {
     // Overlay example
     sceneOverlay = Engine.Create<Scene>();
     sceneOverlay->camera = Engine.Create<Camera>();
+    //sceneOverlay->camera->isFixedAspect = true;
     Renderer.AddSceneToRenderQueue(sceneOverlay);
-    sceneOverlay->camera->isFixedAspect = true;
     
     overlayObject = Engine.CreateOverlayRenderer();
     overlayObject->transform.scale = Vector3(0.013, 1, 0.013);
@@ -208,8 +208,8 @@ float cameraSpeed     = 1.5f;
 void Framework::Run() {
     
     overlayRenderer->mesh->ClearSubMeshes();
-    Engine.AddMeshText(overlayRenderer->mesh, -35, 0, FloatToString(mainCamera->transform.position.x), Colors.green);
-    Engine.AddMeshText(overlayRenderer->mesh, -35, 1, FloatToString(mainCamera->transform.position.z), Colors.green);
+    Engine.AddMeshText(overlayRenderer->mesh, 0, 0, FloatToString(mainCamera->transform.position.x), Colors.green);
+    Engine.AddMeshText(overlayRenderer->mesh, 0, 1, FloatToString(mainCamera->transform.position.z), Colors.green);
     overlayRenderer->mesh->UploadToGPU();
     
     
