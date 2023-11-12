@@ -44,6 +44,8 @@ set (ENGINE_HEADERS
     "source/Engine/types/transform.h"
     "source/Engine/types/viewport.h"
     
+    "source/Engine/UI/text.h"
+    
     "source/Input/InputSystem.h"
     "source/Input/keys.h"
     
@@ -104,6 +106,8 @@ set (ENGINE_SOURCES
     "source/Engine/Engine.cpp"
     "source/Engine/components/component.cpp"
     "source/Engine/components/gameobject.cpp"
+    
+    "source/Engine/UI/text.cpp"
     
     "source/AI/ActorSystem.cpp"
     "source/AI/genetics.cpp"
