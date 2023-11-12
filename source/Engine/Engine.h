@@ -2,6 +2,7 @@
 #define ENGINE_CORE
 
 #include "components/gameobject.h"
+#include "UI/text.h"
 
 #include "../application/applicationlayer.h"
 #include "../../tests/framework.h"
@@ -139,6 +140,7 @@ public:
         if (std::is_same<T, Script>::value)    return CreateComponent(Components.Script);
         if (std::is_same<T, RigidBody>::value) return CreateComponent(Components.RigidBody);
         if (std::is_same<T, Actor>::value)     return CreateComponent(Components.Actor);
+        if (std::is_same<T, Text>::value)      return CreateComponent(Components.Text);
         return nullptr;
     }
     
@@ -162,6 +164,7 @@ private:
     // Engine allocators
     PoolAllocator<GameObject> mGameObjects;
     PoolAllocator<Component>  mComponents;
+    PoolAllocator<Text>       mTextObjects;
     
 };
 

@@ -149,11 +149,16 @@ void Framework::Start() {
     // Overlay example
     sceneOverlay = Engine.Create<Scene>();
     sceneOverlay->camera = Engine.Create<Camera>();
-    //sceneOverlay->camera->isFixedAspect = true;
+    sceneOverlay->camera->isFixedAspect = true;
     Renderer.AddSceneToRenderQueue(sceneOverlay);
     
+    
     overlayObject = Engine.CreateOverlayRenderer();
-    overlayObject->transform.scale = Vector3(0.013, 1, 0.013);
+    overlayObject->AddComponent( Engine.CreateComponent<Text>() );
+    
+    float textSize = 1.5;
+    overlayObject->transform.position += Vector3(0, -0.5, -0.7);
+    overlayObject->transform.scale = Vector3(0.01 * textSize, 1, 0.011 * textSize);
     
     overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
     sceneOverlay->AddMeshRendererToSceneRoot( overlayRenderer );
@@ -161,7 +166,7 @@ void Framework::Start() {
     Engine.Destroy<Material>( overlayRenderer->material );
     overlayRenderer->material = Resources.CreateMaterialFromTag("font");
     overlayRenderer->material->shader   = UIShader;
-    overlayRenderer->material->ambient  = Colors.black;
+    overlayRenderer->material->ambient  = Colors.green;
     
     overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
     overlayRenderer->material->SetTextureFiltration(MATERIAL_FILTER_NONE);
@@ -207,14 +212,18 @@ float cameraSpeed     = 1.5f;
 
 void Framework::Run() {
     
-    overlayRenderer->mesh->ClearSubMeshes();
-    Engine.AddMeshText(overlayRenderer->mesh, 0, 0, FloatToString(mainCamera->transform.position.x), Colors.green);
-    Engine.AddMeshText(overlayRenderer->mesh, 0, 1, FloatToString(mainCamera->transform.position.z), Colors.green);
-    overlayRenderer->mesh->UploadToGPU();
+    // Update player position on screen
+    
+    overlayObject->GetComponent<Text>()->text = "some string";
+    
+    
+    
     
     
     if (Input.CheckKeyCurrent(VK_I)) {overlayObject->transform.position.y += 0.1;}
     if (Input.CheckKeyCurrent(VK_K)) {overlayObject->transform.position.y -= 0.1;}
+    
+    std::cout << FloatToString(overlayObject->transform.position.y) << std::endl;
     
     glm::vec3 force(0);
     if (mainCamera != nullptr) {

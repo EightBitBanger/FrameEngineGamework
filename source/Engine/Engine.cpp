@@ -317,9 +317,13 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
             component_object = (void*)AI.CreateActor();
             break;
         }
+        case COMPONENT_TYPE_TEXT: {
+            component_object = (void*)mTextObjects.Create();
+            break;
+        }
         
         default:
-            break;
+            return nullptr;
     }
     
     Component* newComponent = mComponents.Create();
@@ -362,6 +366,11 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
         case COMPONENT_TYPE_ACTOR: {
             Actor* actorObject = (Actor*)componentPtr->GetComponent();
             AI.DestroyActor(actorObject);
+            break;
+        }
+        case COMPONENT_TYPE_TEXT: {
+            Text* textObject = (Text*)componentPtr->GetComponent();
+            mTextObjects.Destroy(textObject);
             break;
         }
         
@@ -459,6 +468,18 @@ void EngineSystemManager::Update(void) {
             componentCamera->transform.position = currentTransform.position;
             if (!componentCamera->useMouseLook) 
                 componentCamera->transform.orientation = currentTransform.orientation;
+        }
+        
+        Text* componentText = objectPtr->GetComponent<Text>();
+        if (componentText != nullptr) {
+            if (componentMeshRenderer != nullptr) {
+                
+                componentMeshRenderer->mesh->ClearSubMeshes();
+                Engine.AddMeshText(componentMeshRenderer->mesh, 0, 5, componentText->text, Colors.yellow);
+                componentMeshRenderer->mesh->UploadToGPU();
+                
+            }
+            
         }
         
         continue;

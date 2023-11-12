@@ -11,7 +11,9 @@ GameObject::GameObject() :
     mCameraCache(nullptr),
     mRigidBodyCache(nullptr),
     mMeshRendererCache(nullptr),
-    mLightCache(nullptr)
+    mLightCache(nullptr),
+    mActorCache(nullptr),
+    mTextCache(nullptr)
 {
 }
 
@@ -25,24 +27,28 @@ void GameObject::AddComponent(Component* component) {
     
     // Cache the component objects
     
-    // Rigid body component
     if (component->GetType() == Components.RigidBody) {
         mRigidBodyCache = (rp3d::RigidBody*)component->GetComponent();
     }
     
-    // Mesh renderer renderer component
     if (component->GetType() == Components.MeshRenderer) {
         mMeshRendererCache = (MeshRenderer*)component->GetComponent();
     }
     
-    // Camera component
     if (component->GetType() == Components.Camera) {
         mCameraCache = (Camera*)component->GetComponent();
     }
     
-    // Light component
     if (component->GetType() == Components.Light) {
         mLightCache = (Light*)component->GetComponent();
+    }
+    
+    if (component->GetType() == Components.Actor) {
+        mActorCache = (Actor*)component->GetComponent();
+    }
+    
+    if (component->GetType() == Components.Text) {
+        mTextCache = (Text*)component->GetComponent();
     }
     
     mComponentList.push_back(component);
@@ -56,6 +62,8 @@ bool GameObject::RemoveComponent(Component* component) {
         if (component == thisComponentPtr) {
             
             // Null the cache pointers
+            if (component->GetType() == Components.Text)          mTextCache = nullptr;
+            if (component->GetType() == Components.Actor)         mActorCache = nullptr;
             if (component->GetType() == Components.Light)         mLightCache = nullptr;
             if (component->GetType() == Components.Camera)        mCameraCache = nullptr;
             if (component->GetType() == Components.RigidBody)     mRigidBodyCache = nullptr;

@@ -11,6 +11,8 @@
 #include "../../Renderer/RenderSystem.h"
 
 #include "../../Resources/assets/colliderTag.h"
+#include "../../AI/components/actor.h"
+#include "../UI/text.h"
 
 #include "component.h"
 
@@ -55,6 +57,8 @@ public:
         if (std::is_same<T, Light>::value)            return (T*)mLightCache;
         if (std::is_same<T, MeshRenderer>::value)     return (T*)mMeshRendererCache;
         if (std::is_same<T, RigidBody>::value)        return (T*)mRigidBodyCache;
+        if (std::is_same<T, Actor>::value)            return (T*)mActorCache;
+        if (std::is_same<T, Text>::value)             return (T*)mTextCache;
         
         return nullptr;
     }
@@ -133,9 +137,11 @@ private:
     
     // Cached component pointers, to avoid overhead from working with components internally
     Camera*          mCameraCache;
-    RigidBody* mRigidBodyCache;
+    RigidBody*       mRigidBodyCache;
     MeshRenderer*    mMeshRendererCache;
     Light*           mLightCache;
+    Actor*           mActorCache;
+    Text*            mTextCache;
     
 };
 
