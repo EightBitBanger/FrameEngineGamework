@@ -75,8 +75,12 @@ public:
     /// Create an AI actor component and return its pointer.
     GameObject* CreateAIActor(glm::vec3 position);
     
-    /// Create an overlay renderer objects and return its pointer.
+    /// Create an empty overlay renderer object and return its pointer.
     GameObject* CreateOverlayRenderer(void);
+    
+    /// Create a text overlay renderer object and return its pointer.
+    GameObject* CreateOverlayTextRenderer(std::string text, unsigned int textSize, std::string shaderTag);
+    
     
     /// Add a string of sprite quads to a mesh.
     void AddMeshText(Mesh* meshPtr, float xPos, float yPos, std::string text, Color textColor);

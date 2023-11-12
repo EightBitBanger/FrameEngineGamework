@@ -227,6 +227,26 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     return overlayObject;
 }
 
+GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, unsigned int textSize, std::string shaderTag) {
+    
+    GameObject* overlayObject = CreateOverlayRenderer();
+    overlayObject->AddComponent( CreateComponent<Text>() );
+    overlayObject->GetComponent<Text>()->text = text;
+    overlayObject->transform.scale = Vector3(0.01 * (textSize * 0.1), 1, 0.011 * (textSize * 0.1));
+    
+    MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
+    
+    Destroy<Material>( overlayRenderer->material );
+    overlayRenderer->material = Resources.CreateMaterialFromTag(shaderTag);
+    overlayRenderer->material->ambient  = Colors.green;
+    
+    overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
+    overlayRenderer->material->SetTextureFiltration(MATERIAL_FILTER_NONE);
+    
+    overlayRenderer->material->DisableCulling();
+    return overlayObject;
+}
+
 void EngineSystemManager::AddMeshText(Mesh* meshPtr, float xPos, float yPos, std::string text, Color textColor) {
     int spriteMapWidth = 15;
     int spriteMapHeight = 15;

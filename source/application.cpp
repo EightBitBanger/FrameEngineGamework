@@ -32,7 +32,7 @@ Camera*      mainCamera;
 Material* skyMaterial;
 
 GameObject* plain;
-GameObject* overlayObject;
+GameObject* overlayObject[4];
 
 MeshRenderer* overlayRenderer;
 Vector3 overlayPosition;
@@ -152,27 +152,19 @@ void Framework::Start() {
     sceneOverlay->camera->isFixedAspect = true;
     Renderer.AddSceneToRenderQueue(sceneOverlay);
     
+    overlayObject[0] = Engine.CreateOverlayTextRenderer("", 17, "font");
+    overlayObject[1] = Engine.CreateOverlayTextRenderer("", 17, "font");
+    overlayObject[2] = Engine.CreateOverlayTextRenderer("", 17, "font");
+    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[0]->GetComponent<MeshRenderer>() );
+    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[1]->GetComponent<MeshRenderer>() );
+    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[2]->GetComponent<MeshRenderer>() );
+    overlayObject[0]->GetComponent<MeshRenderer>()->material->shader = UIShader;
+    overlayObject[1]->GetComponent<MeshRenderer>()->material->shader = UIShader;
+    overlayObject[2]->GetComponent<MeshRenderer>()->material->shader = UIShader;
     
-    overlayObject = Engine.CreateOverlayRenderer();
-    overlayObject->AddComponent( Engine.CreateComponent<Text>() );
-    
-    float textSize = 1.5;
-    overlayObject->transform.position += Vector3(0, -0.5, -0.7);
-    overlayObject->transform.scale = Vector3(0.01 * textSize, 1, 0.011 * textSize);
-    
-    overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
-    sceneOverlay->AddMeshRendererToSceneRoot( overlayRenderer );
-    
-    Engine.Destroy<Material>( overlayRenderer->material );
-    overlayRenderer->material = Resources.CreateMaterialFromTag("font");
-    overlayRenderer->material->shader   = UIShader;
-    overlayRenderer->material->ambient  = Colors.green;
-    
-    overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
-    overlayRenderer->material->SetTextureFiltration(MATERIAL_FILTER_NONE);
-    
-    overlayRenderer->material->DisableCulling();
-    
+    overlayObject[0]->transform.position += Vector3(0, -0.64,  -0.74);
+    overlayObject[1]->transform.position += Vector3(0, -0.67,  -0.74);
+    overlayObject[2]->transform.position += Vector3(0, -0.7,   -0.74);
     
     
     
@@ -214,16 +206,10 @@ void Framework::Run() {
     
     // Update player position on screen
     
-    overlayObject->GetComponent<Text>()->text = "some string";
+    overlayObject[0]->GetComponent<Text>()->text = "x " + FloatToString(mainCamera->transform.position.x);
+    overlayObject[1]->GetComponent<Text>()->text = "y " + FloatToString(mainCamera->transform.position.y);
+    overlayObject[2]->GetComponent<Text>()->text = "z " + FloatToString(mainCamera->transform.position.z);
     
-    
-    
-    
-    
-    if (Input.CheckKeyCurrent(VK_I)) {overlayObject->transform.position.y += 0.1;}
-    if (Input.CheckKeyCurrent(VK_K)) {overlayObject->transform.position.y -= 0.1;}
-    
-    std::cout << FloatToString(overlayObject->transform.position.y) << std::endl;
     
     glm::vec3 force(0);
     if (mainCamera != nullptr) {
