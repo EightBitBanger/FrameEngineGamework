@@ -23,12 +23,6 @@ class RenderSystem {
     
 public:
     
-    /// Default material object.
-    Material* defaultMaterial;
-    
-    /// Default GLSL shader object.
-    Shader*   defaultShader;
-    
     /// Current rendering view port
     Viewport  viewport;
     

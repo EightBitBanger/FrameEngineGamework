@@ -138,9 +138,14 @@ void GameObject::SetAngularDamping(float damping) {
     mRigidBodyCache->setAngularDamping(damping);
 }
 
-void GameObject::EnableGravity(bool enabled) {
+void GameObject::EnableGravity(void) {
     if (mRigidBodyCache == nullptr) return;
-    mRigidBodyCache->enableGravity(enabled);
+    mRigidBodyCache->enableGravity(true);
+}
+
+void GameObject::DisableGravity(void) {
+    if (mRigidBodyCache == nullptr) return;
+    mRigidBodyCache->enableGravity(false);
 }
 
 void GameObject::CalculatePhysics(void) {

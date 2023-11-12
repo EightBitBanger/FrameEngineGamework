@@ -34,6 +34,7 @@ Material* skyMaterial;
 GameObject* plain;
 GameObject* overlayObject;
 
+MeshRenderer* overlayRenderer;
 Vector3 overlayPosition;
 
 
@@ -46,24 +47,24 @@ void Framework::Start() {
     Renderer.AddSceneToRenderQueue(sceneMain);
     
     // Create some objects from the loaded resources
-    Shader* surfaceShader = Resources.CreateShaderFromTag("surface");
+    Shader* colorShader   = Resources.CreateShaderFromTag("color");
     Shader* textureShader = Resources.CreateShaderFromTag("texture");
-    
+    Shader* textureUnlit  = Resources.CreateShaderFromTag("textureUnlit");
+    Shader* UIShader      = Resources.CreateShaderFromTag("UI");
     
     
     //
     // Create a sky
     
-    Color skyLow(Colors.ltgray);
+    Color skyLow(Colors.black);
     Color skyHigh(Colors.blue);
     
-    GameObject* skyObject = Engine.CreateSky("sky", "surface", skyLow, skyHigh, 0.127);
+    GameObject* skyObject = Engine.CreateSky("sky", "color", skyLow, skyHigh, 0.0001);
     sceneMain->AddMeshRendererToSceneRoot( skyObject->GetComponent<MeshRenderer>() );
     
     skyMaterial = skyObject->GetComponent<MeshRenderer>()->material;
-    skyMaterial->diffuse = Color(0.1, 0.1, 0.1);
+    skyMaterial->diffuse = Color(0.087, 0.087, 0.087);
     skyMaterial->EnableDepthTest();
-    
     
     
     
@@ -74,13 +75,20 @@ void Framework::Start() {
     cameraController->transform.position = glm::vec3(0);
     mainCamera = cameraController->GetComponent<Camera>();
     sceneMain->camera = mainCamera;
+    cameraController->DisableGravity();
     
     // Attach sky object to the camera object
-    //skyObject->parent = cameraController;
+    skyObject->parent = cameraController;
+    
     
     cameraController->AddComponent( Engine.CreateComponent<Light>() );
     Light* cameraLight = cameraController->GetComponent<Light>();
-    cameraLight->intensity = 100;
+    sceneMain->AddLightToSceneRoot(cameraLight);
+    cameraLight->intensity   = 10000;
+    cameraLight->range       = 80;
+    cameraLight->attenuation = 10;
+    cameraLight->color       = Colors.red;
+    
     
     
     
@@ -88,38 +96,11 @@ void Framework::Start() {
     plain->transform.scale = Vector3(10, 10, 10);
     plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("plain"), Resources.CreateMaterialFromTag("grassy") ) );
     Mesh* plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
-    plain->GetComponent<MeshRenderer>()->material->shader = surfaceShader;
+    plain->GetComponent<MeshRenderer>()->material->shader = textureShader;
+    plain->GetComponent<MeshRenderer>()->material->ambient = Colors.black;
     plain->GetComponent<MeshRenderer>()->material->DisableCulling();
+    
     sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    GameObject* barrel = Engine.Create<GameObject>();
-    barrel->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("barrel"), Resources.CreateMaterialFromTag("barrel") ) );
-    barrel->GetComponent<MeshRenderer>()->material->shader = textureShader;
-    barrel->GetComponent<MeshRenderer>()->material->ambient = Colors.black;
-    barrel->GetComponent<MeshRenderer>()->material->diffuse = Colors.black;
-    
-    barrel->GetComponent<MeshRenderer>()->mesh->ChangeSubMeshColor(0, Colors.MakeGrayScale(0.1));
-    
-    sceneMain->AddMeshRendererToSceneRoot( barrel->GetComponent<MeshRenderer>() );
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     
@@ -130,7 +111,7 @@ void Framework::Start() {
     Engine.Destroy<Mesh>( plainMesh );
     plainMesh = Engine.Create<Mesh>();
     
-    float noiseMul = 1;
+    float noiseMul = 3;
     float xNoise = 0.1;
     float zNoise = 0.1;
     
@@ -150,6 +131,8 @@ void Framework::Start() {
             if (noiseTotal < 0)   noiseTotal = 0;
             if (noiseTotal > 0.9) noiseTotal = 0.9;
             
+            noiseTotal *= 0.3;
+            
             plainMesh->ChangeSubMeshColor(plainMesh->GetSubMeshCount() - 1, Colors.Make(noiseTotal, noiseTotal, noiseTotal));
             
         }
@@ -163,28 +146,27 @@ void Framework::Start() {
     
     
     
-    
-    
     // Overlay example
     sceneOverlay = Engine.Create<Scene>();
     sceneOverlay->camera = Engine.Create<Camera>();
     Renderer.AddSceneToRenderQueue(sceneOverlay);
+    sceneOverlay->camera->isFixedAspect = true;
     
     overlayObject = Engine.CreateOverlayRenderer();
-    overlayObject->transform.scale = Vector3(0.1, 0.1, 0.1);
+    overlayObject->transform.scale = Vector3(0.013, 1, 0.013);
     
-    MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
+    overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
     sceneOverlay->AddMeshRendererToSceneRoot( overlayRenderer );
     
     Engine.Destroy<Material>( overlayRenderer->material );
+    overlayRenderer->material = Resources.CreateMaterialFromTag("font");
+    overlayRenderer->material->shader   = UIShader;
+    overlayRenderer->material->ambient  = Colors.black;
     
-    overlayRenderer->material = Resources.CreateMaterialFromTag("barrel");
-    overlayRenderer->material->shader = textureShader;
     overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
+    overlayRenderer->material->SetTextureFiltration(MATERIAL_FILTER_NONE);
     
-    //overlayRenderer->material->EnableBlending();
-    
-    
+    overlayRenderer->material->DisableCulling();
     
     
     
@@ -224,6 +206,12 @@ float cameraSpeed     = 1.5f;
 //
 
 void Framework::Run() {
+    
+    overlayRenderer->mesh->ClearSubMeshes();
+    Engine.AddMeshText(overlayRenderer->mesh, -35, 0, FloatToString(mainCamera->transform.position.x), Colors.green);
+    Engine.AddMeshText(overlayRenderer->mesh, -35, 1, FloatToString(mainCamera->transform.position.z), Colors.green);
+    overlayRenderer->mesh->UploadToGPU();
+    
     
     if (Input.CheckKeyCurrent(VK_I)) {overlayObject->transform.position.y += 0.1;}
     if (Input.CheckKeyCurrent(VK_K)) {overlayObject->transform.position.y -= 0.1;}

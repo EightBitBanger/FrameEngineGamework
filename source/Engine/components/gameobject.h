@@ -112,8 +112,10 @@ public:
     /// Set the angular rotation lock multiplier.
     void SetAngularAxisLockFactor(float x, float y, float z);
     
-    /// Set the gravity state.
-    void EnableGravity(bool enabled);
+    /// Enable gravity.
+    void EnableGravity(void);
+    /// Disable gravity.
+    void DisableGravity(void);
     
     /// Calculate the physical weight proportions by the size and offset of attached colliders.
     void CalculatePhysics(void);

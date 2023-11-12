@@ -15,6 +15,15 @@
 
 #include "../../configuration.h"
 
+class CompositeShader {
+    
+public:
+    
+    std::string vertexShader;
+    std::string fragmentShader;
+    
+};
+
 
 
 
@@ -32,10 +41,12 @@ public:
     /// Set the uniform camera position.
     void SetCameraPosition(glm::vec3 cameraPosition);
     
-    /// Set the global lighting color of the material.
+    /// Set the ambient color of the material.
     void SetMaterialAmbient(Color color);
     /// Set the diffuse color of the material.
     void SetMaterialDiffuse(Color color);
+    /// Set the specular color of the material.
+    void SetMaterialSpecular(Color color);
     
     /// Set the texture sampler index.
     void SetTextureSampler(unsigned int index);
@@ -58,9 +69,6 @@ public:
     /// Bind the shader program for rendering.
     void Bind(void);
     
-    /// Build a default shader program.
-    bool BuildDefault(void);
-    
     
 private:
     
@@ -73,6 +81,7 @@ private:
     int mMaterialColorLocation;
     int mMaterialAmbientLocation;
     int mMaterialDiffuseLocation;
+    int mMaterialSpecularLocation;
     int mSamplerLocation;
     int mLightCount;
     int mLightPosition;

@@ -18,10 +18,12 @@ public:
     /// Texture image height.
     unsigned int height;
     
-    /// Global illumination value.
+    /// Ambient material color.
     Color ambient;
-    /// The color with which the texture will be rendered.
+    /// Diffuse material color.
     Color diffuse;
+    /// Specular material color.
+    Color specular;
     
     /// State whether depth testing will be used.
     bool doDepthTest;

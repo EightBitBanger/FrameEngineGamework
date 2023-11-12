@@ -77,6 +77,12 @@ public:
     /// Create an overlay renderer objects and return its pointer.
     GameObject* CreateOverlayRenderer(void);
     
+    /// Add a string of sprite quads to a mesh.
+    void AddMeshText(Mesh* meshPtr, float xPos, float yPos, std::string text, Color textColor);
+    
+    /// Add a quad to a mesh mapping to a sub sprite from a sprite sheet texture.
+    void AddMeshSubSprite(Mesh* meshPtr, float xPos, float yPos, int index, Color meshColor, int mapWidth, int mapHeight);
+    
     
     EngineSystemManager();
     

@@ -115,7 +115,7 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName) {
     TextureTag textureTag;
     textureTag.name = assetName;
     
-    textureTag.buffer = LoadImageRaw(path.c_str(), &textureTag.width, &textureTag.height, &textureTag.channels, 3);
+    textureTag.buffer = LoadImageRaw(path.c_str(), &textureTag.width, &textureTag.height, &textureTag.channels, 0);
     assert(textureTag.buffer != nullptr);
     
     mTextureTags.push_back(textureTag);

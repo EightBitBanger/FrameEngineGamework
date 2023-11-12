@@ -24,6 +24,7 @@ Material::Material() :
 {
     ambient = Color(0.01, 0.01, 0.01, 1);
     diffuse = Color(0.87, 0.87, 0.87, 1);
+    specular = Color(0, 0, 0, 1);
     
     glGenTextures(1, &mTextureBuffer);
     
@@ -65,7 +66,7 @@ void Material::BindTextureSlot(unsigned int slot) {
 
 void Material::UpdateTextureBuffer(void* textureData) {
     glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

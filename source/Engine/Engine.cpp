@@ -24,6 +24,7 @@ EngineSystemManager   Engine;
 
 
 EngineSystemManager::EngineSystemManager(void) {
+    
     return;
 }
 
@@ -115,9 +116,15 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
     for (int i=0; i < skyMesh->GetNumberOfVertices(); i++) {
         Vertex vertex = skyMesh->GetVertex(i);
         
-        vertex.r = Math.Lerp(colorLow.r, colorHigh.r, vertex.y * biasMul);
-        vertex.g = Math.Lerp(colorLow.g, colorHigh.g, vertex.y * biasMul);
-        vertex.b = Math.Lerp(colorLow.b, colorHigh.b, vertex.y * biasMul);
+        if (vertex.y > 0) {
+            vertex.r = Math.Lerp(colorHigh.r, colorLow.r, vertex.y * biasMul);
+            vertex.g = Math.Lerp(colorHigh.g, colorLow.g, vertex.y * biasMul);
+            vertex.b = Math.Lerp(colorHigh.b, colorLow.b, vertex.y * biasMul);
+        } else {
+            vertex.r = Math.Lerp(colorLow.r, colorHigh.r, vertex.y * biasMul);
+            vertex.g = Math.Lerp(colorLow.g, colorHigh.g, vertex.y * biasMul);
+            vertex.b = Math.Lerp(colorLow.b, colorHigh.b, vertex.y * biasMul);
+        }
         
         skyMesh->SetVertex(i, vertex);
     }
@@ -164,8 +171,7 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     // Actor component
     //Actor* ActorObject = newGameObject->GetComponent<Actor>();
     
-    materialPtr->shader = Renderer.defaultShader;
-    materialPtr->diffuse = Colors.MakeRandom();
+    //materialPtr->shader = Renderer.defaultShader;
     
     // Mesh renderer component
     MeshRenderer* entityRenderer = newGameObject->GetComponent<MeshRenderer>();
@@ -200,22 +206,66 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
 
 GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     GameObject* overlayObject = Create<GameObject>();
+    overlayObject->transform.RotateAxis(-180, Vector3(0, 1, 0));
+    
     overlayObject->transform.RotateAxis(90, Vector3(0, 0, 1));
-    overlayObject->transform.scale = Vector3(0.1, 0.1, 0.1);
+    overlayObject->transform.scale = Vector3(0.01, 0.01, 0.01);
     overlayObject->transform.position = Vector3(1.0, 0, 0);
     
     Mesh*     overlayMesh     = Create<Mesh>();
     Material* overlayMaterial = Create<Material>();
     
-    overlayMesh->AddPlain(0, 0, 0, 1, 1, Colors.white);
-    overlayMesh->UploadToGPU();
+    //overlayMaterial->shader = Renderer.defaultShader;
+    overlayMaterial->ambient = Colors.black;
     
-    overlayMaterial->shader = Renderer.defaultShader;
     overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
+    overlayMaterial->SetTextureFiltration(MATERIAL_FILTER_NONE);
+    overlayMaterial->DisableCulling();
     
     overlayObject->AddComponent( CreateComponent<MeshRenderer>(overlayMesh, overlayMaterial) );
     
     return overlayObject;
+}
+
+void EngineSystemManager::AddMeshText(Mesh* meshPtr, float xPos, float yPos, std::string text, Color textColor) {
+    int spriteMapWidth = 15;
+    int spriteMapHeight = 15;
+    
+    for (int i=0; i < text.size(); i++)
+        AddMeshSubSprite(meshPtr, xPos + i, yPos, text[i], textColor, spriteMapWidth, spriteMapHeight);
+    
+    meshPtr->UploadToGPU();
+    return;
+}
+
+void EngineSystemManager::AddMeshSubSprite(Mesh* meshPtr, float xPos, float yPos, int index, Color meshColor, int mapWidth, int mapHeight) {
+    
+    // Sprite atlas parameters
+    float glyfWidth  = 0.03127;
+    float glyfHeight = 0.0274;
+    float mapStartX  = 0;
+    float mapStartY  = -0.003;
+    
+    float spacingWidth  = 0.6;
+    float spacingHeight = 0.9;
+    
+    
+    // Calculate the sub sprite in the map grid
+    int subWidth  = 0;
+    int subHeight = 0;
+    for (int i=0; i < index; i++) {
+        subWidth++;
+        if (subWidth > mapWidth) {
+            subWidth=0;
+            subHeight++;
+            if (subHeight > mapHeight)
+                return;
+        }
+    }
+    
+    meshPtr->AddPlain(yPos * spacingHeight, 0, -(xPos * spacingWidth), 1, 1, meshColor, glyfWidth, glyfHeight, mapStartX, mapStartY, subWidth, subHeight);
+    
+    return;
 }
 
 GameObject* EngineSystemManager::GetGameObject(unsigned int index) {

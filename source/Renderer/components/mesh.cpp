@@ -118,16 +118,16 @@ void Mesh::SetDefaultAttributes(void) {
     return;
 }
 
-void Mesh::AddPlain(float x, float y, float z, float width, float height, Color color) {
+void Mesh::AddPlain(float x, float y, float z, float width, float height, Color color, float uCoord, float vCoord, float uStart, float vStart, unsigned int uOffset, unsigned int vOffset) {
     
     // Align the mesh
     z = (z * 2) - x;
     
     Vertex vertex[4];
-    vertex[0] = Vertex( x-width, y, z+height,   color.r, color.g, color.b,   0, 1, 0,   0, 1 );
-    vertex[1] = Vertex( x+width, y, z+height,   color.r, color.g, color.b,   0, 1, 0,   1, 1 );
-    vertex[2] = Vertex( x+width, y, z-height,   color.r, color.g, color.b,   0, 1, 0,   1, 0 );
-    vertex[3] = Vertex( x-width, y, z-height,   color.r, color.g, color.b,   0, 1, 0,   0, 0 );
+    vertex[0] = Vertex( x-width, y, z+height,   color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + 0,      vStart + (vOffset * vCoord) + vCoord);
+    vertex[1] = Vertex( x+width, y, z+height,   color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + 0,      vStart + (vOffset * vCoord) + 0 );
+    vertex[2] = Vertex( x+width, y, z-height,   color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + 0 );
+    vertex[3] = Vertex( x-width, y, z-height,   color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + vCoord);
     
     SubMesh subBuffer;
     subBuffer.vertexBuffer.push_back(vertex[0]);
@@ -163,9 +163,9 @@ void Mesh::AddWall(float x, float y, float z, float width, float height, Color c
     
     Vertex vertex[4];
     vertex[0] = Vertex( x-width, y+height, z,   color.r, color.g, color.b,   0,0,1,  0, 1 );
-    vertex[1] = Vertex( x+width, y+height, z,   color.r, color.g, color.b,   0,0,1,  1, 1 );
+    vertex[1] = Vertex( x+width, y+height, z,   color.r, color.g, color.b,   0,0,1,  0, 0 );
     vertex[2] = Vertex( x+width, y-height, z,   color.r, color.g, color.b,   0,0,1,  1, 0 );
-    vertex[3] = Vertex( x-width, y-height, z,   color.r, color.g, color.b,   0,0,1,  0, 0 );
+    vertex[3] = Vertex( x-width, y-height, z,   color.r, color.g, color.b,   0,0,1,  1, 1 );
     
     SubMesh subBuffer;
     subBuffer.vertexBuffer.push_back(vertex[0]);
@@ -398,6 +398,13 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
     glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
     
     return true;
+}
+
+void Mesh::ClearSubMeshes(void) {
+    mSubMesh.clear();
+    mVertexBuffer.clear();
+    mIndexBuffer.clear();
+    return;
 }
 
 void Mesh::UploadToGPU(void) {

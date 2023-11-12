@@ -66,7 +66,7 @@ public:
     unsigned int GetSubMeshCount(void);
     
     /// Add a plain sub mesh to the vertex buffer.
-    void AddPlain(float x, float y, float z, float width, float height, Color color);
+    void AddPlain(float x, float y, float z, float width, float height, Color color, float uCoord=1, float vCoord=1, float uStart=0, float vStart=0, unsigned int uOffset=0, unsigned int vOffset=0);
     /// Add a sub divided plain sub mesh to the vertex buffer.
     void AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
     
@@ -91,6 +91,9 @@ public:
     bool ChangeSubMeshColor(unsigned int index, Color newColor);
     /// Update the position of a sub mesh.
     bool ChangeSubMeshPosition(unsigned int index, float x, float y, float z);
+    
+    /// Clear all sub meshes in the mesh.
+    void ClearSubMeshes(void);
     
     /// Fully re-upload the vertex buffer into the GPU buffer.
     void UploadToGPU(void);

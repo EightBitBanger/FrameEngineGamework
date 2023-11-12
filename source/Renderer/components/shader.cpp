@@ -9,6 +9,7 @@ Shader::Shader() :
     
     mMaterialAmbientLocation(0),
     mMaterialDiffuseLocation(0),
+    mMaterialSpecularLocation(0),
     mSamplerLocation(0),
     
     mLightCount(0),
@@ -45,6 +46,10 @@ void Shader::SetMaterialDiffuse(Color color) {
     glUniform3f(mMaterialDiffuseLocation, color.r, color.g, color.b);
 }
 
+void Shader::SetMaterialSpecular(Color color) {
+    glUniform3f(mMaterialSpecularLocation, color.r, color.g, color.b);
+}
+
 void Shader::SetTextureSampler(unsigned int index) {
     glUniform1i(mSamplerLocation, index);
 }
@@ -72,6 +77,7 @@ void Shader::SetUniformLocations(void) {
     std::string eyeUniformName          = "u_eye";
     std::string matAmbientUniformName   = "m_ambient";
     std::string matDiffuseUniformName   = "m_diffuse";
+    std::string matSpecularUniformName  = "m_specular";
     std::string samplerUniformName      = "u_sampler";
     std::string lightCountUniformName        = "u_light_count";
     std::string lightPositionUniformName     = "u_light_position";
@@ -85,6 +91,7 @@ void Shader::SetUniformLocations(void) {
     // Material
     mMaterialAmbientLocation   = glGetUniformLocation(mShaderProgram, matAmbientUniformName.c_str());
     mMaterialDiffuseLocation   = glGetUniformLocation(mShaderProgram, matDiffuseUniformName.c_str());
+    mMaterialSpecularLocation  = glGetUniformLocation(mShaderProgram, matSpecularUniformName.c_str());
     mSamplerLocation           = glGetUniformLocation(mShaderProgram, samplerUniformName.c_str());
     // Lighting
     mLightCount                = glGetUniformLocation(mShaderProgram, lightCountUniformName.c_str());
@@ -153,91 +160,4 @@ void Shader::Bind(void) {
     return;
 }
 
-bool Shader::BuildDefault(void) {
-    std::string numberOfLights = IntToString(RENDER_NUMBER_OF_LIGHTS);
-    
-    std::string vertexShader = 
-        "#version 330 core\n"
-        
-        "layout(location = 0) in vec3 l_position;"
-        "layout(location = 1) in vec3 l_color;"
-        "layout(location = 2) in vec3 l_normal;"
-        "layout(location = 3) in vec2 l_uv;"
-        
-        "uniform mat4 u_proj;"
-        "uniform mat4 u_model;"
-        "uniform vec3 u_eye;"
-        
-        "varying vec2 v_coord;"
-        "varying vec3 v_color;"
-        
-        "uniform vec3 m_ambient;"
-        "uniform vec3 m_diffuse;"
-        
-        "uniform int   u_light_count;"
-        "uniform vec3  u_light_position["+numberOfLights+"];"
-        "uniform vec3  u_light_attenuation["+numberOfLights+"];"
-        "uniform vec3  u_light_color["+numberOfLights+"];"
-        
-        "float l_diff = 1.0;"
-        "float l_dist = 1.0;"
-        
-        "void main() "
-        "{"
-        
-        "  vec4 vertPos = u_model * vec4(l_position, 1);"
-        "  vec3 finalColor = m_ambient;"
-        
-        
-        
-        "  for (int i=0; i<=u_light_count; i++) {"
-        
-        "    float l_intensity    = u_light_attenuation[i].r;"
-        "    float l_range        = u_light_attenuation[i].g;"
-        "    float l_attenuation  = u_light_attenuation[i].b;"
-        
-        "    vec3 l_direction = normalize(u_light_position[i] - vec3(vertPos));"
-        
-        "    vec3 normal = normalize(l_normal);"
-        
-        "    l_diff = max(dot(normal, l_direction), 0.0);"
-        "    l_dist = length( u_light_position[i] - vec3(vertPos));"
-        
-        "    if (l_dist < l_range) {"
-        "      float f_attenuation = l_attenuation * l_range * l_dist;"
-        "      finalColor += (l_diff * u_light_color[i] * l_intensity) / f_attenuation;"
-        "    }"
-        "  }"
-        
-        
-        
-        "  v_color = finalColor + l_color + m_diffuse;"
-        "  v_coord = l_uv;"
-        "  gl_Position = u_proj * vertPos;"
-        "};";
-    
-    
-    
-    std::string fragmentShader = 
-        "#version 330 core\n"
-        ""
-        "varying vec3 v_color;"
-        "varying vec2 v_coord;"
-        ""
-        "uniform sampler2D u_sampler;"
-        ""
-        "out vec4 color;"
-        ""
-        "void main()"
-        "{"
-        "  "
-        "  float Gamma = 2.2;"
-        "  "
-        "  color = vec4( pow(v_color, vec3(1.0/Gamma)), 1);"
-        "  "
-        "}";
-    
-    if (CreateShaderProgram(vertexShader, fragmentShader) == 1) return true;
-    
-    return false;
-}
+

@@ -6,6 +6,8 @@ Camera::Camera() :
     forward(glm::vec3(0, 0, 0)),
     right(glm::vec3(0, 0, 0)),
     
+    viewport(Viewport(0,0,800,600)),
+    
     useMouseLook(false),
     isFixedAspect(false),
     lookAngle(glm::vec2(0, 0)),

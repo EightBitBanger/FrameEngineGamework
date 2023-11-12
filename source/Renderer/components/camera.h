@@ -2,6 +2,7 @@
 #define __COMPONENT_CAMERA
 
 #include "../../engine/types/transform.h"
+#include "../../Engine/types/viewport.h"
 
 #include "../../Input/InputSystem.h"
 
@@ -19,6 +20,9 @@ public:
     glm::vec3 forward;
     /// Right angle to the cameras forward angle.
     glm::vec3 right;
+    
+    /// Camera view angle.
+    Viewport viewport;
     
     /// Whether mouse look is calculated on update.
     bool useMouseLook;

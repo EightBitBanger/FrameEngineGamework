@@ -1,10 +1,6 @@
 #include "rendersystem.h"
 
 RenderSystem::RenderSystem() : 
-    
-    defaultMaterial(nullptr),
-    defaultShader(nullptr),
-    
     viewport(Viewport(0, 0, 0, 0)),
     
     displaySize(glm::vec2(0, 0)),
@@ -25,7 +21,6 @@ RenderSystem::RenderSystem() :
 
 MeshRenderer* RenderSystem::CreateMeshRenderer(void) {
     MeshRenderer* meshRendererPtr = mEntity.Create();
-    meshRendererPtr->material = defaultMaterial;
     return meshRendererPtr;
 }
 bool RenderSystem::DestroyMeshRenderer(MeshRenderer* meshRendererPtr) {
@@ -50,6 +45,7 @@ bool RenderSystem::DestroyShader(Shader* shaderPtr) {
 
 Camera* RenderSystem::CreateCamera(void) {
     Camera* cameraPtr = mCamera.Create();
+    cameraPtr->viewport = viewport;
     return cameraPtr;
 }
 bool RenderSystem::DestroyCamera(Camera* cameraPtr) {
@@ -58,7 +54,6 @@ bool RenderSystem::DestroyCamera(Camera* cameraPtr) {
 
 Material* RenderSystem::CreateMaterial(void) {
     Material* materialPtr = mMaterial.Create();
-    materialPtr->shader = defaultShader;
     return materialPtr;
 }
 bool RenderSystem::DestroyMaterial(Material* materialPtr) {
@@ -82,11 +77,6 @@ bool RenderSystem::DestroyScene(Scene* scenePtr) {
 }
 
 void RenderSystem::Initiate(void) {
-    
-    defaultShader = CreateShader();
-    defaultShader->BuildDefault();
-    
-    defaultMaterial = CreateMaterial();
     
 #ifdef _RENDERER_CHECK_OPENGL_ERRORS__
     GetGLErrorCodes("OnInitiate::");
@@ -274,7 +264,7 @@ unsigned int RenderSystem::GetNumberOfDrawCalls(void) {
 
 
 //
-// Render processing
+// Frame rendering
 //
 
 void RenderSystem::RenderFrame(float deltaTime) {
@@ -282,13 +272,13 @@ void RenderSystem::RenderFrame(float deltaTime) {
     mNumberOfDrawCalls = 0;
     
     // Clear the view port
-    glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0, 0, 0, 1);
     
     // Set the default shader
-    Shader* currentShader = defaultShader;
+    Shader* currentShader = nullptr;
     
+    // Run the scene list
     for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
         
         Scene* scenePtr = *it;
@@ -297,6 +287,8 @@ void RenderSystem::RenderFrame(float deltaTime) {
         Camera* currentCamera = scenePtr->camera;
         if (currentCamera == nullptr) 
             continue;
+        
+        glViewport(currentCamera->viewport.x, currentCamera->viewport.y, currentCamera->viewport.w, currentCamera->viewport.h);
         
         // Camera mouse looking
         if (currentCamera->useMouseLook) {
@@ -307,10 +299,10 @@ void RenderSystem::RenderFrame(float deltaTime) {
             currentCamera->transform.orientation.y = currentCamera->lookAngle.y;
         }
         
-        
+        // Calculate projection angle
         glm::mat4 projection = glm::perspective( glm::radians( currentCamera->fov ), currentCamera->aspect, currentCamera->clipNear, currentCamera->clipFar);
         
-        // Calculate viewing angle
+        // Point of origin
         glm::vec3 eye;
         eye.x = currentCamera->transform.position.x;
         eye.y = currentCamera->transform.position.y;
@@ -322,13 +314,13 @@ void RenderSystem::RenderFrame(float deltaTime) {
         currentCamera->forward.z = sin( currentCamera->transform.orientation.x * 180 / glm::pi<float>() );
         currentCamera->forward = glm::normalize(currentCamera->forward);
         
-        // Calculate view point
-        glm::vec3 angle;
-        angle.x = currentCamera->transform.position.x + currentCamera->forward.x;
-        angle.y = currentCamera->transform.position.y + currentCamera->forward.y;
-        angle.z = currentCamera->transform.position.z + currentCamera->forward.z;
+        glm::vec3 lookingAngle;
+        lookingAngle.x = currentCamera->transform.position.x + currentCamera->forward.x;
+        lookingAngle.y = currentCamera->transform.position.y + currentCamera->forward.y;
+        lookingAngle.z = currentCamera->transform.position.z + currentCamera->forward.z;
         
-        glm::mat4 view = glm::lookAt(eye, angle, currentCamera->up);
+        // Calculate view projection angle
+        glm::mat4 view = glm::lookAt(eye, lookingAngle, currentCamera->up);
         glm::mat4 viewProjection = projection * view;
         
         // Right angle to the looking angle
@@ -336,12 +328,15 @@ void RenderSystem::RenderFrame(float deltaTime) {
         
         
         //
-        // Check to update the scene light list
+        // Light list
         //
         
+        mNumberOfLights = scenePtr->GetLightQueueSize();
+        
+        if (mNumberOfLights > RENDER_NUMBER_OF_LIGHTS) 
+            mNumberOfLights = RENDER_NUMBER_OF_LIGHTS;
+        
         if (scenePtr->doUpdateLights) {
-            mNumberOfLights = scenePtr->GetLightQueueSize();
-            if (mNumberOfLights > RENDER_NUMBER_OF_LIGHTS) mNumberOfLights = RENDER_NUMBER_OF_LIGHTS;
             
             // Accumulate the light list for this scene
             for (unsigned int i=0; i < mNumberOfLights; i++) {
@@ -374,7 +369,6 @@ void RenderSystem::RenderFrame(float deltaTime) {
             
             MeshRenderer* currentEntity = scenePtr->GetMeshRenderer(i);
             
-            
             // Mesh binding
             
             Mesh* mesh = currentEntity->mesh;
@@ -397,8 +391,8 @@ void RenderSystem::RenderFrame(float deltaTime) {
             if (mCurrentMaterial != materialPtr) {
                 mCurrentMaterial = materialPtr;
                 
-                mCurrentMaterial->BindTextureSlot(0);
                 mCurrentMaterial->Bind();
+                mCurrentMaterial->BindTextureSlot(0);
                 
                 // Depth testing
                 
@@ -426,7 +420,12 @@ void RenderSystem::RenderFrame(float deltaTime) {
                 
                 if (mCurrentMaterial->doBlending) {
                     glEnable(GL_BLEND);
-                    glBlendFuncSeparate(mCurrentMaterial->blendSource, mCurrentMaterial->blendDestination, mCurrentMaterial->blendAlphaSource, mCurrentMaterial->blendAlphaDestination);
+                    
+                    glBlendFuncSeparate(mCurrentMaterial->blendSource,
+                                        mCurrentMaterial->blendDestination,
+                                        mCurrentMaterial->blendAlphaSource,
+                                        mCurrentMaterial->blendAlphaDestination);
+                    
                 } else {
                     glDisable(GL_BLEND);
                 }
@@ -443,14 +442,12 @@ void RenderSystem::RenderFrame(float deltaTime) {
                     
                     currentShader = shaderPtr;
                     currentShader->Bind();
+                    
+                    currentShader->SetTextureSampler(0);
                 }
                 
-            } else {
-                
-                // No shader, use the default
-                currentShader = defaultShader;
-                currentShader->Bind();
             }
+            
             
             // Set the projection
             currentShader->SetProjectionMatrix( viewProjection );
@@ -463,10 +460,10 @@ void RenderSystem::RenderFrame(float deltaTime) {
             currentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
             currentShader->SetLightColors(mNumberOfLights, mLightColor);
             
-            // Apply material to shader
+            // Set the material and texture
             currentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
             currentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
-            currentShader->SetTextureSampler(0);
+            currentShader->SetMaterialSpecular(mCurrentMaterial->specular);
             
             mesh->DrawIndexArray();
             
