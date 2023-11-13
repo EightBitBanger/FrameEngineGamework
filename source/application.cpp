@@ -46,20 +46,17 @@ void Framework::Start() {
     sceneMain = Engine.Create<Scene>();
     Renderer.AddSceneToRenderQueue(sceneMain);
     
-    // Create some objects from the loaded resources
-    Shader* colorShader   = Resources.CreateShaderFromTag("color");
-    Shader* textureShader = Resources.CreateShaderFromTag("texture");
-    Shader* textureUnlit  = Resources.CreateShaderFromTag("textureUnlit");
-    Shader* UIShader      = Resources.CreateShaderFromTag("UI");
-    
     
     //
     // Create a sky
     
-    Color skyLow(Colors.black);
     Color skyHigh(Colors.blue);
+    skyHigh += Colors.MakeGrayScale(0.2);
     
-    GameObject* skyObject = Engine.CreateSky("sky", "color", skyLow, skyHigh, 0.0001);
+    Color skyLow(Colors.blue);
+    skyLow  += Colors.MakeGrayScale(0.6);
+    
+    GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, 0.0001);
     sceneMain->AddMeshRendererToSceneRoot( skyObject->GetComponent<MeshRenderer>() );
     
     skyMaterial = skyObject->GetComponent<MeshRenderer>()->material;
@@ -96,7 +93,7 @@ void Framework::Start() {
     plain->transform.scale = Vector3(10, 10, 10);
     plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("plain"), Resources.CreateMaterialFromTag("grassy") ) );
     Mesh* plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
-    plain->GetComponent<MeshRenderer>()->material->shader = textureShader;
+    plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.texture;
     plain->GetComponent<MeshRenderer>()->material->ambient = Colors.black;
     plain->GetComponent<MeshRenderer>()->material->DisableCulling();
     
@@ -152,19 +149,23 @@ void Framework::Start() {
     sceneOverlay->camera->isFixedAspect = true;
     Renderer.AddSceneToRenderQueue(sceneOverlay);
     
-    overlayObject[0] = Engine.CreateOverlayTextRenderer("", 17, "font");
-    overlayObject[1] = Engine.CreateOverlayTextRenderer("", 17, "font");
-    overlayObject[2] = Engine.CreateOverlayTextRenderer("", 17, "font");
+    // Create some text renderers
+    overlayObject[0] = Engine.CreateOverlayTextRenderer("", 15, Colors.black, "font");
+    overlayObject[1] = Engine.CreateOverlayTextRenderer("", 15, Colors.black, "font");
+    overlayObject[2] = Engine.CreateOverlayTextRenderer("", 15, Colors.black, "font");
+    overlayObject[3] = Engine.CreateOverlayTextRenderer("", 10, Colors.green, "font");
+    
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[0]->GetComponent<MeshRenderer>() );
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[1]->GetComponent<MeshRenderer>() );
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[2]->GetComponent<MeshRenderer>() );
-    overlayObject[0]->GetComponent<MeshRenderer>()->material->shader = UIShader;
-    overlayObject[1]->GetComponent<MeshRenderer>()->material->shader = UIShader;
-    overlayObject[2]->GetComponent<MeshRenderer>()->material->shader = UIShader;
+    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[3]->GetComponent<MeshRenderer>() );
     
-    overlayObject[0]->transform.position += Vector3(0, -0.64,  -0.74);
-    overlayObject[1]->transform.position += Vector3(0, -0.67,  -0.74);
-    overlayObject[2]->transform.position += Vector3(0, -0.7,   -0.74);
+    overlayObject[0]->transform.position += Vector3(0, -0.62, -0.74);
+    overlayObject[1]->transform.position += Vector3(0, -0.65, -0.74);
+    overlayObject[2]->transform.position += Vector3(0, -0.68, -0.74);
+    overlayObject[3]->transform.position += Vector3(0,  0.24, -0.74);
+    
+    overlayObject[3]->GetComponent<Text>()->text = "String of text";
     
     
     

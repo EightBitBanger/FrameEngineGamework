@@ -24,7 +24,6 @@ EngineSystemManager   Engine;
 
 
 EngineSystemManager::EngineSystemManager(void) {
-    
     return;
 }
 
@@ -103,7 +102,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     return cameraController;
 }
 
-GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string shaderTagName, Color colorLow, Color colorHigh, float biasMul) {
+GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorLow, Color colorHigh, float biasMul) {
     
     Mesh* skyMesh = Resources.CreateMeshFromTag(meshTagName);
     if (skyMesh == nullptr) return nullptr;
@@ -112,6 +111,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
     
     skyMaterial->diffuse = Color(1, 1, 1);
     skyMaterial->DisableDepthTest();
+    skyMaterial->shader = shaders.color;
     
     for (int i=0; i < skyMesh->GetNumberOfVertices(); i++) {
         Vertex vertex = skyMesh->GetVertex(i);
@@ -135,10 +135,6 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, std::string 
     skyObject->AddComponent( CreateComponentMeshRenderer(skyMesh, skyMaterial) );
     
     skyObject->transform.SetScale(10000, 2000, 10000);
-    
-    Shader* skyShader = Resources.CreateShaderFromTag(shaderTagName);
-    if (skyShader != nullptr) 
-        skyMaterial->shader = skyShader;
     
     return skyObject;
 }
@@ -171,7 +167,7 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     // Actor component
     //Actor* ActorObject = newGameObject->GetComponent<Actor>();
     
-    //materialPtr->shader = Renderer.defaultShader;
+    materialPtr->shader = shaders.color;
     
     // Mesh renderer component
     MeshRenderer* entityRenderer = newGameObject->GetComponent<MeshRenderer>();
@@ -215,7 +211,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     Mesh*     overlayMesh     = Create<Mesh>();
     Material* overlayMaterial = Create<Material>();
     
-    //overlayMaterial->shader = Renderer.defaultShader;
+    overlayMaterial->shader = shaders.color;
     overlayMaterial->ambient = Colors.black;
     
     overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
@@ -227,18 +223,23 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     return overlayObject;
 }
 
-GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, unsigned int textSize, std::string shaderTag) {
+GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, unsigned int textSize, Color color, std::string materialTag) {
     
     GameObject* overlayObject = CreateOverlayRenderer();
     overlayObject->AddComponent( CreateComponent<Text>() );
-    overlayObject->GetComponent<Text>()->text = text;
+    
+    overlayObject->GetComponent<Text>()->text  = text;
+    overlayObject->GetComponent<Text>()->color = color;
+    
     overlayObject->transform.scale = Vector3(0.01 * (textSize * 0.1), 1, 0.011 * (textSize * 0.1));
     
     MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
     
+    // Sprite sheet material
     Destroy<Material>( overlayRenderer->material );
-    overlayRenderer->material = Resources.CreateMaterialFromTag(shaderTag);
-    overlayRenderer->material->ambient  = Colors.green;
+    overlayRenderer->material = Resources.CreateMaterialFromTag( materialTag );
+    overlayRenderer->material->ambient  = Colors.black;
+    overlayRenderer->material->shader = shaders.UI;
     
     overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
     overlayRenderer->material->SetTextureFiltration(MATERIAL_FILTER_NONE);
@@ -247,28 +248,40 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     return overlayObject;
 }
 
-void EngineSystemManager::AddMeshText(Mesh* meshPtr, float xPos, float yPos, std::string text, Color textColor) {
-    int spriteMapWidth = 15;
-    int spriteMapHeight = 15;
+void EngineSystemManager::AddMeshText(GameObject* overlayObject, float xPos, float yPos, std::string text, Color textColor) {
+    
+    Mesh* meshPtr = overlayObject->GetComponent<MeshRenderer>()->mesh;
+    if (meshPtr == nullptr) 
+        return;
     
     for (int i=0; i < text.size(); i++)
-        AddMeshSubSprite(meshPtr, xPos + i, yPos, text[i], textColor, spriteMapWidth, spriteMapHeight);
+        AddMeshSubSprite(overlayObject, xPos + i, yPos, text[i], textColor);
     
     meshPtr->UploadToGPU();
     return;
 }
 
-void EngineSystemManager::AddMeshSubSprite(Mesh* meshPtr, float xPos, float yPos, int index, Color meshColor, int mapWidth, int mapHeight) {
+void EngineSystemManager::AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, int index, Color meshColor) {
+    
+    Mesh* meshPtr = overlayObject->GetComponent<MeshRenderer>()->mesh;
+    if (meshPtr == nullptr) 
+        return;
+    
+    Text* textPtr = overlayObject->GetComponent<Text>();
+    if (textPtr == nullptr) 
+        return;
     
     // Sprite atlas parameters
-    float glyfWidth  = 0.03127;
-    float glyfHeight = 0.0274;
-    float mapStartX  = 0;
-    float mapStartY  = -0.003;
+    float spriteWidth  = textPtr->spriteWidth;
+    float spriteHeight = textPtr->spriteHeight;
+    float spriteStartX  = textPtr->spriteStartX;
+    float spriteStartY  = textPtr->spriteStartY;
     
-    float spacingWidth  = 0.6;
-    float spacingHeight = 0.9;
+    float spacingWidth  = textPtr->spacingWidth;
+    float spacingHeight = textPtr->spacingHeight;
     
+    int mapWidth  = textPtr->spriteAtlasWidth;
+    int mapHeight = textPtr->spriteAtlasHeight;
     
     // Calculate the sub sprite in the map grid
     int subWidth  = 0;
@@ -283,7 +296,14 @@ void EngineSystemManager::AddMeshSubSprite(Mesh* meshPtr, float xPos, float yPos
         }
     }
     
-    meshPtr->AddPlain(yPos * spacingHeight, 0, -(xPos * spacingWidth), 1, 1, meshColor, glyfWidth, glyfHeight, mapStartX, mapStartY, subWidth, subHeight);
+    meshPtr->AddPlain(yPos * spacingHeight, 
+                      0, 
+                      -(xPos * spacingWidth), 
+                      1, 1, 
+                      meshColor, 
+                      spriteWidth, spriteHeight, 
+                      spriteStartX, spriteStartY, 
+                      subWidth, subHeight);
     
     return;
 }
@@ -303,6 +323,12 @@ unsigned int EngineSystemManager::GetComponentCount(void) {
 }
 
 void EngineSystemManager::Initiate() {
+    
+    shaders.texture       = Resources.CreateShaderFromTag("texture");
+    shaders.textureUnlit  = Resources.CreateShaderFromTag("textureUnlit");
+    shaders.color         = Resources.CreateShaderFromTag("color");
+    shaders.UI            = Resources.CreateShaderFromTag("UI");
+    
     return;
 }
 
@@ -494,9 +520,11 @@ void EngineSystemManager::Update(void) {
         if (componentText != nullptr) {
             if (componentMeshRenderer != nullptr) {
                 
+                // Update the text element
                 componentMeshRenderer->mesh->ClearSubMeshes();
-                Engine.AddMeshText(componentMeshRenderer->mesh, 0, 5, componentText->text, Colors.yellow);
+                Engine.AddMeshText(objectPtr, 0, 5, componentText->text, componentText->color);
                 componentMeshRenderer->mesh->UploadToGPU();
+                
                 
             }
             
@@ -513,6 +541,11 @@ void EngineSystemManager::Shutdown(void) {
     while (GetGameObjectCount() > 0) {
         DestroyGameObject( GetGameObject(0) );
     }
+    
+    Renderer.DestroyShader(shaders.texture);
+    Renderer.DestroyShader(shaders.textureUnlit);
+    Renderer.DestroyShader(shaders.color);
+    Renderer.DestroyShader(shaders.UI);
     
     assert(GetGameObjectCount() == 0);
     assert(mComponents.Size() == 0);

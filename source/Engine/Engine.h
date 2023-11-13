@@ -58,13 +58,13 @@ public:
     unsigned int GetComponentCount(void);
     
     
-    // Specially built components and game objects
+    // Special components and game objects
     
     /// Create a camera controller game object and return its pointer.
     GameObject* CreateCameraController(glm::vec3 position, glm::vec3 scale);
     
     /// Generate a sky object and return its pointer.
-    GameObject* CreateSky(std::string meshTagName, std::string shaderTagName, Color colorLow, Color colorHigh, float biasMul);
+    GameObject* CreateSky(std::string meshTagName, Color colorLow, Color colorHigh, float biasMul);
     
     /// Create a mesh renderer component and return its pointer.
     Component* CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr);
@@ -75,18 +75,21 @@ public:
     /// Create an AI actor component and return its pointer.
     GameObject* CreateAIActor(glm::vec3 position);
     
+    
+    // UI elements
+    
     /// Create an empty overlay renderer object and return its pointer.
     GameObject* CreateOverlayRenderer(void);
     
     /// Create a text overlay renderer object and return its pointer.
-    GameObject* CreateOverlayTextRenderer(std::string text, unsigned int textSize, std::string shaderTag);
+    GameObject* CreateOverlayTextRenderer(std::string text, unsigned int textSize, Color color, std::string materialTag);
     
     
     /// Add a string of sprite quads to a mesh.
-    void AddMeshText(Mesh* meshPtr, float xPos, float yPos, std::string text, Color textColor);
+    void AddMeshText(GameObject* overlayObject, float xPos, float yPos, std::string text, Color textColor);
     
     /// Add a quad to a mesh mapping to a sub sprite from a sprite sheet texture.
-    void AddMeshSubSprite(Mesh* meshPtr, float xPos, float yPos, int index, Color meshColor, int mapWidth, int mapHeight);
+    void AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, int index, Color meshColor);
     
     
     EngineSystemManager();
@@ -169,6 +172,19 @@ private:
     PoolAllocator<GameObject> mGameObjects;
     PoolAllocator<Component>  mComponents;
     PoolAllocator<Text>       mTextObjects;
+    
+    // Default shaders
+    struct DefaultShaders {
+        Shader*  texture;
+        Shader*  textureUnlit;
+        Shader*  color;
+        Shader*  UI;
+    };
+    
+    
+public:
+    
+    DefaultShaders shaders;
     
 };
 
