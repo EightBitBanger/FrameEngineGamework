@@ -6,7 +6,7 @@ class Canvas {
     
 public:
     
-    bool anchorTop;
+    bool anchorBottom;
     bool anchorRight;
     
     Vector2 position;
@@ -18,7 +18,7 @@ public:
     float height;
     
     Canvas() : 
-        anchorTop(false),
+        anchorBottom(false),
         anchorRight(false),
         
         position(Vector2(0, 0)),

@@ -206,9 +206,6 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     overlayObject->transform.RotateAxis(-180, Vector3(0, 1, 0));
     overlayObject->transform.RotateAxis( -90, Vector3(0, 0, 1));
     
-    overlayObject->transform.scale = Vector3(1, 1, 1);
-    overlayObject->transform.position = Vector3(0, 0, 0);
-    
     Mesh*     overlayMesh     = Create<Mesh>();
     Material* overlayMaterial = Create<Material>();
     
@@ -231,6 +228,9 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     
     overlayObject->GetComponent<Text>()->text  = text;
     overlayObject->GetComponent<Text>()->color = color;
+    
+    overlayObject->GetComponent<Text>()->canvas.width  = Renderer.displayCenter.x;
+    overlayObject->GetComponent<Text>()->canvas.height = Renderer.displayCenter.y;
     
     overlayObject->transform.scale = Vector3(textSize, 1, textSize);
     
@@ -367,8 +367,8 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
         case COMPONENT_TYPE_TEXT: {
             component_object = (void*)mTextObjects.Create();
             Text* textComponent = (Text*)component_object;
-            textComponent->canvas.width  = Renderer.viewport.w;
-            textComponent->canvas.height = Renderer.viewport.h;
+            textComponent->canvas.width  = Renderer.displaySize.x;
+            textComponent->canvas.height = Renderer.displaySize.y;
             break;
         }
         
@@ -524,15 +524,11 @@ void EngineSystemManager::Update(void) {
         if (componentText != nullptr) {
             if (componentMeshRenderer != nullptr) {
                 
-                if (componentText->canvas.anchorRight) {
-                    float anchorX = Renderer.viewport.w - componentText->canvas.width;
-                    gameObject->transform.position.z = anchorX * Renderer.displaySize.x;
-                }
+                if (componentText->canvas.anchorRight) 
+                    gameObject->transform.position.z = Renderer.viewport.w - componentText->canvas.width;
                 
-                if (componentText->canvas.anchorTop) {
-                    float anchorY = Renderer.viewport.h - componentText->canvas.height;
-                    gameObject->transform.position.y = anchorY * Renderer.displaySize.y;
-                }
+                if (componentText->canvas.anchorBottom) 
+                    gameObject->transform.position.y = Renderer.viewport.h - componentText->canvas.height;
                 
                 componentMeshRenderer->mesh->ClearSubMeshes();
                 Engine.AddMeshText(gameObject, componentText->canvas.position.x, -componentText->canvas.position.y, componentText->text, componentText->color);

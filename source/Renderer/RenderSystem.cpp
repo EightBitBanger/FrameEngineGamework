@@ -305,7 +305,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
         if (!currentCamera->isOrthographic) {
             projection = glm::perspective( glm::radians( currentCamera->fov ), currentCamera->aspect, currentCamera->clipNear, currentCamera->clipFar);
         } else {
-            projection = glm::ortho((float)viewport.x, (float)viewport.w, (float)viewport.h, (float)viewport.y, -1.0f, 1.0f);
+            projection = glm::ortho((float)viewport.x, (float)viewport.w, (float)viewport.h, (float)viewport.y, currentCamera->clipNear, currentCamera->clipFar);
         }
         
         // Point of origin

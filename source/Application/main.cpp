@@ -91,6 +91,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Physics timer
     float physicsUpdateTimeout = 1000.0f / PHYSICS_UPDATES_PER_SECOND;
     float physicsAccumulator=0;
+    float physicsAlpha=0;
     PhysicsTime.Update();
     
     // Tick update timer
@@ -113,22 +114,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             Application.isActive = false;
 #endif
         
-        // Physics timer
-        physicsAccumulator += PhysicsTime.GetCurrentDelta();
-        PhysicsTime.Update();
-        
-        if (physicsAccumulator > physicsUpdateTimeout) {
-            physicsAccumulator = 0;
-            Physics.world->update( physicsUpdateTimeout );
-        }
-        
+        //
         // Tick update timer
+        //
+        
         tickAccumulator += tickTimer.GetCurrentDelta();
         tickTimer.Update();
         
-        // Update any extra accumulated ticks
-        if (tickAccumulator > tickUpdateTimeout) {
+        if (tickAccumulator >= tickUpdateTimeout) {
+            
             for (int i=0; i < 2; i++) {
+                
                 tickAccumulator -= tickUpdateTimeout;
                 
                 AI.Update();
@@ -141,14 +137,35 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             }
         }
         
-        // Application and render timer
+        
+        //
+        // Physics timer
+        //
+        
+        physicsAccumulator += PhysicsTime.GetCurrentDelta();
+        PhysicsTime.Update();
+        
+        while (physicsAccumulator >= physicsUpdateTimeout) {
+            
+            physicsAccumulator -= physicsUpdateTimeout;
+            
+            Physics.world->update( physicsUpdateTimeout );
+            
+            physicsAlpha = physicsAccumulator / physicsUpdateTimeout;
+            
+        }
+        
+        
+        //
+        // Render timer
+        //
+        
         renderAccumulator += Time.GetCurrentDelta();
         Time.Update();
         
-        
-        if (renderAccumulator > renderUpdateTimeout) {
+        if (renderAccumulator >= renderUpdateTimeout) {
             
-            renderAccumulator = 0;
+            renderAccumulator -= renderUpdateTimeout;
             
             Framework::Run();
             

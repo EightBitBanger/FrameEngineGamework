@@ -151,45 +151,50 @@ void Framework::Start() {
     
     sceneOverlay->camera->transform.position = Vector3(0, 0, 0);
     
+    sceneOverlay->camera->clipFar  =  100;
+    sceneOverlay->camera->clipNear = -100;
+    
     
     Renderer.AddSceneToRenderQueue(sceneOverlay);
     
     // Create some text renderers
-    overlayObject[0] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
-    overlayObject[1] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
-    overlayObject[2] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
-    overlayObject[3] = Engine.CreateOverlayTextRenderer("================================================", 12, Colors.green, "font");
+    overlayObject[0] = Engine.CreateOverlayTextRenderer("Render window", 12, Colors.black, "font");
+    overlayObject[1] = Engine.CreateOverlayTextRenderer("", 7, Colors.black, "font");
+    overlayObject[2] = Engine.CreateOverlayTextRenderer("", 7, Colors.black, "font");
+    overlayObject[3] = Engine.CreateOverlayTextRenderer("", 7, Colors.green, "font");
     
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[0]->GetComponent<MeshRenderer>() );
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[1]->GetComponent<MeshRenderer>() );
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[2]->GetComponent<MeshRenderer>() );
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[3]->GetComponent<MeshRenderer>() );
     
-    //overlayObject[0]->transform.position = Vector3(0, -0.42, -0.74);
-    //overlayObject[1]->transform.position = Vector3(0, -0.45, -0.74);
-    //overlayObject[2]->transform.position = Vector3(0, -0.48, -0.74);
-    //overlayObject[3]->transform.position = Vector3(0,  0.24, -0.74);
+    Text* text[4];
+    for (int i=0; i < 4; i++) 
+        text[i] = overlayObject[i]->GetComponent<Text>();
     
-    overlayObject[0]->GetComponent<Text>()->color = Colors.black;
-    overlayObject[1]->GetComponent<Text>()->color = Colors.black;
-    overlayObject[2]->GetComponent<Text>()->color = Colors.black;
-    overlayObject[3]->GetComponent<Text>()->color = Colors.red;
+    text[0]->color = Colors.red;
+    text[1]->color = Colors.black;
+    text[2]->color = Colors.black;
+    text[3]->color = Colors.black;
     
-    overlayObject[0]->GetComponent<Text>()->canvas.position.x =  1;
-    overlayObject[0]->GetComponent<Text>()->canvas.position.y =  4;
+    text[0]->canvas.position.x =  1;
+    text[0]->canvas.position.y =  3;
     
-    overlayObject[1]->GetComponent<Text>()->canvas.position.x =  1;
-    overlayObject[1]->GetComponent<Text>()->canvas.position.y =  5;
+    text[1]->canvas.position.x =  80;
+    text[1]->canvas.position.y =  27;
     
-    overlayObject[2]->GetComponent<Text>()->canvas.position.x =  1;
-    overlayObject[2]->GetComponent<Text>()->canvas.position.y =  6;
+    text[2]->canvas.position.x =  80;
+    text[2]->canvas.position.y =  28;
     
-    overlayObject[3]->GetComponent<Text>()->canvas.position.x =  1;
-    overlayObject[3]->GetComponent<Text>()->canvas.position.y =  3;
+    text[3]->canvas.position.x =  80;
+    text[3]->canvas.position.y =  29;
     
-    
-    //overlayObject[3]->GetComponent<Text>()->canvas.anchorTop = true;
-    //overlayObject[3]->GetComponent<Text>()->canvas.anchorRight = true;
+    text[1]->canvas.anchorBottom = true;
+    text[1]->canvas.anchorRight = true;
+    text[2]->canvas.anchorBottom = true;
+    text[2]->canvas.anchorRight = true;
+    text[3]->canvas.anchorRight = true;
+    text[3]->canvas.anchorBottom = true;
     
     
     
@@ -200,20 +205,6 @@ void Framework::Start() {
     
     return;
 }
-
-
-
-
-
-
-
-
-
-
-// Day cycle
-float dayNightMaxLight = 0.1f;
-float dayNightRate     = 0.0001f;
-
 
 
 
@@ -229,32 +220,11 @@ float cameraSpeed     = 1.5f;
 
 void Framework::Run() {
     
-    float speed = 0.04;
-    
-    if (Input.CheckKeyCurrent(VK_I)) overlayObject[3]->GetComponent<Text>()->canvas.position.x += 0.3;
-    if (Input.CheckKeyCurrent(VK_K)) overlayObject[3]->GetComponent<Text>()->canvas.position.x -= 0.3;
-    if (Input.CheckKeyCurrent(VK_O)) overlayObject[3]->GetComponent<Text>()->canvas.position.y += 0.3;
-    if (Input.CheckKeyCurrent(VK_L)) overlayObject[3]->GetComponent<Text>()->canvas.position.y -= 0.3;
-    
-    
-    
     // Update player position on screen
+    overlayObject[1]->GetComponent<Text>()->text = "x " + FloatToString( mainCamera->transform.position.x );
+    overlayObject[2]->GetComponent<Text>()->text = "y " + FloatToString( mainCamera->transform.position.y );
+    overlayObject[3]->GetComponent<Text>()->text = "z " + FloatToString( mainCamera->transform.position.z );
     
-    overlayObject[0]->GetComponent<Text>()->text = "x " + FloatToString(mainCamera->transform.position.x);
-    overlayObject[1]->GetComponent<Text>()->text = "y " + FloatToString(mainCamera->transform.position.y);
-    overlayObject[2]->GetComponent<Text>()->text = "z " + FloatToString(mainCamera->transform.position.z);
-    
-    
-    
-    
-    /*
-    if (Input.CheckKeyCurrent(VK_U)) sceneOverlay->camera->transform.position.x += 0.1;
-    if (Input.CheckKeyCurrent(VK_J)) sceneOverlay->camera->transform.position.x -= 0.1;
-    if (Input.CheckKeyCurrent(VK_I)) sceneOverlay->camera->transform.position.y += 0.1;
-    if (Input.CheckKeyCurrent(VK_K)) sceneOverlay->camera->transform.position.y -= 0.1;
-    if (Input.CheckKeyCurrent(VK_O)) sceneOverlay->camera->transform.position.z += 0.1;
-    if (Input.CheckKeyCurrent(VK_L)) sceneOverlay->camera->transform.position.z -= 0.1;
-    */
     
     glm::vec3 force(0);
     if (mainCamera != nullptr) {

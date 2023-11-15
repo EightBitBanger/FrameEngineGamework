@@ -46,10 +46,10 @@
 // Rendering
 //
 
-#define  RENDER_FRAMES_PER_SECOND          60
+#define  RENDER_FRAMES_PER_SECOND          120
 #define  RENDERER_CHECK_OPENGL_ERRORS
 
-#define RENDER_NUMBER_OF_LIGHTS    120
+#define RENDER_NUMBER_OF_LIGHTS    30
 
 #define  LOG_RENDER_DETAILS
 
