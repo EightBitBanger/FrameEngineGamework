@@ -33,7 +33,7 @@ set (ENGINE_HEADERS
     
     "source/Serialization/Serialization.h"
     
-    "source/Math/Math.cpp"
+    "source/Math/Math.h"
     
     "source/Engine/Engine.h"
     "source/Engine/components/component.h"
@@ -45,6 +45,7 @@ set (ENGINE_HEADERS
     "source/Engine/types/viewport.h"
     
     "source/Engine/UI/text.h"
+    "source/Engine/UI/canvas.h"
     
     "source/Input/InputSystem.h"
     "source/Input/keys.h"
@@ -106,8 +107,6 @@ set (ENGINE_SOURCES
     "source/Engine/Engine.cpp"
     "source/Engine/components/component.cpp"
     "source/Engine/components/gameobject.cpp"
-    
-    "source/Engine/UI/text.cpp"
     
     "source/AI/ActorSystem.cpp"
     "source/AI/genetics.cpp"
