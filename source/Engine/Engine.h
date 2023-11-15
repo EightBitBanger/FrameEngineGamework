@@ -2,6 +2,8 @@
 #define ENGINE_CORE
 
 #include "components/gameobject.h"
+
+#include "UI/canvas.h"
 #include "UI/text.h"
 
 #include "../application/applicationlayer.h"
@@ -21,8 +23,6 @@
 #include "../../vendor/CodeBaseLibrary/logging.h"
 #include "../../vendor/CodeBaseLibrary/random.h"
 #include "../../vendor/CodeBaseLibrary/timer.h"
-
-typedef glm::vec3  Vector3;
 
 extern PhysicsSystem  Physics;
 
@@ -115,8 +115,6 @@ public:
         if (std::is_same<T, Scene>::value)         return (T*)Renderer.CreateScene();
         if (std::is_same<T, Camera>::value)        return (T*)Renderer.CreateCamera();
         if (std::is_same<T, MeshRenderer>::value)  return (T*)Renderer.CreateMeshRenderer();
-        // Physics system
-        if (std::is_same<T, RigidBody>::value)  return (T*)Physics.CreateRigidBody(0, 0, 0);
         
         return nullptr;
     }
@@ -133,9 +131,6 @@ public:
         if (std::is_same<T, Scene>::value)         return Renderer.DestroyScene( (Scene*)objectPtr );
         if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera( (Camera*)objectPtr );
         if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer( (MeshRenderer*)objectPtr );
-        
-        // Physics system
-        if (std::is_same<T, RigidBody>::value)  return Physics.DestroyRigidBody( (RigidBody*)objectPtr );
         
         return false;
     }

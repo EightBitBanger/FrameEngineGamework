@@ -202,11 +202,12 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
 
 GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     GameObject* overlayObject = Create<GameObject>();
-    overlayObject->transform.RotateAxis(-180, Vector3(0, 1, 0));
     
-    overlayObject->transform.RotateAxis(90, Vector3(0, 0, 1));
-    overlayObject->transform.scale = Vector3(0.01, 0.01, 0.01);
-    overlayObject->transform.position = Vector3(1.0, 0, 0);
+    overlayObject->transform.RotateAxis(-180, Vector3(0, 1, 0));
+    overlayObject->transform.RotateAxis( -90, Vector3(0, 0, 1));
+    
+    overlayObject->transform.scale = Vector3(1, 1, 1);
+    overlayObject->transform.position = Vector3(0, 0, 0);
     
     Mesh*     overlayMesh     = Create<Mesh>();
     Material* overlayMaterial = Create<Material>();
@@ -231,7 +232,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     overlayObject->GetComponent<Text>()->text  = text;
     overlayObject->GetComponent<Text>()->color = color;
     
-    overlayObject->transform.scale = Vector3(0.01 * (textSize * 0.1), 1, 0.011 * (textSize * 0.1));
+    overlayObject->transform.scale = Vector3(textSize, 1, textSize);
     
     MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
     
@@ -365,6 +366,9 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
         }
         case COMPONENT_TYPE_TEXT: {
             component_object = (void*)mTextObjects.Create();
+            Text* textComponent = (Text*)component_object;
+            textComponent->canvas.width  = Renderer.viewport.w;
+            textComponent->canvas.height = Renderer.viewport.h;
             break;
         }
         
@@ -432,19 +436,19 @@ void EngineSystemManager::Update(void) {
     // Run through the game objects
     for (int i=0; i < mGameObjects.Size(); i++ ) {
         
-        GameObject* objectPtr = mGameObjects[i];
+        GameObject* gameObject = mGameObjects[i];
         
-        if (!objectPtr->isActive) 
+        if (!gameObject->isActive) 
             continue;
         
         // Current transform
         Transform currentTransform;
-        currentTransform.position    = objectPtr->transform.position;
-        currentTransform.orientation = objectPtr->transform.orientation;
-        currentTransform.scale       = objectPtr->transform.scale;
+        currentTransform.position    = gameObject->transform.position;
+        currentTransform.orientation = gameObject->transform.orientation;
+        currentTransform.scale       = gameObject->transform.scale;
         
         // Calculate parent transforms
-        GameObject* parent = objectPtr->parent;
+        GameObject* parent = gameObject->parent;
         
         // Roll over the parent matrix transform chain
         while (parent != nullptr) {
@@ -467,7 +471,7 @@ void EngineSystemManager::Update(void) {
         // Sync with the rigid body
         //
         
-        RigidBody* componentRigidBody = objectPtr->GetComponent<RigidBody>();
+        RigidBody* componentRigidBody = gameObject->GetComponent<RigidBody>();
         if (componentRigidBody != nullptr) {
             
             // Use the rigid body as the source transform
@@ -488,14 +492,14 @@ void EngineSystemManager::Update(void) {
             bodyTransform.getOpenGLMatrix(&currentTransform.matrix[0][0]);
             
             // Update the game object transform
-            objectPtr->transform.position    = currentTransform.position;
-            objectPtr->transform.orientation = currentTransform.orientation;
+            gameObject->transform.position    = currentTransform.position;
+            gameObject->transform.orientation = currentTransform.orientation;
             
             // Scale the transform
-            currentTransform.matrix = glm::scale(currentTransform.matrix, objectPtr->transform.scale);
+            currentTransform.matrix = glm::scale(currentTransform.matrix, gameObject->transform.scale);
         }
         
-        MeshRenderer* componentMeshRenderer = objectPtr->GetComponent<MeshRenderer>();
+        MeshRenderer* componentMeshRenderer = gameObject->GetComponent<MeshRenderer>();
         if (componentMeshRenderer != nullptr) {
             componentMeshRenderer->transform.position    = currentTransform.position;
             componentMeshRenderer->transform.orientation = currentTransform.orientation;
@@ -503,29 +507,36 @@ void EngineSystemManager::Update(void) {
             componentMeshRenderer->transform.matrix      = currentTransform.matrix;
         }
         
-        Light* componentLight = objectPtr->GetComponent<Light>();
+        Light* componentLight = gameObject->GetComponent<Light>();
         if (componentLight != nullptr) {
             componentLight->transform.position    = currentTransform.position;
             componentLight->transform.orientation = currentTransform.orientation;
         }
         
-        Camera* componentCamera = objectPtr->GetComponent<Camera>();
+        Camera* componentCamera = gameObject->GetComponent<Camera>();
         if (componentCamera != nullptr) {
             componentCamera->transform.position = currentTransform.position;
             if (!componentCamera->useMouseLook) 
                 componentCamera->transform.orientation = currentTransform.orientation;
         }
         
-        Text* componentText = objectPtr->GetComponent<Text>();
+        Text* componentText = gameObject->GetComponent<Text>();
         if (componentText != nullptr) {
             if (componentMeshRenderer != nullptr) {
                 
-                // Update the text element
+                if (componentText->canvas.anchorRight) {
+                    float anchorX = Renderer.viewport.w - componentText->canvas.width;
+                    gameObject->transform.position.z = anchorX * Renderer.displaySize.x;
+                }
+                
+                if (componentText->canvas.anchorTop) {
+                    float anchorY = Renderer.viewport.h - componentText->canvas.height;
+                    gameObject->transform.position.y = anchorY * Renderer.displaySize.y;
+                }
+                
                 componentMeshRenderer->mesh->ClearSubMeshes();
-                Engine.AddMeshText(objectPtr, 0, 5, componentText->text, componentText->color);
+                Engine.AddMeshText(gameObject, componentText->canvas.position.x, -componentText->canvas.position.y, componentText->text, componentText->color);
                 componentMeshRenderer->mesh->UploadToGPU();
-                
-                
             }
             
         }

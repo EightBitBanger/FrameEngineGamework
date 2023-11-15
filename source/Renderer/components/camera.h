@@ -28,6 +28,8 @@ public:
     bool useMouseLook;
     /// Whether the camera aspect will update to the window aspect.
     bool isFixedAspect;
+    /// Whether the camera should render orthographically.
+    bool isOrthographic;
     /// Camera looking angle.
     glm::vec2 lookAngle;
     

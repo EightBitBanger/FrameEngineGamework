@@ -12,6 +12,7 @@
 
 #include "../../Resources/assets/colliderTag.h"
 #include "../../AI/components/actor.h"
+
 #include "../UI/text.h"
 
 #include "component.h"

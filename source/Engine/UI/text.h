@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "canvas.h"
 #include "../types/color.h"
 
 
@@ -17,22 +18,40 @@ public:
     Color color;
     
     // Sprite atlas layout
+    int spriteAtlasWidth;
+    int spriteAtlasHeight;
     
-    int spriteAtlasWidth = 15;
-    int spriteAtlasHeight = 15;
+    // Sub sprite parameters
+    float spriteStartX;
+    float spriteStartY;
+    float spriteWidth;
+    float spriteHeight;
     
-    // Sub sprite  parameters
+    // Character spacing
+    float spacingWidth;
+    float spacingHeight;
     
-    float spriteWidth  = 0.03127;
-    float spriteHeight = 0.0274;
-    float spriteStartX = 0;
-    float spriteStartY = -0.003;
+    // Window anchoring
+    Canvas canvas;
     
-    float spacingWidth  = 0.6;
-    float spacingHeight = 0.9;
-    
-    
-    Text();
+    Text() : 
+        
+        text(""),
+        
+        spriteAtlasWidth(15),
+        spriteAtlasHeight(15),
+        
+        spriteStartX(0),
+        spriteStartY(-0.003),
+        spriteWidth(0.03127),
+        spriteHeight(0.0274),
+        
+        spacingWidth(0.6),
+        spacingHeight(0.9)
+    {
+        color = Color(0, 0, 0);
+        return;
+    }
     
     
 };

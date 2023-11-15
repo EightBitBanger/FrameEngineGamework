@@ -10,6 +10,7 @@ Camera::Camera() :
     
     useMouseLook(false),
     isFixedAspect(false),
+    isOrthographic(false),
     lookAngle(glm::vec2(0, 0)),
     
     fov(60),

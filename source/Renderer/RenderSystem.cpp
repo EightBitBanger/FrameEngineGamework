@@ -300,7 +300,13 @@ void RenderSystem::RenderFrame(float deltaTime) {
         }
         
         // Calculate projection angle
-        glm::mat4 projection = glm::perspective( glm::radians( currentCamera->fov ), currentCamera->aspect, currentCamera->clipNear, currentCamera->clipFar);
+        glm::mat4 projection = glm::mat4(1);
+        
+        if (!currentCamera->isOrthographic) {
+            projection = glm::perspective( glm::radians( currentCamera->fov ), currentCamera->aspect, currentCamera->clipNear, currentCamera->clipFar);
+        } else {
+            projection = glm::ortho((float)viewport.x, (float)viewport.w, (float)viewport.h, (float)viewport.y, -1.0f, 1.0f);
+        }
         
         // Point of origin
         glm::vec3 eye;

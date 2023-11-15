@@ -62,12 +62,12 @@ bool GameObject::RemoveComponent(Component* component) {
         if (component == thisComponentPtr) {
             
             // Null the cache pointers
-            if (component->GetType() == Components.Text)          mTextCache = nullptr;
-            if (component->GetType() == Components.Actor)         mActorCache = nullptr;
-            if (component->GetType() == Components.Light)         mLightCache = nullptr;
-            if (component->GetType() == Components.Camera)        mCameraCache = nullptr;
-            if (component->GetType() == Components.RigidBody)     mRigidBodyCache = nullptr;
             if (component->GetType() == Components.MeshRenderer)  mMeshRendererCache = nullptr;
+            if (component->GetType() == Components.RigidBody)     mRigidBodyCache = nullptr;
+            if (component->GetType() == Components.Camera)        mCameraCache = nullptr;
+            if (component->GetType() == Components.Light)         mLightCache = nullptr;
+            if (component->GetType() == Components.Actor)         mActorCache = nullptr;
+            if (component->GetType() == Components.Text)          mTextCache = nullptr;
             
             mComponentList.erase(it);
             return true;
