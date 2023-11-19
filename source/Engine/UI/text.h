@@ -18,8 +18,11 @@ public:
     /// Color of the text to be render.
     Color color;
     
-    /// Image dimensions
+    /// Image dimensions.
     Sprite sprite;
+    
+    /// Window anchoring layout.
+    Canvas canvas;
     
     /// Sprite spacing width.
     float spacingWidth;

@@ -27,9 +27,6 @@ public:
     /// Height to render from the main texture.
     float spriteHeight;
     
-    /// Window anchoring
-    Canvas canvas;
-    
     
     Sprite() : 
         textureWidth(15),

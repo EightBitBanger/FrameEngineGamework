@@ -129,7 +129,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 
                 AI.Update();
                 
-                TickUpdate();
+                Framework::TickUpdate();
                 
                 if (tickAccumulator > tickUpdateTimeout) 
                     continue;
@@ -167,7 +167,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             renderAccumulator -= renderUpdateTimeout;
             
-            Run();
+            Framework::Run();
             
             Scripting.Update();
             
@@ -181,7 +181,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     
     // Shutdown engine & sub systems
-    Shutdown();
+    Framework::Shutdown();
     
     Engine.Shutdown();
     

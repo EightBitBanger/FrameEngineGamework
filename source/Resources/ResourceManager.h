@@ -66,6 +66,9 @@ public:
     
 private:
     
+    // Thread loading queue
+    std::vector<std::string> streamQueue;
+    
     // Asset lists
     std::vector<MeshTag>      mMeshTags;
     std::vector<TextureTag>   mTextureTags;

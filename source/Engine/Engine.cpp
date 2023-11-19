@@ -229,8 +229,8 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     overlayObject->GetComponent<Text>()->text  = text;
     overlayObject->GetComponent<Text>()->color = color;
     
-    overlayObject->GetComponent<Text>()->sprite.canvas.width  = Renderer.displayCenter.x;
-    overlayObject->GetComponent<Text>()->sprite.canvas.height = Renderer.displayCenter.y;
+    overlayObject->GetComponent<Text>()->canvas.width  = Renderer.displayCenter.x;
+    overlayObject->GetComponent<Text>()->canvas.height = Renderer.displayCenter.y;
     
     overlayObject->transform.scale = Vector3(textSize, 1, textSize);
     
@@ -367,8 +367,8 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
         case COMPONENT_TYPE_TEXT: {
             component_object = (void*)mTextObjects.Create();
             Text* textComponent = (Text*)component_object;
-            textComponent->sprite.canvas.width  = Renderer.displaySize.x;
-            textComponent->sprite.canvas.height = Renderer.displaySize.y;
+            textComponent->canvas.width  = Renderer.displaySize.x;
+            textComponent->canvas.height = Renderer.displaySize.y;
             break;
         }
         
@@ -559,16 +559,16 @@ void EngineSystemManager::Update(void) {
         if (componentText != nullptr) {
             if (componentMeshRenderer != nullptr) {
                 
-                if (componentText->sprite.canvas.anchorRight) 
-                    gameObject->transform.position.z = Renderer.viewport.w - componentText->sprite.canvas.width;
+                if (componentText->canvas.anchorRight) 
+                    gameObject->transform.position.z = Renderer.viewport.w - componentText->canvas.width;
                 
-                if (componentText->sprite.canvas.anchorBottom) 
-                    gameObject->transform.position.y = Renderer.viewport.h - componentText->sprite.canvas.height;
+                if (componentText->canvas.anchorBottom) 
+                    gameObject->transform.position.y = Renderer.viewport.h - componentText->canvas.height;
                 
                 componentMeshRenderer->mesh->ClearSubMeshes();
                 Engine.AddMeshText(gameObject, 
-                                    componentText->sprite.canvas.position.x, 
-                                   -componentText->sprite.canvas.position.y, 
+                                    componentText->canvas.position.x, 
+                                   -componentText->canvas.position.y, 
                                     componentText->text, 
                                     componentText->color);
                 

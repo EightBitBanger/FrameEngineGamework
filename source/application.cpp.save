@@ -221,7 +221,7 @@ float cameraSpeed     = 1.5f;
 
 GameObject* test;
 
-void Run() {
+void Framework::Run() {
     
     test = Engine.Create<GameObject>();
     Engine.Destroy<GameObject>( test );
@@ -300,7 +300,7 @@ void Run() {
 // Called once every tick
 //
 
-void TickUpdate(void) {
+void Framework::TickUpdate(void) {
     
     
     
@@ -315,7 +315,7 @@ void TickUpdate(void) {
 
 
 
-void Shutdown(void) {
+void Framework::Shutdown(void) {
     
     return;
 }
