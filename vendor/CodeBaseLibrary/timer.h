@@ -3,7 +3,7 @@
 
 #include <windows.h>
 
-class Timer {
+class __declspec(dllexport) Timer {
     
 public:
     

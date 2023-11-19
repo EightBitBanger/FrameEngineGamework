@@ -6,7 +6,7 @@
 
 #define  EVENT_LOG_FILENAME   "events.txt"
 
-class Logger {
+class __declspec(dllexport) Logger {
     
 public:
     

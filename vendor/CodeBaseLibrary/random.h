@@ -8,7 +8,7 @@
 #include <cstdlib>
 //#include <random>
 
-class RandomGen {
+class __declspec(dllexport) RandomGen {
     
 public:
     

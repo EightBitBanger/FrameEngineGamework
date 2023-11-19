@@ -28,7 +28,7 @@ Data...
 */
 
 
-class FileLoader {
+class __declspec(dllexport) FileLoader {
     
 public:
     

@@ -6,6 +6,6 @@
 #include <string>
 #include <iostream>
 
-std::vector<std::string> DirectoryGetList(std::string path);
+__declspec(dllexport) std::vector<std::string> DirectoryGetList(std::string path);
 
 #endif

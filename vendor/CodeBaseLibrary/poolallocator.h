@@ -33,7 +33,7 @@
  #include <string>
 #endif
 
-struct CustomAllocator {
+struct __declspec(dllexport) CustomAllocator {
     
     /** Initial number of pools.*/
     int poolSize;
@@ -43,7 +43,7 @@ struct CustomAllocator {
     
 };
 
-template<typename T> class PoolAllocator {
+template<typename T> class __declspec(dllexport) PoolAllocator {
     
     std::vector< std::pair<T*, std::vector<bool>> > m_pool;
     std::vector< T* > m_activeList;
