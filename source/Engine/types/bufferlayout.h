@@ -1,7 +1,7 @@
 #ifndef _VERTEXBUFFER_TYPE__
 #define _VERTEXBUFFER_TYPE__
 
-struct Vertex {
+struct __declspec(dllexport) Vertex {
     
     /// Position
     float x, y, z;
@@ -25,7 +25,7 @@ struct Vertex {
 };
 
 
-struct Index  {
+struct __declspec(dllexport) Index  {
     
     unsigned int index;
     

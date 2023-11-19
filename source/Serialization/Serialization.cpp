@@ -5,7 +5,6 @@
 
 
 Serialization::Serialization(void) {
-    
 }
 
 

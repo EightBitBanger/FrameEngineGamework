@@ -27,7 +27,7 @@
 extern PhysicsSystem  Physics;
 
 
-class EngineSystemManager {
+class __declspec(dllexport) EngineSystemManager {
     
 public:
     

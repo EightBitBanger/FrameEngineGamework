@@ -1,5 +1,9 @@
 #include "material.h"
 
+#define GLEW_STATIC
+#include <gl/glew.h>
+
+
 Material::Material() : 
     
     width(0),

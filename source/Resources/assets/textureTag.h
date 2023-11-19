@@ -3,7 +3,7 @@
 
 #include "../../Renderer/RenderSystem.h"
 
-struct TextureTag {
+struct __declspec(dllexport) TextureTag {
     
     /// Texture resource name.
     std::string name;

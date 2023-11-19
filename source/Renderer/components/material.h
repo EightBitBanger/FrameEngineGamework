@@ -1,15 +1,13 @@
 #ifndef __COMPONENT_MATERIAL
 #define __COMPONENT_MATERIAL
 
-#define GLEW_STATIC
-#include <gl/glew.h>
-
-#include "shader.h"
 #include "../../engine/types/color.h"
+
 #include "../enumerators.h"
+#include "shader.h"
 
 
-class Material {
+class __declspec(dllexport) Material {
     
 public:
     
@@ -33,25 +31,25 @@ public:
     bool doFaceCulling;
     
     /// Texture interpolation
-    GLint textureFiltration;
+    int textureFiltration;
     
     /// Depth function used for rendering with the depth buffer.
-    GLint depthFunc;
+    int depthFunc;
     /// The direction in which the triangles will be rendered.
-    GLint faceWinding;
+    int faceWinding;
     /// The side of the triangle to skip drawing.
-    GLint faceCullSide;
+    int faceCullSide;
     
     /// Blending source.
-    GLint blendSource;
+    int blendSource;
     /// Blending destination.
-    GLint blendDestination;
+    int blendDestination;
     /// The alpha blend source.
-    GLint blendAlphaSource;
+    int blendAlphaSource;
     /// The alpha blend destination.
-    GLint blendAlphaDestination;
+    int blendAlphaDestination;
     /// The function used to blend colors.
-    GLint blendFunction;
+    int blendFunction;
     
     /// Shader used by this material for rendering.
     Shader* shader;
@@ -64,32 +62,32 @@ public:
     /// Disable depth testing.
     void DisableDepthTest(void);
     /// Set the depth testing function.
-    void SetDepthFunction(GLint func);
+    void SetDepthFunction(int func);
     
     /// Enable face culling.
     void EnableCulling(void);
     /// Disable face culling.
     void DisableCulling(void);
     /// Set the side which will be culled during rendering.
-    void SetFaceCullingSide(GLint side);
+    void SetFaceCullingSide(int side);
     /// Set the winding direction for drawing triangles.
-    void SetFaceWindingOrder(GLint direction);
+    void SetFaceWindingOrder(int direction);
     
     /// Get texture filtration.
-    GLint GetTextureFiltration(void);
+    int GetTextureFiltration(void);
     /// Set texture filtration.
-    void SetTextureFiltration(GLint filtration);
+    void SetTextureFiltration(int filtration);
     
     /// Enable blending.
     void EnableBlending(void);
     /// Disable blending.
     void DisableBlending(void);
     /// Set blending source and destination.
-    void SetBlending(GLint src, GLint dest);
+    void SetBlending(int src, int dest);
     /// Set blending source and destination with alpha.
-    void SetBlendingAlpha(GLint srca, GLint desta);
+    void SetBlendingAlpha(int srca, int desta);
     /// Set blending function.
-    void SetBlendingFunction(GLint func);
+    void SetBlendingFunction(int func);
     
     /// Bind the material texture for rendering.
     void Bind(void);

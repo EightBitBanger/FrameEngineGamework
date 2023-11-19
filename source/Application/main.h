@@ -1,4 +1,3 @@
-//#define _WIN32_WINNT  0x500
 #include <SDKDDKVer.h>
 #include <windows.h>
 
@@ -6,7 +5,6 @@
 #include <mutex>
 
 #include "../configuration.h"
-#include "../plugins.h"
 
 #ifdef RUN_UNIT_TESTS
  #include "../../tests/framework.h"

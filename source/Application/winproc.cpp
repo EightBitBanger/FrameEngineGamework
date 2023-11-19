@@ -1,11 +1,10 @@
 #include "winproc.h"
-
+#include <windowsx.h>
 extern InputSystem    Input;
 extern RenderSystem   Renderer;
 
 extern ApplicationLayer Application;
 
-Viewport view;
 
 LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam) {
     
@@ -62,8 +61,8 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
                 int windowWidth  = WindowRect.right - WindowRect.left;
                 int windowHeight = WindowRect.bottom - WindowRect.top;
                 
-                Renderer[i]->camera->viewport.x = view.x;
-                Renderer[i]->camera->viewport.y = view.y;
+                Renderer[i]->camera->viewport.x = 0;
+                Renderer[i]->camera->viewport.y = 0;
                 Renderer[i]->camera->viewport.w = windowWidth;
                 Renderer[i]->camera->viewport.h = windowHeight;
                 

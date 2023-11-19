@@ -4,6 +4,7 @@
 
 extern RenderSystem Renderer;
 extern PhysicsSystem Physics;
+extern Logger Log;
 
 ResourceManager::ResourceManager() {
     return;

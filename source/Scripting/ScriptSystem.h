@@ -8,7 +8,7 @@
 #include "components/script.h"
 
 
-class ScriptSystem {
+class __declspec(dllexport) ScriptSystem {
     
 public:
     

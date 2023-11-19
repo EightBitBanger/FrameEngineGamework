@@ -3,7 +3,7 @@
 
 #include "../../Physics/PhysicsSystem.h"
 
-struct ColliderTag {
+struct __declspec(dllexport) ColliderTag {
     
     /// Collider resource name.
     std::string name;

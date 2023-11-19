@@ -10,7 +10,8 @@
 #include "../../Physics/PhysicsSystem.h"
 #include "../../Renderer/RenderSystem.h"
 
-class Actor {
+
+class __declspec(dllexport) Actor {
     
 public:
     

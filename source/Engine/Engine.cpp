@@ -1,25 +1,24 @@
 #include "engine.h"
 
+__declspec(dllexport) EngineComponents  Components;
+__declspec(dllexport) ColorPreset       Colors;
+__declspec(dllexport) RandomGen         Random;
+__declspec(dllexport) Logger            Log;
+__declspec(dllexport) Timer             PhysicsTime;
+__declspec(dllexport) Timer             Time;
 
-EngineComponents  Components;
-ColorPreset       Colors;
-RandomGen         Random;
-Logger            Log;
-Timer             PhysicsTime;
-Timer             Time;
+__declspec(dllexport) Serialization     Serializer;
+__declspec(dllexport) ResourceManager   Resources;
+__declspec(dllexport) ScriptSystem      Scripting;
+__declspec(dllexport) RenderSystem      Renderer;
+__declspec(dllexport) PhysicsSystem     Physics;
+__declspec(dllexport) AudioSystem       Audio;
+__declspec(dllexport) InputSystem       Input;
+__declspec(dllexport) MathCore          Math;
+__declspec(dllexport) ActorSystem       AI;
 
-Serialization     Serializer;
-ResourceManager   Resources;
-ScriptSystem      Scripting;
-RenderSystem      Renderer;
-PhysicsSystem     Physics;
-AudioSystem       Audio;
-InputSystem       Input;
-MathCore          Math;
-ActorSystem       AI;
-
-ApplicationLayer      Application;
-EngineSystemManager   Engine;
+__declspec(dllexport) ApplicationLayer      Application;
+__declspec(dllexport) EngineSystemManager   Engine;
 
 
 
@@ -67,7 +66,8 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     Component* cameraComponent = CreateComponent(Components.Camera);
     Camera* cameraMain = (Camera*)cameraComponent->GetComponent();
     cameraMain->EnableMouseLook();
-    cameraMain->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    
+    SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     // Add a rigid body component
     Component* rigidBodyComponent = CreateComponent(Components.RigidBody);
@@ -229,8 +229,8 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     overlayObject->GetComponent<Text>()->text  = text;
     overlayObject->GetComponent<Text>()->color = color;
     
-    overlayObject->GetComponent<Text>()->canvas.width  = Renderer.displayCenter.x;
-    overlayObject->GetComponent<Text>()->canvas.height = Renderer.displayCenter.y;
+    overlayObject->GetComponent<Text>()->sprite.canvas.width  = Renderer.displayCenter.x;
+    overlayObject->GetComponent<Text>()->sprite.canvas.height = Renderer.displayCenter.y;
     
     overlayObject->transform.scale = Vector3(textSize, 1, textSize);
     
@@ -273,16 +273,16 @@ void EngineSystemManager::AddMeshSubSprite(GameObject* overlayObject, float xPos
         return;
     
     // Sprite atlas parameters
-    float spriteWidth  = textPtr->spriteWidth;
-    float spriteHeight = textPtr->spriteHeight;
-    float spriteStartX  = textPtr->spriteStartX;
-    float spriteStartY  = textPtr->spriteStartY;
+    float spriteStartX  = textPtr->sprite.spriteStartX;
+    float spriteStartY  = textPtr->sprite.spriteStartY;
+    float spriteWidth   = textPtr->sprite.spriteWidth;
+    float spriteHeight  = textPtr->sprite.spriteHeight;
     
     float spacingWidth  = textPtr->spacingWidth;
     float spacingHeight = textPtr->spacingHeight;
     
-    int mapWidth  = textPtr->spriteAtlasWidth;
-    int mapHeight = textPtr->spriteAtlasHeight;
+    int mapWidth  = textPtr->sprite.textureWidth;
+    int mapHeight = textPtr->sprite.textureHeight;
     
     // Calculate the sub sprite in the map grid
     int subWidth  = 0;
@@ -367,8 +367,8 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
         case COMPONENT_TYPE_TEXT: {
             component_object = (void*)mTextObjects.Create();
             Text* textComponent = (Text*)component_object;
-            textComponent->canvas.width  = Renderer.displaySize.x;
-            textComponent->canvas.height = Renderer.displaySize.y;
+            textComponent->sprite.canvas.width  = Renderer.displaySize.x;
+            textComponent->sprite.canvas.height = Renderer.displaySize.y;
             break;
         }
         
@@ -515,23 +515,63 @@ void EngineSystemManager::Update(void) {
         
         Camera* componentCamera = gameObject->GetComponent<Camera>();
         if (componentCamera != nullptr) {
+            
+            // Update mouse looking
+            if (componentCamera->useMouseLook) {
+                
+                POINT cursorPos;
+                GetCursorPos(&cursorPos);
+                SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
+                
+                //glm::vec2 cursorPos(0);
+                //cursorPos = Input.CursorGetPosition();
+                //int mouseX = cursorPos.x;
+                //int mouseY = cursorPos.y;
+                //Input.CursorSetPosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+                
+                float MouseDiffX = (cursorPos.x - Renderer.displayCenter.x) * componentCamera->MouseSensitivityYaw;
+                float MouseDiffY = (cursorPos.y - Renderer.displayCenter.y) * componentCamera->MouseSensitivityPitch;
+                
+                componentCamera->lookAngle.x += MouseDiffX * 0.01;
+                componentCamera->lookAngle.y -= MouseDiffY * 0.01;
+                
+                // Yaw limit
+                if (componentCamera->lookAngle.x >= 0.109655) {componentCamera->lookAngle.x -= 0.109655;}
+                if (componentCamera->lookAngle.x <= 0.109655) {componentCamera->lookAngle.x += 0.109655;}
+                
+                // Pitch limit
+                if (componentCamera->lookAngle.y >  0.0274f) componentCamera->lookAngle.y =  0.0274f;
+                if (componentCamera->lookAngle.y < -0.0274f) componentCamera->lookAngle.y = -0.0274f;
+                
+                componentCamera->transform.orientation.x = componentCamera->lookAngle.x;
+                componentCamera->transform.orientation.y = componentCamera->lookAngle.y;
+                
+            }
+            
             componentCamera->transform.position = currentTransform.position;
+            
             if (!componentCamera->useMouseLook) 
                 componentCamera->transform.orientation = currentTransform.orientation;
+            
         }
         
         Text* componentText = gameObject->GetComponent<Text>();
         if (componentText != nullptr) {
             if (componentMeshRenderer != nullptr) {
                 
-                if (componentText->canvas.anchorRight) 
-                    gameObject->transform.position.z = Renderer.viewport.w - componentText->canvas.width;
+                if (componentText->sprite.canvas.anchorRight) 
+                    gameObject->transform.position.z = Renderer.viewport.w - componentText->sprite.canvas.width;
                 
-                if (componentText->canvas.anchorBottom) 
-                    gameObject->transform.position.y = Renderer.viewport.h - componentText->canvas.height;
+                if (componentText->sprite.canvas.anchorBottom) 
+                    gameObject->transform.position.y = Renderer.viewport.h - componentText->sprite.canvas.height;
                 
                 componentMeshRenderer->mesh->ClearSubMeshes();
-                Engine.AddMeshText(gameObject, componentText->canvas.position.x, -componentText->canvas.position.y, componentText->text, componentText->color);
+                Engine.AddMeshText(gameObject, 
+                                    componentText->sprite.canvas.position.x, 
+                                   -componentText->sprite.canvas.position.y, 
+                                    componentText->text, 
+                                    componentText->color);
+                
                 componentMeshRenderer->mesh->UploadToGPU();
             }
             

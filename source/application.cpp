@@ -47,6 +47,7 @@ void Framework::Start() {
     Renderer.AddSceneToRenderQueue(sceneMain);
     
     
+    
     //
     // Create a sky
     
@@ -62,7 +63,6 @@ void Framework::Start() {
     skyMaterial = skyObject->GetComponent<MeshRenderer>()->material;
     skyMaterial->diffuse = Color(0.087, 0.087, 0.087);
     skyMaterial->EnableDepthTest();
-    
     
     
     
@@ -82,9 +82,9 @@ void Framework::Start() {
     Light* cameraLight = cameraController->GetComponent<Light>();
     sceneMain->AddLightToSceneRoot(cameraLight);
     cameraLight->intensity   = 10000;
-    cameraLight->range       = 80;
+    cameraLight->range       = 120;
     cameraLight->attenuation = 10;
-    cameraLight->color       = Colors.red;
+    cameraLight->color       = Colors.white;
     
     
     
@@ -148,6 +148,7 @@ void Framework::Start() {
     sceneOverlay->camera = Engine.Create<Camera>();
     //sceneOverlay->camera->isFixedAspect = true;
     sceneOverlay->camera->isOrthographic = true;
+    //sceneOverlay->camera->transform.scale = Vector3(0.7, 1, 0.7);
     
     sceneOverlay->camera->transform.position = Vector3(0, 0, 0);
     
@@ -158,10 +159,10 @@ void Framework::Start() {
     Renderer.AddSceneToRenderQueue(sceneOverlay);
     
     // Create some text renderers
-    overlayObject[0] = Engine.CreateOverlayTextRenderer("Render window", 12, Colors.black, "font");
-    overlayObject[1] = Engine.CreateOverlayTextRenderer("", 7, Colors.black, "font");
-    overlayObject[2] = Engine.CreateOverlayTextRenderer("", 7, Colors.black, "font");
-    overlayObject[3] = Engine.CreateOverlayTextRenderer("", 7, Colors.green, "font");
+    overlayObject[0] = Engine.CreateOverlayTextRenderer("Render window", 15, Colors.black, "font");
+    overlayObject[1] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
+    overlayObject[2] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
+    overlayObject[3] = Engine.CreateOverlayTextRenderer("", 12, Colors.green, "font");
     
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[0]->GetComponent<MeshRenderer>() );
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[1]->GetComponent<MeshRenderer>() );
@@ -177,24 +178,24 @@ void Framework::Start() {
     text[2]->color = Colors.black;
     text[3]->color = Colors.black;
     
-    text[0]->canvas.position.x =  1;
-    text[0]->canvas.position.y =  3;
+    text[0]->sprite.canvas.position.x =  5;
+    text[0]->sprite.canvas.position.y =  3;
     
-    text[1]->canvas.position.x =  80;
-    text[1]->canvas.position.y =  27;
+    text[1]->sprite.canvas.position.x =  80;
+    text[1]->sprite.canvas.position.y =  17;
     
-    text[2]->canvas.position.x =  80;
-    text[2]->canvas.position.y =  28;
+    text[2]->sprite.canvas.position.x =  80;
+    text[2]->sprite.canvas.position.y =  18;
     
-    text[3]->canvas.position.x =  80;
-    text[3]->canvas.position.y =  29;
+    text[3]->sprite.canvas.position.x =  80;
+    text[3]->sprite.canvas.position.y =  19;
     
-    text[1]->canvas.anchorBottom = true;
-    text[1]->canvas.anchorRight = true;
-    text[2]->canvas.anchorBottom = true;
-    text[2]->canvas.anchorRight = true;
-    text[3]->canvas.anchorRight = true;
-    text[3]->canvas.anchorBottom = true;
+    text[1]->sprite.canvas.anchorBottom = true;
+    text[1]->sprite.canvas.anchorRight = true;
+    text[2]->sprite.canvas.anchorBottom = true;
+    text[2]->sprite.canvas.anchorRight = true;
+    text[3]->sprite.canvas.anchorRight = true;
+    text[3]->sprite.canvas.anchorBottom = true;
     
     
     
@@ -218,12 +219,20 @@ float cameraSpeed     = 1.5f;
 // Application loop
 //
 
+GameObject* test;
+
 void Framework::Run() {
+    
+    test = Engine.Create<GameObject>();
+    Engine.Destroy<GameObject>( test );
     
     // Update player position on screen
     overlayObject[1]->GetComponent<Text>()->text = "x " + FloatToString( mainCamera->transform.position.x );
     overlayObject[2]->GetComponent<Text>()->text = "y " + FloatToString( mainCamera->transform.position.y );
     overlayObject[3]->GetComponent<Text>()->text = "z " + FloatToString( mainCamera->transform.position.z );
+    
+    if (Input.CheckKeyCurrent(VK_I)) sceneOverlay->camera->transform.scale += 0.01;
+    if (Input.CheckKeyCurrent(VK_K)) sceneOverlay->camera->transform.scale -= 0.01;
     
     
     glm::vec3 force(0);
@@ -272,7 +281,7 @@ void Framework::Run() {
             Application.ShowMouseCursor();
             
         } else {
-            mainCamera->SetMouseCenter(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
             mainCamera->EnableMouseLook();
             
             Application.HideMouseCursor();

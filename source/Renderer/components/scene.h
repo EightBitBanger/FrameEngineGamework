@@ -1,14 +1,12 @@
 #ifndef __COMPONENT_SCENE
 #define __COMPONENT_SCENE
 
-#include <vector>
-
 #include "meshrenderer.h"
 #include "camera.h"
 #include "light.h"
 
 
-class Scene {
+class __declspec(dllexport) Scene {
     
 public:
     

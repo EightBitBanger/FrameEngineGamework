@@ -21,7 +21,7 @@ extern RenderSystem Renderer;
 extern EngineComponents Components;
 
 
-class GameObject {
+class __declspec(dllexport) GameObject {
     
 public:
     

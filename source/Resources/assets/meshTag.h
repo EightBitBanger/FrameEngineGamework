@@ -3,7 +3,7 @@
 
 #include "../../Renderer/RenderSystem.h"
 
-struct MeshTag {
+struct __declspec(dllexport) MeshTag {
     
     /// Mesh resource name.
     std::string name;

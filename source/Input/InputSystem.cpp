@@ -1,22 +1,5 @@
 #include "InputSystem.h"
 
-void CursorSetPosition(int xx, int yy) {
-    SetCursorPos( xx, yy );
-    return;
-}
-
-glm::vec2 CursorGetPosition(void) {
-    POINT Pos;
-    glm::vec2 MousePos;
-    
-    GetCursorPos(&Pos);
-    
-    MousePos.x = Pos.x;
-    MousePos.y = Pos.y;
-    
-    return MousePos;
-}
-
 extern InputSystem::InputSystem(void) : 
     
     LastKeyPressed(-1),

@@ -1,10 +1,12 @@
 #ifndef OPENGL_RENDERER_SYSTEM
 #define OPENGL_RENDERER_SYSTEM
 
+#define GLEW_STATIC
+#include <gl/glew.h>
+
 #include "../../vendor/CodeBaseLibrary/poolallocator.h"
 #include "../../vendor/CodeBaseLibrary/types.h"
 #include "../../vendor/CodeBaseLibrary/logging.h"
-extern Logger Log;
 
 #include "enumerators.h"
 
@@ -18,8 +20,10 @@ extern Logger Log;
 #include "components/meshrenderer.h"
 #include "components/scene.h"
 
+#include "../configuration.h"
 
-class RenderSystem {
+
+class __declspec(dllexport) RenderSystem {
     
 public:
     

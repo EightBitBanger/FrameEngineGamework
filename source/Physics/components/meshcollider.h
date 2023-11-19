@@ -4,7 +4,7 @@
 #include <ReactPhysics3d/ReactPhysics3d.h>
 
 
-class MeshCollider {
+class __declspec(dllexport) MeshCollider {
     
 public:
     

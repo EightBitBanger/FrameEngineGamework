@@ -5,7 +5,7 @@
 // Window layout
 //
 
-#define  WINDOW_NAME  "Render view"
+#define  WINDOW_NAME  "Render window"
 // Dimensions
 #define  WINDOW_WIDTH       1330
 #define  WINDOW_HEIGHT      1000
@@ -32,14 +32,11 @@
 //#define  EVENT_LOG_DETAILED
 
 
-
-
 //
 // Tick update
 //
 
 #define  TICK_UPDATES_PER_SECOND           3
-
 
 
 //
@@ -54,13 +51,11 @@
 #define  LOG_RENDER_DETAILS
 
 
-
 //
 // Physics
 //
 
 #define PHYSICS_UPDATES_PER_SECOND         60
-
 
 
 //

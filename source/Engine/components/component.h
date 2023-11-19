@@ -16,7 +16,7 @@
 typedef unsigned short int ComponentType;
 
 
-struct EngineComponents {
+struct __declspec(dllexport) EngineComponents {
     /// Undefined component type.
     short int Undefined = COMPONENT_TYPE_UNDEFINED;
     /// Mesh renderer component type.
@@ -38,7 +38,7 @@ struct EngineComponents {
 
 
 
-class Component {
+class __declspec(dllexport) Component {
     
 public:
     

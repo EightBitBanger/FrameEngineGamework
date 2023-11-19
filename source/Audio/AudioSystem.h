@@ -6,7 +6,7 @@
 //#include "openAL/al/alc.h"
 
 
-class AudioSystem {
+class __declspec(dllexport) AudioSystem {
     
 public:
     

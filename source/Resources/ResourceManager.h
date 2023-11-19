@@ -17,7 +17,7 @@
 #include "../../vendor/CodeBaseLibrary/strings.h"
 
 
-class ResourceManager {
+class __declspec(dllexport) ResourceManager {
     
 public:
     

@@ -7,7 +7,7 @@
 #include "Genetics.h"
 
 
-class ActorSystem {
+class __declspec(dllexport) ActorSystem {
     
 public:
     

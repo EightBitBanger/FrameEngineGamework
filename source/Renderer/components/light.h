@@ -5,7 +5,7 @@
 #include "../../engine/types/color.h"
 
 
-class Light {
+class __declspec(dllexport) Light {
     
 public:
     

@@ -1,5 +1,5 @@
-#ifndef PHYSICSFRAMEWORK
-#define PHYSICSFRAMEWORK
+#ifndef _PHYSICS_WRAP_
+#define _PHYSICS_WRAP_
 
 #include <ReactPhysics3d/ReactPhysics3d.h>
 
@@ -14,7 +14,7 @@ typedef rp3d::SphereShape  SphereShape;
 typedef rp3d::CapsuleShape CapsuleShape;
 
 
-class PhysicsSystem {
+class __declspec(dllexport) PhysicsSystem {
     
 public:
     

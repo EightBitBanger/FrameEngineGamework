@@ -7,7 +7,7 @@
 #include "mesh.h"
 
 
-class Entity {
+class __declspec(dllexport) Entity {
     
 public:
     

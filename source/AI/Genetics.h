@@ -2,7 +2,7 @@
 #define _GENETICS_SYSTEM__
 
 
-class Gene {
+class __declspec(dllexport) Gene {
     
 public:
     

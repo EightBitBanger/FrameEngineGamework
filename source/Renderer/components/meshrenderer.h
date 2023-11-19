@@ -7,7 +7,7 @@
 #include "mesh.h"
 
 
-class MeshRenderer {
+class __declspec(dllexport) MeshRenderer {
     
 public:
     

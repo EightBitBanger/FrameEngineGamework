@@ -28,7 +28,7 @@ namespace Framework {
 
 
 
-class ApplicationLayer {
+class __declspec(dllexport) ApplicationLayer {
     
 public:
     

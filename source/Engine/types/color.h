@@ -4,7 +4,7 @@
 #include <cstdlib>
 
 
-class Color {
+class __declspec(dllexport) Color {
     
 public:
     
@@ -39,7 +39,7 @@ public:
 };
 
 
-class ColorPreset {
+class __declspec(dllexport) ColorPreset {
     
 public:
     

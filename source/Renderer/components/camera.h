@@ -7,7 +7,7 @@
 #include "../../Input/InputSystem.h"
 
 
-class Camera {
+class __declspec(dllexport) Camera {
     
 public:
     
@@ -54,15 +54,10 @@ public:
     
     Camera();
     
-    /// Set the position the mouse will reset to on mouse look update.
-    void SetMouseCenter(int mouseResetX, int mouseResetY);
-    
     /// Enable mouse look.
     void EnableMouseLook(void);
     /// Disable mouse look.
     void DisableMouseLook(void);
-    /// Update the mouse look state by the deltaTime. The mouse will reset to mouseResetX and mouseResetY.
-    void MouseLook(float deltaTime, int mouseResetX, int mouseResetY);
     
     /// Get the camera pitch angle.
     float GetPitch(void);

@@ -1,17 +1,17 @@
 #include "main.h"
-extern Timer        PhysicsTime;
-extern Timer        Time;
 
+extern Timer                PhysicsTime;
+extern Timer                Time;
+extern Logger               Log;
+extern ActorSystem          AI;
+extern InputSystem          Input;
+extern AudioSystem          Audio;
+extern EngineSystemManager  Engine;
 extern PhysicsSystem        Physics;
 extern RenderSystem         Renderer;
-extern AudioSystem          Audio;
 extern ScriptSystem         Scripting;
 extern ResourceManager      Resources;
 extern ApplicationLayer     Application;
-extern ActorSystem          AI;
-extern EngineSystemManager  Engine;
-extern InputSystem          Input;
-
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     

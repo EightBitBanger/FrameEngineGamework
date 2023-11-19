@@ -1,5 +1,9 @@
 #include "rendersystem.h"
 
+#include <iostream>
+
+Logger RenderLog;
+
 RenderSystem::RenderSystem() : 
     viewport(Viewport(0, 0, 0, 0)),
     
@@ -143,7 +147,6 @@ GLenum RenderSystem::SetRenderTarget(HWND wHndl) {
     pfd.cColorBits  = 32;
     pfd.cDepthBits  = 16;
     pfd.iLayerType  = PFD_MAIN_PLANE;
-    int numberOfObjectsToThrow = 3;
     
     // Setup pixel format
     iFormat = ChoosePixelFormat(mDeviceContext, &pfd);
@@ -171,23 +174,23 @@ GLenum RenderSystem::SetRenderTarget(HWND wHndl) {
     gcVersion    = std::string(gcVersionConst);
     
     // Log details
-    Log.Write("== Hardware details =="); Line = "" + gcRenderer;
-    Log.Write(Line);
-    Log.WriteLn();
+    RenderLog.Write("== Hardware details =="); Line = "" + gcRenderer;
+    RenderLog.Write(Line);
+    RenderLog.WriteLn();
     
     std::string DetailStringHead = "  - ";
     std::string DetailStringEqu  = " = ";
     
-    Line = " Device"; Log.Write(Line);
-    Line = DetailStringHead + "Name   " + DetailStringEqu + gcVendor;  Log.Write(Line);
-    Line = DetailStringHead + "Version" + DetailStringEqu + gcVersion; Log.Write(Line);
-    Log.WriteLn();
+    Line = " Device"; RenderLog.Write(Line);
+    Line = DetailStringHead + "Name   " + DetailStringEqu + gcVendor;  RenderLog.Write(Line);
+    Line = DetailStringHead + "Version" + DetailStringEqu + gcVersion; RenderLog.Write(Line);
+    RenderLog.WriteLn();
     
-    Line = " Colors"; Log.Write(Line);
-    Line = DetailStringHead + "Color" + DetailStringEqu + IntToString(pfd.cColorBits) + " bit"; Log.Write(Line);
-    Line = DetailStringHead + "Depth" + DetailStringEqu + IntToString(pfd.cDepthBits) + " bit"; Log.Write(Line);
-    Log.WriteLn();
-    Log.WriteLn();
+    Line = " Colors"; RenderLog.Write(Line);
+    Line = DetailStringHead + "Color" + DetailStringEqu + IntToString(pfd.cColorBits) + " bit"; RenderLog.Write(Line);
+    Line = DetailStringHead + "Depth" + DetailStringEqu + IntToString(pfd.cDepthBits) + " bit"; RenderLog.Write(Line);
+    RenderLog.WriteLn();
+    RenderLog.WriteLn();
 #endif
     return glpassed;
 }
@@ -242,8 +245,8 @@ std::vector<std::string> RenderSystem::GetGLErrorCodes(std::string errorLocation
             
         }
         
-        //Log.Write(ErrorMsg);
-        //Log.WriteLn();
+        //RenderLog.Write(ErrorMsg);
+        //RenderLog.WriteLn();
         
         ErrorList.push_back( ErrorMsg );
         
@@ -283,6 +286,11 @@ void RenderSystem::RenderFrame(float deltaTime) {
         
         Scene* scenePtr = *it;
         
+        
+        //
+        // Calculate camera view projection
+        //
+        
         // Check scene camera
         Camera* currentCamera = scenePtr->camera;
         if (currentCamera == nullptr) 
@@ -290,22 +298,13 @@ void RenderSystem::RenderFrame(float deltaTime) {
         
         glViewport(currentCamera->viewport.x, currentCamera->viewport.y, currentCamera->viewport.w, currentCamera->viewport.h);
         
-        // Camera mouse looking
-        if (currentCamera->useMouseLook) {
-            currentCamera->MouseLook(deltaTime, displayCenter.x, displayCenter.y);
-        } else {
-            // Restore camera looking angle
-            currentCamera->transform.orientation.x = currentCamera->lookAngle.x;
-            currentCamera->transform.orientation.y = currentCamera->lookAngle.y;
-        }
-        
         // Calculate projection angle
         glm::mat4 projection = glm::mat4(1);
         
         if (!currentCamera->isOrthographic) {
             projection = glm::perspective( glm::radians( currentCamera->fov ), currentCamera->aspect, currentCamera->clipNear, currentCamera->clipFar);
         } else {
-            projection = glm::ortho((float)viewport.x, (float)viewport.w, (float)viewport.h, (float)viewport.y, currentCamera->clipNear, currentCamera->clipFar);
+            projection = glm::ortho((float)0, (float)displaySize.x, (float)displaySize.y, (float)0, currentCamera->clipNear, currentCamera->clipFar);
         }
         
         // Point of origin
@@ -333,8 +332,10 @@ void RenderSystem::RenderFrame(float deltaTime) {
         currentCamera->right = glm::normalize(glm::cross(currentCamera->up, currentCamera->forward));
         
         
+        
+        
         //
-        // Light list
+        // Accumulate scene lights
         //
         
         mNumberOfLights = scenePtr->GetLightQueueSize();
@@ -344,11 +345,9 @@ void RenderSystem::RenderFrame(float deltaTime) {
         
         if (scenePtr->doUpdateLights) {
             
-            // Accumulate the light list for this scene
             for (unsigned int i=0; i < mNumberOfLights; i++) {
                 Light* lightPtr = scenePtr->GetLight(i);
                 
-                // Get the light position, attenuation and color
                 mLightPosition[i] = lightPtr->transform.position;
                 
                 mLightAttenuation[i].x = lightPtr->intensity;
@@ -363,6 +362,7 @@ void RenderSystem::RenderFrame(float deltaTime) {
             }
             
         }
+        
         
         
         //
@@ -452,18 +452,18 @@ void RenderSystem::RenderFrame(float deltaTime) {
                     currentShader->SetTextureSampler(0);
                 }
                 
+                // Send in the light list
+                currentShader->SetLightCount(mNumberOfLights);
+                currentShader->SetLightPositions(mNumberOfLights, mLightPosition);
+                currentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
+                currentShader->SetLightColors(mNumberOfLights, mLightColor);
+                
             }
             
             // Set the projection
             currentShader->SetProjectionMatrix( viewProjection );
             currentShader->SetModelMatrix( currentEntity->transform.matrix );
             currentShader->SetCameraPosition(eye);
-            
-            // Send in the light list
-            currentShader->SetLightCount(mNumberOfLights);
-            currentShader->SetLightPositions(mNumberOfLights, mLightPosition);
-            currentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
-            currentShader->SetLightColors(mNumberOfLights, mLightColor);
             
             // Set the material and texture
             currentShader->SetMaterialAmbient(mCurrentMaterial->ambient);

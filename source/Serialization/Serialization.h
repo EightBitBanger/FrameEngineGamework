@@ -1,12 +1,10 @@
 #ifndef __SERIALIZATION_SYSTEM_
 #define __SERIALIZATION_SYSTEM_
 
-#include "../../vendor/CodeBaseLibrary/logging.h"
-extern Logger Log;
+#include <fstream>
 
 
-
-class Serialization {
+class __declspec(dllexport) Serialization {
     
 public:
     
@@ -20,8 +18,6 @@ public:
     
     
 private:
-    
-    
     
 };
 

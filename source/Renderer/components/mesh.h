@@ -1,18 +1,14 @@
 #ifndef __COMPONENT_MESH
 #define __COMPONENT_MESH
 
-#define GLEW_STATIC
-#include <gl/glew.h>
-
 #include <vector>
 
 #include "../../engine/types/bufferlayout.h"
 
-#include "material.h"
-#include "shader.h"
+#include "../../engine/types/color.h"
+#include "../../Math/Math.h"
 
-
-struct SubMesh {
+struct __declspec(dllexport) SubMesh {
     
     /// Begin offset position.
     unsigned vertexBegin;
@@ -32,7 +28,7 @@ struct SubMesh {
 
 
 
-class Mesh {
+class __declspec(dllexport) Mesh {
     
 public:
     

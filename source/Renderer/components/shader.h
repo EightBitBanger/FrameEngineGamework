@@ -1,33 +1,13 @@
 #ifndef __COMPONENT_SHADER
 #define __COMPONENT_SHADER
 
-#include <string>
-
-#include <iostream>
-
-#define GLEW_STATIC
-#include <gl/glew.h>
-
 #include "../../../vendor/CodeBaseLibrary/types.h"
 
 #include "../../engine/types/transform.h"
 #include "../../engine/types/color.h"
 
-#include "../../configuration.h"
 
-class CompositeShader {
-    
-public:
-    
-    std::string vertexShader;
-    std::string fragmentShader;
-    
-};
-
-
-
-
-class Shader {
+class __declspec(dllexport) Shader {
     
 public:
     

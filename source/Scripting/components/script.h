@@ -7,7 +7,7 @@ void DefaultFunctionPtr(void* gameObject);
 
 #define  nullfunc  DefaultFunctionPtr
 
-struct Script {
+struct __declspec(dllexport) Script {
     
     /// Script name.
     std::string name;
