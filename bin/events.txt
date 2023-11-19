@@ -1,0 +1,28 @@
+== Hardware details ==
+Intel(R) HD Graphics 4400
+
+ Device
+  - Name    = Intel
+  - Version = 4.3.0 - Build 20.19.15.5126
+
+ Colors
+  - Color = 32 bit
+  - Depth = 16 bit
+
+
+  + color  core/shaders/color.shader
+  + texture  core/shaders/texture.shader
+  + textureUnlit  core/shaders/textureUnlit.shader
+  + UI  core/shaders/UI.shader
+  + barrel  core/models/barrel.obj
+  + chunk  core/models/chunk.obj
+  + cube  core/models/cube.obj
+  + plain  core/models/plain.obj
+  + sky  core/models/sky.obj
+  + barrel  core/materials/barrel.png
+  + chunk  core/materials/chunk.png
+  + cross  core/materials/cross.png_
+  + cross_black  core/materials/cross_black.png
+  + cross_white  core/materials/cross_white.png
+  + font  core/materials/font.png
+  + grassy  core/materials/grassy.png
