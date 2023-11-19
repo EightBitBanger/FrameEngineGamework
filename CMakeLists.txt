@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(GameEngineFramework VERSION 0.1.0 LANGUAGES CXX)
+project(framework VERSION 0.1.0 LANGUAGES CXX)
 include(GNUInstallDirs)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY bin)
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY vendor)
 
 set(RUNTIME_OUTPUT_NAME release)
 set(LIBRARY_OUTPUT_NAME core)
@@ -15,7 +14,8 @@ set(ARCHIVE_OUTPUT_NAME core)
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
 
-set (APPLICATION_HEADERS
+
+set (RUNTIME_HEADERS
     
     "source/configuration.h"
     
@@ -91,15 +91,14 @@ set (APPLICATION_HEADERS
     
 )
 
-
-set (APPLICATION_SOURCES
+set (RUNTIME_SOURCES
     
     "source/Application/properties.rc"
 #    "source/Application/ApplicationLayer.cpp"
 #    "source/Application/winproc.cpp"
     "source/Application/main.cpp"
     
-    "source/application.cpp"
+#    "source/application.cpp"
     
 #    "source/Audio/AudioSystem.cpp"
     
@@ -162,6 +161,100 @@ set (APPLICATION_SOURCES
 #    "vendor/CodeBaseLibrary/types.cpp"
     
 )
+
+
+
+
+
+
+
+set (GAME_HEADERS
+    
+    "source/configuration.h"
+    
+    "source/Application/applicationlayer.h"
+    "source/Application/winproc.h"
+    "source/Application/main.h"
+    
+    "source/Audio/AudioSystem.h"
+    
+    "source/AI/ActorSystem.h"
+    "source/AI/genetics.h"
+    "source/AI/components/actor.h"
+    
+    "source/Serialization/Serialization.h"
+    
+    "source/Math/Math.h"
+    
+    "source/Engine/Engine.h"
+    "source/Engine/components/component.h"
+    "source/Engine/components/gameobject.h"
+    
+    "source/Engine/types/bufferlayout.h"
+    "source/Engine/types/color.h"
+    "source/Engine/types/transform.h"
+    "source/Engine/types/viewport.h"
+    
+    "source/Engine/UI/text.h"
+    "source/Engine/UI/sprite.h"
+    "source/Engine/UI/canvas.h"
+    
+    "source/Input/InputSystem.h"
+    "source/Input/keys.h"
+    
+    "source/Physics/PhysicsSystem.h"
+    "source/Physics/components/meshcollider.h"
+    
+    "source/Renderer/enumerators.h"
+    "source/Renderer/RenderSystem.h"
+    "source/Renderer/components/camera.h"
+    "source/Renderer/components/meshrenderer.h"
+    "source/Renderer/components/material.h"
+    "source/Renderer/components/mesh.h"
+    "source/Renderer/components/scene.h"
+    "source/Renderer/components/light.h"
+    "source/Renderer/components/shader.h"
+    
+    "source/Resources/plugins.h"
+    "source/Resources/ResourceManager.h"
+    "source/Resources/assets/colliderTag.h"
+    "source/Resources/assets/meshTag.h"
+    "source/Resources/assets/shaderTag.h"
+    "source/Resources/assets/textureTag.h"
+    
+    "source/Scripting/ScriptSystem.h"
+    "source/Scripting/components/script.h"
+    
+    "tests/framework.h"
+    
+    "vendor/Bly7/OBJ_Loader.h"
+    
+#    "vendor/CodeBaseLibrary/directorysearch.h"
+#    "vendor/CodeBaseLibrary/fileloader.h"
+#    "vendor/CodeBaseLibrary/logging.h"
+#    "vendor/CodeBaseLibrary/poolallocator.h"
+#    "vendor/CodeBaseLibrary/random.h"
+#    "vendor/CodeBaseLibrary/strings.h"
+#    "vendor/CodeBaseLibrary/timer.h"
+#    "vendor/CodeBaseLibrary/types.h"
+    
+#    "vendor/stb/stb_image.h"
+#    "vendor/stb/stb_perlin.h"
+#    "vendor/stb/stb_truetype.h"
+    
+)
+
+set (GAME_SOURCES
+    
+    "source/application.cpp"
+    
+)
+
+
+
+
+
+
 
 
 set (CORE_HEADERS
@@ -312,29 +405,65 @@ set (CORE_SOURCES
 )
 
 
+
+
+
+
+
+
 #
-# Build application executable
+# Build application executable runtime
 #
 
-add_executable(release ${APPLICATION_HEADERS} ${APPLICATION_SOURCES})
+add_executable(runtime ${RUNTIME_HEADERS} ${RUNTIME_SOURCES})
 
-target_compile_features(release PUBLIC cxx_std_11)
+target_compile_features(runtime PUBLIC cxx_std_11)
 
-set_target_properties(release PROPERTIES CXX_EXTENSIONS OFF)
+set_target_properties(runtime PROPERTIES CXX_EXTENSIONS OFF)
 
-set_target_properties(release PROPERTIES
+set_target_properties(runtime PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
 )
 
-target_include_directories(release PUBLIC
+target_include_directories(runtime PUBLIC
               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
               $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(release glew32s.lib)
-target_link_libraries(release opengl32.a)
-target_link_libraries(release ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
-target_link_libraries(release ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
+target_link_libraries(runtime glew32s.lib)
+target_link_libraries(runtime opengl32.a)
+target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
+target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
+target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libgame.dll.a)
+
+
+
+
+#
+# Build application code space library
+#
+
+add_library(game SHARED ${GAME_HEADERS} ${GAME_SOURCES})
+
+target_compile_features(game PUBLIC cxx_std_11)
+
+set_target_properties(game PROPERTIES CXX_EXTENSIONS OFF)
+
+set_target_properties(game PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib"
+)
+
+target_include_directories(game PUBLIC
+              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+              $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(game glew32s.lib)
+target_link_libraries(game opengl32.a)
+target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
+target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
 
 
 
@@ -366,6 +495,4 @@ target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
 
 
 
-set(DEFAULT_BUILD_TYPE "release")
-
-
+set(DEFAULT_BUILD_TYPE "game")
