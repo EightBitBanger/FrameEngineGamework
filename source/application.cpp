@@ -32,7 +32,10 @@ Camera*      mainCamera;
 Material* skyMaterial;
 
 GameObject* plain;
-GameObject* overlayObject[4];
+Mesh*       plainMesh;
+SubMesh     meshPlainPart;
+
+GameObject* overlayObject[5];
 
 MeshRenderer* overlayRenderer;
 Vector3 overlayPosition;
@@ -45,7 +48,6 @@ void Start() {
     
     sceneMain = Engine.Create<Scene>();
     Renderer.AddSceneToRenderQueue(sceneMain);
-    
     
     
     //
@@ -92,23 +94,25 @@ void Start() {
     GameObject* plain = Engine.Create<GameObject>();
     plain->transform.scale = Vector3(10, 10, 10);
     plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("plain"), Resources.CreateMaterialFromTag("grassy") ) );
-    Mesh* plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
+    plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
     plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.texture;
     plain->GetComponent<MeshRenderer>()->material->ambient = Colors.black;
     plain->GetComponent<MeshRenderer>()->material->DisableCulling();
     
     sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
     
-    
-    
-    
-    SubMesh meshPart;
-    plainMesh->CopySubMesh(0, meshPart);
+    plainMesh->CopySubMesh(0, meshPlainPart);
     
     Engine.Destroy<Mesh>( plainMesh );
     plainMesh = Engine.Create<Mesh>();
     
-    float noiseMul = 3;
+    
+    
+    
+    
+    
+    
+    float noiseMul = 8;
     float xNoise = 0.1;
     float zNoise = 0.1;
     
@@ -123,7 +127,7 @@ void Start() {
             
             float noiseTotal = Random.Perlin(CoordX, 0, CoordZ) * noiseMul;
             
-            plainMesh->AddSubMesh((float)x, noiseTotal, z, meshPart, false);
+            plainMesh->AddSubMesh((float)x, noiseTotal, z, meshPlainPart, false);
             
             if (noiseTotal < 0)   noiseTotal = 0;
             if (noiseTotal > 0.9) noiseTotal = 0.9;
@@ -139,11 +143,23 @@ void Start() {
     
     
     
+    GameObject* RandomLight = Engine.Create<GameObject>();
+    RandomLight->transform.position = Vector3(50, 5, 50);
+    
+    RandomLight->AddComponent( Engine.CreateComponent<Light>() );
+    Light* LightComponent = RandomLight->GetComponent<Light>();
+    sceneMain->AddLightToSceneRoot( LightComponent );
+    LightComponent->color = Colors.white;
+    LightComponent->intensity   = 10000;
+    LightComponent->range       = 120;
+    LightComponent->attenuation = 0.7;
+    LightComponent->color       = Colors.white;
     
     
     
-    
+    //
     // Overlay example
+    
     sceneOverlay = Engine.Create<Scene>();
     sceneOverlay->camera = Engine.Create<Camera>();
     //sceneOverlay->camera->isFixedAspect = true;
@@ -162,21 +178,24 @@ void Start() {
     overlayObject[0] = Engine.CreateOverlayTextRenderer("Render window", 15, Colors.black, "font");
     overlayObject[1] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
     overlayObject[2] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
-    overlayObject[3] = Engine.CreateOverlayTextRenderer("", 12, Colors.green, "font");
+    overlayObject[3] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
+    overlayObject[4] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
     
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[0]->GetComponent<MeshRenderer>() );
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[1]->GetComponent<MeshRenderer>() );
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[2]->GetComponent<MeshRenderer>() );
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[3]->GetComponent<MeshRenderer>() );
+    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[4]->GetComponent<MeshRenderer>() );
     
-    Text* text[4];
-    for (int i=0; i < 4; i++) 
+    Text* text[5];
+    for (int i=0; i < 5; i++) 
         text[i] = overlayObject[i]->GetComponent<Text>();
     
     text[0]->color = Colors.red;
     text[1]->color = Colors.black;
     text[2]->color = Colors.black;
     text[3]->color = Colors.black;
+    text[4]->color = Colors.black;
     
     text[0]->canvas.position.x =  5;
     text[0]->canvas.position.y =  3;
@@ -190,12 +209,17 @@ void Start() {
     text[3]->canvas.position.x =  80;
     text[3]->canvas.position.y =  19;
     
+    text[4]->canvas.position.x =  5;
+    text[4]->canvas.position.y =  19;
+    
     text[1]->canvas.anchorBottom = true;
-    text[1]->canvas.anchorRight = true;
+    text[1]->canvas.anchorRight  = true;
     text[2]->canvas.anchorBottom = true;
-    text[2]->canvas.anchorRight = true;
-    text[3]->canvas.anchorRight = true;
+    text[2]->canvas.anchorRight  = true;
     text[3]->canvas.anchorBottom = true;
+    text[3]->canvas.anchorRight  = true;
+    text[4]->canvas.anchorBottom = false;
+    text[4]->canvas.anchorRight  = false;
     
     
     
@@ -219,17 +243,28 @@ float cameraSpeed     = 1.5f;
 // Application loop
 //
 
-GameObject* test;
-
 void Run() {
     
-    test = Engine.Create<GameObject>();
-    Engine.Destroy<GameObject>( test );
+    if (Input.CheckKeyCurrent(VK_SPACE)) {
+        
+        float xx = Random.Range(0, 10) - Random.Range(0, 10);
+        float yy = Random.Range(0,  5) - Random.Range(0,  5);
+        float zz = Random.Range(0, 10) - Random.Range(0, 10);
+        
+        
+        plainMesh->AddSubMesh(xx, yy, zz, meshPlainPart, false);
+        plainMesh->UploadToGPU();
+    }
+    
+    
+    
+    
     
     // Update player position on screen
     overlayObject[1]->GetComponent<Text>()->text = "x " + FloatToString( mainCamera->transform.position.x );
     overlayObject[2]->GetComponent<Text>()->text = "y " + FloatToString( mainCamera->transform.position.y );
     overlayObject[3]->GetComponent<Text>()->text = "z " + FloatToString( mainCamera->transform.position.z );
+    overlayObject[4]->GetComponent<Text>()->text = "Draw calls " + IntToString( Renderer.GetNumberOfDrawCalls() );
     
     if (Input.CheckKeyCurrent(VK_I)) sceneOverlay->camera->transform.scale += 0.01;
     if (Input.CheckKeyCurrent(VK_K)) sceneOverlay->camera->transform.scale -= 0.01;
@@ -300,15 +335,12 @@ void Run() {
 // Called once every tick
 //
 
+
 void TickUpdate(void) {
     
     
     
-    
-    
-    
-    
-    
+    return;
 }
 
 
@@ -316,6 +348,8 @@ void TickUpdate(void) {
 
 
 void Shutdown(void) {
+    
+    
     
     return;
 }
