@@ -167,7 +167,6 @@ set (RUNTIME_SOURCES
 
 
 
-
 set (GAME_HEADERS
     
     "source/configuration.h"
