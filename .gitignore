@@ -27,3 +27,6 @@
 *.out
 *.app
 *.bat
+
+# Uneeded image files
+*.jpg
