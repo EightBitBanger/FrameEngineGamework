@@ -11,7 +11,7 @@
 #include "../vendor/CodeBaseLibrary/strings.h"
 
 
-class TestFramework {
+class __declspec(dllexport) TestFramework {
     
 public:
     
