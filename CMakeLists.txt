@@ -4,12 +4,6 @@ project(framework VERSION 0.1.0 LANGUAGES CXX)
 include(GNUInstallDirs)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY build)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY build)
-
-set(RUNTIME_OUTPUT_NAME release)
-set(LIBRARY_OUTPUT_NAME core)
-set(ARCHIVE_OUTPUT_NAME core)
 
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
@@ -426,6 +420,8 @@ target_compile_features(runtime PUBLIC cxx_std_11)
 set_target_properties(runtime PROPERTIES CXX_EXTENSIONS OFF)
 
 set_target_properties(runtime PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
     RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
 )
 
@@ -444,7 +440,7 @@ target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libgame.dll.a)
 
 
 #
-# Build application code space library
+# Build application code library
 #
 
 add_library(game SHARED ${GAME_HEADERS} ${GAME_SOURCES})
