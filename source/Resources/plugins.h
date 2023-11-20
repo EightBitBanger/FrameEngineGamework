@@ -17,12 +17,12 @@
 //#define  STBI_ONLY_PIC
 //#define  STBI_ONLY_PNM // (.ppm and .pgm)
 #define STB_IMAGE_IMPLEMENTATION
-#include "../../vendor/stb/stb_image.h"
+#include "../../dependencies/stb/stb_image.h"
 
 
 // Wavefront file format loader by Bly7/OBJ_Loader
 //
-#include "../../vendor/Bly7/OBJ_Loader.h"
+#include "../../dependencies/Bly7/OBJ_Loader.h"
 
 
 #endif
