@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "../vendor/CodeBaseLibrary/types.h"
-#include "../vendor/CodeBaseLibrary/strings.h"
+#include "../dependencies/CodeBaseLibrary/types.h"
+#include "../dependencies/CodeBaseLibrary/strings.h"
 
 
 class __declspec(dllexport) TestFramework {
