@@ -1,10 +1,10 @@
 ## Features
-- <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Render%E2%80%89System">Render system</a>⁭
+- Render system
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 - ⁯⁮⁭Audio (Considering openAL)
-- <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Resource%E2%80%89Management">Resource management</a>⁭
-- <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Input%E2%80%89System">Input handling</a>⁭
-- <a href="https://github.com/RetroBytes32/GameEngineFramework/wiki/Serialization%E2%80%89System">Serialization</a>⁭
+- Resource management
+- Input handling
+- Serialization
 
 
 
