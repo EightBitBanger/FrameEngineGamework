@@ -11,7 +11,6 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
 
 
-
 set (RUNTIME_HEADERS
     
     "source/configuration.h"
