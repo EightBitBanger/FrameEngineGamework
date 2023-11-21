@@ -6,6 +6,8 @@
 - Input handling
 - Serialization
 
+## Overview
+This engine is split up into three parts. The engine core and the game code are located in separate dynamic libraries with a runtime executable to bring it together.
 
 
 <br><br/>
