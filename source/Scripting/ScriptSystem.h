@@ -3,7 +3,7 @@
 
 #include <mutex>
 
-#include "../../dependencies/CodeBaseLibrary/poolallocator.h"
+#include "../../vendor/CodeBaseLibrary/poolallocator.h"
 
 #include "components/script.h"
 

@@ -1,7 +1,7 @@
 #ifndef __COMPONENT_SHADER
 #define __COMPONENT_SHADER
 
-#include "../../../dependencies/CodeBaseLibrary/types.h"
+#include "../../../vendor/CodeBaseLibrary/types.h"
 
 #include "../../engine/types/transform.h"
 #include "../../engine/types/color.h"

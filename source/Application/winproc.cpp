@@ -48,14 +48,9 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
                 if (Renderer[i]->camera == nullptr) 
                     continue;
                 
+                // Fixed view port
                 if (Renderer[i]->camera->isFixedAspect) 
                     continue;
-                
-                // Update camera aspect
-                Renderer[i]->camera->aspect = Renderer.viewport.w / Renderer.viewport.h;
-                
-                if (Renderer[i]->camera->aspect < 1.3) 
-                    Renderer[i]->camera->aspect = 1.3;
                 
                 // Update view port
                 int windowWidth  = WindowRect.right - WindowRect.left;
@@ -65,6 +60,12 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
                 Renderer[i]->camera->viewport.y = 0;
                 Renderer[i]->camera->viewport.w = windowWidth;
                 Renderer[i]->camera->viewport.h = windowHeight;
+                
+                // Update camera aspect
+                Renderer[i]->camera->aspect = Renderer.viewport.w / Renderer.viewport.h;
+                
+                if (Renderer[i]->camera->aspect < 1.3) 
+                    Renderer[i]->camera->aspect = 1.3;
                 
                 continue;
             }

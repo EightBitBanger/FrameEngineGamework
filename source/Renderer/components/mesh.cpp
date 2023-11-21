@@ -208,7 +208,8 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
         for (std::vector<SubMesh>::iterator it = mFreeMesh.begin(); it != mFreeMesh.end(); ++it) {
             SubMesh freeMeshPtr = *it;
             
-            if (vrtxBuffer.size() != freeMeshPtr.vertexCount) continue;
+            if (vrtxBuffer.size() != freeMeshPtr.vertexCount) 
+                continue;
             
             mFreeMesh.erase(it);
             
@@ -261,6 +262,7 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
     
     mSubMesh.push_back(newMesh);
     
+    // Copy the buffers
     for (std::vector<Vertex>::iterator it = vrtxBuffer.begin(); it != vrtxBuffer.end(); ++it) {
         Vertex vertex = *it;
         vertex.x += x;
@@ -380,8 +382,8 @@ bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) 
     
     mSubMesh[index].position = glm::vec3(x, y, z);
     
-    glBindVertexArray(mVertexArray);
-    glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
+    //glBindVertexArray(mVertexArray);
+    //glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
     
     return true;
 }
@@ -400,8 +402,8 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
         destMesh.push_back(vertex);
     }
     
-    glBindVertexArray(mVertexArray);
-    glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
+    //glBindVertexArray(mVertexArray);
+    //glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
     
     return true;
 }

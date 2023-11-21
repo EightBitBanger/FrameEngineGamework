@@ -9,12 +9,12 @@
 #include "assets/shaderTag.h"
 #include "assets/colliderTag.h"
 
-#include "../../dependencies/CodeBaseLibrary/fileloader.h"
-#include "../../dependencies/CodeBaseLibrary/logging.h"
+#include "../../vendor/CodeBaseLibrary/fileloader.h"
+#include "../../vendor/CodeBaseLibrary/logging.h"
 
-#include "../../dependencies/CodeBaseLibrary/directorysearch.h"
-#include "../../dependencies/CodeBaseLibrary/poolallocator.h"
-#include "../../dependencies/CodeBaseLibrary/strings.h"
+#include "../../vendor/CodeBaseLibrary/directorysearch.h"
+#include "../../vendor/CodeBaseLibrary/poolallocator.h"
+#include "../../vendor/CodeBaseLibrary/strings.h"
 
 
 class __declspec(dllexport) ResourceManager {

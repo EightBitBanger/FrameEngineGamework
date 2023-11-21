@@ -1,7 +1,7 @@
 #ifndef _ACTOR_AI_SYSTEM__
 #define _ACTOR_AI_SYSTEM__
 
-#include "../../dependencies/CodeBaseLibrary/poolallocator.h"
+#include "../../vendor/CodeBaseLibrary/poolallocator.h"
 
 #include "components/actor.h"
 #include "Genetics.h"

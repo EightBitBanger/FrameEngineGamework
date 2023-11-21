@@ -19,10 +19,10 @@
 #include "../AI/components/actor.h"
 #include "../AI/Genetics.h"
 
-#include "../../dependencies/CodeBaseLibrary/directorysearch.h"
-#include "../../dependencies/CodeBaseLibrary/logging.h"
-#include "../../dependencies/CodeBaseLibrary/random.h"
-#include "../../dependencies/CodeBaseLibrary/timer.h"
+#include "../../vendor/CodeBaseLibrary/directorysearch.h"
+#include "../../vendor/CodeBaseLibrary/logging.h"
+#include "../../vendor/CodeBaseLibrary/random.h"
+#include "../../vendor/CodeBaseLibrary/timer.h"
 
 extern PhysicsSystem  Physics;
 

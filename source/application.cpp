@@ -71,8 +71,7 @@ void Start() {
     
     //
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(Vector3(0, 50, 0), Vector3(1, 8, 1));
-    cameraController->transform.position = glm::vec3(0);
+    cameraController = Engine.CreateCameraController(Vector3(-100, 50, -100), Vector3(1, 8, 1));
     mainCamera = cameraController->GetComponent<Camera>();
     sceneMain->camera = mainCamera;
     cameraController->DisableGravity();
@@ -84,10 +83,10 @@ void Start() {
     cameraController->AddComponent( Engine.CreateComponent<Light>() );
     Light* cameraLight = cameraController->GetComponent<Light>();
     sceneMain->AddLightToSceneRoot(cameraLight);
-    cameraLight->intensity   = 4;
+    cameraLight->intensity   = 100;
     cameraLight->range       = 1000;
     cameraLight->attenuation = 0.8;
-    cameraLight->color       = Colors.MakeGrayScale(0.3);
+    cameraLight->color       = Colors.blue;
     
     
     
@@ -112,18 +111,16 @@ void Start() {
     
     
     
+    float depthThreshold = 0.4;
     
-    
-    float noiseMul = 1;
     float xNoise = 0.1;
     float yNoise = 0.1;
     float zNoise = 0.1;
     
-    int width  = 200;
-    int depth  = 8;
-    int height = 200;
+    int width  = 30;
+    int depth  = 30;
+    int height = 30;
     
-    float depthThreshold = 0.1;
     
     for (int z=0; z < height; z++) {
         
@@ -135,23 +132,23 @@ void Start() {
                 float CoordY = y * yNoise;
                 float CoordZ = z * zNoise;
                 
-                float noiseTotal = Random.Perlin(CoordX, CoordY, CoordZ) * noiseMul;
+                float noiseTotal = Random.Perlin(CoordX, CoordY, CoordZ);
                 
                 if (noiseTotal > depthThreshold) 
                     continue;
                 
                 // Create new color for the sub mesh
                 Color color = Colors.MakeRandomGrayScale();
-                color *= Color(0.4, 0.4, 0.4);
-                color += Color(0.07, 0.07, 0.07);
+                color *= Color(0.2, 0.2, 0.2);
+                color += Color(0.04, 0.04, 0.04);
                 
                 if (Random.Range(0, 10) > 8) 
                     color += Colors.yellow;
                 
-                if (Random.Range(0, 10) > 8) 
-                    color += Colors.red;
+                if (Random.Range(0, 10) > 4) 
+                    color += Colors.blue * Color(0.4, 0.4, 0.4);
                 
-                // Change submesh color
+                // Change sub mesh color
                 for (int v=0; v < meshPlainPart.vertexCount; v++) {
                     
                     meshPlainPart.vertexBuffer[v].r = color.r;
@@ -173,17 +170,16 @@ void Start() {
     
     
     
-    
     //
     // Overlay example
     
     sceneOverlay = Engine.Create<Scene>();
     sceneOverlay->camera = Engine.Create<Camera>();
-    //sceneOverlay->camera->isFixedAspect = true;
     sceneOverlay->camera->isOrthographic = true;
-    //sceneOverlay->camera->transform.scale = Vector3(0.7, 1, 0.7);
+    sceneOverlay->camera->isFixedAspect  = true;
     
-    sceneOverlay->camera->transform.position = Vector3(0, 0, 0);
+    sceneOverlay->camera->viewport.w = Renderer.displaySize.x;
+    sceneOverlay->camera->viewport.h = Renderer.displaySize.y;
     
     sceneOverlay->camera->clipFar  =  100;
     sceneOverlay->camera->clipNear = -100;
@@ -192,11 +188,11 @@ void Start() {
     Renderer.AddSceneToRenderQueue(sceneOverlay);
     
     // Create some text renderers
-    overlayObject[0] = Engine.CreateOverlayTextRenderer("Render window", 15, Colors.black, "font");
-    overlayObject[1] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
-    overlayObject[2] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
-    overlayObject[3] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
-    overlayObject[4] = Engine.CreateOverlayTextRenderer("", 12, Colors.black, "font");
+    overlayObject[0] = Engine.CreateOverlayTextRenderer("Render window", 13, Colors.black, "font");
+    overlayObject[1] = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
+    overlayObject[2] = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
+    overlayObject[3] = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
+    overlayObject[4] = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
     
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[0]->GetComponent<MeshRenderer>() );
     sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[1]->GetComponent<MeshRenderer>() );
@@ -215,28 +211,30 @@ void Start() {
     text[4]->color = Colors.black;
     
     text[0]->canvas.position.x =  5;
-    text[0]->canvas.position.y =  3;
+    text[0]->canvas.position.y =  13;
     
-    text[1]->canvas.position.x =  80;
-    text[1]->canvas.position.y =  17;
+    text[1]->canvas.position.x =  20;
+    text[1]->canvas.position.y =  20;
     
-    text[2]->canvas.position.x =  80;
-    text[2]->canvas.position.y =  18;
+    text[2]->canvas.position.x =  20;
+    text[2]->canvas.position.y =  21;
     
-    text[3]->canvas.position.x =  80;
-    text[3]->canvas.position.y =  19;
+    text[3]->canvas.position.x =  20;
+    text[3]->canvas.position.y =  22;
     
-    text[4]->canvas.position.x =  5;
-    text[4]->canvas.position.y =  19;
+    text[4]->canvas.position.x =  80;
+    text[4]->canvas.position.y =  20;
     
+    text[0]->canvas.anchorBottom = false;
+    text[0]->canvas.anchorRight  = false;
     text[1]->canvas.anchorBottom = true;
     text[1]->canvas.anchorRight  = true;
     text[2]->canvas.anchorBottom = true;
     text[2]->canvas.anchorRight  = true;
     text[3]->canvas.anchorBottom = true;
     text[3]->canvas.anchorRight  = true;
-    text[4]->canvas.anchorBottom = false;
-    text[4]->canvas.anchorRight  = false;
+    text[4]->canvas.anchorBottom = true;
+    text[4]->canvas.anchorRight  = true;
     
     
     
@@ -252,7 +250,7 @@ void Start() {
 
 
 // Camera movement force
-float cameraSpeed     = 10.5f;
+float cameraSpeed   = 10;
 
 
 
@@ -275,31 +273,18 @@ void Run() {
         if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
         if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         
-        //if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 2;
-        
-        if (cameraController != nullptr) {
+        if (cameraController != nullptr) 
             force *= cameraSpeed;
-            glm::vec3 velocity = cameraController->transform.GetPosition();
-            velocity += force;
-            cameraController->transform.SetPosition(velocity);
-            
-            RigidBody* rigidBody = cameraController->GetComponent<RigidBody>();
-            
-            rp3d::Transform transform = rp3d::Transform::identity();
-            transform.setPosition( rp3d::Vector3(velocity.x, velocity.y, velocity.z) );
-            
-            rigidBody->setTransform( transform );
-        }
+        
+        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 2 * Time.delta;
+        
+        
+        
+        cameraController->AddForce(force.x, force.y, force.z);
         
     }
     
-    return;
     
-    // Change some sub meshes
-    for (int i=0; i < 10; i++) {
-        int subMeshIndex = Random.Range(0, plainMesh->GetSubMeshCount());
-        plainMesh->ChangeSubMeshColor(subMeshIndex, Colors.red);
-    }
     
     // Update player position on screen
     overlayObject[1]->GetComponent<Text>()->text = "x " + FloatToString( mainCamera->transform.position.x );

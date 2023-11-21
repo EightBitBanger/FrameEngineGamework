@@ -4,9 +4,9 @@
 #define GLEW_STATIC
 #include <gl/glew.h>
 
-#include "../../dependencies/CodeBaseLibrary/poolallocator.h"
-#include "../../dependencies/CodeBaseLibrary/types.h"
-#include "../../dependencies/CodeBaseLibrary/logging.h"
+#include "../../vendor/CodeBaseLibrary/poolallocator.h"
+#include "../../vendor/CodeBaseLibrary/types.h"
+#include "../../vendor/CodeBaseLibrary/logging.h"
 
 #include "enumerators.h"
 

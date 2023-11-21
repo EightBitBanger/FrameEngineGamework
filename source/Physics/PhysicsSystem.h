@@ -3,7 +3,7 @@
 
 #include <ReactPhysics3d/ReactPhysics3d.h>
 
-#include "../../dependencies/CodeBaseLibrary/poolallocator.h"
+#include "../../vendor/CodeBaseLibrary/poolallocator.h"
 
 #include "components/meshcollider.h"
 #include "../Renderer/components/mesh.h"

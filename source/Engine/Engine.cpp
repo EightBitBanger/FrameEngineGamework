@@ -537,21 +537,13 @@ void EngineSystemManager::Update(void) {
                 if (componentCamera->lookAngle.y >  0.0274f) componentCamera->lookAngle.y =  0.0274f;
                 if (componentCamera->lookAngle.y < -0.0274f) componentCamera->lookAngle.y = -0.0274f;
                 
-                componentCamera->transform.orientation.x = componentCamera->lookAngle.x;
-                componentCamera->transform.orientation.y = componentCamera->lookAngle.y;
-                
-            } else {
-                
-                // Restore looking angle
-                componentCamera->transform.orientation.x = componentCamera->lookAngle.x;
-                componentCamera->transform.orientation.y = componentCamera->lookAngle.y;
-                
             }
             
-            componentCamera->transform.position = currentTransform.position;
+            // Restore looking angle
+            componentCamera->transform.orientation.x = componentCamera->lookAngle.x;
+            componentCamera->transform.orientation.y = componentCamera->lookAngle.y;
             
-            //if (!componentCamera->useMouseLook) 
-            //    componentCamera->transform.orientation = currentTransform.orientation;
+            componentCamera->transform.position = currentTransform.position;
             
         }
         
@@ -573,6 +565,7 @@ void EngineSystemManager::Update(void) {
                                     componentText->color);
                 
                 componentMeshRenderer->mesh->UploadToGPU();
+                
             }
             
         }

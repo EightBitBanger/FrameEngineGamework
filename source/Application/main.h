@@ -12,13 +12,13 @@
 
 
 // Code base library
-#include "../../dependencies/CodeBaseLibrary/poolallocator.h"
-#include "../../dependencies/CodeBaseLibrary/strings.h"
-#include "../../dependencies/CodeBaseLibrary/types.h"
-#include "../../dependencies/CodeBaseLibrary/random.h"
-#include "../../dependencies/CodeBaseLibrary/logging.h"
-#include "../../dependencies/CodeBaseLibrary/fileloader.h"
-#include "../../dependencies/CodeBaseLibrary/timer.h"
+#include "../../vendor/CodeBaseLibrary/poolallocator.h"
+#include "../../vendor/CodeBaseLibrary/strings.h"
+#include "../../vendor/CodeBaseLibrary/types.h"
+#include "../../vendor/CodeBaseLibrary/random.h"
+#include "../../vendor/CodeBaseLibrary/logging.h"
+#include "../../vendor/CodeBaseLibrary/fileloader.h"
+#include "../../vendor/CodeBaseLibrary/timer.h"
 
 #include "../Input/InputSystem.h"
 #include "../Physics/PhysicsSystem.h"
