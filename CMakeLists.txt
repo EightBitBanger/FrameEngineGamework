@@ -71,20 +71,20 @@ set (RUNTIME_HEADERS
     
     "tests/framework.h"
     
-    "dependencies/Bly7/OBJ_Loader.h"
+    "vendor/Bly7/OBJ_Loader.h"
     
-#    "dependencies/CodeBaseLibrary/directorysearch.h"
-#    "dependencies/CodeBaseLibrary/fileloader.h"
-#    "dependencies/CodeBaseLibrary/logging.h"
-#    "dependencies/CodeBaseLibrary/poolallocator.h"
-#    "dependencies/CodeBaseLibrary/random.h"
-#    "dependencies/CodeBaseLibrary/strings.h"
-#    "dependencies/CodeBaseLibrary/timer.h"
-#    "dependencies/CodeBaseLibrary/types.h"
+#    "vendor/CodeBaseLibrary/directorysearch.h"
+#    "vendor/CodeBaseLibrary/fileloader.h"
+#    "vendor/CodeBaseLibrary/logging.h"
+#    "vendor/CodeBaseLibrary/poolallocator.h"
+#    "vendor/CodeBaseLibrary/random.h"
+#    "vendor/CodeBaseLibrary/strings.h"
+#    "vendor/CodeBaseLibrary/timer.h"
+#    "vendor/CodeBaseLibrary/types.h"
     
-#    "dependencies/stb/stb_image.h"
-#    "dependencies/stb/stb_perlin.h"
-#    "dependencies/stb/stb_truetype.h"
+#    "vendor/stb/stb_image.h"
+#    "vendor/stb/stb_perlin.h"
+#    "vendor/stb/stb_truetype.h"
     
 )
 
@@ -149,13 +149,13 @@ set (RUNTIME_SOURCES
 #    "tests/units/testSerializer.cpp"
 #    "tests/units/testTransform.cpp"
     
-#    "dependencies/CodeBaseLibrary/directorysearch.cpp"
-#    "dependencies/CodeBaseLibrary/fileloader.cpp"
-#    "dependencies/CodeBaseLibrary/logging.cpp"
-#    "dependencies/CodeBaseLibrary/random.cpp"
-#    "dependencies/CodeBaseLibrary/strings.cpp"
-#    "dependencies/CodeBaseLibrary/timer.cpp"
-#    "dependencies/CodeBaseLibrary/types.cpp"
+#    "vendor/CodeBaseLibrary/directorysearch.cpp"
+#    "vendor/CodeBaseLibrary/fileloader.cpp"
+#    "vendor/CodeBaseLibrary/logging.cpp"
+#    "vendor/CodeBaseLibrary/random.cpp"
+#    "vendor/CodeBaseLibrary/strings.cpp"
+#    "vendor/CodeBaseLibrary/timer.cpp"
+#    "vendor/CodeBaseLibrary/types.cpp"
     
 )
 
@@ -224,20 +224,20 @@ set (GAME_HEADERS
     
     "tests/framework.h"
     
-    "dependencies/Bly7/OBJ_Loader.h"
+    "vendor/Bly7/OBJ_Loader.h"
     
-#    "dependencies/CodeBaseLibrary/directorysearch.h"
-#    "dependencies/CodeBaseLibrary/fileloader.h"
-#    "dependencies/CodeBaseLibrary/logging.h"
-#    "dependencies/CodeBaseLibrary/poolallocator.h"
-#    "dependencies/CodeBaseLibrary/random.h"
-#    "dependencies/CodeBaseLibrary/strings.h"
-#    "dependencies/CodeBaseLibrary/timer.h"
-#    "dependencies/CodeBaseLibrary/types.h"
+#    "vendor/CodeBaseLibrary/directorysearch.h"
+#    "vendor/CodeBaseLibrary/fileloader.h"
+#    "vendor/CodeBaseLibrary/logging.h"
+#    "vendor/CodeBaseLibrary/poolallocator.h"
+#    "vendor/CodeBaseLibrary/random.h"
+#    "vendor/CodeBaseLibrary/strings.h"
+#    "vendor/CodeBaseLibrary/timer.h"
+#    "vendor/CodeBaseLibrary/types.h"
     
-#    "dependencies/stb/stb_image.h"
-#    "dependencies/stb/stb_perlin.h"
-#    "dependencies/stb/stb_truetype.h"
+#    "vendor/stb/stb_image.h"
+#    "vendor/stb/stb_perlin.h"
+#    "vendor/stb/stb_truetype.h"
     
 )
 
@@ -313,20 +313,20 @@ set (CORE_HEADERS
     
     "tests/framework.h"
     
-    "dependencies/Bly7/OBJ_Loader.h"
+    "vendor/Bly7/OBJ_Loader.h"
     
-    "dependencies/CodeBaseLibrary/directorysearch.h"
-    "dependencies/CodeBaseLibrary/fileloader.h"
-    "dependencies/CodeBaseLibrary/logging.h"
-    "dependencies/CodeBaseLibrary/poolallocator.h"
-    "dependencies/CodeBaseLibrary/random.h"
-    "dependencies/CodeBaseLibrary/strings.h"
-    "dependencies/CodeBaseLibrary/timer.h"
-    "dependencies/CodeBaseLibrary/types.h"
+    "vendor/CodeBaseLibrary/directorysearch.h"
+    "vendor/CodeBaseLibrary/fileloader.h"
+    "vendor/CodeBaseLibrary/logging.h"
+    "vendor/CodeBaseLibrary/poolallocator.h"
+    "vendor/CodeBaseLibrary/random.h"
+    "vendor/CodeBaseLibrary/strings.h"
+    "vendor/CodeBaseLibrary/timer.h"
+    "vendor/CodeBaseLibrary/types.h"
     
-    "dependencies/stb/stb_image.h"
-    "dependencies/stb/stb_perlin.h"
-    "dependencies/stb/stb_truetype.h"
+    "vendor/stb/stb_image.h"
+    "vendor/stb/stb_perlin.h"
+    "vendor/stb/stb_truetype.h"
     
 )
 
@@ -391,13 +391,13 @@ set (CORE_SOURCES
     "tests/units/testSerializer.cpp"
     "tests/units/testTransform.cpp"
     
-    "dependencies/CodeBaseLibrary/directorysearch.cpp"
-    "dependencies/CodeBaseLibrary/fileloader.cpp"
-    "dependencies/CodeBaseLibrary/logging.cpp"
-    "dependencies/CodeBaseLibrary/random.cpp"
-    "dependencies/CodeBaseLibrary/strings.cpp"
-    "dependencies/CodeBaseLibrary/timer.cpp"
-    "dependencies/CodeBaseLibrary/types.cpp"
+    "vendor/CodeBaseLibrary/directorysearch.cpp"
+    "vendor/CodeBaseLibrary/fileloader.cpp"
+    "vendor/CodeBaseLibrary/logging.cpp"
+    "vendor/CodeBaseLibrary/random.cpp"
+    "vendor/CodeBaseLibrary/strings.cpp"
+    "vendor/CodeBaseLibrary/timer.cpp"
+    "vendor/CodeBaseLibrary/types.cpp"
     
 )
 
@@ -431,9 +431,9 @@ target_include_directories(runtime PUBLIC
 
 target_link_libraries(runtime glew32s.lib)
 target_link_libraries(runtime opengl32.a)
-target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/dependencies/librp3d.a)
-target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/dependencies/libcore.dll.a)
-target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/dependencies/libgame.dll.a)
+target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
+target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
+target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libgame.dll.a)
 
 
 
@@ -461,8 +461,8 @@ target_include_directories(game PUBLIC
 
 target_link_libraries(game glew32s.lib)
 target_link_libraries(game opengl32.a)
-target_link_libraries(game ${PROJECT_SOURCE_DIR}/dependencies/librp3d.a)
-target_link_libraries(game ${PROJECT_SOURCE_DIR}/dependencies/libcore.dll.a)
+target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
+target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
 
 
 
@@ -490,7 +490,7 @@ target_include_directories(core PUBLIC
 
 target_link_libraries(core glew32s.lib)
 target_link_libraries(core opengl32.a)
-target_link_libraries(core ${PROJECT_SOURCE_DIR}/dependencies/librp3d.a)
+target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
 
 
 
