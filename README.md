@@ -40,14 +40,14 @@ Building this repository will require the following libraries to be installed.
 * <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 * <a href="https://github.com/nothings/stb">STB-Image</a>⁭
 * <a href="https://github.com/Bly7/OBJ-Loader">Bly7-OBJ-loader</a>⁭
-* <a href="https://github.com/Groovounet/glm">glm</a>⁭
+* <a href="https://github.com/icaven/glm">glm</a>⁭
 * <a href="https://github.com/nigels-com/glew">glew</a>⁭
 
 
 
 <br><br/>
 ## Singleton access pointers
-The framework contains many sub systems which can be accessed though the following singletons.
+The framework contains many sub systems which can be accessed though the following "singletons".
 
 ```c++
 #include "Engine/Engine.h"
