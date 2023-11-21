@@ -113,15 +113,15 @@ void Start() {
     
     
     
-    float depthThreshold = -0.7;
+    float depthThreshold = -0.5;
     
     float xNoise = 0.1;
     float yNoise = 0.1;
     float zNoise = 0.1;
     
-    int width  = 300;
+    int width  = 100;
     int depth  = 100;
-    int height = 300;
+    int height = 100;
     
     
     for (int z=0; z < height; z++) {
@@ -209,21 +209,31 @@ void Start() {
     text[3]->color = Colors.black;
     text[4]->color = Colors.black;
     
-    text[0]->canvas.position.x =  1;
-    text[0]->canvas.position.y =  3;
+    text[0]->canvas.position.x =  5;
+    text[0]->canvas.position.y =  13;
     
-    text[1]->canvas.position.x =  1;
-    text[1]->canvas.position.y =  10;
+    text[1]->canvas.position.x =  20;
+    text[1]->canvas.position.y =  20;
     
-    text[2]->canvas.position.x =  1;
-    text[2]->canvas.position.y =  11;
+    text[2]->canvas.position.x =  20;
+    text[2]->canvas.position.y =  21;
     
-    text[3]->canvas.position.x =  1;
-    text[3]->canvas.position.y =  12;
+    text[3]->canvas.position.x =  20;
+    text[3]->canvas.position.y =  22;
     
-    text[4]->canvas.position.x =  1;
-    text[4]->canvas.position.y =  7;
+    text[4]->canvas.position.x =  80;
+    text[4]->canvas.position.y =  20;
     
+    text[0]->canvas.anchorBottom = false;
+    text[0]->canvas.anchorRight  = false;
+    text[1]->canvas.anchorBottom = true;
+    text[1]->canvas.anchorRight  = true;
+    text[2]->canvas.anchorBottom = true;
+    text[2]->canvas.anchorRight  = true;
+    text[3]->canvas.anchorBottom = true;
+    text[3]->canvas.anchorRight  = true;
+    text[4]->canvas.anchorBottom = true;
+    text[4]->canvas.anchorRight  = true;
     
     
     

@@ -111,7 +111,7 @@ void Transform::Scale(float x, float y, float z) {
 }
 
 glm::vec3 Transform::EulerAngles(void) {
-    return glm::eulerAngles(orientation);
+    return glm::eulerAngles(wua);
 }
 
 void Transform::SetIdentity(void) {

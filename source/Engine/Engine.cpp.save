@@ -510,7 +510,7 @@ void EngineSystemManager::Update(void) {
         Light* componentLight = gameObject->GetComponent<Light>();
         if (componentLight != nullptr) {
             componentLight->position    = currentTransform.position;
-            componentLight->direction   = currentTransform.EulerAngles();
+            componentLight->direction   = currentTransform.;
         }
         
         Camera* componentCamera = gameObject->GetComponent<Camera>();

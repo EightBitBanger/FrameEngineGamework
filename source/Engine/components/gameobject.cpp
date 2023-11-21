@@ -107,7 +107,7 @@ void GameObject::SetPosition(float x, float y, float z) {
         mCameraCache->transform.position = glm::vec3(x, y, z);
     }
     if (mLightCache != nullptr) {
-        mLightCache->transform.position = glm::vec3(x, y, z);
+        mLightCache->position = glm::vec3(x, y, z);
     }
     return;
 }

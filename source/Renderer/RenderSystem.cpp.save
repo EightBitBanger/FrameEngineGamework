@@ -293,11 +293,12 @@ void RenderSystem::RenderFrame(float deltaTime) {
         setTargetCamera( scenePtr->camera, eye, viewProjection );
         
         // Gather the list of active lights in this scene
-        unsigned int numberOfActiveLights=0;
+        int numberOfActiveLights=0;
         accumulateSceneLights( scenePtr, eye, numberOfActiveLights );
         
         
         // Draw the mesh renderers
+        submitMeshRendererList
         
         unsigned int entityListSz = scenePtr->GetMeshRendererQueueSize();
         
@@ -485,7 +486,7 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
     return true;
 }
 
-void RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye, unsigned int& numberOfActiveLights) {
+void RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye, int& numberOfActiveLights) {
     
     numberOfActiveLights=0;
     
@@ -523,3 +524,8 @@ void RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye, uns
     return;
 }
 
+void RenderSystem::submitMeshRendererList(Scene* currentScene) {
+    
+    
+    
+}

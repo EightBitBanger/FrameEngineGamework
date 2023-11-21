@@ -157,6 +157,8 @@ private:
     
     void accumulateSceneLights(Scene* currentScene, glm::vec3 eye, unsigned int& numberOfActiveLights);
     
+    void submitMeshRendererList(Scene* currentScene);
+    
 };
 
 #endif
