@@ -26,7 +26,7 @@ void TestFramework::TestEngineFunctionality(void) {
     // Test light component
     component = Engine.CreateComponentLight(glm::vec3(1, -2, 3));
     Light* lightPoint = (Light*)component->GetComponent();
-    if (lightPoint->transform.position != glm::vec3(1, -2, 3)) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
+    if (lightPoint->position != glm::vec3(1, -2, 3)) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     if (component == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     if (!Engine.DestroyComponent(component)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
     if (Engine.GetComponentCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
