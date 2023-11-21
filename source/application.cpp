@@ -73,9 +73,11 @@ void Start() {
     
     //
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(Vector3(-100, 50, -100), Vector3(1, 8, 1));
+    cameraController = Engine.CreateCameraController(Vector3(-130, 90, 0), Vector3(1, 8, 1));
     mainCamera = cameraController->GetComponent<Camera>();
+    mainCamera->lookAngle = Vector3(0, -0.01, 0);
     sceneMain->camera = mainCamera;
+    
     cameraController->DisableGravity();
     
     // Attach sky object to the camera object
@@ -85,24 +87,26 @@ void Start() {
     cameraController->AddComponent( Engine.CreateComponent<Light>() );
     Light* cameraLight = cameraController->GetComponent<Light>();
     sceneMain->AddLightToSceneRoot(cameraLight);
-    cameraLight->intensity   = 100;
+    cameraLight->intensity   = 1000;
     cameraLight->range       = 1000;
-    cameraLight->attenuation = 0.8;
-    cameraLight->color       = Colors.blue;
+    cameraLight->attenuation = 4;
+    cameraLight->color       = Colors.white;
     
     
     
     
     GameObject* plain = Engine.Create<GameObject>();
     plain->transform.scale = Vector3(10, 10, 10);
-    plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("cube"), Resources.CreateMaterialFromTag("grassy") ) );
+    plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("barrel"), Resources.CreateMaterialFromTag("barrel") ) );
     plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
-    plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.color;
-    plain->GetComponent<MeshRenderer>()->material->ambient = Colors.MakeGrayScale(0.02);
-    plain->GetComponent<MeshRenderer>()->material->diffuse = Colors.MakeGrayScale(0.02);
+    plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.texture;
+    plain->GetComponent<MeshRenderer>()->material->ambient = Colors.MakeGrayScale(0.4);
+    plain->GetComponent<MeshRenderer>()->material->diffuse = Colors.MakeGrayScale(0.87);
     plain->GetComponent<MeshRenderer>()->material->DisableCulling();
     
     sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
+    
+    
     
     plainMesh->CopySubMesh(0, meshPlainPart);
     
@@ -113,15 +117,15 @@ void Start() {
     
     
     
-    float depthThreshold = -0.7;
+    float depthThreshold = -0.2;
     
     float xNoise = 0.1;
     float yNoise = 0.1;
     float zNoise = 0.1;
     
-    int width  = 300;
-    int depth  = 100;
-    int height = 300;
+    int width  = 400;
+    int depth  = 400;
+    int height = 400;
     
     
     for (int z=0; z < height; z++) {
@@ -129,6 +133,9 @@ void Start() {
         for (int y=0; y < depth; y++) {
             
             for (int x=0; x < width; x++) {
+                
+                if (Random.Range(0, 10000) > 1) 
+                    continue;
                 
                 float CoordX = x * xNoise;
                 float CoordY = y * yNoise;
@@ -166,7 +173,7 @@ void Start() {
         }
     }
     plainMesh->UploadToGPU();
-     
+    
     
     
     
@@ -239,7 +246,7 @@ void Start() {
 
 
 // Camera movement force
-float cameraSpeed   = 10;
+float cameraSpeed   = 100;
 
 
 
@@ -265,7 +272,7 @@ void Run() {
         if (cameraController != nullptr) 
             force *= cameraSpeed;
         
-        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 2 * Time.delta;
+        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 3;
         
         
         
