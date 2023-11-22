@@ -1,17 +1,9 @@
-#include <SDKDDKVer.h>
-#include <windows.h>
-
-#include <thread>
-#include <mutex>
-
 #include "../configuration.h"
 
 #ifdef RUN_UNIT_TESTS
  #include "../../tests/framework.h"
 #endif
 
-
-// Code base library
 #include "../../vendor/CodeBaseLibrary/poolallocator.h"
 #include "../../vendor/CodeBaseLibrary/strings.h"
 #include "../../vendor/CodeBaseLibrary/types.h"
@@ -31,7 +23,3 @@
 #include "../application/applicationlayer.h"
 
 #include "../engine/engine.h"
-
-
-
-#include <string>

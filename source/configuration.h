@@ -21,8 +21,6 @@
 #define     WINDOW_CONSOLE_WIDTH   700
 #define     WINDOW_CONSOLE_HEIGHT  800
 
-// Exit runtime with the ESCAPE key
-//#define  ESCAPE_KEY_QUIT
 
 
 //
@@ -31,12 +29,6 @@
 
 //#define  EVENT_LOG_DETAILED
 
-
-//
-// Tick update
-//
-
-#define  TICK_UPDATES_PER_SECOND           3
 
 
 //
@@ -51,6 +43,7 @@
 #define  LOG_RENDER_DETAILS
 
 
+
 //
 // Physics
 //
@@ -58,11 +51,20 @@
 #define PHYSICS_UPDATES_PER_SECOND         60
 
 
+
 //
 // Unit testing
 //
 
 #define RUN_UNIT_TESTS
+
+
+
+//
+// Tick update
+//
+
+#define  TICK_UPDATES_PER_SECOND           30
 
 
 

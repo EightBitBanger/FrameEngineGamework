@@ -1,5 +1,8 @@
 #include "main.h"
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 extern Timer                PhysicsTime;
 extern Timer                Time;
 extern Logger               Log;
@@ -16,10 +19,13 @@ extern ApplicationLayer     Application;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
     // Create the main render window
-    HWND wHndl = Application.CreateWindowHandle("windowFrame", "Scene View");
+    HWND wHndl = Application.CreateWindowHandle("windowFrame", "Render window");
     
     // Console window
-    HWND cHnd = GetConsoleWindow();
+    char consoleTitle[500];
+    GetConsoleTitleA( consoleTitle, 500 );
+    HWND cHnd = FindWindowA( NULL, consoleTitle );
+    
     ShowWindow(cHnd, SW_SHOW);
     SetWindowPos(cHnd, NULL, WINDOW_CONSOLE_LEFT, WINDOW_CONSOLE_TOP, WINDOW_CONSOLE_WIDTH, WINDOW_CONSOLE_HEIGHT, SWP_SHOWWINDOW);
     
@@ -109,11 +115,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             DispatchMessage(&messages);
         }
         
-#ifdef ESCAPE_KEY_QUIT
-        if (Input.CheckKeyPressed(VK_ESCAPE)) 
-            Application.isActive = false;
-#endif
-        
         //
         // Tick update timer
         //
@@ -123,20 +124,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         
         if (tickAccumulator >= tickUpdateTimeout) {
             
+            // Update application space
+            Run();
+            
+            Scripting.Update();
+            
+            Engine.Update();
+            
+            // Call updates on accumulated time
             for (int i=0; i < 2; i++) {
-                
-                tickAccumulator -= tickUpdateTimeout;
                 
                 AI.Update();
                 
                 TickUpdate();
                 
+                tickAccumulator -= tickUpdateTimeout;
                 if (tickAccumulator > tickUpdateTimeout) 
                     continue;
                 break;
             }
         }
-        
         
         //
         // Physics timer
@@ -155,7 +162,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
         }
         
-        
         //
         // Render timer
         //
@@ -166,12 +172,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         if (renderAccumulator >= renderUpdateTimeout) {
             
             renderAccumulator -= renderUpdateTimeout;
-            
-            Run();
-            
-            Scripting.Update();
-            
-            Engine.Update();
             
             Renderer.RenderFrame( renderUpdateTimeout );
         }
