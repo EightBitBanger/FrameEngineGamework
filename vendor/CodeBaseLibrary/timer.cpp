@@ -1,6 +1,5 @@
 #include "timer.h"
 
-
 Timer::Timer() {
     
     delta=0;

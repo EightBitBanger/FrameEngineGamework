@@ -1,7 +1,13 @@
 #ifndef TIMER_WINDOWS
 #define TIMER_WINDOWS
 
+#ifndef _WIN32_WINNT
+  #define _WIN32_WINNT 0x500
+  #include <sdkddkver.h>
+#endif
+
 #include <windows.h>
+
 
 class __declspec(dllexport) Timer {
     

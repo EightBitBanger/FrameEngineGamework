@@ -1,10 +1,6 @@
 #ifndef TYPE_CONVERSION
 #define TYPE_CONVERSION
 
-//#define _WIN32_WINNT  0x500
-#include <SDKDDKVer.h>
-#include <windows.h>
-
 // Standard headers
 #include <stdio.h>
 #include <stdlib.h>
