@@ -1,5 +1,16 @@
 #include "main.h"
 
+//#define WIN32_LEAN_AND_MEAN
+#include <sdkddkver.h>
+#define _WIN32_WINNT 0x500
+
+#if       _win32_winnt < 0x0500
+  #undef  _win32_winnt
+  #define _win32_winnt   0x0500
+#endif
+
+#include <windows.h>
+
 extern Timer                PhysicsTime;
 extern Timer                Time;
 extern Logger               Log;

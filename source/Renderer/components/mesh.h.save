@@ -8,8 +8,6 @@
 #include "../../engine/types/color.h"
 #include "../../Math/Math.h"
 
-#include "../../configuration.h"
-
 #ifndef RENDERER_VERTEX_BUFFER_MAX
   #define RENDERER_VERTEX_BUFFER_MAX  100000
 #endif

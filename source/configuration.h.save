@@ -35,7 +35,7 @@
 // Rendering
 //
 
-#define  RENDER_FRAMES_PER_SECOND          30
+#define  RENDER_FRAMES_PER_SECOND          1
 //#define  RENDERER_CHECK_OPENGL_ERRORS
 
 #define RENDER_NUMBER_OF_LIGHTS    30
@@ -50,7 +50,7 @@
 // Physics
 //
 
-#define PHYSICS_UPDATES_PER_SECOND         30
+#define PHYSICS_UPDATES_PER_SECOND         60
 
 
 

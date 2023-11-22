@@ -1,7 +1,7 @@
 #ifndef OPENGL_RENDERER_SYSTEM
 #define OPENGL_RENDERER_SYSTEM
 
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #define GLEW_STATIC

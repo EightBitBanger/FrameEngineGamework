@@ -75,7 +75,6 @@ void Start() {
     // Create a camera controller
     cameraController = Engine.CreateCameraController(Vector3(-130, 90, 0), Vector3(1, 8, 1));
     mainCamera = cameraController->GetComponent<Camera>();
-    mainCamera->lookAngle = Vector3(0, -0.01, 0);
     sceneMain->camera = mainCamera;
     
     cameraController->DisableGravity();
@@ -87,9 +86,9 @@ void Start() {
     cameraController->AddComponent( Engine.CreateComponent<Light>() );
     Light* cameraLight = cameraController->GetComponent<Light>();
     sceneMain->AddLightToSceneRoot(cameraLight);
-    cameraLight->intensity   = 1000;
+    cameraLight->intensity   = 700;
     cameraLight->range       = 1000;
-    cameraLight->attenuation = 4;
+    cameraLight->attenuation = 3;
     cameraLight->color       = Colors.white;
     
     
@@ -100,8 +99,8 @@ void Start() {
     plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("barrel"), Resources.CreateMaterialFromTag("barrel") ) );
     plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
     plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.texture;
-    plain->GetComponent<MeshRenderer>()->material->ambient = Colors.MakeGrayScale(0.4);
-    plain->GetComponent<MeshRenderer>()->material->diffuse = Colors.MakeGrayScale(0.87);
+    plain->GetComponent<MeshRenderer>()->material->ambient = Colors.MakeGrayScale(0.1);
+    plain->GetComponent<MeshRenderer>()->material->diffuse = Colors.MakeGrayScale(0);
     plain->GetComponent<MeshRenderer>()->material->DisableCulling();
     
     sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
@@ -115,17 +114,49 @@ void Start() {
     
     
     
+    for (int x=0; x < 500000; x++) {
+        
+        float CoordX = Random.Range(0, 100) - Random.Range(0, 100);
+        float CoordY = Random.Range(0, 100) - Random.Range(0, 100);
+        float CoordZ = Random.Range(0, 100) - Random.Range(0, 100);
+        
+        // Create new color for the sub mesh
+        Color color = Colors.MakeRandomGrayScale();
+        color *= Color(0.2, 0.2, 0.2);
+        color += Color(0.04, 0.04, 0.04);
+        
+        if (Random.Range(0, 10) > 8) 
+            color += Colors.yellow;
+        
+        if (Random.Range(0, 10) > 4) 
+            color += Colors.blue * Color(0.4, 0.4, 0.4);
+        
+        // Change sub mesh color
+        for (int v=0; v < meshPlainPart.vertexCount; v++) {
+            meshPlainPart.vertexBuffer[v].r = color.r;
+            meshPlainPart.vertexBuffer[v].g = color.g;
+            meshPlainPart.vertexBuffer[v].b = color.b;
+        }
+        
+        
+        if (!plainMesh->AddSubMesh(CoordX, CoordY, CoordZ, meshPlainPart, false)) 
+            break;
+        
+        continue;
+    }
+    plainMesh->UploadToGPU();
     
     
-    float depthThreshold = -0.2;
+    /*
+    float depthThreshold = 0.5;
     
     float xNoise = 0.1;
     float yNoise = 0.1;
     float zNoise = 0.1;
     
-    int width  = 400;
-    int depth  = 400;
-    int height = 400;
+    int width  = 10;
+    int depth  = 10;
+    int height = 10;
     
     
     for (int z=0; z < height; z++) {
@@ -134,14 +165,14 @@ void Start() {
             
             for (int x=0; x < width; x++) {
                 
-                if (Random.Range(0, 10000) > 1) 
-                    continue;
+                //if (Random.Range(0, 10000) > 1) 
+                //    continue;
                 
                 float CoordX = x * xNoise;
                 float CoordY = y * yNoise;
                 float CoordZ = z * zNoise;
                 
-                float noiseTotal = Random.Perlin(CoordX, CoordY, CoordZ);
+                //float noiseTotal = Random.Perlin(CoordX, CoordY, CoordZ);
                 
                 if (noiseTotal > depthThreshold) 
                     continue;
@@ -173,7 +204,7 @@ void Start() {
         }
     }
     plainMesh->UploadToGPU();
-    
+    */
     
     
     
@@ -246,7 +277,7 @@ void Start() {
 
 
 // Camera movement force
-float cameraSpeed   = 100;
+float cameraSpeed   = 30;
 
 
 

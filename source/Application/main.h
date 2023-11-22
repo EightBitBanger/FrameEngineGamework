@@ -4,6 +4,8 @@
  #include "../../tests/framework.h"
 #endif
 
+#include "../application/applicationlayer.h"
+
 #include "../../vendor/CodeBaseLibrary/poolallocator.h"
 #include "../../vendor/CodeBaseLibrary/strings.h"
 #include "../../vendor/CodeBaseLibrary/types.h"
@@ -19,7 +21,5 @@
 #include "../Scripting/ScriptSystem.h"
 #include "../Serialization/Serialization.h"
 #include "../AI/ActorSystem.h"
-
-#include "../application/applicationlayer.h"
 
 #include "../engine/engine.h"

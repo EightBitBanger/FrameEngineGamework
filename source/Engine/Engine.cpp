@@ -111,6 +111,8 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     
     skyMaterial->diffuse = Color(1, 1, 1);
     skyMaterial->DisableDepthTest();
+    skyMaterial->ambient = Colors.MakeGrayScale(0.3);
+    skyMaterial->diffuse = Colors.MakeGrayScale(0.3);
     skyMaterial->shader = shaders.color;
     
     for (int i=0; i < skyMesh->GetNumberOfVertices(); i++) {
