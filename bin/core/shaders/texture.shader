@@ -29,7 +29,7 @@ void main() {
     
     vec3 norm = normalize(l_normal);
     
-    vec3 finalColor = m_ambient;
+    vec3 lightColor = vec3(0);
     
     for (int i=0; i<=u_light_count; i++) {
         
@@ -47,17 +47,18 @@ void main() {
         vec3 reflectDir = reflect(-lightDir, norm);  
         float shininess = 1;
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-        vec3 specular = u_light_color[i] * (spec * m_specular);
+        vec3 specular = u_light_color[i] * spec * m_specular;
         
         if (dist > range) 
             continue;
         
-        finalColor += ((diff * u_light_color[i]) * intensity) / (1.0 + (dist * attenuation)) + specular;
-        finalColor = clamp(finalColor, 0.0, 2.0);
+        lightColor += ((diff * u_light_color[i]) * intensity) / (1.0 + (dist * attenuation)) + specular;
+        lightColor = clamp(lightColor, 0.0, 2.0);
+	
         continue;
     }
     
-    v_color = finalColor + m_diffuse;
+    v_color = (m_ambient + m_diffuse) + lightColor;
     v_coord = l_uv;
     
     gl_Position = u_proj * vertPos;
