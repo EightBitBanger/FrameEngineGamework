@@ -89,6 +89,10 @@ void RenderSystem::Initiate(void) {
     return;
 }
 
+void RenderSystem::Shutdown(void) {
+    return;
+}
+
 
 void RenderSystem::AddSceneToRenderQueue(Scene* scenePtr) {
     assert(scenePtr != nullptr);

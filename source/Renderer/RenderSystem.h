@@ -89,6 +89,9 @@ public:
     /// Prepare the render system.
     void Initiate(void);
     
+    /// Shutdown the render system.
+    void Shutdown(void);
+    
     /// Set the target render context.
     GLenum  SetRenderTarget(HWND wHndl);
     

@@ -46,12 +46,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
     Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     
-    Physics.Initiate();
-    Renderer.Initiate();
-    Audio.Initiate();
     Resources.Initiate();
+    Log.WriteLn();
     
-    // Initiate the engine
+    AI.Initiate();
+    
+    Renderer.Initiate();
+    
+    Audio.Initiate();
+    
+    Physics.Initiate();
+    
     Engine.Initiate();
     
 #ifdef RUN_UNIT_TESTS
@@ -83,6 +88,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         std::cin >> freeze;
     }
 #endif
+    
+    Log.WriteLn();
+    Log.Write("<MainScene>");
     
     Start();
     
@@ -175,18 +183,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
     
     
+    Log.WriteLn();
+    
     // Shutdown engine & sub systems
     Shutdown();
     
     Engine.Shutdown();
     
-    Resources.DestroyAssets();
-    
     Physics.Shutdown();
     
     Audio.Shutdown();
     
+    Renderer.Shutdown();
     Renderer.ReleaseRenderTarget();
+    
+    AI.Shutdown();
+    
+    Resources.DestroyAssets();
     
     Application.DestroyWindowHandle();
     

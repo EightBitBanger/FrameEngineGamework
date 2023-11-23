@@ -1,10 +1,9 @@
 #ifndef AUDIO_RENDER_SYSTEM
 #define AUDIO_RENDER_SYSTEM
 
-// Audio render support by openAL maybe
-//#include "openAL/al/al.h"
-//#include "openAL/al/alc.h"
-
+#include <thread>
+#include <mutex>
+#include <chrono>
 
 class __declspec(dllexport) AudioSystem {
     
@@ -16,8 +15,7 @@ public:
     
 private:
     
-    //ALCdevice*  mDevice  = NULL;
-    //ALCcontext* mContext = alcGetCurrentContext();
+    std::thread* audioThread;
     
 };
 

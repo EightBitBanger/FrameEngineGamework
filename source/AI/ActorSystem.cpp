@@ -1,8 +1,31 @@
 #include "ActorSystem.h"
 
+#include "../../vendor/codebaselibrary/logging.h"
+
+extern Logger Log;
+
+// Actor system thread
+bool isActorThreadActive = true;
+void actorThreadMain(void);
+
 
 ActorSystem::ActorSystem() {
     
+}
+
+void ActorSystem::Initiate(void) {
+    actorSystemThread = new std::thread( actorThreadMain );
+    
+    return;
+}
+
+void ActorSystem::Shutdown(void) {
+    
+    isActorThreadActive = false;
+    
+    actorSystemThread->join();
+    
+    return;
 }
 
 void ActorSystem::Update(void) {
@@ -12,9 +35,6 @@ void ActorSystem::Update(void) {
             continue;
         
         mActors[i]->Update();
-        
-        
-        
         
         // Advance actor age
         mActors[i]->age++;
@@ -31,3 +51,21 @@ Actor* ActorSystem::CreateActor(void) {
 bool ActorSystem::DestroyActor(Actor* actorPtr) {
     return mActors.Destroy(actorPtr);
 }
+
+void actorThreadMain() {
+    
+    Log.Write( " >> AI thread started" );
+    
+    while (isActorThreadActive) {
+        
+        
+        
+        
+        continue;
+    }
+    
+    Log.Write( " >> AI thread stopped" );
+    
+    return;
+}
+
