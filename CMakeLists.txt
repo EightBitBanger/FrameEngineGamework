@@ -58,7 +58,6 @@ set (RUNTIME_HEADERS
     "source/Renderer/components/light.h"
     "source/Renderer/components/shader.h"
     
-    "source/Resources/plugins.h"
     "source/Resources/ResourceManager.h"
     "source/Resources/assets/colliderTag.h"
     "source/Resources/assets/meshTag.h"
