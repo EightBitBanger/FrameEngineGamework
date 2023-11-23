@@ -8,6 +8,9 @@ struct __declspec(dllexport) ShaderTag {
     /// Shader resource name.
     std::string name;
     
+    /// Is the resource loaded into memory.
+    bool isLoaded;
+    
     /// Vertex shader script.
     std::string vertexScript;
     

@@ -24,8 +24,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     ShowWindow(cHnd, SW_SHOW);
     SetWindowPos(cHnd, NULL, WINDOW_CONSOLE_LEFT, WINDOW_CONSOLE_TOP, WINDOW_CONSOLE_WIDTH, WINDOW_CONSOLE_HEIGHT, SWP_SHOWWINDOW);
     
-    DestroyWindow(cHnd);
-    
     Application.SetWindowCenterScale(0.85, 1.1);
     Viewport windowSz = Application.GetWindowArea();
     
@@ -34,7 +32,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     // Initiate and set the target context for rendering
     if (Renderer.SetRenderTarget(wHndl) != GLEW_OK) {
+        Application.ShowMouseCursor();
         DestroyWindow(wHndl);
+        ShowWindow(cHnd, SW_HIDE);
         MessageBox(NULL, "Cannot locate the OpenGL library. Please update your graphics drivers...", "Error", MB_OK);
         return 0;
     }
@@ -51,7 +51,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Audio.Initiate();
     Resources.Initiate();
     
-    // Initiate the engine last
+    // Initiate the engine
     Engine.Initiate();
     
 #ifdef RUN_UNIT_TESTS
@@ -121,24 +121,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         
         if (tickAccumulator >= tickUpdateTimeout) {
             
-            // Update application space
-            Run();
-            
-            Scripting.Update();
-            
-            Engine.Update();
-            
-            // Call updates on accumulated time
+            // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
+                Run();
+                
+                Scripting.Update();
                 
                 AI.Update();
                 
                 TickUpdate();
                 
+                Engine.Update();
+                
                 tickAccumulator -= tickUpdateTimeout;
-                if (tickAccumulator > tickUpdateTimeout) 
-                    continue;
-                break;
+                if (tickAccumulator < tickUpdateTimeout) 
+                    break;
+                
+                continue;
             }
         }
         
@@ -149,14 +148,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         physicsAccumulator += PhysicsTime.GetCurrentDelta();
         PhysicsTime.Update();
         
-        while (physicsAccumulator >= physicsUpdateTimeout) {
+        if (physicsAccumulator >= physicsUpdateTimeout) {
             
             physicsAccumulator -= physicsUpdateTimeout;
             
             Physics.world->update( physicsUpdateTimeout );
             
             physicsAlpha = physicsAccumulator / physicsUpdateTimeout;
-            
         }
         
         //

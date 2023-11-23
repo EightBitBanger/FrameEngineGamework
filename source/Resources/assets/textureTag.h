@@ -6,7 +6,13 @@
 struct __declspec(dllexport) TextureTag {
     
     /// Texture resource name.
+    std::string path;
+    
+    /// Texture resource name.
     std::string name;
+    
+    /// Is the resource loaded into memory.
+    bool isLoaded;
     
     /// Width of the image in pixels.
     int width;
@@ -17,6 +23,12 @@ struct __declspec(dllexport) TextureTag {
     
     /// Pointer to the data held by the image loading program.
     unsigned char* buffer;
+    
+    /// Load the data to which this asset points.
+    bool Load(void);
+    
+    /// Frees the memory associated with this texture.
+    bool Unload(void);
     
     TextureTag();
     

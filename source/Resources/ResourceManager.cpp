@@ -1,7 +1,5 @@
 #include "ResourceManager.h"
 
-#include "plugins.h"
-
 extern RenderSystem Renderer;
 extern PhysicsSystem Physics;
 extern Logger Log;
@@ -11,8 +9,6 @@ ResourceManager::ResourceManager() {
 }
 
 void ResourceManager::Initiate(void) {
-    
-    stbi_set_flip_vertically_on_load(true);
     
     // Load resource directories if they exist
     std::vector<std::string> shaderDirectoryList   = DirectoryGetList(".\\core\\shaders\\");
@@ -29,10 +25,6 @@ void ResourceManager::Initiate(void) {
         LoadTexture("core/materials/" + materialDirectoryList[i], StringGetNameFromFilenameNoExt( materialDirectoryList[i] ));
     
     return;
-}
-
-unsigned char* ResourceManager::LoadImageRaw(char const* path, int* width, int* height, int* channels, int req_channels) {
-    return stbi_load(path, width, height, channels, req_channels);
 }
 
 MeshTag* ResourceManager::FindMeshTag(std::string resourceName) {
@@ -66,6 +58,9 @@ ColliderTag* ResourceManager::FindColliderTag(std::string resourceName) {
 Mesh* ResourceManager::CreateMeshFromTag(std::string resourceName) {
     MeshTag* meshTag = FindMeshTag(resourceName);
     if (meshTag == nullptr) return nullptr;
+    if (!meshTag->isLoaded) 
+        if (!meshTag->Load()) 
+            return nullptr;
     Mesh* meshPtr = Renderer.CreateMesh();
     meshPtr->AddSubMesh(0,0,0, meshTag->mesh.vertexBuffer, meshTag->mesh.indexBuffer);
     return meshPtr;
@@ -74,6 +69,8 @@ Mesh* ResourceManager::CreateMeshFromTag(std::string resourceName) {
 Material* ResourceManager::CreateMaterialFromTag(std::string resourceName) {
     TextureTag* texTag = FindTextureTag(resourceName);
     if (texTag == nullptr) return nullptr;
+    if (!texTag->isLoaded) 
+        texTag->Load();
     Material* materialPtr = Renderer.CreateMaterial();
     materialPtr->width  = texTag->width;
     materialPtr->height = texTag->height;
@@ -100,29 +97,26 @@ rp3d::BoxShape* ResourceManager::CreateColliderFromTag(std::string resourceName)
 void ResourceManager::DestroyAssets(void) {
     for (std::vector<TextureTag>::iterator it = mTextureTags.begin(); it != mTextureTags.end(); ++it) 
         if (it->buffer != nullptr) 
-            stbi_image_free(it->buffer);
+            it->Unload();
     
     return;
 }
 
-bool ResourceManager::LoadTexture(std::string path, std::string resourceName) {
-    
-    std::string name       = StringGetNameFromFilename(path);
-    std::string assetName  = StringGetNameFromFilenameNoExt(path);
-    
-    if (resourceName != "") 
-        assetName = resourceName;
+bool ResourceManager::LoadTexture(std::string path, std::string resourceName, bool loadImmediately) {
     
     TextureTag textureTag;
-    textureTag.name = assetName;
     
-    textureTag.buffer = LoadImageRaw(path.c_str(), &textureTag.width, &textureTag.height, &textureTag.channels, 0);
-    assert(textureTag.buffer != nullptr);
+    textureTag.name = resourceName;
+    textureTag.path = path;
+    
+    if (loadImmediately) 
+        textureTag.Load();
     
     mTextureTags.push_back(textureTag);
     
-    std::string logstr = "  + " + assetName + "  " + path;
+    std::string logstr = "  + " + resourceName + "  " + path;
     Log.Write(logstr);
+    
 #ifdef EVENT_LOG_DETAILED
     logstr = "    + " + IntToString(textureTag.width) + " X " + IntToString(textureTag.height);
     Log.Write(logstr);
@@ -130,45 +124,16 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName) {
     return true;
 }
 
-bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName) {
-    
-    objl::Loader loader;
-    if (!loader.LoadFile(path)) {
-        Log.Write("!! File not found - " + path); Log.WriteLn();
-    }
-    
-    unsigned int numberOfMeshes = loader.LoadedMeshes.size();
-    if (numberOfMeshes == 0) return false;
+bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName, bool loadImmediately) {
     
     MeshTag newAsset;
-    newAsset.name = loader.LoadedMeshes[0].MeshName;
+    //newAsset.name = loader.LoadedMeshes[0].MeshName;
     
-    if (resourceName != "") 
-        newAsset.name = resourceName;
+    newAsset.name = resourceName;
+    newAsset.path = path;
     
-    for (unsigned int i=0; i < loader.LoadedMeshes[0].Vertices.size(); i++) {
-        
-        objl::Vertex objlVertex = loader.LoadedMeshes[0].Vertices[i];
-        
-        Vertex vertex;
-        vertex.x = objlVertex.Position.X;
-        vertex.y = objlVertex.Position.Y;
-        vertex.z = objlVertex.Position.Z;
-        vertex.r = 1;
-        vertex.g = 1;
-        vertex.b = 1;
-        vertex.nx = objlVertex.Normal.X;
-        vertex.ny = objlVertex.Normal.Y;
-        vertex.nz = objlVertex.Normal.Z;
-        vertex.u = objlVertex.TextureCoordinate.X;
-        vertex.v = objlVertex.TextureCoordinate.Y;
-        
-        newAsset.mesh.vertexBuffer.push_back(vertex);
-    }
-    
-    for (unsigned int i=0; i < loader.LoadedMeshes[0].Indices.size(); i++) {
-        newAsset.mesh.indexBuffer.push_back(loader.LoadedMeshes[0].Indices[i]);
-    }
+    if (loadImmediately) 
+        newAsset.Load();
     
     mMeshTags.push_back(newAsset);
     
@@ -182,7 +147,7 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName) 
     return true;
 }
 
-bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName) {
+bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName, bool loadImmediately) {
     
     FileLoader loader(path);
     if (!loader.CheckIsFileLoaded()) {
@@ -191,15 +156,11 @@ bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName)
         return false;
     }
     
-    std::string name = StringGetNameFromFilenameNoExt(path);
-    
     std::string vertex   = loader.GetDataBlockByName("vertex");
     std::string fragment = loader.GetDataBlockByName("fragment");
     
     ShaderTag newAsset;
-    newAsset.name = name;
-    if (resourceName != "") 
-        newAsset.name = resourceName;
+    newAsset.name = resourceName;
     
     newAsset.vertexScript   = vertex;
     newAsset.fragmentScript = fragment;
@@ -215,6 +176,8 @@ bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName)
 bool ResourceManager::UnloadMeshTag(std::string resourceName) {
     for (std::vector<MeshTag>::iterator it = mMeshTags.begin(); it != mMeshTags.end(); ++it) {
         if (it->name == resourceName) {
+            if (it->isLoaded) 
+                it->Unload();
             mMeshTags.erase(it);
             return true;
         }
@@ -225,6 +188,8 @@ bool ResourceManager::UnloadMeshTag(std::string resourceName) {
 bool ResourceManager::UnloadTextureTag(std::string resourceName) {
     for (std::vector<TextureTag>::iterator it = mTextureTags.begin(); it != mTextureTags.end(); ++it) {
         if (it->name == resourceName) {
+            if (it->isLoaded) 
+                it->Unload();
             mTextureTags.erase(it);
             return true;
         }

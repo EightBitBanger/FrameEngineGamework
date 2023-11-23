@@ -8,8 +8,11 @@ struct __declspec(dllexport) ColliderTag {
     /// Collider resource name.
     std::string name;
     
-    /// Collider state is static or reacts dynamically.
-    bool  isStatic;
+    /// Is the resource loaded into memory.
+    bool isLoaded;
+    
+    /// Collider state is static or reacts as a dynamic object.
+    bool isStatic;
     
     /// Physical box collider shape.
     rp3d::BoxShape* colliderShape;

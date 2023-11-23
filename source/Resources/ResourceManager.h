@@ -1,6 +1,9 @@
 #ifndef RESOURCE_ALLOCATION_SYSTEM
 #define RESOURCE_ALLOCATION_SYSTEM
 
+#include <thread>
+#include <mutex>
+
 #include "../Renderer/RenderSystem.h"
 #include "../Physics/PhysicsSystem.h"
 
@@ -28,20 +31,11 @@ public:
     void Initiate(void);
     
     /// Load a wavefront model file and assign it a resource tag name.
-    bool LoadWaveFront(std::string path, std::string resourceName);
+    bool LoadWaveFront(std::string path, std::string resourceName, bool loadImmediately=false);
     /// Load a texture image file and assign it a resource tag name.
-    bool LoadTexture(std::string path, std::string resourceName);
+    bool LoadTexture(std::string path, std::string resourceName, bool loadImmediately=false);
     /// Load a GLSL shader file and assign it a resource tag name.
-    bool LoadShaderGLSL(std::string path, std::string resourceName);
-    
-    /// Find a mesh resource by its resource tag name.
-    MeshTag*     FindMeshTag(std::string resourceName);
-    /// Find a texture resource by its resource tag name.
-    TextureTag*  FindTextureTag(std::string resourceName);
-    /// Find a shader resource by its resource tag name.
-    ShaderTag*   FindShaderTag(std::string resourceName);
-    /// Find a resource by its resource tag name.
-    ColliderTag* FindColliderTag(std::string resourceName);
+    bool LoadShaderGLSL(std::string path, std::string resourceName, bool loadImmediately=false);
     
     /// Destroy and deallocate a mesh model resource by its name.
     bool UnloadMeshTag(std::string resourceName);
@@ -51,11 +45,11 @@ public:
     bool UnloadShaderTag(std::string resourceName);
     
     /// Create a render mesh object from a mesh resource tag.
-    Mesh*     CreateMeshFromTag(std::string resourceName);
+    Mesh* CreateMeshFromTag(std::string resourceName);
     /// Create a material object from a texture image resource tag.
     Material* CreateMaterialFromTag(std::string resourceName);
     /// Create a shader object from a GLSL shader resource tag.
-    Shader*   CreateShaderFromTag(std::string resourceName);
+    Shader* CreateShaderFromTag(std::string resourceName);
     /// Create a physics collision shape from a collider resource tag.
     rp3d::BoxShape* CreateColliderFromTag(std::string resourceName);
     
@@ -66,6 +60,12 @@ public:
     
 private:
     
+    // Find a resource by its tag name.
+    MeshTag* FindMeshTag(std::string resourceName);
+    TextureTag* FindTextureTag(std::string resourceName);
+    ShaderTag* FindShaderTag(std::string resourceName);
+    ColliderTag* FindColliderTag(std::string resourceName);
+    
     // Thread loading queue
     std::vector<std::string> streamQueue;
     
@@ -74,9 +74,6 @@ private:
     std::vector<TextureTag>   mTextureTags;
     std::vector<ShaderTag>    mShaderTags;
     std::vector<ColliderTag>  mColliderTags;
-    
-    // Raw image data loader
-    unsigned char* LoadImageRaw(char const* path, int* width, int* height, int* channels, int req_channels);
     
 };
 

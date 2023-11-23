@@ -44,9 +44,12 @@ public:
     WNDCLASSEX wClassEx;
     HINSTANCE hInstance;
     
+    /// Game paused state.
     bool isPaused;
+    /// Game loop running state. Setting this to false will exit the loop.
     bool isActive;
     
+    /// Cursor icon handle.
     HICON__* hCursor;
     
     ApplicationLayer();
