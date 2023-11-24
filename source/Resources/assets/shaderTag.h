@@ -5,6 +5,9 @@
 
 struct __declspec(dllexport) ShaderTag {
     
+    /// Shader resource path.
+    std::string path;
+    
     /// Shader resource name.
     std::string name;
     
@@ -16,6 +19,12 @@ struct __declspec(dllexport) ShaderTag {
     
     /// Fragment shader script.
     std::string fragmentScript;
+    
+    /// Load the data to which this asset points.
+    bool Load(void);
+    
+    /// Frees the memory associated with this texture.
+    bool Unload(void);
     
     ShaderTag();
     

@@ -2,8 +2,10 @@
 
 MeshCollider::MeshCollider() : 
     
-    concaveMeshShape(nullptr),
     heightFieldShape(nullptr),
+    heightMapBuffer(nullptr),
+    
+    concaveMeshShape(nullptr),
     
     triangleArray(nullptr),
     triangleMesh(nullptr)

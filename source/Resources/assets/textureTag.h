@@ -5,7 +5,7 @@
 
 struct __declspec(dllexport) TextureTag {
     
-    /// Texture resource name.
+    /// Texture resource path.
     std::string path;
     
     /// Texture resource name.

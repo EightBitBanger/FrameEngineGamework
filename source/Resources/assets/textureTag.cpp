@@ -40,11 +40,14 @@ bool TextureTag::Load(void) {
     if (buffer == nullptr) 
         return false;
     
+    isLoaded = true;
     return true;
 }
 
 bool TextureTag::Unload(void) {
-    if (!isLoaded) return false;
+    if (!isLoaded) 
+        return false;
     stbi_image_free( buffer );
+    isLoaded = false;
     return true;
 }

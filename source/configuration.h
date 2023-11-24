@@ -35,12 +35,12 @@
 // Rendering
 //
 
-#define  RENDER_FRAMES_PER_SECOND          30
+#define  RENDER_FRAMES_PER_SECOND          60
 //#define  RENDERER_CHECK_OPENGL_ERRORS
 
 #define RENDER_NUMBER_OF_LIGHTS    30
 
-#define RENDERER_VERTEX_BUFFER_MAX  500000
+#define RENDERER_VERTEX_BUFFER_MAX  1000000
 
 #define  LOG_RENDER_DETAILS
 
@@ -50,7 +50,7 @@
 // Physics
 //
 
-#define PHYSICS_UPDATES_PER_SECOND         30
+#define PHYSICS_UPDATES_PER_SECOND         60
 
 
 

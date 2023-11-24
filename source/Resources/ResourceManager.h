@@ -12,13 +12,6 @@
 #include "assets/shaderTag.h"
 #include "assets/colliderTag.h"
 
-#include "../../vendor/CodeBaseLibrary/fileloader.h"
-#include "../../vendor/CodeBaseLibrary/logging.h"
-
-#include "../../vendor/CodeBaseLibrary/directorysearch.h"
-#include "../../vendor/CodeBaseLibrary/poolallocator.h"
-#include "../../vendor/CodeBaseLibrary/strings.h"
-
 
 class __declspec(dllexport) ResourceManager {
     

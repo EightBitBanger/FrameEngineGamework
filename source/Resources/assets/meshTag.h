@@ -5,7 +5,7 @@
 
 struct __declspec(dllexport) MeshTag {
     
-    /// Resource path name.
+    /// Resource path path.
     std::string path;
     
     /// Mesh resource name.

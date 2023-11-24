@@ -24,8 +24,7 @@ void ApplicationLayer::Pause(void) {
     return;
 }
 
-HWND ApplicationLayer::CreateWindowHandle(std::string className, std::string windowName, HWND parentHandle) {
-    assert(windowHandle == NULL);
+HWND ApplicationLayer::CreateWindowHandle(std::string className, std::string windowName, HWND parentHandle, LRESULT CALLBACK(*windowProcedure)(HWND, UINT, WPARAM, LPARAM)) {
     
     isPaused = false;
     isActive = true;
@@ -35,7 +34,7 @@ HWND ApplicationLayer::CreateWindowHandle(std::string className, std::string win
     wClassEx.lpszClassName   = className.c_str();
     wClassEx.cbSize          = sizeof(WNDCLASSEX);
     wClassEx.style           = CS_OWNDC;
-    wClassEx.lpfnWndProc     = WindowProc;
+    wClassEx.lpfnWndProc     = (WNDPROC)windowProcedure;
     wClassEx.cbClsExtra      = 0;
     wClassEx.cbWndExtra      = 0;
     wClassEx.hInstance       = hInstance;
@@ -68,13 +67,16 @@ HWND ApplicationLayer::CreateWindowHandle(std::string className, std::string win
 
 void ApplicationLayer::DestroyWindowHandle(void) {
     assert(windowHandle != NULL);
+    
     DestroyWindow(windowHandle);
     windowHandle = NULL;
+    
     mIsWindowRunning = false;
     return;
 }
 
 void ApplicationLayer::SetWindowCenter(void) {
+    assert(windowHandle != NULL);
     
     int DisplayWidth  = GetDeviceCaps(deviceContext, HORZRES);
     int DisplayHeight = GetDeviceCaps(deviceContext, VERTRES);
@@ -94,6 +96,7 @@ void ApplicationLayer::SetWindowCenter(void) {
 }
 
 void ApplicationLayer::SetWindowCenterScale(float width, float height) {
+    assert(windowHandle != NULL);
     
     RECT windowSz;
     GetWindowRect(windowHandle, &windowSz);
@@ -116,6 +119,8 @@ void ApplicationLayer::SetWindowPosition(Viewport windowSize) {
 }
 
 Viewport ApplicationLayer::GetWindowArea(void) {
+    assert(windowHandle != NULL);
+    
     RECT windowSz;
     GetWindowRect(windowHandle, &windowSz);
     

@@ -222,8 +222,8 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
             mSubMesh.push_back(freeMeshPtr);
             
             unsigned int i = 0;
-            for (std::vector<Vertex>::iterator it = mVertexBuffer.begin() + freeMeshPtr.vertexBegin; it != mVertexBuffer.begin() + freeMeshPtr.vertexBegin + freeMeshPtr.vertexCount; ++it) {
-                Vertex& vertex = *it;
+            for (std::vector<Vertex>::iterator itsub = mVertexBuffer.begin() + freeMeshPtr.vertexBegin; itsub != mVertexBuffer.begin() + freeMeshPtr.vertexBegin + freeMeshPtr.vertexCount; ++itsub) {
+                Vertex& vertex = *itsub;
                 vertex.x = vrtxBuffer[i].x + x;
                 vertex.y = vrtxBuffer[i].y + y;
                 vertex.z = vrtxBuffer[i].z + z;
@@ -236,8 +236,8 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
             }
             
             i = 0;
-            for (std::vector<Index>::iterator it = mIndexBuffer.begin() + freeMeshPtr.indexBegin; it != mIndexBuffer.begin() + freeMeshPtr.indexBegin + freeMeshPtr.indexCount; ++it) {
-                Index& index = *it;
+            for (std::vector<Index>::iterator itsub = mIndexBuffer.begin() + freeMeshPtr.indexBegin; itsub != mIndexBuffer.begin() + freeMeshPtr.indexBegin + freeMeshPtr.indexCount; ++itsub) {
+                Index& index = *itsub;
                 index.index = indxBuffer[i].index + freeMeshPtr.vertexBegin;
                 i++;
             }

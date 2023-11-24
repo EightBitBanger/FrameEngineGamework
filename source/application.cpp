@@ -86,17 +86,17 @@ void Start() {
     cameraController->AddComponent( Engine.CreateComponent<Light>() );
     Light* cameraLight = cameraController->GetComponent<Light>();
     sceneMain->AddLightToSceneRoot(cameraLight);
-    cameraLight->intensity   = 700;
+    cameraLight->intensity   = 500;
     cameraLight->range       = 1000;
-    cameraLight->attenuation = 3;
+    cameraLight->attenuation = 7;
     cameraLight->color       = Colors.white;
     
     
     
     
-    GameObject* plain = Engine.Create<GameObject>();
+    plain = Engine.Create<GameObject>();
     plain->transform.scale = Vector3(10, 10, 10);
-    plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("barrel"), Resources.CreateMaterialFromTag("barrel") ) );
+    plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("cube"), Resources.CreateMaterialFromTag("barrel") ) );
     plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
     plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.texture;
     plain->GetComponent<MeshRenderer>()->material->ambient = Colors.MakeGrayScale(0.1);
@@ -112,9 +112,9 @@ void Start() {
     Engine.Destroy<Mesh>( plainMesh );
     plainMesh = Engine.Create<Mesh>();
     
+    /*
     
-    
-    for (int x=0; x < 500000; x++) {
+    for (int x=0; x < 1000000; x++) {
         
         float CoordX = Random.Range(0, 100) - Random.Range(0, 100);
         float CoordY = Random.Range(0, 100) - Random.Range(0, 100);
@@ -145,18 +145,19 @@ void Start() {
         continue;
     }
     plainMesh->UploadToGPU();
+    */
     
     
-    /*
-    float depthThreshold = 0.5;
+    
+    float depthThreshold = -0.4;
     
     float xNoise = 0.1;
     float yNoise = 0.1;
     float zNoise = 0.1;
     
-    int width  = 10;
-    int depth  = 10;
-    int height = 10;
+    int width  = 100;
+    int depth  = 100;
+    int height = 100;
     
     
     for (int z=0; z < height; z++) {
@@ -172,7 +173,7 @@ void Start() {
                 float CoordY = y * yNoise;
                 float CoordZ = z * zNoise;
                 
-                //float noiseTotal = Random.Perlin(CoordX, CoordY, CoordZ);
+                float noiseTotal = Random.Perlin(CoordX, CoordY, CoordZ);
                 
                 if (noiseTotal > depthThreshold) 
                     continue;
@@ -189,7 +190,7 @@ void Start() {
                     color += Colors.blue * Color(0.4, 0.4, 0.4);
                 
                 // Change sub mesh color
-                for (int v=0; v < meshPlainPart.vertexCount; v++) {
+                for (unsigned int v=0; v < meshPlainPart.vertexCount; v++) {
                     
                     meshPlainPart.vertexBuffer[v].r = color.r;
                     meshPlainPart.vertexBuffer[v].g = color.g;
@@ -204,7 +205,7 @@ void Start() {
         }
     }
     plainMesh->UploadToGPU();
-    */
+    
     
     
     
@@ -277,7 +278,7 @@ void Start() {
 
 
 // Camera movement force
-float cameraSpeed   = 30;
+float cameraSpeed   = 3;
 
 
 

@@ -15,4 +15,4 @@ Script::Script() :
 }
 
 // Dummy landing function
-void DefaultFunctionPtr(void* dummyObjectPtr) {}
+void DefaultFunctionPtr(void*) {return;}

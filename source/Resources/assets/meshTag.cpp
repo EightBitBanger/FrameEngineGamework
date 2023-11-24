@@ -63,6 +63,6 @@ bool MeshTag::Unload(void) {
     
     mesh.vertexBuffer.clear();
     mesh.indexBuffer.clear();
-    
+    isLoaded = false;
     return true;
 }

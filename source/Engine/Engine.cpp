@@ -115,7 +115,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     skyMaterial->diffuse = Colors.MakeGrayScale(0.4);
     skyMaterial->shader = shaders.color;
     
-    for (int i=0; i < skyMesh->GetNumberOfVertices(); i++) {
+    for (unsigned int i=0; i < skyMesh->GetNumberOfVertices(); i++) {
         Vertex vertex = skyMesh->GetVertex(i);
         
         if (vertex.y > 0) {
@@ -257,7 +257,7 @@ void EngineSystemManager::AddMeshText(GameObject* overlayObject, float xPos, flo
     if (meshPtr == nullptr) 
         return;
     
-    for (int i=0; i < text.size(); i++)
+    for (unsigned int i=0; i < text.size(); i++)
         AddMeshSubSprite(overlayObject, xPos + i, yPos, text[i], textColor);
     
     meshPtr->UploadToGPU();

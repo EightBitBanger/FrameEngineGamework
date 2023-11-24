@@ -2,7 +2,16 @@
 
 #include <iostream>
 
+#include "../../vendor/codebaselibrary/logging.h"
+
+extern Logger Log;
+
 Logger RenderLog;
+
+// Render thread
+bool isThreadActive = true;
+void RenderThreadMain(void);
+
 
 RenderSystem::RenderSystem() : 
     viewport(Viewport(0, 0, 0, 0)),
@@ -86,10 +95,19 @@ void RenderSystem::Initiate(void) {
     GetGLErrorCodes("OnInitiate::");
 #endif
     
+    renderThreadMain = new std::thread( RenderThreadMain );
+    
+    Log.Write( " >> Render thread started" );
+    
     return;
 }
 
 void RenderSystem::Shutdown(void) {
+    
+    isThreadActive = false;
+    
+    renderThreadMain->join();
+    
     return;
 }
 
@@ -270,7 +288,7 @@ unsigned int RenderSystem::GetNumberOfDrawCalls(void) {
 // Frame rendering pipeline
 //
 
-void RenderSystem::RenderFrame(float deltaTime) {
+void RenderSystem::RenderFrame(void) {
     
     glm::mat4 viewProjection;
     glm::vec3 eye;
@@ -526,4 +544,27 @@ void RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye, uns
     
     return;
 }
+
+
+
+//
+// Render thread
+//
+
+void RenderThreadMain(void) {
+    
+    while (isThreadActive) {
+        
+        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
+        
+        continue;
+    }
+    
+    std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(3) );
+    Log.Write( " >> Render thread stopped" );
+    
+    return;
+}
+
+
 

@@ -2,6 +2,8 @@
 #define _AI_ACTOR__
 
 #include <vector>
+#include <mutex>
+
 #include <string>
 #include <iostream>
 #include <glm/glm.hpp>
@@ -14,6 +16,87 @@
 class __declspec(dllexport) Actor {
     
 public:
+    
+    friend class ActorSystem;
+    
+    /// Set the name of the actor.
+    void SetName(std::string newName);
+    
+    /// Set the active state of the actor.
+    void SetActive(bool state);
+    
+    /// Set the age of the actor.
+    void SetAge(unsigned long int newAge);
+    
+    /// Get the name of the actor.
+    std::string GetName(void);
+    
+    /// Get the active state of the actor.
+    bool GetActive(void);
+    
+    /// Get the age of the actor.
+    unsigned long int GetAge(void);
+    
+    /// Set the chance the entity will start moving it its forward direction.
+    void SetChanceToMove(int chance);
+    
+    /// Set the chance the entity will look at the player.
+    void SetChanceToLookAtPlayer(int chance);
+    
+    /// Set the chance the entity will look at another entity.
+    void SetChanceToLookAtEntity(int chance);
+    
+    /// Set the chance the entity will stop moving.
+    void SetChanceToStopMoving(int chance);
+    
+    /// Set the distance the entity will move on average.
+    void SetDistanceToMove(float distance);
+    
+    /// Set the distance the entity will look at the player.
+    void SetDistanceToLookAtPlayer(float distance);
+    
+    /// Set the distance the entity will look another entity.
+    void SetDistanceToLookAtEntity(float distance);
+    
+    /// Set the distance the entity will stop moving if its reached.
+    void SetDistanceToStopMoving(float distance);
+    
+    /// Get the chance the entity will start moving it its forward direction.
+    int GetChanceToMove(void);
+    
+    /// Get the chance the entity will look at the player.
+    int GetChanceToLookAtPlayer(void);
+    
+    /// Get the chance the entity will look at another entity.
+    int GetChanceToLookAtEntity(void);
+    
+    /// Get the chance the entity will stop moving.
+    int GetChanceToStopMoving(void);
+    
+    /// Get the distance the entity will move on average.
+    float GetDistanceToMove(void);
+    
+    /// Get the distance the entity will look at the player.
+    float GetDistanceToLookAtPlayer(void);
+    
+    /// Get the distance the entity will look another entity.
+    float GetDistanceToLookAtEntity(void);
+    
+    /// get the distance the entity will stop moving if its reached.
+    float GetDistanceToStopMoving(void);
+    
+    Actor();
+    
+    /// Add a new gene to the actors genome. The gene index location will returned.
+    void AddGene(Gene& newGene);
+    
+    /// Remove a gene from the actors genome.
+    void RemoveGene(unsigned int index);
+    
+    /// Get the number of genes in the genome of this actor.
+    unsigned int GetNumberOfGenes(void);
+    
+private:
     
     std::string name;
     
@@ -33,22 +116,10 @@ public:
     float distanceToLookAtEntity;
     float distanceToStopMoving;
     
-    
-    Actor();
-    
-    void Update(void);
-    
-    /// Add a new gene to the actors genome. The gene index location will returned.
-    unsigned int AddGene(Gene& newGene);
-    /// Remove a gene from the actors genome.
-    void RemoveGene(unsigned int index);
-    
-    
-    
-private:
-    
     // Actor genome
     std::vector<Gene> mGenes;
+    
+    std::mutex mux;
     
 };
 

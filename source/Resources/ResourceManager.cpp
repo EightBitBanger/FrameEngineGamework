@@ -1,5 +1,10 @@
 #include "ResourceManager.h"
 
+#include "../../vendor/CodeBaseLibrary/directorysearch.h"
+#include "../../vendor/CodeBaseLibrary/poolallocator.h"
+#include "../../vendor/CodeBaseLibrary/strings.h"
+#include "../../vendor/CodeBaseLibrary/fileloader.h"
+
 extern RenderSystem Renderer;
 extern PhysicsSystem Physics;
 extern Logger Log;
@@ -15,13 +20,13 @@ void ResourceManager::Initiate(void) {
     std::vector<std::string> modelDirectoryList    = DirectoryGetList(".\\core\\models\\");
     std::vector<std::string> materialDirectoryList = DirectoryGetList(".\\core\\materials\\");
     
-    for (int i=0; i < shaderDirectoryList.size(); i++) 
+    for (unsigned int i=0; i < shaderDirectoryList.size(); i++) 
         LoadShaderGLSL("core/shaders/" + shaderDirectoryList[i], StringGetNameFromFilenameNoExt( shaderDirectoryList[i] ));
     
-    for (int i=0; i < modelDirectoryList.size(); i++) 
+    for (unsigned int i=0; i < modelDirectoryList.size(); i++) 
         LoadWaveFront("core/models/" + modelDirectoryList[i], StringGetNameFromFilenameNoExt( modelDirectoryList[i] ));
     
-    for (int i=0; i < materialDirectoryList.size(); i++) 
+    for (unsigned int i=0; i < materialDirectoryList.size(); i++) 
         LoadTexture("core/materials/" + materialDirectoryList[i], StringGetNameFromFilenameNoExt( materialDirectoryList[i] ));
     
     return;
@@ -82,6 +87,8 @@ Material* ResourceManager::CreateMaterialFromTag(std::string resourceName) {
 Shader* ResourceManager::CreateShaderFromTag(std::string resourceName) {
     ShaderTag* shaderTag = FindShaderTag(resourceName);
     if (shaderTag == nullptr) return nullptr;
+    if (!shaderTag->isLoaded) 
+        shaderTag->Load();
     Shader* shaderPtr = Renderer.CreateShader();
     shaderPtr->CreateShaderProgram(shaderTag->vertexScript, shaderTag->fragmentScript);
     return shaderPtr;
@@ -126,8 +133,10 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName, bo
 
 bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName, bool loadImmediately) {
     
+    // should probably load sub meshes as well
+    //newAsset.name = loader.LoadedMeshes[ i ].MeshName;
+    
     MeshTag newAsset;
-    //newAsset.name = loader.LoadedMeshes[0].MeshName;
     
     newAsset.name = resourceName;
     newAsset.path = path;
@@ -149,21 +158,12 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName, 
 
 bool ResourceManager::LoadShaderGLSL(std::string path, std::string resourceName, bool loadImmediately) {
     
-    FileLoader loader(path);
-    if (!loader.CheckIsFileLoaded()) {
-        std::string logstr = "! " + path;
-        Log.Write(logstr);
-        return false;
-    }
-    
-    std::string vertex   = loader.GetDataBlockByName("vertex");
-    std::string fragment = loader.GetDataBlockByName("fragment");
-    
     ShaderTag newAsset;
     newAsset.name = resourceName;
+    newAsset.path = path;
     
-    newAsset.vertexScript   = vertex;
-    newAsset.fragmentScript = fragment;
+    if (loadImmediately) 
+        newAsset.Load();
     
     mShaderTags.push_back(newAsset);
     

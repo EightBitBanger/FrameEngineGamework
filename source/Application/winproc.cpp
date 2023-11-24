@@ -6,6 +6,10 @@ extern RenderSystem   Renderer;
 extern ApplicationLayer Application;
 
 
+LRESULT CALLBACK WindowProc2(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam) {
+    return 0;
+}
+
 LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam) {
     
     switch (Messages) {
@@ -33,8 +37,7 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             Input.SetMouseRightReleased(true);
             break;
         
-        // Window resize
-        case WM_SIZE: 
+        case WM_SIZE: // Window resize
             
             RECT WindowRect;
             GetWindowRect(wHnd, &WindowRect);
@@ -43,7 +46,7 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             Renderer.SetViewport(0, 0, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top);
             
             // Update scene cameras
-            for (int i=0; i < Renderer.GetRenderQueueSize(); i++) {
+            for (unsigned int i=0; i < Renderer.GetRenderQueueSize(); i++) {
                 
                 if (Renderer[i]->camera == nullptr) 
                     continue;
@@ -72,8 +75,7 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             
             break;
         
-        // Minimum window size
-        case WM_GETMINMAXINFO: {
+        case WM_GETMINMAXINFO: { // Minimum window size
             
             LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
             lpMMI -> ptMinTrackSize.x = WINDOW_WIDTH_MIN;
@@ -82,12 +84,7 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             break;
         }
         
-        case WM_SETCURSOR: 
-            SetCursor(Application.hCursor);
-            break;
-        
-        // Close button handling
-        case WM_CLOSE:
+        case WM_CLOSE: // Window (X) close button
             
             Application.isActive = false;
             PostQuitMessage(0);

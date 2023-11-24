@@ -15,39 +15,34 @@ extern ApplicationLayer     Application;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
-    // Create the main render window
-    HWND wHndl = Application.CreateWindowHandle("windowFrame", "Render window");
+    HWND wHndl = Application.CreateWindowHandle("windowFrame", "Render window", NULL, WindowProc);
     
-    // Console window
     HWND cHnd = GetConsoleWindow();
     
     ShowWindow(cHnd, SW_SHOW);
     SetWindowPos(cHnd, NULL, WINDOW_CONSOLE_LEFT, WINDOW_CONSOLE_TOP, WINDOW_CONSOLE_WIDTH, WINDOW_CONSOLE_HEIGHT, SWP_SHOWWINDOW);
     
-    Application.SetWindowCenterScale(0.85, 1.1);
-    Viewport windowSz = Application.GetWindowArea();
-    
-    // Clear the event log output file
     Log.Clear();
     
-    // Initiate and set the target context for rendering
     if (Renderer.SetRenderTarget(wHndl) != GLEW_OK) {
         Application.ShowMouseCursor();
+        
         DestroyWindow(wHndl);
         ShowWindow(cHnd, SW_HIDE);
+        
         MessageBox(NULL, "Cannot locate the OpenGL library. Please update your graphics drivers...", "Error", MB_OK);
         return 0;
     }
     
-    // Set the render window view port size
+    // Initiate window size
+    Application.SetWindowCenterScale(0.85, 1.1);
+    Viewport windowSz = Application.GetWindowArea();
     Renderer.SetViewport(0, 0, windowSz.w, windowSz.h);
     
     // Initiate engine sub systems
-    PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
-    Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
-    
     Resources.Initiate();
-    Log.WriteLn();
+    
+    Log.WriteLn(); // For event log layout
     
     AI.Initiate();
     
@@ -76,10 +71,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     testFrameWork.AddTest( &testFrameWork.TestSerializerSystem );
     
-    // Run test suite
+    // Run all the tests
     testFrameWork.RunTestSuite();
     
-    // Finish the test
+    // Finalize
     if (!testFrameWork.hasTestFailed) {
         testFrameWork.Complete();
     } else {
@@ -94,27 +89,34 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Start();
     
+    
     // Render timer
     float renderUpdateTimeout = 1000.0f / RENDER_FRAMES_PER_SECOND;
     float renderAccumulator=0;
+    
+    Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     Time.Update();
+    
     
     // Physics timer
     float physicsUpdateTimeout = 1000.0f / PHYSICS_UPDATES_PER_SECOND;
     float physicsAccumulator=0;
     float physicsAlpha=0;
+    
+    PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
     PhysicsTime.Update();
+    
     
     // Tick update timer
     Timer tickTimer;
     float tickUpdateTimeout = 1000.0f / TICK_UPDATES_PER_SECOND;
     float tickAccumulator=0;
-    tickTimer.Update();
     
-    MSG messages;
+    tickTimer.Update();
     
     while (Application.isActive) {
         
+        MSG messages;
         while (PeekMessage(&messages, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&messages);
             DispatchMessage(&messages);
@@ -134,8 +136,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 Run();
                 
                 Scripting.Update();
-                
-                AI.Update();
                 
                 TickUpdate();
                 
@@ -162,7 +162,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             Physics.world->update( physicsUpdateTimeout );
             
-            physicsAlpha = physicsAccumulator / physicsUpdateTimeout;
+            // Interpolation factor
+            //physicsAlpha = physicsAccumulator / physicsUpdateTimeout;
+            
         }
         
         //
@@ -176,7 +178,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             renderAccumulator -= renderUpdateTimeout;
             
-            Renderer.RenderFrame( renderUpdateTimeout );
+            Renderer.RenderFrame();
         }
         
         continue;
@@ -203,7 +205,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Application.DestroyWindowHandle();
     
-    return messages.wParam;
+    return 0;
 }
 
 

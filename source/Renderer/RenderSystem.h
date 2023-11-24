@@ -1,8 +1,19 @@
 #ifndef OPENGL_RENDERER_SYSTEM
 #define OPENGL_RENDERER_SYSTEM
 
-//#define WIN32_LEAN_AND_MEAN
+
+#ifndef _WIN32_WINNT
+  #define _WIN32_WINNT 0x500
+#endif
+
+#define WIN32_LEAN_AND_MEAN
+
+#include <sdkddkver.h>
 #include <windows.h>
+
+#include <thread>
+#include <mutex>
+#include <chrono>
 
 #define GLEW_STATIC
 #include <gl/glew.h>
@@ -102,7 +113,7 @@ public:
     void SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
     
     /// Draw the current frame as it stands.
-    void RenderFrame(float deltaTime);
+    void RenderFrame(void);
     
     /// Add a scene to the render queue for drawing.
     void AddSceneToRenderQueue(Scene* scene);
@@ -156,6 +167,10 @@ private:
     PoolAllocator<Camera>          mCamera;
     PoolAllocator<Light>           mLight;
     PoolAllocator<Scene>           mScene;
+    
+    // Render support thread
+    std::thread* renderThreadMain;
+    
     
     // Render pipeline
     

@@ -97,7 +97,7 @@ MeshCollider* PhysicsSystem::CreateColliderFromMesh(Mesh* sourceMesh) {
     unsigned int indexCount  = sourceMesh->GetNumberOfIndices();
     
     
-    for (int i=0; i < vertexCount; i++) {
+    for (unsigned int i=0; i < vertexCount; i++) {
         Vertex vertex = sourceMesh->GetVertex(i);
         newMeshCollider->vertexBuffer.push_back(vertex.x);
         newMeshCollider->vertexBuffer.push_back(vertex.y);
@@ -105,7 +105,7 @@ MeshCollider* PhysicsSystem::CreateColliderFromMesh(Mesh* sourceMesh) {
     }
     
     
-    for (int i=0; i < indexCount; i++) {
+    for (unsigned int i=0; i < indexCount; i++) {
         unsigned int index = sourceMesh->GetIndex(i).index;
         
         newMeshCollider->indexBuffer.push_back( index );
