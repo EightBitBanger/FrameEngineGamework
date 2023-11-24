@@ -52,7 +52,7 @@ HWND ApplicationLayer::CreateWindowHandle(std::string className, std::string win
     ShowWindow(windowHandle, true);
     SetCursor(hCursor);
     
-#ifdef WINDOW_MOUSE_HIDDEN_ON_START
+#ifdef APPLICATION_MOUSE_HIDDEN_ON_START
     while (ShowCursor(false) >= 0);
 #endif
     

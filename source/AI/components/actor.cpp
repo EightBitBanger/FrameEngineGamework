@@ -6,6 +6,7 @@ extern PhysicsSystem  Physics;
 Actor::Actor() : 
     name(""),
     isActive(true),
+    doUpdateGenetics(false),
     age(0),
     
     chanceToMove(0),
@@ -16,7 +17,9 @@ Actor::Actor() :
     distanceToMove(0),
     distanceToLookAtPlayer(0),
     distanceToLookAtEntity(0),
-    distanceToStopMoving(0)
+    distanceToStopMoving(0),
+    
+    velocity(glm::vec3(0, 0, 0))
 {
 }
 
@@ -172,6 +175,13 @@ float Actor::GetDistanceToStopMoving(void) {
     int dist = distanceToStopMoving;
     mux.unlock();
     return dist;
+}
+
+glm::vec3 Actor::GetVelocity(void) {
+    mux.lock();
+    glm::vec3 velocityVec = velocity;
+    mux.unlock();
+    return velocityVec;
 }
 
 void Actor::AddGene(Gene& newGene) {

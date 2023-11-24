@@ -124,9 +124,23 @@ void GameObject::AddForce(float x, float y, float z) {
     return;
 }
 
+void GameObject::AddForce(glm::vec3 force) {
+    if (mRigidBodyCache == nullptr) return;
+    rp3d::Vector3 nudge(force.x, force.y, force.z);
+    mRigidBodyCache->applyLocalForceAtCenterOfMass(nudge);
+    return;
+}
+
 void GameObject::AddTorque(float x, float y, float z) {
     if (mRigidBodyCache == nullptr) return;
     rp3d::Vector3 twist(x, y, z);
+    mRigidBodyCache->applyLocalTorque(twist);
+    return;
+}
+
+void GameObject::AddTorque(glm::vec3 force) {
+    if (mRigidBodyCache == nullptr) return;
+    rp3d::Vector3 twist(force.x, force.y, force.z);
     mRigidBodyCache->applyLocalTorque(twist);
     return;
 }

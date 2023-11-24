@@ -14,7 +14,6 @@ public:
     float geneB[3]; // Position
     float geneC[3]; // Rotation
     float geneD[3]; // Scale
-    
     float geneE[3]; // Color
     
     Gene();

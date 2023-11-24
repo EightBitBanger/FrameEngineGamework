@@ -25,6 +25,8 @@ class __declspec(dllexport) GameObject {
     
 public:
     
+    friend class EngineSystemManager;
+    
     /// Object name.
     std::string name;
     
@@ -93,6 +95,10 @@ public:
     void AddForce(float x, float y, float z);
     /// Add rotational torque to the rigid body.
     void AddTorque(float x, float y, float z);
+    /// Add directional force to the rigid body.
+    void AddForce(glm::vec3 force);
+    /// Add rotational torque to the rigid body.
+    void AddTorque(glm::vec3 force);
     
     /// Add a collider from a resource tag at the offset position x, y and z.
     void AddCollider(ColliderTag* colliderTag, float x, float y, float z);

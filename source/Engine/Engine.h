@@ -27,6 +27,24 @@
 extern PhysicsSystem  Physics;
 
 
+
+#define STREAM_BUFFER_SIZE   32768
+
+struct DataStream {
+    
+    GameObject*    gameObject;
+    
+    Text*          text;
+    Light*         light;
+    Actor*         actor;
+    Camera*        camera;
+    RigidBody*     rigidBody;
+    MeshRenderer*  meshRenderer;
+    
+};
+
+
+
 class __declspec(dllexport) EngineSystemManager {
     
 public:
@@ -173,12 +191,18 @@ private:
         Shader*  texture;
         Shader*  textureUnlit;
         Shader*  color;
+        Shader*  colorUnlit;
         Shader*  UI;
     };
     
+    // Component data stream
+    bool doUpdateDataStream;
+    unsigned int streamSize;
+    DataStream streamBuffer[STREAM_BUFFER_SIZE];
     
 public:
     
+    /// Shader objects provided by the engine by default.
     DefaultShaders shaders;
     
 };

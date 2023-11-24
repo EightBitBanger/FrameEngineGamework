@@ -22,13 +22,16 @@ __declspec(dllexport) EngineSystemManager   Engine;
 
 
 
-EngineSystemManager::EngineSystemManager(void) {
-    return;
+EngineSystemManager::EngineSystemManager(void) : 
+    doUpdateDataStream(true),
+    streamSize(0)
+{
 }
 
 GameObject* EngineSystemManager::CreateGameObject(void) {
     GameObject* newGameObject = mGameObjects.Create();
     mGameObjectActive.push_back(newGameObject);
+    doUpdateDataStream = true;
     return newGameObject;
 }
 
@@ -53,6 +56,8 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     }
     
     mGameObjects.Destroy(gameObjectPtr);
+    
+    doUpdateDataStream = true;
     return true;
 }
 
@@ -64,14 +69,14 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     
     // Add a camera component
     Component* cameraComponent = CreateComponent(Components.Camera);
-    Camera* cameraMain = (Camera*)cameraComponent->GetComponent();
+    Camera* cameraMain = (Camera*)cameraComponent->mObject;
     cameraMain->EnableMouseLook();
     
     SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     // Add a rigid body component
     Component* rigidBodyComponent = CreateComponent(Components.RigidBody);
-    RigidBody* rigidBody = (RigidBody*)rigidBodyComponent->GetComponent();
+    RigidBody* rigidBody = (RigidBody*)rigidBodyComponent->mObject;
     
     rp3d::Vector3 bodyPosition(position.x, position.y, position.z);
     rp3d::Quaternion quat = rp3d::Quaternion::identity();
@@ -81,7 +86,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     
     // Add a scripting component
     Component* scriptComponent = CreateComponent(Components.Script);
-    Script* script = (Script*)scriptComponent->GetComponent();
+    Script* script = (Script*)scriptComponent->mObject;
     script->name = "controller";
     script->gameObject = cameraController;
     script->isActive = true;
@@ -99,6 +104,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     BoxShape* boxShape = Physics.CreateColliderBox(scale.x, scale.y, scale.z);
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
+    doUpdateDataStream = true;
     return cameraController;
 }
 
@@ -138,21 +144,28 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     
     skyObject->transform.SetScale(10000, 2000, 10000);
     
+    doUpdateDataStream = true;
     return skyObject;
 }
 
 Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr) {
     Component* rendererComponent = CreateComponent(Components.MeshRenderer);
-    MeshRenderer* entityRenderer = (MeshRenderer*)rendererComponent->GetComponent();
+    MeshRenderer* entityRenderer = (MeshRenderer*)rendererComponent->mObject;
+    
     entityRenderer->mesh = meshPtr;
     entityRenderer->material = materialPtr;
+    
+    doUpdateDataStream = true;
     return rendererComponent;
 }
 
 Component* EngineSystemManager::CreateComponentLight(glm::vec3 position) {
     Component* lightComponent = CreateComponent(Components.Light);
-    Light* lightPoint = (Light*)lightComponent->GetComponent();
+    Light* lightPoint = (Light*)lightComponent->mObject;
+    
     lightPoint->position = position;
+    
+    doUpdateDataStream = true;
     return lightComponent;
 }
 
@@ -167,24 +180,20 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     Material* materialPtr = Renderer.CreateMaterial();
     
     // Actor component
-    //Actor* ActorObject = newGameObject->GetComponent<Actor>();
+    //Actor* ActorObject = newGameObject->mActorCache;
     
     materialPtr->shader = shaders.color;
     
     // Mesh renderer component
-    MeshRenderer* entityRenderer = newGameObject->GetComponent<MeshRenderer>();
+    MeshRenderer* entityRenderer = newGameObject->mMeshRendererCache;
     
     entityRenderer->mesh = meshPtr;
     entityRenderer->material = materialPtr;
     
-    // Rigid body component
-    RigidBody* rigidBody = newGameObject->GetComponent<RigidBody>();
-    rigidBody->setTransform( rp3d::Transform( rp3d::Vector3(position.x, position.y, position.z) , rp3d::Quaternion::identity()) );
-    
-    float randomScale = Random.Range(1, 10);
+    float scale = 1.0;
     
     // Collider
-    BoxShape* boxShape = Physics.CreateColliderBox(randomScale, randomScale, randomScale);
+    BoxShape* boxShape = Physics.CreateColliderBox(scale, scale, scale);
     newGameObject->AddColliderBox(boxShape, 0, 0, 0);
     newGameObject->EnableGravity();
     
@@ -192,13 +201,16 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     newGameObject->SetMass(1);
     newGameObject->SetLinearDamping(3);
     newGameObject->SetAngularDamping(1);
+    
     newGameObject->CalculatePhysics();
     
     newGameObject->SetLinearAxisLockFactor(1, 1, 1);
     newGameObject->SetAngularAxisLockFactor(0, 1, 0);
     
-    newGameObject->transform.SetScale(randomScale, randomScale, randomScale);
+    newGameObject->transform.SetScale(scale, scale, scale);
+    newGameObject->SetPosition(position);
     
+    doUpdateDataStream = true;
     return newGameObject;
 }
 
@@ -220,6 +232,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     
     overlayObject->AddComponent( CreateComponent<MeshRenderer>(overlayMesh, overlayMaterial) );
     
+    doUpdateDataStream = true;
     return overlayObject;
 }
 
@@ -248,6 +261,8 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     overlayRenderer->material->SetTextureFiltration(MATERIAL_FILTER_NONE);
     
     overlayRenderer->material->DisableCulling();
+    
+    doUpdateDataStream = true;
     return overlayObject;
 }
 
@@ -261,6 +276,7 @@ void EngineSystemManager::AddMeshText(GameObject* overlayObject, float xPos, flo
         AddMeshSubSprite(overlayObject, xPos + i, yPos, text[i], textColor);
     
     meshPtr->UploadToGPU();
+    
     return;
 }
 
@@ -330,6 +346,7 @@ void EngineSystemManager::Initiate() {
     shaders.texture       = Resources.CreateShaderFromTag("texture");
     shaders.textureUnlit  = Resources.CreateShaderFromTag("textureUnlit");
     shaders.color         = Resources.CreateShaderFromTag("color");
+    shaders.colorUnlit    = Resources.CreateShaderFromTag("colorUnlit");
     shaders.UI            = Resources.CreateShaderFromTag("UI");
     
     return;
@@ -380,6 +397,8 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
     
     Component* newComponent = mComponents.Create();
     newComponent->SetComponent(type, component_object);
+    
+    doUpdateDataStream = true;
     return newComponent;
 }
 
@@ -430,27 +449,54 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             return false;
     }
     mComponents.Destroy(componentPtr);
+    
+    doUpdateDataStream = true;
     return true;
 }
 
 void EngineSystemManager::Update(void) {
     
-    // Run through the game objects
+    // Check to update the data stream
+    if (doUpdateDataStream) {
+        
+        doUpdateDataStream = false;
+        
+        streamSize = mGameObjects.Size();
+        
+        for (int i=0; i < streamSize; i++ ) {
+            
+            streamBuffer[i].gameObject    = mGameObjects[i];
+            
+            streamBuffer[i].text          = mGameObjects[i]->mTextCache;
+            streamBuffer[i].light         = mGameObjects[i]->mLightCache;
+            streamBuffer[i].actor         = mGameObjects[i]->mActorCache;
+            streamBuffer[i].camera        = mGameObjects[i]->mCameraCache;
+            streamBuffer[i].rigidBody     = mGameObjects[i]->mRigidBodyCache;
+            streamBuffer[i].meshRenderer  = mGameObjects[i]->mMeshRendererCache;
+            
+            continue;
+        }
+        
+    }
+    
+    
+    //
+    // Run the game object list
+    //
+    
     for (int i=0; i < mGameObjects.Size(); i++ ) {
         
-        GameObject* gameObject = mGameObjects[i];
-        
-        if (!gameObject->isActive) 
+        if (!streamBuffer[i].gameObject->isActive) 
             continue;
         
         // Current transform
         Transform currentTransform;
-        currentTransform.position    = gameObject->transform.position;
-        currentTransform.orientation = gameObject->transform.orientation;
-        currentTransform.scale       = gameObject->transform.scale;
+        currentTransform.position    = streamBuffer[i].gameObject->transform.position;
+        currentTransform.orientation = streamBuffer[i].gameObject->transform.orientation;
+        currentTransform.scale       = streamBuffer[i].gameObject->transform.scale;
         
         // Calculate parent transforms
-        GameObject* parent = gameObject->parent;
+        GameObject* parent = streamBuffer[i].gameObject->parent;
         
         // Roll over the parent matrix transform chain
         while (parent != nullptr) {
@@ -470,14 +516,12 @@ void EngineSystemManager::Update(void) {
         
         
         //
-        // Sync with the rigid body
+        // Rigid body
         //
-        
-        RigidBody* componentRigidBody = gameObject->GetComponent<RigidBody>();
-        if (componentRigidBody != nullptr) {
+        if (streamBuffer[i].rigidBody != nullptr) {
             
             // Use the rigid body as the source transform
-            rp3d::Transform bodyTransform = componentRigidBody->getTransform();
+            rp3d::Transform bodyTransform = streamBuffer[i].rigidBody->getTransform();
             rp3d::Vector3 bodyPosition = bodyTransform.getPosition();
             rp3d::Quaternion quaterion = bodyTransform.getOrientation();
             
@@ -494,82 +538,95 @@ void EngineSystemManager::Update(void) {
             bodyTransform.getOpenGLMatrix(&currentTransform.matrix[0][0]);
             
             // Update the game object transform
-            gameObject->transform.position    = currentTransform.position;
-            gameObject->transform.orientation = currentTransform.orientation;
+            streamBuffer[i].gameObject->transform.position    = currentTransform.position;
+            streamBuffer[i].gameObject->transform.orientation = currentTransform.orientation;
             
-            // Scale the transform
-            currentTransform.matrix = glm::scale(currentTransform.matrix, gameObject->transform.scale);
+            currentTransform.matrix = glm::scale(currentTransform.matrix, streamBuffer[i].gameObject->transform.scale);
+            
         }
         
-        MeshRenderer* componentMeshRenderer = gameObject->GetComponent<MeshRenderer>();
-        if (componentMeshRenderer != nullptr) {
-            componentMeshRenderer->transform.position    = currentTransform.position;
-            componentMeshRenderer->transform.orientation = currentTransform.orientation;
-            componentMeshRenderer->transform.scale       = currentTransform.scale;
-            componentMeshRenderer->transform.matrix      = currentTransform.matrix;
+        
+        //
+        // Mesh renderer
+        //
+        if (streamBuffer[i].meshRenderer != nullptr) {
+            
+            if (streamBuffer[i].rigidBody != nullptr) {
+                streamBuffer[i].meshRenderer->transform.matrix       = currentTransform.matrix;
+            } else {
+                streamBuffer[i].meshRenderer->transform.position     = currentTransform.position;
+                streamBuffer[i].meshRenderer->transform.orientation  = currentTransform.orientation;
+                streamBuffer[i].meshRenderer->transform.scale        = currentTransform.scale;
+                streamBuffer[i].meshRenderer->transform.matrix       = currentTransform.matrix;
+            }
+            
         }
         
-        Light* componentLight = gameObject->GetComponent<Light>();
-        if (componentLight != nullptr) {
-            componentLight->position    = currentTransform.position;
-            componentLight->direction   = currentTransform.EulerAngles();
+        
+        //
+        // Text canvas
+        //
+        if (streamBuffer[i].text != nullptr) {
+            
+            if (streamBuffer[i].meshRenderer != nullptr) {
+                if (streamBuffer[i].text->canvas.anchorRight) 
+                    streamBuffer[i].gameObject->transform.position.x = Renderer.viewport.w - streamBuffer[i].text->canvas.width;
+                
+                if (streamBuffer[i].text->canvas.anchorBottom) 
+                    streamBuffer[i].gameObject->transform.position.y = Renderer.viewport.h - streamBuffer[i].text->canvas.height;
+                
+                float canvasXX =  streamBuffer[i].text->canvas.position.x;
+                float canvasYY = -streamBuffer[i].text->canvas.position.y;
+                
+                streamBuffer[i].meshRenderer->mesh->ClearSubMeshes();
+                Engine.AddMeshText(streamBuffer[i].gameObject, canvasXX, canvasYY, streamBuffer[i].text->text, streamBuffer[i].text->color);
+            }
         }
         
-        Camera* componentCamera = gameObject->GetComponent<Camera>();
-        if (componentCamera != nullptr) {
+        
+        //
+        // Camera
+        //
+        if (streamBuffer[i].camera != nullptr) {
             
             // Update mouse looking
-            if (componentCamera->useMouseLook) {
+            if (streamBuffer[i].camera->useMouseLook) {
                 
                 POINT cursorPos;
                 GetCursorPos(&cursorPos);
                 SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
                 
-                float MouseDiffX = (cursorPos.x - Renderer.displayCenter.x) * componentCamera->MouseSensitivityYaw;
-                float MouseDiffY = (cursorPos.y - Renderer.displayCenter.y) * componentCamera->MouseSensitivityPitch;
+                float MouseDiffX = (cursorPos.x - Renderer.displayCenter.x) * streamBuffer[i].camera->MouseSensitivityYaw;
+                float MouseDiffY = (cursorPos.y - Renderer.displayCenter.y) * streamBuffer[i].camera->MouseSensitivityPitch;
                 
-                componentCamera->lookAngle.x += MouseDiffX * 0.01;
-                componentCamera->lookAngle.y -= MouseDiffY * 0.01;
+                streamBuffer[i].camera->lookAngle.x += MouseDiffX * 0.01;
+                streamBuffer[i].camera->lookAngle.y -= MouseDiffY * 0.01;
                 
                 // Yaw limit
-                if (componentCamera->lookAngle.x >= 0.109655) {componentCamera->lookAngle.x -= 0.109655;}
-                if (componentCamera->lookAngle.x <= 0.109655) {componentCamera->lookAngle.x += 0.109655;}
+                if (streamBuffer[i].camera->lookAngle.x >= 0.109655) {streamBuffer[i].camera->lookAngle.x -= 0.109655;}
+                if (streamBuffer[i].camera->lookAngle.x <= 0.109655) {streamBuffer[i].camera->lookAngle.x += 0.109655;}
                 
                 // Pitch limit
-                if (componentCamera->lookAngle.y >  0.0274f) componentCamera->lookAngle.y =  0.0274f;
-                if (componentCamera->lookAngle.y < -0.0274f) componentCamera->lookAngle.y = -0.0274f;
+                if (streamBuffer[i].camera->lookAngle.y >  0.0274f) streamBuffer[i].camera->lookAngle.y =  0.0274f;
+                if (streamBuffer[i].camera->lookAngle.y < -0.0274f) streamBuffer[i].camera->lookAngle.y = -0.0274f;
                 
             }
             
             // Restore looking angle
-            componentCamera->transform.orientation.x = componentCamera->lookAngle.x;
-            componentCamera->transform.orientation.y = componentCamera->lookAngle.y;
+            streamBuffer[i].camera->transform.orientation.x = streamBuffer[i].camera->lookAngle.x;
+            streamBuffer[i].camera->transform.orientation.y = streamBuffer[i].camera->lookAngle.y;
             
-            componentCamera->transform.position = currentTransform.position;
+            streamBuffer[i].camera->transform.position = currentTransform.position;
             
         }
         
-        Text* componentText = gameObject->GetComponent<Text>();
-        if (componentText != nullptr) {
-            if (componentMeshRenderer != nullptr) {
-                
-                if (componentText->canvas.anchorRight) 
-                    gameObject->transform.position.z = Renderer.viewport.w - componentText->canvas.width;
-                
-                if (componentText->canvas.anchorBottom) 
-                    gameObject->transform.position.y = Renderer.viewport.h - componentText->canvas.height;
-                
-                componentMeshRenderer->mesh->ClearSubMeshes();
-                Engine.AddMeshText(gameObject, 
-                                    componentText->canvas.position.x, 
-                                   -componentText->canvas.position.y, 
-                                    componentText->text, 
-                                    componentText->color);
-                
-                componentMeshRenderer->mesh->UploadToGPU();
-                
-            }
-            
+        
+        //
+        // Lights
+        //
+        if (streamBuffer[i].light != nullptr) {
+            streamBuffer[i].light->position    = currentTransform.position;
+            streamBuffer[i].light->direction   = currentTransform.EulerAngles();
         }
         
         continue;

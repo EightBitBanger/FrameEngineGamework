@@ -2,18 +2,21 @@
 #define APPLICATION_CONFIGURATION
 
 //
-// Window layout
+// Application layout
 //
 
 #define  WINDOW_NAME  "Render window"
-// Dimensions
+
+// Starting window dimensions
 #define  WINDOW_WIDTH       1330
 #define  WINDOW_HEIGHT      1000
-// MAX size
+
+// Minimum window size
 #define  WINDOW_WIDTH_MIN   300
 #define  WINDOW_HEIGHT_MIN  200
 
-#define  WINDOW_MOUSE_HIDDEN_ON_START
+#define  APPLICATION_MOUSE_HIDDEN_ON_START
+//#define  APPLICATION_ESCAPE_KEY_PAUSE
 
 // Console window area
 #define     WINDOW_CONSOLE_LEFT    5

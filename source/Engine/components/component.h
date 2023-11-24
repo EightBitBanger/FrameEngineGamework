@@ -49,6 +49,8 @@ class __declspec(dllexport) Component {
     
 public:
     
+    friend class EngineSystemManager;
+    
     /// Component name.
     std::string name;
     

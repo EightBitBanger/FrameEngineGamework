@@ -85,7 +85,8 @@ public:
     /// get the distance the entity will stop moving if its reached.
     float GetDistanceToStopMoving(void);
     
-    Actor();
+    /// Get the velocity this actor wishes to output.
+    glm::vec3 GetVelocity(void);
     
     /// Add a new gene to the actors genome. The gene index location will returned.
     void AddGene(Gene& newGene);
@@ -96,16 +97,19 @@ public:
     /// Get the number of genes in the genome of this actor.
     unsigned int GetNumberOfGenes(void);
     
+    Actor();
+    
 private:
     
     std::string name;
     
     bool isActive;
+    bool doUpdateGenetics;
     
     unsigned long int age;
     
-    // AI personality parameters
     
+    // Personality parameters (Inputs)
     int chanceToMove;
     int chanceToLookAtPlayer;
     int chanceToLookAtEntity;
@@ -115,6 +119,10 @@ private:
     float distanceToLookAtPlayer;
     float distanceToLookAtEntity;
     float distanceToStopMoving;
+    
+    // Action parameters (Outputs)
+    glm::vec3 velocity;
+    
     
     // Actor genome
     std::vector<Gene> mGenes;

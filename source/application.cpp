@@ -73,7 +73,7 @@ void Start() {
     
     
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(Vector3(-130, 90, 0), Vector3(1, 8, 1));
+    cameraController = Engine.CreateCameraController(Vector3(0, 0, 0), Vector3(1, 8, 1));
     mainCamera = cameraController->GetComponent<Camera>();
     sceneMain->camera = mainCamera;
     
@@ -86,9 +86,9 @@ void Start() {
     cameraController->AddComponent( Engine.CreateComponent<Light>() );
     Light* cameraLight = cameraController->GetComponent<Light>();
     sceneMain->AddLightToSceneRoot(cameraLight);
-    cameraLight->intensity   = 500;
-    cameraLight->range       = 1000;
-    cameraLight->attenuation = 7;
+    cameraLight->intensity   = 1000;
+    cameraLight->range       = 100;
+    cameraLight->attenuation = 30;
     cameraLight->color       = Colors.white;
     
     
@@ -98,7 +98,7 @@ void Start() {
     plain->transform.scale = Vector3(10, 10, 10);
     plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("cube"), Resources.CreateMaterialFromTag("barrel") ) );
     plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
-    plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.texture;
+    plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.color;
     plain->GetComponent<MeshRenderer>()->material->ambient = Colors.MakeGrayScale(0.1);
     plain->GetComponent<MeshRenderer>()->material->diffuse = Colors.MakeGrayScale(0);
     plain->GetComponent<MeshRenderer>()->material->DisableCulling();
@@ -113,7 +113,7 @@ void Start() {
     plainMesh = Engine.Create<Mesh>();
     
     /*
-    
+
     for (int x=0; x < 1000000; x++) {
         
         float CoordX = Random.Range(0, 100) - Random.Range(0, 100);
@@ -148,16 +148,16 @@ void Start() {
     */
     
     
-    
+    /*
     float depthThreshold = -0.4;
     
     float xNoise = 0.1;
     float yNoise = 0.1;
     float zNoise = 0.1;
     
-    int width  = 100;
+    int width  = 200;
     int depth  = 100;
-    int height = 100;
+    int height = 200;
     
     
     for (int z=0; z < height; z++) {
@@ -166,8 +166,8 @@ void Start() {
             
             for (int x=0; x < width; x++) {
                 
-                //if (Random.Range(0, 10000) > 1) 
-                //    continue;
+                if (Random.Range(0, 4) > 1) 
+                    continue;
                 
                 float CoordX = x * xNoise;
                 float CoordY = y * yNoise;
@@ -181,13 +181,12 @@ void Start() {
                 // Create new color for the sub mesh
                 Color color = Colors.MakeRandomGrayScale();
                 color *= Color(0.2, 0.2, 0.2);
-                color += Color(0.04, 0.04, 0.04);
+                color += Color(0.03, 0.03, 0.03);
                 
-                if (Random.Range(0, 10) > 8) 
-                    color += Colors.yellow;
-                
-                if (Random.Range(0, 10) > 4) 
-                    color += Colors.blue * Color(0.4, 0.4, 0.4);
+                if (Random.Range(0, 10) > 70) color += Colors.green  * Color(0.1, 0.1, 0.1);
+                if (Random.Range(0, 10) > 40) color += Colors.yellow * Color(0.1, 0.1, 0.1);
+                if (Random.Range(0, 10) > 20) color += Colors.orange * Color(0.1, 0.1, 0.1);
+                if (Random.Range(0, 10) > 10) color += Colors.blue   * Color(0.1, 0.1, 0.1);
                 
                 // Change sub mesh color
                 for (unsigned int v=0; v < meshPlainPart.vertexCount; v++) {
@@ -199,20 +198,44 @@ void Start() {
                 }
                 
                 
-                plainMesh->AddSubMesh((float)x, (float)y, (float)z, meshPlainPart, false);
+                plainMesh->AddSubMesh((float)x - (width / 2), (float)y, (float)z - (height / 2), meshPlainPart, false);
                 
             }
         }
     }
     plainMesh->UploadToGPU();
-    
-    
+    */
     
     
     
     actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
     sceneMain->AddMeshRendererToSceneRoot( actorObject->GetComponent<MeshRenderer>() );
     
+    for (int i=0; i < 400; i++) {
+        
+        float xx = Random.Range(0, 10) - Random.Range(0, 10);
+        float yy = Random.Range(0, 10) - Random.Range(0, 10);
+        float zz = Random.Range(0, 10) - Random.Range(0, 10);
+        
+        float uniformScale = 0.4;
+        float scalexx = Random.Range(0, 10) * uniformScale;
+        float scaleyy = Random.Range(0, 10) * uniformScale;
+        float scalezz = Random.Range(0, 10) * uniformScale;
+        
+        GameObject* newActorObject = Engine.CreateAIActor( Vector3(xx, yy, zz) );
+        newActorObject->transform.scale = Vector3(scalexx, scaleyy, scalezz);
+        
+        MeshRenderer* actorMeshRenderer = newActorObject->GetComponent<MeshRenderer>();
+        actorMeshRenderer->material->shader = Engine.shaders.colorUnlit;
+        actorMeshRenderer->material->ambient  = Colors.black;
+        actorMeshRenderer->material->diffuse  = Colors.MakeRandomGrayScale();
+        actorMeshRenderer->material->diffuse *= Colors.dkgray;
+        
+        Actor* actor = newActorObject->GetComponent<Actor>();
+        actor->SetChanceToMove( Random.Range(0, 10) );
+        
+        sceneMain->AddMeshRendererToSceneRoot( newActorObject->GetComponent<MeshRenderer>() );
+    }
     
     
     
@@ -335,20 +358,22 @@ void Run() {
     
     
     
-    // Escape key pause
-    
     if (Input.CheckKeyPressed(VK_ESCAPE)) {
         
         Application.Pause();
         
         if (Application.isPaused) {
+            
             mainCamera->DisableMouseLook();
+            
             Input.ClearKeys();
             
             Application.ShowMouseCursor();
             
         } else {
+            
             SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            
             mainCamera->EnableMouseLook();
             
             Application.HideMouseCursor();
@@ -358,7 +383,6 @@ void Run() {
         }
         
     }
-    
     return;
 }
 

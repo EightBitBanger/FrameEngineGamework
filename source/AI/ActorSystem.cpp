@@ -1,9 +1,11 @@
 #include "ActorSystem.h"
 
 #include "../../vendor/codebaselibrary/logging.h"
+#include "../../vendor/codebaselibrary/random.h"
 
 extern Logger Log;
 extern ActorSystem AI;
+extern RandomGen Random;
 
 // Actor system thread
 bool isActorThreadActive = true;
@@ -66,12 +68,19 @@ Actor* ActorSystem::GetActor(unsigned int index) {
     return actorPtr;
 }
 
+
+//
+// AI actor processing
+//
+
 void ActorSystem::Update(void) {
-    unsigned int numberOfActors = mActors.Size();
+    unsigned int numberOfActors = mActors.Size()-1;
+    
+    float force = 0.005;
     
     mux.lock();
     
-    for (unsigned int i=0; i < numberOfActors; i++) {
+    for (unsigned int i=numberOfActors; i > 0; i--) {
         if (!mActors[i]->isActive) 
             continue;
         
@@ -79,6 +88,14 @@ void ActorSystem::Update(void) {
         
         // Advance actor age
         mActors[i]->age++;
+        
+        if (Random.Range(0, 10) > mActors[i]->chanceToMove) {
+            
+            mActors[i]->velocity.x = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
+            mActors[i]->velocity.y = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
+            mActors[i]->velocity.z = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
+            
+        }
         
         mActors[i]->mux.unlock();
         

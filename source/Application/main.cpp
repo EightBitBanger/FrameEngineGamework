@@ -114,9 +114,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     float tickUpdateTimeout = 1000.0f / 4;
     float tickAccumulator=0;
     tickTimer.Update();
+    AI.UpdateSendSignal();
+    
     
     //
     // Game loop
+    //
+    
     while (Application.isActive) {
         
         MSG messages;
@@ -210,6 +214,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             Renderer.RenderFrame();
         }
+        
+#ifdef APPLICATION_ESCAPE_KEY_PAUSE
+        if (Input.CheckKeyPressed(VK_ESCAPE)) {
+            
+            Application.Pause();
+            
+            if (Application.isPaused) {
+                Input.ClearKeys();
+                
+                Application.ShowMouseCursor();
+                
+            } else {
+                SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
+                
+                Application.HideMouseCursor();
+                
+                Time.Update();
+                PhysicsTime.Update();
+            }
+            
+        }
+#endif
         
         continue;
     }
