@@ -41,19 +41,21 @@ GameObject* overlayObject[5];
 MeshRenderer* overlayRenderer;
 Vector3 overlayPosition;
 
+GameObject* actorObject;
+
+
 
 // Application entry point
 //
 
 void Start() {
     
+    // Create the main world scene
     sceneMain = Engine.Create<Scene>();
     Renderer.AddSceneToRenderQueue(sceneMain);
     
     
-    //
     // Create a sky
-    
     Color skyHigh(Colors.blue);
     Color skyLow(Colors.blue);
     
@@ -70,8 +72,6 @@ void Start() {
     skyMaterial->EnableDepthTest();
     
     
-    
-    //
     // Create a camera controller
     cameraController = Engine.CreateCameraController(Vector3(-130, 90, 0), Vector3(1, 8, 1));
     mainCamera = cameraController->GetComponent<Camera>();
@@ -210,6 +210,15 @@ void Start() {
     
     
     
+    actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
+    sceneMain->AddMeshRendererToSceneRoot( actorObject->GetComponent<MeshRenderer>() );
+    
+    
+    
+    
+    
+    
+    
     
     //
     // Overlay example
@@ -318,7 +327,7 @@ void Run() {
     overlayObject[1]->GetComponent<Text>()->text = "x " + FloatToString( mainCamera->transform.position.x );
     overlayObject[2]->GetComponent<Text>()->text = "y " + FloatToString( mainCamera->transform.position.y );
     overlayObject[3]->GetComponent<Text>()->text = "z " + FloatToString( mainCamera->transform.position.z );
-    overlayObject[4]->GetComponent<Text>()->text = "Draw calls " + IntToString( Renderer.GetNumberOfDrawCalls() );
+    overlayObject[4]->GetComponent<Text>()->text = "Age " + IntToString( actorObject->GetComponent<Actor>()->GetAge() );
     
     if (Input.CheckKeyCurrent(VK_I)) sceneOverlay->camera->transform.scale += 0.01;
     if (Input.CheckKeyCurrent(VK_K)) sceneOverlay->camera->transform.scale -= 0.01;

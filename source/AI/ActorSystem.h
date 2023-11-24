@@ -17,8 +17,6 @@ public:
     
     ActorSystem();
     
-    void Update(void);
-    
     /// Create an actor and return its pointer.
     Actor* CreateActor(void);
     
@@ -36,6 +34,12 @@ public:
     
     /// Get an actor from the simulation by its index.
     Actor* GetActor(unsigned int index);
+    
+    /// Signal to the AI thread to update the simulation.
+    void UpdateSendSignal(void);
+    
+    /// Update simulation actors. (called internally from another thread)
+    void Update();
     
 private:
     

@@ -7,6 +7,7 @@ extern ActorSystem AI;
 
 // Actor system thread
 bool isActorThreadActive = true;
+bool doUpdate = false;
 void actorThreadMain(void);
 
 
@@ -32,27 +33,8 @@ void ActorSystem::Shutdown(void) {
     return;
 }
 
-void ActorSystem::Update(void) {
-    unsigned int numberOfActors = mActors.Size();
-    
-    mux.lock();
-    
-    for (unsigned int i=0; i < numberOfActors; i++) {
-        if (!mActors[i]->isActive) 
-            continue;
-        
-        mActors[i]->mux.lock();
-        
-        // Advance actor age
-        mActors[i]->age++;
-        
-        mActors[i]->mux.unlock();
-        
-        continue;
-    }
-    
-    mux.unlock();
-    
+void ActorSystem::UpdateSendSignal(void) {
+    doUpdate = true;
     return;
 }
 
@@ -84,6 +66,31 @@ Actor* ActorSystem::GetActor(unsigned int index) {
     return actorPtr;
 }
 
+void ActorSystem::Update(void) {
+    unsigned int numberOfActors = mActors.Size();
+    
+    mux.lock();
+    
+    for (unsigned int i=0; i < numberOfActors; i++) {
+        if (!mActors[i]->isActive) 
+            continue;
+        
+        mActors[i]->mux.lock();
+        
+        // Advance actor age
+        mActors[i]->age++;
+        
+        mActors[i]->mux.unlock();
+        
+        continue;
+    }
+    
+    mux.unlock();
+    
+    return;
+}
+
+
 
 //
 // Actor system thread
@@ -92,11 +99,14 @@ Actor* ActorSystem::GetActor(unsigned int index) {
 void actorThreadMain() {
     
     while (isActorThreadActive) {
+        if (!doUpdate) {
+            std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
+            continue;
+        }
         
-        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
+        AI.Update();
         
-        //unsigned int numberOfActors = AI.GetNumberOfActors();
-        
+        doUpdate = false;
         continue;
     }
     

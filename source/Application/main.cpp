@@ -93,33 +93,63 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Render timer
     float renderUpdateTimeout = 1000.0f / RENDER_FRAMES_PER_SECOND;
     float renderAccumulator=0;
-    
     Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     Time.Update();
-    
     
     // Physics timer
     float physicsUpdateTimeout = 1000.0f / PHYSICS_UPDATES_PER_SECOND;
     float physicsAccumulator=0;
     float physicsAlpha=0;
-    
     PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
     PhysicsTime.Update();
     
+    // Fixed rate update timer
+    Timer fixedTimer;
+    float fixedUpdateTimeout = 1000.0f / TICK_UPDATES_PER_SECOND;
+    float fixedAccumulator=0;
+    fixedTimer.Update();
     
     // Tick update timer
     Timer tickTimer;
-    float tickUpdateTimeout = 1000.0f / TICK_UPDATES_PER_SECOND;
+    float tickUpdateTimeout = 1000.0f / 4;
     float tickAccumulator=0;
-    
     tickTimer.Update();
     
+    //
+    // Game loop
     while (Application.isActive) {
         
         MSG messages;
         while (PeekMessage(&messages, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&messages);
             DispatchMessage(&messages);
+        }
+        
+        //
+        // Fixed rate update timer
+        //
+        
+        fixedAccumulator += fixedTimer.GetCurrentDelta();
+        fixedTimer.Update();
+        
+        if (fixedAccumulator >= fixedUpdateTimeout) {
+            
+            // Call extra updates on accumulated time
+            for (int i=0; i < 2; i++) {
+                Run();
+                
+                Scripting.Update();
+                
+                Engine.Update();
+                
+                fixedAccumulator -= fixedUpdateTimeout;
+                
+                // Break if no more accumulated time
+                if (fixedAccumulator < fixedUpdateTimeout) 
+                    break;
+                
+                continue;
+            }
         }
         
         //
@@ -131,17 +161,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         
         if (tickAccumulator >= tickUpdateTimeout) {
             
+            tickAccumulator -= tickUpdateTimeout;
+            
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
-                Run();
-                
-                Scripting.Update();
-                
                 TickUpdate();
                 
-                Engine.Update();
+                AI.UpdateSendSignal();
                 
                 tickAccumulator -= tickUpdateTimeout;
+                
+                // Break if no more accumulated time
                 if (tickAccumulator < tickUpdateTimeout) 
                     break;
                 
