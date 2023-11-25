@@ -88,7 +88,7 @@ void ActorSystem::Update(void) {
     
     glm::vec3 forward(0);
     
-    //mux.lock();
+    mux.lock();
     
     for (int i=numberOfActors; i >= 0; i--) {
         if (!mActors[i]->isActive) 
@@ -109,8 +109,6 @@ void ActorSystem::Update(void) {
             forward.x = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
             forward.y = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
             forward.z = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
-            
-            
         }
         
         // Apply forward velocity
@@ -122,7 +120,7 @@ void ActorSystem::Update(void) {
         continue;
     }
     
-    //mux.unlock();
+    mux.unlock();
     
     return;
 }

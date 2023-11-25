@@ -253,8 +253,8 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     overlayObject->GetComponent<Text>()->text  = text;
     overlayObject->GetComponent<Text>()->color = color;
     
-    overlayObject->GetComponent<Text>()->canvas.width  = Renderer.displayCenter.x;
-    overlayObject->GetComponent<Text>()->canvas.height = Renderer.displayCenter.y;
+    //overlayObject->GetComponent<Text>()->canvas.width  = Renderer.displayCenter.x;
+    //overlayObject->GetComponent<Text>()->canvas.height = Renderer.displayCenter.y;
     
     overlayObject->transform.scale = Vector3(textSize, 1, textSize);
     
@@ -614,11 +614,15 @@ void EngineSystemManager::Update(void) {
             
             if (streamBuffer[i].meshRenderer != nullptr) {
                 
-                //if (streamBuffer[i].text->canvas.anchorRight) 
-                //    streamBuffer[i].gameObject->transform.position.x = Renderer.viewport.w - streamBuffer[i].text->canvas.width;
+                Viewport windowArea = Application.GetWindowArea();
                 
-                //if (streamBuffer[i].text->canvas.anchorBottom) 
-                //    streamBuffer[i].gameObject->transform.position.y = Renderer.viewport.h - streamBuffer[i].text->canvas.height;
+                // Anchor RIGHT
+                if (streamBuffer[i].text->canvas.anchorRight) 
+                    streamBuffer[i].gameObject->transform.position.z = Renderer.viewport.w + streamBuffer[i].text->canvas.width;
+                
+                // Anchor TOP
+                if (streamBuffer[i].text->canvas.anchorTop) 
+                    streamBuffer[i].gameObject->transform.position.y = Renderer.displaySize.y - (windowArea.h - windowArea.y);
                 
                 float canvasXX =  streamBuffer[i].text->canvas.position.x;
                 float canvasYY = -streamBuffer[i].text->canvas.position.y;

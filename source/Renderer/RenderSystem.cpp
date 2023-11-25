@@ -483,10 +483,14 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
     currentCamera->forward.y = tan( (currentCamera->transform.orientation.y * 180) / glm::pi<float>() );
     currentCamera->forward.z = sin( (currentCamera->transform.orientation.x * 180) / glm::pi<float>() );
     currentCamera->forward = glm::normalize(currentCamera->forward);
+    
     glm::vec3 lookingAngle;
     lookingAngle.x = currentCamera->transform.position.x + currentCamera->forward.x;
     lookingAngle.y = currentCamera->transform.position.y + currentCamera->forward.y;
     lookingAngle.z = currentCamera->transform.position.z + currentCamera->forward.z;
+    
+    // View angle
+    glm::mat4 view = glm::lookAt(eye, lookingAngle, currentCamera->up);
     
     // Calculate projection / orthographic angle
     glm::mat4 projection = glm::mat4(0);
@@ -497,8 +501,6 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
         projection = glm::ortho(0.0f, (float)displaySize.x, (float)displaySize.y, 0.0f, currentCamera->clipNear, currentCamera->clipFar);
     }
     
-    // View angle
-    glm::mat4 view = glm::lookAt(eye, lookingAngle, currentCamera->up);
     viewProjection = projection * view;
     
     // Right angle to the looking angle

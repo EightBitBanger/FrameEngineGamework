@@ -34,12 +34,14 @@ GameObject* plain;
 Mesh*       plainMesh;
 SubMesh     meshPlainPart;
 
-GameObject* overlayObject[5];
+GameObject* overlayObject[20];
 
 MeshRenderer* overlayRenderer;
 Vector3 overlayPosition;
 
 GameObject* actorObject;
+
+GameObject* bannerObject;
 
 
 
@@ -206,18 +208,17 @@ void Start() {
     */
     
     
-    
     actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
     
-    float area = 30;
+    float area = 10;
+    float uniformScale = 0.7;
     
-    for (int i=0; i < 2000; i++) {
+    for (int i=0; i < 400; i++) {
         
         float xx = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
         float yy = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
         float zz = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
         
-        float uniformScale = 0.4;
         float scalexx = Random.Range(0, 10) * uniformScale;
         float scaleyy = Random.Range(0, 10) * uniformScale;
         float scalezz = Random.Range(0, 10) * uniformScale;
@@ -228,7 +229,7 @@ void Start() {
         MeshRenderer* actorMeshRenderer = newActorObject->GetComponent<MeshRenderer>();
         actorMeshRenderer->material->shader = Engine.shaders.colorUnlit;
         actorMeshRenderer->material->ambient  = Colors.black;
-        actorMeshRenderer->material->diffuse  = Colors.MakeRandomGrayScale();
+        actorMeshRenderer->material->diffuse  = Colors.MakeRandom();
         actorMeshRenderer->material->diffuse *= Colors.dkgray;
         
         Actor* actor = newActorObject->GetComponent<Actor>();
@@ -247,54 +248,75 @@ void Start() {
     // Overlay example
     
     sceneOverlay = Engine.Create<Scene>();
+    Renderer.AddSceneToRenderQueue(sceneOverlay);
+    
     sceneOverlay->camera = Engine.Create<Camera>();
     sceneOverlay->camera->isOrthographic = true;
-    sceneOverlay->camera->isFixedAspect  = false;
+    sceneOverlay->camera->isFixedAspect  = true;
+    
+    sceneOverlay->camera->viewport.w = Renderer.displaySize.x;
+    sceneOverlay->camera->viewport.h = Renderer.displaySize.y;
     
     sceneOverlay->camera->clipFar  =  100;
     sceneOverlay->camera->clipNear = -100;
     
     
-    Renderer.AddSceneToRenderQueue(sceneOverlay);
     
-    // Create some text renderers
-    overlayObject[0] = Engine.CreateOverlayTextRenderer("Render window", 13, Colors.black, "font");
-    overlayObject[1] = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
-    overlayObject[2] = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
-    overlayObject[3] = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
-    overlayObject[4] = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
     
-    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[0]->GetComponent<MeshRenderer>() );
-    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[1]->GetComponent<MeshRenderer>() );
-    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[2]->GetComponent<MeshRenderer>() );
-    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[3]->GetComponent<MeshRenderer>() );
-    sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[4]->GetComponent<MeshRenderer>() );
+    bannerObject = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
+    sceneOverlay->AddMeshRendererToSceneRoot( bannerObject->GetComponent<MeshRenderer>() );
     
-    Text* text[5];
-    for (int i=0; i < 5; i++) 
+    Text* bannerText = bannerObject->GetComponent<Text>();
+    bannerText->text = "Render window";
+    
+    //bannerText->canvas.anchorRight  = true;
+    bannerText->canvas.anchorTop    = true;
+    
+    
+    // Offset position of the canvas
+    bannerObject->transform.position.z = 400;
+    bannerObject->transform.position.y = 500;
+    
+    // This worked for edges
+    //bannerObject->transform.position.z = Renderer.viewport.w - 30;
+    //bannerObject->transform.position.y = Renderer.displaySize.y - 30;
+    
+    
+    //bannerText->color = Colors.black;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /*
+    Text* text[10];
+    for (int i=0; i < 10; i++) {
+        
+        overlayObject[i] = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
+        
+        sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[i]->GetComponent<MeshRenderer>() );
+        
         text[i] = overlayObject[i]->GetComponent<Text>();
+        
+        text[i]->canvas.position.x =  1;
+        text[i]->canvas.position.y =  5 + i;
+        
+        //text[i]->color = Colors.black;
+        
+    }
     
     text[0]->color = Colors.red;
-    text[1]->color = Colors.black;
-    text[2]->color = Colors.black;
-    text[3]->color = Colors.black;
-    text[4]->color = Colors.black;
-    
+    text[0]->text = "Render window";
     text[0]->canvas.position.x =  1;
     text[0]->canvas.position.y =  3;
+    overlayObject[0]->transform.scale = glm::vec3(0.01, 0.01, 0.01);
     
-    text[1]->canvas.position.x =  1;
-    text[1]->canvas.position.y =  10;
-    
-    text[2]->canvas.position.x =  1;
-    text[2]->canvas.position.y =  11;
-    
-    text[3]->canvas.position.x =  1;
-    text[3]->canvas.position.y =  12;
-    
-    text[4]->canvas.position.x =  1;
-    text[4]->canvas.position.y =  7;
-    
+    //text[4]->canvas.anchorRight = true;
+    */
     
     
     
@@ -335,6 +357,14 @@ void Run() {
         if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
         if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         
+        
+        // Move overlay camera
+        if (Input.CheckKeyCurrent(VK_I)) {bannerObject->transform.position -= glm::vec3(0.0, 10.0, 0.0);}
+        if (Input.CheckKeyCurrent(VK_K)) {bannerObject->transform.position += glm::vec3(0.0, 10.0, 0.0);}
+        if (Input.CheckKeyCurrent(VK_J)) {bannerObject->transform.position -= glm::vec3(0.0, 0.0, 10.0);}
+        if (Input.CheckKeyCurrent(VK_L)) {bannerObject->transform.position += glm::vec3(0.0, 0.0, 10.0);}
+        
+        
         if (cameraController != nullptr) 
             force *= cameraSpeed;
         
@@ -347,16 +377,23 @@ void Run() {
     }
     
     
+    std::string posYY = FloatToString( bannerObject->transform.position.y );
+    std::string posZZ = FloatToString( bannerObject->transform.position.z );
+    
+    bannerObject->GetComponent<Text>()->text = posYY + " , " + posZZ;
     
     // Update player position on screen
-    overlayObject[1]->GetComponent<Text>()->text = "x " + FloatToString( mainCamera->transform.position.x );
-    overlayObject[2]->GetComponent<Text>()->text = "y " + FloatToString( mainCamera->transform.position.y );
-    overlayObject[3]->GetComponent<Text>()->text = "z " + FloatToString( mainCamera->transform.position.z );
-    overlayObject[4]->GetComponent<Text>()->text = "Age " + IntToString( actorObject->GetComponent<Actor>()->GetAge() );
+    /*
+    overlayObject[1]->GetComponent<Text>()->text = IntToString( Renderer.viewport.w );
+    overlayObject[2]->GetComponent<Text>()->text = IntToString( Renderer.viewport.h );
+    //overlayObject[3]->GetComponent<Text>()->text = IntToString(  );
+    //overlayObject[4]->GetComponent<Text>()->text = IntToString(  );
     
-    if (Input.CheckKeyCurrent(VK_I)) sceneOverlay->camera->transform.scale += 0.01;
-    if (Input.CheckKeyCurrent(VK_K)) sceneOverlay->camera->transform.scale -= 0.01;
-    
+    overlayObject[5]->GetComponent<Text>()->text = "x " + FloatToString( mainCamera->transform.position.x );
+    overlayObject[6]->GetComponent<Text>()->text = "y " + FloatToString( mainCamera->transform.position.y );
+    overlayObject[7]->GetComponent<Text>()->text = "z " + FloatToString( mainCamera->transform.position.z );
+    overlayObject[8]->GetComponent<Text>()->text = "Age " + IntToString( actorObject->GetComponent<Actor>()->GetAge() );
+    */
     
     
     
