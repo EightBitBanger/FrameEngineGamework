@@ -15,14 +15,19 @@ void  RandomGen::Seed(int value) {
     return;
 }
 
+int  RandomGen::Range(int min, int max) {
+    if (min >= max) return 0;
+    return (rand() % max) + min;
+}
+
 float  RandomGen::Range(float min, float max) {
     if (min >= max) return 0;
     return ((float)(rand() % (int)max) + min);
 }
 
-int  RandomGen::Range(int min, int max) {
+double  RandomGen::Range(double min, double max) {
     if (min >= max) return 0;
-    return (rand() % max) + min;
+    return ((double)(rand() % (int)max) + min);
 }
 
 float RandomGen::Perlin(float xcoord, float ycoord, float zcoord) {

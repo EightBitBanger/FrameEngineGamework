@@ -18,6 +18,8 @@ public:
     void  Seed(int value);
     /// Return a float between the min and max values.
     float Range(float min, float max);
+    /// Return a double between the min and max values.
+    double Range(double min, double max);
     /// Return an integer between the min and max values.
     int   Range(int min, int max);
     

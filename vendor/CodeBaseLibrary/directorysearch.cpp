@@ -1,5 +1,8 @@
 #include "directorysearch.h"
 
+//#include <filesystem>
+#include <dirent.h>
+
 std::vector<std::string> DirectoryGetList(std::string path) {
     
     DIR* dir;
@@ -18,6 +21,7 @@ std::vector<std::string> DirectoryGetList(std::string path) {
     }
     
     closedir(dir);
+    
     return directoryList;
 }
 

@@ -3,9 +3,11 @@
 
 #ifndef _WIN32_WINNT
   #define _WIN32_WINNT 0x500
-  #include <sdkddkver.h>
 #endif
 
+#define WIN32_LEAN_AND_MEAN
+
+#include <sdkddkver.h>
 #include <windows.h>
 
 

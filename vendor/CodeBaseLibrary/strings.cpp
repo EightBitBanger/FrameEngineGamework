@@ -34,3 +34,10 @@ std::string StringGetExtFromFilename(std::string FilePath) {
     return name[1];
 }
 
+std::string StringGetPathFromFilename(std::string FilePath) {
+    std::vector<std::string> pathParts = StringExplode(FilePath, '/');
+    std::string path;
+    for (unsigned int i=0; i < pathParts.size()-1; i++) 
+        path += pathParts[i];
+    return path;
+}
