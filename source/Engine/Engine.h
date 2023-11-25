@@ -49,11 +49,8 @@ class __declspec(dllexport) EngineSystemManager {
     
 public:
     
-    /// Main rendering camera.
-    Camera* cameraMain;
-    
-    /// Main world scene.
-    Scene*  sceneMain;
+    /// Currently active world scene.
+    Scene* sceneMain;
     
     
     // Game objects

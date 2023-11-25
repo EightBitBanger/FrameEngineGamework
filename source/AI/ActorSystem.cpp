@@ -88,7 +88,7 @@ void ActorSystem::Update(void) {
     
     glm::vec3 forward(0);
     
-    mux.lock();
+    //mux.lock();
     
     for (int i=numberOfActors; i >= 0; i--) {
         if (!mActors[i]->isActive) 
@@ -122,7 +122,7 @@ void ActorSystem::Update(void) {
         continue;
     }
     
-    mux.unlock();
+    //mux.unlock();
     
     return;
 }

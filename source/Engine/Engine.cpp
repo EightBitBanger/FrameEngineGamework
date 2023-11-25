@@ -23,7 +23,6 @@ __declspec(dllexport) EngineSystemManager   Engine;
 
 
 EngineSystemManager::EngineSystemManager(void) : 
-    cameraMain(nullptr),
     sceneMain(nullptr),
     
     doUpdateDataStream(true),
@@ -197,6 +196,9 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     entityRenderer->mesh = meshPtr;
     entityRenderer->material = materialPtr;
     
+    if (sceneMain != nullptr) 
+        sceneMain->AddMeshRendererToSceneRoot( entityRenderer );
+    
     float scale = 1.0;
     
     // Collider
@@ -205,11 +207,11 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     newGameObject->EnableGravity();
     
     // Physics
-    newGameObject->SetMass(1);
+    newGameObject->SetMass(10);
     newGameObject->SetLinearDamping(3);
     newGameObject->SetAngularDamping(1);
     
-    newGameObject->CalculatePhysics();
+    //newGameObject->CalculatePhysics();
     
     newGameObject->SetLinearAxisLockFactor(1, 1, 1);
     newGameObject->SetAngularAxisLockFactor(0, 1, 0);
@@ -464,8 +466,12 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
 void EngineSystemManager::Update(void) {
     
     // Update player position in the AI simulation
-    if (cameraMain != nullptr)
-        AI.SetPlayerWorldPosition( cameraMain->transform.position );
+    if (sceneMain != nullptr) {
+        Camera* activeCamera = sceneMain->camera;
+        if (activeCamera != nullptr) {
+            AI.SetPlayerWorldPosition( activeCamera->transform.position );
+        }
+    }
     
     // Check to update the data stream
     if (doUpdateDataStream) {
@@ -573,25 +579,32 @@ void EngineSystemManager::Update(void) {
         }
         
         
+        
         //
         // Actor
         //
         if (streamBuffer[i].actor != nullptr) {
-            if (streamBuffer[i].rigidBody != nullptr) {
+            
+            if (streamBuffer[i].actor->GetActive()) {
                 
-                glm::vec3 actorVelocity = streamBuffer[i].actor->GetVelocity();
-                
-                // Set AI inputs
-                streamBuffer[i].actor->SetPosition( currentTransform.position );
-                
-                
-                // Get AI outputs
-                
-                // Apply force velocity
-                streamBuffer[i].rigidBody->applyLocalForceAtCenterOfMass(rp3d::Vector3(actorVelocity.x, actorVelocity.y, actorVelocity.z));
-                
+                if (streamBuffer[i].rigidBody != nullptr) {
+                    
+                    glm::vec3 actorVelocity = streamBuffer[i].actor->GetVelocity();
+                    
+                    // Set AI inputs
+                    streamBuffer[i].actor->SetPosition( currentTransform.position );
+                    
+                    
+                    // Get AI outputs
+                    
+                    // Apply force velocity
+                    streamBuffer[i].rigidBody->applyLocalForceAtCenterOfMass(rp3d::Vector3(actorVelocity.x, actorVelocity.y, actorVelocity.z));
+                    
+                }
             }
+            
         }
+        
         
         
         //

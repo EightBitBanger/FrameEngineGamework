@@ -24,11 +24,9 @@ extern ActorSystem          AI;
 
 
 // User globals
-Scene* sceneMain;
 Scene* sceneOverlay;
 
 GameObject*  cameraController;
-Camera*      mainCamera;
 
 Material* skyMaterial;
 
@@ -50,10 +48,9 @@ GameObject* actorObject;
 
 void Start() {
     
-    // Create the main world scene
-    sceneMain = Engine.Create<Scene>();
-    Renderer.AddSceneToRenderQueue(sceneMain);
-    
+    // Create the main world scene and add it to the render queue
+    Engine.sceneMain = Engine.Create<Scene>();
+    Renderer.AddSceneToRenderQueue(Engine.sceneMain);
     
     // Create a sky
     Color skyHigh(Colors.blue);
@@ -65,8 +62,6 @@ void Start() {
     float fadeBias = 0.0001;
     
     GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, fadeBias);
-    sceneMain->AddMeshRendererToSceneRoot( skyObject->GetComponent<MeshRenderer>() );
-    
     skyMaterial = skyObject->GetComponent<MeshRenderer>()->material;
     skyMaterial->diffuse = Color(0.087, 0.087, 0.087);
     skyMaterial->EnableDepthTest();
@@ -74,8 +69,7 @@ void Start() {
     
     // Create a camera controller
     cameraController = Engine.CreateCameraController(Vector3(0, 0, 0), Vector3(1, 8, 1));
-    mainCamera = cameraController->GetComponent<Camera>();
-    sceneMain->camera = mainCamera;
+    Engine.sceneMain->camera = cameraController->GetComponent<Camera>();
     
     cameraController->DisableGravity();
     
@@ -85,10 +79,9 @@ void Start() {
     
     cameraController->AddComponent( Engine.CreateComponent<Light>() );
     Light* cameraLight = cameraController->GetComponent<Light>();
-    sceneMain->AddLightToSceneRoot(cameraLight);
     cameraLight->intensity   = 1000;
     cameraLight->range       = 100;
-    cameraLight->attenuation = 30;
+    cameraLight->attenuation = 2;
     cameraLight->color       = Colors.white;
     
     
@@ -103,7 +96,6 @@ void Start() {
     plain->GetComponent<MeshRenderer>()->material->diffuse = Colors.MakeGrayScale(0);
     plain->GetComponent<MeshRenderer>()->material->DisableCulling();
     
-    sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
     
     
     
@@ -111,6 +103,9 @@ void Start() {
     
     Engine.Destroy<Mesh>( plainMesh );
     plainMesh = Engine.Create<Mesh>();
+    
+    
+    
     
     /*
 
@@ -146,6 +141,10 @@ void Start() {
     }
     plainMesh->UploadToGPU();
     */
+    
+    
+    
+    
     
     
     /*
@@ -209,11 +208,10 @@ void Start() {
     
     
     actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
-    sceneMain->AddMeshRendererToSceneRoot( actorObject->GetComponent<MeshRenderer>() );
     
-    float area = 10;
+    float area = 30;
     
-    for (int i=0; i < 600; i++) {
+    for (int i=0; i < 2000; i++) {
         
         float xx = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
         float yy = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
@@ -236,7 +234,7 @@ void Start() {
         Actor* actor = newActorObject->GetComponent<Actor>();
         actor->SetChanceToMove( Random.Range(0, 10) );
         
-        sceneMain->AddMeshRendererToSceneRoot( newActorObject->GetComponent<MeshRenderer>() );
+        
     }
     
     
@@ -321,6 +319,8 @@ float cameraSpeed   = 3;
 //
 
 void Run() {
+    
+    Camera* mainCamera = Engine.sceneMain->camera;
     
     glm::vec3 force(0);
     if (mainCamera != nullptr) {
