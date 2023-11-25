@@ -1,5 +1,5 @@
-#ifndef _GENETICS_SYSTEM__
-#define _GENETICS_SYSTEM__
+#ifndef _GENETICS_NODE__
+#define _GENETICS_NODE__
 
 
 class __declspec(dllexport) Gene {

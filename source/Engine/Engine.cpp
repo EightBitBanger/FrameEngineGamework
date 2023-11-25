@@ -23,6 +23,9 @@ __declspec(dllexport) EngineSystemManager   Engine;
 
 
 EngineSystemManager::EngineSystemManager(void) : 
+    cameraMain(nullptr),
+    sceneMain(nullptr),
+    
     doUpdateDataStream(true),
     streamSize(0)
 {
@@ -150,10 +153,13 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
 
 Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr) {
     Component* rendererComponent = CreateComponent(Components.MeshRenderer);
-    MeshRenderer* entityRenderer = (MeshRenderer*)rendererComponent->mObject;
+    MeshRenderer* meshRenderer = (MeshRenderer*)rendererComponent->mObject;
     
-    entityRenderer->mesh = meshPtr;
-    entityRenderer->material = materialPtr;
+    meshRenderer->mesh = meshPtr;
+    meshRenderer->material = materialPtr;
+    
+    if (sceneMain != nullptr) 
+        sceneMain->AddMeshRendererToSceneRoot( meshRenderer );
     
     doUpdateDataStream = true;
     return rendererComponent;
@@ -164,6 +170,9 @@ Component* EngineSystemManager::CreateComponentLight(glm::vec3 position) {
     Light* lightPoint = (Light*)lightComponent->mObject;
     
     lightPoint->position = position;
+    
+    if (sceneMain != nullptr) 
+        sceneMain->AddLightToSceneRoot( lightPoint );
     
     doUpdateDataStream = true;
     return lightComponent;
@@ -176,11 +185,9 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     newGameObject->AddComponent( CreateComponent(Components.RigidBody) );
     newGameObject->AddComponent( CreateComponent(Components.MeshRenderer) );
     
+    // Basic cube mesh
     Mesh* meshPtr = Resources.CreateMeshFromTag("cube");
     Material* materialPtr = Renderer.CreateMaterial();
-    
-    // Actor component
-    //Actor* ActorObject = newGameObject->mActorCache;
     
     materialPtr->shader = shaders.color;
     
@@ -456,6 +463,10 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
 
 void EngineSystemManager::Update(void) {
     
+    // Update player position in the AI simulation
+    if (cameraMain != nullptr)
+        AI.SetPlayerWorldPosition( cameraMain->transform.position );
+    
     // Check to update the data stream
     if (doUpdateDataStream) {
         
@@ -551,15 +562,35 @@ void EngineSystemManager::Update(void) {
         //
         if (streamBuffer[i].meshRenderer != nullptr) {
             
-            if (streamBuffer[i].rigidBody != nullptr) {
-                streamBuffer[i].meshRenderer->transform.matrix       = currentTransform.matrix;
-            } else {
+            streamBuffer[i].meshRenderer->transform.matrix = currentTransform.matrix;
+            
+            if (streamBuffer[i].rigidBody == nullptr) {
                 streamBuffer[i].meshRenderer->transform.position     = currentTransform.position;
                 streamBuffer[i].meshRenderer->transform.orientation  = currentTransform.orientation;
                 streamBuffer[i].meshRenderer->transform.scale        = currentTransform.scale;
-                streamBuffer[i].meshRenderer->transform.matrix       = currentTransform.matrix;
             }
             
+        }
+        
+        
+        //
+        // Actor
+        //
+        if (streamBuffer[i].actor != nullptr) {
+            if (streamBuffer[i].rigidBody != nullptr) {
+                
+                glm::vec3 actorVelocity = streamBuffer[i].actor->GetVelocity();
+                
+                // Set AI inputs
+                streamBuffer[i].actor->SetPosition( currentTransform.position );
+                
+                
+                // Get AI outputs
+                
+                // Apply force velocity
+                streamBuffer[i].rigidBody->applyLocalForceAtCenterOfMass(rp3d::Vector3(actorVelocity.x, actorVelocity.y, actorVelocity.z));
+                
+            }
         }
         
         
@@ -569,11 +600,12 @@ void EngineSystemManager::Update(void) {
         if (streamBuffer[i].text != nullptr) {
             
             if (streamBuffer[i].meshRenderer != nullptr) {
-                if (streamBuffer[i].text->canvas.anchorRight) 
-                    streamBuffer[i].gameObject->transform.position.x = Renderer.viewport.w - streamBuffer[i].text->canvas.width;
                 
-                if (streamBuffer[i].text->canvas.anchorBottom) 
-                    streamBuffer[i].gameObject->transform.position.y = Renderer.viewport.h - streamBuffer[i].text->canvas.height;
+                //if (streamBuffer[i].text->canvas.anchorRight) 
+                //    streamBuffer[i].gameObject->transform.position.x = Renderer.viewport.w - streamBuffer[i].text->canvas.width;
+                
+                //if (streamBuffer[i].text->canvas.anchorBottom) 
+                //    streamBuffer[i].gameObject->transform.position.y = Renderer.viewport.h - streamBuffer[i].text->canvas.height;
                 
                 float canvasXX =  streamBuffer[i].text->canvas.position.x;
                 float canvasYY = -streamBuffer[i].text->canvas.position.y;

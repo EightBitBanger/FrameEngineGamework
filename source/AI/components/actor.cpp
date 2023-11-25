@@ -65,6 +65,20 @@ unsigned long int Actor::GetAge(void) {
     return ageValue;
 }
 
+void Actor::SetPosition(glm::vec3 newPosition) {
+    mux.lock();
+    worldPosition = newPosition;
+    mux.unlock();
+    return;
+}
+
+glm::vec3 Actor::GetPosition(void) {
+    mux.lock();
+    glm::vec3 currentPosition = worldPosition;
+    mux.unlock();
+    return currentPosition;
+}
+
 void Actor::SetChanceToMove(int chance) {
     mux.lock();
     chanceToMove = chance;
@@ -203,4 +217,11 @@ unsigned int Actor::GetNumberOfGenes(void) {
     unsigned int sizeValue = mGenes.size();
     mux.unlock();
     return sizeValue;
+}
+
+Gene Actor::GetGeneFromGenome(unsigned int index) {
+    mux.lock();
+    Gene geneValue = mGenes[index];
+    mux.unlock();
+    return geneValue;
 }

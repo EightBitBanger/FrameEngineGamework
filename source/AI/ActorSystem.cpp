@@ -13,8 +13,9 @@ bool doUpdate = false;
 void actorThreadMain(void);
 
 
-ActorSystem::ActorSystem() {
-    
+ActorSystem::ActorSystem() : 
+    playerPosition(0)
+{
 }
 
 void ActorSystem::Initiate(void) {
@@ -32,6 +33,13 @@ void ActorSystem::Shutdown(void) {
     
     actorSystemThread->join();
     
+    return;
+}
+
+void ActorSystem::SetPlayerWorldPosition(glm::vec3 position) {
+    mux.lock();
+    playerPosition = position;
+    mux.unlock();
     return;
 }
 
@@ -74,13 +82,15 @@ Actor* ActorSystem::GetActor(unsigned int index) {
 //
 
 void ActorSystem::Update(void) {
-    unsigned int numberOfActors = mActors.Size()-1;
+    unsigned int numberOfActors = (unsigned int)mActors.Size() - 1;
     
     float force = 0.005;
     
+    glm::vec3 forward(0);
+    
     mux.lock();
     
-    for (unsigned int i=numberOfActors; i > 0; i--) {
+    for (int i=numberOfActors; i >= 0; i--) {
         if (!mActors[i]->isActive) 
             continue;
         
@@ -89,13 +99,23 @@ void ActorSystem::Update(void) {
         // Advance actor age
         mActors[i]->age++;
         
+        
+        
+        
+        
+        
+        // Chance to start moving
         if (Random.Range(0, 10) > mActors[i]->chanceToMove) {
+            forward.x = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
+            forward.y = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
+            forward.z = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
             
-            mActors[i]->velocity.x = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
-            mActors[i]->velocity.y = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
-            mActors[i]->velocity.z = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
             
         }
+        
+        // Apply forward velocity
+        mActors[i]->velocity = forward;
+        
         
         mActors[i]->mux.unlock();
         

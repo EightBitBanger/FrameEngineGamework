@@ -211,11 +211,13 @@ void Start() {
     actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
     sceneMain->AddMeshRendererToSceneRoot( actorObject->GetComponent<MeshRenderer>() );
     
-    for (int i=0; i < 400; i++) {
+    float area = 10;
+    
+    for (int i=0; i < 600; i++) {
         
-        float xx = Random.Range(0, 10) - Random.Range(0, 10);
-        float yy = Random.Range(0, 10) - Random.Range(0, 10);
-        float zz = Random.Range(0, 10) - Random.Range(0, 10);
+        float xx = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
+        float yy = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
+        float zz = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
         
         float uniformScale = 0.4;
         float scalexx = Random.Range(0, 10) * uniformScale;

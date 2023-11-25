@@ -29,6 +29,9 @@ public:
     /// Shutdown the actor AI system.
     void Shutdown(void);
     
+    /// Set the player position in the simulation.
+    void SetPlayerWorldPosition(glm::vec3 position);
+    
     /// Get the number of actors in the AI simulation.
     unsigned int GetNumberOfActors(void);
     
@@ -41,7 +44,11 @@ public:
     /// Update simulation actors. (called internally from another thread)
     void Update();
     
+    
 private:
+    
+    // Current position of the player in the world
+    glm::vec3 playerPosition;
     
     std::thread* actorSystemThread;
     

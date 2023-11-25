@@ -6,9 +6,11 @@
 
 #include <string>
 #include <iostream>
+
 #include <glm/glm.hpp>
 
 #include "../Genetics.h"
+
 #include "../../Physics/PhysicsSystem.h"
 #include "../../Renderer/RenderSystem.h"
 
@@ -36,6 +38,12 @@ public:
     
     /// Get the age of the actor.
     unsigned long int GetAge(void);
+    
+    /// Set the actor position in the world.
+    void SetPosition(glm::vec3 newPosition);
+    
+    /// Get the actor position in the world.
+    glm::vec3 GetPosition(void);
     
     /// Set the chance the entity will start moving it its forward direction.
     void SetChanceToMove(int chance);
@@ -88,7 +96,7 @@ public:
     /// Get the velocity this actor wishes to output.
     glm::vec3 GetVelocity(void);
     
-    /// Add a new gene to the actors genome. The gene index location will returned.
+    /// Add a new gene to the actors genome. The index location will be returned.
     void AddGene(Gene& newGene);
     
     /// Remove a gene from the actors genome.
@@ -96,6 +104,9 @@ public:
     
     /// Get the number of genes in the genome of this actor.
     unsigned int GetNumberOfGenes(void);
+    
+    /// Get a gene from the genome.
+    Gene GetGeneFromGenome(unsigned int index);
     
     Actor();
     
@@ -108,8 +119,10 @@ private:
     
     unsigned long int age;
     
+    // Environmental sensory (Inputs)
+    glm::vec3 worldPosition;
     
-    // Personality parameters (Inputs)
+    // Personality parameters (Decision making)
     int chanceToMove;
     int chanceToLookAtPlayer;
     int chanceToLookAtEntity;
@@ -124,7 +137,7 @@ private:
     glm::vec3 velocity;
     
     
-    // Actor genome
+    // Genetic expression
     std::vector<Gene> mGenes;
     
     std::mutex mux;
