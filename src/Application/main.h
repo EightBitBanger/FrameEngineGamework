@@ -20,6 +20,6 @@
 #include "../Resources/ResourceManager.h"
 #include "../Scripting/ScriptSystem.h"
 #include "../Serialization/Serialization.h"
-#include "../AI/ActorSystem.h"
+#include "../ActorAI/ActorSystem.h"
 
 #include "../engine/engine.h"

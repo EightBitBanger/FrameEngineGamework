@@ -11,7 +11,7 @@
 #include "../../Renderer/RenderSystem.h"
 
 #include "../../Resources/assets/colliderTag.h"
-#include "../../AI/components/actor.h"
+#include "../../ActorAI/components/actor.h"
 
 #include "../UI/text.h"
 

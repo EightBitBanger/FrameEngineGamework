@@ -15,9 +15,9 @@
 #include "../Scripting/components/script.h"
 #include "../Renderer/components/camera.h"
 
-#include "../AI/ActorSystem.h"
-#include "../AI/components/actor.h"
-#include "../AI/Genetics.h"
+#include "../ActorAI/ActorSystem.h"
+#include "../ActorAI/components/actor.h"
+#include "../ActorAI/Genetics.h"
 
 #include "../../vendor/CodeBaseLibrary/directorysearch.h"
 #include "../../vendor/CodeBaseLibrary/logging.h"
