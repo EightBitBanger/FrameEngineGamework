@@ -2,7 +2,7 @@
 #include <string>
 
 #include "../framework.h"
-#include "../../source/Scripting/ScriptSystem.h"
+#include "../../src/Scripting/ScriptSystem.h"
 extern ScriptSystem Scripting;
 
 

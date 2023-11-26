@@ -2,7 +2,7 @@
 #include <string>
 
 #include "../framework.h"
-#include "../../source/Physics/PhysicsSystem.h"
+#include "../../src/Physics/PhysicsSystem.h"
 extern PhysicsSystem Physics;
 
 
