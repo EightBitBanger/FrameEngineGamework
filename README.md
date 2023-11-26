@@ -1,10 +1,11 @@
 ## Features
 - Render system
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
-- ⁯⁮⁭Audio (Considering openAL)
+- ⁯⁮⁭Audio
 - Resource management
 - Input handling
 - Serialization
+- Multithreading
 
 ## Overview
 This engine is split up into three parts. The engine core and the game code are located in separate dynamic libraries with a runtime executable to bring it together.
