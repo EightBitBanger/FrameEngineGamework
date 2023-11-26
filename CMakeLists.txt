@@ -13,147 +13,70 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
 set (RUNTIME_HEADERS
     
-    "source/configuration.h"
+    "src/configuration.h"
     
-    "source/Application/applicationlayer.h"
-    "source/Application/winproc.h"
-    "source/Application/main.h"
+    "src/Application/applicationlayer.h"
+    "src/Application/winproc.h"
+    "src/Application/main.h"
     
-    "source/Audio/AudioSystem.h"
+    "src/Audio/AudioSystem.h"
     
-    "source/AI/ActorSystem.h"
-    "source/AI/genetics.h"
-    "source/AI/components/actor.h"
+    "src/ActorAI/ActorSystem.h"
+    "src/ActorAI/genetics.h"
+    "src/ActorAI/components/actor.h"
     
-    "source/Serialization/Serialization.h"
+    "src/Serialization/Serialization.h"
     
-    "source/Math/Math.h"
+    "src/Math/Math.h"
     
-    "source/Engine/Engine.h"
-    "source/Engine/components/component.h"
-    "source/Engine/components/gameobject.h"
+    "src/Engine/Engine.h"
+    "src/Engine/components/component.h"
+    "src/Engine/components/gameobject.h"
     
-    "source/Engine/types/bufferlayout.h"
-    "source/Engine/types/color.h"
-    "source/Engine/types/transform.h"
-    "source/Engine/types/viewport.h"
+    "src/Engine/types/bufferlayout.h"
+    "src/Engine/types/color.h"
+    "src/Engine/types/transform.h"
+    "src/Engine/types/viewport.h"
     
-    "source/Engine/UI/text.h"
-    "source/Engine/UI/sprite.h"
-    "source/Engine/UI/canvas.h"
+    "src/Engine/UI/text.h"
+    "src/Engine/UI/sprite.h"
+    "src/Engine/UI/canvas.h"
     
-    "source/Input/InputSystem.h"
-    "source/Input/keys.h"
+    "src/Input/InputSystem.h"
+    "src/Input/keys.h"
     
-    "source/Physics/PhysicsSystem.h"
-    "source/Physics/components/meshcollider.h"
+    "src/Physics/PhysicsSystem.h"
+    "src/Physics/components/meshcollider.h"
     
-    "source/Renderer/enumerators.h"
-    "source/Renderer/RenderSystem.h"
-    "source/Renderer/components/camera.h"
-    "source/Renderer/components/meshrenderer.h"
-    "source/Renderer/components/material.h"
-    "source/Renderer/components/mesh.h"
-    "source/Renderer/components/scene.h"
-    "source/Renderer/components/light.h"
-    "source/Renderer/components/shader.h"
+    "src/Renderer/enumerators.h"
+    "src/Renderer/RenderSystem.h"
+    "src/Renderer/components/camera.h"
+    "src/Renderer/components/meshrenderer.h"
+    "src/Renderer/components/material.h"
+    "src/Renderer/components/mesh.h"
+    "src/Renderer/components/scene.h"
+    "src/Renderer/components/light.h"
+    "src/Renderer/components/shader.h"
     
-    "source/Resources/ResourceManager.h"
-    "source/Resources/assets/colliderTag.h"
-    "source/Resources/assets/meshTag.h"
-    "source/Resources/assets/shaderTag.h"
-    "source/Resources/assets/textureTag.h"
+    "src/Resources/ResourceManager.h"
+    "src/Resources/assets/colliderTag.h"
+    "src/Resources/assets/meshTag.h"
+    "src/Resources/assets/shaderTag.h"
+    "src/Resources/assets/textureTag.h"
     
-    "source/Scripting/ScriptSystem.h"
-    "source/Scripting/components/script.h"
+    "src/Scripting/ScriptSystem.h"
+    "src/Scripting/components/script.h"
     
     "tests/framework.h"
     
     "vendor/Bly7/OBJ_Loader.h"
     
-#    "vendor/CodeBaseLibrary/directorysearch.h"
-#    "vendor/CodeBaseLibrary/fileloader.h"
-#    "vendor/CodeBaseLibrary/logging.h"
-#    "vendor/CodeBaseLibrary/poolallocator.h"
-#    "vendor/CodeBaseLibrary/random.h"
-#    "vendor/CodeBaseLibrary/strings.h"
-#    "vendor/CodeBaseLibrary/timer.h"
-#    "vendor/CodeBaseLibrary/types.h"
-    
-#    "vendor/stb/stb_image.h"
-#    "vendor/stb/stb_perlin.h"
-#    "vendor/stb/stb_truetype.h"
-    
 )
 
 set (RUNTIME_SOURCES
     
-    "source/Application/properties.rc"
-#    "source/Application/ApplicationLayer.cpp"
-#    "source/Application/winproc.cpp"
-    "source/Application/main.cpp"
-    
-#    "source/application.cpp"
-    
-#    "source/Audio/AudioSystem.cpp"
-    
-#    "source/Engine/Engine.cpp"
-#    "source/Engine/components/component.cpp"
-#    "source/Engine/components/gameobject.cpp"
-    
-#    "source/Engine/types/bufferlayout.cpp"
-#    "source/Engine/types/color.cpp"
-#    "source/Engine/types/transform.cpp"
-#    "source/Engine/types/viewport.cpp"
-    
-#    "source/AI/ActorSystem.cpp"
-#    "source/AI/genetics.cpp"
-#    "source/AI/components/actor.cpp"
-    
-#    "source/Serialization/Serialization.cpp"
-    
-#    "source/Math/Math.cpp"
-    
-#    "source/Input/InputSystem.cpp"
-    
-#    "source/Physics/PhysicsSystem.cpp"
-#    "source/Physics/components/meshcollider.cpp"
-    
-#    "source/Renderer/RenderSystem.cpp"
-#    "source/Renderer/components/camera.cpp"
-#    "source/Renderer/components/meshrenderer.cpp"
-#    "source/Renderer/components/material.cpp"
-#    "source/Renderer/components/mesh.cpp"
-#    "source/Renderer/components/scene.cpp"
-#    "source/Renderer/components/light.cpp"
-#    "source/Renderer/components/shader.cpp"
-    
-#    "source/Resources/ResourceManager.cpp"
-#    "source/Resources/assets/colliderTag.cpp"
-#    "source/Resources/assets/meshTag.cpp"
-#    "source/Resources/assets/shaderTag.cpp"
-#    "source/Resources/assets/textureTag.cpp"
-    
-#    "source/Scripting/ScriptSystem.cpp"
-#    "source/Scripting/components/script.cpp"
-    
-#    "tests/framework.cpp"
-#    "tests/units/testComponents.cpp"
-#    "tests/units/testEngineFunctionality.cpp"
-#    "tests/units/testGameObjects.cpp"
-#    "tests/units/testRenderSystem.cpp"
-#    "tests/units/testScriptSystem.cpp"
-#    "tests/units/testPhysicsSystem.cpp"
-#    "tests/units/testSerializer.cpp"
-#    "tests/units/testTransform.cpp"
-    
-#    "vendor/CodeBaseLibrary/directorysearch.cpp"
-#    "vendor/CodeBaseLibrary/fileloader.cpp"
-#    "vendor/CodeBaseLibrary/logging.cpp"
-#    "vendor/CodeBaseLibrary/random.cpp"
-#    "vendor/CodeBaseLibrary/strings.cpp"
-#    "vendor/CodeBaseLibrary/timer.cpp"
-#    "vendor/CodeBaseLibrary/types.cpp"
+    "src/Application/properties.rc"
+    "src/Application/main.cpp"
     
 )
 
@@ -165,82 +88,69 @@ set (RUNTIME_SOURCES
 
 set (GAME_HEADERS
     
-    "source/configuration.h"
+    "src/configuration.h"
     
-    "source/Application/applicationlayer.h"
-    "source/Application/winproc.h"
-    "source/Application/main.h"
+    "src/Application/applicationlayer.h"
+    "src/Application/winproc.h"
+    "src/Application/main.h"
     
-    "source/Audio/AudioSystem.h"
+    "src/Audio/AudioSystem.h"
     
-    "source/AI/ActorSystem.h"
-    "source/AI/genetics.h"
-    "source/AI/components/actor.h"
+    "src/ActorAI/ActorSystem.h"
+    "src/ActorAI/genetics.h"
+    "src/ActorAI/components/actor.h"
     
-    "source/Serialization/Serialization.h"
+    "src/Serialization/Serialization.h"
     
-    "source/Math/Math.h"
+    "src/Math/Math.h"
     
-    "source/Engine/Engine.h"
-    "source/Engine/components/component.h"
-    "source/Engine/components/gameobject.h"
+    "src/Engine/Engine.h"
+    "src/Engine/components/component.h"
+    "src/Engine/components/gameobject.h"
     
-    "source/Engine/types/bufferlayout.h"
-    "source/Engine/types/color.h"
-    "source/Engine/types/transform.h"
-    "source/Engine/types/viewport.h"
+    "src/Engine/types/bufferlayout.h"
+    "src/Engine/types/color.h"
+    "src/Engine/types/transform.h"
+    "src/Engine/types/viewport.h"
     
-    "source/Engine/UI/text.h"
-    "source/Engine/UI/sprite.h"
-    "source/Engine/UI/canvas.h"
+    "src/Engine/UI/text.h"
+    "src/Engine/UI/sprite.h"
+    "src/Engine/UI/canvas.h"
     
-    "source/Input/InputSystem.h"
-    "source/Input/keys.h"
+    "src/Input/InputSystem.h"
+    "src/Input/keys.h"
     
-    "source/Physics/PhysicsSystem.h"
-    "source/Physics/components/meshcollider.h"
+    "src/Physics/PhysicsSystem.h"
+    "src/Physics/components/meshcollider.h"
     
-    "source/Renderer/enumerators.h"
-    "source/Renderer/RenderSystem.h"
-    "source/Renderer/components/camera.h"
-    "source/Renderer/components/meshrenderer.h"
-    "source/Renderer/components/material.h"
-    "source/Renderer/components/mesh.h"
-    "source/Renderer/components/scene.h"
-    "source/Renderer/components/light.h"
-    "source/Renderer/components/shader.h"
+    "src/Renderer/enumerators.h"
+    "src/Renderer/RenderSystem.h"
+    "src/Renderer/components/camera.h"
+    "src/Renderer/components/meshrenderer.h"
+    "src/Renderer/components/material.h"
+    "src/Renderer/components/mesh.h"
+    "src/Renderer/components/scene.h"
+    "src/Renderer/components/light.h"
+    "src/Renderer/components/shader.h"
     
-    "source/Resources/ResourceManager.h"
-    "source/Resources/assets/colliderTag.h"
-    "source/Resources/assets/meshTag.h"
-    "source/Resources/assets/shaderTag.h"
-    "source/Resources/assets/textureTag.h"
+    "src/Resources/ResourceManager.h"
+    "src/Resources/assets/colliderTag.h"
+    "src/Resources/assets/meshTag.h"
+    "src/Resources/assets/shaderTag.h"
+    "src/Resources/assets/textureTag.h"
     
-    "source/Scripting/ScriptSystem.h"
-    "source/Scripting/components/script.h"
+    "src/Scripting/ScriptSystem.h"
+    "src/Scripting/components/script.h"
     
     "tests/framework.h"
     
     "vendor/Bly7/OBJ_Loader.h"
     
-#    "vendor/CodeBaseLibrary/directorysearch.h"
-#    "vendor/CodeBaseLibrary/fileloader.h"
-#    "vendor/CodeBaseLibrary/logging.h"
-#    "vendor/CodeBaseLibrary/poolallocator.h"
-#    "vendor/CodeBaseLibrary/random.h"
-#    "vendor/CodeBaseLibrary/strings.h"
-#    "vendor/CodeBaseLibrary/timer.h"
-#    "vendor/CodeBaseLibrary/types.h"
-    
-#    "vendor/stb/stb_image.h"
-#    "vendor/stb/stb_perlin.h"
-#    "vendor/stb/stb_truetype.h"
-    
 )
 
 set (GAME_SOURCES
     
-    "source/application.cpp"
+    "src/application.cpp"
     
 )
 
@@ -253,59 +163,56 @@ set (GAME_SOURCES
 
 set (CORE_HEADERS
     
-#    "source/configuration.h"
+    "src/Application/applicationlayer.h"
+    "src/Application/winproc.h"
     
-    "source/Application/applicationlayer.h"
-    "source/Application/winproc.h"
-#    "source/Application/main.h"
+    "src/Audio/AudioSystem.h"
     
-    "source/Audio/AudioSystem.h"
+    "src/ActorAI/ActorSystem.h"
+    "src/ActorAI/genetics.h"
+    "src/ActorAI/components/actor.h"
     
-    "source/AI/ActorSystem.h"
-    "source/AI/genetics.h"
-    "source/AI/components/actor.h"
+    "src/Serialization/Serialization.h"
     
-    "source/Serialization/Serialization.h"
+    "src/Math/Math.h"
     
-    "source/Math/Math.h"
+    "src/Engine/Engine.h"
+    "src/Engine/components/component.h"
+    "src/Engine/components/gameobject.h"
     
-    "source/Engine/Engine.h"
-    "source/Engine/components/component.h"
-    "source/Engine/components/gameobject.h"
+    "src/Engine/types/bufferlayout.h"
+    "src/Engine/types/color.h"
+    "src/Engine/types/transform.h"
+    "src/Engine/types/viewport.h"
     
-    "source/Engine/types/bufferlayout.h"
-    "source/Engine/types/color.h"
-    "source/Engine/types/transform.h"
-    "source/Engine/types/viewport.h"
+    "src/Engine/UI/text.h"
+    "src/Engine/UI/sprite.h"
+    "src/Engine/UI/canvas.h"
     
-    "source/Engine/UI/text.h"
-    "source/Engine/UI/sprite.h"
-    "source/Engine/UI/canvas.h"
+    "src/Input/InputSystem.h"
+    "src/Input/keys.h"
     
-    "source/Input/InputSystem.h"
-    "source/Input/keys.h"
+    "src/Physics/PhysicsSystem.h"
+    "src/Physics/components/meshcollider.h"
     
-    "source/Physics/PhysicsSystem.h"
-    "source/Physics/components/meshcollider.h"
+    "src/Renderer/enumerators.h"
+    "src/Renderer/RenderSystem.h"
+    "src/Renderer/components/camera.h"
+    "src/Renderer/components/meshrenderer.h"
+    "src/Renderer/components/material.h"
+    "src/Renderer/components/mesh.h"
+    "src/Renderer/components/scene.h"
+    "src/Renderer/components/light.h"
+    "src/Renderer/components/shader.h"
     
-    "source/Renderer/enumerators.h"
-    "source/Renderer/RenderSystem.h"
-    "source/Renderer/components/camera.h"
-    "source/Renderer/components/meshrenderer.h"
-    "source/Renderer/components/material.h"
-    "source/Renderer/components/mesh.h"
-    "source/Renderer/components/scene.h"
-    "source/Renderer/components/light.h"
-    "source/Renderer/components/shader.h"
+    "src/Resources/ResourceManager.h"
+    "src/Resources/assets/colliderTag.h"
+    "src/Resources/assets/meshTag.h"
+    "src/Resources/assets/shaderTag.h"
+    "src/Resources/assets/textureTag.h"
     
-    "source/Resources/ResourceManager.h"
-    "source/Resources/assets/colliderTag.h"
-    "source/Resources/assets/meshTag.h"
-    "source/Resources/assets/shaderTag.h"
-    "source/Resources/assets/textureTag.h"
-    
-    "source/Scripting/ScriptSystem.h"
-    "source/Scripting/components/script.h"
+    "src/Scripting/ScriptSystem.h"
+    "src/Scripting/components/script.h"
     
     "tests/framework.h"
     
@@ -328,54 +235,50 @@ set (CORE_HEADERS
 
 set (CORE_SOURCES
     
-#    "source/Application/properties.rc"
-    "source/Application/ApplicationLayer.cpp"
-    "source/Application/winproc.cpp"
-#    "source/Application/main.cpp"
+    "src/Application/ApplicationLayer.cpp"
+    "src/Application/winproc.cpp"
     
-#    "source/application.cpp"
+    "src/Audio/AudioSystem.cpp"
     
-    "source/Audio/AudioSystem.cpp"
+    "src/Engine/Engine.cpp"
+    "src/Engine/components/component.cpp"
+    "src/Engine/components/gameobject.cpp"
     
-    "source/Engine/Engine.cpp"
-    "source/Engine/components/component.cpp"
-    "source/Engine/components/gameobject.cpp"
+    "src/Engine/types/bufferlayout.cpp"
+    "src/Engine/types/color.cpp"
+    "src/Engine/types/transform.cpp"
+    "src/Engine/types/viewport.cpp"
     
-    "source/Engine/types/bufferlayout.cpp"
-    "source/Engine/types/color.cpp"
-    "source/Engine/types/transform.cpp"
-    "source/Engine/types/viewport.cpp"
+    "src/ActorAI/ActorSystem.cpp"
+    "src/ActorAI/genetics.cpp"
+    "src/ActorAI/components/actor.cpp"
     
-    "source/AI/ActorSystem.cpp"
-    "source/AI/genetics.cpp"
-    "source/AI/components/actor.cpp"
+    "src/Serialization/Serialization.cpp"
     
-    "source/Serialization/Serialization.cpp"
+    "src/Math/Math.cpp"
     
-    "source/Math/Math.cpp"
+    "src/Input/InputSystem.cpp"
     
-    "source/Input/InputSystem.cpp"
+    "src/Physics/PhysicsSystem.cpp"
+    "src/Physics/components/meshcollider.cpp"
     
-    "source/Physics/PhysicsSystem.cpp"
-    "source/Physics/components/meshcollider.cpp"
+    "src/Renderer/RenderSystem.cpp"
+    "src/Renderer/components/camera.cpp"
+    "src/Renderer/components/meshrenderer.cpp"
+    "src/Renderer/components/material.cpp"
+    "src/Renderer/components/mesh.cpp"
+    "src/Renderer/components/scene.cpp"
+    "src/Renderer/components/light.cpp"
+    "src/Renderer/components/shader.cpp"
     
-    "source/Renderer/RenderSystem.cpp"
-    "source/Renderer/components/camera.cpp"
-    "source/Renderer/components/meshrenderer.cpp"
-    "source/Renderer/components/material.cpp"
-    "source/Renderer/components/mesh.cpp"
-    "source/Renderer/components/scene.cpp"
-    "source/Renderer/components/light.cpp"
-    "source/Renderer/components/shader.cpp"
+    "src/Resources/ResourceManager.cpp"
+    "src/Resources/assets/colliderTag.cpp"
+    "src/Resources/assets/meshTag.cpp"
+    "src/Resources/assets/shaderTag.cpp"
+    "src/Resources/assets/textureTag.cpp"
     
-    "source/Resources/ResourceManager.cpp"
-    "source/Resources/assets/colliderTag.cpp"
-    "source/Resources/assets/meshTag.cpp"
-    "source/Resources/assets/shaderTag.cpp"
-    "source/Resources/assets/textureTag.cpp"
-    
-    "source/Scripting/ScriptSystem.cpp"
-    "source/Scripting/components/script.cpp"
+    "src/Scripting/ScriptSystem.cpp"
+    "src/Scripting/components/script.cpp"
     
     "tests/framework.cpp"
     "tests/units/testComponents.cpp"
@@ -396,9 +299,6 @@ set (CORE_SOURCES
     "vendor/CodeBaseLibrary/types.cpp"
     
 )
-
-
-
 
 
 
