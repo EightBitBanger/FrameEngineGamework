@@ -7,7 +7,12 @@ void DefaultFunctionPtr(void* gameObject);
 
 #define  nullfunc  DefaultFunctionPtr
 
-struct __declspec(dllexport) Script {
+
+class __declspec(dllexport) Script {
+    
+public:
+    
+    friend class ScriptSystem;
     
     /// Script name.
     std::string name;
@@ -21,14 +26,16 @@ struct __declspec(dllexport) Script {
     /// Pointer to the game object who owns this script.
     void* gameObject;
     
-    /// This function will be called on object creation.
+    Script();
+    
+    
+private:
+    
+    // This function will be called on object creation.
     void(*OnCreate)(void* gameObjectPtr);
     
-    /// This function will be called once per frame.
+    // This function will be called once per frame.
     void(*OnUpdate)(void* gameObjectPtr);
-    
-    
-    Script();
     
 };
 

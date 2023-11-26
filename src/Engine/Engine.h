@@ -3,7 +3,10 @@
 
 #include "components/gameobject.h"
 
+#include "UI/button.h"
 #include "UI/canvas.h"
+#include "UI/panel.h"
+#include "UI/sprite.h"
 #include "UI/text.h"
 
 #include "../application/applicationlayer.h"
@@ -188,7 +191,9 @@ private:
     // Engine allocators
     PoolAllocator<GameObject> mGameObjects;
     PoolAllocator<Component>  mComponents;
+    // UI
     PoolAllocator<Text>       mTextObjects;
+    PoolAllocator<Button>     mButtonObjects;
     
     // Default shaders
     struct DefaultShaders {

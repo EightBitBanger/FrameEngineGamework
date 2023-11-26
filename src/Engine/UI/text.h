@@ -18,25 +18,27 @@ public:
     /// Color of the text to be rendered.
     Color color;
     
+    /// Size of the font.
+    unsigned int size;
+    
     /// Window anchoring layout.
     Canvas canvas;
     
     /// Font sub sprite atlas.
     Sprite sprite;
     
-    /// Size of the font.
-    unsigned int size;
+    // Text sprite layout
     
-    /// Sprite spacing width.
+    /// Width between the sprite glyphs.
     float width;
     
-    /// Sprite spacing height.
+    /// Height between the sprite glyphs.
     float height;
     
-    /// Width of the text glyphs on screen.
+    /// Width of the sprite glyphs.
     float glyphWidth;
     
-    /// Height of the text glyphs on screen.
+    /// Height of the sprite glyphs.
     float glyphHeight;
     
     

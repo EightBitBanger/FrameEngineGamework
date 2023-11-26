@@ -14,6 +14,12 @@ public:
     
     int  LastKeyPressed;
     
+    int mouseX;
+    int mouseY;
+    
+    /// Set the mouse position.
+    void SetMousePosition(unsigned int x, unsigned int y);
+    
     /// Set a pressed key state on the key ID index.
     void SetKeyPressed(int keyid);
     /// Set a released key state on the key ID index.

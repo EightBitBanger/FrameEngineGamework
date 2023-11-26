@@ -18,7 +18,7 @@ void PhysicsSystem::Initiate(void) {
     worldSettings.restitutionVelocityThreshold = 0.9;
     
     worldSettings.isSleepingEnabled = true;
-    worldSettings.gravity = rp3d::Vector3(0 , -9.81 , 0);
+    worldSettings.gravity = rp3d::Vector3(0, 0, 0);
     
     world = common.createPhysicsWorld(worldSettings);
     
@@ -33,9 +33,8 @@ void PhysicsSystem::Initiate(void) {
 
 void PhysicsSystem::Shutdown(void) {
     
-    while (mRigidBodyFreeList.size() > 0) {
+    while (mRigidBodyFreeList.size() > 0) 
         DestroyRigidBody( RemoveRigidBodyFromFreeList() );
-    }
     
     common.destroyPhysicsWorld(world);
     
@@ -55,11 +54,13 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
     rp3d::Quaternion orientation = rp3d::Quaternion::identity();
     rp3d::Transform physicsTransform = rp3d::Transform(position, orientation);
     
-    //rp3d::RigidBody* body = RemoveRigidBodyFromFreeList();
-    //if (body != nullptr) {
-    //    body->setTransform(physicsTransform);
-    //    return body;
-    //}
+    /*
+    rp3d::RigidBody* body = RemoveRigidBodyFromFreeList();
+    if (body != nullptr) {
+        body->setTransform(physicsTransform);
+        return body;
+    }
+    */
     
     return world->createRigidBody(physicsTransform);
 }

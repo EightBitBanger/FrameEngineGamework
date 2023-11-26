@@ -222,6 +222,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             renderAccumulator -= renderUpdateTimeout;
             
+            // Update mouse position
+            POINT cursorPos;
+            GetCursorPos(&cursorPos);
+            Input.mouseX = cursorPos.x;
+            Input.mouseY = cursorPos.y;
+            
+            // Update window area
+            RECT WindowRect;
+            GetWindowRect(Application.windowHandle, &WindowRect);
+            
+            // Set window view port
+            Renderer.viewport.x = WindowRect.left;
+            Renderer.viewport.y = WindowRect.top;
+            Renderer.viewport.w = WindowRect.right - WindowRect.left;
+            Renderer.viewport.h = WindowRect.bottom - WindowRect.top;
+            
+            // Draw the current frame state
             Renderer.RenderFrame();
         }
         

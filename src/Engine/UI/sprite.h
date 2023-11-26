@@ -1,10 +1,6 @@
 #ifndef _ENGINE_UI_SPRITE_COMPONENT__
 #define _ENGINE_UI_SPRITE_COMPONENT__
 
-#include <string>
-
-#include "canvas.h"
-
 
 class Sprite {
     

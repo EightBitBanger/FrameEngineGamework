@@ -1,8 +1,20 @@
 #include "InputSystem.h"
 
+#ifndef _WIN32_WINNT
+  #define _WIN32_WINNT 0x500
+#endif
+
+#define WIN32_LEAN_AND_MEAN
+
+#include <sdkddkver.h>
+#include <windows.h>
+
 extern InputSystem::InputSystem(void) : 
     
     LastKeyPressed(-1),
+    
+    mouseX(0),
+    mouseY(0),
     
     mMouseLeftPressed(false),
     mMouseRightPressed(false),
@@ -10,6 +22,11 @@ extern InputSystem::InputSystem(void) :
     mMouseRightReleased(false)
 {
     for (int i=0; i <= 255; i++) {mKeyPressed[i] = 0; mKeyReleased[i] = 0; mKeyCurrent[i] = 0;}
+}
+
+void InputSystem::SetMousePosition(unsigned int x, unsigned int y) {
+    SetCursorPos( (int)x, (int)y );
+    return;
 }
 
 // Set key state

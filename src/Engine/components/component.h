@@ -4,42 +4,51 @@
 #include <string>
 
 #define  COMPONENT_TYPE_UNDEFINED       0
+//Rendering
 #define  COMPONENT_TYPE_MESH_RENDERER   1
 #define  COMPONENT_TYPE_CAMERA          2
 #define  COMPONENT_TYPE_LIGHT           3
 #define  COMPONENT_TYPE_SCRIPT          4
+// Physics
 #define  COMPONENT_TYPE_RIGID_BODY      5
+// AI
 #define  COMPONENT_TYPE_ACTOR           6
+// UI
 #define  COMPONENT_TYPE_TEXT            7
+#define  COMPONENT_TYPE_BUTTON          8
+
 
 
 typedef unsigned short int ComponentType;
 
 
 struct __declspec(dllexport) EngineComponents {
-    /// Undefined component type.
+    /// Undefined component.
     short int Undefined = COMPONENT_TYPE_UNDEFINED;
     
-    /// Mesh renderer component type.
+    /// Mesh renderer component.
     short int MeshRenderer = COMPONENT_TYPE_MESH_RENDERER;
     
-    /// Camera component type.
+    /// Camera component.
     short int Camera = COMPONENT_TYPE_CAMERA;
     
-    /// Light component type.
+    /// Light component.
     short int Light = COMPONENT_TYPE_LIGHT;
     
-    /// Script component type.
+    /// Scripting component.
     short int Script = COMPONENT_TYPE_SCRIPT;
     
-    /// RigidBody component type.
+    /// Physics rigid body component.
     short int RigidBody = COMPONENT_TYPE_RIGID_BODY;
     
-    /// AI actor component type.
+    /// AI actor component.
     short int Actor = COMPONENT_TYPE_ACTOR;
     
-    /// Text component type.
+    /// Text UI component.
     short int Text = COMPONENT_TYPE_TEXT;
+    
+    /// Button UI component.
+    short int Button = COMPONENT_TYPE_BUTTON;
 };
 
 
