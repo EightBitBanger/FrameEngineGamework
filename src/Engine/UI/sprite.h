@@ -7,10 +7,10 @@ class Sprite {
 public:
     
     /// Width of the sprite texture.
-    unsigned int width;
+    int width;
     
     /// Height of the sprite texture.
-    unsigned int height;
+    int height;
     
     // Sub sprite atlas layout
     

@@ -31,8 +31,7 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
     switch (type) {
         
         case COMPONENT_TYPE_MESH_RENDERER: {
-            MeshRenderer* meshRendererPtr = Renderer.CreateMeshRenderer();
-            component_object = (void*)meshRendererPtr;
+            component_object = (void*)Renderer.CreateMeshRenderer();
             break;
         }
         case COMPONENT_TYPE_CAMERA: {
@@ -40,8 +39,7 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
             break;
         }
         case COMPONENT_TYPE_LIGHT: {
-            Light* lightPtr = Renderer.CreateLight();
-            component_object = (void*)lightPtr;
+            component_object = (void*)Renderer.CreateLight();
             break;
         }
         case COMPONENT_TYPE_SCRIPT: {
@@ -58,12 +56,10 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
         }
         case COMPONENT_TYPE_TEXT: {
             component_object = (void*)mTextObjects.Create();
-            Text* textComponent = (Text*)component_object;
             break;
         }
-        case COMPONENT_TYPE_BUTTON: {
-            component_object = (void*)mButtonObjects.Create();
-            Button* textComponent = (Button*)component_object;
+        case COMPONENT_TYPE_PANEL: {
+            component_object = (void*)mPanelObjects.Create();
             break;
         }
         
@@ -118,6 +114,11 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
         case COMPONENT_TYPE_TEXT: {
             Text* textObject = (Text*)componentPtr->GetComponent();
             mTextObjects.Destroy(textObject);
+            break;
+        }
+        case COMPONENT_TYPE_PANEL: {
+            Panel* panelObject = (Panel*)componentPtr->GetComponent();
+            mPanelObjects.Destroy(panelObject);
             break;
         }
         

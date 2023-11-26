@@ -142,12 +142,14 @@ void EngineSystemManager::Update(void) {
             
             streamBuffer[i].gameObject    = mGameObjects[i];
             
-            streamBuffer[i].text          = mGameObjects[i]->mTextCache;
             streamBuffer[i].light         = mGameObjects[i]->mLightCache;
             streamBuffer[i].actor         = mGameObjects[i]->mActorCache;
             streamBuffer[i].camera        = mGameObjects[i]->mCameraCache;
             streamBuffer[i].rigidBody     = mGameObjects[i]->mRigidBodyCache;
             streamBuffer[i].meshRenderer  = mGameObjects[i]->mMeshRendererCache;
+            
+            streamBuffer[i].text          = mGameObjects[i]->mTextCache;
+            streamBuffer[i].panel         = mGameObjects[i]->mPanelCache;
             
             continue;
         }
@@ -266,9 +268,106 @@ void EngineSystemManager::Update(void) {
         
         
         //
-        // Text canvas
+        // Panel canvas alignment
         //
+        
+        if (streamBuffer[i].panel != nullptr) {
+            
+            if (streamBuffer[i].meshRenderer != nullptr) {
+                
+                //
+                // Anchor RIGHT
+                //
+                
+                if (streamBuffer[i].panel->canvas.anchorRight) {
+                    streamBuffer[i].gameObject->transform.position.z = Renderer.viewport.w + 
+                                                                       streamBuffer[i].panel->width * 
+                                                                       streamBuffer[i].panel->canvas.y;
+                    
+                } else {
+                    
+                    //
+                    // Anchor LEFT by default
+                    //
+                    
+                    streamBuffer[i].gameObject->transform.position.z  = (streamBuffer[i].panel->canvas.y * streamBuffer[i].panel->width);
+                    streamBuffer[i].gameObject->transform.position.z += streamBuffer[i].panel->width;
+                    
+                    //
+                    // Anchor CENTER horizontally
+                    //
+                    
+                    if (streamBuffer[i].panel->canvas.anchorCenterHorz) {
+                        
+                        streamBuffer[i].gameObject->transform.position.z = (Renderer.viewport.w / 2) + (streamBuffer[i].panel->canvas.y * streamBuffer[i].panel->width);
+                        
+                    }
+                    
+                }
+                
+                //
+                // Anchor TOP
+                //
+                
+                if (streamBuffer[i].panel->canvas.anchorTop) {
+                    int topAnchorTotal = Renderer.displaySize.y - Renderer.viewport.h;
+                    
+                    topAnchorTotal += (streamBuffer[i].panel->height * streamBuffer[i].panel->height) / 2;
+                    topAnchorTotal += streamBuffer[i].panel->height * streamBuffer[i].panel->canvas.x;
+                    
+                    streamBuffer[i].gameObject->transform.position.y = topAnchorTotal;
+                } else {
+                    
+                    //
+                    // Anchor BOTTOM by default
+                    //
+                    
+                    streamBuffer[i].gameObject->transform.position.y  = Renderer.displaySize.y - streamBuffer[i].panel->height;
+                    streamBuffer[i].gameObject->transform.position.y -= streamBuffer[i].panel->height * -(streamBuffer[i].panel->canvas.x);
+                    
+                    //
+                    // Anchor CENTER vertically
+                    //
+                    
+                    if (streamBuffer[i].panel->canvas.anchorCenterVert) {
+                        int topAnchorTotal = Renderer.displaySize.y - Renderer.viewport.h / 2;
+                        
+                        topAnchorTotal += (streamBuffer[i].panel->height * streamBuffer[i].panel->height) / 2;
+                        topAnchorTotal += (streamBuffer[i].panel->height * streamBuffer[i].panel->canvas.x) - (streamBuffer[i].panel->height * 2);
+                        
+                        streamBuffer[i].gameObject->transform.position.y = topAnchorTotal;
+                    }
+                    
+                }
+                
+            }
+            
+        }
+        
+        
+        
+        //
+        // Text canvas alignment
+        //
+        
         if (streamBuffer[i].text != nullptr) {
+            
+            // Sync parent panel
+            if (streamBuffer[i].gameObject->parent == nullptr) {
+                
+                Panel* parentPanel = streamBuffer[i].gameObject->GetComponent<Panel>();
+                
+                if (parentPanel != nullptr) {
+                    
+                    streamBuffer[i].text->canvas.x = parentPanel->canvas.x;
+                    streamBuffer[i].text->canvas.y = parentPanel->canvas.y;
+                    
+                    streamBuffer[i].gameObject->transform.position.z = parentPanel->canvas.x;
+                    streamBuffer[i].gameObject->transform.position.y = parentPanel->canvas.y;
+                    
+                }
+                
+            }
             
             if (streamBuffer[i].meshRenderer != nullptr) {
                 
@@ -348,6 +447,7 @@ void EngineSystemManager::Update(void) {
                 Engine.AddMeshText(streamBuffer[i].gameObject, 0, 0, textGlyphWidth, textGlyphHeight, streamBuffer[i].text->text, streamBuffer[i].text->color);
             }
         }
+        
         
         
         //

@@ -30,21 +30,14 @@ GameObject*  cameraController;
 
 Material* skyMaterial;
 
-GameObject* plain;
-Mesh*       plainMesh;
-SubMesh     meshPlainPart;
-
-GameObject* overlayObject[20];
-
-MeshRenderer* overlayRenderer;
-Vector3 overlayPosition;
-
-GameObject* actorObject;
-
-GameObject* bannerObject;
-Text*       bannerText;
+Text* positionX;
+Text* positionY;
+Text* positionZ;
+Text* positionW;
 
 
+GameObject* panelObject;
+Text*       textObject;
 
 
 
@@ -58,15 +51,15 @@ void Start() {
     Renderer.AddSceneToRenderQueue(Engine.sceneMain);
     
     // Create a sky
+    float skyFadeBias = 0.0001;
     Color skyHigh(Colors.blue);
     Color skyLow(Colors.blue);
     
     skyHigh += Colors.MakeGrayScale(0.2);
     skyLow  += Colors.MakeGrayScale(0.6);
     
-    float fadeBias = 0.0001;
+    GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, skyFadeBias);
     
-    GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, fadeBias);
     skyMaterial = skyObject->GetComponent<MeshRenderer>()->material;
     skyMaterial->diffuse = Color(0.087, 0.087, 0.087);
     skyMaterial->EnableDepthTest();
@@ -82,35 +75,6 @@ void Start() {
     skyObject->parent = cameraController;
     
     
-    cameraController->AddComponent( Engine.CreateComponent<Light>() );
-    Light* cameraLight = cameraController->GetComponent<Light>();
-    cameraLight->intensity   = 1000;
-    cameraLight->range       = 100;
-    cameraLight->attenuation = 2;
-    cameraLight->color       = Colors.white;
-    
-    
-    
-    
-    plain = Engine.Create<GameObject>();
-    plain->transform.scale = Vector3(10, 10, 10);
-    plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("cube"), Resources.CreateMaterialFromTag("barrel") ) );
-    Engine.sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
-    
-    plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
-    plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.color;
-    plain->GetComponent<MeshRenderer>()->material->ambient = Colors.MakeGrayScale(0.1);
-    plain->GetComponent<MeshRenderer>()->material->diffuse = Colors.MakeGrayScale(0);
-    plain->GetComponent<MeshRenderer>()->material->DisableCulling();
-    
-    
-    
-    
-    plainMesh->CopySubMesh(0, meshPlainPart);
-    
-    Engine.Destroy<Mesh>( plainMesh );
-    plainMesh = Engine.Create<Mesh>();
-    
     
     
     
@@ -120,110 +84,8 @@ void Start() {
     
     
     //
-    // Perlin noise example
+    // Initiate overlay scene
     //
-    
-    
-    float depthThreshold = -0.4;
-    
-    float xNoise = 0.1;
-    float yNoise = 0.1;
-    float zNoise = 0.1;
-    
-    int width  = 200;
-    int depth  = 50;
-    int height = 200;
-    
-    
-    for (int z=0; z < height; z++) {
-        
-        for (int y=0; y < depth; y++) {
-            
-            for (int x=0; x < width; x++) {
-                
-                if (Random.Range(0, 4) > 1) 
-                    continue;
-                
-                float CoordX = x * xNoise;
-                float CoordY = y * yNoise;
-                float CoordZ = z * zNoise;
-                
-                float noiseTotal = Random.Perlin(CoordX, CoordY, CoordZ);
-                
-                if (noiseTotal > depthThreshold) 
-                    continue;
-                
-                // Create new color for the sub mesh
-                Color color = Colors.MakeRandomGrayScale();
-                color *= Color(0.2, 0.2, 0.2);
-                color += Color(0.03, 0.03, 0.03);
-                
-                if (Random.Range(0, 10) > 70) color += Colors.green  * Color(0.1, 0.1, 0.1);
-                if (Random.Range(0, 10) > 40) color += Colors.yellow * Color(0.1, 0.1, 0.1);
-                if (Random.Range(0, 10) > 20) color += Colors.orange * Color(0.1, 0.1, 0.1);
-                if (Random.Range(0, 10) > 10) color += Colors.blue   * Color(0.1, 0.1, 0.1);
-                
-                // Change sub mesh color
-                for (unsigned int v=0; v < meshPlainPart.vertexCount; v++) {
-                    
-                    meshPlainPart.vertexBuffer[v].r = color.r;
-                    meshPlainPart.vertexBuffer[v].g = color.g;
-                    meshPlainPart.vertexBuffer[v].b = color.b;
-                    
-                }
-                
-                
-                plainMesh->AddSubMesh((float)x - (width / 2), (float)y, (float)z - (height / 2), meshPlainPart, false);
-                
-            }
-        }
-    }
-    plainMesh->UploadToGPU();
-    
-    
-    
-    
-    
-    
-    
-    actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
-    
-    float area = 100;
-    float uniformScale = 0.9;
-    
-    for (int i=0; i < 100; i++) {
-        
-        float xx = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
-        float yy = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
-        float zz = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
-        
-        float scalexx = Random.Range(0, 10) * uniformScale;
-        float scaleyy = Random.Range(0, 10) * uniformScale;
-        float scalezz = Random.Range(0, 10) * uniformScale;
-        
-        GameObject* newActorObject = Engine.CreateAIActor( Vector3(xx, yy, zz) );
-        newActorObject->transform.scale = Vector3(scalexx, scaleyy, scalezz);
-        
-        MeshRenderer* actorMeshRenderer = newActorObject->GetComponent<MeshRenderer>();
-        actorMeshRenderer->material->shader = Engine.shaders.colorUnlit;
-        actorMeshRenderer->material->ambient  = Colors.black;
-        actorMeshRenderer->material->diffuse  = Colors.MakeRandom();
-        actorMeshRenderer->material->diffuse *= Colors.dkgray;
-        
-        Actor* actor = newActorObject->GetComponent<Actor>();
-        actor->SetChanceToMove( Random.Range(0, 10) );
-        
-        
-    }
-    
-    
-    
-    
-    
-    
-    
-    //
-    // Overlay example
     
     sceneOverlay = Engine.Create<Scene>();
     Renderer.AddSceneToRenderQueue(sceneOverlay);
@@ -238,117 +100,94 @@ void Start() {
     sceneOverlay->camera->clipFar  =  100;
     sceneOverlay->camera->clipNear = -100;
     
-    
     int fontSize = 9;
     Color fontColor = Colors.MakeGrayScale(0.09);
     
     
     
+    //
+    // Panel UI
+    //
     
     
-    // Upper left
-    bannerObject = Engine.CreateOverlayTextRenderer("Upper left", fontSize, fontColor, "font");
+    panelObject = Engine.CreateOverlayPanelRenderer(10, 10, "panel");
+    textObject  = Engine.CreateOverlayTextRenderer("", 9, Colors.red, "panel");
+    
+    sceneOverlay->AddMeshRendererToSceneRoot( panelObject->GetComponent<MeshRenderer>() );
+    sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
+    
+    
+    
+    panelOverlay  = panelObject->parent->GetComponent<Panel>();
+    
+    panelOverlay->canvas.anchorCenterHorz = true;
+    panelOverlay->canvas.anchorCenterVert = true;
+    
+    
+    
+    
+    textOverlay   = panelObject->GetComponent<Text>();
+    
+    textOverlay->canvas.anchorCenterHorz = true;
+    textOverlay->canvas.anchorCenterVert = true;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // Window banner
+    
+    Color bannerColor = Colors.blue;
+    GameObject* bannerObject = Engine.CreateOverlayTextRenderer("Window renderer", 9, bannerColor, "font");
     sceneOverlay->AddMeshRendererToSceneRoot( bannerObject->GetComponent<MeshRenderer>() );
-    bannerText = bannerObject->GetComponent<Text>();
     
+    Text* bannerText = bannerObject->GetComponent<Text>();
+    
+    bannerText->canvas.x = 10;
+    bannerText->canvas.y = 10;
     bannerText->canvas.anchorTop = true;
-    bannerText->canvas.y += 2;
-    
-    // Upper right
-    bannerObject = Engine.CreateOverlayTextRenderer("Upper right", fontSize, fontColor, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( bannerObject->GetComponent<MeshRenderer>() );
-    bannerText = bannerObject->GetComponent<Text>();
-    
-    bannerText->canvas.anchorTop = true;
-    bannerText->canvas.anchorRight = true;
-    bannerText->canvas.x -= 3;
-    bannerText->canvas.y += 2;
-    
-    
-    // Lower left
-    bannerObject = Engine.CreateOverlayTextRenderer("Lower left", fontSize, fontColor, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( bannerObject->GetComponent<MeshRenderer>() );
-    bannerText = bannerObject->GetComponent<Text>();
-    
-    
-    // Lower right
-    bannerObject = Engine.CreateOverlayTextRenderer("Lower right", fontSize, fontColor, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( bannerObject->GetComponent<MeshRenderer>() );
-    bannerText = bannerObject->GetComponent<Text>();
-    
-    bannerText->canvas.anchorRight = true;
-    bannerText->canvas.x -= 3;
-    bannerText->canvas.y  = 0;
-    
-    
-    
-    
-    
-    // Center vertically
-    bannerObject = Engine.CreateOverlayTextRenderer("Center vertically", fontSize, fontColor, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( bannerObject->GetComponent<MeshRenderer>() );
-    bannerText = bannerObject->GetComponent<Text>();
-    
-    bannerText->canvas.anchorCenterVert = true;
-    bannerText->canvas.y = -1;
-    
-    
-    
-    // Center horizontally
-    bannerObject = Engine.CreateOverlayTextRenderer("Center horizontally", fontSize, fontColor, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( bannerObject->GetComponent<MeshRenderer>() );
-    bannerText = bannerObject->GetComponent<Text>();
-    
-    bannerText->canvas.anchorCenterHorz = true;
-    bannerText->canvas.x = -11;
-    
-    
-    
-    // Center
-    bannerObject = Engine.CreateOverlayTextRenderer("Center", fontSize, fontColor, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( bannerObject->GetComponent<MeshRenderer>() );
-    bannerText = bannerObject->GetComponent<Text>();
-    
-    bannerText->canvas.anchorCenterHorz = true;
-    bannerText->canvas.anchorCenterVert = true;
-    bannerText->canvas.x = -11;
     
     
     
     
     
     
-    /*
-    Text* text[10];
-    for (int i=0; i < 10; i++) {
-        
-        overlayObject[i] = Engine.CreateOverlayTextRenderer("", 10, Colors.black, "font");
-        
-        sceneOverlay->AddMeshRendererToSceneRoot( overlayObject[i]->GetComponent<MeshRenderer>() );
-        
-        text[i] = overlayObject[i]->GetComponent<Text>();
-        
-        text[i]->canvas.position.x =  1;
-        text[i]->canvas.position.y =  5 + i;
-        
-        //text[i]->color = Colors.black;
-        
-    }
     
-    text[0]->color = Colors.red;
-    text[0]->text = "Render window";
-    text[0]->canvas.position.x =  1;
-    text[0]->canvas.position.y =  3;
-    overlayObject[0]->transform.scale = glm::vec3(0.01, 0.01, 0.01);
+    // Outputs
     
-    //text[4]->canvas.anchorRight = true;
-    */
+    GameObject* textObjectA = Engine.CreateOverlayTextRenderer("", fontSize, Colors.black, "font");
+    sceneOverlay->AddMeshRendererToSceneRoot( textObjectA->GetComponent<MeshRenderer>() );
+    positionX = textObjectA->GetComponent<Text>();
+    positionX->canvas.anchorTop = true;
+    positionX->canvas.y = 5;
+    
+    GameObject* textObjectB = Engine.CreateOverlayTextRenderer("", fontSize, Colors.black, "font");
+    sceneOverlay->AddMeshRendererToSceneRoot( textObjectB->GetComponent<MeshRenderer>() );
+    positionY = textObjectB->GetComponent<Text>();
+    positionY->canvas.anchorTop = true;
+    positionY->canvas.y = 6;
+    
+    GameObject* textObjectC = Engine.CreateOverlayTextRenderer("ass", fontSize, Colors.black, "font");
+    sceneOverlay->AddMeshRendererToSceneRoot( textObjectC->GetComponent<MeshRenderer>() );
+    positionZ = textObjectC->GetComponent<Text>();
+    positionZ->canvas.anchorTop = true;
+    positionZ->canvas.y = 7;
+    
+    GameObject* textObjectD = Engine.CreateOverlayTextRenderer("twat", fontSize, Colors.black, "font");
+    sceneOverlay->AddMeshRendererToSceneRoot( textObjectD->GetComponent<MeshRenderer>() );
+    positionW = textObjectD->GetComponent<Text>();
+    positionW->canvas.anchorTop = true;
+    positionW->canvas.y = 8;
     
     
     
-    // World physics
     
-    Physics.SetWorldGravity(0, 0, 0);
     
     
     return;
@@ -357,20 +196,74 @@ void Start() {
 
 
 
-// Camera movement force
-float cameraSpeed   = 3;
-
 
 
 //
 // Application loop
 //
 
+unsigned long long int numberWang = 0;
+
 void Run() {
     
+    numberWang++;
+    positionX->text = "Numberwang " + IntToString( numberWang );
+    
+    
+    
+    
+    //
+    // Mouse checking
+    //
+    
+    int buttonX = 30;
+    int buttonY = 30;
+    
+    int buttonW = 50;
+    int buttonH = 50;
+    
+    int windowMouseX = Input.mouseX - Renderer.viewport.x;
+    int windowMouseY = Input.mouseY - Renderer.viewport.y;
+    
+    positionZ->text = "";
+    
+    if ((windowMouseX > buttonX) & (windowMouseX < buttonX + buttonW) & 
+        (windowMouseY > buttonY) & (windowMouseY < buttonY + buttonH)) 
+        positionZ->text = "hovered";
+    
+    
+    
+    
+    MeshRenderer* panelRenderer = panelObject->GetComponent<MeshRenderer>();
+    
+    if (Input.CheckKeyCurrent(VK_I)) panelOverlay->canvas.x -= amount;
+    if (Input.CheckKeyCurrent(VK_K)) panelOverlay->canvas.x += amount;
+    if (Input.CheckKeyCurrent(VK_J)) panelOverlay->canvas.y -= amount;
+    if (Input.CheckKeyCurrent(VK_L)) panelOverlay->canvas.y += amount;
+    
+    // Testing ambient alpha channel hack
+    if (Input.CheckKeyCurrent(VK_R)) panelRenderer->material->ambient += Colors.MakeGrayScale(0.01);
+    if (Input.CheckKeyCurrent(VK_F)) panelRenderer->material->ambient -= Colors.MakeGrayScale(0.01);
+    
+    if (Input.CheckKeyCurrent(VK_T)) panelObject->transform.scale += Vector3(1);
+    if (Input.CheckKeyCurrent(VK_G)) panelObject->transform.scale -= Vector3(1);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    //
+    // Camera controller input handling
+    
+    if (cameraController == nullptr) 
+        return;
+    
     Camera* mainCamera = Engine.sceneMain->camera;
-    
-    
     
     glm::vec3 force(0);
     if (mainCamera != nullptr) {
@@ -385,10 +278,10 @@ void Run() {
         if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
         if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         
-        if (cameraController != nullptr) 
-            force *= cameraSpeed;
         
-        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 3;
+            force *= 2;
+        
+        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 5;
         
         cameraController->AddForce(force.x, force.y, force.z);
         
@@ -396,6 +289,11 @@ void Run() {
     
     
     
+    
+    
+    
+    //
+    // Pausing
     
     if (Input.CheckKeyPressed(VK_ESCAPE)) {
         

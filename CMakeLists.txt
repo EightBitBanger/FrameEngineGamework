@@ -41,6 +41,7 @@ set (RUNTIME_HEADERS
     "src/Engine/UI/text.h"
     "src/Engine/UI/sprite.h"
     "src/Engine/UI/canvas.h"
+    "src/Engine/UI/panel.h"
     
     "src/Input/InputSystem.h"
     "src/Input/keys.h"
@@ -116,6 +117,7 @@ set (GAME_HEADERS
     "src/Engine/UI/text.h"
     "src/Engine/UI/sprite.h"
     "src/Engine/UI/canvas.h"
+    "src/Engine/UI/panel.h"
     
     "src/Input/InputSystem.h"
     "src/Input/keys.h"
@@ -188,6 +190,7 @@ set (CORE_HEADERS
     "src/Engine/UI/text.h"
     "src/Engine/UI/sprite.h"
     "src/Engine/UI/canvas.h"
+    "src/Engine/UI/panel.h"
     
     "src/Input/InputSystem.h"
     "src/Input/keys.h"
@@ -241,6 +244,8 @@ set (CORE_SOURCES
     "src/Audio/AudioSystem.cpp"
     
     "src/Engine/Engine.cpp"
+    "src/Engine/EngineGameObjects.cpp"
+    "src/Engine/EngineComponents.cpp"
     "src/Engine/components/component.cpp"
     "src/Engine/components/gameobject.cpp"
     

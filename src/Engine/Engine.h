@@ -3,7 +3,6 @@
 
 #include "components/gameobject.h"
 
-#include "UI/button.h"
 #include "UI/canvas.h"
 #include "UI/panel.h"
 #include "UI/sprite.h"
@@ -35,14 +34,19 @@ extern PhysicsSystem  Physics;
 
 struct DataStream {
     
+    // Engine
     GameObject*    gameObject;
     
-    Text*          text;
+    // Rendering
     Light*         light;
     Actor*         actor;
     Camera*        camera;
     RigidBody*     rigidBody;
     MeshRenderer*  meshRenderer;
+    
+    // UI
+    Text*          text;
+    Panel*         panel;
     
 };
 
@@ -103,12 +107,24 @@ public:
     
     // UI elements
     
-    /// Create an empty overlay renderer object and return its pointer.
+    /// Create an empty overlay renderer and return its object.
     GameObject* CreateOverlayRenderer(void);
     
-    /// Create a text overlay renderer object and return its pointer.
+    /// Create a text overlay and return its object.
     GameObject* CreateOverlayTextRenderer(std::string text, unsigned int textSize, Color color, std::string materialTag);
     
+    /// Create a panel overlay and return its object.
+    GameObject* CreateOverlayPanelRenderer(unsigned int scaleWidth, unsigned int scaleHeight, std::string materialTag);
+    
+    /// Create a panel with a text overlay and return its object.
+    GameObject* CreateOverlayButtonRenderer(unsigned int scaleWidth, unsigned int scaleHeight, std::string materialTag);
+    
+    
+    
+    
+    //
+    // Lower level UI rendering
+    //
     
     /// Add a string of sprite quads to a mesh.
     void AddMeshText(GameObject* overlayObject, float xPos, float yPos, float scaleWidth, float scaleHeight, std::string text, Color textColor);
@@ -130,10 +146,12 @@ public:
     
     /// Create an object of the type specified.
     template <typename T> T* Create(void) {
+        
         // Engine
         if (std::is_same<T, GameObject>::value)    return (T*)CreateGameObject();
         if (std::is_same<T, Component>::value)     return (T*)CreateComponent( COMPONENT_TYPE_UNDEFINED );
-        // Render system
+        
+        // Renderer
         if (std::is_same<T, Mesh>::value)          return (T*)Renderer.CreateMesh();
         if (std::is_same<T, Material>::value)      return (T*)Renderer.CreateMaterial();
         if (std::is_same<T, Shader>::value)        return (T*)Renderer.CreateShader();
@@ -146,9 +164,11 @@ public:
     
     /// Destroy an object of the type specified.
     template <typename T> bool Destroy(T* objectPtr) {
+        
         // Engine
         if (std::is_same<T, GameObject>::value)    return DestroyGameObject( (GameObject*)objectPtr );
         if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
+        
         // Render system
         if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh( (Mesh*)objectPtr );
         if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial( (Material*)objectPtr );
@@ -162,12 +182,17 @@ public:
     
     /// Create a component object containing the type specified.
     template <typename T> Component* CreateComponent(void) {
+        // Renderer
         if (std::is_same<T, Camera>::value)    return CreateComponent(Components.Camera);
         if (std::is_same<T, Light>::value)     return CreateComponent(Components.Light);
         if (std::is_same<T, Script>::value)    return CreateComponent(Components.Script);
+        // Physics
         if (std::is_same<T, RigidBody>::value) return CreateComponent(Components.RigidBody);
+        // AI
         if (std::is_same<T, Actor>::value)     return CreateComponent(Components.Actor);
+        // UI
         if (std::is_same<T, Text>::value)      return CreateComponent(Components.Text);
+        if (std::is_same<T, Panel>::value)     return CreateComponent(Components.Panel);
         return nullptr;
     }
     
@@ -193,7 +218,7 @@ private:
     PoolAllocator<Component>  mComponents;
     // UI
     PoolAllocator<Text>       mTextObjects;
-    PoolAllocator<Button>     mButtonObjects;
+    PoolAllocator<Panel>     mPanelObjects;
     
     // Default shaders
     struct DefaultShaders {

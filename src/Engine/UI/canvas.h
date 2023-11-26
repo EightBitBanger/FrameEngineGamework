@@ -6,6 +6,12 @@ class Canvas {
     
 public:
     
+    /// The x position of the canvas relative to the window.
+    int x;
+    
+    /// The y position of the canvas relative to the window.
+    int y;
+    
     /// Anchor the canvas to the top of the window.
     bool anchorTop;
     
@@ -18,22 +24,16 @@ public:
     /// Center the canvas vertically in the window.
     bool anchorCenterVert;
     
-    /// The x position of the canvas relative to the window.
-    unsigned int x;
-    
-    /// The y position of the canvas relative to the window.
-    unsigned int y;
-    
     
     Canvas() : 
+        x(0),
+        y(0),
+        
         anchorTop(false),
         anchorRight(false),
         
         anchorCenterHorz(false),
-        anchorCenterVert(false),
-        
-        x(0),
-        y(0)
+        anchorCenterVert(false)
     {
     }
     

@@ -200,7 +200,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     Mesh*     overlayMesh     = Create<Mesh>();
     Material* overlayMaterial = Create<Material>();
     
-    overlayMaterial->shader = shaders.color;
+    overlayMaterial->shader = shaders.UI;
     overlayMaterial->ambient = Colors.black;
     
     overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
@@ -243,4 +243,47 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     
     doUpdateDataStream = true;
     return overlayObject;
+}
+
+GameObject* EngineSystemManager::CreateOverlayPanelRenderer(unsigned int scaleWidth, unsigned int scaleHeight, std::string materialTag) {
+    
+    GameObject* overlayObject = CreateOverlayRenderer();
+    overlayObject->AddComponent( CreateComponent<Panel>() );
+    
+    MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
+    
+    // Sprite base material
+    Material* overlayMaterial = overlayRenderer->material;
+    Mesh*     overlayMesh     = overlayRenderer->mesh;
+    
+    Destroy<Material>( overlayMaterial );
+    overlayMaterial = Resources.CreateMaterialFromTag( materialTag );
+    
+    overlayMaterial->ambient  = Colors.black;
+    overlayMaterial->shader = shaders.texture;
+    
+    overlayMaterial->SetBlending(BLEND_ONE, BLEND_ONE_MINUS_SRC_ALPHA);
+    overlayMaterial->EnableBlending();
+    
+    overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
+    overlayMaterial->SetTextureFiltration(MATERIAL_FILTER_NONE);
+    
+    overlayMaterial->DisableCulling();
+    
+    overlayMesh->AddPlain(0, 0, 0, scaleWidth, scaleHeight, Colors.white, 1, 1);
+    overlayMesh->UploadToGPU();
+    
+    doUpdateDataStream = true;
+    return overlayObject;
+}
+
+GameObject* EngineSystemManager::CreateOverlayButtonRenderer(unsigned int scaleWidth, unsigned int scaleHeight, std::string materialTag) {
+    assert(0); // This function doesnt work
+    
+    GameObject* panelObject = CreateOverlayPanelRenderer(10, 10, "panel");
+    GameObject* textObject  = CreateOverlayTextRenderer("Button", 0.9, Colors.black, "font");
+    
+    textObject->parent = panelObject;
+    
+    return textObject;
 }

@@ -14,6 +14,7 @@
 #include "../../ActorAI/components/actor.h"
 
 #include "../UI/text.h"
+#include "../UI/panel.h"
 
 #include "component.h"
 
@@ -62,6 +63,7 @@ public:
         if (std::is_same<T, RigidBody>::value)        return (T*)mRigidBodyCache;
         if (std::is_same<T, Actor>::value)            return (T*)mActorCache;
         if (std::is_same<T, Text>::value)             return (T*)mTextCache;
+        if (std::is_same<T, Panel>::value)            return (T*)mPanelCache;
         
         return nullptr;
     }
@@ -149,6 +151,7 @@ private:
     Light*           mLightCache;
     Actor*           mActorCache;
     Text*            mTextCache;
+    Panel*           mPanelCache;
     
 };
 
