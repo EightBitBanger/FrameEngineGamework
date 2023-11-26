@@ -45,6 +45,9 @@ GameObject* bannerObject;
 Text*       bannerText;
 
 
+
+
+
 // Application entry point
 //
 
@@ -92,6 +95,8 @@ void Start() {
     plain = Engine.Create<GameObject>();
     plain->transform.scale = Vector3(10, 10, 10);
     plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("cube"), Resources.CreateMaterialFromTag("barrel") ) );
+    Engine.sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
+    
     plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
     plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.color;
     plain->GetComponent<MeshRenderer>()->material->ambient = Colors.MakeGrayScale(0.1);
@@ -109,47 +114,16 @@ void Start() {
     
     
     
-    /*
-
-    for (int x=0; x < 1000000; x++) {
-        
-        float CoordX = Random.Range(0, 100) - Random.Range(0, 100);
-        float CoordY = Random.Range(0, 100) - Random.Range(0, 100);
-        float CoordZ = Random.Range(0, 100) - Random.Range(0, 100);
-        
-        // Create new color for the sub mesh
-        Color color = Colors.MakeRandomGrayScale();
-        color *= Color(0.2, 0.2, 0.2);
-        color += Color(0.04, 0.04, 0.04);
-        
-        if (Random.Range(0, 10) > 8) 
-            color += Colors.yellow;
-        
-        if (Random.Range(0, 10) > 4) 
-            color += Colors.blue * Color(0.4, 0.4, 0.4);
-        
-        // Change sub mesh color
-        for (int v=0; v < meshPlainPart.vertexCount; v++) {
-            meshPlainPart.vertexBuffer[v].r = color.r;
-            meshPlainPart.vertexBuffer[v].g = color.g;
-            meshPlainPart.vertexBuffer[v].b = color.b;
-        }
-        
-        
-        if (!plainMesh->AddSubMesh(CoordX, CoordY, CoordZ, meshPlainPart, false)) 
-            break;
-        
-        continue;
-    }
-    plainMesh->UploadToGPU();
-    */
     
     
     
     
     
+    //
+    // Perlin noise example
+    //
     
-    /*
+    
     float depthThreshold = -0.4;
     
     float xNoise = 0.1;
@@ -157,7 +131,7 @@ void Start() {
     float zNoise = 0.1;
     
     int width  = 200;
-    int depth  = 100;
+    int depth  = 50;
     int height = 200;
     
     
@@ -205,7 +179,11 @@ void Start() {
         }
     }
     plainMesh->UploadToGPU();
-    */
+    
+    
+    
+    
+    
     
     
     actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
@@ -274,7 +252,6 @@ void Start() {
     bannerText = bannerObject->GetComponent<Text>();
     
     bannerText->canvas.anchorTop = true;
-    bannerText->canvas.x += 1;
     bannerText->canvas.y += 2;
     
     // Upper right
@@ -325,6 +302,16 @@ void Start() {
     bannerText->canvas.anchorCenterHorz = true;
     bannerText->canvas.x = -11;
     
+    
+    
+    // Center
+    bannerObject = Engine.CreateOverlayTextRenderer("Center", fontSize, fontColor, "font");
+    sceneOverlay->AddMeshRendererToSceneRoot( bannerObject->GetComponent<MeshRenderer>() );
+    bannerText = bannerObject->GetComponent<Text>();
+    
+    bannerText->canvas.anchorCenterHorz = true;
+    bannerText->canvas.anchorCenterVert = true;
+    bannerText->canvas.x = -11;
     
     
     
@@ -384,12 +371,6 @@ void Run() {
     Camera* mainCamera = Engine.sceneMain->camera;
     
     
-    if (Input.CheckKeyCurrent(VK_I)) {bannerText->scaleWidth  -= 1.0;}
-    if (Input.CheckKeyCurrent(VK_K)) {bannerText->scaleWidth  += 1.0;}
-    if (Input.CheckKeyCurrent(VK_J)) {bannerText->scaleHeight -= 1.0;}
-    if (Input.CheckKeyCurrent(VK_L)) {bannerText->scaleHeight += 1.0;}
-    
-    
     
     glm::vec3 force(0);
     if (mainCamera != nullptr) {
@@ -441,14 +422,14 @@ void Run() {
         }
         
     }
+    
     return;
 }
 
 
 //
-// Called once every tick
+// Called once every tick (every 20 frames)
 //
-
 
 void TickUpdate(void) {
     

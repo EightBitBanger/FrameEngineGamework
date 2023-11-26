@@ -10,6 +10,8 @@ class __declspec(dllexport) Scene {
     
 public:
     
+    friend class RenderSystem;
+    
     /// Light update state.
     bool doUpdateLights;
     

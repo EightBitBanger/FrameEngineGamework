@@ -11,6 +11,8 @@ class __declspec(dllexport) MeshRenderer {
     
 public:
     
+    friend class RenderSystem;
+    
     /// Pointer to the mesh component.
     Mesh*     mesh;
     /// Pointer to the material component.

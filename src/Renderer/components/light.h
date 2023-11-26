@@ -9,6 +9,8 @@ class __declspec(dllexport) Light {
     
 public:
     
+    friend class RenderSystem;
+    
     bool isActive;
     
     float renderDistance;

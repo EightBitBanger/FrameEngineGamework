@@ -38,6 +38,8 @@ class __declspec(dllexport) Mesh {
     
 public:
     
+    friend class RenderSystem;
+    
     Mesh();
     ~Mesh();
     

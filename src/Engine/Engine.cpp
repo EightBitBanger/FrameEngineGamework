@@ -265,6 +265,9 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     overlayRenderer->material->ambient  = Colors.black;
     overlayRenderer->material->shader = shaders.UI;
     
+    overlayRenderer->material->SetBlending(BLEND_ONE, BLEND_ONE_MINUS_SRC_ALPHA);
+    overlayRenderer->material->EnableBlending();
+    
     overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
     overlayRenderer->material->SetTextureFiltration(MATERIAL_FILTER_NONE);
     
@@ -685,8 +688,11 @@ void EngineSystemManager::Update(void) {
                     
                 }
                 
+                float textGlyphWidth  = streamBuffer[i].text->glyphWidth;
+                float textGlyphHeight = streamBuffer[i].text->glyphHeight;
+                
                 streamBuffer[i].meshRenderer->mesh->ClearSubMeshes();
-                Engine.AddMeshText(streamBuffer[i].gameObject, 0, 0, 1.0, 0.89, streamBuffer[i].text->text, streamBuffer[i].text->color);
+                Engine.AddMeshText(streamBuffer[i].gameObject, 0, 0, textGlyphWidth, textGlyphHeight, streamBuffer[i].text->text, streamBuffer[i].text->color);
             }
         }
         

@@ -11,6 +11,8 @@ class __declspec(dllexport) Material {
     
 public:
     
+    friend class RenderSystem;
+    
     /// Texture image width.
     unsigned int width;
     /// Texture image height.

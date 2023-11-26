@@ -11,6 +11,8 @@ class __declspec(dllexport) Camera {
     
 public:
     
+    friend class RenderSystem;
+    
     /// Transformation matrix.
     Transform transform;
     

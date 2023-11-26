@@ -11,6 +11,8 @@ class __declspec(dllexport) Entity {
     
 public:
     
+    friend class RenderSystem;
+    
     /// Transformation matrix.
     Transform transform;
     

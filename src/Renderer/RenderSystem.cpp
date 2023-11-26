@@ -318,14 +318,14 @@ void RenderSystem::RenderFrame(void) {
         unsigned int numberOfActiveLights=0;
         accumulateSceneLights( scenePtr, eye, numberOfActiveLights );
         
-        
         // Draw the mesh renderers
         
-        unsigned int entityListSz = scenePtr->GetMeshRendererQueueSize();
+        std::vector<MeshRenderer*>& meshRenderers = scenePtr->mMeshRendererList;
+        unsigned int entityListSz = meshRenderers.size();
         
         for (unsigned int i=0; i < entityListSz; i++) {
             
-            MeshRenderer* currentEntity = scenePtr->GetMeshRenderer(i);
+            MeshRenderer* currentEntity = meshRenderers[i];
             
             // Mesh binding
             
@@ -513,16 +513,18 @@ void RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye, uns
     
     numberOfActiveLights=0;
     
-    mNumberOfLights = currentScene->GetLightQueueSize();
-    
     if (mNumberOfLights > RENDER_NUMBER_OF_LIGHTS) 
         mNumberOfLights = RENDER_NUMBER_OF_LIGHTS;
     
     if (!currentScene->doUpdateLights) 
         return;
     
+    std::vector<Light*> lightList = currentScene->mLightList;
+    mNumberOfLights = currentScene->mLightList.size();
+    
     for (unsigned int i=0; i < mNumberOfLights; i++) {
-        Light* lightPtr = currentScene->GetLight(i);
+        
+        Light* lightPtr = lightList[i];
         
         if (!lightPtr->isActive) 
             continue;

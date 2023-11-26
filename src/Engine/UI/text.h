@@ -33,11 +33,11 @@ public:
     /// Sprite spacing height.
     float height;
     
-    /// Sprite scale width.
-    float scaleWidth;
+    /// Width of the text glyphs on screen.
+    float glyphWidth;
     
-    /// Sprite scale height.
-    float scaleHeight;
+    /// Height of the text glyphs on screen.
+    float glyphHeight;
     
     
     Text() : 
@@ -45,11 +45,11 @@ public:
         
         size(0),
         
-        width(0.6),
+        width(0.5),
         height(0.9),
         
-        scaleWidth(1),
-        scaleHeight(1)
+        glyphWidth(0.9),
+        glyphHeight(0.9)
     {
         color = Color(0, 0, 0);
         return;

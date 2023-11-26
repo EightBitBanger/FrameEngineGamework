@@ -11,6 +11,8 @@ class __declspec(dllexport) Shader {
     
 public:
     
+    friend class RenderSystem;
+    
     Shader();
     ~Shader();
     
