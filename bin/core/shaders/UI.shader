@@ -13,6 +13,7 @@ uniform vec3 u_eye;
 
 varying vec2 v_coord;
 varying vec3 v_color;
+varying vec3 v_ambient;
 
 uniform vec3 m_ambient;
 uniform vec3 m_diffuse;
@@ -27,7 +28,9 @@ void main() {
     
     vec4 vertPos = u_model * vec4(l_position, 1);
     
-    v_color = l_color + m_ambient;
+    v_color = l_color;
+    v_ambient = m_ambient;
+    
     v_coord = l_uv;
     
     gl_Position = u_proj * vertPos;
@@ -43,8 +46,9 @@ void main() {
 
 #version 330 core
 
-varying vec3 v_color;
 varying vec2 v_coord;
+varying vec3 v_color;
+varying vec3 v_ambient;
 
 uniform sampler2D u_sampler;
 
@@ -54,7 +58,12 @@ void main() {
     
     vec4 texColor = texture(u_sampler, v_coord);
     
-    if (texColor.a < 0.5) 
+    float threshold = 1;
+    if (texColor.r > threshold) texColor.r = 1;
+    if (texColor.g > threshold) texColor.g = 1;
+    if (texColor.b > threshold) texColor.b = 1;
+    
+    if (texColor.a < 0.58) 
         discard;
     
     color = vec4(v_color, 1) * texColor;
