@@ -7,26 +7,35 @@
 - Serialization
 - Multithreading
 
+
+<br><br/>
+
+
 ## Overview
 This engine is split up into three parts. The engine core and the game code are located in separate dynamic libraries with a runtime executable to bring it together.
 
 
 <br><br/>
+
+
 ## Screenshots
 You can find more screenshots [here](https://github.com/RetroBytes32/GameEngineFramework/wiki/Screenshots).
 
 ### Vertex lighting demo
-<img src="https://github.com/RetroBytes32/GameEngineFramework/blob/main/demo/vertex_lighting_demo_2.jpg"  width="800" height="600">
-
+<img src="https://github.com/RetroBytes32/GameEngineFramework/blob/main/demo/vertex_lighting_demo_2.jpg"  width="600" height="400">
 
 
 <br><br/>
+
+
 ## Platform
 While this framework currently only supports windows, I look forward to porting to linux in the future.
 - Windows
 
 
 <br><br/>
+
+
 ##  Building the project
 First, clone the repository with git. You can then use cmake to generate the project files of your choice.
 
