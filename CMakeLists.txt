@@ -246,6 +246,8 @@ set (CORE_SOURCES
     "src/Engine/Engine.cpp"
     "src/Engine/EngineGameObjects.cpp"
     "src/Engine/EngineComponents.cpp"
+    "src/Engine/EngineUpdate.cpp"
+    
     "src/Engine/components/component.cpp"
     "src/Engine/components/gameobject.cpp"
     
@@ -268,6 +270,7 @@ set (CORE_SOURCES
     "src/Physics/components/meshcollider.cpp"
     
     "src/Renderer/RenderSystem.cpp"
+    "src/Renderer/Pipeline.cpp"
     "src/Renderer/components/camera.cpp"
     "src/Renderer/components/meshrenderer.cpp"
     "src/Renderer/components/material.cpp"
