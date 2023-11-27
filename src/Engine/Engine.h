@@ -30,12 +30,14 @@ extern PhysicsSystem  Physics;
 
 
 
-#define STREAM_BUFFER_SIZE   32768
+#define COMPONENT_STREAM_BUFFER_SIZE   1024 * 32
 
-struct DataStream {
+struct ComponentDataStreamBuffer {
     
-    // Engine
+    // Base object
     GameObject*    gameObject;
+    
+    // Components
     
     // Rendering
     Light*         light;
@@ -229,10 +231,11 @@ private:
         Shader*  UI;
     };
     
-    // Component data stream
+    // Buffer for streaming component data
     bool doUpdateDataStream;
     unsigned int streamSize;
-    DataStream streamBuffer[STREAM_BUFFER_SIZE];
+    
+    ComponentDataStreamBuffer streamBuffer[COMPONENT_STREAM_BUFFER_SIZE];
     
 public:
     

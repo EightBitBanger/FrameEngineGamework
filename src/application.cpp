@@ -36,6 +36,73 @@ Text* text[20];
 
 
 
+
+// Button system mock up
+struct Button {
+    
+    int x;
+    int y;
+    
+    int w;
+    int h;
+    
+    /// State whether the mouse is hovering over the button.
+    bool isHovering;
+    
+    /// Call the callback function on the left mouse button event.
+    bool activeOnLeftClick;
+    
+    /// Call the callback function on the middle mouse button event.
+    bool activeOnMiddleClick;
+    
+    /// Call the callback function on the right mouse button event.
+    bool activeOnRightClick;
+    
+    /// Call the callback function when the mouse button is pressed.
+    bool activeOnPressed;
+    
+    /// Call the callback function when the mouse button is released.
+    bool activeOnRelease;
+    
+    /// Callback if clicked.
+    void(*callback)();
+    
+    Button() : 
+        x(0),
+        y(0),
+        
+        w(0),
+        h(0),
+        
+        isHovering(false),
+        
+        activeOnLeftClick(false),
+        activeOnMiddleClick(false),
+        activeOnRightClick(false),
+        
+        activeOnPressed(false),
+        activeOnRelease(false),
+        
+        callback(nullptr)
+    {
+    }
+    
+};
+
+std::vector<Button> mButtons;
+
+
+
+
+
+void callbackButtonA(void) {text[5]->text = "ButtonA";};
+void callbackButtonB(void) {text[6]->text = "ButtonB";};
+void callbackButtonC(void) {text[7]->text = "ButtonC";};
+void callbackButtonD(void) {text[8]->text = "ButtonB";};
+
+
+
+
 // Application entry point
 //
 
@@ -66,7 +133,7 @@ void Start() {
     cameraController = Engine.CreateCameraController(Vector3(0, 0, 0), Vector3(1, 8, 1));
     Engine.sceneMain->camera = cameraController->GetComponent<Camera>();
     Engine.sceneMain->camera->DisableMouseLook();
-    Engine.sceneMain->camera->isFixedAspect = true;
+    //Engine.sceneMain->camera->isFixedAspect = true;
     
     Engine.sceneMain->camera->viewport.w = Renderer.viewport.w;
     Engine.sceneMain->camera->viewport.h = Renderer.viewport.h;
@@ -112,33 +179,34 @@ void Start() {
     // Panel UI
     //
     
+    
+    
     //
     // Left panel
     //
     
-    GameObject* panelBase = Engine.CreateOverlayPanelRenderer(110, 10000, "panel_blue");
-    Panel* panelBaseOverlay = panelBase->GetComponent<Panel>();
+    GameObject* panelLeft = Engine.CreateOverlayPanelRenderer(110, 10000, "panel_blue");
+    Panel* panelBaseOverlay = panelLeft->GetComponent<Panel>();
     
-    panelBaseOverlay->canvas.anchorCenterVert = true;
-    
+    //panelBaseOverlay->canvas.anchorCenterVert = true;
+    //panelBaseOverlay->canvas.
     
     //
     // Top panel
     //
     
-    GameObject* panelTitleBase = Engine.CreateOverlayPanelRenderer(10000, 80, "panel_gray");
-    Panel* panelTitleOverlay = panelTitleBase->GetComponent<Panel>();
+    GameObject* panelTitle = Engine.CreateOverlayPanelRenderer(10000, 59, "panel_gray");
+    Panel* panelTitleOverlay = panelTitle->GetComponent<Panel>();
     
     panelTitleOverlay->canvas.anchorCenterHorz = true;
     panelTitleOverlay->canvas.anchorTop = true;
     
-    
-    // Panel layer
-    sceneOverlay->AddMeshRendererToSceneRoot( panelTitleBase->GetComponent<MeshRenderer>() );
-    sceneOverlay->AddMeshRendererToSceneRoot( panelBase->GetComponent<MeshRenderer>() );
+    sceneOverlay->AddMeshRendererToSceneRoot( panelLeft->GetComponent<MeshRenderer>() );   // Left panel
+    sceneOverlay->AddMeshRendererToSceneRoot( panelTitle->GetComponent<MeshRenderer>() );  // Title bar
     
     
-    // Output text elements
+    
+    // Initiate left panel text elements
     for (int i=0; i < 20; i++) {
         
         GameObject* textObject = Engine.CreateOverlayTextRenderer("", fontSize, fontColor, "font");
@@ -146,14 +214,43 @@ void Start() {
         sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
         text[i] = textObject->GetComponent<Text>();
         text[i]->canvas.anchorTop = true;
-        text[i]->canvas.y = 2 * i + 2;
+        text[i]->canvas.y = 2 * i + 4;
         
     }
     
     
     
+    // Title bar menu items
+    GameObject* textObject = Engine.CreateOverlayTextRenderer("File  Edit  Project  Settings", fontSize, fontColor, "font");
+    
+    sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
+    Text* titleText = textObject->GetComponent<Text>();
+    titleText->canvas.anchorTop = true;
+    titleText->canvas.x = 1;
+    titleText->canvas.y = 1;
     
     
+    
+    
+    
+    
+    //
+    // Button callback test
+    //
+    
+    Button buttonA;
+    
+    buttonA.x = 0;
+    buttonA.y = 0;
+    
+    buttonA.w = 60;
+    buttonA.h = 50;
+    
+    buttonA.activeOnLeftClick = true;
+    buttonA.activeOnPressed = true;
+    buttonA.callback = callbackButtonA;
+    
+    mButtons.push_back(buttonA);
     
     
     
@@ -172,14 +269,12 @@ void Start() {
 
 
 
+
 //
 // Application loop
 //
 
 void Run() {
-    
-    text[0]->text = "Mouse X " + IntToString( Input.mouseX );
-    text[1]->text = "Mouse Y " + IntToString( Input.mouseY );
     
     if (Input.CheckKeyCurrent(VK_I)) Engine.sceneMain->camera->viewport.x += 10;
     if (Input.CheckKeyCurrent(VK_K)) Engine.sceneMain->camera->viewport.x -= 10;
@@ -188,44 +283,95 @@ void Run() {
     
     
     float viewScale = 0;
+    
     if (Input.CheckKeyCurrent(VK_R)) viewScale =  1;
     if (Input.CheckKeyCurrent(VK_F)) viewScale = -1;
     
     Engine.sceneMain->camera->viewport.w += viewScale;
     Engine.sceneMain->camera->viewport.h += viewScale;
     
+    
+    text[5]->text = "";
+    text[6]->text = "";
+    text[7]->text = "";
+    text[8]->text = "";
+    
+    
+    
+    
+    
+    
+    
+    
     //
-    // Mouse checking
+    // Check mouse / button interaction (rough system mock up.. might put this in the engine system)
     //
     
-    int buttonX = 0;
-    int buttonY = 0;
-    
-    int buttonW = 100;
-    int buttonH = 50;
     
     int windowMouseX = Input.mouseX - Renderer.viewport.x;
     int windowMouseY = Input.mouseY - Renderer.viewport.y;
     
-    text[2]->text = "";
-    
-    bool isClicked = false;
-    bool isHovered = false;
-    
-    // Check hovered
-    if ((windowMouseX > buttonX) & (windowMouseX < buttonX + buttonW) & 
-        (windowMouseY > buttonY) & (windowMouseY < buttonY + buttonH)) {
-        isHovered = true;
+    for (unsigned int i=0; i < mButtons.size(); i++) {
         
-        // Check clicked
-        if (Input.CheckMouseLeftPressed()) 
-            isClicked = true;
+        // Check butt event
+        bool leftActive   = false;
+        bool middleActive = false;
+        bool rightActive  = false;
+        
+        if (mButtons[i].activeOnPressed) {
+            if (Input.CheckMouseLeftPressed())   {leftActive   = true; Input.SetMouseLeftPressed(false);}
+            if (Input.CheckMouseMiddlePressed()) {middleActive = true; Input.SetMouseMiddlePressed(false);}
+            if (Input.CheckMouseRightPressed())  {rightActive  = true; Input.SetMouseRightPressed(false);}
+        } else {
+            if (Input.CheckMouseLeftReleased())   {leftActive   = true; Input.SetMouseLeftReleased(false);}
+            if (Input.CheckMouseMiddleReleased()) {middleActive = true; Input.SetMouseMiddleReleased(false);}
+            if (Input.CheckMouseRightReleased())  {rightActive  = true; Input.SetMouseRightReleased(false);}
+        }
+        
+        // Button parameter
+        int buttonX = mButtons[i].x;
+        int buttonY = mButtons[i].y;
+        
+        int buttonW = mButtons[i].w;
+        int buttonH = mButtons[i].h;
+        
+        // Check hovered
+        if ((windowMouseX > buttonX) & (windowMouseX < (buttonX + buttonW)) & 
+            (windowMouseY > buttonY) & (windowMouseY < (buttonY + buttonH))) {
+            
+            mButtons[i].isHovering = true;
+            
+            // Get clicked state
+            bool isClicked = false;
+            if (mButtons[i].activeOnLeftClick)   if (leftActive)   isClicked = true;
+            if (mButtons[i].activeOnMiddleClick) if (middleActive) isClicked = true;
+            if (mButtons[i].activeOnRightClick)  if (rightActive)  isClicked = true;
+            
+            // Check clicked
+            if (isClicked) {
+                
+                // Call the button payload
+                if (mButtons[i].callback != nullptr) 
+                    mButtons[i].callback();
+                
+            }
+            
+        } else {
+            
+            // Not hovering
+            mButtons[i].isHovering = false;
+            
+        }
+        
     }
     
     
     
-    if (isClicked) 
-        text[2]->text = "Clicked";
+    
+    
+    
+    
+    
     
     
     

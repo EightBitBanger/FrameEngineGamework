@@ -1,7 +1,6 @@
 #ifndef OPENGL_RENDERER_SYSTEM
 #define OPENGL_RENDERER_SYSTEM
 
-
 #ifndef _WIN32_WINNT
   #define _WIN32_WINNT 0x500
 #endif
@@ -37,6 +36,24 @@
 #include "../configuration.h"
 
 
+#define RENDER_COMMAND_STREAM_BUFFER_SIZE   1024 * 16
+
+struct RenderCommandStreamBuffer {
+    
+    MeshRenderer* meshRenderer;
+    
+    // Vertex GPU buffer
+    unsigned int mVertexArray;
+    unsigned int mBufferVertex;
+    unsigned int mBufferIndex;
+    
+    // Texture GPU buffer
+    unsigned int mTextureBuffer;
+    
+};
+
+
+
 class __declspec(dllexport) RenderSystem {
     
 public:
@@ -49,6 +66,9 @@ public:
     
     /// Current center of the display.
     glm::vec2 displayCenter;
+    
+    /// Recalculate lights every frame.
+    bool doUpdateLightsEveryFrame;
     
     
     RenderSystem();
