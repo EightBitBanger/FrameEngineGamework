@@ -1,7 +1,7 @@
 ## Features
 - Render system
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
-- ⁯⁮⁭Audio
+- ⁯⁮⁭Audio (Not yet added in full)
 - Resource management
 - Input handling
 - Serialization
