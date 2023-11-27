@@ -1,5 +1,5 @@
-#ifndef WINDOW_PROCEDURE
-#define WINDOW_PROCEDURE
+#ifndef __APPLICATION_WINDOW_PROCEDURE__
+#define __APPLICATION_WINDOW_PROCEDURE__
 
 #include "../configuration.h"
 

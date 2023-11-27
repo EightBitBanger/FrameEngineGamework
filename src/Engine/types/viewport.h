@@ -1,7 +1,9 @@
 #ifndef _VIEWPORT_TYPE__
 #define _VIEWPORT_TYPE__
 
-struct __declspec(dllexport) Viewport {
+class __declspec(dllexport) Viewport {
+    
+public:
     
     /// View left.
     int x;

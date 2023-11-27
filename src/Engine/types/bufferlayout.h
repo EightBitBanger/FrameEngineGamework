@@ -1,7 +1,9 @@
 #ifndef _VERTEXBUFFER_TYPE__
 #define _VERTEXBUFFER_TYPE__
 
-struct __declspec(dllexport) Vertex {
+class __declspec(dllexport) Vertex {
+    
+public:
     
     /// Position
     float x, y, z;
