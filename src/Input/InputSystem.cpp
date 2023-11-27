@@ -16,6 +16,8 @@ extern InputSystem::InputSystem(void) :
     mouseX(0),
     mouseY(0),
     
+    mouseWheelDelta(0),
+    
     mMouseLeftPressed(false),
     mMouseRightPressed(false),
     mMouseLeftReleased(false),
@@ -41,14 +43,18 @@ bool  InputSystem::CheckKeyCurrent(int keyid)  {return mKeyCurrent [keyid];}
 // Set mouse state
 void InputSystem::SetMouseLeftPressed(bool State)   {mMouseLeftPressed = State;}
 void InputSystem::SetMouseRightPressed(bool State)  {mMouseRightPressed = State;}
+void InputSystem::SetMouseMiddlePressed(bool state) {mMouseMiddlePressed = state;}
 void InputSystem::SetMouseLeftReleased(bool State)  {mMouseLeftReleased = State;}
 void InputSystem::SetMouseRightReleased(bool State) {mMouseRightReleased = State;}
+void InputSystem::SetMouseMiddleReleased(bool state) {mMouseMiddleReleased = state;}
 
 // Check mouse state
 bool InputSystem::CheckMouseLeftPressed(void)   {return mMouseLeftPressed;}
 bool InputSystem::CheckMouseRightPressed(void)  {return mMouseRightPressed;}
+bool InputSystem::CheckMouseMiddlePressed(void) {return mMouseMiddlePressed;}
 bool InputSystem::CheckMouseLeftReleased(void)  {return mMouseLeftReleased;}
 bool InputSystem::CheckMouseRightReleased(void) {return mMouseRightReleased;}
+bool InputSystem::CheckMouseMiddleReleased(void) {return mMouseMiddleReleased;}
 
 // Clear mouse state
 void InputSystem::ClearMouseLeft(void)  {mMouseLeftPressed = false; mMouseLeftReleased = false;}

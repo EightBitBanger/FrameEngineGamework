@@ -14,8 +14,14 @@ public:
     
     int  LastKeyPressed;
     
+    /// Mouse X position in screen coordinates.
     int mouseX;
+    
+    /// Mouse Y position in screen coordinates.
     int mouseY;
+    
+    /// Mouse scroll wheel delta.
+    float mouseWheelDelta;
     
     /// Set the mouse position.
     void SetMousePosition(unsigned int x, unsigned int y);
@@ -36,19 +42,29 @@ public:
     void SetMouseLeftPressed(bool State);
     /// Set the right mouse button to a pressed state.
     void SetMouseRightPressed(bool State);
+    /// Set the middle mouse button to a pressed state.
+    void SetMouseMiddlePressed(bool state);
+    
     /// Set the left mouse button to a release state.
     void SetMouseLeftReleased(bool State);
     /// Set the right mouse button to a release state.
     void SetMouseRightReleased(bool State);
+    /// Set the middle mouse button to a released state.
+    void SetMouseMiddleReleased(bool State);
     
     /// Check if the left mouse button is pressed.
     bool CheckMouseLeftPressed(void);
     /// Check if the right mouse button is pressed.
     bool CheckMouseRightPressed(void);
+    /// Check if the middle mouse button is pressed.
+    bool CheckMouseMiddlePressed(void);
+    
     /// Check if the left mouse button is release.
     bool CheckMouseLeftReleased(void);
     /// Check if the right mouse button is release.
     bool CheckMouseRightReleased(void);
+    /// Check if the middle mouse button is released.
+    bool CheckMouseMiddleReleased(void);
     
     /// Clear the state of the left mouse button.
     void ClearMouseLeft(void);
@@ -81,8 +97,11 @@ private:
     
     bool mMouseLeftPressed;
     bool mMouseRightPressed;
+    bool mMouseMiddlePressed;
+    
     bool mMouseLeftReleased;
     bool mMouseRightReleased;
+    bool mMouseMiddleReleased;
     
 };
 

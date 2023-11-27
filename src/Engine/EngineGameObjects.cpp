@@ -270,7 +270,8 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(unsigned int scaleWi
     
     overlayMaterial->DisableCulling();
     
-    overlayMesh->AddPlain(0, 0, 0, scaleWidth, scaleHeight, Colors.white, 1, 1);
+    // Width and height are indeed flipped
+    overlayMesh->AddPlain(0, 0, 0, scaleHeight, scaleWidth, Colors.white, 1, 1);
     overlayMesh->UploadToGPU();
     
     doUpdateDataStream = true;
@@ -283,7 +284,7 @@ GameObject* EngineSystemManager::CreateOverlayButtonRenderer(unsigned int scaleW
     GameObject* panelObject = CreateOverlayPanelRenderer(10, 10, "panel");
     GameObject* textObject  = CreateOverlayTextRenderer("Button", 0.9, Colors.black, "font");
     
-    textObject->parent = panelObject;
+    //textObject->parent = panelObject;
     
     return textObject;
 }

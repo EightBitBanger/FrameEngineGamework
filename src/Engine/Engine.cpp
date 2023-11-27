@@ -352,23 +352,6 @@ void EngineSystemManager::Update(void) {
         
         if (streamBuffer[i].text != nullptr) {
             
-            // Sync parent panel
-            if (streamBuffer[i].gameObject->parent == nullptr) {
-                
-                Panel* parentPanel = streamBuffer[i].gameObject->GetComponent<Panel>();
-                
-                if (parentPanel != nullptr) {
-                    
-                    streamBuffer[i].text->canvas.x = parentPanel->canvas.x;
-                    streamBuffer[i].text->canvas.y = parentPanel->canvas.y;
-                    
-                    streamBuffer[i].gameObject->transform.position.z = parentPanel->canvas.x;
-                    streamBuffer[i].gameObject->transform.position.y = parentPanel->canvas.y;
-                    
-                }
-                
-            }
-            
             if (streamBuffer[i].meshRenderer != nullptr) {
                 
                 //
@@ -480,7 +463,12 @@ void EngineSystemManager::Update(void) {
             streamBuffer[i].camera->transform.orientation.x = streamBuffer[i].camera->lookAngle.x;
             streamBuffer[i].camera->transform.orientation.y = streamBuffer[i].camera->lookAngle.y;
             
-            streamBuffer[i].camera->transform.position = currentTransform.position;
+            // Check camera
+            if (streamBuffer[i].panel != nullptr) {
+                
+                streamBuffer[i].camera->transform.position = currentTransform.position;
+                
+            } 
             
         }
         

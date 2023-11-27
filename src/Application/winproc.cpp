@@ -37,6 +37,24 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             Input.SetMouseRightReleased(true);
             break;
         
+        case WM_MBUTTONUP: 
+            Input.SetMouseMiddlePressed(false);
+            Input.SetMouseMiddleReleased(true);
+            break;
+        
+        case WM_MBUTTONDOWN: 
+            Input.SetMouseMiddlePressed(true);
+            Input.SetMouseMiddleReleased(false);
+            break;
+        
+        case WM_MOUSEWHEEL: {
+            float mouseWheelDelta = (float)GET_WHEEL_DELTA_WPARAM(wParam);
+            if (mouseWheelDelta > 0) mouseWheelDelta = 1;
+            if (mouseWheelDelta < 0) mouseWheelDelta = -1;
+            Input.mouseWheelDelta = mouseWheelDelta;
+            break;
+        }
+        
         case WM_SIZE: // Window resize
             
             RECT WindowRect;

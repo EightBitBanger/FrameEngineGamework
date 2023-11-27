@@ -30,14 +30,9 @@ GameObject*  cameraController;
 
 Material* skyMaterial;
 
-Text* positionX;
-Text* positionY;
-Text* positionZ;
-Text* positionW;
+Text* text[20];
 
 
-GameObject* panelObject;
-Text*       textObject;
 
 
 
@@ -48,6 +43,8 @@ void Start() {
     
     // Create the main world scene and add it to the render queue
     Engine.sceneMain = Engine.Create<Scene>();
+    
+    // Add the scene to the renderer
     Renderer.AddSceneToRenderQueue(Engine.sceneMain);
     
     // Create a sky
@@ -68,6 +65,11 @@ void Start() {
     // Create a camera controller
     cameraController = Engine.CreateCameraController(Vector3(0, 0, 0), Vector3(1, 8, 1));
     Engine.sceneMain->camera = cameraController->GetComponent<Camera>();
+    Engine.sceneMain->camera->DisableMouseLook();
+    Engine.sceneMain->camera->isFixedAspect = true;
+    
+    Engine.sceneMain->camera->viewport.w = Renderer.viewport.w;
+    Engine.sceneMain->camera->viewport.h = Renderer.viewport.h;
     
     cameraController->DisableGravity();
     
@@ -101,7 +103,8 @@ void Start() {
     sceneOverlay->camera->clipNear = -100;
     
     int fontSize = 9;
-    Color fontColor = Colors.MakeGrayScale(0.09);
+    Color fontColor = Colors.MakeGrayScale(0.9);
+    
     
     
     
@@ -109,49 +112,43 @@ void Start() {
     // Panel UI
     //
     
+    //
+    // Left panel
+    //
     
-    panelObject = Engine.CreateOverlayPanelRenderer(10, 10, "panel");
-    textObject  = Engine.CreateOverlayTextRenderer("", 9, Colors.red, "panel");
+    GameObject* panelBase = Engine.CreateOverlayPanelRenderer(110, 10000, "panel_blue");
+    Panel* panelBaseOverlay = panelBase->GetComponent<Panel>();
     
-    sceneOverlay->AddMeshRendererToSceneRoot( panelObject->GetComponent<MeshRenderer>() );
-    sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
-    
-    
-    
-    panelOverlay  = panelObject->parent->GetComponent<Panel>();
-    
-    panelOverlay->canvas.anchorCenterHorz = true;
-    panelOverlay->canvas.anchorCenterVert = true;
+    panelBaseOverlay->canvas.anchorCenterVert = true;
     
     
+    //
+    // Top panel
+    //
+    
+    GameObject* panelTitleBase = Engine.CreateOverlayPanelRenderer(10000, 80, "panel_gray");
+    Panel* panelTitleOverlay = panelTitleBase->GetComponent<Panel>();
+    
+    panelTitleOverlay->canvas.anchorCenterHorz = true;
+    panelTitleOverlay->canvas.anchorTop = true;
     
     
-    textOverlay   = panelObject->GetComponent<Text>();
-    
-    textOverlay->canvas.anchorCenterHorz = true;
-    textOverlay->canvas.anchorCenterVert = true;
-    
+    // Panel layer
+    sceneOverlay->AddMeshRendererToSceneRoot( panelTitleBase->GetComponent<MeshRenderer>() );
+    sceneOverlay->AddMeshRendererToSceneRoot( panelBase->GetComponent<MeshRenderer>() );
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    // Window banner
-    
-    Color bannerColor = Colors.blue;
-    GameObject* bannerObject = Engine.CreateOverlayTextRenderer("Window renderer", 9, bannerColor, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( bannerObject->GetComponent<MeshRenderer>() );
-    
-    Text* bannerText = bannerObject->GetComponent<Text>();
-    
-    bannerText->canvas.x = 10;
-    bannerText->canvas.y = 10;
-    bannerText->canvas.anchorTop = true;
+    // Output text elements
+    for (int i=0; i < 20; i++) {
+        
+        GameObject* textObject = Engine.CreateOverlayTextRenderer("", fontSize, fontColor, "font");
+        
+        sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
+        text[i] = textObject->GetComponent<Text>();
+        text[i]->canvas.anchorTop = true;
+        text[i]->canvas.y = 2 * i + 2;
+        
+    }
     
     
     
@@ -159,31 +156,8 @@ void Start() {
     
     
     
-    // Outputs
     
-    GameObject* textObjectA = Engine.CreateOverlayTextRenderer("", fontSize, Colors.black, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( textObjectA->GetComponent<MeshRenderer>() );
-    positionX = textObjectA->GetComponent<Text>();
-    positionX->canvas.anchorTop = true;
-    positionX->canvas.y = 5;
     
-    GameObject* textObjectB = Engine.CreateOverlayTextRenderer("", fontSize, Colors.black, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( textObjectB->GetComponent<MeshRenderer>() );
-    positionY = textObjectB->GetComponent<Text>();
-    positionY->canvas.anchorTop = true;
-    positionY->canvas.y = 6;
-    
-    GameObject* textObjectC = Engine.CreateOverlayTextRenderer("ass", fontSize, Colors.black, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( textObjectC->GetComponent<MeshRenderer>() );
-    positionZ = textObjectC->GetComponent<Text>();
-    positionZ->canvas.anchorTop = true;
-    positionZ->canvas.y = 7;
-    
-    GameObject* textObjectD = Engine.CreateOverlayTextRenderer("twat", fontSize, Colors.black, "font");
-    sceneOverlay->AddMeshRendererToSceneRoot( textObjectD->GetComponent<MeshRenderer>() );
-    positionW = textObjectD->GetComponent<Text>();
-    positionW->canvas.anchorTop = true;
-    positionW->canvas.y = 8;
     
     
     
@@ -202,56 +176,56 @@ void Start() {
 // Application loop
 //
 
-unsigned long long int numberWang = 0;
-
 void Run() {
     
-    numberWang++;
-    positionX->text = "Numberwang " + IntToString( numberWang );
+    text[0]->text = "Mouse X " + IntToString( Input.mouseX );
+    text[1]->text = "Mouse Y " + IntToString( Input.mouseY );
+    
+    if (Input.CheckKeyCurrent(VK_I)) Engine.sceneMain->camera->viewport.x += 10;
+    if (Input.CheckKeyCurrent(VK_K)) Engine.sceneMain->camera->viewport.x -= 10;
+    if (Input.CheckKeyCurrent(VK_J)) Engine.sceneMain->camera->viewport.y += 10;
+    if (Input.CheckKeyCurrent(VK_L)) Engine.sceneMain->camera->viewport.y -= 10;
     
     
+    float viewScale = 0;
+    if (Input.CheckKeyCurrent(VK_R)) viewScale =  1;
+    if (Input.CheckKeyCurrent(VK_F)) viewScale = -1;
     
+    Engine.sceneMain->camera->viewport.w += viewScale;
+    Engine.sceneMain->camera->viewport.h += viewScale;
     
     //
     // Mouse checking
     //
     
-    int buttonX = 30;
-    int buttonY = 30;
+    int buttonX = 0;
+    int buttonY = 0;
     
-    int buttonW = 50;
+    int buttonW = 100;
     int buttonH = 50;
     
     int windowMouseX = Input.mouseX - Renderer.viewport.x;
     int windowMouseY = Input.mouseY - Renderer.viewport.y;
     
-    positionZ->text = "";
+    text[2]->text = "";
     
+    bool isClicked = false;
+    bool isHovered = false;
+    
+    // Check hovered
     if ((windowMouseX > buttonX) & (windowMouseX < buttonX + buttonW) & 
-        (windowMouseY > buttonY) & (windowMouseY < buttonY + buttonH)) 
-        positionZ->text = "hovered";
+        (windowMouseY > buttonY) & (windowMouseY < buttonY + buttonH)) {
+        isHovered = true;
+        
+        // Check clicked
+        if (Input.CheckMouseLeftPressed()) 
+            isClicked = true;
+    }
     
     
     
-    
-    MeshRenderer* panelRenderer = panelObject->GetComponent<MeshRenderer>();
-    
-    if (Input.CheckKeyCurrent(VK_I)) panelOverlay->canvas.x -= amount;
-    if (Input.CheckKeyCurrent(VK_K)) panelOverlay->canvas.x += amount;
-    if (Input.CheckKeyCurrent(VK_J)) panelOverlay->canvas.y -= amount;
-    if (Input.CheckKeyCurrent(VK_L)) panelOverlay->canvas.y += amount;
-    
-    // Testing ambient alpha channel hack
-    if (Input.CheckKeyCurrent(VK_R)) panelRenderer->material->ambient += Colors.MakeGrayScale(0.01);
-    if (Input.CheckKeyCurrent(VK_F)) panelRenderer->material->ambient -= Colors.MakeGrayScale(0.01);
-    
-    if (Input.CheckKeyCurrent(VK_T)) panelObject->transform.scale += Vector3(1);
-    if (Input.CheckKeyCurrent(VK_G)) panelObject->transform.scale -= Vector3(1);
-    
-    
-    
-    
-    
+    if (isClicked) 
+        text[2]->text = "Clicked";
     
     
     

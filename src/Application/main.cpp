@@ -222,6 +222,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             renderAccumulator -= renderUpdateTimeout;
             
+            // Reset mouse scroll wheel state
+            Input.mouseWheelDelta = 0;
+            
             // Update mouse position
             POINT cursorPos;
             GetCursorPos(&cursorPos);
