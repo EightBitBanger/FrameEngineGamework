@@ -30,6 +30,19 @@ EngineSystemManager::EngineSystemManager(void) :
 {
 }
 
+Button* EngineSystemManager::CreateButton(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
+    Button* newButton = mButtons.Create();
+    newButton->x = x;
+    newButton->y = y;
+    newButton->w = w;
+    newButton->h = h;
+    return newButton;
+}
+
+bool EngineSystemManager::DestroyButton(Button* button) {
+    return mButtons.Destroy( button );
+}
+
 void EngineSystemManager::AddMeshText(GameObject* overlayObject, float xPos, float yPos, float scaleWidth, float scaleHeight, std::string text, Color textColor) {
     
     Mesh* meshPtr = overlayObject->GetComponent<MeshRenderer>()->mesh;

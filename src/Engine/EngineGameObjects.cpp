@@ -277,14 +277,3 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(unsigned int scaleWi
     doUpdateDataStream = true;
     return overlayObject;
 }
-
-GameObject* EngineSystemManager::CreateOverlayButtonRenderer(unsigned int scaleWidth, unsigned int scaleHeight, std::string materialTag) {
-    assert(0); // This function doesnt work
-    
-    GameObject* panelObject = CreateOverlayPanelRenderer(10, 10, "panel");
-    GameObject* textObject  = CreateOverlayTextRenderer("Button", 0.9, Colors.black, "font");
-    
-    //textObject->parent = panelObject;
-    
-    return textObject;
-}

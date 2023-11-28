@@ -7,6 +7,7 @@
 #include "UI/panel.h"
 #include "UI/sprite.h"
 #include "UI/text.h"
+#include "UI/button.h"
 
 #include "../application/applicationlayer.h"
 #include "../../tests/framework.h"
@@ -82,7 +83,7 @@ public:
     /// Create a component object with initial type information and return its pointer.
     Component* CreateComponent(ComponentType type);
     
-    /// Destroy a component object.z
+    /// Destroy a component object.
     bool DestroyComponent(Component* componentPtr);
     
     /// Get the number of component objects.
@@ -118,10 +119,14 @@ public:
     /// Create a panel overlay and return its object.
     GameObject* CreateOverlayPanelRenderer(unsigned int scaleWidth, unsigned int scaleHeight, std::string materialTag);
     
-    /// Create a panel with a text overlay and return its object.
-    GameObject* CreateOverlayButtonRenderer(unsigned int scaleWidth, unsigned int scaleHeight, std::string materialTag);
     
+    // Button event callback
     
+    /// Create a button and return its pointer.
+    Button* CreateButton(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
+    
+    /// Destroy a button 
+    bool DestroyButton(Button* button);
     
     
     //
@@ -142,6 +147,9 @@ public:
     
     /// Call update on engine components.
     void Update(void);
+    
+    /// Call update on UI components.
+    void UpdateUI(void);
     
     /// Shutdown the engine.
     void Shutdown(void);
@@ -220,7 +228,8 @@ private:
     PoolAllocator<Component>  mComponents;
     // UI
     PoolAllocator<Text>       mTextObjects;
-    PoolAllocator<Panel>     mPanelObjects;
+    PoolAllocator<Panel>      mPanelObjects;
+    PoolAllocator<Button>     mButtons;
     
     // Default shaders
     struct DefaultShaders {

@@ -37,68 +37,13 @@ Text* text[20];
 
 
 
-// Button system mock up
-struct Button {
-    
-    int x;
-    int y;
-    
-    int w;
-    int h;
-    
-    /// State whether the mouse is hovering over the button.
-    bool isHovering;
-    
-    /// Call the callback function on the left mouse button event.
-    bool activeOnLeftClick;
-    
-    /// Call the callback function on the middle mouse button event.
-    bool activeOnMiddleClick;
-    
-    /// Call the callback function on the right mouse button event.
-    bool activeOnRightClick;
-    
-    /// Call the callback function when the mouse button is pressed.
-    bool activeOnPressed;
-    
-    /// Call the callback function when the mouse button is released.
-    bool activeOnRelease;
-    
-    /// Callback if clicked.
-    void(*callback)();
-    
-    Button() : 
-        x(0),
-        y(0),
-        
-        w(0),
-        h(0),
-        
-        isHovering(false),
-        
-        activeOnLeftClick(false),
-        activeOnMiddleClick(false),
-        activeOnRightClick(false),
-        
-        activeOnPressed(false),
-        activeOnRelease(false),
-        
-        callback(nullptr)
-    {
-    }
-    
-};
-
-std::vector<Button> mButtons;
 
 
 
-
-
-void callbackButtonA(void) {text[5]->text = "ButtonA";};
-void callbackButtonB(void) {text[6]->text = "ButtonB";};
-void callbackButtonC(void) {text[7]->text = "ButtonC";};
-void callbackButtonD(void) {text[8]->text = "ButtonB";};
+void callbackButtonA(void) {text[5]->text = "ButtonA";}
+void callbackButtonB(void) {text[6]->text = "ButtonB";}
+void callbackButtonC(void) {text[7]->text = "ButtonC";}
+void callbackButtonD(void) {text[8]->text = "ButtonB";}
 
 
 
@@ -186,7 +131,7 @@ void Start() {
     //
     
     GameObject* panelLeft = Engine.CreateOverlayPanelRenderer(110, 10000, "panel_blue");
-    Panel* panelBaseOverlay = panelLeft->GetComponent<Panel>();
+    //Panel* panelBaseOverlay = panelLeft->GetComponent<Panel>();
     
     //panelBaseOverlay->canvas.anchorCenterVert = true;
     //panelBaseOverlay->canvas.
@@ -232,12 +177,16 @@ void Start() {
     
     
     
-    
-    
     //
     // Button callback test
     //
     
+    Button* buttonExample = Engine.CreateButton(0, 0, 60, 50);
+    buttonExample->triggerOnLeftButton = true;
+    buttonExample->triggerOnPressed    = true;
+    buttonExample->callback = callbackButtonA;
+    
+    /*
     Button buttonA;
     
     buttonA.x = 0;
@@ -251,14 +200,7 @@ void Start() {
     buttonA.callback = callbackButtonA;
     
     mButtons.push_back(buttonA);
-    
-    
-    
-    
-    
-    
-    
-    
+    */
     
     
     return;
@@ -295,80 +237,6 @@ void Run() {
     text[6]->text = "";
     text[7]->text = "";
     text[8]->text = "";
-    
-    
-    
-    
-    
-    
-    
-    
-    //
-    // Check mouse / button interaction (rough system mock up.. might put this in the engine system)
-    //
-    
-    
-    int windowMouseX = Input.mouseX - Renderer.viewport.x;
-    int windowMouseY = Input.mouseY - Renderer.viewport.y;
-    
-    for (unsigned int i=0; i < mButtons.size(); i++) {
-        
-        // Check butt event
-        bool leftActive   = false;
-        bool middleActive = false;
-        bool rightActive  = false;
-        
-        if (mButtons[i].activeOnPressed) {
-            if (Input.CheckMouseLeftPressed())   {leftActive   = true; Input.SetMouseLeftPressed(false);}
-            if (Input.CheckMouseMiddlePressed()) {middleActive = true; Input.SetMouseMiddlePressed(false);}
-            if (Input.CheckMouseRightPressed())  {rightActive  = true; Input.SetMouseRightPressed(false);}
-        } else {
-            if (Input.CheckMouseLeftReleased())   {leftActive   = true; Input.SetMouseLeftReleased(false);}
-            if (Input.CheckMouseMiddleReleased()) {middleActive = true; Input.SetMouseMiddleReleased(false);}
-            if (Input.CheckMouseRightReleased())  {rightActive  = true; Input.SetMouseRightReleased(false);}
-        }
-        
-        // Button parameter
-        int buttonX = mButtons[i].x;
-        int buttonY = mButtons[i].y;
-        
-        int buttonW = mButtons[i].w;
-        int buttonH = mButtons[i].h;
-        
-        // Check hovered
-        if ((windowMouseX > buttonX) & (windowMouseX < (buttonX + buttonW)) & 
-            (windowMouseY > buttonY) & (windowMouseY < (buttonY + buttonH))) {
-            
-            mButtons[i].isHovering = true;
-            
-            // Get clicked state
-            bool isClicked = false;
-            if (mButtons[i].activeOnLeftClick)   if (leftActive)   isClicked = true;
-            if (mButtons[i].activeOnMiddleClick) if (middleActive) isClicked = true;
-            if (mButtons[i].activeOnRightClick)  if (rightActive)  isClicked = true;
-            
-            // Check clicked
-            if (isClicked) {
-                
-                // Call the button payload
-                if (mButtons[i].callback != nullptr) 
-                    mButtons[i].callback();
-                
-            }
-            
-        } else {
-            
-            // Not hovering
-            mButtons[i].isHovering = false;
-            
-        }
-        
-    }
-    
-    
-    
-    
-    
     
     
     

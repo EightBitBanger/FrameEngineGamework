@@ -15,7 +15,7 @@
 #include <chrono>
 
 #define GLEW_STATIC
-#include <gl/glew.h>
+#include "../../vendor/gl/glew.h"
 
 #include "../../vendor/CodeBaseLibrary/poolallocator.h"
 #include "../../vendor/CodeBaseLibrary/types.h"

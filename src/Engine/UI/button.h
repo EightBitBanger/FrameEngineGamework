@@ -1,35 +1,59 @@
 #ifndef _BUTTON_UI_ELEMENT__
 #define _BUTTON_UI_ELEMENT__
 
-#include "canvas.h"
 
-
-class Button {
+struct Button {
     
-public:
+    /// Button X position in the window.
+    int x;
     
-    /// Horizontal position in the window in pixels.
-    unsigned int x;
+    /// Button Y position in the window.
+    int y;
     
-    /// Vertical position in the window in pixels.
-    unsigned int y;
+    /// Button width.
+    int w;
     
-    /// Width of the button in pixels.
-    unsigned int width;
+    /// Button height.
+    int h;
     
-    /// Height of the button in pixels.
-    unsigned int height;
+    /// State whether the mouse is hovering over the button.
+    bool isHovering;
     
-    /// Window anchoring layout.
-    Canvas canvas;
+    /// Trigger on the left mouse button event.
+    bool triggerOnLeftButton;
     
+    /// Trigger on the middle mouse button event.
+    bool triggerOnMiddleButton;
+    
+    /// Trigger on the right mouse button event.
+    bool triggerOnRightButton;
+    
+    /// Trigger when the mouse button is pressed.
+    bool triggerOnPressed;
+    
+    /// Trigger when the mouse button is released.
+    bool triggerOnRelease;
+    
+    /// Function pointer to an event callback.
+    void(*callback)();
     
     Button() : 
         x(0),
         y(0),
         
-        width(0),
-        height(0)
+        w(0),
+        h(0),
+        
+        isHovering(false),
+        
+        triggerOnLeftButton(false),
+        triggerOnMiddleButton(false),
+        triggerOnRightButton(false),
+        
+        triggerOnPressed(false),
+        triggerOnRelease(false),
+        
+        callback(nullptr)
     {
     }
     

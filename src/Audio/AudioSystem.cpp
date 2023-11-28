@@ -1,7 +1,9 @@
 #include "audiosystem.h"
 
-//#include <Audioclient.h>
-//#include <Audiopolicy.h>
+#include <Audioclient.h>
+#include <Audiopolicy.h>
+
+#include <mmdeviceapi.h>
 
 #include "../../vendor/codebaselibrary/logging.h"
 

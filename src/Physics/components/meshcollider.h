@@ -2,6 +2,7 @@
 #define _MESH_COLLIDER_
 
 #include <ReactPhysics3d/ReactPhysics3d.h>
+#include <vector>
 
 
 class __declspec(dllexport) MeshCollider {

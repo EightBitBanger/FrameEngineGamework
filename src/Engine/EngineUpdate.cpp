@@ -44,7 +44,7 @@ void EngineSystemManager::Update(void) {
         
         streamSize = mGameObjects.Size();
         
-        for (int i=0; i < streamSize; i++ ) {
+        for (unsigned int i=0; i < streamSize; i++ ) {
             
             streamBuffer[i].gameObject    = mGameObjects[i];
             
@@ -68,7 +68,7 @@ void EngineSystemManager::Update(void) {
     // Run the game object list
     //
     
-    for (int i=0; i < mGameObjects.Size(); i++ ) {
+    for (unsigned int i=0; i < mGameObjects.Size(); i++ ) {
         
         if (!streamBuffer[i].gameObject->isActive) 
             continue;

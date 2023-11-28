@@ -38,7 +38,8 @@ void Mesh::SetPrimitive(int primitiveType) {
 void Mesh::SetAttribute(int index, int attributeCount, int vertexSize, int byteOffset) {
     Bind();
     glEnableVertexAttribArray(index);
-    glVertexAttribPointer(index, attributeCount, GL_FLOAT, GL_FALSE, vertexSize, (void*) byteOffset);
+    GLintptr offset = byteOffset;
+    glVertexAttribPointer(index, attributeCount, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*)offset);
     return;
 }
 

@@ -42,6 +42,7 @@ set (RUNTIME_HEADERS
     "src/Engine/UI/sprite.h"
     "src/Engine/UI/canvas.h"
     "src/Engine/UI/panel.h"
+    "src/Engine/UI/button.h"
     
     "src/Input/InputSystem.h"
     "src/Input/keys.h"
@@ -118,6 +119,7 @@ set (GAME_HEADERS
     "src/Engine/UI/sprite.h"
     "src/Engine/UI/canvas.h"
     "src/Engine/UI/panel.h"
+    "src/Engine/UI/button.h"
     
     "src/Input/InputSystem.h"
     "src/Input/keys.h"
@@ -191,6 +193,7 @@ set (CORE_HEADERS
     "src/Engine/UI/sprite.h"
     "src/Engine/UI/canvas.h"
     "src/Engine/UI/panel.h"
+    "src/Engine/UI/button.h"
     
     "src/Input/InputSystem.h"
     "src/Input/keys.h"
@@ -247,6 +250,7 @@ set (CORE_SOURCES
     "src/Engine/EngineGameObjects.cpp"
     "src/Engine/EngineComponents.cpp"
     "src/Engine/EngineUpdate.cpp"
+    "src/Engine/EngineUpdateUI.cpp"
     
     "src/Engine/components/component.cpp"
     "src/Engine/components/gameobject.cpp"
@@ -365,8 +369,8 @@ target_include_directories(game PUBLIC
 
 target_link_libraries(game glew32s.lib)
 target_link_libraries(game opengl32.a)
-target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
-target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
+target_link_libraries(game ${PROJECT_SOURCE_DIR}\vendor\librp3d.a)
+target_link_libraries(game ${PROJECT_SOURCE_DIR}\vendor\libcore.dll.a)
 
 
 

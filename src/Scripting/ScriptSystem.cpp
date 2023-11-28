@@ -3,7 +3,7 @@
 
 void ScriptSystem::Update(void) {
     
-    for (int i=0; i < mScript.Size(); i++ ) {
+    for (unsigned int i=0; i < mScript.Size(); i++ ) {
         Script* scriptRef = mScript[i];
         
         if (!scriptRef->isActive) 
