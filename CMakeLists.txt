@@ -369,8 +369,8 @@ target_include_directories(game PUBLIC
 
 target_link_libraries(game glew32s.lib)
 target_link_libraries(game opengl32.a)
-target_link_libraries(game ${PROJECT_SOURCE_DIR}\vendor\librp3d.a)
-target_link_libraries(game ${PROJECT_SOURCE_DIR}\vendor\libcore.dll.a)
+target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
+target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
 
 
 
