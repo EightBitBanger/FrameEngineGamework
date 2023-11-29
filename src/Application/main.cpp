@@ -54,6 +54,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Engine.Initiate();
     
+    // Profiling timers
+    Timer profileTimer;
+    
 #ifdef RUN_UNIT_TESTS
     TestFramework testFrameWork;
     testFrameWork.Initiate();
@@ -89,7 +92,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Start();
     
-    
     // Render timer
     float renderUpdateTimeout = 1000.0f / RENDER_FRAMES_PER_SECOND;
     float renderAccumulator=0;
@@ -117,6 +119,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     float tickUpdateMax = tickUpdateTimeout * 100;
     tickTimer.Update();
     AI.UpdateSendSignal();
+    
+    // Profiler timers
+    profileTimer.Update();
     
     
     //
@@ -147,6 +152,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
                 
+                profileTimer.Update();
+                
                 Run();
                 
                 Scripting.Update();
@@ -154,6 +161,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 Engine.UpdateUI();
                 
                 Engine.Update();
+                
+                Engine.profileGameEngineUpdate = profileTimer.GetCurrentDelta();
                 
                 fixedAccumulator -= fixedUpdateTimeout;
                 
@@ -206,7 +215,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             physicsAccumulator -= physicsUpdateTimeout;
             
+            profileTimer.Update();
+            
             Physics.world->update( physicsUpdateTimeout );
+            
+            Engine.profilePhysicsSystem = profileTimer.GetCurrentDelta();
             
             // Interpolation factor
             //physicsAlpha = physicsAccumulator / physicsUpdateTimeout;
@@ -243,8 +256,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             Renderer.viewport.w = WindowRect.right - WindowRect.left;
             Renderer.viewport.h = WindowRect.bottom - WindowRect.top;
             
+            
+            profileTimer.Update();
+            
             // Draw the current frame state
             Renderer.RenderFrame();
+            
+            Engine.profileRenderSystem = profileTimer.GetCurrentDelta();
+            
         }
         
 #ifdef APPLICATION_ESCAPE_KEY_PAUSE

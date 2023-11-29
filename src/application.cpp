@@ -75,7 +75,7 @@ void Start() {
     
     
     // Create a camera controller
-    Vector3 position = Vector3(0, 0, 0);
+    Vector3 position = Vector3(-100, 0, 0);
     Vector3 colliderScale = Vector3(1, 8, 1);
     
     cameraController = Engine.CreateCameraController(position, colliderScale);
@@ -83,12 +83,105 @@ void Start() {
     
     // Attach the sky object to the camera controller
     skyObject->parent = cameraController;
+    cameraController->DisableGravity();
+    
+    cameraController->AddComponent( Engine.CreateComponent<Light>() );
+    Light* cameraLight = cameraController->GetComponent<Light>();
+    Engine.sceneMain->AddLightToSceneRoot(cameraLight);
+    cameraLight->color = Colors.white;
+    cameraLight->attenuation = 10;
+    cameraLight->intensity   = 1000;
+    cameraLight->range       = 400;
+    
+    
+    
+    GameObject* plain = Engine.Create<GameObject>();
+    plain->transform.scale = Vector3(10, 10, 10);
+    plain->AddComponent( Engine.CreateComponent<MeshRenderer>( Resources.CreateMeshFromTag("cube"), Resources.CreateMaterialFromTag("barrel") ) );
+    Engine.sceneMain->AddMeshRendererToSceneRoot( plain->GetComponent<MeshRenderer>() );
+    
+    Mesh* plainMesh = plain->GetComponent<MeshRenderer>()->mesh;
+    plain->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.color;
+    plain->GetComponent<MeshRenderer>()->material->ambient = Colors.MakeGrayScale(0.1);
+    plain->GetComponent<MeshRenderer>()->material->diffuse = Colors.MakeGrayScale(0);
+    plain->GetComponent<MeshRenderer>()->material->DisableCulling();
+    
+    
+    SubMesh meshPlainPart;
+    
+    plainMesh->CopySubMesh(0, meshPlainPart);
+    
+    Engine.Destroy<Mesh>( plainMesh );
+    plainMesh = Engine.Create<Mesh>();
     
     
     
     
     
     
+    
+    
+    
+    //
+    // Perlin noise example
+    //
+    
+    
+    float depthThreshold = -0.5;
+    
+    float xNoise = 0.1;
+    float yNoise = 0.1;
+    float zNoise = 0.1;
+    
+    int width  = 80;
+    int depth  = 80;
+    int height = 80;
+    
+    
+    for (int z=0; z < height; z++) {
+        
+        for (int y=0; y < depth; y++) {
+            
+            for (int x=0; x < width; x++) {
+                
+                if (Random.Range(0, 4) > 1) 
+                    continue;
+                
+                float CoordX = x * xNoise;
+                float CoordY = y * yNoise;
+                float CoordZ = z * zNoise;
+                
+                float noiseTotal = Random.Perlin(CoordX, CoordY, CoordZ);
+                
+                if (noiseTotal > depthThreshold) 
+                    continue;
+                
+                // Create new color for the sub mesh
+                Color color = Colors.MakeRandomGrayScale();
+                color *= Color(0.2, 0.2, 0.2);
+                color += Color(0.03, 0.03, 0.03);
+                
+                if (Random.Range(0, 10) > 70) color += Colors.green  * Color(0.1, 0.1, 0.1);
+                if (Random.Range(0, 10) > 40) color += Colors.yellow * Color(0.1, 0.1, 0.1);
+                if (Random.Range(0, 10) > 20) color += Colors.orange * Color(0.1, 0.1, 0.1);
+                if (Random.Range(0, 10) > 10) color += Colors.blue   * Color(0.1, 0.1, 0.1);
+                
+                // Change sub mesh color
+                for (unsigned int v=0; v < meshPlainPart.vertexCount; v++) {
+                    
+                    meshPlainPart.vertexBuffer[v].r = color.r;
+                    meshPlainPart.vertexBuffer[v].g = color.g;
+                    meshPlainPart.vertexBuffer[v].b = color.b;
+                    
+                }
+                
+                
+                plainMesh->AddSubMesh((float)x - (width / 2), (float)y, (float)z - (height / 2), meshPlainPart, false);
+                
+            }
+        }
+    }
+    plainMesh->UploadToGPU();
     
     
     
@@ -111,7 +204,7 @@ void Start() {
     sceneOverlay->camera->clipNear = -100;
     
     int fontSize = 9;
-    Color fontColor = Colors.MakeGrayScale(0.9);
+    Color fontColor = Colors.black;
     
     
     
@@ -142,7 +235,7 @@ void Start() {
     panelTitleOverlay->canvas.anchorCenterHorz = true;
     panelTitleOverlay->canvas.anchorTop = true;
     
-    sceneOverlay->AddMeshRendererToSceneRoot( panelLeft->GetComponent<MeshRenderer>() );   // Left panel
+    //sceneOverlay->AddMeshRendererToSceneRoot( panelLeft->GetComponent<MeshRenderer>() );   // Left panel
     sceneOverlay->AddMeshRendererToSceneRoot( panelTitle->GetComponent<MeshRenderer>() );  // Title bar
     
     
@@ -155,6 +248,8 @@ void Start() {
         sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
         text[i] = textObject->GetComponent<Text>();
         text[i]->canvas.anchorTop = true;
+        
+        text[i]->canvas.x = 0;
         text[i]->canvas.y = 2 * i + 4;
         
     }
@@ -213,10 +308,10 @@ void Run() {
     Engine.sceneMain->camera->viewport.h += viewScale;
     
     
-    text[5]->text = "";
-    text[6]->text = "";
-    text[7]->text = "";
-    text[8]->text = "";
+    text[5]->text = "Renderer - " + FloatToString( Engine.profileRenderSystem );
+    text[6]->text = "Physics  - " + FloatToString( Engine.profilePhysicsSystem );
+    text[7]->text = "Engine   - " + FloatToString( Engine.profileGameEngineUpdate );
+    text[8]->text = "ActorAI  - " + FloatToString( Engine.profileActorAI );
     
     
     

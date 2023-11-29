@@ -62,6 +62,12 @@ public:
     /// Currently active world scene.
     Scene* sceneMain;
     
+    // Profiling
+    
+    float profileRenderSystem;
+    float profilePhysicsSystem;
+    float profileGameEngineUpdate;
+    float profileActorAI;
     
     // Game objects
     
@@ -244,7 +250,7 @@ private:
     bool doUpdateDataStream;
     unsigned int streamSize;
     
-    ComponentDataStreamBuffer streamBuffer[COMPONENT_STREAM_BUFFER_SIZE];
+    ComponentDataStreamBuffer streamBuffer[ COMPONENT_STREAM_BUFFER_SIZE ];
     
 public:
     

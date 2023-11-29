@@ -12,10 +12,10 @@ public:
     
     friend class RenderSystem;
     
-    /// Light update state.
+    /// Should lights be updated.
     bool doUpdateLights;
     
-    /// Get the camera associated with this scene.
+    /// The camera associated with this scene.
     Camera* camera;
     
     Scene();

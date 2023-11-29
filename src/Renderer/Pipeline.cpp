@@ -12,6 +12,8 @@ void RenderSystem::RenderFrame(void) {
     
     mNumberOfDrawCalls = 0;
     
+    mNumberOfLights = 0;
+    
     // Clear the view port
     glClear(GL_DEPTH_BUFFER_BIT);// | GL_COLOR_BUFFER_BIT);
     
@@ -32,8 +34,10 @@ void RenderSystem::RenderFrame(void) {
         setTargetCamera( scenePtr->camera, eye, viewProjection );
         
         // Gather the list of active lights in this scene
-        unsigned int numberOfActiveLights=0;
-        accumulateSceneLights( scenePtr, eye, numberOfActiveLights );
+        mNumberOfLights += accumulateSceneLights( scenePtr, eye );
+        
+        if (mNumberOfLights >= RENDER_NUMBER_OF_LIGHTS) 
+            mNumberOfLights = RENDER_NUMBER_OF_LIGHTS;
         
         // Draw the mesh renderers
         
@@ -141,10 +145,10 @@ void RenderSystem::RenderFrame(void) {
                 }
                 
                 // Send in the light list
-                currentShader->SetLightCount(numberOfActiveLights);
-                currentShader->SetLightPositions(numberOfActiveLights, mLightPosition);
-                currentShader->SetLightAttenuation(numberOfActiveLights, mLightAttenuation);
-                currentShader->SetLightColors(numberOfActiveLights, mLightColor);
+                currentShader->SetLightCount(mNumberOfLights);
+                currentShader->SetLightPositions(mNumberOfLights, mLightPosition);
+                currentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
+                currentShader->SetLightColors(mNumberOfLights, mLightColor);
                 
             } else {
                 
@@ -226,20 +230,17 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
     return true;
 }
 
-void RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye, unsigned int& numberOfActiveLights) {
+unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye) {
     
-    numberOfActiveLights=0;
-    
-    if (mNumberOfLights > RENDER_NUMBER_OF_LIGHTS) 
-        mNumberOfLights = RENDER_NUMBER_OF_LIGHTS;
+    unsigned int numberOfLights=0;
     
     if (!currentScene->doUpdateLights) 
-        return;
+        return 0;
     
-    std::vector<Light*> lightList = currentScene->mLightList;
-    mNumberOfLights = currentScene->mLightList.size();
+    std::vector<Light*>& lightList = currentScene->mLightList;
+    unsigned int totalNumberOfLights = lightList.size();
     
-    for (unsigned int i=0; i < mNumberOfLights; i++) {
+    for (unsigned int i=0; i < totalNumberOfLights; i++) {
         
         Light* lightPtr = lightList[i];
         
@@ -259,7 +260,8 @@ void RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye, uns
         mLightColor[i].g = lightPtr->color.g;
         mLightColor[i].b = lightPtr->color.b;
         
-        numberOfActiveLights++;
+        numberOfLights++;
+        
         continue;
     }
     
@@ -267,5 +269,5 @@ void RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye, uns
     if (!doUpdateLightsEveryFrame) 
         currentScene->doUpdateLights = false;
     
-    return;
+    return numberOfLights;
 }

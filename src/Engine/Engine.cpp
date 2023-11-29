@@ -25,6 +25,11 @@ __declspec(dllexport) EngineSystemManager   Engine;
 EngineSystemManager::EngineSystemManager(void) : 
     sceneMain(nullptr),
     
+    profileRenderSystem(0),
+    profilePhysicsSystem(0),
+    profileGameEngineUpdate(0),
+    profileActorAI(0),
+    
     doUpdateDataStream(true),
     streamSize(0)
 {

@@ -36,22 +36,6 @@
 #include "../configuration.h"
 
 
-#define RENDER_COMMAND_STREAM_BUFFER_SIZE   1024 * 16
-
-struct RenderCommandStreamBuffer {
-    
-    MeshRenderer* meshRenderer;
-    
-    // Vertex GPU buffer
-    unsigned int mVertexArray;
-    unsigned int mBufferVertex;
-    unsigned int mBufferIndex;
-    
-    // Texture GPU buffer
-    unsigned int mTextureBuffer;
-    
-};
-
 
 
 class __declspec(dllexport) RenderSystem {
@@ -196,7 +180,7 @@ private:
     
     bool setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::mat4& viewProjection);
     
-    void accumulateSceneLights(Scene* currentScene, glm::vec3 eye, unsigned int& numberOfActiveLights);
+    unsigned int accumulateSceneLights(Scene* currentScene, glm::vec3 eye);
     
 };
 

@@ -149,6 +149,67 @@ void EngineSystemManager::Update(void) {
         
         
         
+        
+        
+        //
+        // Camera
+        //
+        
+        if (streamBuffer[i].camera != nullptr) {
+            
+            // Update mouse looking
+            if (streamBuffer[i].camera->useMouseLook) {
+                
+                float MouseDiffX = (Input.mouseX - Renderer.displayCenter.x) * streamBuffer[i].camera->MouseSensitivityYaw;
+                float MouseDiffY = (Input.mouseY - Renderer.displayCenter.y) * streamBuffer[i].camera->MouseSensitivityPitch;
+                
+                Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+                
+                streamBuffer[i].camera->lookAngle.x += MouseDiffX * 0.01;
+                streamBuffer[i].camera->lookAngle.y -= MouseDiffY * 0.01;
+                
+                // Yaw limit
+                if (streamBuffer[i].camera->lookAngle.x >= 0.109655) {streamBuffer[i].camera->lookAngle.x -= 0.109655;}
+                if (streamBuffer[i].camera->lookAngle.x <= 0.109655) {streamBuffer[i].camera->lookAngle.x += 0.109655;}
+                
+                // Pitch limit
+                if (streamBuffer[i].camera->lookAngle.y >  0.0274f) streamBuffer[i].camera->lookAngle.y =  0.0274f;
+                if (streamBuffer[i].camera->lookAngle.y < -0.0274f) streamBuffer[i].camera->lookAngle.y = -0.0274f;
+                
+            }
+            
+            // Restore looking angle
+            streamBuffer[i].camera->transform.orientation.x = streamBuffer[i].camera->lookAngle.x;
+            streamBuffer[i].camera->transform.orientation.y = streamBuffer[i].camera->lookAngle.y;
+            
+            // Check camera panel
+            if (streamBuffer[i].panel != nullptr) {
+                
+                // Align the camera with a panel canvas
+                
+            } else {
+                
+                streamBuffer[i].camera->transform.position = currentTransform.position;
+                
+            }
+            
+        }
+        
+        
+        
+        //
+        // Lights
+        //
+        if (streamBuffer[i].light != nullptr) {
+            
+            streamBuffer[i].light->position    = currentTransform.position;
+            
+            streamBuffer[i].light->direction   = currentTransform.EulerAngles();
+            
+        }
+        
+        
+        
         //
         // Actor
         //
@@ -167,7 +228,7 @@ void EngineSystemManager::Update(void) {
                     // Get AI outputs
                     
                     // Apply force velocity
-                    streamBuffer[i].rigidBody->applyLocalForceAtCenterOfMass(rp3d::Vector3(actorVelocity.x, actorVelocity.y, actorVelocity.z));
+                    streamBuffer[i].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, actorVelocity.y, actorVelocity.z) );
                     
                 }
             }
@@ -338,58 +399,6 @@ void EngineSystemManager::Update(void) {
                 streamBuffer[i].meshRenderer->mesh->ClearSubMeshes();
                 Engine.AddMeshText(streamBuffer[i].gameObject, 0, 0, textGlyphWidth, textGlyphHeight, streamBuffer[i].text->text, streamBuffer[i].text->color);
             }
-        }
-        
-        
-        
-        //
-        // Camera
-        //
-        
-        if (streamBuffer[i].camera != nullptr) {
-            
-            // Update mouse looking
-            if (streamBuffer[i].camera->useMouseLook) {
-                
-                float MouseDiffX = (Input.mouseX - Renderer.displayCenter.x) * streamBuffer[i].camera->MouseSensitivityYaw;
-                float MouseDiffY = (Input.mouseY - Renderer.displayCenter.y) * streamBuffer[i].camera->MouseSensitivityPitch;
-                
-                Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
-                
-                streamBuffer[i].camera->lookAngle.x += MouseDiffX * 0.01;
-                streamBuffer[i].camera->lookAngle.y -= MouseDiffY * 0.01;
-                
-                // Yaw limit
-                if (streamBuffer[i].camera->lookAngle.x >= 0.109655) {streamBuffer[i].camera->lookAngle.x -= 0.109655;}
-                if (streamBuffer[i].camera->lookAngle.x <= 0.109655) {streamBuffer[i].camera->lookAngle.x += 0.109655;}
-                
-                // Pitch limit
-                if (streamBuffer[i].camera->lookAngle.y >  0.0274f) streamBuffer[i].camera->lookAngle.y =  0.0274f;
-                if (streamBuffer[i].camera->lookAngle.y < -0.0274f) streamBuffer[i].camera->lookAngle.y = -0.0274f;
-                
-            }
-            
-            // Restore looking angle
-            streamBuffer[i].camera->transform.orientation.x = streamBuffer[i].camera->lookAngle.x;
-            streamBuffer[i].camera->transform.orientation.y = streamBuffer[i].camera->lookAngle.y;
-            
-            // Check camera panel
-            if (streamBuffer[i].panel != nullptr) {
-                
-                streamBuffer[i].camera->transform.position = currentTransform.position;
-                
-            }
-            
-        }
-        
-        
-        
-        //
-        // Lights
-        //
-        if (streamBuffer[i].light != nullptr) {
-            streamBuffer[i].light->position    = currentTransform.position;
-            streamBuffer[i].light->direction   = currentTransform.EulerAngles();
         }
         
         continue;

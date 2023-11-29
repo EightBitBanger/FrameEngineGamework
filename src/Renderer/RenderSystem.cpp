@@ -19,7 +19,7 @@ RenderSystem::RenderSystem() :
     displaySize(glm::vec2(0, 0)),
     displayCenter(glm::vec2(0, 0)),
     
-    doUpdateLightsEveryFrame(false),
+    doUpdateLightsEveryFrame(true),
     
     mNumberOfDrawCalls(0),
     
