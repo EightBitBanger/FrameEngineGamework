@@ -53,10 +53,10 @@ void callbackButtonD(void) {text[8]->text = "ButtonB";}
 
 void Start() {
     
-    // Create the main world scene and add it to the render queue
+    // Create the main world scene 
     Engine.sceneMain = Engine.Create<Scene>();
     
-    // Add the scene to the renderer
+    // Add the scene to the render system
     Renderer.AddSceneToRenderQueue(Engine.sceneMain);
     
     // Create a sky
@@ -75,17 +75,13 @@ void Start() {
     
     
     // Create a camera controller
-    cameraController = Engine.CreateCameraController(Vector3(0, 0, 0), Vector3(1, 8, 1));
+    Vector3 position = Vector3(0, 0, 0);
+    Vector3 colliderScale = Vector3(1, 8, 1);
+    
+    cameraController = Engine.CreateCameraController(position, colliderScale);
     Engine.sceneMain->camera = cameraController->GetComponent<Camera>();
-    Engine.sceneMain->camera->DisableMouseLook();
-    //Engine.sceneMain->camera->isFixedAspect = true;
     
-    Engine.sceneMain->camera->viewport.w = Renderer.viewport.w;
-    Engine.sceneMain->camera->viewport.h = Renderer.viewport.h;
-    
-    cameraController->DisableGravity();
-    
-    // Attach sky object to the camera object
+    // Attach the sky object to the camera controller
     skyObject->parent = cameraController;
     
     
@@ -185,22 +181,6 @@ void Start() {
     buttonExample->triggerOnLeftButton = true;
     buttonExample->triggerOnPressed    = true;
     buttonExample->callback = callbackButtonA;
-    
-    /*
-    Button buttonA;
-    
-    buttonA.x = 0;
-    buttonA.y = 0;
-    
-    buttonA.w = 60;
-    buttonA.h = 50;
-    
-    buttonA.activeOnLeftClick = true;
-    buttonA.activeOnPressed = true;
-    buttonA.callback = callbackButtonA;
-    
-    mButtons.push_back(buttonA);
-    */
     
     
     return;

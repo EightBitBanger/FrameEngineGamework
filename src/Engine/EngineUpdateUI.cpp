@@ -67,9 +67,9 @@ void EngineSystemManager::UpdateUI(void) {
             
             // Get clicked state
             bool isClicked = false;
-            if (button->activeOnLeftClick)   if (leftActive)   isClicked = true;
-            if (button->activeOnMiddleClick) if (middleActive) isClicked = true;
-            if (button->activeOnRightClick)  if (rightActive)  isClicked = true;
+            if (button->triggerOnLeftButton)   if (leftActive)   isClicked = true;
+            if (button->triggerOnMiddleButton) if (middleActive) isClicked = true;
+            if (button->triggerOnRightButton)  if (rightActive)  isClicked = true;
             
             // Check clicked
             if (isClicked) {
