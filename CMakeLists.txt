@@ -1,15 +1,22 @@
 cmake_minimum_required(VERSION 3.8)
 
 project(framework VERSION 0.1.0 LANGUAGES CXX)
+
 include(GNUInstallDirs)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
-
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
+option(BUILD_RUNTIME_EXECUTABLE "" OFF)
+option(BUILD_APPLICATION_LIBRARY "" ON)
+option(BUILD_CORE_ENGINE "" OFF)
 
 
+if(BUILD_RUNTIME_EXECUTABLE)
 
+if(BUILD_CORE_ENGINE OR BUILD_APPLICATION_LIBRARY)
+    message(FATAL_ERROR "Multiple project builds are set. Cmake can only build one project at a time.")
+endif()
 
 set (RUNTIME_HEADERS
     
@@ -83,10 +90,45 @@ set (RUNTIME_SOURCES
 )
 
 
+add_executable(runtime ${RUNTIME_HEADERS} ${RUNTIME_SOURCES})
+
+target_compile_features(runtime PUBLIC cxx_std_11)
+
+set_target_properties(runtime PROPERTIES CXX_EXTENSIONS OFF)
+
+set_target_properties(runtime PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+)
+
+target_include_directories(runtime PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(runtime glew32s.lib)
+target_link_libraries(runtime opengl32.a)
+target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
+target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
+target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libgame.dll.a)
+
+endif()
 
 
 
 
+
+
+
+
+#
+# Build application code library
+#
+
+if(BUILD_APPLICATION_LIBRARY)
+
+if(BUILD_CORE_ENGINE OR BUILD_RUNTIME_EXECUTABLE)
+    message(FATAL_ERROR "Multiple build options are set. Please only select one build option at a time.")
+endif()
 
 set (GAME_HEADERS
     
@@ -159,11 +201,46 @@ set (GAME_SOURCES
 )
 
 
+add_library(game SHARED ${GAME_HEADERS} ${GAME_SOURCES})
+
+target_compile_features(game PUBLIC cxx_std_11)
+
+set_target_properties(game PROPERTIES CXX_EXTENSIONS OFF)
+
+set_target_properties(game PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+	LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+	ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/vendor"
+)
+
+target_include_directories(game PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(game glew32s.lib)
+target_link_libraries(game opengl32.a)
+target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
+target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
+
+endif()
 
 
 
 
 
+
+
+
+#
+# Build core engine library
+#
+
+if(BUILD_CORE_ENGINE)
+
+if(BUILD_APPLICATION_LIBRARY OR BUILD_RUNTIME_EXECUTABLE)
+    message(FATAL_ERROR "Multiple build options are set. Please only select one build option at a time.")
+endif()
 
 set (CORE_HEADERS
     
@@ -313,72 +390,6 @@ set (CORE_SOURCES
 )
 
 
-
-
-
-#
-# Build application executable runtime
-#
-
-add_executable(runtime ${RUNTIME_HEADERS} ${RUNTIME_SOURCES})
-
-target_compile_features(runtime PUBLIC cxx_std_11)
-
-set_target_properties(runtime PROPERTIES CXX_EXTENSIONS OFF)
-
-set_target_properties(runtime PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
-)
-
-target_include_directories(runtime PUBLIC
-              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-              $<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries(runtime glew32s.lib)
-target_link_libraries(runtime opengl32.a)
-target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
-target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
-target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libgame.dll.a)
-
-
-
-
-#
-# Build application code library
-#
-
-add_library(game SHARED ${GAME_HEADERS} ${GAME_SOURCES})
-
-target_compile_features(game PUBLIC cxx_std_11)
-
-set_target_properties(game PROPERTIES CXX_EXTENSIONS OFF)
-
-set_target_properties(game PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
-)
-
-target_include_directories(game PUBLIC
-              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-              $<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries(game glew32s.lib)
-target_link_libraries(game opengl32.a)
-target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
-target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
-
-
-
-
-#
-# Build core engine library
-#
-
 add_library(core SHARED ${CORE_HEADERS} ${CORE_SOURCES})
 
 target_compile_features(core PUBLIC cxx_std_11)
@@ -386,19 +397,20 @@ target_compile_features(core PUBLIC cxx_std_11)
 set_target_properties(core PROPERTIES CXX_EXTENSIONS OFF)
 
 set_target_properties(core PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}"
+	RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+	LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+	ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/vendor"
 )
 
 target_include_directories(core PUBLIC
-              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-              $<INSTALL_INTERFACE:include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
 )
 
 target_link_libraries(core glew32s.lib)
 target_link_libraries(core opengl32.a)
 target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
 
+endif()
 
 
