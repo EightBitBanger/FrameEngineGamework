@@ -21,7 +21,7 @@
 //#define  ENABLE_DEBUG_ON_DESTRUCT__
 //#define  ENABLE_DEBUG_PAUSE__
 
-//#define  ENABLE_CRASH_DUMP__
+#define  ENABLE_CRASH_DUMP__
 
 
 #ifdef  ENABLE_CONSOLE_DEBUG__
@@ -204,9 +204,6 @@ public:
             T& poolPtr = *poolPair.first;
             std::vector<bool>& boolPtr = poolPair.second;
             
-            // Check if the pool allocated
-            if (&poolPtr == nullptr) return nullptr;
-            
 #ifdef ENABLE_CONSOLE_DEBUG__
     #ifdef ENABLE_DEBUG_ON_CONSTRUCT__
             
@@ -286,13 +283,13 @@ public:
     }
     
     /** Returns the number of active objects.*/
-    int Size(void) {
+    unsigned int Size(void) {
         return m_activeList.size();
     }
     
     
     /** Returns the number of used memory locations.*/
-    int GetObjectCount(void) {
+    unsigned int GetObjectCount(void) {
         
         int ObjectCount = 0;
         
@@ -318,21 +315,21 @@ public:
         return ObjectCount;
     }
     /** Returns the number of unused memory locations.*/
-    int GetFreeCount(void) {
+    unsigned int GetFreeCount(void) {
         
-        int FreeCount = 0;
+        unsigned int FreeCount = 0;
         
         // Iterate the pool list
-        int poolListSz = m_pool.size();
-        for (int i=0; i < poolListSz; i++) {
+        unsigned int poolListSz = m_pool.size();
+        for (unsigned int i=0; i < poolListSz; i++) {
             
             // Get the next pool and free list pair
             //T*    poolPtr = m_pool[i].first;
             std::vector<bool> boolPtr = m_pool[i].second;
             
             // Iterate the pool its self
-            int poolSz = this ->m_poolSz;
-            for (int a=0; a < poolSz; a++) {
+            unsigned int poolSz = this ->m_poolSz;
+            for (unsigned int a=0; a < poolSz; a++) {
                 
                 // Check if the object is inactive
                 if (!boolPtr[a]) FreeCount++;
@@ -356,16 +353,16 @@ public:
         std::cout << "  Memory offset    State" << std::endl << std::endl;
         
         // Iterate the pool list
-        int poolListSz = m_pool.size();
-        for (int i=0; i < poolListSz; i++) {
+        unsigned int poolListSz = m_pool.size();
+        for (unsigned int i=0; i < poolListSz; i++) {
             
             // Get the next pool and free list
             T*    poolPtr = m_pool[i].first;
             std::vector<bool> boolPtr = m_pool[i].second;
             
             // Iterate the pool objects
-            int poolSz = this ->m_poolSz;
-            for (int f=0; f < poolSz; f++) {
+            unsigned int poolSz = this ->m_poolSz;
+            for (unsigned int f=0; f < poolSz; f++) {
                 
                 std::cout << "  " << &poolPtr[f];
                 
@@ -417,7 +414,7 @@ public:
         
         // Iterate the pool list
         int poolListSz = m_pool.size();
-        for (int i=0; i < poolListSz; i++) {
+        for (unsigned int i=0; i < poolListSz; i++) {
             
             // Get the next pair
             std::pair<T*, std::vector<bool>>* poolPair = &m_pool[i];
@@ -430,7 +427,7 @@ public:
             
             // Iterate the pool
             int poolSz = this ->m_poolSz;
-            for (int f=0; f < poolSz; f++) {
+            for (unsigned int f=0; f < poolSz; f++) {
                 
                 if (boolPtr[f]) {
                     

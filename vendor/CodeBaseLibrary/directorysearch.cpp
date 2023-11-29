@@ -1,6 +1,5 @@
 #include "directorysearch.h"
 
-//#include <filesystem>
 #include <dirent.h>
 
 std::vector<std::string> DirectoryGetList(std::string path) {
