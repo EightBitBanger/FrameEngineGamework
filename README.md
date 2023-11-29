@@ -18,16 +18,6 @@ This engine is split up into three parts. The engine core and the game code are 
 <br><br/>
 
 
-## Screenshots
-You can find more screenshots [here](https://github.com/RetroBytes32/GameEngineFramework/wiki/Screenshots).
-
-### Vertex lighting demo
-<img src="https://github.com/RetroBytes32/GameEngineFramework/blob/main/demo/vertex_lighting_demo_2.jpg"  width="600" height="400">
-
-
-<br><br/>
-
-
 ## Platform
 While this framework currently only supports windows, I look forward to porting to linux in the future.
 - Windows
@@ -37,7 +27,7 @@ While this framework currently only supports windows, I look forward to porting 
 
 
 ##  Building the project
-First, clone the repository with git. You can then use cmake to generate the project files of your choice.
+First, clone the repository with git. You can then use cmake to generate the project files of your choice. You have three build options in cmake. Each option will generate a project file which will compile the selected part of the framework. To use the framework you would want to select BUILD_APPLICATION_LIBRARY, however, modifying the core requires you to select BUILD_CORE_ENGINE.
 
 ```
 git clone https://github.com/RetroBytes32/FrameEngineGamework
@@ -55,8 +45,15 @@ Building this repository will require the following libraries to be installed.
 
 
 
+## Screenshots
+You can find screenshots of development progress [here](https://github.com/RetroBytes32/GameEngineFramework/wiki/Screenshots).
+
+
 <br><br/>
-## Singleton access pointers
+
+
+<br><br/>
+## Access pointers
 The framework contains many sub systems which can be accessed though the following "singletons".
 
 ```c++
