@@ -37,10 +37,14 @@ void main() {
         float range        = u_light_attenuation[i].g;
         float attenuation  = u_light_attenuation[i].b;
         
+        float dist = length( u_light_position[i] - vec3(vertPos));
+        
+        if (dist > range) 
+            continue;
+        
         vec3 lightDir = normalize(u_light_position[i] - vec3(vertPos));
         
         float diff = max(dot(norm, lightDir), 0.0);
-        float dist = length( u_light_position[i] - vec3(vertPos));
         
         // Specular
         vec3 viewDir = normalize(u_eye - vec3(vertPos));
@@ -48,9 +52,6 @@ void main() {
         float shininess = 1;
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
         vec3 specular = u_light_color[i] * spec * m_specular;
-        
-        if (dist > range) 
-            continue;
         
         lightColor += ((diff * u_light_color[i]) * intensity) / (1.0 + (dist * attenuation)) + specular;
         lightColor = clamp(lightColor, 0.0, 2.0);
