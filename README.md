@@ -52,30 +52,6 @@ You can find screenshots of development progress [here](https://github.com/Retro
 <br><br/>
 
 
-<br><br/>
-## Access pointers
-The framework contains many sub systems which can be accessed though the following "singletons".
-
-```c++
-#include "Engine/Engine.h"
-
-extern RandomGen            Random;
-extern ColorPreset          Colors;
-extern Timer                Time;
-extern Timer                PhysicsTime;
-extern Logger               Log;
-
-extern EngineSystemManager  Engine;
-extern ApplicationLayer     Application;
-extern ResourceManager      Resources;
-extern ScriptSystem         Scripting;
-extern RenderSystem         Renderer;
-extern PhysicsSystem        Physics;
-extern InputSystem          Input;
-```
-
-
-<br><br/>
 ## Application entry point
 The source file "Application.cpp" is the application layer entry point and the starting point for your application code.
 The framework will provide you with the functions `Start()` and `Run()`. These functions will serve as an entry point for your application.
