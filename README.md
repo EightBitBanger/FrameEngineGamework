@@ -26,7 +26,7 @@ While this framework currently only supports windows, I look forward to porting 
 <br><br/>
 
 
-##  Building the project
+##  Building the repository
 First, clone the repository with git. You can then use cmake to generate the project files of your choice. You have three build options in cmake. Each option will generate a project file which will compile the selected part of the framework. To use the framework you would want to select BUILD_APPLICATION_LIBRARY, however, modifying the core requires you to select BUILD_CORE_ENGINE.
 
 ```
@@ -35,7 +35,7 @@ git clone https://github.com/RetroBytes32/FrameEngineGamework
 
 
 ### Dependencies
-Building this repository will require the following libraries to be installed.
+Building this repository will require the following libraries.
 
 * <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 * <a href="https://github.com/nothings/stb">STB-Image</a>⁭
