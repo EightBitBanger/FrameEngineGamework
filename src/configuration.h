@@ -27,6 +27,14 @@
 
 
 //
+// Profiling
+//
+
+#define PROFILE_ENGINE_CORE
+
+
+
+//
 // Event log
 //
 
@@ -41,7 +49,7 @@
 #define  RENDER_FRAMES_PER_SECOND          60
 //#define  RENDERER_CHECK_OPENGL_ERRORS
 
-#define RENDER_NUMBER_OF_LIGHTS    30
+#define RENDER_NUMBER_OF_LIGHTS    80
 
 #define RENDERER_VERTEX_BUFFER_MAX  1000000
 

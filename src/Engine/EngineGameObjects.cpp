@@ -170,9 +170,9 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     float scale = 1.0;
     
     // Collider
-    BoxShape* boxShape = Physics.CreateColliderBox(scale, scale, scale);
-    newGameObject->AddColliderBox(boxShape, 0, 0, 0);
-    newGameObject->EnableGravity();
+    //BoxShape* boxShape = Physics.CreateColliderBox(scale, scale, scale);
+    //newGameObject->AddColliderBox(boxShape, 0, 0, 0);
+    //newGameObject->EnableGravity();
     
     // Physics
     newGameObject->SetMass(10);

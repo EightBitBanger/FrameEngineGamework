@@ -54,8 +54,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Engine.Initiate();
     
-    // Profiling timers
-    Timer profileTimer;
+#ifdef PROFILE_ENGINE_CORE
+    ProfilerTimer profileTimer;
+#endif
     
 #ifdef RUN_UNIT_TESTS
     TestFramework testFrameWork;
@@ -93,15 +94,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Start();
     
     // Render timer
-    float renderUpdateTimeout = 1000.0f / RENDER_FRAMES_PER_SECOND;
-    float renderAccumulator=0;
     Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     Time.Update();
     
     // Physics timer
-    float physicsUpdateTimeout = 1000.0f / PHYSICS_UPDATES_PER_SECOND;
-    float physicsAccumulator=0;
-    float physicsAlpha=0;
     PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
     PhysicsTime.Update();
     
@@ -114,14 +110,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     // Tick update timer
     Timer tickTimer;
-    float tickUpdateTimeout = 1000.0f / 4;
+    float tickUpdateTimeout = 1000.0f / 4.0;
     float tickAccumulator=0;
     float tickUpdateMax = tickUpdateTimeout * 100;
     tickTimer.Update();
     AI.UpdateSendSignal();
-    
-    // Profiler timers
-    profileTimer.Update();
     
     
     //
@@ -152,7 +145,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
                 
-                profileTimer.Update();
+#ifdef PROFILE_ENGINE_CORE
+                profileTimer.Begin();
+#endif
                 
                 Run();
                 
@@ -162,7 +157,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 
                 Engine.Update();
                 
-                Engine.profileGameEngineUpdate = profileTimer.GetCurrentDelta();
+#ifdef PROFILE_ENGINE_CORE
+                Engine.profileGameEngineUpdate = profileTimer.Query();
+#endif
                 
                 fixedAccumulator -= fixedUpdateTimeout;
                 
@@ -208,18 +205,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         // Physics timer
         //
         
-        physicsAccumulator += PhysicsTime.GetCurrentDelta();
-        PhysicsTime.Update();
-        
-        if (physicsAccumulator >= physicsUpdateTimeout) {
+        if (PhysicsTime.Update()) {
             
-            physicsAccumulator -= physicsUpdateTimeout;
+#ifdef PROFILE_ENGINE_CORE
+            profileTimer.Begin();
+#endif
             
-            profileTimer.Update();
+            Physics.world->update( PHYSICS_UPDATES_PER_SECOND );
             
-            Physics.world->update( physicsUpdateTimeout );
-            
-            Engine.profilePhysicsSystem = profileTimer.GetCurrentDelta();
+#ifdef PROFILE_ENGINE_CORE
+            Engine.profilePhysicsSystem = profileTimer.Query();
+#endif
             
             // Interpolation factor
             //physicsAlpha = physicsAccumulator / physicsUpdateTimeout;
@@ -230,12 +226,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         // Render timer
         //
         
-        renderAccumulator += Time.GetCurrentDelta();
-        Time.Update();
-        
-        if (renderAccumulator >= renderUpdateTimeout) {
+        if (Time.Update()) {
             
-            renderAccumulator -= renderUpdateTimeout;
+            std::cout<< Time.updateRateMs <<std::endl;
             
             // Reset mouse scroll wheel state
             Input.mouseWheelDelta = 0;
@@ -246,23 +239,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             Input.mouseX = cursorPos.x;
             Input.mouseY = cursorPos.y;
             
-            // Update window area
-            RECT WindowRect;
-            GetWindowRect(Application.windowHandle, &WindowRect);
-            
-            // Set window view port
-            Renderer.viewport.x = WindowRect.left;
-            Renderer.viewport.y = WindowRect.top;
-            Renderer.viewport.w = WindowRect.right - WindowRect.left;
-            Renderer.viewport.h = WindowRect.bottom - WindowRect.top;
-            
-            
-            profileTimer.Update();
+#ifdef PROFILE_ENGINE_CORE
+            profileTimer.Begin();
+#endif
             
             // Draw the current frame state
             Renderer.RenderFrame();
             
-            Engine.profileRenderSystem = profileTimer.GetCurrentDelta();
+#ifdef PROFILE_ENGINE_CORE
+            Engine.profileRenderSystem = profileTimer.Query();
+#endif
             
         }
         

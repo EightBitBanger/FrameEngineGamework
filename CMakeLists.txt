@@ -11,6 +11,8 @@ option(BUILD_RUNTIME_EXECUTABLE "" OFF)
 option(BUILD_APPLICATION_LIBRARY "" ON)
 option(BUILD_CORE_ENGINE "" OFF)
 
+find_package ( ReactPhysics3D REQUIRED )
+
 
 if(BUILD_RUNTIME_EXECUTABLE)
 
@@ -56,6 +58,8 @@ set (RUNTIME_HEADERS
     
     "src/Physics/PhysicsSystem.h"
     "src/Physics/components/meshcollider.h"
+    
+    "src/Profiler/Profiler.h"
     
     "src/Renderer/enumerators.h"
     "src/Renderer/RenderSystem.h"
@@ -169,6 +173,8 @@ set (GAME_HEADERS
     "src/Physics/PhysicsSystem.h"
     "src/Physics/components/meshcollider.h"
     
+    "src/Profiler/Profiler.h"
+    
     "src/Renderer/enumerators.h"
     "src/Renderer/RenderSystem.h"
     "src/Renderer/components/camera.h"
@@ -278,6 +284,8 @@ set (CORE_HEADERS
     "src/Physics/PhysicsSystem.h"
     "src/Physics/components/meshcollider.h"
     
+    "src/Profiler/Profiler.h"
+    
     "src/Renderer/enumerators.h"
     "src/Renderer/RenderSystem.h"
     "src/Renderer/components/camera.h"
@@ -349,6 +357,8 @@ set (CORE_SOURCES
     
     "src/Physics/PhysicsSystem.cpp"
     "src/Physics/components/meshcollider.cpp"
+    
+    "src/Profiler/Profiler.cpp"
     
     "src/Renderer/RenderSystem.cpp"
     "src/Renderer/Pipeline.cpp"

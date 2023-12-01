@@ -21,5 +21,6 @@
 #include "../Scripting/ScriptSystem.h"
 #include "../Serialization/Serialization.h"
 #include "../ActorAI/ActorSystem.h"
+#include "../Profiler/Profiler.h"
 
 #include "../engine/engine.h"

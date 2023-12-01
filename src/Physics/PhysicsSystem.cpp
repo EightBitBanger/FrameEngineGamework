@@ -13,20 +13,20 @@ PhysicsSystem::PhysicsSystem() :
 void PhysicsSystem::Initiate(void) {
     assert(world == nullptr);
     rp3d::PhysicsWorld::WorldSettings worldSettings;
-    worldSettings.defaultBounciness            = 0.5;
-    worldSettings.defaultFrictionCoefficient   = 0.7;
-    worldSettings.restitutionVelocityThreshold = 0.9;
+    //worldSettings.defaultBounciness            = 0.5;
+    //worldSettings.defaultFrictionCoefficient   = 0.7;
+    //worldSettings.restitutionVelocityThreshold = 0.9;
     
     worldSettings.isSleepingEnabled = true;
     worldSettings.gravity = rp3d::Vector3(0, 0, 0);
     
     world = common.createPhysicsWorld(worldSettings);
     
-    world->setSleepLinearVelocity(0.01);
-    world->setSleepAngularVelocity(0.01);
+    //world->setSleepLinearVelocity(0.01);
+    //world->setSleepAngularVelocity(0.01);
     
-    world->setNbIterationsVelocitySolver(15);
-    world->setNbIterationsPositionSolver(8);
+    //world->setNbIterationsVelocitySolver(15);
+    //world->setNbIterationsPositionSolver(8);
     
     return;
 }

@@ -63,7 +63,6 @@ public:
     Scene* sceneMain;
     
     // Profiling
-    
     float profileRenderSystem;
     float profilePhysicsSystem;
     float profileGameEngineUpdate;

@@ -104,12 +104,21 @@ void ActorSystem::Update(void) {
         
         
         
+         
+        
         // Chance to start moving
         if (Random.Range(0, 10) > mActors[i]->chanceToMove) {
             forward.x = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
             forward.y = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
             forward.z = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
         }
+        
+        
+        
+        
+        
+        
+        
         
         // Apply forward velocity
         mActors[i]->velocity = forward;
