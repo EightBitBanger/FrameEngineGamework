@@ -2,7 +2,7 @@
 #include <string>
 
 #include "../framework.h"
-#include "../../src/engine/types/transform.h"
+#include <engine/types/transform.h>
 
 void TestFramework::TestTransform(void) {
     if (hasTestFailed) return;

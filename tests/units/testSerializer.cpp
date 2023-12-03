@@ -2,7 +2,7 @@
 #include <string>
 
 #include "../framework.h"
-#include "../../src/Serialization/Serialization.h"
+#include <Serialization/Serialization.h>
 
 extern Serialization  Serializer;
 

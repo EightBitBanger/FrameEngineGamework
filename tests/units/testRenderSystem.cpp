@@ -2,7 +2,7 @@
 #include <string>
 
 #include "../framework.h"
-#include "../../src/Renderer/RenderSystem.h"
+#include <Renderer/RenderSystem.h>
 extern RenderSystem Renderer;
 
 

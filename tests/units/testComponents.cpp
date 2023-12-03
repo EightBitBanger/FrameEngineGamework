@@ -2,7 +2,7 @@
 #include <string>
 
 #include "../framework.h"
-#include "../../src/Engine/Engine.h"
+#include <Engine/Engine.h>
 
 extern EngineSystemManager  Engine;
 
