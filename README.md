@@ -20,7 +20,7 @@ This engine is split up into three parts. The engine core and the game code are 
 
 ## Platform
 While this framework currently only supports windows, I look forward to porting to linux in the future.
-- Windows
+- Windows (x64)
 
 
 <br><br/>
