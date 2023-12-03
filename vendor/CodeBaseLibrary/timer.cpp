@@ -6,15 +6,15 @@ Timer::Timer() {
     units=0;
     accumulator=0;
     
-    updateRateMs  = 30 / 1000;
-    updateRateMax = updateRateMs + (updateRateMs / 4);
+    updateRateMs  = 1000.0 / 30.0;
+    updateRateMax = updateRateMs + (updateRateMs / 4.0);
     
     interpolationFactor = 0;
     
     LARGE_INTEGER tFrequency;
     
     QueryPerformanceFrequency(&tFrequency);
-    timeFrequency = tFrequency.QuadPart / 1000;
+    timeFrequency = tFrequency.QuadPart / 1000.0;
     
     QueryPerformanceCounter(&tLast);
     return;
@@ -42,12 +42,12 @@ bool Timer::Update(void) {
     
     if (accumulator >= updateRateMs) {
         
-        if (accumulator > updateRateMax) accumulator = updateRateMs;
-        
-        delta = accumulator / 1000;
-        units = accumulator;
+        if (accumulator > updateRateMax) 
+            accumulator = updateRateMax;
         
         accumulator -= updateRateMs;
+        
+        units = accumulator * 1000;
         
         interpolationFactor = accumulator / updateRateMs;
         
@@ -64,8 +64,8 @@ float Timer::Current(void) {
 }
 
 void Timer::SetRefreshRate(int rate) {
-    updateRateMs = 1000 / rate;
-    updateRateMax = updateRateMs + (updateRateMs / 4);
+    updateRateMs = 1000.0 / (float)rate;
+    updateRateMax = updateRateMs + (updateRateMs / 4.0);
     return;
 }
 

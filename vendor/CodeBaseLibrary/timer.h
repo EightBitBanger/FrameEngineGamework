@@ -15,11 +15,14 @@ class __declspec(dllexport) Timer {
     
 public:
     
-    /// Time delta from the last frame.
+    /// Time difference between frames.
     float  delta;
     
-    /// Time delta scaled to units per second.
+    /// Delta time scaled to seconds.
     float  units;
+    
+    /// Amount of accumulated frame time
+    float accumulator;
     
     /// Rate of update in milliseconds.
     float  updateRateMs;
@@ -52,9 +55,6 @@ private:
     
     // Previous frame time
     LARGE_INTEGER tLast;
-    
-    // Amount of accumulated frame time
-    float accumulator;
     
 };
 
