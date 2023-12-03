@@ -1,4 +1,4 @@
-#include <Renderer/components/material.h>
+#include <GameEngineFramework/Renderer/components/material.h>
 
 #define GLEW_STATIC
 #include <gl/glew.h>

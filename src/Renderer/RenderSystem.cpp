@@ -1,4 +1,4 @@
-#include <Renderer/rendersystem.h>
+#include <GameEngineFramework/Renderer/rendersystem.h>
 
 #include <iostream>
 
@@ -271,7 +271,7 @@ std::vector<std::string> RenderSystem::GetGLErrorCodes(std::string errorLocation
         
         ErrorList.push_back( ErrorMsg );
         
-        std::cout << ErrorMsg << std::endl;
+        std::cout << ErrorMsg << "\n";
         
         // Get the next error
         glError = glGetError();

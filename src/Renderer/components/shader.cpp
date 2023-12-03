@@ -1,4 +1,4 @@
-#include <Renderer/components/shader.h>
+#include <GameEngineFramework/Renderer/components/shader.h>
 
 #define GLEW_STATIC
 #include <gl/glew.h>
@@ -130,7 +130,7 @@ int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentSc
     GLint state;
     glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &state);
     if (state == GL_FALSE) {
-        std::cout << " ! Shader link error" << std::endl;
+        std::cout << " ! Shader link error\n";
         return 0;
     }
     
@@ -153,7 +153,7 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
     int vResult;
     glGetShaderiv(ShaderID, GL_COMPILE_STATUS, &vResult);
     if (!vResult) {
-        std::cout << std::endl << " ! Shader compilation error" << std::endl << std::endl << std::endl;
+        std::cout << "\n ! Shader compilation error\n\n\n";
         return 0;
     }
     

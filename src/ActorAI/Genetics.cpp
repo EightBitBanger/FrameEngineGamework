@@ -1,4 +1,4 @@
-#include <ActorAI/Genetics.h>
+#include <GameEngineFramework/ActorAI/Genetics.h>
 
 Gene::Gene() : 
     isActive(false),

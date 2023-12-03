@@ -1,7 +1,7 @@
 // User application code space
 //
 
-#include "Engine/Engine.h"
+#include <GameEngineFramework/Engine/Engine.h>
 
 extern EngineComponents     Components;
 extern ColorPreset          Colors;
@@ -126,7 +126,7 @@ void Start() {
     // AI actor testing
     //
     
-    float spawnArea = 1;
+    float spawnArea = 0;
     float uniformScale = 0.1;
     
     for (int i=0; i < 1000; i++) {

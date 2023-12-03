@@ -1,4 +1,4 @@
-#include <ActorAI/components/neuron.h>
+#include <GameEngineFramework/ActorAI/components/neuron.h>
 
 Neuron::Neuron() {
     

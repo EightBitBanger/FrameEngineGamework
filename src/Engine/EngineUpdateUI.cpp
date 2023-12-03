@@ -1,7 +1,7 @@
 // Engine component related functions
 //
 
-#include <Engine/Engine.h>
+#include <GameEngineFramework/Engine/Engine.h>
 
 __declspec(dllexport) extern EngineComponents  Components;
 __declspec(dllexport) extern ColorPreset       Colors;

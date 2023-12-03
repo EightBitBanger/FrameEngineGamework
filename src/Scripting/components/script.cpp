@@ -1,4 +1,4 @@
-#include <Scripting/components/script.h>
+#include <GameEngineFramework/Scripting/components/script.h>
 
 Script::Script() : 
     

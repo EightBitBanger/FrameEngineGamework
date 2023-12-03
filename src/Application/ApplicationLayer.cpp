@@ -1,4 +1,4 @@
-#include <application/applicationlayer.h>
+#include <GameEngineFramework/Application/ApplicationLayer.h>
 
 #define IDI_ICON  101
 
@@ -98,14 +98,11 @@ void ApplicationLayer::SetWindowCenter(void) {
 void ApplicationLayer::SetWindowCenterScale(float width, float height) {
     assert(windowHandle != NULL);
     
-    RECT windowSz;
-    GetWindowRect(windowHandle, &windowSz);
-    
     Viewport newWindowSz;
-    newWindowSz.x = windowSz.left;
-    newWindowSz.y = windowSz.top;
-    newWindowSz.w = (windowSz.right  - windowSz.left) * width;
-    newWindowSz.h = (windowSz.bottom - windowSz.top)  * height;
+    newWindowSz.y = 0;
+    newWindowSz.x = 0;
+    newWindowSz.w = displayWidth  * width;
+    newWindowSz.h = displayHeight * height;
     
     SetWindowPosition(newWindowSz);
     SetWindowCenter();

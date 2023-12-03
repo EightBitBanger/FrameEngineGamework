@@ -1,4 +1,4 @@
-#include <ActorAI/ActorSystem.h>
+#include <GameEngineFramework/ActorAI/ActorSystem.h>
 
 #include "../../vendor/codebaselibrary/logging.h"
 #include "../../vendor/codebaselibrary/random.h"
@@ -84,7 +84,7 @@ Actor* ActorSystem::GetActor(unsigned int index) {
 void ActorSystem::Update(void) {
     unsigned int numberOfActors = (unsigned int)mActors.Size() - 1;
     
-    float force = 0.005;
+    float force = 0.0001;
     
     glm::vec3 forward(0);
     

@@ -1,4 +1,4 @@
-#include <Renderer/components/camera.h>
+#include <GameEngineFramework/Renderer/components/camera.h>
 
 extern InputSystem Input;
 

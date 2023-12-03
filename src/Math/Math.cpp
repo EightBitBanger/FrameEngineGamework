@@ -1,4 +1,4 @@
-#include <Math/Math.h>
+#include <GameEngineFramework/Math/Math.h>
 
 float MathCore::Lerp(float min, float max, float bias) {
     return glm::lerp(min, max, bias);
