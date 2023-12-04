@@ -7,11 +7,37 @@ include(GNUInstallDirs)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
-option(BUILD_APPLICATION_LIBRARY "" ON)
-option(BUILD_RUNTIME_EXECUTABLE "" OFF)
-option(BUILD_CORE_ENGINE "" OFF)
+option(BUILD_APPLICATION_LIBRARY "Project will build the user application library." ON)
+option(BUILD_RUNTIME_EXECUTABLE "Project will build the runtime executable." OFF)
+option(BUILD_CORE_ENGINE "Project will build the core engine library" OFF)
+
+option(EVENT_LOG_DETAILED   "Log events out to the event log file." OFF)
+option(RUN_UNIT_TESTS       "Run unit tests at application start." OFF)
+option(PROFILE_ENGINE_CORE  "Profile the engine`s core systems." OFF)
 
 
+
+#
+# Build configuration
+#
+
+if(EVENT_LOG_DETAILED)
+    add_compile_definitions(EVENT_LOG_DETAILED)
+endif()
+
+if(RUN_UNIT_TESTS)
+    add_compile_definitions(RUN_UNIT_TESTS)
+endif()
+
+if(PROFILE_ENGINE_CORE)
+    add_compile_definitions(PROFILE_ENGINE_CORE)
+endif()
+
+
+
+#
+# Build application code library
+#
 
 if(BUILD_RUNTIME_EXECUTABLE)
 
@@ -88,6 +114,16 @@ set (RUNTIME_HEADERS
 
 set (RUNTIME_SOURCES
     
+    "tests/framework.cpp"
+    "tests/units/testComponents.cpp"
+    "tests/units/testEngineFunctionality.cpp"
+    "tests/units/testGameObjects.cpp"
+    "tests/units/testRenderSystem.cpp"
+    "tests/units/testScriptSystem.cpp"
+    "tests/units/testPhysicsSystem.cpp"
+    "tests/units/testSerializer.cpp"
+    "tests/units/testTransform.cpp"
+    
     "src/Application/properties.rc"
     "src/Application/main.cpp"
     
@@ -95,6 +131,8 @@ set (RUNTIME_SOURCES
 
 
 add_executable(runtime ${RUNTIME_HEADERS} ${RUNTIME_SOURCES})
+
+add_compile_definitions(BUILD_RUNTIME)
 
 target_compile_features(runtime PUBLIC cxx_std_11)
 
@@ -195,8 +233,6 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Scripting/ScriptSystem.h"
     "include/GameEngineFramework/Scripting/components/script.h"
     
-    "tests/framework.h"
-    
     "vendor/Bly7/OBJ_Loader.h"
     
 )
@@ -209,6 +245,8 @@ set (GAME_SOURCES
 
 
 add_library(game SHARED ${GAME_HEADERS} ${GAME_SOURCES})
+
+add_compile_definitions(BUILD_APPLICATION)
 
 target_compile_features(game PUBLIC cxx_std_11)
 
@@ -307,8 +345,6 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Scripting/ScriptSystem.h"
     "include/GameEngineFramework/Scripting/components/script.h"
     
-    "tests/framework.h"
-    
     "vendor/Bly7/OBJ_Loader.h"
     
     "vendor/CodeBaseLibrary/directorysearch.h"
@@ -382,16 +418,6 @@ set (CORE_SOURCES
     "src/Scripting/ScriptSystem.cpp"
     "src/Scripting/components/script.cpp"
     
-    "tests/framework.cpp"
-    "tests/units/testComponents.cpp"
-    "tests/units/testEngineFunctionality.cpp"
-    "tests/units/testGameObjects.cpp"
-    "tests/units/testRenderSystem.cpp"
-    "tests/units/testScriptSystem.cpp"
-    "tests/units/testPhysicsSystem.cpp"
-    "tests/units/testSerializer.cpp"
-    "tests/units/testTransform.cpp"
-    
     "vendor/CodeBaseLibrary/directorysearch.cpp"
     "vendor/CodeBaseLibrary/fileloader.cpp"
     "vendor/CodeBaseLibrary/logging.cpp"
@@ -404,6 +430,8 @@ set (CORE_SOURCES
 
 
 add_library(core SHARED ${CORE_HEADERS} ${CORE_SOURCES})
+
+add_compile_definitions(BUILD_CORE)
 
 target_compile_features(core PUBLIC cxx_std_11)
 
