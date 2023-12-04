@@ -4,6 +4,9 @@
 #include <vector>
 #include <string>
 
-__declspec(dllexport) std::vector<std::string> DirectoryGetList(std::string path);
+#include <GameEngineFramework/configuration.h>
+
+
+ENGINE_API std::vector<std::string> DirectoryGetList(std::string path);
 
 #endif

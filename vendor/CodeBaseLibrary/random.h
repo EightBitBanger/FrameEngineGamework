@@ -8,7 +8,10 @@
 #include <cstdlib>
 //#include <random>
 
-class __declspec(dllexport) RandomGen {
+#include <GameEngineFramework/configuration.h>
+
+
+class ENGINE_API RandomGen {
     
 public:
     

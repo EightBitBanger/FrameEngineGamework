@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <vector>
 
+#include <GameEngineFramework/configuration.h>
 
 //
 // Configuration
@@ -33,7 +34,7 @@
  #include <string>
 #endif
 
-struct __declspec(dllexport) CustomAllocator {
+struct ENGINE_API CustomAllocator {
     
     /** Initial number of pools.*/
     int poolSize;
@@ -43,7 +44,7 @@ struct __declspec(dllexport) CustomAllocator {
     
 };
 
-template<typename T> class __declspec(dllexport) PoolAllocator {
+template<typename T> class ENGINE_API PoolAllocator {
     
     std::vector< std::pair<T*, std::vector<bool>> > m_pool;
     std::vector< T* > m_activeList;
@@ -135,7 +136,7 @@ public:
                     T& poolRef = *poolPair ->first;
                     
                     std::cout << " [Leak detected]  < " << &poolPtr[f] << " >  pool #" << i << "  pool *";
-                    std::cout << &poolRef << std::endl;
+                    std::cout << &poolRef << "\n";
                 }
                 
             }
@@ -173,7 +174,7 @@ public:
 #ifdef ENABLE_CONSOLE_DEBUG__
     #ifdef ENABLE_DEBUG_ON_CONSTRUCT__
                     
-                    std::cout << "  Constructed :: " << &poolPtr[f] << "   Pool * " << &poolPtr[0] << std::endl;
+                    std::cout << "  Constructed :: " << &poolPtr[f] << "   Pool * " << &poolPtr[0] << "\n";
                     
     #endif
 #endif
@@ -207,7 +208,7 @@ public:
 #ifdef ENABLE_CONSOLE_DEBUG__
     #ifdef ENABLE_DEBUG_ON_CONSTRUCT__
             
-            std::cout << "  Constructed :: " << &poolPtr << "   Pool * " << &poolPtr << std::endl;
+            std::cout << "  Constructed :: " << &poolPtr << "   Pool * " << &poolPtr << "\n";
             
     #endif
 #endif
@@ -251,7 +252,7 @@ public:
     #ifdef ENABLE_DEBUG_ON_DESTRUCT__
                         T& poolRef = *poolPtr;
                         
-                        std::cout << "  Destructed :: " << &poolPtr[f] << "   Pool * " << &poolRef << std::endl;
+                        std::cout << "  Destructed :: " << &poolPtr[f] << "   Pool * " << &poolRef << "\n";
                         
     #endif
 #endif
@@ -348,9 +349,9 @@ public:
         
     #ifdef  ENABLE_DEBUG_DETAILS__
         
-        std::cout << std::endl << std::endl << std::endl;
+        std::cout << "\n\n\n";
         
-        std::cout << "  Memory offset    State" << std::endl << std::endl;
+        std::cout << "  Memory offset    State\n\n";
         
         // Iterate the pool list
         unsigned int poolListSz = m_pool.size();
@@ -368,31 +369,31 @@ public:
                 
                 if (boolPtr[f]) std::cout << "         " << "Reserved";
                 
-                std::cout << std::endl;
+                std::cout << "\n";
                 
             }
             
         }
     #endif
         
-        std::cout << std::endl << std::endl << " === Memory statistical analysis === " << std::endl << std::endl;
+        std::cout << "\n\n === Memory statistical analysis === \n\n";
         
         std::string spcStr = "  ";
         
-        std::cout << spcStr << this ->getObjectCount() << " - Used memory locations" << std::endl;
-        std::cout << spcStr << this ->getFreeCount() << " - Unused memory locations" << std::endl;
+        std::cout << spcStr << this ->getObjectCount() << " - Used memory locations\n";
+        std::cout << spcStr << this ->getFreeCount() << " - Unused memory locations\n";
         
-        std::cout << std::endl;
+        std::cout << "\n";
         
-        std::cout << spcStr << spcStr << m_poolSz << " - Pool size" << std::endl;
-        std::cout << spcStr << spcStr << m_poolCount << " - Total pools" << std::endl;
+        std::cout << spcStr << spcStr << m_poolSz << " - Pool size\n";
+        std::cout << spcStr << spcStr << m_poolCount << " - Total pools\n";
         
-        std::cout << std::endl;
+        std::cout << "\n";
         
-        std::cout << spcStr << spcStr << m_poolSz * sizeof(T) <<      " - Size of a pool in bytes" << std::endl;
-        std::cout << spcStr << spcStr << m_poolSz * sizeof(T) * m_poolCount << " - Total size of all pools in bytes" << std::endl;
+        std::cout << spcStr << spcStr << m_poolSz * sizeof(T) <<      " - Size of a pool in bytes\n";
+        std::cout << spcStr << spcStr << m_poolSz * sizeof(T) * m_poolCount << " - Total size of all pools in bytes\n";
         
-        std::cout << std::endl<< std::endl;
+        std::cout << "\n\n";
         
 #endif
         
@@ -408,9 +409,9 @@ public:
         fDump.open(FileName, std::fstream::trunc | std::fstream::out);
         
         // Create the file if it does not exist
-        if (!fDump.is_open()) fDump << "" << std::endl;
+        if (!fDump.is_open()) fDump << "\n";
         
-        fDump << "  Allocation crash report" << std::endl << std::endl;
+        fDump << "  Allocation crash report\n";
         
         // Iterate the pool list
         int poolListSz = m_pool.size();
@@ -423,7 +424,7 @@ public:
             
             // Log the pool pointer
             T& poolRef = *poolPair ->first;
-            fDump << "pool[" << i << "] " << poolPair ->first << std::endl;
+            fDump << "pool[" << i << "] " << poolPair ->first << "\n";
             
             // Iterate the pool
             int poolSz = this ->m_poolSz;
@@ -433,7 +434,7 @@ public:
                     
                     // Log the object pointer
                     T* poolRef = &poolPtr[f];
-                    fDump << " " << f << " " << poolRef << std::endl;
+                    fDump << " " << f << " " << poolRef << "\n";
                     
                 }
                 

@@ -10,8 +10,10 @@
 #include <sdkddkver.h>
 #include <windows.h>
 
+#include <GameEngineFramework/configuration.h>
 
-class __declspec(dllexport) Timer {
+
+class ENGINE_API Timer {
     
 public:
     

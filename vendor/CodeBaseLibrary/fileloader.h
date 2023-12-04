@@ -28,7 +28,7 @@ Data...
 */
 
 
-class __declspec(dllexport) FileLoader {
+class ENGINE_API FileLoader {
     
 public:
     

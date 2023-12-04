@@ -6,7 +6,10 @@
 
 #define  EVENT_LOG_FILENAME   "events.txt"
 
-class __declspec(dllexport) Logger {
+#include <GameEngineFramework/configuration.h>
+
+
+class ENGINE_API Logger {
     
 public:
     
