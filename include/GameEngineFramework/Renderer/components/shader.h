@@ -7,7 +7,7 @@
 #include <GameEngineFramework/Engine/types/color.h>
 
 
-class __declspec(dllexport) Shader {
+class ENGINE_API Shader {
     
 public:
     

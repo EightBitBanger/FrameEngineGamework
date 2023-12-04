@@ -1,7 +1,9 @@
 #ifndef _NEURAL_NETWORKING__
 #define _NEURAL_NETWORKING__
 
-struct __declspec(dllexport) Neuron {
+#include <GameEngineFramework/configuration.h>
+
+struct ENGINE_API Neuron {
     
     float in   [3];
     float layerA[4];

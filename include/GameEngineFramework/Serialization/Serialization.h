@@ -3,8 +3,10 @@
 
 #include <fstream>
 
+#include <GameEngineFramework/configuration.h>
 
-class __declspec(dllexport) Serialization {
+
+class ENGINE_API Serialization {
     
 public:
     

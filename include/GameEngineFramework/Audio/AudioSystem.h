@@ -5,7 +5,10 @@
 #include <mutex>
 #include <chrono>
 
-class __declspec(dllexport) AudioSystem {
+#include <GameEngineFramework/configuration.h>
+
+
+class ENGINE_API AudioSystem {
     
 public:
     

@@ -4,8 +4,10 @@
 #include <ReactPhysics3d/ReactPhysics3d.h>
 #include <vector>
 
+#include <GameEngineFramework/configuration.h>
 
-class __declspec(dllexport) MeshCollider {
+
+class ENGINE_API MeshCollider {
     
 public:
     

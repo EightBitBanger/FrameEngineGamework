@@ -15,6 +15,9 @@ ResourceManager::ResourceManager() {
 
 void ResourceManager::Initiate(void) {
     
+    Log.Write("Resource definitions");
+    Log.WriteLn();
+    
     // Load resource directories if they exist
     std::vector<std::string> shaderDirectoryList   = DirectoryGetList(".\\core\\shaders\\");
     std::vector<std::string> modelDirectoryList    = DirectoryGetList(".\\core\\models\\");
@@ -124,10 +127,6 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName, bo
     std::string logstr = "  + " + resourceName + "  " + path;
     Log.Write(logstr);
     
-#ifdef EVENT_LOG_DETAILED
-    logstr = "    + " + IntToString(textureTag.width) + " X " + IntToString(textureTag.height);
-    Log.Write(logstr);
-#endif
     return true;
 }
 
@@ -149,10 +148,6 @@ bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName, 
     std::string logstr = "  + " + newAsset.name + "  " + path;
     Log.Write(logstr);
     
-#ifdef EVENT_LOG_DETAILED
-    logstr = "    + " + IntToString(loader.LoadedMeshes[0].Vertices.size()) + " vertices";
-    Log.Write(logstr);
-#endif
     return true;
 }
 

@@ -7,7 +7,7 @@
 #include "shader.h"
 
 
-class __declspec(dllexport) Material {
+class ENGINE_API Material {
     
 public:
     

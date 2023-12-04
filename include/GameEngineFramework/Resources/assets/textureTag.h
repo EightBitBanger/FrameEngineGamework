@@ -3,7 +3,7 @@
 
 #include "../../Renderer/RenderSystem.h"
 
-struct __declspec(dllexport) TextureTag {
+struct ENGINE_API TextureTag {
     
     /// Texture resource path.
     std::string path;

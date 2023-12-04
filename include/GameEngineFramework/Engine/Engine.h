@@ -17,6 +17,7 @@
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
 #include <GameEngineFramework/Scripting/components/script.h>
 #include <GameEngineFramework/Renderer/components/camera.h>
+#include <GameEngineFramework/Profiler/Profiler.h>
 
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
 #include <GameEngineFramework/ActorAI/components/actor.h>
@@ -29,6 +30,7 @@
 
 extern PhysicsSystem  Physics;
 
+typedef void(*ButtonCallBack)();
 
 
 #define COMPONENT_STREAM_BUFFER_SIZE   1024 * 32
@@ -55,18 +57,12 @@ struct ComponentDataStreamBuffer {
 
 
 
-class __declspec(dllexport) EngineSystemManager {
+class ENGINE_API EngineSystemManager {
     
 public:
     
     /// Currently active world scene.
     Scene* sceneMain;
-    
-    // Profiling
-    float profileRenderSystem;
-    float profilePhysicsSystem;
-    float profileGameEngineUpdate;
-    float profileActorAI;
     
     // Game objects
     
@@ -128,7 +124,7 @@ public:
     // Button event callback
     
     /// Create a button and return its pointer.
-    Button* CreateButtonCallback(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
+    Button* CreateButtonCallback(unsigned int x, unsigned int y, unsigned int w, unsigned int h, ButtonCallBack callback);
     
     /// Destroy a button 
     bool DestroyButtonCallback(Button* button);

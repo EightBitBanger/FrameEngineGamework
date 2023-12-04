@@ -3,7 +3,7 @@
 
 #include "../../Renderer/RenderSystem.h"
 
-struct __declspec(dllexport) ShaderTag {
+struct ENGINE_API ShaderTag {
     
     /// Shader resource path.
     std::string path;

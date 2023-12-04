@@ -3,7 +3,7 @@
 
 #include "../../Renderer/RenderSystem.h"
 
-struct __declspec(dllexport) MeshTag {
+struct ENGINE_API MeshTag {
     
     /// Resource path path.
     std::string path;

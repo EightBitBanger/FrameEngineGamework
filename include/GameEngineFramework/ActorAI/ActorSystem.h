@@ -12,7 +12,7 @@
 #include "Genetics.h"
 
 
-class __declspec(dllexport) ActorSystem {
+class ENGINE_API ActorSystem {
     
 public:
     

@@ -8,7 +8,7 @@
 #include <GameEngineFramework/Scripting/components/script.h>
 
 
-class __declspec(dllexport) ScriptSystem {
+class ENGINE_API ScriptSystem {
     
 public:
     

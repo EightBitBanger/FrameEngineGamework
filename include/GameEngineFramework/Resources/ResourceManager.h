@@ -13,7 +13,7 @@
 #include <GameEngineFramework/Resources/assets/MeshTag.h>
 
 
-class __declspec(dllexport) ResourceManager {
+class ENGINE_API ResourceManager {
     
 public:
     

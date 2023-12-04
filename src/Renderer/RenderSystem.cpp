@@ -99,7 +99,7 @@ void RenderSystem::Initiate(void) {
     
     renderThreadMain = new std::thread( RenderThreadMain );
     
-    Log.Write( " >> Render thread started" );
+    Log.Write( " >> Starting thread renderer" );
     
     return;
 }
@@ -301,7 +301,7 @@ void RenderThreadMain(void) {
     }
     
     std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(3) );
-    Log.Write( " >> Render thread stopped" );
+    Log.Write( " >> Shutting down on thread renderer" );
     
     return;
 }

@@ -6,7 +6,7 @@
 #include "light.h"
 
 
-class __declspec(dllexport) Scene {
+class ENGINE_API Scene {
     
 public:
     

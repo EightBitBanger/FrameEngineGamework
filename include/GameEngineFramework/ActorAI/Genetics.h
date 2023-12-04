@@ -1,8 +1,10 @@
 #ifndef _GENETICS_NODE__
 #define _GENETICS_NODE__
 
+#include <GameEngineFramework/configuration.h>
 
-class __declspec(dllexport) Gene {
+
+class ENGINE_API Gene {
     
 public:
     

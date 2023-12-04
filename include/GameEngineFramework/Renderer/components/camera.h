@@ -7,7 +7,7 @@
 #include "../../Input/InputSystem.h"
 
 
-class __declspec(dllexport) Camera {
+class ENGINE_API Camera {
     
 public:
     

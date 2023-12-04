@@ -5,8 +5,10 @@
 
 #include <GameEngineFramework/Input/keys.h>
 
+#include <GameEngineFramework/configuration.h>
 
-class __declspec(dllexport) InputSystem {
+
+class ENGINE_API InputSystem {
     
 public:
     

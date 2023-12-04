@@ -16,7 +16,7 @@
 #include "../../Renderer/RenderSystem.h"
 
 
-class __declspec(dllexport) Actor {
+class ENGINE_API Actor {
     
 public:
     

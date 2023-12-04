@@ -3,25 +3,25 @@
 
 #include <GameEngineFramework/Engine/Engine.h>
 
-__declspec(dllexport) extern EngineComponents  Components;
-__declspec(dllexport) extern ColorPreset       Colors;
-__declspec(dllexport) extern RandomGen         Random;
-__declspec(dllexport) extern Logger            Log;
-__declspec(dllexport) extern Timer             PhysicsTime;
-__declspec(dllexport) extern Timer             Time;
+ENGINE_API extern EngineComponents  Components;
+ENGINE_API extern ColorPreset       Colors;
+ENGINE_API extern RandomGen         Random;
+ENGINE_API extern Logger            Log;
+ENGINE_API extern Timer             PhysicsTime;
+ENGINE_API extern Timer             Time;
 
-__declspec(dllexport) extern Serialization     Serializer;
-__declspec(dllexport) extern ResourceManager   Resources;
-__declspec(dllexport) extern ScriptSystem      Scripting;
-__declspec(dllexport) extern RenderSystem      Renderer;
-__declspec(dllexport) extern PhysicsSystem     Physics;
-__declspec(dllexport) extern AudioSystem       Audio;
-__declspec(dllexport) extern InputSystem       Input;
-__declspec(dllexport) extern MathCore          Math;
-__declspec(dllexport) extern ActorSystem       AI;
+ENGINE_API extern Serialization     Serializer;
+ENGINE_API extern ResourceManager   Resources;
+ENGINE_API extern ScriptSystem      Scripting;
+ENGINE_API extern RenderSystem      Renderer;
+ENGINE_API extern PhysicsSystem     Physics;
+ENGINE_API extern AudioSystem       Audio;
+ENGINE_API extern InputSystem       Input;
+ENGINE_API extern MathCore          Math;
+ENGINE_API extern ActorSystem       AI;
 
-__declspec(dllexport) extern ApplicationLayer      Application;
-__declspec(dllexport) extern EngineSystemManager   Engine;
+ENGINE_API extern ApplicationLayer      Application;
+ENGINE_API extern EngineSystemManager   Engine;
 
 
 
@@ -152,12 +152,10 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position, Mesh* mesh) {
     newGameObject->AddComponent( CreateComponent(Components.RigidBody) );
     newGameObject->AddComponent( CreateComponent(Components.MeshRenderer) );
     
-    // Basic cube mesh
     Material* materialPtr = Renderer.CreateMaterial();
     
     materialPtr->shader = shaders.color;
     
-    // Mesh renderer component
     MeshRenderer* entityRenderer = newGameObject->mMeshRendererCache;
     
     entityRenderer->mesh = mesh;

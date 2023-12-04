@@ -20,7 +20,7 @@ void AudioSystem::Initiate(void) {
     // Launch the audio thread
     audioThread = new std::thread( AudioThreadMain );
     
-    Log.Write( " >> Audio thread started" );
+    Log.Write( " >> Starting thread audio" );
     
     return;
 }
@@ -50,7 +50,7 @@ void AudioThreadMain(void) {
     }
     
     std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(2) );
-    Log.Write(" >> Audio thread stopped");
+    Log.Write(" >> Shutting down on thread audio");
     
     return;
 }

@@ -1,46 +1,43 @@
 #include <GameEngineFramework/Engine/Engine.h>
 
-__declspec(dllexport) EngineComponents  Components;
-__declspec(dllexport) ColorPreset       Colors;
-__declspec(dllexport) RandomGen         Random;
-__declspec(dllexport) Logger            Log;
-__declspec(dllexport) Timer             PhysicsTime;
-__declspec(dllexport) Timer             Time;
+ENGINE_API EngineComponents  Components;
+ENGINE_API ColorPreset       Colors;
+ENGINE_API RandomGen         Random;
+ENGINE_API Logger            Log;
+ENGINE_API Timer             PhysicsTime;
+ENGINE_API Timer             Time;
+ENGINE_API ProfilerTimer     Profiler;
 
-__declspec(dllexport) Serialization     Serializer;
-__declspec(dllexport) ResourceManager   Resources;
-__declspec(dllexport) ScriptSystem      Scripting;
-__declspec(dllexport) RenderSystem      Renderer;
-__declspec(dllexport) PhysicsSystem     Physics;
-__declspec(dllexport) AudioSystem       Audio;
-__declspec(dllexport) InputSystem       Input;
-__declspec(dllexport) MathCore          Math;
-__declspec(dllexport) ActorSystem       AI;
+ENGINE_API Serialization     Serializer;
+ENGINE_API ResourceManager   Resources;
+ENGINE_API ScriptSystem      Scripting;
+ENGINE_API RenderSystem      Renderer;
+ENGINE_API PhysicsSystem     Physics;
+ENGINE_API AudioSystem       Audio;
+ENGINE_API InputSystem       Input;
+ENGINE_API MathCore          Math;
+ENGINE_API ActorSystem       AI;
 
-__declspec(dllexport) ApplicationLayer      Application;
-__declspec(dllexport) EngineSystemManager   Engine;
+ENGINE_API ApplicationLayer      Application;
+ENGINE_API EngineSystemManager   Engine;
 
 
 
 EngineSystemManager::EngineSystemManager(void) : 
     sceneMain(nullptr),
     
-    profileRenderSystem(0),
-    profilePhysicsSystem(0),
-    profileGameEngineUpdate(0),
-    profileActorAI(0),
-    
     doUpdateDataStream(true),
     streamSize(0)
 {
 }
 
-Button* EngineSystemManager::CreateButtonCallback(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
+Button* EngineSystemManager::CreateButtonCallback(unsigned int x, unsigned int y, unsigned int w, unsigned int h, ButtonCallBack callback) {
     Button* newButton = mButtons.Create();
     newButton->x = x;
     newButton->y = y;
     newButton->w = w;
     newButton->h = h;
+    newButton->callback = callback;
     return newButton;
 }
 

@@ -8,6 +8,6 @@
 
 #include "applicationlayer.h"
 
-extern "C" __declspec(dllexport) LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam);
+extern "C" ENGINE_API LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam);
 
 #endif

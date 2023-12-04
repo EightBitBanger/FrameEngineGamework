@@ -14,7 +14,7 @@
   #define RENDERER_VERTEX_BUFFER_MAX  100000
 #endif
 
-struct __declspec(dllexport) SubMesh {
+struct ENGINE_API SubMesh {
     
     /// Begin offset position.
     unsigned vertexBegin;
@@ -34,7 +34,7 @@ struct __declspec(dllexport) SubMesh {
 
 
 
-class __declspec(dllexport) Mesh {
+class ENGINE_API Mesh {
     
 public:
     

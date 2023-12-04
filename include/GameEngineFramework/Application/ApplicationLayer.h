@@ -21,17 +21,17 @@
 #include "winproc.h"
 
 
-__declspec(dllexport) void Start(void);
+ENGINE_API void Start(void);
 
-__declspec(dllexport) void Run(void);
+ENGINE_API void Run(void);
 
-__declspec(dllexport) void TickUpdate(void);
+ENGINE_API void TickUpdate(void);
 
-__declspec(dllexport) void Shutdown(void);
+ENGINE_API void Shutdown(void);
 
 
 
-class __declspec(dllexport) ApplicationLayer {
+class ENGINE_API ApplicationLayer {
     
 public:
     

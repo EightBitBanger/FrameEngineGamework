@@ -12,6 +12,9 @@
 //#define  STBI_ONLY_PNM // (.ppm and .pgm)
 
 #include "../../../vendor/stb/stb_image.h"
+#include "../../../vendor/CodeBaseLibrary/logging.h"
+
+extern Logger Log;
 
 
 TextureTag::TextureTag() : 
@@ -39,6 +42,11 @@ bool TextureTag::Load(void) {
     
     if (buffer == nullptr) 
         return false;
+    
+#ifdef EVENT_LOG_DETAILED
+    std::string logstr = "  + " + name + " " + IntToString(width) + " X " + IntToString(height);
+    Log.Write(logstr);
+#endif
     
     isLoaded = true;
     return true;

@@ -7,6 +7,7 @@ extern EngineComponents     Components;
 extern ColorPreset          Colors;
 extern RandomGen            Random;
 extern Logger               Log;
+extern ProfilerTimer        Profiler;
 extern Timer                PhysicsTime;
 extern Timer                Time;
 
@@ -34,6 +35,16 @@ Text* text[20];
 
 
 
+
+
+
+
+GameObject* panelLeft;
+
+void callbackButtonA(void) {text[5]->text = "ButtonA";}
+void callbackButtonB(void) {text[6]->text = "ButtonB";}
+void callbackButtonC(void) {text[7]->text = "ButtonC";}
+void callbackButtonD(void) {text[8]->text = "ButtonB";}
 
 
 
@@ -74,18 +85,15 @@ void Start() {
     // Attach the sky object to the camera controller
     skyObject->parent = cameraController;
     cameraController->DisableGravity();
+    Engine.sceneMain->camera->DisableMouseLook();
     
-    // Camera light
-    cameraController->AddComponent( Engine.CreateComponent<Light>() );
-    Light* light = cameraController->GetComponent<Light>();
-    light->color = Colors.MakeRandom();
-    light->attenuation = 4;
-    light->range = 300;
-    light->intensity = 1000;
     
-    Engine.sceneMain->AddLightToSceneRoot(light);
     
-    // Scene overlay
+    
+    //
+    // Initiate overlay scene
+    //
+    
     sceneOverlay = Engine.Create<Scene>();
     Renderer.AddSceneToRenderQueue(sceneOverlay);
     
@@ -103,8 +111,44 @@ void Start() {
     Color fontColor = Colors.black;
     
     
-    // Initiate text elements
-    for (int i=0; i < 10; i++) {
+    
+    
+    //
+    // Panel testing
+    //
+    
+    
+    
+    //
+    // Left panel
+    //
+    
+    panelLeft = Engine.CreateOverlayPanelRenderer(32, 32, "panel_blue");
+    Panel* panelBaseOverlay = panelLeft->GetComponent<Panel>();
+    
+    panelBaseOverlay->canvas.anchorCenterVert = true;
+    panelBaseOverlay->canvas.anchorTop = true;
+    panelBaseOverlay->canvas.x = 100;
+    panelBaseOverlay->canvas.y = 100;
+    
+    
+    //
+    // Top bar panel
+    //
+    
+    GameObject* panelTitle = Engine.CreateOverlayPanelRenderer(10000, 59, "panel_gray");
+    Panel* panelTitleOverlay = panelTitle->GetComponent<Panel>();
+    
+    panelTitleOverlay->canvas.anchorCenterHorz = true;
+    panelTitleOverlay->canvas.anchorTop = true;
+    
+    sceneOverlay->AddMeshRendererToSceneRoot( panelLeft->GetComponent<MeshRenderer>() );   // Left panel
+    sceneOverlay->AddMeshRendererToSceneRoot( panelTitle->GetComponent<MeshRenderer>() );  // Title bar
+    
+    
+    
+    // Initiate left panel text elements
+    for (int i=0; i < 20; i++) {
         
         GameObject* textObject = Engine.CreateOverlayTextRenderer("", fontSize, fontColor, "font");
         
@@ -118,55 +162,34 @@ void Start() {
     }
     
     
-    Mesh* cubeMeshPtr = Resources.CreateMeshFromTag("cube");
+    // Title bar menu items
+    GameObject* textObject = Engine.CreateOverlayTextRenderer("File  Edit  Project  Settings", fontSize, Colors.white, "font");
+    
+    sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
+    Text* titleText = textObject->GetComponent<Text>();
+    titleText->canvas.anchorTop = true;
+    titleText->canvas.x = 1;
+    titleText->canvas.y = 1;
+    
     
     
     
     //
-    // AI actor testing
+    // Button callback test
     //
     
-    float spawnArea = 0;
-    float uniformScale = 0.1;
-    
-    for (int i=0; i < 1000; i++) {
-        
-        float xx = (Random.Range(0, 10) - Random.Range(0, 10)) * spawnArea;
-        float yy = (Random.Range(0, 10) - Random.Range(0, 10)) * spawnArea;
-        float zz = (Random.Range(0, 10) - Random.Range(0, 10)) * spawnArea;
-        
-        float scalexx = Random.Range(0, 10) * uniformScale;
-        float scaleyy = Random.Range(0, 10) * uniformScale;
-        float scalezz = Random.Range(0, 10) * uniformScale;
-        
-        GameObject* newActorObject = Engine.CreateAIActor(Vector3(xx, yy, zz), cubeMeshPtr);
-        newActorObject->transform.scale = Vector3(scalexx, scaleyy, scalezz);
-        newActorObject->DisableGravity();
-        
-        MeshRenderer* actorMeshRenderer = newActorObject->GetComponent<MeshRenderer>();
-        actorMeshRenderer->material->shader = Engine.shaders.colorUnlit;
-        actorMeshRenderer->material->ambient  = Colors.black;
-        actorMeshRenderer->material->diffuse  = Colors.MakeRandom();
-        actorMeshRenderer->material->diffuse *= Colors.dkgray;
-        
-        Actor* actor = newActorObject->GetComponent<Actor>();
-        actor->SetChanceToMove( Random.Range(0, 2) );
-        
-    }
-    
-    
-    
-    
-    
-    
-    
+    Button* buttonExample = Engine.CreateButtonCallback(0, 0, 60, 50, callbackButtonA);
+    buttonExample->triggerOnLeftButton = true;
+    buttonExample->triggerOnPressed    = true;
     
     return;
 }
 
 
+unsigned int mouseOldX = 0;
+unsigned int mouseOldY = 0;
 
-
+bool isMouseDown = false;
 
 
 
@@ -176,11 +199,74 @@ void Start() {
 
 void Run() {
     
-    text[1]->text = "Renderer - " + FloatToString( Engine.profileRenderSystem );
-    text[2]->text = "Physics  - " + FloatToString( Engine.profilePhysicsSystem );
-    text[3]->text = "Engine   - " + FloatToString( Engine.profileGameEngineUpdate );
-    //text[4]->text = "ActorAI  - " + FloatToString( Engine.profileActorAI );
+    if (Input.CheckKeyCurrent(VK_I)) Engine.sceneMain->camera->viewport.x += 10;
+    if (Input.CheckKeyCurrent(VK_K)) Engine.sceneMain->camera->viewport.x -= 10;
+    if (Input.CheckKeyCurrent(VK_J)) Engine.sceneMain->camera->viewport.y += 10;
+    if (Input.CheckKeyCurrent(VK_L)) Engine.sceneMain->camera->viewport.y -= 10;
     
+    
+    float viewScale = 0;
+    
+    if (Input.CheckKeyCurrent(VK_R)) viewScale =  1;
+    if (Input.CheckKeyCurrent(VK_F)) viewScale = -1;
+    
+    Engine.sceneMain->camera->viewport.w += viewScale;
+    Engine.sceneMain->camera->viewport.h += viewScale;
+    
+    if (Input.CheckMouseLeftPressed()) {
+        mouseOldX = Input.mouseX;
+        mouseOldY = Input.mouseY;
+        isMouseDown = true;
+    }
+    
+    if (Input.CheckMouseLeftReleased()) 
+        isMouseDown = false;
+    
+    
+    if (isMouseDown) {
+        
+        Panel* panelObject = panelLeft->GetComponent<Panel>();
+        
+        panelObject->canvas.x -= mouseOldY - Input.mouseY;
+        panelObject->canvas.y -= mouseOldX - Input.mouseX;
+        
+        mouseOldX = Input.mouseX;
+        mouseOldY = Input.mouseY;
+        
+    }
+    
+    
+    
+    
+    // Initiate windows area
+    RECT WindowRect;
+    GetWindowRect(Application.windowHandle, &WindowRect);
+    
+    // Set window view port
+    //Renderer.viewport.x = WindowRect.left;
+    //Renderer.viewport.y = WindowRect.top;
+    //Renderer.viewport.w = WindowRect.right - WindowRect.left;
+    //Renderer.viewport.h = WindowRect.bottom - WindowRect.top;
+    
+    
+    
+    text[5]->text = "Renderer - " + FloatToString( Profiler.profileRenderSystem );
+    text[6]->text = "Physics  - " + FloatToString( Profiler.profilePhysicsSystem );
+    text[7]->text = "Engine   - " + FloatToString( Profiler.profileGameEngineUpdate );
+    text[8]->text = "ActorAI  - " + FloatToString( Profiler.profileActorAI );
+    
+    text[10]->text = "mouse x - " + FloatToString( WindowRect.left + Input.mouseX );
+    text[11]->text = "mouse y - " + FloatToString( WindowRect.top  + Input.mouseY );
+    
+    
+    
+    
+    
+    
+    
+    
+    //
+    // Camera controller input handling
     
     if (cameraController == nullptr) 
         return;

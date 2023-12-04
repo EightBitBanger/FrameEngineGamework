@@ -7,8 +7,10 @@ void DefaultFunctionPtr(void* gameObject);
 
 #define  nullfunc  DefaultFunctionPtr
 
+#include <GameEngineFramework/configuration.h>
 
-class __declspec(dllexport) Script {
+
+class ENGINE_API Script {
     
 public:
     

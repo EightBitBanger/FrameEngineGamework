@@ -3,8 +3,10 @@
 
 #include <cstdlib>
 
+#include <GameEngineFramework/configuration.h>
 
-class __declspec(dllexport) Color {
+
+class ENGINE_API Color {
     
 public:
     
@@ -39,7 +41,7 @@ public:
 };
 
 
-class __declspec(dllexport) ColorPreset {
+class ENGINE_API ColorPreset {
     
 public:
     

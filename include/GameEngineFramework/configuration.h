@@ -7,15 +7,15 @@
 
 #define  WINDOW_NAME  "Render window"
 
-// Starting window dimensions
-#define  WINDOW_WIDTH       1330
-#define  WINDOW_HEIGHT      1000
+// Starting window dimensions relative to display size
+#define  WINDOW_WIDTH       0.7
+#define  WINDOW_HEIGHT      0.8
 
-// Minimum window size
+// Minimum window size (In pixels)
 #define  WINDOW_WIDTH_MIN   300
 #define  WINDOW_HEIGHT_MIN  200
 
-//#define  APPLICATION_MOUSE_HIDDEN_ON_START
+//#define  APPLICATION_CURSOR_HIDDEN_ON_START
 //#define  APPLICATION_ESCAPE_KEY_PAUSE
 
 // Console window area
@@ -30,7 +30,7 @@
 // Profiling
 //
 
-#define PROFILE_ENGINE_CORE
+//#define PROFILE_ENGINE_CORE
 
 
 
@@ -69,7 +69,7 @@
 // Unit testing
 //
 
-#define RUN_UNIT_TESTS
+//#define RUN_UNIT_TESTS
 
 
 
@@ -79,6 +79,23 @@
 
 #define  TICK_UPDATES_PER_SECOND           30
 
+
+
+
+
+
+
+#ifdef BUILD_CORE
+    #define ENGINE_API  __declspec(dllexport)
+#endif
+
+#ifdef BUILD_APPLICATION
+    #define ENGINE_API  __declspec(dllexport)
+#endif
+
+#ifdef BUILD_RUNTIME
+    #define ENGINE_API  __declspec(dllimport)
+#endif
 
 
 #endif

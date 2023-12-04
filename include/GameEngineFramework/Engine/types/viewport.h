@@ -1,7 +1,10 @@
 #ifndef _VIEWPORT_TYPE__
 #define _VIEWPORT_TYPE__
 
-class __declspec(dllexport) Viewport {
+#include <GameEngineFramework/configuration.h>
+
+
+class ENGINE_API Viewport {
     
 public:
     

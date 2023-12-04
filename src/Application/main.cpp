@@ -12,6 +12,7 @@
  #include "../../tests/framework.h"
 #endif
 
+extern ProfilerTimer        Profiler;
 extern Timer                PhysicsTime;
 extern Timer                Time;
 extern Logger               Log;
@@ -47,7 +48,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
     
     // Initiate window size
-    Application.SetWindowCenterScale(0.85, 1.1);
+    Application.SetWindowCenterScale(WINDOW_WIDTH, WINDOW_HEIGHT);
     Viewport windowSz = Application.GetWindowArea();
     Renderer.SetViewport(0, 0, windowSz.w, windowSz.h);
     
@@ -65,10 +66,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Physics.Initiate();
     
     Engine.Initiate();
-    
-#ifdef PROFILE_ENGINE_CORE
-    ProfilerTimer profileTimer;
-#endif
     
 #ifdef RUN_UNIT_TESTS
     TestFramework testFrameWork;
@@ -158,7 +155,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             for (int i=0; i < 2; i++) {
                 
 #ifdef PROFILE_ENGINE_CORE
-                profileTimer.Begin();
+                Profiler.Begin();
 #endif
                 
                 Run();
@@ -170,7 +167,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 Engine.Update();
                 
 #ifdef PROFILE_ENGINE_CORE
-                Engine.profileGameEngineUpdate = profileTimer.Query();
+                Profiler.profileGameEngineUpdate = Profiler.Query();
 #endif
                 
                 fixedAccumulator -= fixedUpdateTimeout;
@@ -220,13 +217,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         if (PhysicsTime.Update()) {
             
 #ifdef PROFILE_ENGINE_CORE
-            profileTimer.Begin();
+            Profiler.Begin();
 #endif
             
             Physics.world->update( PHYSICS_UPDATES_PER_SECOND );
             
 #ifdef PROFILE_ENGINE_CORE
-            Engine.profilePhysicsSystem = profileTimer.Query();
+            Profiler.profilePhysicsSystem = Profiler.Query();
 #endif
             
             // Interpolation factor
@@ -250,14 +247,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             Input.mouseY = cursorPos.y;
             
 #ifdef PROFILE_ENGINE_CORE
-            profileTimer.Begin();
+            Profiler.Begin();
 #endif
             
             // Draw the current frame state
             Renderer.RenderFrame();
             
 #ifdef PROFILE_ENGINE_CORE
-            Engine.profileRenderSystem = profileTimer.Query();
+            Profiler.profileRenderSystem = Profiler.Query();
 #endif
             
         }

@@ -7,8 +7,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/compatibility.hpp>
 
+#include <GameEngineFramework/configuration.h>
 
-class __declspec(dllexport) MathCore {
+
+class ENGINE_API MathCore {
     
 public:
     

@@ -3,6 +3,9 @@
 
 #include <string>
 
+#include <GameEngineFramework/configuration.h>
+
+
 #define  COMPONENT_TYPE_UNDEFINED       0
 //Rendering
 #define  COMPONENT_TYPE_MESH_RENDERER   1
@@ -22,7 +25,7 @@
 typedef unsigned short int ComponentType;
 
 
-struct __declspec(dllexport) EngineComponents {
+struct ENGINE_API EngineComponents {
     /// Undefined component.
     constexpr static short int Undefined = COMPONENT_TYPE_UNDEFINED;
     
@@ -54,7 +57,7 @@ struct __declspec(dllexport) EngineComponents {
 
 
 
-class __declspec(dllexport) Component {
+class ENGINE_API Component {
     
 public:
     

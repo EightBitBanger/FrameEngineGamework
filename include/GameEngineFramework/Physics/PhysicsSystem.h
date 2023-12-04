@@ -14,7 +14,7 @@ typedef rp3d::SphereShape  SphereShape;
 typedef rp3d::CapsuleShape CapsuleShape;
 
 
-class __declspec(dllexport) PhysicsSystem {
+class ENGINE_API PhysicsSystem {
     
 public:
     

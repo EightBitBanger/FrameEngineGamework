@@ -22,7 +22,7 @@ void ActorSystem::Initiate(void) {
     
     actorSystemThread = new std::thread( actorThreadMain );
     
-    Log.Write( " >> AI thread started" );
+    Log.Write( " >> Starting thread AI" );
     
     return;
 }
@@ -154,7 +154,7 @@ void actorThreadMain() {
     }
     
     std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
-    Log.Write( " >> AI thread stopped" );
+    Log.Write( " >> Shutting down on thread AI" );
     
     return;
 }

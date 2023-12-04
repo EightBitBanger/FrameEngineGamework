@@ -38,7 +38,7 @@
 
 
 
-class __declspec(dllexport) RenderSystem {
+class ENGINE_API RenderSystem {
     
 public:
     

@@ -1,7 +1,9 @@
 #include <GameEngineFramework/Resources/assets/meshTag.h>
 
 #include "../../../vendor/Bly7/OBJ_Loader.h"
+#include "../../../vendor/CodeBaseLibrary/logging.h"
 
+extern Logger Log;
 
 MeshTag::MeshTag() : 
     
@@ -52,6 +54,11 @@ bool MeshTag::Load(void) {
     for (unsigned int i=0; i < loader.LoadedMeshes[0].Indices.size(); i++) {
         mesh.indexBuffer.push_back(loader.LoadedMeshes[0].Indices[i]);
     }
+    
+#ifdef EVENT_LOG_DETAILED
+    std::string logstr = "  + " + name + " " + IntToString( mesh.vertexCount ) + " vertices";
+    Log.Write(logstr);
+#endif
     
     isLoaded = true;
     return true;

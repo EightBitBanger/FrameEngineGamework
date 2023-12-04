@@ -1,7 +1,10 @@
 #ifndef _VERTEXBUFFER_TYPE__
 #define _VERTEXBUFFER_TYPE__
 
-class __declspec(dllexport) Vertex {
+#include <GameEngineFramework/configuration.h>
+
+
+class ENGINE_API Vertex {
     
 public:
     
@@ -27,7 +30,7 @@ public:
 };
 
 
-struct __declspec(dllexport) Index  {
+struct ENGINE_API Index  {
     
     unsigned int index;
     
