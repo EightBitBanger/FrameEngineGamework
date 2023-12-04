@@ -39,13 +39,21 @@ Text* text[20];
 
 
 
+Text* titleText;
+
 GameObject* panelLeft;
+Button* buttonExample;
+
+unsigned int mouseOldX = 0;
+unsigned int mouseOldY = 0;
+
+bool isMouseDragging = false;
+
 
 void callbackButtonA(void) {text[5]->text = "ButtonA";}
 void callbackButtonB(void) {text[6]->text = "ButtonB";}
 void callbackButtonC(void) {text[7]->text = "ButtonC";}
 void callbackButtonD(void) {text[8]->text = "ButtonB";}
-
 
 
 
@@ -113,83 +121,90 @@ void Start() {
     
     
     
+    // Initiate left panel text elements
+    for (int i=0; i < 20; i++) {
+        
+        GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 2 * i + 4, "", fontSize, fontColor, "font");
+        
+        sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
+        text[i] = textObject->GetComponent<Text>();
+        text[i]->canvas.anchorTop = true;
+        
+    }
+    
+    
+    
+    
+    
     //
     // Panel testing
     //
     
     
     
-    //
-    // Left panel
-    //
-    
-    panelLeft = Engine.CreateOverlayPanelRenderer(32, 32, "panel_blue");
-    Panel* panelBaseOverlay = panelLeft->GetComponent<Panel>();
-    
-    panelBaseOverlay->canvas.anchorCenterVert = true;
-    panelBaseOverlay->canvas.anchorTop = true;
-    panelBaseOverlay->canvas.x = 100;
-    panelBaseOverlay->canvas.y = 100;
-    
     
     //
     // Top bar panel
     //
     
-    GameObject* panelTitle = Engine.CreateOverlayPanelRenderer(10000, 59, "panel_gray");
+    GameObject* panelTitle = Engine.CreateOverlayPanelRenderer(-50, -1, 10000, 70, "panel_gray");
     Panel* panelTitleOverlay = panelTitle->GetComponent<Panel>();
     
-    panelTitleOverlay->canvas.anchorCenterHorz = true;
+    //panelTitleOverlay->canvas.anchorCenterHorz = true;
     panelTitleOverlay->canvas.anchorTop = true;
-    
-    sceneOverlay->AddMeshRendererToSceneRoot( panelLeft->GetComponent<MeshRenderer>() );   // Left panel
-    sceneOverlay->AddMeshRendererToSceneRoot( panelTitle->GetComponent<MeshRenderer>() );  // Title bar
-    
-    
-    
-    // Initiate left panel text elements
-    for (int i=0; i < 20; i++) {
-        
-        GameObject* textObject = Engine.CreateOverlayTextRenderer("", fontSize, fontColor, "font");
-        
-        sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
-        text[i] = textObject->GetComponent<Text>();
-        text[i]->canvas.anchorTop = true;
-        
-        text[i]->canvas.x = 0;
-        text[i]->canvas.y = 2 * i + 4;
-        
-    }
     
     
     // Title bar menu items
-    GameObject* textObject = Engine.CreateOverlayTextRenderer("File  Edit  Project  Settings", fontSize, Colors.white, "font");
+    GameObject* textObject = Engine.CreateOverlayTextRenderer(1, 1, "File  Edit  Project  Settings", fontSize, Colors.green, "font");
     
-    sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
-    Text* titleText = textObject->GetComponent<Text>();
+    titleText = textObject->GetComponent<Text>();
     titleText->canvas.anchorTop = true;
-    titleText->canvas.x = 1;
-    titleText->canvas.y = 1;
     
     
     
     
     //
+    // Mouse drag test panel
+    //
+    
+    int buttonX = 200;
+    int buttonY = 200;
+    
+    int buttonW = 32;
+    int buttonH = 32;
+    
+    panelLeft = Engine.CreateOverlayPanelRenderer(buttonX, buttonY, buttonW, buttonH, "panel_blue");
+    Panel* panelBaseOverlay = panelLeft->GetComponent<Panel>();
+    
+    //panelBaseOverlay->canvas.anchorCenterVert = true;
+    panelBaseOverlay->canvas.anchorTop = true;
+    
     // Button callback test
-    //
+    buttonExample = Engine.CreateOverlayButtonCallback(buttonX, 
+                                                       buttonY, 
+                                                       buttonW, 
+                                                       buttonH, 
+                                                       callbackButtonA);
     
-    Button* buttonExample = Engine.CreateButtonCallback(0, 0, 60, 50, callbackButtonA);
     buttonExample->triggerOnLeftButton = true;
     buttonExample->triggerOnPressed    = true;
+    
+    
+    
+    
+    sceneOverlay->AddMeshRendererToSceneRoot( panelLeft->GetComponent<MeshRenderer>() );   // Left panel
+    sceneOverlay->AddMeshRendererToSceneRoot( panelTitle->GetComponent<MeshRenderer>() );  // Title bar
+    sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );  // Title text
     
     return;
 }
 
 
-unsigned int mouseOldX = 0;
-unsigned int mouseOldY = 0;
 
-bool isMouseDown = false;
+
+
+
+
 
 
 
@@ -199,36 +214,49 @@ bool isMouseDown = false;
 
 void Run() {
     
-    if (Input.CheckKeyCurrent(VK_I)) Engine.sceneMain->camera->viewport.x += 10;
-    if (Input.CheckKeyCurrent(VK_K)) Engine.sceneMain->camera->viewport.x -= 10;
-    if (Input.CheckKeyCurrent(VK_J)) Engine.sceneMain->camera->viewport.y += 10;
-    if (Input.CheckKeyCurrent(VK_L)) Engine.sceneMain->camera->viewport.y -= 10;
+    if (Input.CheckKeyPressed(VK_I)) titleText->glyphWidth  += 0.01;
+    if (Input.CheckKeyPressed(VK_K)) titleText->glyphWidth  -= 0.01;
+    
+    if (Input.CheckKeyPressed(VK_O)) titleText->glyphHeight += 0.01;
+    if (Input.CheckKeyPressed(VK_L)) titleText->glyphHeight -= 0.01;
+    
+    text[15]->text = "text width  - " + FloatToString(titleText->glyphWidth);
+    text[16]->text = "text height - " + FloatToString(titleText->glyphHeight);
+    
+    //
+    // Mouse drag testing
+    //
     
     
-    float viewScale = 0;
-    
-    if (Input.CheckKeyCurrent(VK_R)) viewScale =  1;
-    if (Input.CheckKeyCurrent(VK_F)) viewScale = -1;
-    
-    Engine.sceneMain->camera->viewport.w += viewScale;
-    Engine.sceneMain->camera->viewport.h += viewScale;
-    
-    if (Input.CheckMouseLeftPressed()) {
+    // Check mouse down
+    if (Input.CheckMouseLeftPressed() & (buttonExample->isHovering)) {
+        
+        // Set current position when mouse is clicked
         mouseOldX = Input.mouseX;
         mouseOldY = Input.mouseY;
-        isMouseDown = true;
+        
+        isMouseDragging = true;
     }
     
-    if (Input.CheckMouseLeftReleased()) 
-        isMouseDown = false;
+    // Check mouse up
+    if (Input.CheckMouseLeftReleased()) {
+        
+        // Reset dragging state
+        isMouseDragging = false;
+    }
     
-    
-    if (isMouseDown) {
+    // Drag the panel object
+    if (isMouseDragging) {
         
         Panel* panelObject = panelLeft->GetComponent<Panel>();
         
+        // Update panel renderer position
         panelObject->canvas.x -= mouseOldY - Input.mouseY;
         panelObject->canvas.y -= mouseOldX - Input.mouseX;
+        
+        // Update button callback position
+        buttonExample->x -= mouseOldX - Input.mouseX;
+        buttonExample->y -= mouseOldY - Input.mouseY;
         
         mouseOldX = Input.mouseX;
         mouseOldY = Input.mouseY;
@@ -239,26 +267,31 @@ void Run() {
     
     
     // Initiate windows area
-    RECT WindowRect;
-    GetWindowRect(Application.windowHandle, &WindowRect);
     
-    // Set window view port
-    //Renderer.viewport.x = WindowRect.left;
-    //Renderer.viewport.y = WindowRect.top;
-    //Renderer.viewport.w = WindowRect.right - WindowRect.left;
-    //Renderer.viewport.h = WindowRect.bottom - WindowRect.top;
-    
-    
+    text[2]->text = "window x - " + IntToString(Application.windowLeft);
+    text[3]->text = "window y - " + IntToString(Application.windowTop);
     
     text[5]->text = "Renderer - " + FloatToString( Profiler.profileRenderSystem );
     text[6]->text = "Physics  - " + FloatToString( Profiler.profilePhysicsSystem );
     text[7]->text = "Engine   - " + FloatToString( Profiler.profileGameEngineUpdate );
     text[8]->text = "ActorAI  - " + FloatToString( Profiler.profileActorAI );
     
-    text[10]->text = "mouse x - " + FloatToString( WindowRect.left + Input.mouseX );
-    text[11]->text = "mouse y - " + FloatToString( WindowRect.top  + Input.mouseY );
+    text[10]->text = "mouse x - " + FloatToString( Application.windowLeft + Input.mouseX );
+    text[11]->text = "mouse y - " + FloatToString( Application.windowTop + Input.mouseY );
     
-    
+    if (buttonExample->isHovering) {
+        text[13]->text = "Hovering";
+        text[13]->color = Colors.red;
+        
+        panelLeft->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.texture;
+        
+    } else {
+        text[13]->text = "Not hovering";
+        text[13]->color = Colors.black;
+        
+        panelLeft->GetComponent<MeshRenderer>()->material->shader = Engine.shaders.color;
+        
+    }
     
     
     

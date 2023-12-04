@@ -63,10 +63,15 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             GetWindowRect(wHnd, &WindowRect);
             
             // Set window view port
-            Renderer.viewport.x = WindowRect.left;
-            Renderer.viewport.y = WindowRect.top;
+            Renderer.viewport.x = 0;
+            Renderer.viewport.y = 0;
             Renderer.viewport.w = WindowRect.right - WindowRect.left;
             Renderer.viewport.h = WindowRect.bottom - WindowRect.top;
+            
+            Application.windowLeft   = Renderer.viewport.x;
+            Application.windowTop    = Renderer.viewport.y;
+            Application.windowRight  = Renderer.viewport.w;
+            Application.windowBottom = Renderer.viewport.h;
             
             // Update scene cameras
             for (unsigned int i=0; i < Renderer.GetRenderQueueSize(); i++) {

@@ -198,6 +198,31 @@ void Mesh::AddWallSubDivided(float x, float y, float z, float width, float heigh
     return;
 }
 
+void Mesh::AddQuad(float x, float y, float z, float width, float height, Color color, float uCoord, float vCoord, float uStart, float vStart, unsigned int uOffset, unsigned int vOffset) {
+    
+    Vertex vertex[4];
+    vertex[0] = Vertex( x, y,       z,         color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + 0,      vStart + (vOffset * vCoord) + vCoord);
+    vertex[1] = Vertex( x+width, y, z,         color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + 0,      vStart + (vOffset * vCoord) + 0 );
+    vertex[2] = Vertex( x, y,       z-height,  color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + 0 );
+    vertex[3] = Vertex( x-width, y, z-height,  color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + vCoord);
+    
+    SubMesh subBuffer;
+    subBuffer.vertexBuffer.push_back(vertex[0]);
+    subBuffer.vertexBuffer.push_back(vertex[1]);
+    subBuffer.vertexBuffer.push_back(vertex[2]);
+    subBuffer.vertexBuffer.push_back(vertex[3]);
+    
+    subBuffer.indexBuffer.push_back(0);
+    subBuffer.indexBuffer.push_back(1);
+    subBuffer.indexBuffer.push_back(2);
+    subBuffer.indexBuffer.push_back(0);
+    subBuffer.indexBuffer.push_back(2);
+    subBuffer.indexBuffer.push_back(3);
+    
+    AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
+    return;
+}
+
 bool Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu) {
     return AddSubMesh(x, y, z, mesh.vertexBuffer, mesh.indexBuffer, doUploadToGpu);
 }

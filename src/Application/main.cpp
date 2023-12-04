@@ -47,6 +47,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         return 0;
     }
     
+    // Get window area
+    RECT windowRect;
+    GetWindowRect(wHndl, &windowRect);
+    
+    Application.windowLeft   = windowRect.left;
+    Application.windowTop    = windowRect.top;
+    Application.windowRight  = windowRect.right;
+    Application.windowBottom = windowRect.bottom;
+    
     // Initiate window size
     Application.SetWindowCenterScale(WINDOW_WIDTH, WINDOW_HEIGHT);
     Viewport windowSz = Application.GetWindowArea();
@@ -165,6 +174,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 Engine.UpdateUI();
                 
                 Engine.Update();
+                
+                // Update window area
+                RECT windowRect;
+                GetWindowRect(wHndl, &windowRect);
+                
+                Application.windowLeft   =  windowRect.left;
+                Application.windowTop    =  windowRect.top;
+                Application.windowRight  = (windowRect.right  - windowRect.left);
+                Application.windowBottom = (windowRect.bottom - windowRect.top);
                 
 #ifdef PROFILE_ENGINE_CORE
                 Profiler.profileGameEngineUpdate = Profiler.Query();

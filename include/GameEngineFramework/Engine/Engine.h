@@ -115,19 +115,19 @@ public:
     GameObject* CreateOverlayRenderer(void);
     
     /// Create a text overlay and return its object.
-    GameObject* CreateOverlayTextRenderer(std::string text, unsigned int textSize, Color color, std::string materialTag);
+    GameObject* CreateOverlayTextRenderer(int x, int y, std::string text, unsigned int textSize, Color color, std::string materialTag);
     
     /// Create a panel overlay and return its object.
-    GameObject* CreateOverlayPanelRenderer(unsigned int scaleWidth, unsigned int scaleHeight, std::string materialTag);
+    GameObject* CreateOverlayPanelRenderer(int x, int y, int scaleWidth, int scaleHeight, std::string materialTag);
     
     
-    // Button event callback
+    // Mouse button event callback
     
     /// Create a button and return its pointer.
-    Button* CreateButtonCallback(unsigned int x, unsigned int y, unsigned int w, unsigned int h, ButtonCallBack callback);
+    Button* CreateOverlayButtonCallback(int x, int y, int w, int h, ButtonCallBack callback);
     
     /// Destroy a button 
-    bool DestroyButtonCallback(Button* button);
+    bool DestroyOverlayButtonCallback(Button* button);
     
     
     //

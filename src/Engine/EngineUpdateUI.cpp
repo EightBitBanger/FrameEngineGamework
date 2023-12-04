@@ -31,17 +31,17 @@ void EngineSystemManager::UpdateUI(void) {
     // Check mouse / button interaction
     //
     
-    unsigned int windowMouseX = Input.mouseX - Renderer.viewport.x;
-    unsigned int windowMouseY = Input.mouseY - Renderer.viewport.y;
+    unsigned int windowMouseX = Input.mouseX - Application.windowLeft;
+    unsigned int windowMouseY = Input.mouseY - Application.windowTop;
     
     for (unsigned int i=0; i < mButtons.Size(); i++) {
         Button* button = mButtons[i];
         
-        // Check butt event
         bool leftActive   = false;
         bool middleActive = false;
         bool rightActive  = false;
         
+        // Check button event
         if (button->triggerOnPressed) {
             if (Input.CheckMouseLeftPressed())   {leftActive   = true; Input.SetMouseLeftPressed(false);}
             if (Input.CheckMouseMiddlePressed()) {middleActive = true; Input.SetMouseMiddlePressed(false);}

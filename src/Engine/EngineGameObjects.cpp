@@ -210,7 +210,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     return overlayObject;
 }
 
-GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, unsigned int textSize, Color color, std::string materialTag) {
+GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::string text, unsigned int textSize, Color color, std::string materialTag) {
     
     GameObject* overlayObject = CreateOverlayRenderer();
     overlayObject->AddComponent( CreateComponent<Text>() );
@@ -221,6 +221,9 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     textElement->size = textSize;
     
     overlayObject->transform.scale = Vector3(textSize, 1, textSize);
+    
+    textElement->canvas.x = x;
+    textElement->canvas.y = y;
     
     MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
     
@@ -242,10 +245,14 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(std::string text, uns
     return overlayObject;
 }
 
-GameObject* EngineSystemManager::CreateOverlayPanelRenderer(unsigned int scaleWidth, unsigned int scaleHeight, std::string materialTag) {
+GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int scaleWidth, int scaleHeight, std::string materialTag) {
     
     GameObject* overlayObject = CreateOverlayRenderer();
     overlayObject->AddComponent( CreateComponent<Panel>() );
+    Panel* overPanel = overlayObject->GetComponent<Panel>();
+    
+    overPanel->canvas.x = x;
+    overPanel->canvas.y = y;
     
     MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
     
@@ -267,10 +274,32 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(unsigned int scaleWi
     
     overlayMaterial->DisableCulling();
     
-    // Width and height are indeed flipped
+    
+    
+    
+    float scaleWidthHalf  = (float)scaleWidth  * 0.4;
+    float scaleHeightHalf = (float)scaleHeight * 0.4;
+    
+    //overlayMesh->AddPlain(0, 0, 0, scaleHeight, scaleWidth, Colors.white, 1, 1);
     overlayMesh->AddPlain(0, 0, 0, scaleHeight, scaleWidth, Colors.white, 1, 1);
+    
+    //overlayMesh->ChangeSubMeshPosition(0, scaleHeight, 0, -scaleWidthHalf);
+    
     overlayMesh->UploadToGPU();
     
     doUpdateDataStream = true;
     return overlayObject;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -31,7 +31,7 @@ EngineSystemManager::EngineSystemManager(void) :
 {
 }
 
-Button* EngineSystemManager::CreateButtonCallback(unsigned int x, unsigned int y, unsigned int w, unsigned int h, ButtonCallBack callback) {
+Button* EngineSystemManager::CreateOverlayButtonCallback(int x, int y, int w, int h, ButtonCallBack callback) {
     Button* newButton = mButtons.Create();
     newButton->x = x;
     newButton->y = y;
@@ -41,7 +41,7 @@ Button* EngineSystemManager::CreateButtonCallback(unsigned int x, unsigned int y
     return newButton;
 }
 
-bool EngineSystemManager::DestroyButtonCallback(Button* button) {
+bool EngineSystemManager::DestroyOverlayButtonCallback(Button* button) {
     return mButtons.Destroy( button );
 }
 

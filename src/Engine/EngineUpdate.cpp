@@ -393,8 +393,9 @@ void EngineSystemManager::Update(void) {
                     
                 }
                 
-                float textGlyphWidth  = streamBuffer[i].text->glyphWidth;
-                float textGlyphHeight = streamBuffer[i].text->glyphHeight;
+                // Flip height and width
+                float textGlyphWidth  = streamBuffer[i].text->glyphHeight;
+                float textGlyphHeight = streamBuffer[i].text->glyphWidth;
                 
                 streamBuffer[i].meshRenderer->mesh->ClearSubMeshes();
                 Engine.AddMeshText(streamBuffer[i].gameObject, 0, 0, textGlyphWidth, textGlyphHeight, streamBuffer[i].text->text, streamBuffer[i].text->color);

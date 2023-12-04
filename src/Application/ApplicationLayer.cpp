@@ -10,6 +10,11 @@ ApplicationLayer::ApplicationLayer() :
     displayWidth(1024),
     displayHeight(800),
     
+    windowLeft(0),
+    windowTop(0),
+    windowRight(0),
+    windowBottom(0),
+    
     isPaused(false),
     isActive(true),
     

@@ -78,6 +78,8 @@ public:
     void AddWall(float x, float y, float z, float width, float height, Color color);
     /// Add a sub divided wall sub mesh to the vertex buffer.
     void AddWallSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
+    /// Add a quad sub mesh to the vertex buffer.
+    void AddQuad(float x, float y, float z, float width, float height, Color color, float uCoord=1, float vCoord=1, float uStart=0, float vStart=0, unsigned int uOffset=0, unsigned int vOffset=0);
     
     /// Add a sub mesh into this vertex buffer.
     bool AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu=true);

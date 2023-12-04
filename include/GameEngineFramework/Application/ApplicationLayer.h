@@ -38,8 +38,13 @@ public:
     HWND windowHandle;
     HDC deviceContext;
     
-    unsigned int displayWidth;
-    unsigned int displayHeight;
+    int displayWidth;
+    int displayHeight;
+    
+    int windowLeft;
+    int windowTop;
+    int windowRight;
+    int windowBottom;
     
     WNDCLASSEX wClassEx;
     HINSTANCE hInstance;
