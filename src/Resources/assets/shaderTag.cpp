@@ -1,7 +1,7 @@
 #include <GameEngineFramework/Resources/assets/shaderTag.h>
+#include <GameEngineFramework/Logging/Logging.h>
 
 #include "../../../vendor/CodeBaseLibrary/fileloader.h"
-#include "../../../vendor/CodeBaseLibrary/logging.h"
 
 extern Logger Log;
 

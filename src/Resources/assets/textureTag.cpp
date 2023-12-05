@@ -1,4 +1,5 @@
 #include <GameEngineFramework/Resources/assets/textureTag.h>
+#include <GameEngineFramework/Logging/Logging.h>
 
 #define  STB_IMAGE_IMPLEMENTATION
 //#define  STBI_ONLY_JPEG
@@ -12,7 +13,6 @@
 //#define  STBI_ONLY_PNM // (.ppm and .pgm)
 
 #include "../../../vendor/stb/stb_image.h"
-#include "../../../vendor/CodeBaseLibrary/logging.h"
 
 extern Logger Log;
 

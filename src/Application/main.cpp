@@ -1,10 +1,7 @@
 #include <GameEngineFramework/Application/main.h>
+#include <GameEngineFramework/Logging/Logging.h>
 
 #include "../../vendor/CodeBaseLibrary/poolallocator.h"
-#include "../../vendor/CodeBaseLibrary/strings.h"
-#include "../../vendor/CodeBaseLibrary/types.h"
-#include "../../vendor/CodeBaseLibrary/random.h"
-#include "../../vendor/CodeBaseLibrary/logging.h"
 #include "../../vendor/CodeBaseLibrary/fileloader.h"
 #include "../../vendor/CodeBaseLibrary/timer.h"
 
@@ -16,6 +13,7 @@ extern ProfilerTimer        Profiler;
 extern Timer                PhysicsTime;
 extern Timer                Time;
 extern Logger               Log;
+
 extern ActorSystem          AI;
 extern InputSystem          Input;
 extern AudioSystem          Audio;
@@ -25,6 +23,7 @@ extern RenderSystem         Renderer;
 extern ScriptSystem         Scripting;
 extern ResourceManager      Resources;
 extern ApplicationLayer     Application;
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     

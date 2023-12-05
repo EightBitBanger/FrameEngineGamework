@@ -11,4 +11,4 @@
 #include <GameEngineFrameWork/ActorAI/ActorSystem.h>
 #include <GameEngineFrameWork/Profiler/Profiler.h>
 
-#include <GameEngineFrameWork/Engine/engine.h>
+#include <GameEngineFrameWork/Engine/Engine.h>

@@ -1,12 +1,13 @@
 #include <GameEngineFramework/Renderer/rendersystem.h>
+#include <GameEngineFramework/Logging/Logging.h>
 
 #include <iostream>
 
-#include "../../vendor/codebaselibrary/logging.h"
-
 extern Logger Log;
 
-Logger RenderLog;
+#include <GameEngineFramework/Types/types.h>
+extern IntType Int;
+
 
 // Render thread
 bool isThreadActive = true;
@@ -198,23 +199,23 @@ GLenum RenderSystem::SetRenderTarget(HWND wHndl) {
     gcVersion    = std::string(gcVersionConst);
     
     // Log details
-    RenderLog.Write("== Hardware details =="); Line = "" + gcRenderer;
-    RenderLog.Write(Line);
-    RenderLog.WriteLn();
+    Log.Write("== Hardware details =="); Line = "" + gcRenderer;
+    Log.Write(Line);
+    Log.WriteLn();
     
     std::string DetailStringHead = "  - ";
     std::string DetailStringEqu  = " = ";
     
-    Line = " Device"; RenderLog.Write(Line);
-    Line = DetailStringHead + "Name   " + DetailStringEqu + gcVendor;  RenderLog.Write(Line);
-    Line = DetailStringHead + "Version" + DetailStringEqu + gcVersion; RenderLog.Write(Line);
-    RenderLog.WriteLn();
+    Line = " Device"; Log.Write(Line);
+    Line = DetailStringHead + "Name   " + DetailStringEqu + gcVendor;  Log.Write(Line);
+    Line = DetailStringHead + "Version" + DetailStringEqu + gcVersion; Log.Write(Line);
+    Log.WriteLn();
     
-    Line = " Colors"; RenderLog.Write(Line);
-    Line = DetailStringHead + "Color" + DetailStringEqu + IntToString(pfd.cColorBits) + " bit"; RenderLog.Write(Line);
-    Line = DetailStringHead + "Depth" + DetailStringEqu + IntToString(pfd.cDepthBits) + " bit"; RenderLog.Write(Line);
-    RenderLog.WriteLn();
-    RenderLog.WriteLn();
+    Line = " Colors"; Log.Write(Line);
+    Line = DetailStringHead + "Color" + DetailStringEqu + Int.ToString(pfd.cColorBits) + " bit"; Log.Write(Line);
+    Line = DetailStringHead + "Depth" + DetailStringEqu + Int.ToString(pfd.cDepthBits) + " bit"; Log.Write(Line);
+    Log.WriteLn();
+    Log.WriteLn();
 #endif
     return glpassed;
 }

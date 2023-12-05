@@ -1,11 +1,10 @@
 #ifndef __COMPONENT_SHADER
 #define __COMPONENT_SHADER
 
-#include "../../../../vendor/CodeBaseLibrary/types.h"
-
 #include <GameEngineFramework/Engine/types/transform.h>
 #include <GameEngineFramework/Engine/types/color.h>
 
+#include <string>
 
 class ENGINE_API Shader {
     

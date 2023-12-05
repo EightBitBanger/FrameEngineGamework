@@ -13,6 +13,8 @@
 #include "../../../tests/framework.h"
 
 #include <GameEngineFramework/Math/Math.h>
+#include <GameEngineFramework/Math/Random.h>
+
 #include <GameEngineFramework/Renderer/components/meshrenderer.h>
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
 #include <GameEngineFramework/Scripting/components/script.h>
@@ -23,9 +25,11 @@
 #include <GameEngineFramework/ActorAI/components/actor.h>
 #include <GameEngineFramework/ActorAI/Genetics.h>
 
+#include <GameEngineFramework/Types/types.h>
+
+#include <GameEngineFramework/Logging/Logging.h>
+
 #include "../../../vendor/CodeBaseLibrary/directorysearch.h"
-#include "../../../vendor/CodeBaseLibrary/logging.h"
-#include "../../../vendor/CodeBaseLibrary/random.h"
 #include "../../../vendor/CodeBaseLibrary/timer.h"
 
 #ifndef BUILD_CORE
@@ -46,6 +50,13 @@
     extern InputSystem          Input;
     extern MathCore             Math;
     extern ActorSystem          AI;
+    
+    extern StringType  String;
+    extern FloatType   Float;
+    extern DoubleType  Double;
+    extern IntType     Int;
+    extern UintType    Uint;
+    
 #endif
 
 

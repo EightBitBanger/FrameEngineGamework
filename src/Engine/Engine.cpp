@@ -21,6 +21,11 @@ ENGINE_API ActorSystem       AI;
 ENGINE_API ApplicationLayer      Application;
 ENGINE_API EngineSystemManager   Engine;
 
+ENGINE_API StringType        String;
+ENGINE_API FloatType         Float;
+ENGINE_API DoubleType        Double;
+ENGINE_API IntType           Int;
+ENGINE_API UintType          Uint;
 
 
 EngineSystemManager::EngineSystemManager(void) : 

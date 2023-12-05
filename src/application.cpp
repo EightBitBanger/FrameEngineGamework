@@ -164,16 +164,16 @@ void Run() {
     
     // Initiate windows area
     
-    text[2]->text = "window x - " + IntToString(Application.windowLeft);
-    text[3]->text = "window y - " + IntToString(Application.windowTop);
+    text[2]->text = "window x - " + Int.ToString(Application.windowLeft);
+    text[3]->text = "window y - " + Int.ToString(Application.windowTop);
     
-    text[5]->text = "Renderer - " + FloatToString( Profiler.profileRenderSystem );
-    text[6]->text = "Physics  - " + FloatToString( Profiler.profilePhysicsSystem );
-    text[7]->text = "Engine   - " + FloatToString( Profiler.profileGameEngineUpdate );
-    text[8]->text = "ActorAI  - " + FloatToString( Profiler.profileActorAI );
+    text[5]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
+    text[6]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
+    text[7]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
+    text[8]->text = "ActorAI  - " + Float.ToString( Profiler.profileActorAI );
     
-    text[10]->text = "mouse x - " + FloatToString( Input.mouseX - Application.windowLeft );
-    text[11]->text = "mouse y - " + FloatToString( Input.mouseY - Application.windowTop );
+    text[10]->text = "mouse x - " + Float.ToString( Input.mouseX - Application.windowLeft );
+    text[11]->text = "mouse y - " + Float.ToString( Input.mouseY - Application.windowTop );
     
     text[15]->text = "";
     text[16]->text = "";

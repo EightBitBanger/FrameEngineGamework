@@ -5,7 +5,7 @@
 
 #include <mmdeviceapi.h>
 
-#include "../../vendor/codebaselibrary/logging.h"
+#include <GameEngineFramework/Logging/Logging.h>
 
 extern Logger Log;
 

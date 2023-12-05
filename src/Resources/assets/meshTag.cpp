@@ -1,7 +1,7 @@
 #include <GameEngineFramework/Resources/assets/meshTag.h>
+#include <GameEngineFramework/Logging/Logging.h>
 
 #include "../../../vendor/Bly7/OBJ_Loader.h"
-#include "../../../vendor/CodeBaseLibrary/logging.h"
 
 extern Logger Log;
 

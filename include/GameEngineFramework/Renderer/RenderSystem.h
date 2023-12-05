@@ -18,12 +18,8 @@
 #include "../../../vendor/gl/glew.h"
 
 #include "../../../vendor/CodeBaseLibrary/poolallocator.h"
-#include "../../../vendor/CodeBaseLibrary/types.h"
-#include "../../../vendor/CodeBaseLibrary/logging.h"
 
 #include <GameEngineFramework/Renderer/enumerators.h>
-
-#include <GameEngineFramework/Engine/types/viewport.h>
 
 #include <GameEngineFramework/Renderer/components/camera.h>
 #include <GameEngineFramework/Renderer/components/light.h>
@@ -32,6 +28,10 @@
 #include <GameEngineFramework/Renderer/components/meshrenderer.h>
 #include <GameEngineFramework/Renderer/components/scene.h>
 #include <GameEngineFramework/Renderer/components/shader.h>
+
+#include <GameEngineFramework/Engine/types/viewport.h>
+
+#include <GameEngineFramework/Logging/Logging.h>
 
 #include <GameEngineFramework/configuration.h>
 

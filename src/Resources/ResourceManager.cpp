@@ -1,13 +1,14 @@
 #include <GameEngineFramework/Resources/ResourceManager.h>
+#include <GameEngineFramework/Types/types.h>
 
 #include "../../vendor/CodeBaseLibrary/directorysearch.h"
 #include "../../vendor/CodeBaseLibrary/poolallocator.h"
-#include "../../vendor/CodeBaseLibrary/strings.h"
 #include "../../vendor/CodeBaseLibrary/fileloader.h"
 
 extern RenderSystem Renderer;
 extern PhysicsSystem Physics;
 extern Logger Log;
+extern StringType String;
 
 ResourceManager::ResourceManager() {
     return;
@@ -24,13 +25,13 @@ void ResourceManager::Initiate(void) {
     std::vector<std::string> materialDirectoryList = DirectoryGetList(".\\core\\materials\\");
     
     for (unsigned int i=0; i < shaderDirectoryList.size(); i++) 
-        LoadShaderGLSL("core/shaders/" + shaderDirectoryList[i], StringGetNameFromFilenameNoExt( shaderDirectoryList[i] ));
+        LoadShaderGLSL("core/shaders/" + shaderDirectoryList[i], String.GetNameFromFilenameNoExt( shaderDirectoryList[i] ));
     
     for (unsigned int i=0; i < modelDirectoryList.size(); i++) 
-        LoadWaveFront("core/models/" + modelDirectoryList[i], StringGetNameFromFilenameNoExt( modelDirectoryList[i] ));
+        LoadWaveFront("core/models/" + modelDirectoryList[i], String.GetNameFromFilenameNoExt( modelDirectoryList[i] ));
     
     for (unsigned int i=0; i < materialDirectoryList.size(); i++) 
-        LoadTexture("core/materials/" + materialDirectoryList[i], StringGetNameFromFilenameNoExt( materialDirectoryList[i] ));
+        LoadTexture("core/materials/" + materialDirectoryList[i], String.GetNameFromFilenameNoExt( materialDirectoryList[i] ));
     
     return;
 }

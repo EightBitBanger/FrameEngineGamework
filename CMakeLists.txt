@@ -63,6 +63,7 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Serialization/Serialization.h"
     
     "include/GameEngineFramework/Math/Math.h"
+    "include/GameEngineFramework/Math/Random.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -88,6 +89,8 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Profiler/Profiler.h"
     
     "include/GameEngineFramework/Types/Types.h"
+    
+    "include/GameEngineFramework/Logging/Logging.h"
     
     "include/GameEngineFramework/Renderer/enumerators.h"
     "include/GameEngineFramework/Renderer/RenderSystem.h"
@@ -192,6 +195,7 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Serialization/Serialization.h"
     
     "include/GameEngineFramework/Math/Math.h"
+    "include/GameEngineFramework/Math/Random.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -217,6 +221,8 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Profiler/Profiler.h"
     
     "include/GameEngineFramework/Types/Types.h"
+    
+    "include/GameEngineFramework/Logging/Logging.h"
     
     "include/GameEngineFramework/Renderer/enumerators.h"
     "include/GameEngineFramework/Renderer/RenderSystem.h"
@@ -306,6 +312,7 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Serialization/Serialization.h"
     
     "include/GameEngineFramework/Math/Math.h"
+    "include/GameEngineFramework/Math/Random.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -332,6 +339,8 @@ set (CORE_HEADERS
     
     "include/GameEngineFramework/Types/Types.h"
     
+    "include/GameEngineFramework/Logging/Logging.h"
+    
     "include/GameEngineFramework/Renderer/enumerators.h"
     "include/GameEngineFramework/Renderer/RenderSystem.h"
     "include/GameEngineFramework/Renderer/components/camera.h"
@@ -355,12 +364,8 @@ set (CORE_HEADERS
     
     "vendor/CodeBaseLibrary/directorysearch.h"
     "vendor/CodeBaseLibrary/fileloader.h"
-    "vendor/CodeBaseLibrary/logging.h"
     "vendor/CodeBaseLibrary/poolallocator.h"
-    "vendor/CodeBaseLibrary/random.h"
-    "vendor/CodeBaseLibrary/strings.h"
     "vendor/CodeBaseLibrary/timer.h"
-    "vendor/CodeBaseLibrary/types.h"
     
     "vendor/stb/stb_image.h"
     "vendor/stb/stb_perlin.h"
@@ -397,6 +402,7 @@ set (CORE_SOURCES
     "src/Serialization/Serialization.cpp"
     
     "src/Math/Math.cpp"
+    "src/Math/Random.cpp"
     
     "src/Input/InputSystem.cpp"
     
@@ -406,6 +412,8 @@ set (CORE_SOURCES
     "src/Profiler/Profiler.cpp"
     
     "src/Types/Types.cpp"
+    
+    "src/Logging/Logging.cpp"
     
     "src/Renderer/RenderSystem.cpp"
     "src/Renderer/Pipeline.cpp"
@@ -428,11 +436,7 @@ set (CORE_SOURCES
     
     "vendor/CodeBaseLibrary/directorysearch.cpp"
     "vendor/CodeBaseLibrary/fileloader.cpp"
-    "vendor/CodeBaseLibrary/logging.cpp"
-    "vendor/CodeBaseLibrary/random.cpp"
-    "vendor/CodeBaseLibrary/strings.cpp"
     "vendor/CodeBaseLibrary/timer.cpp"
-    "vendor/CodeBaseLibrary/types.cpp"
     
 )
 
