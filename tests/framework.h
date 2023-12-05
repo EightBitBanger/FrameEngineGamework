@@ -1,14 +1,12 @@
 //
 // Application unit tests
+//
 #ifndef APPLICATION_UNIT_TESTS
 #define APPLICATION_UNIT_TESTS
 
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "../vendor/CodeBaseLibrary/types.h"
-#include "../vendor/CodeBaseLibrary/strings.h"
 
 
 class __declspec(dllexport) TestFramework {

@@ -1,5 +1,9 @@
 #include "framework.h"
 
+#include <GameEngineFramework/Types/types.h>
+extern StringType String;
+extern IntType    Int;
+
 
 TestFramework::TestFramework() : 
     hasTestFailed(false),
@@ -26,9 +30,9 @@ void TestFramework::Finalize(void) {
 
 void TestFramework::Throw(std::string message, std::string sourceFile, int line) {
     
-    std::string sourceFileName = StringGetNameFromFilename(sourceFile);
+    std::string sourceFileName = String.GetNameFromFilename(sourceFile);
     
-    mLogString += sourceFileName + "\nLine " + IntToString((int)line) + " - " + message + "\n\n";
+    mLogString += sourceFileName + "\nLine " + Int.ToString((int)line) + " - " + message + "\n\n";
 }
 
 void TestFramework::AddTest(void(TestFramework::*testFunction)()) {
