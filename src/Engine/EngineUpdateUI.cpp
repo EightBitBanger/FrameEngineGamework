@@ -1,4 +1,4 @@
-// Engine component related functions
+// Update user interface elements
 //
 
 #include <GameEngineFramework/Engine/Engine.h>
@@ -65,25 +65,36 @@ void EngineSystemManager::UpdateUI(void) {
             
             button->isHovering = true;
             
-            // Get clicked state
             bool isClicked = false;
+            
+            // Check clicked type and button
             if (button->triggerOnLeftButton)   if (leftActive)   isClicked = true;
             if (button->triggerOnMiddleButton) if (middleActive) isClicked = true;
             if (button->triggerOnRightButton)  if (rightActive)  isClicked = true;
             
-            // Check clicked
             if (isClicked) {
                 
-                // Call the button payload
-                if (button->callback != nullptr) 
-                    button->callback();
+                // Check button type
+                if (!button->isDragAndDrop) {
+                    
+                    // Call the button payload
+                    if (button->callback != nullptr) 
+                        button->callback();
+                    
+                } else {
+                    
+                    // Drag and drop element
+                    //mouseOldX
+                    //mouseOldY
+                    
+                }
                 
             }
             
         } else {
             
             // Not hovering
-            mButtons[i]->isHovering = false;
+            button->isHovering = false;
             
         }
         

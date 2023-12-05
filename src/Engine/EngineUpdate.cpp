@@ -1,4 +1,4 @@
-// Engine game object related functions
+// Update engine related components and game objects
 //
 
 #include <GameEngineFramework/Engine/Engine.h>
@@ -68,7 +68,7 @@ void EngineSystemManager::Update(void) {
     // Run the game object list
     //
     
-    for (unsigned int i=0; i < mGameObjects.Size(); i++ ) {
+    for (unsigned int i=0; i < streamSize; i++ ) {
         
         if (!streamBuffer[i].gameObject->isActive) 
             continue;

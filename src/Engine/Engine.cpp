@@ -26,6 +26,9 @@ ENGINE_API EngineSystemManager   Engine;
 EngineSystemManager::EngineSystemManager(void) : 
     sceneMain(nullptr),
     
+    mouseOldX(0),
+    mouseOldY(0),
+    
     doUpdateDataStream(true),
     streamSize(0)
 {

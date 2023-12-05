@@ -87,6 +87,8 @@ set (RUNTIME_HEADERS
     
     "include/GameEngineFramework/Profiler/Profiler.h"
     
+    "include/GameEngineFramework/Types/Types.h"
+    
     "include/GameEngineFramework/Renderer/enumerators.h"
     "include/GameEngineFramework/Renderer/RenderSystem.h"
     "include/GameEngineFramework/Renderer/components/camera.h"
@@ -214,6 +216,8 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/Profiler/Profiler.h"
     
+    "include/GameEngineFramework/Types/Types.h"
+    
     "include/GameEngineFramework/Renderer/enumerators.h"
     "include/GameEngineFramework/Renderer/RenderSystem.h"
     "include/GameEngineFramework/Renderer/components/camera.h"
@@ -326,6 +330,8 @@ set (CORE_HEADERS
     
     "include/GameEngineFramework/Profiler/Profiler.h"
     
+    "include/GameEngineFramework/Types/Types.h"
+    
     "include/GameEngineFramework/Renderer/enumerators.h"
     "include/GameEngineFramework/Renderer/RenderSystem.h"
     "include/GameEngineFramework/Renderer/components/camera.h"
@@ -398,6 +404,8 @@ set (CORE_SOURCES
     "src/Physics/components/meshcollider.cpp"
     
     "src/Profiler/Profiler.cpp"
+    
+    "src/Types/Types.cpp"
     
     "src/Renderer/RenderSystem.cpp"
     "src/Renderer/Pipeline.cpp"

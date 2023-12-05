@@ -28,7 +28,26 @@
 #include "../../../vendor/CodeBaseLibrary/random.h"
 #include "../../../vendor/CodeBaseLibrary/timer.h"
 
-extern PhysicsSystem  Physics;
+#ifndef BUILD_CORE
+    extern EngineComponents     Components;
+    extern ColorPreset          Colors;
+    extern RandomGen            Random;
+    extern Logger               Log;
+    extern ProfilerTimer        Profiler;
+    extern Timer                PhysicsTime;
+    extern Timer                Time;
+    
+    extern ApplicationLayer     Application;
+    extern ResourceManager      Resources;
+    extern Serialization        Serializer;
+    extern ScriptSystem         Scripting;
+    extern RenderSystem         Renderer;
+    extern PhysicsSystem        Physics;
+    extern InputSystem          Input;
+    extern MathCore             Math;
+    extern ActorSystem          AI;
+#endif
+
 
 typedef void(*ButtonCallBack)();
 
@@ -61,7 +80,7 @@ class ENGINE_API EngineSystemManager {
     
 public:
     
-    /// Currently active world scene.
+    /// Main active rendering scene.
     Scene* sceneMain;
     
     // Game objects
@@ -232,6 +251,10 @@ private:
     PoolAllocator<Panel>      mPanelObjects;
     PoolAllocator<Button>     mButtons;
     
+    // UI state
+    int mouseOldX;
+    int mouseOldY;
+    
     // Default shaders
     struct DefaultShaders {
         Shader*  texture;
@@ -254,6 +277,10 @@ public:
     
 };
 
+
+#ifndef BUILD_CORE
+    extern EngineSystemManager  Engine;
+#endif
 
 
 #endif

@@ -274,16 +274,7 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int sc
     
     overlayMaterial->DisableCulling();
     
-    
-    
-    
-    float scaleWidthHalf  = (float)scaleWidth  * 0.4;
-    float scaleHeightHalf = (float)scaleHeight * 0.4;
-    
-    //overlayMesh->AddPlain(0, 0, 0, scaleHeight, scaleWidth, Colors.white, 1, 1);
     overlayMesh->AddPlain(0, 0, 0, scaleHeight, scaleWidth, Colors.white, 1, 1);
-    
-    //overlayMesh->ChangeSubMeshPosition(0, scaleHeight, 0, -scaleWidthHalf);
     
     overlayMesh->UploadToGPU();
     

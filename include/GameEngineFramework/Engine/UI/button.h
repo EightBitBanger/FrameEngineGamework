@@ -16,8 +16,11 @@ struct Button {
     /// Button height.
     unsigned int h;
     
-    /// State whether the mouse is hovering over the button.
+    /// (Read only) State whether the mouse is hovering over the button.
     bool isHovering;
+    
+    /// State whether this is a simple button element or a drag and drop element.
+    bool isDragAndDrop;
     
     /// Trigger on the left mouse button event.
     bool triggerOnLeftButton;
