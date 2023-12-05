@@ -2,7 +2,7 @@
 #include <string>
 
 #include "../framework.h"
-#include <Scripting/ScriptSystem.h>
+#include <GameEngineFramework/Scripting/ScriptSystem.h>
 extern ScriptSystem Scripting;
 
 

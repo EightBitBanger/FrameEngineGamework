@@ -7,20 +7,20 @@ TestFramework::TestFramework() :
 {}
 
 void TestFramework::Initiate(void) {
-    std::cout << "Running unit tests" << std::endl << std::endl;
+    std::cout << "Running unit tests\n\n";
 }
 
 void TestFramework::Complete(void) {
-    std::cout << std::endl << "Complete" << std::endl << std::endl;
+    std::cout << "\nComplete\n\n";
 }
 
 void TestFramework::Finalize(void) {
     if (mLogString != "") {
-        std::cout  << msgFailed << std::endl;
-        std::cout << mLogString << std::endl;
+        std::cout  << msgFailed << "\n";
+        std::cout << mLogString << "\n";
         mLogString="";
     } else {
-        std::cout << msgPassed << std::endl;
+        std::cout << msgPassed << "\n";
     }
 }
 
