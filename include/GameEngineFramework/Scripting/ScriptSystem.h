@@ -3,7 +3,7 @@
 
 #include <mutex>
 
-#include "../../../vendor/CodeBaseLibrary/poolallocator.h"
+#include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
 #include <GameEngineFramework/Scripting/components/script.h>
 

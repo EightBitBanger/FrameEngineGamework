@@ -12,6 +12,7 @@
 #include <GameEngineFramework/Resources/assets/shaderTag.h>
 #include <GameEngineFramework/Resources/assets/MeshTag.h>
 
+#include <GameEngineFramework/Resources/FileSystem.h>
 
 class ENGINE_API ResourceManager {
     

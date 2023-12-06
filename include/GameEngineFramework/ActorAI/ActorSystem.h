@@ -5,7 +5,7 @@
 #include <mutex>
 #include <chrono>
 
-#include "../../../vendor/CodeBaseLibrary/poolallocator.h"
+#include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
 #include "components/actor.h"
 #include "components/neuron.h"

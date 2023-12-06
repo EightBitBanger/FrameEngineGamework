@@ -17,7 +17,7 @@
 #define GLEW_STATIC
 #include "../../../vendor/gl/glew.h"
 
-#include "../../../vendor/CodeBaseLibrary/poolallocator.h"
+#include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
 #include <GameEngineFramework/Renderer/enumerators.h>
 

@@ -2,6 +2,7 @@
 #define ENGINE_CORE
 
 #include <GameEngineFramework/Engine/components/gameobject.h>
+#include <GameEngineFramework/Engine/components/component.h>
 
 #include <GameEngineFramework/Engine/UI/canvas.h>
 #include <GameEngineFramework/Engine/UI/panel.h>
@@ -10,27 +11,26 @@
 #include <GameEngineFramework/Engine/UI/button.h>
 
 #include <GameEngineFramework/application/applicationlayer.h>
-#include "../../../tests/framework.h"
 
-#include <GameEngineFramework/Math/Math.h>
-#include <GameEngineFramework/Math/Random.h>
+#include <GameEngineFramework/Resources/ResourceManager.h>
+#include <GameEngineFramework/Physics/PhysicsSystem.h>
+#include <GameEngineFramework/Profiler/Profiler.h>
+#include <GameEngineFramework/Scripting/components/script.h>
 
 #include <GameEngineFramework/Renderer/components/meshrenderer.h>
-#include <GameEngineFramework/Physics/PhysicsSystem.h>
-#include <GameEngineFramework/Scripting/components/script.h>
 #include <GameEngineFramework/Renderer/components/camera.h>
-#include <GameEngineFramework/Profiler/Profiler.h>
 
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
 #include <GameEngineFramework/ActorAI/components/actor.h>
 #include <GameEngineFramework/ActorAI/Genetics.h>
 
 #include <GameEngineFramework/Types/types.h>
-
 #include <GameEngineFramework/Logging/Logging.h>
+#include <GameEngineFramework/Timer/timer.h>
 
-#include "../../../vendor/CodeBaseLibrary/directorysearch.h"
-#include "../../../vendor/CodeBaseLibrary/timer.h"
+#include <GameEngineFramework/Math/Math.h>
+#include <GameEngineFramework/Math/Random.h>
+
 
 #ifndef BUILD_CORE
     extern EngineComponents     Components;

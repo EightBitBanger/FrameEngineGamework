@@ -3,20 +3,16 @@
 
 #include <type_traits>
 
-#include "../../Renderer/components/meshrenderer.h"
-#include "../../Renderer/components/camera.h"
-#include "../../Renderer/components/light.h"
-#include "../../Scripting/components/script.h"
-#include "../../Physics/PhysicsSystem.h"
-#include "../../Renderer/RenderSystem.h"
+#include <GameEngineFramework/Renderer/RenderSystem.h>
+#include <GameEngineFramework/Scripting/ScriptSystem.h>
+#include <GameEngineFramework/Physics/PhysicsSystem.h>
+#include <GameEngineFramework/Resources/ResourceManager.h>
+#include <GameEngineFramework/ActorAI/ActorSystem.h>
 
-#include "../../Resources/assets/colliderTag.h"
-#include "../../ActorAI/components/actor.h"
+#include <GameEngineFramework/Engine/UI/panel.h>
+#include <GameEngineFramework/Engine/UI/text.h>
 
-#include "../UI/text.h"
-#include "../UI/panel.h"
-
-#include "component.h"
+#include <GameEngineFramework/Engine/components/component.h>
 
 extern RenderSystem Renderer;
 extern EngineComponents Components;

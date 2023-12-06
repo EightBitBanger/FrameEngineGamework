@@ -1,7 +1,7 @@
 #ifndef CORE_PROFILER
 #define CORE_PROFILER
 
-#include "../../../vendor/codebaselibrary/timer.h"
+#include <GameEngineFramework/Timer/timer.h>
 
 class ENGINE_API ProfilerTimer {
     
