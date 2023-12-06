@@ -21,6 +21,8 @@ ENGINE_API ActorSystem       AI;
 ENGINE_API ApplicationLayer      Application;
 ENGINE_API EngineSystemManager   Engine;
 
+ENGINE_API FileSystemDir     Directory;
+
 ENGINE_API StringType        String;
 ENGINE_API FloatType         Float;
 ENGINE_API DoubleType        Double;

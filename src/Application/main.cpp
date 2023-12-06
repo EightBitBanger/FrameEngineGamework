@@ -1,9 +1,8 @@
 #include <GameEngineFramework/Application/main.h>
-#include <GameEngineFramework/Logging/Logging.h>
 
-#include "../../vendor/CodeBaseLibrary/poolallocator.h"
-#include "../../vendor/CodeBaseLibrary/fileloader.h"
-#include "../../vendor/CodeBaseLibrary/timer.h"
+#include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
+#include <GameEngineFramework/Logging/Logging.h>
+#include <GameEngineFramework/Timer/timer.h>
 
 #ifdef RUN_UNIT_TESTS
  #include "../../tests/framework.h"

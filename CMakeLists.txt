@@ -87,10 +87,10 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Physics/components/meshcollider.h"
     
     "include/GameEngineFramework/Profiler/Profiler.h"
-    
     "include/GameEngineFramework/Types/Types.h"
-    
     "include/GameEngineFramework/Logging/Logging.h"
+    "include/GameEngineFramework/Timer/Timer.h"
+    "include/GameEngineFramework/MemoryAllocation/PoolAllocator.h"
     
     "include/GameEngineFramework/Renderer/enumerators.h"
     "include/GameEngineFramework/Renderer/RenderSystem.h"
@@ -102,6 +102,8 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Renderer/components/light.h"
     "include/GameEngineFramework/Renderer/components/shader.h"
     
+    "include/GameEngineFramework/Resources/FileLoader.h"
+    "include/GameEngineFramework/Resources/FileSystem.h"
     "include/GameEngineFramework/Resources/ResourceManager.h"
     "include/GameEngineFramework/Resources/assets/colliderTag.h"
     "include/GameEngineFramework/Resources/assets/meshTag.h"
@@ -221,8 +223,9 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Profiler/Profiler.h"
     
     "include/GameEngineFramework/Types/Types.h"
-    
     "include/GameEngineFramework/Logging/Logging.h"
+    "include/GameEngineFramework/Timer/Timer.h"
+    "include/GameEngineFramework/MemoryAllocation/PoolAllocator.h"
     
     "include/GameEngineFramework/Renderer/enumerators.h"
     "include/GameEngineFramework/Renderer/RenderSystem.h"
@@ -234,6 +237,8 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Renderer/components/light.h"
     "include/GameEngineFramework/Renderer/components/shader.h"
     
+    "include/GameEngineFramework/Resources/FileLoader.h"
+    "include/GameEngineFramework/Resources/FileSystem.h"
     "include/GameEngineFramework/Resources/ResourceManager.h"
     "include/GameEngineFramework/Resources/assets/colliderTag.h"
     "include/GameEngineFramework/Resources/assets/meshTag.h"
@@ -338,8 +343,9 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Profiler/Profiler.h"
     
     "include/GameEngineFramework/Types/Types.h"
-    
     "include/GameEngineFramework/Logging/Logging.h"
+    "include/GameEngineFramework/Timer/Timer.h"
+    "include/GameEngineFramework/MemoryAllocation/PoolAllocator.h"
     
     "include/GameEngineFramework/Renderer/enumerators.h"
     "include/GameEngineFramework/Renderer/RenderSystem.h"
@@ -351,6 +357,8 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Renderer/components/light.h"
     "include/GameEngineFramework/Renderer/components/shader.h"
     
+    "include/GameEngineFramework/Resources/FileLoader.h"
+    "include/GameEngineFramework/Resources/FileSystem.h"
     "include/GameEngineFramework/Resources/ResourceManager.h"
     "include/GameEngineFramework/Resources/assets/colliderTag.h"
     "include/GameEngineFramework/Resources/assets/meshTag.h"
@@ -361,11 +369,6 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Scripting/components/script.h"
     
     "vendor/Bly7/OBJ_Loader.h"
-    
-    "vendor/CodeBaseLibrary/directorysearch.h"
-    "vendor/CodeBaseLibrary/fileloader.h"
-    "vendor/CodeBaseLibrary/poolallocator.h"
-    "vendor/CodeBaseLibrary/timer.h"
     
     "vendor/stb/stb_image.h"
     "vendor/stb/stb_perlin.h"
@@ -410,10 +413,9 @@ set (CORE_SOURCES
     "src/Physics/components/meshcollider.cpp"
     
     "src/Profiler/Profiler.cpp"
-    
     "src/Types/Types.cpp"
-    
     "src/Logging/Logging.cpp"
+    "src/Timer/Timer.cpp"
     
     "src/Renderer/RenderSystem.cpp"
     "src/Renderer/Pipeline.cpp"
@@ -425,6 +427,8 @@ set (CORE_SOURCES
     "src/Renderer/components/light.cpp"
     "src/Renderer/components/shader.cpp"
     
+    "src/Resources/FileLoader.cpp"
+    "src/Resources/FileSystem.cpp"
     "src/Resources/ResourceManager.cpp"
     "src/Resources/assets/colliderTag.cpp"
     "src/Resources/assets/meshTag.cpp"
@@ -434,11 +438,8 @@ set (CORE_SOURCES
     "src/Scripting/ScriptSystem.cpp"
     "src/Scripting/components/script.cpp"
     
-    "vendor/CodeBaseLibrary/directorysearch.cpp"
-    "vendor/CodeBaseLibrary/fileloader.cpp"
-    "vendor/CodeBaseLibrary/timer.cpp"
-    
 )
+
 
 
 add_library(core SHARED ${CORE_HEADERS} ${CORE_SOURCES})
