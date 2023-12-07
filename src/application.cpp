@@ -77,16 +77,17 @@ void Start() {
     
     sceneOverlay = Engine.Create<Scene>();
     Renderer.AddSceneToRenderQueue(sceneOverlay);
+    Camera* overlayCamera = Engine.Create<Camera>();
+    sceneOverlay->camera = overlayCamera;
     
-    sceneOverlay->camera = Engine.Create<Camera>();
-    sceneOverlay->camera->isOrthographic = true;
-    sceneOverlay->camera->isFixedAspect  = true;
+    overlayCamera->isOrthographic = true;
+    overlayCamera->isFixedAspect  = true;
     
-    sceneOverlay->camera->viewport.w = Renderer.displaySize.x;
-    sceneOverlay->camera->viewport.h = Renderer.displaySize.y;
+    overlayCamera->viewport.w = Renderer.displaySize.x;
+    overlayCamera->viewport.h = Renderer.displaySize.y;
     
-    sceneOverlay->camera->clipFar  =  100;
-    sceneOverlay->camera->clipNear = -100;
+    overlayCamera->clipFar  =  100;
+    overlayCamera->clipNear = -100;
     
     int fontSize = 9;
     Color fontColor = Colors.black;

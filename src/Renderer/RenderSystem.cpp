@@ -1,11 +1,12 @@
 #include <GameEngineFramework/Renderer/rendersystem.h>
 #include <GameEngineFramework/Logging/Logging.h>
 
+#include <GameEngineFramework/Types/types.h>
+
 #include <iostream>
 
 extern Logger Log;
 
-#include <GameEngineFramework/Types/types.h>
 extern IntType Int;
 
 

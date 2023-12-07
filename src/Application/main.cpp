@@ -1,8 +1,5 @@
 #include <GameEngineFramework/Application/main.h>
-
-#include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
-#include <GameEngineFramework/Logging/Logging.h>
-#include <GameEngineFramework/Timer/timer.h>
+#include <GameEngineFramework/Application/winproc.h>
 
 #ifdef RUN_UNIT_TESTS
  #include "../../tests/framework.h"

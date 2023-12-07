@@ -1,4 +1,5 @@
 #include <GameEngineFramework/Profiler/profiler.h>
+
 ProfilerTimer::ProfilerTimer() : 
     profileRenderSystem(0),
     profilePhysicsSystem(0),

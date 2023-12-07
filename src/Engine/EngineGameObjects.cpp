@@ -1,6 +1,3 @@
-// Engine game object related functions
-//
-
 #include <GameEngineFramework/Engine/Engine.h>
 
 ENGINE_API extern EngineComponents  Components;

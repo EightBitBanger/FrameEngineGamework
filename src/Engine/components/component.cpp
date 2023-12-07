@@ -2,6 +2,7 @@
 
 extern EngineComponents Components;
 
+
 Component::Component() : 
     name(""),
     mType(Components.Undefined),

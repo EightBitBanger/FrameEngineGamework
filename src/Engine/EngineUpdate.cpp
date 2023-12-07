@@ -1,6 +1,3 @@
-// Update engine related components and game objects
-//
-
 #include <GameEngineFramework/Engine/Engine.h>
 
 ENGINE_API extern EngineComponents  Components;

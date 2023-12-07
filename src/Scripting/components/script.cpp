@@ -1,5 +1,9 @@
 #include <GameEngineFramework/Scripting/components/script.h>
 
+// Dummy landing function
+void DefaultFunctionPtr(void*) {return;}
+
+
 Script::Script() : 
     
     name(""),
@@ -9,10 +13,7 @@ Script::Script() :
     
     gameObject(nullptr),
     
-    OnCreate(nullfunc),
-    OnUpdate(nullfunc)
+    OnCreate( DefaultFunctionPtr ),
+    OnUpdate( DefaultFunctionPtr )
 {
 }
-
-// Dummy landing function
-void DefaultFunctionPtr(void*) {return;}

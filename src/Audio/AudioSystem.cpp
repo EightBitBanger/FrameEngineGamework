@@ -1,11 +1,11 @@
 #include <GameEngineFramework/Audio/AudioSystem.h>
 
+#include <GameEngineFramework/Logging/Logging.h>
+
 #include <Audioclient.h>
 #include <Audiopolicy.h>
 
 #include <mmdeviceapi.h>
-
-#include <GameEngineFramework/Logging/Logging.h>
 
 extern Logger Log;
 
