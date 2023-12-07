@@ -1,6 +1,8 @@
 #ifndef _TRANSFORM_TYPE__
 #define _TRANSFORM_TYPE__
 
+#include <GameEngineFramework/configuration.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -9,8 +11,6 @@
 #include <glm/ext/quaternion_transform.hpp>
 
 #include <vector>
-
-#include <GameEngineFramework/configuration.h>
 
 typedef glm::vec2  Vector2;
 typedef glm::vec3  Vector3;

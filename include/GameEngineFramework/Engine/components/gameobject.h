@@ -1,8 +1,6 @@
 #ifndef ENGINE_GAME_OBJECT
 #define ENGINE_GAME_OBJECT
 
-#include <type_traits>
-
 #include <GameEngineFramework/Renderer/RenderSystem.h>
 #include <GameEngineFramework/Scripting/ScriptSystem.h>
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
@@ -13,6 +11,8 @@
 #include <GameEngineFramework/Engine/UI/text.h>
 
 #include <GameEngineFramework/Engine/components/component.h>
+
+#include <type_traits>
 
 extern RenderSystem Renderer;
 extern EngineComponents Components;

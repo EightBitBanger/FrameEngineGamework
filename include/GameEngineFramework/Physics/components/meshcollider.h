@@ -1,10 +1,10 @@
 #ifndef _MESH_COLLIDER_
 #define _MESH_COLLIDER_
 
+#include <GameEngineFramework/configuration.h>
+
 #include <ReactPhysics3d/ReactPhysics3d.h>
 #include <vector>
-
-#include <GameEngineFramework/configuration.h>
 
 
 class ENGINE_API MeshCollider {

@@ -1,13 +1,13 @@
 #ifndef __COMPONENT_SCRIPT
 #define __COMPONENT_SCRIPT
 
-#include <string>
+#include <GameEngineFramework/configuration.h>
 
 void DefaultFunctionPtr(void* gameObject);
 
 #define  nullfunc  DefaultFunctionPtr
 
-#include <GameEngineFramework/configuration.h>
+#include <string>
 
 
 class ENGINE_API Script {

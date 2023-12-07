@@ -1,15 +1,15 @@
 #ifndef _ACTOR_AI_SYSTEM__
 #define _ACTOR_AI_SYSTEM__
 
+#include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
+
+#include <GameEngineFramework/ActorAI/components/actor.h>
+#include <GameEngineFramework/ActorAI/components/neuron.h>
+#include <GameEngineFramework/ActorAI/Genetics.h>
+
 #include <thread>
 #include <mutex>
 #include <chrono>
-
-#include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
-
-#include "components/actor.h"
-#include "components/neuron.h"
-#include "Genetics.h"
 
 
 class ENGINE_API ActorSystem {

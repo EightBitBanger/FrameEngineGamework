@@ -1,19 +1,19 @@
 #ifndef _AI_ACTOR__
 #define _AI_ACTOR__
 
+#include <GameEngineFramework/ActorAI/Genetics.h>
+#include <GameEngineFramework/ActorAI/components/neuron.h>
+
+#include <GameEngineFramework/Physics/PhysicsSystem.h>
+#include <GameEngineFramework/Renderer/RenderSystem.h>
+
+#include <glm/glm.hpp>
+
 #include <vector>
 #include <mutex>
 
 #include <string>
 #include <iostream>
-
-#include <glm/glm.hpp>
-
-#include "../Genetics.h"
-#include "Neuron.h"
-
-#include "../../Physics/PhysicsSystem.h"
-#include "../../Renderer/RenderSystem.h"
 
 
 class ENGINE_API Actor {

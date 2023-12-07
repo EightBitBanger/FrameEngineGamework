@@ -1,10 +1,10 @@
 #ifndef __COMPONENT_CAMERA
 #define __COMPONENT_CAMERA
 
-#include "../../engine/types/transform.h"
-#include "../../Engine/types/viewport.h"
+#include <GameEngineFramework/Engine/types/transform.h>
+#include <GameEngineFramework/Engine/types/viewport.h>
 
-#include "../../Input/InputSystem.h"
+#include <GameEngineFramework/Input/InputSystem.h>
 
 
 class ENGINE_API Camera {

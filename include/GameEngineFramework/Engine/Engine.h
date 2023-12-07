@@ -56,7 +56,6 @@
     extern DoubleType  Double;
     extern IntType     Int;
     extern UintType    Uint;
-    
 #endif
 
 

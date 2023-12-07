@@ -1,9 +1,9 @@
 #ifndef ENGINE_COMPONENT
 #define ENGINE_COMPONENT
 
-#include <string>
-
 #include <GameEngineFramework/configuration.h>
+
+#include <string>
 
 
 #define  COMPONENT_TYPE_UNDEFINED       0

@@ -1,9 +1,9 @@
 #ifndef __SERIALIZATION_SYSTEM_
 #define __SERIALIZATION_SYSTEM_
 
-#include <fstream>
-
 #include <GameEngineFramework/configuration.h>
+
+#include <string>
 
 
 class ENGINE_API Serialization {

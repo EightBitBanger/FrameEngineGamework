@@ -1,10 +1,10 @@
 #ifndef __COMPONENT_MATERIAL
 #define __COMPONENT_MATERIAL
 
-#include "../../engine/types/color.h"
+#include <GameEngineFramework/Engine/types/color.h>
 
-#include "../enumerators.h"
-#include "shader.h"
+#include <GameEngineFramework/Renderer/enumerators.h>
+#include <GameEngineFramework/Renderer/components/shader.h>
 
 
 class ENGINE_API Material {

@@ -1,18 +1,19 @@
 #ifndef __COMPONENT_MESH
 #define __COMPONENT_MESH
 
+#include <GameEngineFramework/configuration.h>
+
+#include <GameEngineFramework/engine/types/bufferlayout.h>
+
+#include <GameEngineFramework/engine/types/color.h>
+#include <GameEngineFramework/Math/Math.h>
+
 #include <vector>
-
-#include "../../engine/types/bufferlayout.h"
-
-#include "../../engine/types/color.h"
-#include "../../Math/Math.h"
-
-#include "../../configuration.h"
 
 #ifndef RENDERER_VERTEX_BUFFER_MAX
   #define RENDERER_VERTEX_BUFFER_MAX  100000
 #endif
+
 
 struct ENGINE_API SubMesh {
     

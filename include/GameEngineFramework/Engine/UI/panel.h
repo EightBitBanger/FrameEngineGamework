@@ -1,7 +1,7 @@
 #ifndef _PANEL_UI_ELEMENT__
 #define _PANEL_UI_ELEMENT__
 
-#include "canvas.h"
+#include <GameEngineFramework/Engine/UI/canvas.h>
 
 
 class Panel {

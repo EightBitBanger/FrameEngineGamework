@@ -6,10 +6,10 @@
 #ifndef _POOL_ALLOCATOR_SUPPORT__
 #define _POOL_ALLOCATOR_SUPPORT__
 
+#include <GameEngineFramework/configuration.h>
+
 #include <cstdlib>
 #include <vector>
-
-#include <GameEngineFramework/configuration.h>
 
 //
 // Configuration

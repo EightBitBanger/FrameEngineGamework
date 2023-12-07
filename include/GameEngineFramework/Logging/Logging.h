@@ -1,11 +1,11 @@
 #ifndef EVENT_LOGGING
 #define EVENT_LOGGING
 
+#include <GameEngineFramework/configuration.h>
+
 #include <string>
 
 #define  EVENT_LOG_FILENAME   "events.txt"
-
-#include <GameEngineFramework/configuration.h>
 
 
 class ENGINE_API Logger {

@@ -1,22 +1,6 @@
 #ifndef OPENGL_RENDERER_SYSTEM
 #define OPENGL_RENDERER_SYSTEM
 
-#ifndef _WIN32_WINNT
-  #define _WIN32_WINNT 0x500
-#endif
-
-#define WIN32_LEAN_AND_MEAN
-
-#include <sdkddkver.h>
-#include <windows.h>
-
-#include <thread>
-#include <mutex>
-#include <chrono>
-
-#define GLEW_STATIC
-#include "../../../vendor/gl/glew.h"
-
 #include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
 #include <GameEngineFramework/Renderer/enumerators.h>
@@ -35,7 +19,22 @@
 
 #include <GameEngineFramework/configuration.h>
 
+#include <thread>
+#include <mutex>
+#include <chrono>
 
+#define GLEW_STATIC
+#include "../../../vendor/gl/glew.h"
+
+
+#ifndef _WIN32_WINNT
+  #define _WIN32_WINNT 0x500
+#endif
+
+#define WIN32_LEAN_AND_MEAN
+
+#include <sdkddkver.h>
+#include <windows.h>
 
 
 class ENGINE_API RenderSystem {

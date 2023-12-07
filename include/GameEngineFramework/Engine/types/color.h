@@ -1,9 +1,9 @@
 #ifndef _COLOR_TYPE__
 #define _COLOR_TYPE__
 
-#include <cstdlib>
-
 #include <GameEngineFramework/configuration.h>
+
+#include <cstdlib>
 
 
 class ENGINE_API Color {

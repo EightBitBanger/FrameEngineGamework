@@ -1,9 +1,6 @@
 #ifndef RESOURCE_ALLOCATION_SYSTEM
 #define RESOURCE_ALLOCATION_SYSTEM
 
-#include <thread>
-#include <mutex>
-
 #include <GameEngineFramework/Renderer/RenderSystem.h>
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
 
@@ -13,6 +10,9 @@
 #include <GameEngineFramework/Resources/assets/MeshTag.h>
 
 #include <GameEngineFramework/Resources/FileSystem.h>
+
+#include <thread>
+#include <mutex>
 
 class ENGINE_API ResourceManager {
     

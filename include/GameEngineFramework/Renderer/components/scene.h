@@ -1,9 +1,9 @@
 #ifndef __COMPONENT_SCENE
 #define __COMPONENT_SCENE
 
-#include "meshrenderer.h"
-#include "camera.h"
-#include "light.h"
+#include <GameEngineFramework/Renderer/components/meshrenderer.h>
+#include <GameEngineFramework/Renderer/components/camera.h>
+#include <GameEngineFramework/Renderer/components/light.h>
 
 
 class ENGINE_API Scene {

@@ -1,6 +1,14 @@
 #ifndef APPLICATION_LAYER
 #define APPLICATION_LAYER
 
+#include <GameEngineFramework/Renderer/RenderSystem.h>
+#include <GameEngineFramework/Input/InputSystem.h>
+#include <GameEngineFramework/Physics/PhysicsSystem.h>
+#include <GameEngineFramework/Serialization/Serialization.h>
+#include <GameEngineFramework/Resources/ResourceManager.h>
+#include <GameEngineFramework/Scripting/ScriptSystem.h>
+#include <GameEngineFramework/Audio/AudioSystem.h>
+
 #ifndef _WIN32_WINNT
   #define _WIN32_WINNT 0x500
 #endif
@@ -9,16 +17,6 @@
 
 #include <sdkddkver.h>
 #include <windows.h>
-
-#include "../Renderer/RenderSystem.h"
-#include "../Input/InputSystem.h"
-#include "../Physics/PhysicsSystem.h"
-#include "../Serialization/Serialization.h"
-#include "../Resources/ResourceManager.h"
-#include "../Scripting/ScriptSystem.h"
-#include "../Audio/AudioSystem.h"
-
-#include "winproc.h"
 
 
 ENGINE_API void Start(void);

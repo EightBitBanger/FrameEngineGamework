@@ -1,11 +1,11 @@
 #ifndef SCRIPTING_SYSTEM
 #define SCRIPTING_SYSTEM
 
-#include <mutex>
-
 #include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
 #include <GameEngineFramework/Scripting/components/script.h>
+
+#include <mutex>
 
 
 class ENGINE_API ScriptSystem {

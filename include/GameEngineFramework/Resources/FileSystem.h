@@ -1,10 +1,11 @@
 #ifndef _DIRECTORY_SEARCH__
 #define _DIRECTORY_SEARCH__
 
+#include <GameEngineFramework/configuration.h>
+
 #include <vector>
 #include <string>
 
-#include <GameEngineFramework/configuration.h>
 
 class ENGINE_API FileSystemDir {
     

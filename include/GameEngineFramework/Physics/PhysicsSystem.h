@@ -1,12 +1,13 @@
 #ifndef _PHYSICS_WRAP_
 #define _PHYSICS_WRAP_
 
-#include <ReactPhysics3d/ReactPhysics3d.h>
-
 #include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
 #include <GameEngineFramework/Physics/components/meshcollider.h>
 #include <GameEngineFramework/Renderer/components/mesh.h>
+
+#include <ReactPhysics3d/ReactPhysics3d.h>
+
 
 typedef rp3d::RigidBody    RigidBody;
 typedef rp3d::BoxShape     BoxShape;

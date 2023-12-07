@@ -1,11 +1,11 @@
 #ifndef INPUT_CAPTURE_SYSTEM
 #define INPUT_CAPTURE_SYSTEM
 
-#include <glm/glm.hpp>
+#include <GameEngineFramework/configuration.h>
 
 #include <GameEngineFramework/Input/keys.h>
 
-#include <GameEngineFramework/configuration.h>
+#include <glm/glm.hpp>
 
 
 class ENGINE_API InputSystem {

@@ -1,11 +1,11 @@
 #ifndef _ENGINE_UI_TEXT_COMPONENT__
 #define _ENGINE_UI_TEXT_COMPONENT__
 
-#include <string>
+#include <GameEngineFramework/Engine/UI/canvas.h>
+#include <GameEngineFramework/Engine/UI/sprite.h>
+#include <GameEngineFramework/Engine/types/color.h>
 
-#include "canvas.h"
-#include "sprite.h"
-#include "../types/color.h"
+#include <string>
 
 
 class Text {

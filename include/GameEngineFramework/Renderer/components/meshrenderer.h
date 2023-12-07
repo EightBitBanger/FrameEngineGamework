@@ -1,10 +1,10 @@
 #ifndef __COMPONENT_ENTITY
 #define __COMPONENT_ENTITY
 
-#include "../../engine/types/transform.h"
+#include <GameEngineFramework/Engine/types/transform.h>
 
-#include "material.h"
-#include "mesh.h"
+#include <GameEngineFramework/Renderer/components/material.h>
+#include <GameEngineFramework/Renderer/components/mesh.h>
 
 
 class ENGINE_API MeshRenderer {
