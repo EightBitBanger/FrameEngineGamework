@@ -41,12 +41,12 @@ EngineSystemManager::EngineSystemManager(void) :
 {
 }
 
-Button* EngineSystemManager::CreateOverlayButtonCallback(int x, int y, int w, int h, ButtonCallBack callback) {
+Button* EngineSystemManager::CreateOverlayButtonCallback(int x, int y, int width, int height, ButtonCallBack callback) {
     Button* newButton = mButtons.Create();
     newButton->x = x;
     newButton->y = y;
-    newButton->w = w;
-    newButton->h = h;
+    newButton->w = width;
+    newButton->h = height;
     newButton->callback = callback;
     return newButton;
 }
@@ -55,21 +55,21 @@ bool EngineSystemManager::DestroyOverlayButtonCallback(Button* button) {
     return mButtons.Destroy( button );
 }
 
-void EngineSystemManager::AddMeshText(GameObject* overlayObject, float xPos, float yPos, float scaleWidth, float scaleHeight, std::string text, Color textColor) {
+void EngineSystemManager::AddMeshText(GameObject* overlayObject, float xPos, float yPos, float width, float height, std::string text, Color textColor) {
     
     Mesh* meshPtr = overlayObject->GetComponent<MeshRenderer>()->mesh;
     if (meshPtr == nullptr) 
         return;
     
     for (unsigned int i=0; i < text.size(); i++)
-        AddMeshSubSprite(overlayObject, xPos + i, yPos, scaleWidth, scaleHeight, text[i], textColor);
+        AddMeshSubSprite(overlayObject, xPos + i, yPos, width, height, text[i], textColor);
     
     meshPtr->UploadToGPU();
     
     return;
 }
 
-void EngineSystemManager::AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float scaleWidth, float scaleHeight, int index, Color meshColor) {
+void EngineSystemManager::AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float width, float height, int index, Color meshColor) {
     
     Mesh* meshPtr = overlayObject->GetComponent<MeshRenderer>()->mesh;
     if (meshPtr == nullptr) 
@@ -112,7 +112,7 @@ void EngineSystemManager::AddMeshSubSprite(GameObject* overlayObject, float xPos
     meshPtr->AddPlain(yPos * spacingHeight, 
                       0, 
                       -(xPos * spacingWidth), 
-                      scaleWidth, scaleHeight, 
+                      width, height, 
                       meshColor, 
                       spriteWidth, spriteHeight, 
                       spriteStartX, spriteStartY, 

@@ -40,13 +40,13 @@ void EngineSystemManager::UpdateUI(void) {
         
         // Check button event
         if (button->triggerOnPressed) {
-            if (Input.CheckMouseLeftPressed())   {leftActive   = true; Input.SetMouseLeftPressed(false);}
-            if (Input.CheckMouseMiddlePressed()) {middleActive = true; Input.SetMouseMiddlePressed(false);}
-            if (Input.CheckMouseRightPressed())  {rightActive  = true; Input.SetMouseRightPressed(false);}
+            if (Input.CheckMouseLeftPressed())   leftActive   = true;
+            if (Input.CheckMouseMiddlePressed()) middleActive = true;
+            if (Input.CheckMouseRightPressed())  rightActive  = true;
         } else {
-            if (Input.CheckMouseLeftReleased())   {leftActive   = true; Input.SetMouseLeftReleased(false);}
-            if (Input.CheckMouseMiddleReleased()) {middleActive = true; Input.SetMouseMiddleReleased(false);}
-            if (Input.CheckMouseRightReleased())  {rightActive  = true; Input.SetMouseRightReleased(false);}
+            if (Input.CheckMouseLeftReleased())   leftActive   = true;
+            if (Input.CheckMouseMiddleReleased()) middleActive = true;
+            if (Input.CheckMouseRightReleased())  rightActive  = true;
         }
         
         // Button parameters
@@ -65,9 +65,9 @@ void EngineSystemManager::UpdateUI(void) {
             bool isClicked = false;
             
             // Check clicked type and button
-            if (button->triggerOnLeftButton)   if (leftActive)   isClicked = true;
-            if (button->triggerOnMiddleButton) if (middleActive) isClicked = true;
-            if (button->triggerOnRightButton)  if (rightActive)  isClicked = true;
+            if ((button->triggerOnLeftButton)   & (leftActive))   isClicked = true;
+            if ((button->triggerOnMiddleButton) & (middleActive)) isClicked = true;
+            if ((button->triggerOnRightButton)  & (rightActive))  isClicked = true;
             
             if (isClicked) {
                 
@@ -96,6 +96,15 @@ void EngineSystemManager::UpdateUI(void) {
         }
         
     }
+    
+    // Reset input states
+    Input.SetMouseLeftPressed(false);
+    Input.SetMouseMiddlePressed(false);
+    Input.SetMouseRightPressed(false);
+    
+    Input.SetMouseLeftReleased(false);
+    Input.SetMouseMiddleReleased(false);
+    Input.SetMouseRightReleased(false);
     
     return;
 }

@@ -242,7 +242,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     return overlayObject;
 }
 
-GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int scaleWidth, int scaleHeight, std::string materialTag) {
+GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int width, int height, std::string materialTag) {
     
     GameObject* overlayObject = CreateOverlayRenderer();
     overlayObject->AddComponent( CreateComponent<Panel>() );
@@ -271,7 +271,7 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int sc
     
     overlayMaterial->DisableCulling();
     
-    overlayMesh->AddPlain(0, 0, 0, scaleHeight, scaleWidth, Colors.white, 1, 1);
+    overlayMesh->AddPlain(0, 0, 0, height, width, Colors.white, 1, 1);
     
     overlayMesh->UploadToGPU();
     

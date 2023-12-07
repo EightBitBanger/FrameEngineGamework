@@ -21,7 +21,8 @@ Text* text[20];
 
 Text* titleText;
 
-Button* buttonExample;
+Button* fileButton;
+Button* editButton;
 
 void callbackButtonA(void) {text[15]->text = "ButtonA";}
 void callbackButtonB(void) {text[16]->text = "ButtonB";}
@@ -86,8 +87,8 @@ void Start() {
     overlayCamera->viewport.w = Renderer.displaySize.x;
     overlayCamera->viewport.h = Renderer.displaySize.y;
     
-    overlayCamera->clipFar  =  100;
-    overlayCamera->clipNear = -100;
+    overlayCamera->clipFar  =  10;
+    overlayCamera->clipNear = -10;
     
     int fontSize = 9;
     Color fontColor = Colors.black;
@@ -121,10 +122,31 @@ void Start() {
     
     
     // Title bar menu
-    GameObject* textObject = Engine.CreateOverlayTextRenderer(1, 1, "File  Edit Project", fontSize, Colors.white, "font");
+    GameObject* textObject = Engine.CreateOverlayTextRenderer(1, 1, "File Edit Project", fontSize, Colors.white, "font");
     
     titleText = textObject->GetComponent<Text>();
     titleText->canvas.anchorTop = true;
+    
+    
+    
+    
+    
+    
+    
+    //
+    // Experimental menu system
+    
+    GameObject* panelMenuBackground = Engine.CreateOverlayPanelRenderer(100, 100, 50, 110, "panel_gray");
+    Panel* panelMenuOverlay = panelMenuBackground->GetComponent<Panel>();
+    
+    panelMenuOverlay->canvas.anchorTop = true;
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -134,14 +156,17 @@ void Start() {
     // Mouse drag test panel
     //
     
-    buttonExample = Engine.CreateOverlayButtonCallback(15, 34, 45, 17, callbackButtonA);
+    fileButton = Engine.CreateOverlayButtonCallback(15, 34, 40, 17, callbackButtonA);
+    fileButton->triggerOnLeftButton = true;
+    fileButton->triggerOnPressed    = true;
     
-    buttonExample->triggerOnLeftButton = true;
-    buttonExample->triggerOnPressed    = true;
-    
+    editButton = Engine.CreateOverlayButtonCallback(65, 34, 40, 17, callbackButtonB);
+    editButton->triggerOnLeftButton = true;
+    editButton->triggerOnPressed    = true;
     
     
     sceneOverlay->AddMeshRendererToSceneRoot( panelTitle->GetComponent<MeshRenderer>() );  // Title bar
+    sceneOverlay->AddMeshRendererToSceneRoot( panelMenuBackground->GetComponent<MeshRenderer>() );  // Menu
     sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );  // Title text
     
     return;
@@ -176,10 +201,14 @@ void Run() {
     text[10]->text = "mouse x - " + Float.ToString( Input.mouseX - Application.windowLeft );
     text[11]->text = "mouse y - " + Float.ToString( Input.mouseY - Application.windowTop );
     
+    
     text[15]->text = "";
     text[16]->text = "";
     text[17]->text = "";
     text[18]->text = "";
+    
+    if (fileButton->isHovering) text[17]->text = "Edit hover";
+    if (editButton->isHovering) text[18]->text = "Edit hover";
     
     
     
