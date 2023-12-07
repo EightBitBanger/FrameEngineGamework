@@ -147,13 +147,13 @@ public:
     GameObject* CreateOverlayTextRenderer(int x, int y, std::string text, unsigned int textSize, Color color, std::string materialTag);
     
     /// Create a panel overlay and return its object.
-    GameObject* CreateOverlayPanelRenderer(int x, int y, int scaleWidth, int scaleHeight, std::string materialTag);
+    GameObject* CreateOverlayPanelRenderer(int x, int y, int width, int height, std::string materialTag);
     
     
     // Mouse button event callback
     
     /// Create a button and return its pointer.
-    Button* CreateOverlayButtonCallback(int x, int y, int w, int h, ButtonCallBack callback);
+    Button* CreateOverlayButtonCallback(int x, int y, int width, int height, ButtonCallBack callback);
     
     /// Destroy a button 
     bool DestroyOverlayButtonCallback(Button* button);
@@ -164,10 +164,10 @@ public:
     //
     
     /// Add a string of sprite quads to a mesh.
-    void AddMeshText(GameObject* overlayObject, float xPos, float yPos, float scaleWidth, float scaleHeight, std::string text, Color textColor);
+    void AddMeshText(GameObject* overlayObject, float xPos, float yPos, float width, float height, std::string text, Color textColor);
     
     /// Add a quad to a mesh mapping to a sub sprite from a sprite sheet texture.
-    void AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float scaleWidth, float scaleHeight, int index, Color meshColor);
+    void AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float width, float height, int index, Color meshColor);
     
     
     EngineSystemManager();

@@ -29,7 +29,7 @@ public:
         x(0),
         y(0),
         
-        anchorTop(false),
+        anchorTop(true),
         anchorRight(false),
         
         anchorCenterHorz(false),
