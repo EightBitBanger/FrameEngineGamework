@@ -203,8 +203,8 @@ void Mesh::AddQuad(float x, float y, float z, float width, float height, Color c
     Vertex vertex[4];
     vertex[0] = Vertex( x, y,       z,         color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + 0,      vStart + (vOffset * vCoord) + vCoord);
     vertex[1] = Vertex( x+width, y, z,         color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + 0,      vStart + (vOffset * vCoord) + 0 );
-    vertex[2] = Vertex( x, y,       z-height,  color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + 0 );
-    vertex[3] = Vertex( x-width, y, z-height,  color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + vCoord);
+    vertex[2] = Vertex( x-width, y, z-height,  color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + 0 );
+    vertex[3] = Vertex( x, y,       z-height,  color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + vCoord);
     
     SubMesh subBuffer;
     subBuffer.vertexBuffer.push_back(vertex[0]);
@@ -213,8 +213,8 @@ void Mesh::AddQuad(float x, float y, float z, float width, float height, Color c
     subBuffer.vertexBuffer.push_back(vertex[3]);
     
     subBuffer.indexBuffer.push_back(0);
+    subBuffer.indexBuffer.push_back(3);
     subBuffer.indexBuffer.push_back(1);
-    subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(0);
     subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(3);

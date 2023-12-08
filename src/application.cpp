@@ -136,7 +136,7 @@ void Start() {
     //
     // Experimental menu system
     
-    GameObject* panelMenuBackground = Engine.CreateOverlayPanelRenderer(100, 100, 50, 110, "panel_gray");
+    GameObject* panelMenuBackground = Engine.CreateOverlayPanelRenderer(200, 200, 50, 110, "panel_gray");
     Panel* panelMenuOverlay = panelMenuBackground->GetComponent<Panel>();
     
     panelMenuOverlay->canvas.anchorTop = true;

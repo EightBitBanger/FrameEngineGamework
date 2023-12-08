@@ -271,7 +271,7 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     
     overlayMaterial->DisableCulling();
     
-    overlayMesh->AddPlain(0, 0, 0, height, width, Colors.white, 1, 1);
+    overlayMesh->AddQuad(0, 0, 0, height, width, Colors.white, 1, 1);
     
     overlayMesh->UploadToGPU();
     
