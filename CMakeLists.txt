@@ -65,6 +65,8 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Math/Math.h"
     "include/GameEngineFramework/Math/Random.h"
     
+    "include/GameEngineFramework/Networking/WindSock.h"
+    
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
     "include/GameEngineFramework/Engine/components/gameobject.h"
@@ -155,7 +157,9 @@ target_include_directories(runtime PUBLIC
 )
 
 target_link_libraries(runtime glew32s.lib)
+target_link_libraries(runtime Ws2_32.lib)
 target_link_libraries(runtime opengl32.a)
+
 target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
 target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
 target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libgame.dll.a)
@@ -198,6 +202,8 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/Math/Math.h"
     "include/GameEngineFramework/Math/Random.h"
+    
+    "include/GameEngineFramework/Networking/WindSock.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -280,6 +286,8 @@ target_include_directories(game PUBLIC
 
 target_link_libraries(game glew32s.lib)
 target_link_libraries(game opengl32.a)
+target_link_libraries(game Ws2_32.lib)
+
 target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
 target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
 
@@ -318,6 +326,8 @@ set (CORE_HEADERS
     
     "include/GameEngineFramework/Math/Math.h"
     "include/GameEngineFramework/Math/Random.h"
+    
+    "include/GameEngineFramework/Networking/WindSock.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -382,6 +392,8 @@ set (CORE_SOURCES
     "src/Application/winproc.cpp"
     
     "src/Audio/AudioSystem.cpp"
+    
+    "src/Networking/WindSock.cpp"
     
     "src/Engine/Engine.cpp"
     "src/Engine/EngineGameObjects.cpp"
@@ -463,6 +475,8 @@ target_include_directories(core PUBLIC
 
 target_link_libraries(core glew32s.lib)
 target_link_libraries(core opengl32.a)
+target_link_libraries(core Ws2_32.lib)
+
 target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
 
 endif()
