@@ -2,7 +2,7 @@
 #include <string>
 
 #include "../framework.h"
-#include <GameEngineFramework/engine/types/transform.h>
+#include <GameEngineFramework/Transform/Transform.h>
 
 void TestFramework::TestTransform(void) {
     if (hasTestFailed) return;

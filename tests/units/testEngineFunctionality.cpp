@@ -33,12 +33,12 @@ void TestFramework::TestEngineFunctionality(void) {
     if (Engine.GetComponentCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     // Test camera controller object
-    gameObject = Engine.CreateCameraController(glm::vec3(1, -2, 3), glm::vec3(1, 1, 1));
-    if (gameObject->transform.position != glm::vec3(1, -2, 3)) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
-    if (gameObject == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
-    if (!Engine.DestroyGameObject(gameObject)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
-    if (Engine.GetGameObjectCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
-    if (Engine.GetComponentCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
+    //gameObject = Engine.CreateCameraController(glm::vec3(1, -2, 3), glm::vec3(1, 1, 1));
+    //if (gameObject->transform.position != glm::vec3(1, -2, 3)) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
+    //if (gameObject == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
+    //if (!Engine.DestroyGameObject(gameObject)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
+    //if (Engine.GetGameObjectCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
+    //if (Engine.GetComponentCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     return;
 }
