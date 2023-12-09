@@ -222,6 +222,8 @@ public:
     
     /// Create a component object containing the type specified.
     template <typename T> Component* CreateComponent(void) {
+        // Engine
+        if (std::is_same<T, Transform>::value) return CreateComponent(Components.Transform);
         // Renderer
         if (std::is_same<T, Camera>::value)    return CreateComponent(Components.Camera);
         if (std::is_same<T, Light>::value)     return CreateComponent(Components.Light);
@@ -253,13 +255,15 @@ private:
     // List of active game objects
     std::vector<GameObject*> mGameObjectActive;
     
-    // Engine allocators
+    // Component allocators
     PoolAllocator<GameObject> mGameObjects;
     PoolAllocator<Component>  mComponents;
-    // UI
+    
     PoolAllocator<Text>       mTextObjects;
     PoolAllocator<Panel>      mPanelObjects;
     PoolAllocator<Button>     mButtons;
+    
+    PoolAllocator<Transform>  mTransforms;
     
     // UI state
     int mouseOldX;

@@ -7,18 +7,20 @@
 
 
 #define  COMPONENT_TYPE_UNDEFINED       0
+// Engine
+#define  COMPONENT_TYPE_TRANSFORM       1
 //Rendering
-#define  COMPONENT_TYPE_MESH_RENDERER   1
-#define  COMPONENT_TYPE_CAMERA          2
-#define  COMPONENT_TYPE_LIGHT           3
-#define  COMPONENT_TYPE_SCRIPT          4
+#define  COMPONENT_TYPE_MESH_RENDERER   2
+#define  COMPONENT_TYPE_CAMERA          3
+#define  COMPONENT_TYPE_LIGHT           4
+#define  COMPONENT_TYPE_SCRIPT          5
 // Physics
-#define  COMPONENT_TYPE_RIGID_BODY      5
+#define  COMPONENT_TYPE_RIGID_BODY      6
 // AI
-#define  COMPONENT_TYPE_ACTOR           6
+#define  COMPONENT_TYPE_ACTOR           7
 // UI
-#define  COMPONENT_TYPE_TEXT            7
-#define  COMPONENT_TYPE_PANEL           8
+#define  COMPONENT_TYPE_TEXT            8
+#define  COMPONENT_TYPE_PANEL           9
 
 
 
@@ -28,6 +30,9 @@ typedef unsigned short int ComponentType;
 struct ENGINE_API EngineComponents {
     /// Undefined component.
     constexpr static short int Undefined = COMPONENT_TYPE_UNDEFINED;
+    
+    /// Transform component.
+    constexpr static short int Transform = COMPONENT_TYPE_TRANSFORM;
     
     /// Mesh renderer component.
     constexpr static short int MeshRenderer = COMPONENT_TYPE_MESH_RENDERER;

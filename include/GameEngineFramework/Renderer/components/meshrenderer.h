@@ -1,7 +1,7 @@
 #ifndef __COMPONENT_ENTITY
 #define __COMPONENT_ENTITY
 
-#include <GameEngineFramework/Engine/types/transform.h>
+#include <GameEngineFramework/Transform/Transform.h>
 
 #include <GameEngineFramework/Renderer/components/material.h>
 #include <GameEngineFramework/Renderer/components/mesh.h>

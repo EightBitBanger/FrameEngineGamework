@@ -1,8 +1,8 @@
 #ifndef __COMPONENT_CAMERA
 #define __COMPONENT_CAMERA
 
-#include <GameEngineFramework/Engine/types/transform.h>
 #include <GameEngineFramework/Engine/types/viewport.h>
+#include <GameEngineFramework/Transform/Transform.h>
 
 #include <GameEngineFramework/Input/InputSystem.h>
 

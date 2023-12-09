@@ -1,8 +1,8 @@
 #ifndef __COMPONENT_LIGHT
 #define __COMPONENT_LIGHT
 
-#include <GameEngineFramework/Engine/types/transform.h>
 #include <GameEngineFramework/Engine/types/color.h>
+#include <GameEngineFramework/Transform/Transform.h>
 
 
 class ENGINE_API Light {

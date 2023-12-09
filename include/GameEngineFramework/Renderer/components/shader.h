@@ -1,8 +1,8 @@
 #ifndef __COMPONENT_SHADER
 #define __COMPONENT_SHADER
 
-#include <GameEngineFramework/Engine/types/transform.h>
 #include <GameEngineFramework/Engine/types/color.h>
+#include <GameEngineFramework/Transform/Transform.h>
 
 #include <string>
 

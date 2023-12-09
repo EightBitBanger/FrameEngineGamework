@@ -27,13 +27,10 @@ public:
     /// Object name.
     std::string name;
     
-    /// Object transform.
-    Transform transform;
-    
     /// State whether the object is active.
     bool isActive;
     
-    /// Pointer to a parent object. nullptr represents the root parent object.
+    /// Pointer to a parent object. Setting to nullptr represents the game object as a root node in the scene.
     GameObject* parent;
     
     GameObject();
@@ -53,6 +50,7 @@ public:
     /// Get a component of a given type.
     template <class T> T* GetComponent(void) {
         
+        if (std::is_same<T, Transform>::value)        return (T*)mTransformCache;
         if (std::is_same<T, Camera>::value)           return (T*)mCameraCache;
         if (std::is_same<T, Light>::value)            return (T*)mLightCache;
         if (std::is_same<T, MeshRenderer>::value)     return (T*)mMeshRendererCache;
@@ -141,6 +139,7 @@ private:
     std::vector<Component*> mComponentList;
     
     // Cached component pointers, to avoid overhead from working with components internally
+    Transform*       mTransformCache;
     Camera*          mCameraCache;
     RigidBody*       mRigidBodyCache;
     MeshRenderer*    mMeshRendererCache;

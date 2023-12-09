@@ -62,10 +62,13 @@ set (RUNTIME_HEADERS
     
     "include/GameEngineFramework/Serialization/Serialization.h"
     
+    "include/GameEngineFramework/Transform/Transform.h"
+    
     "include/GameEngineFramework/Math/Math.h"
     "include/GameEngineFramework/Math/Random.h"
     
-    "include/GameEngineFramework/Networking/WindSock.h"
+    "include/GameEngineFramework/Networking/SocketServer.h"
+    "include/GameEngineFramework/Networking/SocketClient.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -73,7 +76,6 @@ set (RUNTIME_HEADERS
     
     "include/GameEngineFramework/Engine/types/bufferlayout.h"
     "include/GameEngineFramework/Engine/types/color.h"
-    "include/GameEngineFramework/Engine/types/transform.h"
     "include/GameEngineFramework/Engine/types/viewport.h"
     
     "include/GameEngineFramework/Engine/UI/text.h"
@@ -200,10 +202,13 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/Serialization/Serialization.h"
     
+    "include/GameEngineFramework/Transform/Transform.h"
+    
     "include/GameEngineFramework/Math/Math.h"
     "include/GameEngineFramework/Math/Random.h"
     
-    "include/GameEngineFramework/Networking/WindSock.h"
+    "include/GameEngineFramework/Networking/SocketServer.h"
+    "include/GameEngineFramework/Networking/SocketClient.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -211,7 +216,6 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/Engine/types/bufferlayout.h"
     "include/GameEngineFramework/Engine/types/color.h"
-    "include/GameEngineFramework/Engine/types/transform.h"
     "include/GameEngineFramework/Engine/types/viewport.h"
     
     "include/GameEngineFramework/Engine/UI/text.h"
@@ -324,10 +328,13 @@ set (CORE_HEADERS
     
     "include/GameEngineFramework/Serialization/Serialization.h"
     
+    "include/GameEngineFramework/Transform/Transform.h"
+    
     "include/GameEngineFramework/Math/Math.h"
     "include/GameEngineFramework/Math/Random.h"
     
-    "include/GameEngineFramework/Networking/WindSock.h"
+    "include/GameEngineFramework/Networking/SocketServer.h"
+    "include/GameEngineFramework/Networking/SocketClient.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -335,7 +342,6 @@ set (CORE_HEADERS
     
     "include/GameEngineFramework/Engine/types/bufferlayout.h"
     "include/GameEngineFramework/Engine/types/color.h"
-    "include/GameEngineFramework/Engine/types/transform.h"
     "include/GameEngineFramework/Engine/types/viewport.h"
     
     "include/GameEngineFramework/Engine/UI/text.h"
@@ -393,7 +399,8 @@ set (CORE_SOURCES
     
     "src/Audio/AudioSystem.cpp"
     
-    "src/Networking/WindSock.cpp"
+    "src/Networking/SocketServer.cpp"
+    "src/Networking/SocketClient.cpp"
     
     "src/Engine/Engine.cpp"
     "src/Engine/EngineGameObjects.cpp"
@@ -406,7 +413,6 @@ set (CORE_SOURCES
     
     "src/Engine/types/bufferlayout.cpp"
     "src/Engine/types/color.cpp"
-    "src/Engine/types/transform.cpp"
     "src/Engine/types/viewport.cpp"
     
     "src/ActorAI/ActorSystem.cpp"
@@ -415,6 +421,8 @@ set (CORE_SOURCES
     "src/ActorAI/components/neuron.cpp"
     
     "src/Serialization/Serialization.cpp"
+    
+    "src/Transform/Transform.cpp"
     
     "src/Math/Math.cpp"
     "src/Math/Random.cpp"
