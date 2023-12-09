@@ -26,6 +26,9 @@ GameObject* EngineSystemManager::CreateGameObject(void) {
     GameObject* newGameObject = mGameObjects.Create();
     mGameObjectActive.push_back(newGameObject);
     doUpdateDataStream = true;
+    
+    newGameObject->AddComponent( Engine.CreateComponent<Transform>() );
+    
     return newGameObject;
 }
 
@@ -59,7 +62,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     
     GameObject* cameraController = CreateGameObject();
     cameraController->name = "camera";
-    cameraController->transform.position = position;
+    cameraController->mTransformCache->position = position;
     
     // Add a camera component
     Component* cameraComponent = CreateComponent(Components.Camera);
@@ -136,7 +139,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     skyObject->name = "sky";
     skyObject->AddComponent( CreateComponentMeshRenderer(skyMesh, skyMaterial) );
     
-    skyObject->transform.SetScale(10000, 2000, 10000);
+    skyObject->mTransformCache->SetScale(10000, 2000, 10000);
     
     doUpdateDataStream = true;
     return skyObject;
@@ -178,7 +181,7 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position, Mesh* mesh) {
     newGameObject->SetLinearAxisLockFactor(1, 1, 1);
     newGameObject->SetAngularAxisLockFactor(0, 1, 0);
     
-    newGameObject->transform.SetScale(scale, scale, scale);
+    newGameObject->mTransformCache->SetScale(scale, scale, scale);
     newGameObject->SetPosition(position);
     
     doUpdateDataStream = true;
@@ -188,8 +191,8 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position, Mesh* mesh) {
 GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     GameObject* overlayObject = Create<GameObject>();
     
-    overlayObject->transform.RotateAxis(-180, Vector3(0, 1, 0));
-    overlayObject->transform.RotateAxis( -90, Vector3(0, 0, 1));
+    overlayObject->mTransformCache->RotateAxis(-180, Vector3(0, 1, 0));
+    overlayObject->mTransformCache->RotateAxis( -90, Vector3(0, 0, 1));
     
     Mesh*     overlayMesh     = Create<Mesh>();
     Material* overlayMaterial = Create<Material>();
@@ -217,7 +220,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     textElement->color = color;
     textElement->size = textSize;
     
-    overlayObject->transform.scale = Vector3(textSize, 1, textSize);
+    overlayObject->mTransformCache->scale = Vector3(textSize, 1, textSize);
     
     textElement->canvas.x = x;
     textElement->canvas.y = y;
@@ -271,7 +274,7 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     
     overlayMaterial->DisableCulling();
     
-    overlayMesh->AddQuad(0, 0, 0, height, width, Colors.white, 1, 1);
+    overlayMesh->AddPlain(0, 0, 0, height, width, Colors.white, 1, 1);
     
     overlayMesh->UploadToGPU();
     

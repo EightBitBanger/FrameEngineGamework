@@ -8,6 +8,7 @@ GameObject::GameObject() :
     
     parent(nullptr),
     
+    mTransformCache(nullptr),
     mCameraCache(nullptr),
     mRigidBodyCache(nullptr),
     mMeshRendererCache(nullptr),
@@ -30,6 +31,7 @@ void GameObject::AddComponent(Component* component) {
     
     switch (component->GetType()) {
         
+        case Components.Transform:    mTransformCache    = (Transform*)component->GetComponent(); break;
         case Components.RigidBody:    mRigidBodyCache    = (rp3d::RigidBody*)component->GetComponent(); break;
         case Components.MeshRenderer: mMeshRendererCache = (MeshRenderer*)component->GetComponent(); break;
         case Components.Camera:       mCameraCache       = (Camera*)component->GetComponent(); break;
@@ -53,6 +55,8 @@ bool GameObject::RemoveComponent(Component* component) {
             
             // Null the cache pointer
             switch (component->GetType()) {
+                
+                case Components.Transform:     mTransformCache = nullptr; break;
                 case Components.MeshRenderer:  mMeshRendererCache = nullptr; break;
                 case Components.RigidBody:     mRigidBodyCache = nullptr; break;
                 case Components.Camera:        mCameraCache = nullptr; break;
@@ -60,6 +64,7 @@ bool GameObject::RemoveComponent(Component* component) {
                 case Components.Actor:         mActorCache = nullptr; break;
                 case Components.Text:          mTextCache = nullptr; break;
                 case Components.Panel:         mPanelCache = nullptr; break;
+                
                 default: break;
             }
             mComponentList.erase(it);
@@ -73,7 +78,6 @@ bool GameObject::RemoveComponent(Component* component) {
 Component* GameObject::GetComponentIndex(unsigned int index) {
     assert(index < mComponentList.size());
     return mComponentList[index];
-    
 }
 
 unsigned int GameObject::GetComponentCount(void) {
@@ -87,7 +91,7 @@ unsigned int GameObject::GetComponentCount(void) {
 //
 
 void GameObject::SetPosition(float x, float y, float z) {
-    transform.position = glm::vec3(x, y, z);
+    mTransformCache->position = glm::vec3(x, y, z);
     if (mRigidBodyCache != nullptr) {
         rp3d::Vector3 position(x, y, z);
         rp3d::Transform bodyTransform = mRigidBodyCache->getTransform();

@@ -13,6 +13,7 @@ ENGINE_API ResourceManager   Resources;
 ENGINE_API ScriptSystem      Scripting;
 ENGINE_API RenderSystem      Renderer;
 ENGINE_API PhysicsSystem     Physics;
+ENGINE_API NetworkSystem     Network;
 ENGINE_API AudioSystem       Audio;
 ENGINE_API InputSystem       Input;
 ENGINE_API MathCore          Math;

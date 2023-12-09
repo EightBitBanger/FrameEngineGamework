@@ -27,6 +27,10 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
     
     switch (type) {
         
+        case COMPONENT_TYPE_TRANSFORM: {
+            component_object = (void*)mTransforms.Create();
+            break;
+        }
         case COMPONENT_TYPE_MESH_RENDERER: {
             component_object = (void*)Renderer.CreateMeshRenderer();
             break;
@@ -39,6 +43,7 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
             component_object = (void*)Renderer.CreateLight();
             break;
         }
+        
         case COMPONENT_TYPE_SCRIPT: {
             component_object = (void*)Scripting.CreateScript();
             break;
@@ -78,44 +83,41 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
     
     switch (componentType) {
         
+        case COMPONENT_TYPE_TRANSFORM: {
+            mTransforms.Destroy( (Transform*)componentPtr->GetComponent() );
+            break;
+        }
+        
         case COMPONENT_TYPE_MESH_RENDERER: {
-            MeshRenderer* componentEntityRenderer = (MeshRenderer*)componentPtr->GetComponent();
-            Renderer.DestroyMeshRenderer(componentEntityRenderer);
+            Renderer.DestroyMeshRenderer( (MeshRenderer*)componentPtr->GetComponent() );
             break;
         }
         case COMPONENT_TYPE_CAMERA: {
-            Camera* componentCamera = (Camera*)componentPtr->GetComponent();
-            Renderer.DestroyCamera(componentCamera);
+            Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() );
             break;
         }
         case COMPONENT_TYPE_LIGHT: {
-            Light* componentLight = (Light*)componentPtr->GetComponent();
-            Renderer.DestroyLight(componentLight);
+            Renderer.DestroyLight( (Light*)componentPtr->GetComponent() );
             break;
         }
         case COMPONENT_TYPE_SCRIPT: {
-            Script* componentScript = (Script*)componentPtr->GetComponent();
-            Scripting.DestroyScript(componentScript);
+            Scripting.DestroyScript( (Script*)componentPtr->GetComponent() );
             break;
         }
         case COMPONENT_TYPE_RIGID_BODY: {
-            RigidBody* componentRigidBody = (RigidBody*)componentPtr->GetComponent();
-            Physics.DestroyRigidBody(componentRigidBody);
+            Physics.DestroyRigidBody( (RigidBody*)componentPtr->GetComponent() );
             break;
         }
         case COMPONENT_TYPE_ACTOR: {
-            Actor* actorObject = (Actor*)componentPtr->GetComponent();
-            AI.DestroyActor(actorObject);
+            AI.DestroyActor( (Actor*)componentPtr->GetComponent() );
             break;
         }
         case COMPONENT_TYPE_TEXT: {
-            Text* textObject = (Text*)componentPtr->GetComponent();
-            mTextObjects.Destroy(textObject);
+            mTextObjects.Destroy( (Text*)componentPtr->GetComponent() );
             break;
         }
         case COMPONENT_TYPE_PANEL: {
-            Panel* panelObject = (Panel*)componentPtr->GetComponent();
-            mPanelObjects.Destroy(panelObject);
+            mPanelObjects.Destroy( (Panel*)componentPtr->GetComponent() );
             break;
         }
         

@@ -15,6 +15,7 @@ extern InputSystem          Input;
 extern AudioSystem          Audio;
 extern EngineSystemManager  Engine;
 extern PhysicsSystem        Physics;
+extern NetworkSystem        Network;
 extern RenderSystem         Renderer;
 extern ScriptSystem         Scripting;
 extern ResourceManager      Resources;
@@ -68,6 +69,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Audio.Initiate();
     
     Physics.Initiate();
+    
+    Network.Initiate();
     
     Engine.Initiate();
     
@@ -142,6 +145,39 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             DispatchMessage(&messages);
         }
         
+        
+        //
+        // Tick update timer (background update)
+        //
+        
+        tickAccumulator += tickTimer.GetCurrentDelta();
+        if (tickAccumulator > tickUpdateMax) 
+            tickAccumulator = tickUpdateMax;
+        
+        tickTimer.Update();
+        
+        if (tickAccumulator >= tickUpdateTimeout) {
+            
+            tickAccumulator -= tickUpdateTimeout;
+            
+            // Call extra updates on accumulated time
+            for (int i=0; i < 2; i++) {
+                TickUpdate();
+                
+                AI.UpdateSendSignal();
+                
+                Network.Update();
+                
+                tickAccumulator -= tickUpdateTimeout;
+                
+                // Break if no more accumulated time
+                if (tickAccumulator < tickUpdateTimeout) 
+                    break;
+                
+                continue;
+            }
+        }
+        
         //
         // Fixed rate update timer
         //
@@ -193,35 +229,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             }
         }
         
-        //
-        // Tick update timer
-        //
         
-        tickAccumulator += tickTimer.GetCurrentDelta();
-        if (tickAccumulator > tickUpdateMax) 
-            tickAccumulator = tickUpdateMax;
-            
-        tickTimer.Update();
-        
-        if (tickAccumulator >= tickUpdateTimeout) {
-            
-            tickAccumulator -= tickUpdateTimeout;
-            
-            // Call extra updates on accumulated time
-            for (int i=0; i < 2; i++) {
-                TickUpdate();
-                
-                AI.UpdateSendSignal();
-                
-                tickAccumulator -= tickUpdateTimeout;
-                
-                // Break if no more accumulated time
-                if (tickAccumulator < tickUpdateTimeout) 
-                    break;
-                
-                continue;
-            }
-        }
         
         //
         // Physics timer
@@ -304,6 +312,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Shutdown();
     
     Engine.Shutdown();
+    
+    Network.Shutdown();
     
     Physics.Shutdown();
     

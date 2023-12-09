@@ -72,9 +72,9 @@ void EngineSystemManager::Update(void) {
         
         // Current transform
         Transform currentTransform;
-        currentTransform.position    = streamBuffer[i].gameObject->transform.position;
-        currentTransform.orientation = streamBuffer[i].gameObject->transform.orientation;
-        currentTransform.scale       = streamBuffer[i].gameObject->transform.scale;
+        currentTransform.position    = streamBuffer[i].gameObject->mTransformCache->position;
+        currentTransform.orientation = streamBuffer[i].gameObject->mTransformCache->orientation;
+        currentTransform.scale       = streamBuffer[i].gameObject->mTransformCache->scale;
         
         // Calculate parent transforms
         GameObject* parent = streamBuffer[i].gameObject->parent;
@@ -82,9 +82,9 @@ void EngineSystemManager::Update(void) {
         // Roll over the parent matrix transform chain
         while (parent != nullptr) {
             
-            currentTransform.position    += parent->transform.position;
-            currentTransform.scale       *= parent->transform.scale;
-            currentTransform.orientation *= parent->transform.orientation;
+            //currentTransform.position    += parent->transform.position;
+            //currentTransform.scale       *= parent->transform.scale;
+            //currentTransform.orientation *= parent->transform.orientation;
             
             parent = parent->parent;
         }
@@ -120,10 +120,10 @@ void EngineSystemManager::Update(void) {
             bodyTransform.getOpenGLMatrix(&currentTransform.matrix[0][0]);
             
             // Update the game object transform
-            streamBuffer[i].gameObject->transform.position    = currentTransform.position;
-            streamBuffer[i].gameObject->transform.orientation = currentTransform.orientation;
+            streamBuffer[i].gameObject->mTransformCache->position    = currentTransform.position;
+            streamBuffer[i].gameObject->mTransformCache->orientation = currentTransform.orientation;
             
-            currentTransform.matrix = glm::scale(currentTransform.matrix, streamBuffer[i].gameObject->transform.scale);
+            currentTransform.matrix = glm::scale(currentTransform.matrix, streamBuffer[i].gameObject->mTransformCache->scale);
             
         }
         
@@ -247,9 +247,9 @@ void EngineSystemManager::Update(void) {
                 //
                 
                 if (streamBuffer[i].panel->canvas.anchorRight) {
-                    streamBuffer[i].gameObject->transform.position.z = Renderer.viewport.w + 
-                                                                       streamBuffer[i].panel->width * 
-                                                                       streamBuffer[i].panel->canvas.y;
+                    streamBuffer[i].gameObject->mTransformCache->position.z = Renderer.viewport.w + 
+                                                                              streamBuffer[i].panel->width * 
+                                                                              streamBuffer[i].panel->canvas.y;
                     
                 } else {
                     
@@ -257,8 +257,8 @@ void EngineSystemManager::Update(void) {
                     // Anchor LEFT by default
                     //
                     
-                    streamBuffer[i].gameObject->transform.position.z  = (streamBuffer[i].panel->canvas.y * streamBuffer[i].panel->width);
-                    streamBuffer[i].gameObject->transform.position.z += streamBuffer[i].panel->width;
+                    streamBuffer[i].gameObject->mTransformCache->position.z  = (streamBuffer[i].panel->canvas.y * streamBuffer[i].panel->width);
+                    streamBuffer[i].gameObject->mTransformCache->position.z += streamBuffer[i].panel->width;
                     
                     //
                     // Anchor CENTER horizontally
@@ -266,7 +266,7 @@ void EngineSystemManager::Update(void) {
                     
                     if (streamBuffer[i].panel->canvas.anchorCenterHorz) {
                         
-                        streamBuffer[i].gameObject->transform.position.z = (Renderer.viewport.w / 2) + (streamBuffer[i].panel->canvas.y * streamBuffer[i].panel->width);
+                        streamBuffer[i].gameObject->mTransformCache->position.z = (Renderer.viewport.w / 2) + (streamBuffer[i].panel->canvas.y * streamBuffer[i].panel->width);
                         
                     }
                     
@@ -282,15 +282,15 @@ void EngineSystemManager::Update(void) {
                     topAnchorTotal += (streamBuffer[i].panel->height * streamBuffer[i].panel->height) / 2;
                     topAnchorTotal += streamBuffer[i].panel->height * streamBuffer[i].panel->canvas.x;
                     
-                    streamBuffer[i].gameObject->transform.position.y = topAnchorTotal;
+                    streamBuffer[i].gameObject->mTransformCache->position.y = topAnchorTotal;
                 } else {
                     
                     //
                     // Anchor BOTTOM by default
                     //
                     
-                    streamBuffer[i].gameObject->transform.position.y  = Renderer.displaySize.y - streamBuffer[i].panel->height;
-                    streamBuffer[i].gameObject->transform.position.y -= streamBuffer[i].panel->height * -(streamBuffer[i].panel->canvas.x);
+                    streamBuffer[i].gameObject->mTransformCache->position.y  = Renderer.displaySize.y - streamBuffer[i].panel->height;
+                    streamBuffer[i].gameObject->mTransformCache->position.y -= streamBuffer[i].panel->height * -(streamBuffer[i].panel->canvas.x);
                     
                     //
                     // Anchor CENTER vertically
@@ -302,7 +302,7 @@ void EngineSystemManager::Update(void) {
                         topAnchorTotal += (streamBuffer[i].panel->height * streamBuffer[i].panel->height) / 2;
                         topAnchorTotal += (streamBuffer[i].panel->height * streamBuffer[i].panel->canvas.x) - (streamBuffer[i].panel->height * 2);
                         
-                        streamBuffer[i].gameObject->transform.position.y = topAnchorTotal;
+                        streamBuffer[i].gameObject->mTransformCache->position.y = topAnchorTotal;
                     }
                     
                 }
@@ -326,13 +326,13 @@ void EngineSystemManager::Update(void) {
                 //
                 
                 if (streamBuffer[i].text->canvas.anchorRight) {
-                    streamBuffer[i].gameObject->transform.position.z = Renderer.viewport.w + 
-                                                                       streamBuffer[i].text->size * 
-                                                                       streamBuffer[i].text->canvas.x;
+                    streamBuffer[i].gameObject->mTransformCache->position.z = Renderer.viewport.w + 
+                                                                              streamBuffer[i].text->size * 
+                                                                              streamBuffer[i].text->canvas.x;
                     
                     // Keep text on screen when anchored right
-                    streamBuffer[i].gameObject->transform.position.z -= streamBuffer[i].text->text.size() * // length of string
-                                                                        streamBuffer[i].text->size;         // Size of font text
+                    streamBuffer[i].gameObject->mTransformCache->position.z -= streamBuffer[i].text->text.size() * // length of string
+                                                                               streamBuffer[i].text->size;         // Size of font text
                     
                 } else {
                     
@@ -340,8 +340,8 @@ void EngineSystemManager::Update(void) {
                     // Anchor LEFT by default
                     //
                     
-                    streamBuffer[i].gameObject->transform.position.z  = (streamBuffer[i].text->canvas.x * streamBuffer[i].text->size);
-                    streamBuffer[i].gameObject->transform.position.z += streamBuffer[i].text->size;
+                    streamBuffer[i].gameObject->mTransformCache->position.z  = (streamBuffer[i].text->canvas.x * streamBuffer[i].text->size);
+                    streamBuffer[i].gameObject->mTransformCache->position.z += streamBuffer[i].text->size;
                     
                     //
                     // Anchor CENTER horizontally
@@ -349,7 +349,7 @@ void EngineSystemManager::Update(void) {
                     
                     if (streamBuffer[i].text->canvas.anchorCenterHorz) {
                         
-                        streamBuffer[i].gameObject->transform.position.z = (Renderer.viewport.w / 2) + (streamBuffer[i].text->canvas.x * streamBuffer[i].text->size);
+                        streamBuffer[i].gameObject->mTransformCache->position.z = (Renderer.viewport.w / 2) + (streamBuffer[i].text->canvas.x * streamBuffer[i].text->size);
                         
                     }
                     
@@ -365,15 +365,15 @@ void EngineSystemManager::Update(void) {
                     topAnchorTotal += (streamBuffer[i].text->size * streamBuffer[i].text->size) / 2;
                     topAnchorTotal += streamBuffer[i].text->size * streamBuffer[i].text->canvas.y;
                     
-                    streamBuffer[i].gameObject->transform.position.y = topAnchorTotal;
+                    streamBuffer[i].gameObject->mTransformCache->position.y = topAnchorTotal;
                 } else {
                     
                     //
                     // Anchor BOTTOM by default
                     //
                     
-                    streamBuffer[i].gameObject->transform.position.y  = Renderer.displaySize.y - streamBuffer[i].text->size;
-                    streamBuffer[i].gameObject->transform.position.y -= streamBuffer[i].text->size * -(streamBuffer[i].text->canvas.y);
+                    streamBuffer[i].gameObject->mTransformCache->position.y  = Renderer.displaySize.y - streamBuffer[i].text->size;
+                    streamBuffer[i].gameObject->mTransformCache->position.y -= streamBuffer[i].text->size * -(streamBuffer[i].text->canvas.y);
                     
                     //
                     // Anchor CENTER vertically
@@ -385,7 +385,7 @@ void EngineSystemManager::Update(void) {
                         topAnchorTotal += (streamBuffer[i].text->size * streamBuffer[i].text->size) / 2;
                         topAnchorTotal += (streamBuffer[i].text->size * streamBuffer[i].text->canvas.y) - (streamBuffer[i].text->size * 2);
                         
-                        streamBuffer[i].gameObject->transform.position.y = topAnchorTotal;
+                        streamBuffer[i].gameObject->mTransformCache->position.y = topAnchorTotal;
                     }
                     
                 }

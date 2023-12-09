@@ -3,6 +3,25 @@
 
 #include <GameEngineFramework/Engine/Engine.h>
 
+extern EngineComponents     Components;
+extern ColorPreset          Colors;
+extern RandomGen            Random;
+extern Logger               Log;
+extern Timer                PhysicsTime;
+extern Timer                Time;
+
+extern EngineSystemManager  Engine;
+extern ApplicationLayer     Application;
+extern ResourceManager      Resources;
+extern Serialization        Serializer;
+extern ScriptSystem         Scripting;
+extern RenderSystem         Renderer;
+extern PhysicsSystem        Physics;
+extern InputSystem          Input;
+extern MathCore             Math;
+extern ActorSystem          AI;
+
+
 
 // User globals
 Scene* sceneOverlay;
@@ -16,18 +35,6 @@ Text* text[20];
 
 
 
-
-
-
-Text* titleText;
-
-Button* fileButton;
-Button* editButton;
-
-void callbackButtonA(void) {text[15]->text = "ButtonA";}
-void callbackButtonB(void) {text[16]->text = "ButtonB";}
-void callbackButtonC(void) {text[17]->text = "ButtonC";}
-void callbackButtonD(void) {text[18]->text = "ButtonB";}
 
 
 
@@ -63,117 +70,62 @@ void Start() {
     
     cameraController = Engine.CreateCameraController(position, colliderScale);
     Engine.sceneMain->camera = cameraController->GetComponent<Camera>();
+    Engine.sceneMain->camera->DisableMouseLook();
     
     // Attach the sky object to the camera controller
     skyObject->parent = cameraController;
     cameraController->DisableGravity();
-    Engine.sceneMain->camera->DisableMouseLook();
+    
+    // Camera light
+    cameraController->AddComponent( Engine.CreateComponent<Light>() );
+    Light* light = cameraController->GetComponent<Light>();
+    light->color = Colors.MakeRandom();
+    light->attenuation = 4;
+    light->range = 300;
+    light->intensity = 1000;
+    
+    Engine.sceneMain->AddLightToSceneRoot(light);
     
     
-    
-    
-    //
-    // Initiate overlay scene
-    //
-    
+    // Scene overlay
     sceneOverlay = Engine.Create<Scene>();
     Renderer.AddSceneToRenderQueue(sceneOverlay);
-    Camera* overlayCamera = Engine.Create<Camera>();
-    sceneOverlay->camera = overlayCamera;
     
-    overlayCamera->isOrthographic = true;
-    overlayCamera->isFixedAspect  = true;
+    sceneOverlay->camera = Engine.Create<Camera>();
+    sceneOverlay->camera->isOrthographic = true;
+    sceneOverlay->camera->isFixedAspect  = true;
     
-    overlayCamera->viewport.w = Renderer.displaySize.x;
-    overlayCamera->viewport.h = Renderer.displaySize.y;
+    sceneOverlay->camera->viewport.w = Renderer.displaySize.x;
+    sceneOverlay->camera->viewport.h = Renderer.displaySize.y;
     
-    overlayCamera->clipFar  =  10;
-    overlayCamera->clipNear = -10;
+    sceneOverlay->camera->clipFar  =  100;
+    sceneOverlay->camera->clipNear = -100;
     
     int fontSize = 9;
     Color fontColor = Colors.black;
     
     
-    
-    
-    // Initiate left panel text elements
-    for (int i=0; i < 20; i++) {
+    // Initiate text elements
+    for (int i=0; i < 10; i++) {
         
-        GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 2 * i + 4, "", fontSize, fontColor, "font");
+        GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", fontSize, fontColor, "font");
         
         sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
         text[i] = textObject->GetComponent<Text>();
         text[i]->canvas.anchorTop = true;
+        
+        text[i]->canvas.x = 0;
+        text[i]->canvas.y = 2 * i + 4;
         
     }
     
     
     
     
-    
-    //
-    // Top bar panel
-    //
-    
-    GameObject* panelTitle = Engine.CreateOverlayPanelRenderer(-50, -1, 10000, 110, "panel_gray");
-    Panel* panelTitleOverlay = panelTitle->GetComponent<Panel>();
-    
-    panelTitleOverlay->canvas.anchorTop = true;
-    
-    
-    // Title bar menu
-    GameObject* textObject = Engine.CreateOverlayTextRenderer(1, 1, "File Edit Project", fontSize, Colors.white, "font");
-    
-    titleText = textObject->GetComponent<Text>();
-    titleText->canvas.anchorTop = true;
-    
-    
-    
-    
-    
-    
-    
-    //
-    // Experimental menu system
-    
-    GameObject* panelMenuBackground = Engine.CreateOverlayPanelRenderer(200, 200, 50, 110, "panel_gray");
-    Panel* panelMenuOverlay = panelMenuBackground->GetComponent<Panel>();
-    
-    panelMenuOverlay->canvas.anchorTop = true;
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    //
-    // Mouse drag test panel
-    //
-    
-    fileButton = Engine.CreateOverlayButtonCallback(15, 34, 40, 17, callbackButtonA);
-    fileButton->triggerOnLeftButton = true;
-    fileButton->triggerOnPressed    = true;
-    
-    editButton = Engine.CreateOverlayButtonCallback(65, 34, 40, 17, callbackButtonB);
-    editButton->triggerOnLeftButton = true;
-    editButton->triggerOnPressed    = true;
-    
-    
-    sceneOverlay->AddMeshRendererToSceneRoot( panelTitle->GetComponent<MeshRenderer>() );  // Title bar
-    sceneOverlay->AddMeshRendererToSceneRoot( panelMenuBackground->GetComponent<MeshRenderer>() );  // Menu
-    sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );  // Title text
+    Network.StartServer(80);
     
     return;
 }
-
-
-
 
 
 
@@ -187,33 +139,23 @@ void Start() {
 
 void Run() {
     
-    
-    // Initiate windows area
-    
-    text[2]->text = "window x - " + Int.ToString(Application.windowLeft);
-    text[3]->text = "window y - " + Int.ToString(Application.windowTop);
-    
-    text[5]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
-    text[6]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
-    text[7]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
-    text[8]->text = "ActorAI  - " + Float.ToString( Profiler.profileActorAI );
-    
-    text[10]->text = "mouse x - " + Float.ToString( Input.mouseX - Application.windowLeft );
-    text[11]->text = "mouse y - " + Float.ToString( Input.mouseY - Application.windowTop );
+    for (int i=0; i < Network.GetNumberOfConnections(); i++) {
+        
+        if (Network.GetBufferStringByIndex(i) == "") 
+            continue;
+        
+        std::cout << Network.GetBufferStringByIndex(i) <<"\n";
+        
+        Network.ClearBufferStringByIndex(i);
+        
+    }
     
     
-    text[15]->text = "";
-    text[16]->text = "";
-    text[17]->text = "";
-    text[18]->text = "";
+    text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
+    text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
+    text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
+    //text[4]->text = "ActorAI  - " + FloatToString( Engine.profileActorAI );
     
-    if (fileButton->isHovering) text[17]->text = "Edit hover";
-    if (editButton->isHovering) text[18]->text = "Edit hover";
-    
-    
-    
-    //
-    // Camera controller input handling
     
     if (cameraController == nullptr) 
         return;
@@ -233,7 +175,8 @@ void Run() {
         if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
         if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         
-        force *= 2;
+        
+            force *= 2;
         
         if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 5;
         
