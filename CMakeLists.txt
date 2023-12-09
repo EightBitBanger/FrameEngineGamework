@@ -67,8 +67,10 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Math/Math.h"
     "include/GameEngineFramework/Math/Random.h"
     
-    "include/GameEngineFramework/Networking/SocketServer.h"
-    "include/GameEngineFramework/Networking/SocketClient.h"
+    "include/GameEngineFramework/Networking/NetworkSystem.h"
+    "include/GameEngineFramework/Networking/ServerSocket.h"
+    "include/GameEngineFramework/Networking/ClientSocket.h"
+    "include/GameEngineFramework/Networking/types/ipaddress.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -149,6 +151,8 @@ target_compile_features(runtime PUBLIC cxx_std_11)
 
 set_target_properties(runtime PROPERTIES CXX_EXTENSIONS OFF)
 
+set(CMAKE_CXX_FLAGS "-O2")
+
 set_target_properties(runtime PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
 )
@@ -207,8 +211,10 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Math/Math.h"
     "include/GameEngineFramework/Math/Random.h"
     
-    "include/GameEngineFramework/Networking/SocketServer.h"
-    "include/GameEngineFramework/Networking/SocketClient.h"
+    "include/GameEngineFramework/Networking/NetworkSystem.h"
+    "include/GameEngineFramework/Networking/ServerSocket.h"
+    "include/GameEngineFramework/Networking/ClientSocket.h"
+    "include/GameEngineFramework/Networking/types/ipaddress.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -277,6 +283,8 @@ target_compile_features(game PUBLIC cxx_std_11)
 
 set_target_properties(game PROPERTIES CXX_EXTENSIONS OFF)
 
+set(CMAKE_CXX_FLAGS "-O2")
+
 set_target_properties(game PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
 	LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
@@ -333,8 +341,10 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Math/Math.h"
     "include/GameEngineFramework/Math/Random.h"
     
-    "include/GameEngineFramework/Networking/SocketServer.h"
-    "include/GameEngineFramework/Networking/SocketClient.h"
+    "include/GameEngineFramework/Networking/NetworkSystem.h"
+    "include/GameEngineFramework/Networking/ServerSocket.h"
+    "include/GameEngineFramework/Networking/ClientSocket.h"
+    "include/GameEngineFramework/Networking/types/ipaddress.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -399,8 +409,10 @@ set (CORE_SOURCES
     
     "src/Audio/AudioSystem.cpp"
     
-    "src/Networking/SocketServer.cpp"
-    "src/Networking/SocketClient.cpp"
+    "src/Networking/NetworkSystem.cpp"
+    "src/Networking/ServerSocket.cpp"
+    "src/Networking/ClientSocket.cpp"
+    "src/Networking/types/ipaddress.cpp"
     
     "src/Engine/Engine.cpp"
     "src/Engine/EngineGameObjects.cpp"
@@ -469,6 +481,8 @@ add_compile_definitions(BUILD_CORE)
 target_compile_features(core PUBLIC cxx_std_11)
 
 set_target_properties(core PROPERTIES CXX_EXTENSIONS OFF)
+
+set(CMAKE_CXX_FLAGS "-O2")
 
 set_target_properties(core PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"

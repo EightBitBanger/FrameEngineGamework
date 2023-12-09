@@ -31,6 +31,8 @@
 #include <GameEngineFramework/Math/Math.h>
 #include <GameEngineFramework/Math/Random.h>
 
+#include <GameEngineFramework/Networking/NetworkSystem.h>
+
 
 #ifndef BUILD_CORE
     extern EngineComponents     Components;
@@ -47,6 +49,7 @@
     extern ScriptSystem         Scripting;
     extern RenderSystem         Renderer;
     extern PhysicsSystem        Physics;
+    extern NetworkSystem        Network;
     extern InputSystem          Input;
     extern MathCore             Math;
     extern ActorSystem          AI;
