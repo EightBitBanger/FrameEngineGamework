@@ -2,11 +2,13 @@
 #define _NETWORKING_SUPPORT__
 
 #include <GameEngineFramework/Networking/ServerSocket.h>
-#include <GameEngineFramework/Networking/ClientSocket.h>
 
 #include <thread>
 #include <mutex>
 #include <chrono>
+
+#include <string>
+#include <vector>
 
 
 class ENGINE_API NetworkSystem {
@@ -16,7 +18,7 @@ public:
     // Client
     
     /// Connect to a host at the address and port.
-    bool ConnectToServer(IPAddress address, unsigned int port);
+    bool ConnectToServer(std::string address, unsigned int port);
     
     /// Disconnect from the host.
     bool DisconnectFromServer(void);
@@ -31,10 +33,13 @@ public:
     
     /// Port number from the last client to access the server.
     unsigned int GetLastPort(void);
+    
     /// Host name from the last client to access the server.
     std::string  GetLastHost(void);
+    
     /// IP address from the last client to access the server.
     IPAddress    GetLastAddress(void);
+    
     /// Index position of the last client to access the server.
     unsigned int GetLastIndex(void);
     
@@ -42,8 +47,10 @@ public:
     
     /// Get the number of hosts in the connections list.
     unsigned int GetNumberOfConnections(void);
+    
     /// Get a host name by its index location in the connections list.
     std::string GetHostByIndex(unsigned int index);
+    
     /// Find a host index location by its name.
     int FindHost(std::string name);
     
@@ -55,6 +62,7 @@ public:
     
     /// Get a buffer string from a socket index location in the connections list.
     std::string GetBufferStringByIndex(unsigned int index);
+    
     /// Get a buffer string from a socket index location in the connections list.
     void ClearBufferStringByIndex(unsigned int index);
     

@@ -23,8 +23,14 @@ class ENGINE_API SocketServer {
     
 public:
     
-    SocketServer(void);
-    ~SocketServer(void);
+    // Client
+    
+    /// Connect to a server at the given address and port number.
+    int ConnectToServer(unsigned int port, std::string address);
+    /// Disconnect from the server.
+    void DisconnectFromServer(void);
+    
+    // Server
     
     /// Start a server listening for incoming connections.
     int InitiateServer(unsigned int port, unsigned int maxConn=MAX_CONNECTIONS);
@@ -87,6 +93,9 @@ public:
     
     /// Receive a message
     int MessageReceive(SOCKET socket, char* buffer, unsigned int bufferSize);
+    
+    SocketServer(void);
+    ~SocketServer(void);
     
     /// Internal timer class
     Timer time;

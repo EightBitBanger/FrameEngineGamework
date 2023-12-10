@@ -69,7 +69,6 @@ set (RUNTIME_HEADERS
     
     "include/GameEngineFramework/Networking/NetworkSystem.h"
     "include/GameEngineFramework/Networking/ServerSocket.h"
-    "include/GameEngineFramework/Networking/ClientSocket.h"
     "include/GameEngineFramework/Networking/types/ipaddress.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
@@ -213,7 +212,6 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/Networking/NetworkSystem.h"
     "include/GameEngineFramework/Networking/ServerSocket.h"
-    "include/GameEngineFramework/Networking/ClientSocket.h"
     "include/GameEngineFramework/Networking/types/ipaddress.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
@@ -343,7 +341,6 @@ set (CORE_HEADERS
     
     "include/GameEngineFramework/Networking/NetworkSystem.h"
     "include/GameEngineFramework/Networking/ServerSocket.h"
-    "include/GameEngineFramework/Networking/ClientSocket.h"
     "include/GameEngineFramework/Networking/types/ipaddress.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
@@ -411,7 +408,6 @@ set (CORE_SOURCES
     
     "src/Networking/NetworkSystem.cpp"
     "src/Networking/ServerSocket.cpp"
-    "src/Networking/ClientSocket.cpp"
     "src/Networking/types/ipaddress.cpp"
     
     "src/Engine/Engine.cpp"
