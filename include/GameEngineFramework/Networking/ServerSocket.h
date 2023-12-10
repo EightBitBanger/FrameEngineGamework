@@ -18,15 +18,20 @@
 // Seconds before timing-out a connection
 #define CONNECTION_TIMEOUT  120
 
+#define NETWORK_DEBUG_CONSOLE
+
 
 class ENGINE_API SocketServer {
     
 public:
     
+    friend class NetworkSystem;
+    
     // Client
     
     /// Connect to a server at the given address and port number.
     int ConnectToServer(unsigned int port, std::string address);
+    
     /// Disconnect from the server.
     void DisconnectFromServer(void);
     
@@ -34,13 +39,16 @@ public:
     
     /// Start a server listening for incoming connections.
     int InitiateServer(unsigned int port, unsigned int maxConn=MAX_CONNECTIONS);
+    
     /// Stop a currently running server.
     void ShutdownServer(void);
     
     /// Check for an incoming connection request.
     SOCKET CheckIncomingConnections(void);
+    
     /// Check for incoming messages from any connected client.
     int CheckIncomingMessages(char* buffer, unsigned int bufferSize);
+    
     /// Check client timers for a time-out.
     int CheckTimers(void);
     
@@ -51,21 +59,17 @@ public:
     
     /// Port number from the last client to access the server.
     unsigned int GetLastPort(void);
-    /// Host name from the last client to access the server.
-    std::string  GetLastHost(void);
+    
     /// IP address from the last client to access the server.
     IPAddress    GetLastAddress(void);
+    
     /// Index position of the last client to access the server.
     unsigned int GetLastIndex(void);
     
     // Active connections
     
-    /// Get the number of hosts in the connections list.
+    /// Get the number of clients in the connections list.
     unsigned int GetNumberOfConnections(void);
-    /// Find a host index location by its name.
-    int FindHost(std::string name);
-    /// Get a host name by its index location in the connections list.
-    std::string GetHostByIndex(unsigned int index);
     
     /// Get a port by its index location in the connections list.
     unsigned int GetPortByIndex(unsigned int index);
@@ -75,6 +79,7 @@ public:
     
     /// Get a buffer string from a socket index location in the connections list.
     std::string GetBufferStringByIndex(unsigned int index);
+    
     /// Get a buffer string from a socket index location in the connections list.
     void ClearBufferStringByIndex(unsigned int index);
     
@@ -82,6 +87,7 @@ public:
     
     /// Get a timer by its index location in the connections list.
     int GetTimerByIndex(unsigned int index);
+    
     /// Set a timer value by its index location in the connections list.
     void SetTimerValue(unsigned int index, int value);
     
@@ -89,7 +95,7 @@ public:
     // Messaging
     
     /// Send a message
-    void MessageSend(SOCKET socket, char* buffer, unsigned int bufferSize);
+    void MessageSend(SOCKET socket, const char* buffer, unsigned int bufferSize);
     
     /// Receive a message
     int MessageReceive(SOCKET socket, char* buffer, unsigned int bufferSize);
@@ -100,6 +106,8 @@ public:
     /// Internal timer class
     Timer time;
     
+    /// Host socket.
+    SOCKET  mSocket;
     
 private:
     
@@ -109,12 +117,10 @@ private:
     unsigned int  mLastIndex;
     
     bool    mIsConnected;
-    SOCKET  mSocket;
     
-    std::vector<std::string>       mHostList;
+    std::vector<SOCKET>            mSocketList;
     std::vector<unsigned int>      mPortList;
     std::vector<IPAddress>         mAddressList;
-    std::vector<SOCKET>            mSocketList;
     std::vector<int>               mTimeoutList;
     std::vector<std::string>       mBufferList;
     

@@ -408,7 +408,7 @@ set (CORE_SOURCES
     
     "src/Networking/NetworkSystem.cpp"
     "src/Networking/ServerSocket.cpp"
-    "src/Networking/types/ipaddress.cpp"
+    "src/Networking/ipaddress.cpp"
     
     "src/Engine/Engine.cpp"
     "src/Engine/EngineGameObjects.cpp"
