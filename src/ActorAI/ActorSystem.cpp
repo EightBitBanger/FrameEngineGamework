@@ -1,7 +1,6 @@
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
-#include <GameEngineFramework/Math/Random.h>
-
 #include <GameEngineFramework/Logging/Logging.h>
+#include <GameEngineFramework/Math/Random.h>
 
 extern Logger Log;
 extern ActorSystem AI;

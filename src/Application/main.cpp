@@ -166,8 +166,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 
                 AI.UpdateSendSignal();
                 
-                Network.Update();
-                
                 tickAccumulator -= tickUpdateTimeout;
                 
                 // Break if no more accumulated time
@@ -205,6 +203,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 Engine.UpdateUI();
                 
                 Engine.Update();
+                
+                Network.Update();
                 
                 // Update window area
                 RECT windowRect;

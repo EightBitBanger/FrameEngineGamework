@@ -137,13 +137,13 @@ Viewport ApplicationLayer::GetWindowArea(void) {
 
 void ApplicationLayer::HideWindowHandle(void) {
     assert(windowHandle != NULL);
-    ShowWindow(windowHandle, true);
+    ShowWindow(windowHandle, false);
     return;
 }
 
 void ApplicationLayer::ShowWindowHandle(void) {
     assert(windowHandle != NULL);
-    ShowWindow(windowHandle, false);
+    ShowWindow(windowHandle, true);
     return;
 }
 

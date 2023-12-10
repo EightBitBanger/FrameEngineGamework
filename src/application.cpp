@@ -32,8 +32,8 @@ Material* skyMaterial;
 
 Text* text[20];
 
-
-
+std::string ipAddress;
+std::string port;
 
 
 
@@ -119,10 +119,11 @@ void Start() {
         
     }
     
+    ipAddress = "192.168.1.153";
+    port      = "80";
     
-    
-    
-    Network.StartServer(80);
+    // Client test
+    text[0]->text = "Connecting to "+ipAddress+" : "+port;
     
     return;
 }
@@ -137,24 +138,148 @@ void Start() {
 // Application loop
 //
 
+unsigned int connectionCount = 0;
+int initiate = 0;
+
 void Run() {
     
-    for (int i=0; i < Network.GetNumberOfConnections(); i++) {
+    if (initiate < 10) {
         
-        if (Network.GetBufferStringByIndex(i) == "") 
-            continue;
+        initiate++;
         
-        std::cout << Network.GetBufferStringByIndex(i) <<"\n";
+        if (initiate == 10) {
+            if (Network.ConnectToServer(ipAddress, 27000) == 1) {
+                
+                text[0]->text = "Joined as client";
+                
+                // Client to server
+                std::string message = "Hello, server.";
+                Network.SendMessageToServer((char*)message.c_str(), message.size());
+                
+            } else {
+                
+                text[0]->text = "Server ready";
+                
+                // Start a server if not able to join
+                Network.StartServer(27000);
+                
+            }
+            
+            initiate = 100;
+        }
         
-        Network.ClearBufferStringByIndex(i);
+    }
+    
+    // Wait for connection
+    if (!Network.GetConnectionStatus()) 
+        return;
+    
+    
+    // Are we the server or client?
+    if (Network.GetServerStatus()) {
+        
+        
+        //
+        // Server side
+        //
+        
+        
+        int currentNumberOfConnections = Network.GetNumberOfConnections();
+        
+        std::string messageToClients = "New client joined!";
+        
+        // Number of connections
+        if (initiate == 100) 
+            text[3]->text = "Number of connctions: " + Int.ToString( currentNumberOfConnections );
+        
+        // Send data to clients
+        if (0 != currentNumberOfConnections) {
+            
+            //connectionCount = currentNumberOfConnections;
+            
+            std::string message = "Welcome to the server!";
+            
+            for (int i=0; i < Network.GetNumberOfConnections(); i++) {
+                
+                Network.Send(i, (char*)message.c_str(), message.size());
+                
+                std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
+                
+            }
+            
+        }
+        
+        // Show incoming messages from connected clients
+        
+        for (int i=0; i < Network.GetNumberOfConnections(); i++) {
+            
+            std::string incomingString = Network.GetClientBufferByIndex( i );
+            
+            if (incomingString != "") {
+                
+                Network.ClearClientBufferByIndex(i);
+                
+                std::cout << incomingString << std::endl;
+                
+            }
+            
+        }
+        
+        
+        
+    } else {
+        
+        
+        //
+        // Client side
+        //
+        
+        std::string buffer;
+        buffer.resize(100);
+        
+        
+        /*
+        
+        // Read data from server   attempt 1
+        int numberOfBytes = recv(Network.mHost.mSocket, (char*)buffer.c_str(), 100, 0);
+        
+        if (numberOfBytes > 0) {
+            buffer.resize(numberOfBytes);
+            std::cout << buffer << std::endl;
+        }
+        */
+        
+        
+        
+        // Read data from server   attempt 2
+        buffer.resize(100);
+        int bufferSize = Network.GetMessageFromServer((char*)buffer.c_str(), 100);
+        
+        if (bufferSize > 0) {
+            
+            buffer.resize(bufferSize);
+            
+            if (bufferSize > 0) 
+                std::cout << buffer << std::endl;
+            
+        }
         
     }
     
     
-    text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
-    text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
-    text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
+    
+    
+    
+    
+    
+    
+    
+    //text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
+    //text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
+    //text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
     //text[4]->text = "ActorAI  - " + FloatToString( Engine.profileActorAI );
+    
+    
     
     
     if (cameraController == nullptr) 
@@ -228,8 +353,6 @@ void Run() {
 
 void TickUpdate(void) {
     
-    
-    
     return;
 }
 
@@ -238,8 +361,6 @@ void TickUpdate(void) {
 
 
 void Shutdown(void) {
-    
-    
     
     return;
 }
