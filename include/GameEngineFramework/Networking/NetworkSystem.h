@@ -17,37 +17,28 @@ public:
     
     // Client
     
-    /// Connect to a host at the address and port.
+    /// Connect to a server at the given IP address and port.
     bool ConnectToServer(std::string address, unsigned int port);
     
-    /// Disconnect from the host.
+    /// Disconnect from the server.
     bool DisconnectFromServer(void);
     
     /// Sends a message to the server.
     void SendMessageToServer(char*, unsigned int size);
     
-    /// Get a buffer string from the server if any is available.
+    /// Get a buffer string from the server. A blank string indicates no messages are available.
     int GetMessageFromServer(char*, unsigned int size);
     
     // Server
     
-    /// Start listening for incoming connections on the port.
+    /// Start a server listening for incoming connections on the given port.
     bool StartServer(unsigned int port);
     
-    /// Stop listening for incoming connections.
+    /// Stop the server no longer listening for incoming connections.
     bool StopServer(void);
     
-    /// Send a string to a client at the given index.
-    bool Send(int index, char* message, unsigned int size);
-    
-    /// Port number from the last client to access the server.
-    unsigned int GetLastPort(void);
-    
-    /// IP address from the last client to access the server.
-    IPAddress GetLastAddress(void);
-    
-    /// Index position of the last client to access the server.
-    unsigned int GetLastIndex(void);
+    /// Send a message to a specific client at the given index.
+    bool Send(int index, char* message, unsigned int messageSz);
     
     // Active connections
     
@@ -85,10 +76,10 @@ public:
     
     NetworkSystem();
     
-    /// Host socket sub system.
-    SocketServer mHost;
-    
 private:
+    
+    // Host socket sub system.
+    SocketServer mHost;
     
     // Networking thread
     std::thread* networkSystemThread;

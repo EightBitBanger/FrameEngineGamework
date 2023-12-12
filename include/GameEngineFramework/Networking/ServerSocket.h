@@ -30,18 +30,18 @@ public:
     // Client
     
     /// Connect to a server at the given address and port number.
-    int ConnectToServer(unsigned int port, std::string address);
+    bool ConnectToServer(std::string address, unsigned int port);
     
     /// Disconnect from the server.
-    void DisconnectFromServer(void);
+    bool DisconnectFromServer(void);
     
     // Server
     
     /// Start a server listening for incoming connections.
-    int InitiateServer(unsigned int port, unsigned int maxConn=MAX_CONNECTIONS);
+    bool InitiateServer(unsigned int port, unsigned int maxConn=MAX_CONNECTIONS);
     
     /// Stop a currently running server.
-    void ShutdownServer(void);
+    bool ShutdownServer(void);
     
     /// Check for an incoming connection request.
     SOCKET CheckIncomingConnections(void);
