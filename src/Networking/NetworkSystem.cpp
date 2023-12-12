@@ -28,15 +28,11 @@ void NetworkSystem::Initiate(void) {
 
 void NetworkSystem::Shutdown(void) {
     
-    // Kill current connections
     if (mIsHosting) {
         
         // Disconnect from clients
-        for (unsigned int i=0; i < mHost.GetNumberOfConnections(); i++) {
-            
+        for (unsigned int i=0; i < mHost.GetNumberOfConnections(); i++) 
             mHost.DisconnectFromClient(i);
-            
-        }
         
     } else {
         
@@ -44,6 +40,7 @@ void NetworkSystem::Shutdown(void) {
         
     }
     
+    // Shutdown the thread
     isNetworkThreadActive = false;
     
     networkSystemThread->join();
@@ -52,12 +49,22 @@ void NetworkSystem::Shutdown(void) {
 }
 
 bool NetworkSystem::ConnectToServer(std::string address, unsigned int port) {
-    return mHost.ConnectToServer(port, address);
+    if (mHost.ConnectToServer(address, port)) {
+        mIsHosting = false;
+        mIsConnected = true;
+        return true;
+    }
+    
+    return false;
 }
 
 bool NetworkSystem::DisconnectFromServer(void) {
-    mHost.DisconnectFromServer();
-    return true;
+    if (mHost.DisconnectFromServer()) {
+        mIsHosting = false;
+        mIsConnected = false;
+        return true;
+    }
+    return false;
 }
 
 void NetworkSystem::SendMessageToServer(char* buffer, unsigned int size) {
@@ -66,54 +73,31 @@ void NetworkSystem::SendMessageToServer(char* buffer, unsigned int size) {
 }
 
 int NetworkSystem::GetMessageFromServer(char* buffer, unsigned int size) {
-    return recv(mHost.mSocket, buffer, size, 0);
+    return recv(mHost.mSocket, buffer, size, EWOULDBLOCK);
 }
 
 bool NetworkSystem::StartServer(unsigned int port) {
-    if (!mIsHosting) {
-        if (mHost.InitiateServer(port) == 1) {
-            mIsHosting = true;
-            mIsConnected = true;
-            return true;
-        }
+    if (mHost.InitiateServer(port)) {
+        mIsHosting = true;
+        mIsConnected = true;
+        return true;
     }
     return false;
 }
 
 bool NetworkSystem::StopServer(void) {
-    if (!mIsHosting) 
-        return false;
-    mHost.ShutdownServer();
-    mIsHosting = false;
-    mIsConnected = false;
-    return true;
+    if (mHost.ShutdownServer()) {
+        mIsHosting = false;
+        mIsConnected = false;
+        return true;
+    }
+    return false;
 }
 
-bool NetworkSystem::Send(int index, char* message, unsigned int size) {
+bool NetworkSystem::Send(int index, char* message, unsigned int messageSz) {
     SOCKET socket = GetSocketByIndex(index);
-    send(mHost.mSocket, message, size, 0);
+    send(socket, message, messageSz, 0);
     return true;
-}
-
-unsigned int NetworkSystem::GetLastPort(void) {
-    mux.lock();
-    unsigned int port = mHost.GetLastPort();
-    mux.unlock();
-    return port;
-}
-
-IPAddress NetworkSystem::GetLastAddress(void) {
-    mux.lock();
-    IPAddress address = mHost.GetLastAddress();
-    mux.unlock();
-    return address;
-}
-
-unsigned int NetworkSystem::GetLastIndex(void) {
-    mux.lock();
-    unsigned int index = mHost.GetLastIndex();
-    mux.unlock();
-    return index;
 }
 
 bool NetworkSystem::GetConnectionStatus(void) {
@@ -168,14 +152,14 @@ void NetworkSystem::Update(void) {
     
     if (mIsHosting) {
         
-        mHost.CheckIncomingMessages( (char*)mBuffer.c_str(), mBuffer.size() );
-        
         mHost.CheckIncomingConnections();
         
+        mHost.CheckIncomingMessages( (char*)mBuffer.c_str(), mBuffer.size() );
+        
+        // Timeout old connections
+        mHost.CheckTimers();
+        
     }
-    
-    // Check timeout on old connections
-    mHost.CheckTimers();
     
     mux.unlock();
     

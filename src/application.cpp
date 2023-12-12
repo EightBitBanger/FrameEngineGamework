@@ -23,6 +23,9 @@ extern ActorSystem          AI;
 
 
 
+#define NUMBER_ON_TEXT_ELEMENTS  80
+
+
 // User globals
 Scene* sceneOverlay;
 
@@ -30,7 +33,7 @@ GameObject*  cameraController;
 
 Material* skyMaterial;
 
-Text* text[20];
+Text* text[NUMBER_ON_TEXT_ELEMENTS];
 
 std::string ipAddress;
 std::string port;
@@ -50,18 +53,9 @@ void Start() {
     Renderer.AddSceneToRenderQueue(Engine.sceneMain);
     
     // Create a sky
-    float skyFadeBias = 0.0001;
-    Color skyHigh(Colors.blue);
-    Color skyLow(Colors.blue);
+    GameObject* skyObject = Engine.CreateSky("sky", Colors.black, Colors.black, 0);
     
-    skyHigh += Colors.MakeGrayScale(0.2);
-    skyLow  += Colors.MakeGrayScale(0.6);
-    
-    GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, skyFadeBias);
-    
-    skyMaterial = skyObject->GetComponent<MeshRenderer>()->material;
-    skyMaterial->diffuse = Color(0.087, 0.087, 0.087);
-    skyMaterial->EnableDepthTest();
+    skyObject->GetComponent<MeshRenderer>()->material->EnableDepthTest();
     
     
     // Create a camera controller
@@ -75,16 +69,6 @@ void Start() {
     // Attach the sky object to the camera controller
     skyObject->parent = cameraController;
     cameraController->DisableGravity();
-    
-    // Camera light
-    cameraController->AddComponent( Engine.CreateComponent<Light>() );
-    Light* light = cameraController->GetComponent<Light>();
-    light->color = Colors.MakeRandom();
-    light->attenuation = 4;
-    light->range = 300;
-    light->intensity = 1000;
-    
-    Engine.sceneMain->AddLightToSceneRoot(light);
     
     
     // Scene overlay
@@ -102,28 +86,47 @@ void Start() {
     sceneOverlay->camera->clipNear = -100;
     
     int fontSize = 9;
-    Color fontColor = Colors.black;
+    Color fontColor = Colors.white;
     
     
     // Initiate text elements
-    for (int i=0; i < 10; i++) {
+    for (int i=0; i < NUMBER_ON_TEXT_ELEMENTS; i++) {
         
         GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", fontSize, fontColor, "font");
         
         sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
         text[i] = textObject->GetComponent<Text>();
+        
         text[i]->canvas.anchorTop = true;
         
         text[i]->canvas.x = 0;
-        text[i]->canvas.y = 2 * i + 4;
+        text[i]->canvas.y = (2 * i) + 1;
         
+        continue;
     }
+    
+    Application.SetWindowCenterScale(0.6, 0.5);
     
     ipAddress = "192.168.1.153";
     port      = "80";
     
-    // Client test
-    text[0]->text = "Connecting to "+ipAddress+" : "+port;
+    
+    if (Network.ConnectToServer( ipAddress, 80 )) {
+        
+        text[0]->text = "Joined as client";
+        
+        // Client to server
+        std::string message = "Message from client";
+        Network.SendMessageToServer((char*)message.c_str(), message.size());
+        
+    } else {
+        
+        text[0]->text = "Server ready";
+        
+        // Start a server if not able to join
+        Network.StartServer( 80 );
+        
+    }
     
     return;
 }
@@ -137,79 +140,45 @@ void Start() {
 //
 // Application loop
 //
-
 unsigned int connectionCount = 0;
-int initiate = 0;
 
 void Run() {
     
-    if (initiate < 10) {
-        
-        initiate++;
-        
-        if (initiate == 10) {
-            if (Network.ConnectToServer(ipAddress, 27000) == 1) {
-                
-                text[0]->text = "Joined as client";
-                
-                // Client to server
-                std::string message = "Hello, server.";
-                Network.SendMessageToServer((char*)message.c_str(), message.size());
-                
-            } else {
-                
-                text[0]->text = "Server ready";
-                
-                // Start a server if not able to join
-                Network.StartServer(27000);
-                
-            }
-            
-            initiate = 100;
-        }
-        
-    }
-    
-    // Wait for connection
     if (!Network.GetConnectionStatus()) 
         return;
     
-    
     // Are we the server or client?
     if (Network.GetServerStatus()) {
-        
         
         //
         // Server side
         //
         
+        // Number of connections
+        text[2]->text = "Number of connections: " + Int.ToString( Network.GetNumberOfConnections() );
+        
         
         int currentNumberOfConnections = Network.GetNumberOfConnections();
         
-        std::string messageToClients = "New client joined!";
-        
-        // Number of connections
-        if (initiate == 100) 
-            text[3]->text = "Number of connctions: " + Int.ToString( currentNumberOfConnections );
+        std::string messageToClients = "Welcome to the server!";
         
         // Send data to clients
-        if (0 != currentNumberOfConnections) {
+        if (connectionCount != currentNumberOfConnections) {
             
-            //connectionCount = currentNumberOfConnections;
-            
-            std::string message = "Welcome to the server!";
+            connectionCount = currentNumberOfConnections;
             
             for (int i=0; i < Network.GetNumberOfConnections(); i++) {
                 
-                Network.Send(i, (char*)message.c_str(), message.size());
-                
-                std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
+                Network.Send(i, (char*)messageToClients.c_str(), messageToClients.size());
                 
             }
+            
+            //std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
             
         }
         
         // Show incoming messages from connected clients
+        int charWidthMax = 10;
         
         for (int i=0; i < Network.GetNumberOfConnections(); i++) {
             
@@ -219,7 +188,20 @@ void Run() {
                 
                 Network.ClearClientBufferByIndex(i);
                 
-                std::cout << incomingString << std::endl;
+                //int numberOfSegments = incomingString.size() / charWidthMax;
+                
+                //for (int a=0; a < numberOfSegments; a++) {
+                    
+                    //std::string segment = incomingString.substr(a * charWidthMax, charWidthMax);
+                    std::string segment = incomingString;
+                    
+                    // Shift text elements down by one
+                    for (int i=20; i > 4; i--) 
+                        text[i+1]->text = text[i]->text;
+                    
+                    text[5]->text = segment;
+                    
+                //}
                 
             }
             
@@ -229,40 +211,24 @@ void Run() {
         
     } else {
         
-        
         //
         // Client side
         //
         
-        std::string buffer;
-        buffer.resize(100);
-        
-        
-        /*
-        
-        // Read data from server   attempt 1
-        int numberOfBytes = recv(Network.mHost.mSocket, (char*)buffer.c_str(), 100, 0);
-        
-        if (numberOfBytes > 0) {
-            buffer.resize(numberOfBytes);
-            std::cout << buffer << std::endl;
-        }
-        */
-        
-        
-        
         // Read data from server   attempt 2
-        buffer.resize(100);
-        int bufferSize = Network.GetMessageFromServer((char*)buffer.c_str(), 100);
+        std::string buffer;
+        buffer.resize(10);
+        int bufferSize = Network.GetMessageFromServer((char*)buffer.c_str(), 10);
         
         if (bufferSize > 0) {
             
             buffer.resize(bufferSize);
             
             if (bufferSize > 0) 
-                std::cout << buffer << std::endl;
+                text[5]->text = buffer;
             
         }
+        
         
     }
     

@@ -62,30 +62,29 @@ void SocketServer::SetTimerValue(unsigned int index, int value) {
     mTimeoutList[index] = value;
 }
 
-int SocketServer::ConnectToServer(unsigned int port, std::string ipAddress) {
+bool SocketServer::ConnectToServer(std::string address, unsigned int port) {
     if (mIsConnected) 
-        return -1;
+        return false;
     
     WSADATA wsData;
     
-    int WSOK = WSAStartup(MAKEWORD(2, 2), &wsData);
-    
-    if (WSOK != 0) 
-        return WSOK;
+    if (WSAStartup(MAKEWORD(2, 2), &wsData) != 0) 
+        return false;
     
     mSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (mSocket == INVALID_SOCKET) 
-        return WSACleanup();
+    if (mSocket == INVALID_SOCKET) {
+        WSACleanup();
+        return false;
+    }
     
     sockaddr_in hint;
     hint.sin_family = AF_INET;
     hint.sin_port = htons(port);
-    hint.sin_addr.s_addr = inet_addr( ipAddress.c_str() );
+    hint.sin_addr.s_addr = inet_addr( address.c_str() );
     
     if (connect(mSocket, (SOCKADDR*)&hint, sizeof(SOCKADDR)) == SOCKET_ERROR) {
-        
         WSACleanup();
-        return 0;
+        return false;
     }
     
     mSocketList.push_back(mSocket);
@@ -95,32 +94,33 @@ int SocketServer::ConnectToServer(unsigned int port, std::string ipAddress) {
     mTimeoutList.push_back(CONNECTION_TIMEOUT);
     
     mIsConnected = true;
-    return 1;
+    return true;
 }
 
-void SocketServer::DisconnectFromServer(void) {
+bool SocketServer::DisconnectFromServer(void) {
+    if (mSocket == INVALID_SOCKET) 
+        return false;
     MessageSend(mSocket, "DISCONN", 7);
-    if (mSocket != INVALID_SOCKET) 
-        closesocket(mSocket);
+    closesocket(mSocket);
     WSACleanup();
     mIsConnected = false;
-    return;
+    return true;
 }
 
-int SocketServer::InitiateServer(unsigned int port, unsigned int maxConn) {
+bool SocketServer::InitiateServer(unsigned int port, unsigned int maxConn) {
     if (mIsConnected) 
-        return -1;
+        return false;
     
     WSADATA wsData;
     
-    int WSOK = WSAStartup(MAKEWORD(2, 2), &wsData);
-    
-    if (WSOK != 0) 
-        return WSOK;
+    if (WSAStartup(MAKEWORD(2, 2), &wsData) != 0) 
+        return false;
     
     mSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (mSocket == INVALID_SOCKET) 
-        return WSACleanup();
+    if (mSocket == INVALID_SOCKET) {
+        WSACleanup();
+        return false;
+    }
     
     sockaddr_in hint;
     hint.sin_family = AF_INET;
@@ -133,21 +133,24 @@ int SocketServer::InitiateServer(unsigned int port, unsigned int maxConn) {
     u_long sockMode = 1; // Non blocking listener
     ioctlsocket(mSocket, FIONBIO, &sockMode);
     
-    if (mSocket == INVALID_SOCKET) 
-        return -1;
+    if (mSocket == INVALID_SOCKET) {
+        WSACleanup();
+        return false;
+    }
     
     time.SetRefreshRate(1);
     
     mIsConnected = true;
-    return 1;
+    return true;
 }
 
-void SocketServer::ShutdownServer(void) {
+bool SocketServer::ShutdownServer(void) {
     if (mSocket != INVALID_SOCKET) 
-        closesocket(mSocket);
+        return false;
+    closesocket(mSocket);
     WSACleanup();
     mIsConnected = false;
-    return;
+    return true;
 }
 
 SOCKET SocketServer::CheckIncomingConnections(void) {
@@ -209,7 +212,7 @@ int SocketServer::CheckIncomingMessages(char* buffer, unsigned int bufferSize) {
         mLastPort    = mPortList[i];
         mLastAddress = mAddressList[i];
         
-        // Check explicit disconnection
+        // Explicit disconnection
         if (numberOfBytes == 7) {
             if ((buffer[0] == 'D') & 
                 (buffer[1] == 'I') & 
@@ -227,6 +230,10 @@ int SocketServer::CheckIncomingMessages(char* buffer, unsigned int bufferSize) {
                 continue;
             }
         }
+        
+        // Socket disconnected
+        if (numberOfBytes == 0) 
+            DisconnectFromClient(i);
         
         // Reset connection time out
         mTimeoutList[i] = CONNECTION_TIMEOUT;
@@ -271,7 +278,7 @@ int SocketServer::DisconnectFromClient(unsigned int index) {
     if (index > mSocketList.size()) 
         return -1;
     
-    MessageSend(index, "DISCONN", 7);
+    MessageSend(GetSocketByIndex(index), "DISCONN", 7);
     
     SOCKET socket = mSocketList[index];
     closesocket(socket);
