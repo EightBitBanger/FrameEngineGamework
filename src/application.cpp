@@ -107,26 +107,30 @@ void Start() {
     
     Application.SetWindowCenterScale(0.6, 0.5);
     
-    ipAddress = "192.168.1.153";
-    port      = "80";
     
-    
-    if (Network.ConnectToServer( ipAddress, 80 )) {
+    if (Network.ConnectToHost("127.0.0.1", 27000)) {
         
-        text[0]->text = "Joined as client";
+        // Client
         
-        // Client to server
-        std::string message = "Message from client";
-        Network.SendMessageToServer((char*)message.c_str(), message.size());
+        text[0]->text = "Joined host";
+        
+        
         
     } else {
         
-        text[0]->text = "Server ready";
+        // Host
         
-        // Start a server if not able to join
-        Network.StartServer( 80 );
+        if (Network.StartHost(27000)) {
+            
+            text[0]->text = "Server initiated";
+            
+            
+            
+        }
         
     }
+    
+    
     
     return;
 }
@@ -140,95 +144,52 @@ void Start() {
 //
 // Application loop
 //
-unsigned int connectionCount = 0;
+
+unsigned int numberOfClients=0;
 
 void Run() {
     
-    if (!Network.GetConnectionStatus()) 
+    if (!Network.GetConnectionState()) 
         return;
     
-    // Are we the server or client?
-    if (Network.GetServerStatus()) {
+    if (Network.GetHostState()) {
         
-        //
-        // Server side
-        //
+        // Host
         
-        // Number of connections
-        text[2]->text = "Number of connections: " + Int.ToString( Network.GetNumberOfConnections() );
+        text[2]->text = "Connections: " + Int.ToString( Network.mSockets.size() );
         
-        
-        int currentNumberOfConnections = Network.GetNumberOfConnections();
-        
-        std::string messageToClients = "Welcome to the server!";
-        
-        // Send data to clients
-        if (connectionCount != currentNumberOfConnections) {
+        for (int i=0; i < Network.mMessages.size(); i++) {
             
-            connectionCount = currentNumberOfConnections;
+            std::string message = Network.mMessages[i];
             
-            for (int i=0; i < Network.GetNumberOfConnections(); i++) {
+            text[5 + i]->text = "Client: " + message;
+            
+            //
+            // Send to all clients
+            //
+            
+            if (numberOfClients != Network.mSockets.size()) {
                 
-                Network.Send(i, (char*)messageToClients.c_str(), messageToClients.size());
-                
-            }
-            
-            //std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
-            
-        }
-        
-        // Show incoming messages from connected clients
-        int charWidthMax = 10;
-        
-        for (int i=0; i < Network.GetNumberOfConnections(); i++) {
-            
-            std::string incomingString = Network.GetClientBufferByIndex( i );
-            
-            if (incomingString != "") {
-                
-                Network.ClearClientBufferByIndex(i);
-                
-                //int numberOfSegments = incomingString.size() / charWidthMax;
-                
-                //for (int a=0; a < numberOfSegments; a++) {
-                    
-                    //std::string segment = incomingString.substr(a * charWidthMax, charWidthMax);
-                    std::string segment = incomingString;
-                    
-                    // Shift text elements down by one
-                    for (int i=20; i > 4; i--) 
-                        text[i+1]->text = text[i]->text;
-                    
-                    text[5]->text = segment;
-                    
-                //}
+                message = Int.ToString( Random.Range(0, 2) );
+                send( Network.mSockets[i], (char*)message.c_str(), message.size(), 0 );
                 
             }
             
         }
-        
+        numberOfClients = Network.mSockets.size();
         
         
     } else {
         
-        //
-        // Client side
-        //
+        // Client
         
-        // Read data from server   attempt 2
-        std::string buffer;
-        buffer.resize(10);
-        int bufferSize = Network.GetMessageFromServer((char*)buffer.c_str(), 10);
+        if (Random.Range(0, 100) > 10) 
+            return;
         
-        if (bufferSize > 0) {
-            
-            buffer.resize(bufferSize);
-            
-            if (bufferSize > 0) 
-                text[5]->text = buffer;
-            
-        }
+        std::string message = Int.ToString( Random.Range(0, 2) );
+        send( Network.mSocket, (char*)message.c_str(), message.size(), 0 );
         
+        text[5]->text = "Server: " + Network.mMessages[0];
         
     }
     

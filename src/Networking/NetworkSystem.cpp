@@ -4,142 +4,138 @@
 extern NetworkSystem Network;
 extern Logger Log;
 
-// Actor system thread
-bool isNetworkThreadActive = true;
-void networkThreadMain(void);
-
-
 NetworkSystem::NetworkSystem() : 
-    mIsHosting(false),
-    mIsConnected(false)
+    mIsConnected(false),
+    mIsHosting(false)
 {
-    mBuffer.resize(1024);
-    return;
+}
+
+bool NetworkSystem::StartHost(unsigned int port) {
+    
+    if (mIsConnected) 
+        return false;
+    
+    WSADATA wsaData;
+	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (result != NO_ERROR) 
+		return false;
+	
+    mSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (mSocket == INVALID_SOCKET) {
+		WSACleanup();
+		return false;
+	}
+    
+    sockaddr_in socketAddress;
+	socketAddress.sin_family = AF_INET;
+	socketAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+	socketAddress.sin_port = htons(port);
+    
+    if (bind(mSocket,(SOCKADDR*)& socketAddress, sizeof(socketAddress)) == SOCKET_ERROR) {
+		closesocket(mSocket);
+		WSACleanup();
+		return false;
+	}
+    
+    if (listen(mSocket, 8) == SOCKET_ERROR) {
+		closesocket(mSocket);
+		WSACleanup();
+		return false;
+	}
+    
+    u_long sockMode = 1; // Non blocking listener
+    ioctlsocket(mSocket, FIONBIO, &sockMode);
+    
+    mIsConnected = true;
+    mIsHosting   = true;
+    
+    return true;
+}
+
+bool NetworkSystem::StopHost(void) {
+    
+    if ((!mIsConnected) | (!mIsHosting))
+        return false;
+    
+    closesocket(mSocket);
+    WSACleanup();
+    
+    
+    return true;
+}
+
+// Client
+
+bool NetworkSystem::ConnectToHost(std::string ipAddress, unsigned int port) {
+    
+    WSADATA wsaData;
+	int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (result != NO_ERROR) 
+		return false;
+	
+	mSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (mSocket == INVALID_SOCKET) {
+        WSACleanup();
+        return false;
+    }
+    
+    sockaddr_in socketAddress;
+    socketAddress.sin_family = AF_INET;
+    socketAddress.sin_addr.s_addr = inet_addr( ipAddress.c_str() );
+    socketAddress.sin_port = htons( port );
+    
+    result = connect( mSocket, (SOCKADDR*)&socketAddress, sizeof(socketAddress) );
+    if (result == SOCKET_ERROR) {
+        closesocket (mSocket);
+        WSACleanup();
+        return false;
+    }
+    
+    u_long sockMode = 1; // Non blocking client
+    ioctlsocket(mSocket, FIONBIO, &sockMode);
+    
+    mSockets.push_back(mSocket);
+    mMessages.push_back("");
+    
+    mIsConnected = true;
+    mIsHosting   = false;
+    
+    return true;
+}
+
+bool NetworkSystem::DisconnectFromHost(void) {
+    if (!mIsConnected) 
+        return false;
+    closesocket(mSocket);
+    WSACleanup();
+    mSockets.erase( mSockets.begin() );
+    mMessages.erase( mMessages.begin() );
+    return true;
 }
 
 void NetworkSystem::Initiate(void) {
-    
-    networkSystemThread = new std::thread( networkThreadMain );
-    
-    Log.Write( " >> Starting thread networking" );
     
     return;
 }
 
 void NetworkSystem::Shutdown(void) {
     
+    if (!mIsConnected) 
+        return;
+    
     if (mIsHosting) {
         
-        // Disconnect from clients
-        for (unsigned int i=0; i < mHost.GetNumberOfConnections(); i++) 
-            mHost.DisconnectFromClient(i);
         
     } else {
         
-        mHost.DisconnectFromServer();
+        std::string message = "DISCONN";
+        send( Network.mSocket, (char*)message.c_str(), message.size(), 0 );
         
     }
     
-    // Shutdown the thread
-    isNetworkThreadActive = false;
+    closesocket(mSocket);
+    WSACleanup();
     
-    networkSystemThread->join();
-    
-    return;
-}
-
-bool NetworkSystem::ConnectToServer(std::string address, unsigned int port) {
-    if (mHost.ConnectToServer(address, port)) {
-        mIsHosting = false;
-        mIsConnected = true;
-        return true;
-    }
-    
-    return false;
-}
-
-bool NetworkSystem::DisconnectFromServer(void) {
-    if (mHost.DisconnectFromServer()) {
-        mIsHosting = false;
-        mIsConnected = false;
-        return true;
-    }
-    return false;
-}
-
-void NetworkSystem::SendMessageToServer(char* buffer, unsigned int size) {
-    send(mHost.mSocket, buffer, size, 0);
-    return;
-}
-
-int NetworkSystem::GetMessageFromServer(char* buffer, unsigned int size) {
-    return recv(mHost.mSocket, buffer, size, EWOULDBLOCK);
-}
-
-bool NetworkSystem::StartServer(unsigned int port) {
-    if (mHost.InitiateServer(port)) {
-        mIsHosting = true;
-        mIsConnected = true;
-        return true;
-    }
-    return false;
-}
-
-bool NetworkSystem::StopServer(void) {
-    if (mHost.ShutdownServer()) {
-        mIsHosting = false;
-        mIsConnected = false;
-        return true;
-    }
-    return false;
-}
-
-bool NetworkSystem::Send(int index, char* message, unsigned int messageSz) {
-    SOCKET socket = GetSocketByIndex(index);
-    send(socket, message, messageSz, 0);
-    return true;
-}
-
-bool NetworkSystem::GetConnectionStatus(void) {
-    return mIsConnected;
-}
-
-bool NetworkSystem::GetServerStatus(void) {
-    return mIsHosting;
-}
-
-unsigned int NetworkSystem::GetNumberOfConnections(void) {
-    mux.lock();
-    unsigned int number = mHost.GetNumberOfConnections();
-    mux.unlock();
-    return number;
-}
-
-unsigned int NetworkSystem::GetPortByIndex(unsigned int index) {
-    mux.lock();
-    unsigned int port = mHost.GetPortByIndex(index);
-    mux.unlock();
-    return port;
-}
-
-SOCKET NetworkSystem::GetSocketByIndex(unsigned int index) {
-    mux.lock();
-    SOCKET socket = mHost.GetSocketByIndex(index);
-    mux.unlock();
-    return socket;
-}
-
-std::string NetworkSystem::GetClientBufferByIndex(unsigned int index) {
-    mux.lock();
-    std::string bufferString = mHost.GetBufferStringByIndex(index);
-    mux.unlock();
-    return bufferString;
-}
-
-void NetworkSystem::ClearClientBufferByIndex(unsigned int index) {
-    mux.lock();
-    mHost.ClearBufferStringByIndex(index);
-    mux.unlock();
     return;
 }
 
@@ -148,46 +144,111 @@ void NetworkSystem::Update(void) {
     if (!mIsConnected) 
         return;
     
-    mux.lock();
-    
     if (mIsHosting) {
         
-        mHost.CheckIncomingConnections();
+        // Server update
+        //
         
-        mHost.CheckIncomingMessages( (char*)mBuffer.c_str(), mBuffer.size() );
+        SOCKADDR_IN addrClient;
+        int length = sizeof(SOCKADDR);
         
-        // Timeout old connections
-        mHost.CheckTimers();
+        SOCKET newSocket = accept( mSocket, (SOCKADDR*)&addrClient, &length );
+        
+        if (newSocket != INVALID_SOCKET) {
+            
+            // Accept the client socket
+            
+            mSockets.push_back(newSocket);
+            mMessages.push_back("");
+            
+        }
+        
+        // Process client messages
+        //
+        
+        for (int i=0; i < mSockets.size(); i++) {
+            
+            int messageSz = recv( mSockets[i], buffer, sizeof(buffer), 0 );
+            
+            if (messageSz == -1) 
+                continue;
+            
+            // Disconnected
+            if (messageSz == 0) {
+                
+                mSockets.erase(  mSockets.begin() + i );
+                mMessages.erase( mMessages.begin() + i );
+                
+                continue;
+            }
+            
+            // Check DISCONN
+            if (messageSz == 7) {
+                
+                if ((mMessages[0][0]=='D') & 
+                    (mMessages[0][1]=='I') & 
+                    (mMessages[0][2]=='S') & 
+                    (mMessages[0][3]=='C') & 
+                    (mMessages[0][4]=='O') & 
+                    (mMessages[0][5]=='N') & 
+                    (mMessages[0][6]=='N')) {
+                    
+                    mMessages[i] = "Shutdown";
+                    
+                    //mSockets.erase(  mSockets.begin() + i );
+                    //mMessages.erase( mMessages.begin() + i );
+                }
+                
+                continue;
+            }
+            
+            // Message
+            if (messageSz > 0) {
+                
+                for (unsigned int a=0; a < messageSz; a++) 
+                    mMessages[i] += buffer[a];
+                
+                continue;
+            }
+            
+            continue;
+        }
+        
+    } else {
+        
+        // Client update
+        //
+        
+        int messageSz = recv( mSocket, buffer, sizeof(buffer), 0 );
+        
+        if (messageSz == -1) 
+            return;
+        
+        for (unsigned int a=0; a < messageSz; a++) 
+            mMessages[0] += buffer[a];
         
     }
-    
-    mux.unlock();
     
     return;
 }
 
-
-
-//
-// Networking thread
-//
-
-void networkThreadMain() {
-    
-    while (isNetworkThreadActive) {
-        std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
-        
-        //Network.Update();
-        
-        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(4) );
-        
-        continue;
-    }
-    
-    std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(4) );
-    Log.Write( " >> Shutting down on thread networking" );
-    
-    return;
+bool NetworkSystem::GetConnectionState(void) {
+    return mIsConnected;
 }
+
+/// Return true if we are hosting a server.
+bool NetworkSystem::GetHostState(void) {
+    return mIsHosting;
+}
+
+
+
+
+
+
+
+
+
+
 
 

@@ -18,7 +18,7 @@ void  RandomGen::Seed(int value) {
 
 int  RandomGen::Range(int min, int max) {
     if (min >= max) return 0;
-    return (rand() % max) + min;
+    return (rand() % (max)) + min;
 }
 
 float  RandomGen::Range(float min, float max) {
