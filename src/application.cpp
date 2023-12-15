@@ -23,7 +23,7 @@ extern ActorSystem          AI;
 
 
 
-#define NUMBER_ON_TEXT_ELEMENTS  80
+#define NUMBER_OF_TEXT_ELEMENTS  80
 
 
 // User globals
@@ -33,7 +33,7 @@ GameObject*  cameraController;
 
 Material* skyMaterial;
 
-Text* text[NUMBER_ON_TEXT_ELEMENTS];
+Text* text[NUMBER_OF_TEXT_ELEMENTS];
 
 std::string ipAddress;
 std::string port;
@@ -90,7 +90,7 @@ void Start() {
     
     
     // Initiate text elements
-    for (int i=0; i < NUMBER_ON_TEXT_ELEMENTS; i++) {
+    for (int i=0; i < NUMBER_OF_TEXT_ELEMENTS; i++) {
         
         GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", fontSize, fontColor, "font");
         
