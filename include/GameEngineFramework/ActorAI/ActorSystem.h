@@ -24,12 +24,6 @@ public:
     /// Destroy an actor.
     bool DestroyActor(Actor* actorPtr);
     
-    /// Initiate the actor AI system.
-    void Initiate(void);
-    
-    /// Shutdown the actor AI system.
-    void Shutdown(void);
-    
     /// Set the player position in the simulation.
     void SetPlayerWorldPosition(glm::vec3 position);
     
@@ -42,9 +36,15 @@ public:
     /// Signal to the AI thread to update the simulation.
     void UpdateSendSignal(void);
     
-    /// Update simulation actors. (called internally from another thread)
-    void Update();
     
+    /// Initiate the actor AI system. (called internally)
+    void Initiate(void);
+    
+    /// Shutdown the actor AI system. (called internally)
+    void Shutdown(void);
+    
+    /// Update simulation actors (called internally from another thread)
+    void Update();
     
 private:
     

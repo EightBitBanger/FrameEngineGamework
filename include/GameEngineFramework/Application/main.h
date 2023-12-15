@@ -1,6 +1,7 @@
 #include <GameEngineFrameWork/configuration.h>
 
 #include <GameEngineFrameWork/Input/InputSystem.h>
+#include <GameEngineFramework/Audio/AudioSystem.h>
 #include <GameEngineFrameWork/Physics/PhysicsSystem.h>
 #include <GameEngineFrameWork/Renderer/RenderSystem.h>
 #include <GameEngineFrameWork/Resources/ResourceManager.h>

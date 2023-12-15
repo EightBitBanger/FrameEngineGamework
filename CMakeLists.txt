@@ -52,6 +52,7 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Application/applicationlayer.h"
     "include/GameEngineFramework/Application/winproc.h"
     "include/GameEngineFramework/Application/main.h"
+    "include/GameEngineFramework/Application/SystemInitiation.h"
     
     "include/GameEngineFramework/Audio/AudioSystem.h"
     
@@ -68,8 +69,6 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Math/Random.h"
     
     "include/GameEngineFramework/Networking/NetworkSystem.h"
-    "include/GameEngineFramework/Networking/ServerSocket.h"
-    "include/GameEngineFramework/Networking/types/ipaddress.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -138,6 +137,7 @@ set (RUNTIME_SOURCES
     
     "src/Application/properties.rc"
     "src/Application/main.cpp"
+    "src/Application/SystemInitiation.cpp"
     
 )
 
@@ -211,8 +211,6 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Math/Random.h"
     
     "include/GameEngineFramework/Networking/NetworkSystem.h"
-    "include/GameEngineFramework/Networking/ServerSocket.h"
-    "include/GameEngineFramework/Networking/types/ipaddress.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -340,8 +338,6 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Math/Random.h"
     
     "include/GameEngineFramework/Networking/NetworkSystem.h"
-    "include/GameEngineFramework/Networking/ServerSocket.h"
-    "include/GameEngineFramework/Networking/types/ipaddress.h"
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/components/component.h"
@@ -407,8 +403,6 @@ set (CORE_SOURCES
     "src/Audio/AudioSystem.cpp"
     
     "src/Networking/NetworkSystem.cpp"
-    "src/Networking/ServerSocket.cpp"
-    "src/Networking/types/ipaddress.cpp"
     
     "src/Engine/Engine.cpp"
     "src/Engine/EngineGameObjects.cpp"

@@ -50,6 +50,7 @@
     extern RenderSystem         Renderer;
     extern PhysicsSystem        Physics;
     extern NetworkSystem        Network;
+    extern AudioSystem          Audio;
     extern InputSystem          Input;
     extern MathCore             Math;
     extern ActorSystem          AI;

@@ -40,9 +40,6 @@ public:
     /// Return true if we are hosting a server.
     bool GetHostState(void);
     
-    
-    
-    
     /// Initiate the network system.
     void Initiate(void);
     
@@ -53,7 +50,6 @@ public:
     void Update(void);
     
     NetworkSystem();
-    
     
     
     
