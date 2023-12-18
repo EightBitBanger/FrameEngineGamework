@@ -3,9 +3,11 @@
 
 #include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
-#include <GameEngineFramework/ActorAI/components/actor.h>
-#include <GameEngineFramework/ActorAI/components/neuron.h>
+#include <GameEngineFramework/ActorAI/neurons/NeuralLayer.h>
+#include <GameEngineFramework/ActorAI/neurons/WeightedLayer.h>
 #include <GameEngineFramework/ActorAI/Genetics.h>
+
+#include <GameEngineFramework/ActorAI/components/actor.h>
 
 #include <thread>
 #include <mutex>
@@ -51,13 +53,12 @@ private:
     // Current position of the player in the world
     glm::vec3 playerPosition;
     
+    // Threading
     std::thread* actorSystemThread;
-    
     std::mutex mux;
     
+    // Actor object pool
     PoolAllocator<Actor> mActors;
-    
-    PoolAllocator<Neuron> mNeurons;
     
 };
 

@@ -47,18 +47,20 @@ public:
     /// Create a physics collision shape from a collider resource tag.
     rp3d::BoxShape* CreateColliderFromTag(std::string resourceName);
     
+    /// Find a mesh tag by its resource name.
+    MeshTag* FindMeshTag(std::string resourceName);
+    /// Find a texture tag by its resource name.
+    TextureTag* FindTextureTag(std::string resourceName);
+    /// Find a shader tag by its resource name.
+    ShaderTag* FindShaderTag(std::string resourceName);
+    /// Find a collider tag by its resource name.
+    ColliderTag* FindColliderTag(std::string resourceName);
     /// Purge all assets loaded in the resource system.
     void DestroyAssets(void);
     
     ResourceManager();
     
 private:
-    
-    // Find a resource by its tag name.
-    MeshTag* FindMeshTag(std::string resourceName);
-    TextureTag* FindTextureTag(std::string resourceName);
-    ShaderTag* FindShaderTag(std::string resourceName);
-    ColliderTag* FindColliderTag(std::string resourceName);
     
     // Thread loading queue
     std::vector<std::string> streamQueue;

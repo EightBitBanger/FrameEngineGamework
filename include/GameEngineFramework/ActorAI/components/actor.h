@@ -2,7 +2,8 @@
 #define _AI_ACTOR__
 
 #include <GameEngineFramework/ActorAI/Genetics.h>
-#include <GameEngineFramework/ActorAI/components/neuron.h>
+#include <GameEngineFramework/ActorAI/neurons/NeuralLayer.h>
+#include <GameEngineFramework/ActorAI/neurons/WeightedLayer.h>
 
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
 #include <GameEngineFramework/Renderer/RenderSystem.h>
@@ -21,6 +22,7 @@ class ENGINE_API Actor {
 public:
     
     friend class ActorSystem;
+    friend class EngineSystemManager;
     
     /// Set the name of the actor.
     void SetName(std::string newName);
@@ -40,62 +42,6 @@ public:
     /// Get the age of the actor.
     unsigned long int GetAge(void);
     
-    /// Set the actor position in the world.
-    void SetPosition(glm::vec3 newPosition);
-    
-    /// Get the actor position in the world.
-    glm::vec3 GetPosition(void);
-    
-    /// Set the chance the entity will start moving it its forward direction.
-    void SetChanceToMove(int chance);
-    
-    /// Set the chance the entity will look at the player.
-    void SetChanceToLookAtPlayer(int chance);
-    
-    /// Set the chance the entity will look at another entity.
-    void SetChanceToLookAtEntity(int chance);
-    
-    /// Set the chance the entity will stop moving.
-    void SetChanceToStopMoving(int chance);
-    
-    /// Set the distance the entity will move on average.
-    void SetDistanceToMove(float distance);
-    
-    /// Set the distance the entity will look at the player.
-    void SetDistanceToLookAtPlayer(float distance);
-    
-    /// Set the distance the entity will look another entity.
-    void SetDistanceToLookAtEntity(float distance);
-    
-    /// Set the distance the entity will stop moving if its reached.
-    void SetDistanceToStopMoving(float distance);
-    
-    /// Get the chance the entity will start moving it its forward direction.
-    int GetChanceToMove(void);
-    
-    /// Get the chance the entity will look at the player.
-    int GetChanceToLookAtPlayer(void);
-    
-    /// Get the chance the entity will look at another entity.
-    int GetChanceToLookAtEntity(void);
-    
-    /// Get the chance the entity will stop moving.
-    int GetChanceToStopMoving(void);
-    
-    /// Get the distance the entity will move on average.
-    float GetDistanceToMove(void);
-    
-    /// Get the distance the entity will look at the player.
-    float GetDistanceToLookAtPlayer(void);
-    
-    /// Get the distance the entity will look another entity.
-    float GetDistanceToLookAtEntity(void);
-    
-    /// get the distance the entity will stop moving if its reached.
-    float GetDistanceToStopMoving(void);
-    
-    /// Get the velocity this actor wishes to output.
-    glm::vec3 GetVelocity(void);
     
     /// Add a new gene to the actors genome. The index location will be returned.
     void AddGene(Gene& newGene);
@@ -103,11 +49,30 @@ public:
     /// Remove a gene from the actors genome.
     void RemoveGene(unsigned int index);
     
-    /// Get the number of genes in the genome of this actor.
+    /// Get the number of genes in the genome.
     unsigned int GetNumberOfGenes(void);
     
     /// Get a gene from the genome.
     Gene GetGeneFromGenome(unsigned int index);
+    
+    
+    /// Add a weighted layer to the neural network.
+    void AddWeightedLayer(WeightedLayer& newNeuralLayer);
+    
+    /// Remove a weighted layer from the neural network by the given index location.
+    void RemoveWeightedLayer(unsigned int index);
+    
+    /// Get a weighted layer from the neural network.
+    WeightedLayer GetWeightedLayer(unsigned int index);
+    
+    /// Get the number of weighted layers in the neural network.
+    unsigned int GetNumberOfWeightedLayers(void);
+    
+    /// Set the input data to be fed through the neural network.
+    void SetNeuralInputLayer(NeuralLayer inputLayer);
+    
+    /// Get the current state of the input data for the neural network.
+    NeuralLayer GetNeuralInputLayer(void);
     
     Actor();
     
@@ -118,28 +83,23 @@ private:
     bool isActive;
     bool doUpdateGenetics;
     
+    // Number of ticks this actor has accumulated in its lifetime.
     unsigned long int age;
     
-    // Environmental sensory (Inputs)
-    glm::vec3 worldPosition;
-    
-    // Personality parameters (Decision making)
-    int chanceToMove;
-    int chanceToLookAtPlayer;
-    int chanceToLookAtEntity;
-    int chanceToStopMoving;
-    
-    float distanceToMove;
-    float distanceToLookAtPlayer;
-    float distanceToLookAtEntity;
-    float distanceToStopMoving;
-    
-    // Action parameters (Outputs)
+    // Movement vector
     glm::vec3 velocity;
     
+    // Position of the actor in the world
+    glm::vec3 position;
     
     // Genetic expression
     std::vector<Gene> mGenes;
+    
+    // Input layer feeding data into the neural network
+    NeuralLayer mNeuralLayerInput;
+    
+    // Layers of weighted neurological expression
+    std::vector<WeightedLayer> mWeightedLayers;
     
     std::mutex mux;
     

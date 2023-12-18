@@ -12,6 +12,12 @@
 #include <vector>
 
 
+
+// TODO:
+// Tell the clients we have shutdown   CPP Line 172
+
+
+
 class ENGINE_API NetworkSystem {
     
 public:
@@ -24,6 +30,21 @@ public:
     /// Stop hosting the server.
     bool StopHost(void);
     
+    /// Get the number of connected sockets.
+    unsigned int GetNumberOfSockets(void);
+    
+    /// Get a socket from a connected client by the given index.
+    SOCKET GetClientSocket(unsigned int index);
+    
+    /// Get a message from a connected client by the given index.
+    std::string GetClientMessage(unsigned int index);
+    
+    /// Clear the message buffer for a connected client by the given index.
+    void ClearClientMessage(unsigned int index);
+    
+    /// Send a message to a client by the given address.
+    bool SendMessageToClient(unsigned int index, std::string& message);
+    
     // Client
     
     /// Connect to a server at the given IP address and port.
@@ -32,6 +53,12 @@ public:
     /// Disconnect from the host.
     bool DisconnectFromHost(void);
     
+    /// Send a message to the connected host.
+    bool SendMessageToHost(std::string& message);
+    
+    /// Receive a message from the connected host. A blank string indicates no messages are available.
+    bool ReceiveMessageFromHost(std::string& message);
+    
     // State
     
     /// Return true if our socket is connected.
@@ -39,6 +66,9 @@ public:
     
     /// Return true if we are hosting a server.
     bool GetHostState(void);
+    
+    /// Get the number of connected sockets.
+    SOCKET GetHostSocket(void);
     
     /// Initiate the network system.
     void Initiate(void);
@@ -51,7 +81,7 @@ public:
     
     NetworkSystem();
     
-    
+private:
     
     // State are we currently connected?
     bool mIsConnected;
@@ -68,8 +98,6 @@ public:
     // Client socket list
     std::vector<SOCKET>       mSockets;
     std::vector<std::string>  mMessages;
-    
-private:
     
 };
 
