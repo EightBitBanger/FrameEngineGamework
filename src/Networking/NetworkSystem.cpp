@@ -64,6 +64,32 @@ bool NetworkSystem::StopHost(void) {
     return true;
 }
 
+unsigned int NetworkSystem::GetNumberOfSockets(void) {
+    return mSockets.size();
+}
+
+SOCKET NetworkSystem::GetClientSocket(unsigned int index) {
+    return mSockets[index];
+}
+
+std::string NetworkSystem::GetClientMessage(unsigned int index) {
+    return mMessages[index];
+}
+
+void NetworkSystem::ClearClientMessage(unsigned int index) {
+    mMessages[index] = "";
+    return;
+}
+
+bool NetworkSystem::SendMessageToClient(unsigned int index, std::string& message) {
+    if (!mIsHosting) 
+        return false;
+    if (index >= mSockets.size()) 
+        return false;
+    send(mSockets[index], (char*)message.c_str(), message.size(), 0);
+    return true;
+}
+
 // Client
 
 bool NetworkSystem::ConnectToHost(std::string ipAddress, unsigned int port) {
@@ -103,6 +129,20 @@ bool NetworkSystem::ConnectToHost(std::string ipAddress, unsigned int port) {
     return true;
 }
 
+bool NetworkSystem::SendMessageToHost(std::string& message) {
+    if (mIsHosting) 
+        return false;
+    send(mSocket, (char*)message.c_str(), message.size(), 0);
+    return true;
+}
+
+bool NetworkSystem::ReceiveMessageFromHost(std::string& message) {
+    if (mIsHosting) 
+        return false;
+    recv(mSocket, (char*)message.c_str(), message.size(), 0);
+    return true;
+}
+
 bool NetworkSystem::DisconnectFromHost(void) {
     if (!mIsConnected) 
         return false;
@@ -111,6 +151,10 @@ bool NetworkSystem::DisconnectFromHost(void) {
     mSockets.erase( mSockets.begin() );
     mMessages.erase( mMessages.begin() );
     return true;
+}
+
+SOCKET NetworkSystem::GetHostSocket(void) {
+    return mSocket;
 }
 
 void NetworkSystem::Initiate(void) {
@@ -125,9 +169,11 @@ void NetworkSystem::Shutdown(void) {
     
     if (mIsHosting) {
         
+        // Tell the clients we have shutdown
         
     } else {
         
+        // Tell the host we have left
         std::string message = "DISCONN";
         send( Network.mSocket, (char*)message.c_str(), message.size(), 0 );
         

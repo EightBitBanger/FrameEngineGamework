@@ -23,9 +23,6 @@ extern ActorSystem          AI;
 
 
 
-#define NUMBER_OF_TEXT_ELEMENTS  80
-
-
 // User globals
 Scene* sceneOverlay;
 
@@ -33,10 +30,10 @@ GameObject*  cameraController;
 
 Material* skyMaterial;
 
-Text* text[NUMBER_OF_TEXT_ELEMENTS];
+Text* text[80];
 
-std::string ipAddress;
-std::string port;
+Actor* actor;
+
 
 
 
@@ -53,9 +50,18 @@ void Start() {
     Renderer.AddSceneToRenderQueue(Engine.sceneMain);
     
     // Create a sky
-    GameObject* skyObject = Engine.CreateSky("sky", Colors.black, Colors.black, 0);
+    float skyFadeBias = 0.0001;
+    Color skyHigh(Colors.blue);
+    Color skyLow(Colors.dkgray);
     
-    skyObject->GetComponent<MeshRenderer>()->material->EnableDepthTest();
+    skyHigh += Colors.MakeGrayScale(0.3);
+    skyLow  += Colors.MakeGrayScale(0.01);
+    
+    GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, skyFadeBias);
+    
+    skyMaterial = skyObject->GetComponent<MeshRenderer>()->material;
+    skyMaterial->diffuse = Color(0.087, 0.087, 0.087);
+    skyMaterial->EnableDepthTest();
     
     
     // Create a camera controller
@@ -85,52 +91,67 @@ void Start() {
     sceneOverlay->camera->clipFar  =  100;
     sceneOverlay->camera->clipNear = -100;
     
-    int fontSize = 9;
-    Color fontColor = Colors.white;
-    
-    
     // Initiate text elements
-    for (int i=0; i < NUMBER_OF_TEXT_ELEMENTS; i++) {
+    for (int i=0; i < 80; i++) {
         
-        GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", fontSize, fontColor, "font");
+        GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", 9, Colors.white, "font");
         
         sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
         text[i] = textObject->GetComponent<Text>();
-        
         text[i]->canvas.anchorTop = true;
         
         text[i]->canvas.x = 0;
-        text[i]->canvas.y = (2 * i) + 1;
+        text[i]->canvas.y = 2 * i + 4;
+        
+    }
+    
+    
+    Mesh* cubeMeshPtr = Resources.CreateMeshFromTag("cube");
+    
+    
+    
+    //
+    // Generate some AI actors
+    //
+    
+    float area = 0.3;
+    float uniformScale = 0.1;
+    unsigned int numberOfActors = 1;
+    
+    for (int i=0; i < numberOfActors; i++) {
+        
+        float xx = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
+        float yy = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
+        float zz = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
+        
+        float scalexx = Random.Range(0, 10) * uniformScale;
+        float scaleyy = Random.Range(0, 10) * uniformScale;
+        float scalezz = Random.Range(0, 10) * uniformScale;
+        
+        GameObject* newActorObject = Engine.CreateAIActor(Vector3(xx, yy, zz), cubeMeshPtr);
+        newActorObject->GetComponent<Transform>()->scale = Vector3(scalexx, scaleyy, scalezz);
+        newActorObject->DisableGravity();
+        
+        MeshRenderer* actorMeshRenderer = newActorObject->GetComponent<MeshRenderer>();
+        actorMeshRenderer->material->shader = Engine.shaders.colorUnlit;
+        actorMeshRenderer->material->ambient  = Colors.black;
+        actorMeshRenderer->material->diffuse  = Colors.MakeRandom();
+        actorMeshRenderer->material->diffuse *= Colors.dkgray;
+        
+        actor = newActorObject->GetComponent<Actor>();
+        
+        WeightedLayer layer;
+        for (int a=0; a < 34; a++) {
+            layer.plasticity = Random.Range(0, 100) * 0.00001;
+            
+            if (layer.plasticity > 1) 
+                layer.plasticity = 1;
+            
+            actor->AddWeightedLayer(layer);
+        }
         
         continue;
     }
-    
-    Application.SetWindowCenterScale(0.6, 0.5);
-    
-    
-    if (Network.ConnectToHost("127.0.0.1", 27000)) {
-        
-        // Client
-        
-        text[0]->text = "Joined host";
-        
-        
-        
-    } else {
-        
-        // Host
-        
-        if (Network.StartHost(27000)) {
-            
-            text[0]->text = "Server initiated";
-            
-            
-            
-        }
-        
-    }
-    
-    
     
     return;
 }
@@ -145,66 +166,50 @@ void Start() {
 // Application loop
 //
 
-unsigned int numberOfClients=0;
-
 void Run() {
     
-    if (!Network.GetConnectionState()) 
-        return;
+    WeightedLayer outputLayer = actor->GetWeightedLayer(0);
     
-    if (Network.GetHostState()) {
+    std::string values;
+    std::string inputValues;
+    std::string outputValues;
+    
+    
+    for (int i=0; i < NEURAL_LAYER_WIDTH; i++) {
+        inputValues += Float.ToString( actor->GetNeuralInputLayer().node[i] )  + " ";
+    }
+    
+    text[1]->text = "Inputs";
+    text[2]->text = inputValues;
+    
+    
+    // Display weighted layers
+    
+    for (int i=0; i < actor->GetNumberOfWeightedLayers(); i++) {
         
-        // Host
+        values = "";
         
-        text[2]->text = "Connections: " + Int.ToString( Network.mSockets.size() );
-        
-        for (int i=0; i < Network.mMessages.size(); i++) {
-            
-            std::string message = Network.mMessages[i];
-            
-            text[5 + i]->text = "Client: " + message;
-            
-            //
-            // Send to all clients
-            //
-            
-            if (numberOfClients != Network.mSockets.size()) {
-                
-                message = Int.ToString( Random.Range(0, 2) );
-                send( Network.mSockets[i], (char*)message.c_str(), message.size(), 0 );
-                
-            }
-            
+        for (int a=0; a < NEURAL_LAYER_WIDTH; a++) {
+            values += Float.ToString( actor->GetWeightedLayer(i).node[a] ) + " ";
         }
-        numberOfClients = Network.mSockets.size();
         
+        values += "  |  ";
         
-    } else {
+        for (int a=0; a < NEURAL_LAYER_WIDTH; a++) {
+            values += Float.ToString( actor->GetWeightedLayer(i).weight[a] ) + " ";
+        }
         
-        // Client
+        values += "  |  ";
         
-        if (Random.Range(0, 100) > 10) 
-            return;
+        values += Float.ToString( actor->GetWeightedLayer(i).plasticity );
         
-        std::string message = Int.ToString( Random.Range(0, 2) );
-        send( Network.mSocket, (char*)message.c_str(), message.size(), 0 );
+        text[5 + i]->text = values;
         
-        text[5]->text = "Server: " + Network.mMessages[0];
-        
+        continue;
     }
     
     
     
-    
-    
-    
-    
-    
-    
-    //text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
-    //text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
-    //text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
-    //text[4]->text = "ActorAI  - " + FloatToString( Engine.profileActorAI );
     
     
     
@@ -227,8 +232,7 @@ void Run() {
         if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
         if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         
-        
-            force *= 2;
+        force *= 2;
         
         if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 5;
         
@@ -236,6 +240,19 @@ void Run() {
         
     }
     
+    
+    
+    
+    // Input layer
+    if (Input.CheckKeyPressed(VK_RETURN)) {
+        NeuralLayer inputLayer;
+        
+        inputLayer.node[0] = Random.Range(0, 100) * 0.01;
+        inputLayer.node[1] = Random.Range(0, 100) * 0.01;
+        inputLayer.node[2] = Random.Range(0, 100) * 0.01;
+        
+        actor->SetNeuralInputLayer(inputLayer);
+    }
     
     
     
@@ -280,6 +297,8 @@ void Run() {
 
 void TickUpdate(void) {
     
+    
+    
     return;
 }
 
@@ -288,6 +307,8 @@ void TickUpdate(void) {
 
 
 void Shutdown(void) {
+    
+    
     
     return;
 }

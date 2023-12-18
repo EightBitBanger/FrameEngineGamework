@@ -126,7 +126,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     // Tick update timer
     Timer tickTimer;
-    float tickUpdateTimeout = 1000.0f / 4.0;
+    float tickUpdateTimeout = 1000.0f / 8.0;
     float tickAccumulator=0;
     float tickUpdateMax = tickUpdateTimeout * 100;
     tickTimer.Update();
@@ -160,11 +160,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             tickAccumulator -= tickUpdateTimeout;
             
+            AI.UpdateSendSignal();
+            
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
-                TickUpdate();
                 
-                AI.UpdateSendSignal();
+                TickUpdate();
                 
                 tickAccumulator -= tickUpdateTimeout;
                 

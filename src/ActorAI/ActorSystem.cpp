@@ -5,11 +5,14 @@
 extern Logger Log;
 extern ActorSystem AI;
 extern RandomGen Random;
+extern MathCore Math;
 
 // Actor system thread
 bool isActorThreadActive = true;
 bool doUpdate = false;
 void actorThreadMain(void);
+
+int actorCounter=0;
 
 
 ActorSystem::ActorSystem() : 
@@ -81,6 +84,7 @@ Actor* ActorSystem::GetActor(unsigned int index) {
 //
 
 void ActorSystem::Update(void) {
+    
     unsigned int numberOfActors = (unsigned int)mActors.Size() - 1;
     
     float force = 0.0001;
@@ -89,40 +93,98 @@ void ActorSystem::Update(void) {
     
     mux.lock();
     
-    for (int i=numberOfActors; i >= 0; i--) {
-        if (!mActors[i]->isActive) 
-            continue;
+    for (int i = 0; i < 80; i++) {
         
-        mActors[i]->mux.lock();
+        actorCounter++;
+        if (actorCounter >= numberOfActors) 
+            actorCounter = 0;
+        
+        Actor* actor = mActors[actorCounter];
+        
+        if (!actor->isActive) {
+            actor->mux.unlock();
+            continue;
+        }
+        
+        actor->mux.lock();
         
         // Advance actor age
-        mActors[i]->age++;
+        actor->age++;
         
         
         
+        // Must have at least two layers to feed the data forward
+        //if (actor->mWeightedLayers.size() < 2) {
+        //    actor->mux.unlock();
+        //    continue;
+        //}
         
         
         
+        // Feed forward the weighted layers
+        for (int a=1; a < actor->mWeightedLayers.size(); a++) {
+            
+            for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
+                actor->mWeightedLayers[a-1].node[w] = actor->mWeightedLayers[a].node[w] * 
+                                                      actor->mWeightedLayers[a].weight[w];
+            
+            continue;
+        }
         
-        // Chance to start moving
-        if (Random.Range(0, 10) > mActors[i]->chanceToMove) {
-            forward.x = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
-            forward.y = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
-            forward.z = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
+        // Apply neural plasticity
+        for (int a=0; a < actor->mWeightedLayers.size(); a++) {
+            
+            for (int w=0; w < NEURAL_LAYER_WIDTH; w++) {
+                
+                actor->mWeightedLayers[a].weight[w] = Math.Lerp(1.0, actor->mWeightedLayers[a].node[w], actor->mWeightedLayers[a].plasticity);
+                
+                // Weight cap
+                if (actor->mWeightedLayers[a].weight[w] > 1) 
+                    actor->mWeightedLayers[a].weight[w] = 1;
+                
+                // Weight floor
+                if (actor->mWeightedLayers[a].weight[w] < 0.1) 
+                    actor->mWeightedLayers[a].weight[w] = 0.1;
+                
+                continue;
+            }
+            
+            continue;
+        }
+        
+        int lastLayer = actor->mWeightedLayers.size()-1;
+        
+        // Feed in new input data
+        for (int a=0; a < NEURAL_LAYER_WIDTH; a++) 
+            actor->mWeightedLayers[lastLayer].node[a] = actor->mNeuralLayerInput.node[a];
+        
+        
+        // Chance to recycle old data
+        
+        if (Random.Range(0, 100) > 98) {
+            for (int a=0; a < actor->mWeightedLayers.size(); a++) {
+                
+                for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
+                    actor->mWeightedLayers[lastLayer].node[w] = actor->mWeightedLayers[0].node[w];
+                
+                continue;
+            }
         }
         
         
         
         
-        
-        
+        // Chance to start moving
+        //forward.x = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
+        //forward.y = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
+        //forward.z = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
         
         
         // Apply forward velocity
-        mActors[i]->velocity = forward;
+        mActors[actorCounter]->velocity = forward;
         
         
-        mActors[i]->mux.unlock();
+        mActors[actorCounter]->mux.unlock();
         
         continue;
     }

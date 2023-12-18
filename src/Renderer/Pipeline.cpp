@@ -15,7 +15,7 @@ void RenderSystem::RenderFrame(void) {
     mNumberOfLights = 0;
     
     // Clear the view port
-    glClear(GL_DEPTH_BUFFER_BIT);// | GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     
     Shader* currentShader = nullptr;
     

@@ -216,13 +216,10 @@ void EngineSystemManager::Update(void) {
                 
                 if (streamBuffer[i].rigidBody != nullptr) {
                     
-                    glm::vec3 actorVelocity = streamBuffer[i].actor->GetVelocity();
+                    glm::vec3 actorVelocity = streamBuffer[i].actor->velocity;
                     
-                    // Set AI inputs
-                    streamBuffer[i].actor->SetPosition( currentTransform.position );
-                    
-                    
-                    // Get AI outputs
+                    // Update actor
+                    streamBuffer[i].actor->position = currentTransform.position;
                     
                     // Apply force velocity
                     streamBuffer[i].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, actorVelocity.y, actorVelocity.z) );
