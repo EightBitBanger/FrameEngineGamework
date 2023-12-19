@@ -59,7 +59,8 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/genetics.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
-    "include/GameEngineFramework/ActorAI/components/neuron.h"
+    "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
+    "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
     
     "include/GameEngineFramework/Serialization/Serialization.h"
     
@@ -201,7 +202,8 @@ set (GAME_HEADERS
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/genetics.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
-    "include/GameEngineFramework/ActorAI/components/neuron.h"
+    "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
+    "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
     
     "include/GameEngineFramework/Serialization/Serialization.h"
     
@@ -328,7 +330,8 @@ set (CORE_HEADERS
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/genetics.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
-    "include/GameEngineFramework/ActorAI/components/neuron.h"
+    "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
+    "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
     
     "include/GameEngineFramework/Serialization/Serialization.h"
     
@@ -420,7 +423,8 @@ set (CORE_SOURCES
     "src/ActorAI/ActorSystem.cpp"
     "src/ActorAI/genetics.cpp"
     "src/ActorAI/components/actor.cpp"
-    "src/ActorAI/components/neuron.cpp"
+    "src/ActorAI/neurons/NeuralLayer.cpp"
+    "src/ActorAI/neurons/WeightedLayer.cpp"
     
     "src/Serialization/Serialization.cpp"
     
