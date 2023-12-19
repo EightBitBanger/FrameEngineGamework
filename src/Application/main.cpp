@@ -160,10 +160,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             tickAccumulator -= tickUpdateTimeout;
             
-            AI.UpdateSendSignal();
-            
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
+                
+                AI.UpdateSendSignal();
                 
                 TickUpdate();
                 

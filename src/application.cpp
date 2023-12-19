@@ -141,11 +141,18 @@ void Start() {
         actor = newActorObject->GetComponent<Actor>();
         
         WeightedLayer layer;
-        for (int a=0; a < 34; a++) {
-            layer.plasticity = Random.Range(0, 100) * 0.00001;
+        for (int a=0; a < 24; a++) {
             
-            if (layer.plasticity > 1) 
-                layer.plasticity = 1;
+            if (Random.Range(0, 100) < 97) {
+                
+                layer.plasticity = 0;
+                
+                actor->AddWeightedLayer(layer);
+                
+                continue;
+            }
+            
+            layer.plasticity = 1;
             
             actor->AddWeightedLayer(layer);
         }
@@ -174,10 +181,11 @@ void Run() {
     std::string inputValues;
     std::string outputValues;
     
+    NeuralLayer inputLayer = actor->GetNeuralInputLayer();
     
-    for (int i=0; i < NEURAL_LAYER_WIDTH; i++) {
-        inputValues += Float.ToString( actor->GetNeuralInputLayer().node[i] )  + " ";
-    }
+    for (int i=0; i < NEURAL_LAYER_WIDTH; i++) 
+        inputValues += Float.ToString( inputLayer.node[i] )  + " ";
+    
     
     text[1]->text = "Inputs";
     text[2]->text = inputValues;
@@ -185,23 +193,26 @@ void Run() {
     
     // Display weighted layers
     
+    
     for (int i=0; i < actor->GetNumberOfWeightedLayers(); i++) {
+        
+        WeightedLayer weightedLayer = actor->GetWeightedLayer(i);
         
         values = "";
         
-        for (int a=0; a < NEURAL_LAYER_WIDTH; a++) {
-            values += Float.ToString( actor->GetWeightedLayer(i).node[a] ) + " ";
-        }
+        for (int a=0; a < NEURAL_LAYER_WIDTH; a++) 
+            values += Float.ToString( weightedLayer.node[a] ) + " ";
+        
         
         values += "  |  ";
         
-        for (int a=0; a < NEURAL_LAYER_WIDTH; a++) {
-            values += Float.ToString( actor->GetWeightedLayer(i).weight[a] ) + " ";
-        }
+        for (int a=0; a < NEURAL_LAYER_WIDTH; a++) 
+            values += Float.ToString( weightedLayer.weight[a] ) + " ";
+        
         
         values += "  |  ";
         
-        values += Float.ToString( actor->GetWeightedLayer(i).plasticity );
+        values += Float.ToString( weightedLayer.plasticity );
         
         text[5 + i]->text = values;
         

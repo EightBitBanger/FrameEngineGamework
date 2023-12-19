@@ -46,7 +46,9 @@ void ActorSystem::SetPlayerWorldPosition(glm::vec3 position) {
 }
 
 void ActorSystem::UpdateSendSignal(void) {
+    mux.lock();
     doUpdate = true;
+    mux.unlock();
     return;
 }
 
@@ -85,8 +87,6 @@ Actor* ActorSystem::GetActor(unsigned int index) {
 
 void ActorSystem::Update(void) {
     
-    unsigned int numberOfActors = (unsigned int)mActors.Size() - 1;
-    
     float force = 0.0001;
     
     glm::vec3 forward(0);
@@ -95,9 +95,17 @@ void ActorSystem::Update(void) {
     
     for (int i = 0; i < 80; i++) {
         
+        mActors[actorCounter]->mux.lock();
+        
+        unsigned int numberOfActors = (unsigned int)mActors.Size();
+        
         actorCounter++;
-        if (actorCounter >= numberOfActors) 
+        if (actorCounter >= numberOfActors) {
             actorCounter = 0;
+            
+            //mActors[actorCounter]->mux.unlock();
+            //break;
+        }
         
         Actor* actor = mActors[actorCounter];
         
@@ -106,27 +114,24 @@ void ActorSystem::Update(void) {
             continue;
         }
         
-        actor->mux.lock();
-        
         // Advance actor age
         actor->age++;
         
         
         
         // Must have at least two layers to feed the data forward
-        //if (actor->mWeightedLayers.size() < 2) {
-        //    actor->mux.unlock();
-        //    continue;
-        //}
-        
+        if (actor->mWeightedLayers.size() < 2) {
+            actor->mux.unlock();
+            continue;
+        }
         
         
         // Feed forward the weighted layers
         for (int a=1; a < actor->mWeightedLayers.size(); a++) {
             
             for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
-                actor->mWeightedLayers[a-1].node[w] = actor->mWeightedLayers[a].node[w] * 
-                                                      actor->mWeightedLayers[a].weight[w];
+                actor->mWeightedLayers[a].node[w] = actor->mWeightedLayers[a-1].node[w] * 
+                                                    actor->mWeightedLayers[a-1].weight[w];
             
             continue;
         }
@@ -134,43 +139,17 @@ void ActorSystem::Update(void) {
         // Apply neural plasticity
         for (int a=0; a < actor->mWeightedLayers.size(); a++) {
             
-            for (int w=0; w < NEURAL_LAYER_WIDTH; w++) {
-                
+            for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
                 actor->mWeightedLayers[a].weight[w] = Math.Lerp(1.0, actor->mWeightedLayers[a].node[w], actor->mWeightedLayers[a].plasticity);
-                
-                // Weight cap
-                if (actor->mWeightedLayers[a].weight[w] > 1) 
-                    actor->mWeightedLayers[a].weight[w] = 1;
-                
-                // Weight floor
-                if (actor->mWeightedLayers[a].weight[w] < 0.1) 
-                    actor->mWeightedLayers[a].weight[w] = 0.1;
-                
-                continue;
-            }
+            
+            //actor->mWeightedLayers[a].plasticity) / 2;
             
             continue;
         }
         
-        int lastLayer = actor->mWeightedLayers.size()-1;
-        
         // Feed in new input data
         for (int a=0; a < NEURAL_LAYER_WIDTH; a++) 
-            actor->mWeightedLayers[lastLayer].node[a] = actor->mNeuralLayerInput.node[a];
-        
-        
-        // Chance to recycle old data
-        
-        if (Random.Range(0, 100) > 98) {
-            for (int a=0; a < actor->mWeightedLayers.size(); a++) {
-                
-                for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
-                    actor->mWeightedLayers[lastLayer].node[w] = actor->mWeightedLayers[0].node[w];
-                
-                continue;
-            }
-        }
-        
+            actor->mWeightedLayers[0].node[a] = actor->mNeuralLayerInput.node[a];
         
         
         
