@@ -31,7 +31,9 @@ void ActorSystem::Initiate(void) {
 
 void ActorSystem::Shutdown(void) {
     
+    mux.lock();
     isActorThreadActive = false;
+    mux.unlock();
     
     actorSystemThread->join();
     
@@ -140,9 +142,7 @@ void ActorSystem::Update(void) {
         for (int a=0; a < actor->mWeightedLayers.size(); a++) {
             
             for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
-                actor->mWeightedLayers[a].weight[w] = Math.Lerp(1.0, actor->mWeightedLayers[a].node[w], actor->mWeightedLayers[a].plasticity);
-            
-            //actor->mWeightedLayers[a].plasticity) / 2;
+                actor->mWeightedLayers[a].weight[w] = Math.Lerp(actor->mWeightedLayers[a].weight[w], actor->mWeightedLayers[a].node[w], actor->mWeightedLayers[a].plasticity);
             
             continue;
         }

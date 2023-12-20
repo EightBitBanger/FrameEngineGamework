@@ -163,7 +163,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
                 
-                AI.UpdateSendSignal();
+                //AI.UpdateSendSignal(); // Crash testing...
+                //AI.Update();
                 
                 TickUpdate();
                 
@@ -196,6 +197,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #ifdef PROFILE_ENGINE_CORE
                 Profiler.Begin();
 #endif
+                
+                //AI.UpdateSendSignal();
+                AI.Update();
                 
                 Run();
                 

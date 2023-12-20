@@ -140,19 +140,21 @@ void Start() {
         
         actor = newActorObject->GetComponent<Actor>();
         
-        WeightedLayer layer;
-        for (int a=0; a < 24; a++) {
+        // Initiate actor neural network layers
+        for (int a=0; a < 5; a++) {
             
-            if (Random.Range(0, 100) < 97) {
-                
-                layer.plasticity = 0;
-                
-                actor->AddWeightedLayer(layer);
-                
-                continue;
-            }
+            WeightedLayer layer;
             
-            layer.plasticity = 1;
+            // Amount to which the weights will change based on the data passing through
+            layer.plasticity = 0;
+            
+            if (Random.Range(0, 100) < 30) 
+                layer.plasticity = 0.00001;
+            
+            // Set random weights
+            for (int z=0; z < NEURAL_LAYER_WIDTH; z++) 
+                if (Random.Range(0, 100) < 90) 
+                    layer.weight[z] = 1.0 - ((Random.Range(0, 10) * 0.0001) - ((Random.Range(0, 10) * 0.0001)));
             
             actor->AddWeightedLayer(layer);
         }
