@@ -9,10 +9,10 @@ class ENGINE_API WeightedLayer {
     
 public:
     
-    /// Amount to which the neural layer will adapt its weights to "memorize" the pattern.
+    /// Amount to which the neural layer will adapt its weights to the data.
     float plasticity;
     
-    /// Layer node values.
+    /// Layer state values.
     float node[NEURAL_LAYER_WIDTH];
     
     /// Layer weight values.

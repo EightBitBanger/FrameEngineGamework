@@ -5,7 +5,7 @@
 
 #include <GameEngineFramework/ActorAI/neurons/NeuralLayer.h>
 #include <GameEngineFramework/ActorAI/neurons/WeightedLayer.h>
-#include <GameEngineFramework/ActorAI/Genetics.h>
+#include <GameEngineFramework/ActorAI/Genetics/Gene.h>
 
 #include <GameEngineFramework/ActorAI/components/actor.h>
 

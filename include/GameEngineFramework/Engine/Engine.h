@@ -22,7 +22,7 @@
 
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
 #include <GameEngineFramework/ActorAI/components/actor.h>
-#include <GameEngineFramework/ActorAI/Genetics.h>
+#include <GameEngineFramework/ActorAI/Genetics/Gene.h>
 
 #include <GameEngineFramework/Types/types.h>
 #include <GameEngineFramework/Logging/Logging.h>

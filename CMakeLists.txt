@@ -57,7 +57,8 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Audio/AudioSystem.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
-    "include/GameEngineFramework/ActorAI/genetics.h"
+    "include/GameEngineFramework/ActorAI/genetics/gene.h"
+    "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
     "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
     "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
@@ -200,7 +201,8 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Audio/AudioSystem.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
-    "include/GameEngineFramework/ActorAI/genetics.h"
+    "include/GameEngineFramework/ActorAI/genetics/gene.h"
+    "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
     "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
     "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
@@ -328,7 +330,8 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Audio/AudioSystem.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
-    "include/GameEngineFramework/ActorAI/genetics.h"
+    "include/GameEngineFramework/ActorAI/genetics/gene.h"
+    "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
     "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
     "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
@@ -421,7 +424,8 @@ set (CORE_SOURCES
     "src/Engine/types/viewport.cpp"
     
     "src/ActorAI/ActorSystem.cpp"
-    "src/ActorAI/genetics.cpp"
+    "src/ActorAI/genetics/gene.h"
+    "src/ActorAI/genetics/base.h"
     "src/ActorAI/components/actor.cpp"
     "src/ActorAI/neurons/NeuralLayer.cpp"
     "src/ActorAI/neurons/WeightedLayer.cpp"

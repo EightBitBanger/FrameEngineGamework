@@ -1,7 +1,7 @@
 #ifndef _AI_ACTOR__
 #define _AI_ACTOR__
 
-#include <GameEngineFramework/ActorAI/Genetics.h>
+#include <GameEngineFramework/ActorAI/Genetics/Gene.h>
 #include <GameEngineFramework/ActorAI/neurons/NeuralLayer.h>
 #include <GameEngineFramework/ActorAI/neurons/WeightedLayer.h>
 
@@ -71,9 +71,6 @@ public:
     /// Set the input data to be fed through the neural network.
     void SetNeuralInputLayer(NeuralLayer inputLayer);
     
-    /// Get the current state of the input data for the neural network.
-    NeuralLayer GetNeuralInputLayer(void);
-    
     Actor();
     
 private:
@@ -94,9 +91,6 @@ private:
     
     // Genetic expression
     std::vector<Gene> mGenes;
-    
-    // Input layer feeding data into the neural network
-    NeuralLayer mNeuralLayerInput;
     
     // Layers of weighted neurological expression
     std::vector<WeightedLayer> mWeightedLayers;
