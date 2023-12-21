@@ -141,15 +141,15 @@ void Start() {
         actor = newActorObject->GetComponent<Actor>();
         
         // Initiate actor neural network layers
-        for (int a=0; a < 5; a++) {
+        for (int a=0; a < 25; a++) {
             
             WeightedLayer layer;
             
-            // Amount to which the weights will change based on the data passing through
+            // Random plasticity
             layer.plasticity = 0;
             
-            if (Random.Range(0, 100) < 30) 
-                layer.plasticity = 0.00001;
+            if (Random.Range(0, 100) < 10) 
+                layer.plasticity = 0.001;
             
             // Set random weights
             for (int z=0; z < NEURAL_LAYER_WIDTH; z++) 
@@ -177,13 +177,11 @@ void Start() {
 
 void Run() {
     
-    WeightedLayer outputLayer = actor->GetWeightedLayer(0);
+    WeightedLayer inputLayer = actor->GetWeightedLayer(0);
     
     std::string values;
     std::string inputValues;
     std::string outputValues;
-    
-    NeuralLayer inputLayer = actor->GetNeuralInputLayer();
     
     for (int i=0; i < NEURAL_LAYER_WIDTH; i++) 
         inputValues += Float.ToString( inputLayer.node[i] )  + " ";

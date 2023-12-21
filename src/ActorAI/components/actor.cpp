@@ -125,14 +125,8 @@ unsigned int Actor::GetNumberOfWeightedLayers(void) {
 
 void Actor::SetNeuralInputLayer(NeuralLayer inputLayer) {
     mux.lock();
-    mNeuralLayerInput = inputLayer;
+    for (int i=0; i < NEURAL_LAYER_WIDTH; i++) 
+        mWeightedLayers[0].node[i] = inputLayer.node[i];
     mux.unlock();
     return;
-}
-
-NeuralLayer Actor::GetNeuralInputLayer(void) {
-    mux.lock();
-    NeuralLayer inputLayer = mNeuralLayerInput;
-    mux.unlock();
-    return inputLayer;
 }

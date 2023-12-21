@@ -139,6 +139,7 @@ void ActorSystem::Update(void) {
         }
         
         // Apply neural plasticity
+        // Plasticity is the amount to which the weights will conform to the data coming though
         for (int a=0; a < actor->mWeightedLayers.size(); a++) {
             
             for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
@@ -146,10 +147,6 @@ void ActorSystem::Update(void) {
             
             continue;
         }
-        
-        // Feed in new input data
-        for (int a=0; a < NEURAL_LAYER_WIDTH; a++) 
-            actor->mWeightedLayers[0].node[a] = actor->mNeuralLayerInput.node[a];
         
         
         
