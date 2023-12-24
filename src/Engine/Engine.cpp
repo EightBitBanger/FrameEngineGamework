@@ -138,16 +138,25 @@ unsigned int EngineSystemManager::GetComponentCount(void) {
 
 void EngineSystemManager::Initiate() {
     
+    // Load default shaders
     shaders.texture       = Resources.CreateShaderFromTag("texture");
     shaders.textureUnlit  = Resources.CreateShaderFromTag("textureUnlit");
     shaders.color         = Resources.CreateShaderFromTag("color");
     shaders.colorUnlit    = Resources.CreateShaderFromTag("colorUnlit");
     shaders.UI            = Resources.CreateShaderFromTag("UI");
     
+    // Load default meshes
+    meshes.cube  = Resources.CreateMeshFromTag("cube");
+    meshes.plain = Resources.CreateMeshFromTag("plain");
+    
+    sceneMain = Create<Scene>();
+    
     return;
 }
 
 void EngineSystemManager::Shutdown(void) {
+    
+    Destroy<Scene>(sceneMain);
     
     while (GetGameObjectCount() > 0) {
         DestroyGameObject( GetGameObject(0) );

@@ -212,19 +212,112 @@ void EngineSystemManager::Update(void) {
         //
         if (streamBuffer[i].actor != nullptr) {
             
-            if (streamBuffer[i].actor->GetActive()) {
+            streamBuffer[i].actor->mVelocity = glm::vec3(0, 0.01, 0);
+            
+            // Update actor
+            
+            if (streamBuffer[i].actor->mIsActive) {
+                
+                // Update genetic expression
+                
+                if (streamBuffer[i].actor->mDoUpdateGenetics) {
+                    
+                    int numberOfGenes = streamBuffer[i].actor->GetNumberOfGenes();
+                    
+                    // Clear the old mesh renderers
+                    for (int a=0; a < streamBuffer[i].actor->mGeneticRenderers.size(); a++) {
+                        
+                        MeshRenderer* geneRenderer = streamBuffer[i].actor->mGeneticRenderers[a];
+                        
+                        if (geneRenderer->material != nullptr) 
+                            Renderer.DestroyMaterial(geneRenderer->material);
+                        
+                        sceneMain->RemoveMeshRendererFromSceneRoot( geneRenderer );
+                        
+                        Renderer.DestroyMeshRenderer( geneRenderer );
+                        
+                        continue;
+                    }
+                    streamBuffer[i].actor->mGeneticRenderers.clear();
+                    streamBuffer[i].actor->mGeneticOffsets.clear();
+                    
+                    // Express genetic elements
+                    for (int a=0; a < numberOfGenes; a++) {
+                        
+                        if (!streamBuffer[i].actor->mGenes[a].doExpress) 
+                            continue;
+                        
+                        Material* newMaterial = Renderer.CreateMaterial();
+                        newMaterial->shader = shaders.color;
+                        newMaterial->diffuse.r = streamBuffer[i].actor->mGenes[a].color.x;
+                        newMaterial->diffuse.g = streamBuffer[i].actor->mGenes[a].color.y;
+                        newMaterial->diffuse.b = streamBuffer[i].actor->mGenes[a].color.z;
+                        
+                        MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
+                        newRenderer->mesh = meshes.cube;
+                        newRenderer->material = newMaterial;
+                        
+                        // Position
+                        newRenderer->transform.position.x = streamBuffer[i].actor->mGenes[a].position.x;
+                        newRenderer->transform.position.y = streamBuffer[i].actor->mGenes[a].position.y;
+                        newRenderer->transform.position.z = streamBuffer[i].actor->mGenes[a].position.z;
+                        
+                        // Offset
+                        glm::vec3 offset(streamBuffer[i].actor->mGenes[a].offset.x, 
+                                         streamBuffer[i].actor->mGenes[a].offset.y, 
+                                         streamBuffer[i].actor->mGenes[a].offset.z);
+                        
+                        // Rotation
+                        newRenderer->transform.RotateAxis(streamBuffer[i].actor->mGenes[a].rotation.x, glm::vec3(1, 0, 0));
+                        newRenderer->transform.RotateAxis(streamBuffer[i].actor->mGenes[a].rotation.y, glm::vec3(0, 1, 0));
+                        newRenderer->transform.RotateAxis(streamBuffer[i].actor->mGenes[a].rotation.z, glm::vec3(0, 0, 1));
+                        
+                        // Scale
+                        newRenderer->transform.scale.x = streamBuffer[i].actor->mGenes[a].scale.x;
+                        newRenderer->transform.scale.y = streamBuffer[i].actor->mGenes[a].scale.y;
+                        newRenderer->transform.scale.z = streamBuffer[i].actor->mGenes[a].scale.z;
+                        
+                        streamBuffer[i].actor->mGeneticRenderers.push_back( newRenderer );
+                        streamBuffer[i].actor->mGeneticOffsets.push_back( offset );
+                        
+                        newRenderer->transform.UpdateMatrix();
+                        
+                        sceneMain->AddMeshRendererToSceneRoot(newRenderer);
+                        
+                        continue;
+                    }
+                    
+                    streamBuffer[i].actor->mDoUpdateGenetics = false;
+                } else {
+                    
+                    // Update genetic renderers
+                    for (int a=0; a < streamBuffer[i].actor->mGeneticRenderers.size(); a++) {
+                        
+                        streamBuffer[i].actor->mGeneticRenderers[a]->transform.position  = streamBuffer[i].actor->mPosition;
+                        streamBuffer[i].actor->mGeneticRenderers[a]->transform.position += streamBuffer[i].actor->mGeneticOffsets[a];
+                        
+                        streamBuffer[i].actor->mGeneticRenderers[a]->transform.UpdateMatrix();
+                        
+                        continue;
+                    }
+                    
+                }
+                
+                
+                // Update actor physics
                 
                 if (streamBuffer[i].rigidBody != nullptr) {
                     
-                    glm::vec3 actorVelocity = streamBuffer[i].actor->velocity;
+                    glm::vec3 actorVelocity = streamBuffer[i].actor->mVelocity;
                     
                     // Update actor
-                    streamBuffer[i].actor->position = currentTransform.position;
+                    streamBuffer[i].actor->mPosition = currentTransform.position;
                     
                     // Apply force velocity
                     streamBuffer[i].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, actorVelocity.y, actorVelocity.z) );
                     
                 }
+                
             }
             
         }

@@ -161,8 +161,7 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position, Mesh* mesh) {
     entityRenderer->mesh = mesh;
     entityRenderer->material = materialPtr;
     
-    if (sceneMain != nullptr) 
-        sceneMain->AddMeshRendererToSceneRoot( entityRenderer );
+    sceneMain->AddMeshRendererToSceneRoot( entityRenderer );
     
     float scale = 1.0;
     

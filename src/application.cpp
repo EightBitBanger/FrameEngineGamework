@@ -30,9 +30,9 @@ GameObject*  cameraController;
 
 Material* skyMaterial;
 
-Text* text[80];
+Text* text[20];
 
-Actor* actor;
+
 
 
 
@@ -52,10 +52,10 @@ void Start() {
     // Create a sky
     float skyFadeBias = 0.0001;
     Color skyHigh(Colors.blue);
-    Color skyLow(Colors.dkgray);
+    Color skyLow(Colors.blue);
     
-    skyHigh += Colors.MakeGrayScale(0.3);
-    skyLow  += Colors.MakeGrayScale(0.01);
+    skyHigh += Colors.MakeGrayScale(0.2);
+    skyLow  += Colors.MakeGrayScale(0.6);
     
     GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, skyFadeBias);
     
@@ -70,12 +70,22 @@ void Start() {
     
     cameraController = Engine.CreateCameraController(position, colliderScale);
     Engine.sceneMain->camera = cameraController->GetComponent<Camera>();
-    Engine.sceneMain->camera->DisableMouseLook();
     
     // Attach the sky object to the camera controller
     skyObject->parent = cameraController;
     cameraController->DisableGravity();
     
+    // Camera light
+    /*
+    cameraController->AddComponent( Engine.CreateComponent<Light>() );
+    Light* light = cameraController->GetComponent<Light>();
+    light->color = Colors.MakeRandom();
+    light->attenuation = 4;
+    light->range = 300;
+    light->intensity = 1000;
+    
+    Engine.sceneMain->AddLightToSceneRoot(light);
+    */
     
     // Scene overlay
     sceneOverlay = Engine.Create<Scene>();
@@ -91,10 +101,12 @@ void Start() {
     sceneOverlay->camera->clipFar  =  100;
     sceneOverlay->camera->clipNear = -100;
     
+    
+    
     // Initiate text elements
-    for (int i=0; i < 80; i++) {
+    for (int i=0; i < 10; i++) {
         
-        GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", 9, Colors.white, "font");
+        GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", 9, Colors.black, "font");
         
         sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
         text[i] = textObject->GetComponent<Text>();
@@ -106,7 +118,7 @@ void Start() {
     }
     
     
-    Mesh* cubeMeshPtr = Resources.CreateMeshFromTag("cube");
+    //Mesh* cubeMeshPtr = Resources.CreateMeshFromTag("cube");
     
     
     
@@ -114,52 +126,28 @@ void Start() {
     // Generate some AI actors
     //
     
-    float area = 0.3;
-    float uniformScale = 0.1;
-    unsigned int numberOfActors = 1;
+    GameObject* newActorObject = Engine.CreateAIActor(Vector3(0, 0, 0), Engine.meshes.cube);
+    newActorObject->GetComponent<Transform>()->scale = Vector3(1, 1, 1);
+    newActorObject->DisableGravity();
     
-    for (int i=0; i < numberOfActors; i++) {
+    MeshRenderer* actorMeshRenderer = newActorObject->GetComponent<MeshRenderer>();
+    actorMeshRenderer->material->shader  = Engine.shaders.colorUnlit;
+    actorMeshRenderer->material->diffuse = Colors.blue;
+    
+    Actor* actor = newActorObject->GetComponent<Actor>();
+    
+    for (int i=0; i < 10; i++) {
+        Gene gene;
         
-        float xx = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
-        float yy = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
-        float zz = (Random.Range(0, 10) - Random.Range(0, 10)) * area;
+        gene.offset    = BaseGene(Random.Range(0, 3) - Random.Range(0, 3), 
+                                  Random.Range(0, 3) - Random.Range(0, 3), 
+                                  Random.Range(0, 3) - Random.Range(0, 3));
         
-        float scalexx = Random.Range(0, 10) * uniformScale;
-        float scaleyy = Random.Range(0, 10) * uniformScale;
-        float scalezz = Random.Range(0, 10) * uniformScale;
+        gene.color     = BaseGene(Random.Range(0, 10) * 0.1, 
+                                  Random.Range(0, 10) * 0.1, 
+                                  Random.Range(0, 10) * 0.1);
         
-        GameObject* newActorObject = Engine.CreateAIActor(Vector3(xx, yy, zz), cubeMeshPtr);
-        newActorObject->GetComponent<Transform>()->scale = Vector3(scalexx, scaleyy, scalezz);
-        newActorObject->DisableGravity();
-        
-        MeshRenderer* actorMeshRenderer = newActorObject->GetComponent<MeshRenderer>();
-        actorMeshRenderer->material->shader = Engine.shaders.colorUnlit;
-        actorMeshRenderer->material->ambient  = Colors.black;
-        actorMeshRenderer->material->diffuse  = Colors.MakeRandom();
-        actorMeshRenderer->material->diffuse *= Colors.dkgray;
-        
-        actor = newActorObject->GetComponent<Actor>();
-        
-        // Initiate actor neural network layers
-        for (int a=0; a < 25; a++) {
-            
-            WeightedLayer layer;
-            
-            // Random plasticity
-            layer.plasticity = 0;
-            
-            if (Random.Range(0, 100) < 10) 
-                layer.plasticity = 0.001;
-            
-            // Set random weights
-            for (int z=0; z < NEURAL_LAYER_WIDTH; z++) 
-                if (Random.Range(0, 100) < 90) 
-                    layer.weight[z] = 1.0 - ((Random.Range(0, 10) * 0.0001) - ((Random.Range(0, 10) * 0.0001)));
-            
-            actor->AddWeightedLayer(layer);
-        }
-        
-        continue;
+        actor->AddGene(gene);
     }
     
     return;
@@ -177,52 +165,10 @@ void Start() {
 
 void Run() {
     
-    WeightedLayer inputLayer = actor->GetWeightedLayer(0);
-    
-    std::string values;
-    std::string inputValues;
-    std::string outputValues;
-    
-    for (int i=0; i < NEURAL_LAYER_WIDTH; i++) 
-        inputValues += Float.ToString( inputLayer.node[i] )  + " ";
-    
-    
-    text[1]->text = "Inputs";
-    text[2]->text = inputValues;
-    
-    
-    // Display weighted layers
-    
-    
-    for (int i=0; i < actor->GetNumberOfWeightedLayers(); i++) {
-        
-        WeightedLayer weightedLayer = actor->GetWeightedLayer(i);
-        
-        values = "";
-        
-        for (int a=0; a < NEURAL_LAYER_WIDTH; a++) 
-            values += Float.ToString( weightedLayer.node[a] ) + " ";
-        
-        
-        values += "  |  ";
-        
-        for (int a=0; a < NEURAL_LAYER_WIDTH; a++) 
-            values += Float.ToString( weightedLayer.weight[a] ) + " ";
-        
-        
-        values += "  |  ";
-        
-        values += Float.ToString( weightedLayer.plasticity );
-        
-        text[5 + i]->text = values;
-        
-        continue;
-    }
-    
-    
-    
-    
-    
+    text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
+    text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
+    text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
+    //text[4]->text = "ActorAI  - " + FloatToString( Engine.profileActorAI );
     
     
     if (cameraController == nullptr) 
@@ -243,7 +189,8 @@ void Run() {
         if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
         if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         
-        force *= 2;
+        
+            force *= 2;
         
         if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 5;
         
@@ -251,19 +198,6 @@ void Run() {
         
     }
     
-    
-    
-    
-    // Input layer
-    if (Input.CheckKeyPressed(VK_RETURN)) {
-        NeuralLayer inputLayer;
-        
-        inputLayer.node[0] = Random.Range(0, 100) * 0.01;
-        inputLayer.node[1] = Random.Range(0, 100) * 0.01;
-        inputLayer.node[2] = Random.Range(0, 100) * 0.01;
-        
-        actor->SetNeuralInputLayer(inputLayer);
-    }
     
     
     

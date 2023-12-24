@@ -93,42 +93,34 @@ void ActorSystem::Update(void) {
     
     glm::vec3 forward(0);
     
+    unsigned int numberOfActors = (unsigned int)mActors.Size();
+    
     mux.lock();
     
     for (int i = 0; i < 80; i++) {
         
-        mActors[actorCounter]->mux.lock();
-        
-        unsigned int numberOfActors = (unsigned int)mActors.Size();
-        
-        actorCounter++;
         if (actorCounter >= numberOfActors) {
             actorCounter = 0;
-            
-            //mActors[actorCounter]->mux.unlock();
-            //break;
+            break;
         }
         
         Actor* actor = mActors[actorCounter];
         
-        if (!actor->isActive) {
+        actorCounter++;
+        
+        actor->mux.lock();
+        
+        if (!actor->mIsActive) {
             actor->mux.unlock();
             continue;
         }
         
         // Advance actor age
-        actor->age++;
+        actor->mAge++;
         
         
+        // Feed data through the network
         
-        // Must have at least two layers to feed the data forward
-        if (actor->mWeightedLayers.size() < 2) {
-            actor->mux.unlock();
-            continue;
-        }
-        
-        
-        // Feed forward the weighted layers
         for (int a=1; a < actor->mWeightedLayers.size(); a++) {
             
             for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
@@ -138,29 +130,24 @@ void ActorSystem::Update(void) {
             continue;
         }
         
+        
         // Apply neural plasticity
         // Plasticity is the amount to which the weights will conform to the data coming though
+        
         for (int a=0; a < actor->mWeightedLayers.size(); a++) {
             
             for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
-                actor->mWeightedLayers[a].weight[w] = Math.Lerp(actor->mWeightedLayers[a].weight[w], actor->mWeightedLayers[a].node[w], actor->mWeightedLayers[a].plasticity);
+                actor->mWeightedLayers[a].weight[w] = Math.Lerp(actor->mWeightedLayers[a].weight[w], 
+                                                                actor->mWeightedLayers[a].node[w], 
+                                                                actor->mWeightedLayers[a].plasticity);
             
             continue;
         }
         
-        
-        
-        // Chance to start moving
-        //forward.x = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
-        //forward.y = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
-        //forward.z = (Random.Range(0, 100) - Random.Range(0, 100)) * force;
-        
-        
         // Apply forward velocity
-        mActors[actorCounter]->velocity = forward;
+        actor->mVelocity = forward;
         
-        
-        mActors[actorCounter]->mux.unlock();
+        actor->mux.unlock();
         
         continue;
     }
@@ -179,6 +166,7 @@ void ActorSystem::Update(void) {
 void actorThreadMain() {
     
     while (isActorThreadActive) {
+        
         if (!doUpdate) {
             std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
             continue;

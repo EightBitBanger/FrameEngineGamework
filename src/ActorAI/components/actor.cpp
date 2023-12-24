@@ -4,16 +4,16 @@ extern PhysicsSystem  Physics;
 
 
 Actor::Actor() : 
-    name(""),
+    mName(""),
     
-    isActive(true),
+    mIsActive(true),
     
-    doUpdateGenetics(false),
+    mDoUpdateGenetics(false),
     
-    age(0),
+    mAge(0),
     
-    velocity(glm::vec3(0, 0, 0)),
-    position(glm::vec3(0, 0, 0))
+    mVelocity(glm::vec3(0, 0, 0)),
+    mPosition(glm::vec3(0, 0, 0))
 {
     
     
@@ -23,42 +23,42 @@ Actor::Actor() :
 
 void Actor::SetName(std::string newName) {
     mux.lock();
-    name = newName;
+    mName = newName;
     mux.unlock();
     return;
 }
 
 void Actor::SetActive(bool state) {
     mux.lock();
-    isActive = state;
+    mIsActive = state;
     mux.unlock();
     return;
 }
 
 void Actor::SetAge(unsigned long int newAge) {
     mux.lock();
-    age = newAge;
+    mAge = newAge;
     mux.unlock();
     return;
 }
 
 std::string Actor::GetName(void) {
     mux.lock();
-    std::string nameString = name;
+    std::string nameString = mName;
     mux.unlock();
     return nameString;
 }
 
 bool Actor::GetActive(void) {
     mux.lock();
-    bool activeState = isActive;
+    bool activeState = mIsActive;
     mux.unlock();
     return activeState;
 }
 
 unsigned long int Actor::GetAge(void) {
     mux.lock();
-    unsigned long int ageValue = age;
+    unsigned long int ageValue = mAge;
     mux.unlock();
     return ageValue;
 }
@@ -68,6 +68,7 @@ unsigned long int Actor::GetAge(void) {
 void Actor::AddGene(Gene& newGene) {
     mux.lock();
     mGenes.push_back( newGene );
+    mDoUpdateGenetics = true;
     mux.unlock();
     return;
 }
@@ -75,6 +76,7 @@ void Actor::AddGene(Gene& newGene) {
 void Actor::RemoveGene(unsigned int index) {
     mux.lock();
     mGenes.erase( mGenes.begin() + index );
+    mDoUpdateGenetics = true;
     mux.unlock();
     return;
 }
