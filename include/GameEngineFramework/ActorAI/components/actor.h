@@ -75,22 +75,31 @@ public:
     
 private:
     
-    std::string name;
+    std::string mName;
     
-    bool isActive;
-    bool doUpdateGenetics;
+    // Is this actor active in the simulation
+    bool mIsActive;
     
-    // Number of ticks this actor has accumulated in its lifetime.
-    unsigned long int age;
+    // Should the genetic data be re-expressed
+    bool mDoUpdateGenetics;
+    
+    // Number of ticks this actor has accumulated in its lifetime
+    unsigned long int mAge;
     
     // Movement vector
-    glm::vec3 velocity;
+    glm::vec3 mVelocity;
     
     // Position of the actor in the world
-    glm::vec3 position;
+    glm::vec3 mPosition;
     
     // Genetic expression
     std::vector<Gene> mGenes;
+    
+    // List of render components representing the genetic components
+    std::vector<MeshRenderer*> mGeneticRenderers;
+    
+    // List of offset positions for each genetic component
+    std::vector<glm::vec3> mGeneticOffsets;
     
     // Layers of weighted neurological expression
     std::vector<WeightedLayer> mWeightedLayers;

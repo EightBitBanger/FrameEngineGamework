@@ -282,6 +282,12 @@ private:
         Shader*  UI;
     };
     
+    // Default meshes
+    struct DefaultMeshes {
+        Mesh* cube;
+        Mesh* plain;
+    };
+    
     // Buffer for streaming component data
     bool doUpdateDataStream;
     unsigned int streamSize;
@@ -290,8 +296,11 @@ private:
     
 public:
     
-    /// Shader objects provided by the engine by default.
+    /// Default shaders provided by the engine.
     DefaultShaders shaders;
+    
+    /// Default meshes provided by the engine.
+    DefaultMeshes  meshes;
     
 };
 

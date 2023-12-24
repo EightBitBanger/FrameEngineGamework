@@ -3,6 +3,7 @@
 
 #include <GameEngineFramework/configuration.h>
 
+#include <string>
 
 class ENGINE_API BaseGene {
     
@@ -13,6 +14,10 @@ public:
     float z;
     
     BaseGene();
+    
+    BaseGene(float xx, float yy, float zz);
+    
+    std::string ToString(void);
     
 private:
     

@@ -14,14 +14,14 @@ public:
     /// Should this gene be expressed.
     bool doExpress;
     
-    // 0-Offset
-    // 1-Position
-    // 2-Rotation
-    // 3-Scale
-    // 4-Color
+    // Base genes in this gene.
     
-    /// Base genes within this gene.
-    BaseGene mBaseGenes[5];
+    /// Model position offset.
+    BaseGene offset;
+    BaseGene position;
+    BaseGene rotation;
+    BaseGene scale;
+    BaseGene color;
     
     Gene();
     
