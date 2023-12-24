@@ -4,33 +4,33 @@
 #include "../../vendor/stb/stb_perlin.h"
 
 
-RandomGen::RandomGen() {
+NumberGeneration::NumberGeneration() {
     
     srand(100);
     return;
 }
 
-void  RandomGen::Seed(int value) {
+void  NumberGeneration::Seed(int value) {
     srand(value);
     stb_perlin_noise3_seed(0, 0, 0, 0, 0, 0, value);
     return;
 }
 
-int  RandomGen::Range(int min, int max) {
+int  NumberGeneration::Range(int min, int max) {
     if (min >= max) return 0;
     return (rand() % (max)) + min;
 }
 
-float  RandomGen::Range(float min, float max) {
+float  NumberGeneration::Range(float min, float max) {
     if (min >= max) return 0;
     return ((float)(rand() % (int)max) + min);
 }
 
-double  RandomGen::Range(double min, double max) {
+double  NumberGeneration::Range(double min, double max) {
     if (min >= max) return 0;
     return ((double)(rand() % (int)max) + min);
 }
 
-float RandomGen::Perlin(float xcoord, float ycoord, float zcoord) {
+float NumberGeneration::Perlin(float xcoord, float ycoord, float zcoord) {
     return stb_perlin_noise3(xcoord, ycoord, zcoord, 0, 0, 0);
 }

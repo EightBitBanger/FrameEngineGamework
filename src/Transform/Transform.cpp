@@ -90,6 +90,12 @@ void Transform::RotateAxis(float angle, glm::vec3 axis) {
     orientation = glm::quat_cast(matrix);
 }
 
+void Transform::RotateWorldAxis(float angle, glm::vec3 axis, glm::vec3 worldPosition) {
+    matrix = glm::rotate(matrix, glm::radians(angle), glm::normalize(axis));
+    matrix = glm::translate(matrix, worldPosition);
+    orientation = glm::quat_cast(matrix);
+}
+
 void Transform::RotateEuler(glm::vec3 eulerAngle) {
     orientation = glm::quat(glm::radians(eulerAngle));
     matrix *= glm::toMat4(orientation);

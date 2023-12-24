@@ -2,7 +2,7 @@
 
 ENGINE_API extern EngineComponents  Components;
 ENGINE_API extern ColorPreset       Colors;
-ENGINE_API extern RandomGen         Random;
+ENGINE_API extern NumberGeneration  Random;
 ENGINE_API extern Logger            Log;
 ENGINE_API extern Timer             PhysicsTime;
 ENGINE_API extern Timer             Time;
@@ -155,13 +155,6 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position, Mesh* mesh) {
     Material* materialPtr = Renderer.CreateMaterial();
     
     materialPtr->shader = shaders.color;
-    
-    MeshRenderer* entityRenderer = newGameObject->mMeshRendererCache;
-    
-    entityRenderer->mesh = mesh;
-    entityRenderer->material = materialPtr;
-    
-    sceneMain->AddMeshRendererToSceneRoot( entityRenderer );
     
     float scale = 1.0;
     

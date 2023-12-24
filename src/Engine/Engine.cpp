@@ -2,7 +2,7 @@
 
 ENGINE_API EngineComponents  Components;
 ENGINE_API ColorPreset       Colors;
-ENGINE_API RandomGen         Random;
+ENGINE_API NumberGeneration  Random;
 ENGINE_API Logger            Log;
 ENGINE_API Timer             PhysicsTime;
 ENGINE_API Timer             Time;

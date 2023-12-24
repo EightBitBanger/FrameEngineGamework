@@ -2,7 +2,7 @@
 
 ENGINE_API extern EngineComponents  Components;
 ENGINE_API extern ColorPreset       Colors;
-ENGINE_API extern RandomGen         Random;
+ENGINE_API extern NumberGeneration  Random;
 ENGINE_API extern Logger            Log;
 ENGINE_API extern Timer             PhysicsTime;
 ENGINE_API extern Timer             Time;
@@ -212,19 +212,34 @@ void EngineSystemManager::Update(void) {
         //
         if (streamBuffer[i].actor != nullptr) {
             
-            streamBuffer[i].actor->mVelocity = glm::vec3(0, 0.01, 0);
+            //streamBuffer[i].actor->mVelocity = glm::vec3(0, 0.01, 0);
+            
+            streamBuffer[i].actor->mRotation += glm::vec3(0, 1, 0);
+            if (streamBuffer[i].actor->mRotation.y > 359) streamBuffer[i].actor->mRotation.y -= 359;
+            
+            
+            
+            for (int a=0; a < streamBuffer[i].actor->mGeneticRenderers.size(); a++) {
+                streamBuffer[i].actor->mAnimationValues[a].y -= 1;
+            }
+            
+            
             
             // Update actor
             
             if (streamBuffer[i].actor->mIsActive) {
                 
+                //
                 // Update genetic expression
+                //
                 
                 if (streamBuffer[i].actor->mDoUpdateGenetics) {
                     
                     int numberOfGenes = streamBuffer[i].actor->GetNumberOfGenes();
                     
-                    // Clear the old mesh renderers
+                    //
+                    // Destroy and clear old genetic renderers
+                    
                     for (int a=0; a < streamBuffer[i].actor->mGeneticRenderers.size(); a++) {
                         
                         MeshRenderer* geneRenderer = streamBuffer[i].actor->mGeneticRenderers[a];
@@ -239,9 +254,12 @@ void EngineSystemManager::Update(void) {
                         continue;
                     }
                     streamBuffer[i].actor->mGeneticRenderers.clear();
-                    streamBuffer[i].actor->mGeneticOffsets.clear();
+                    streamBuffer[i].actor->mAnimationValues.clear();
                     
-                    // Express genetic elements
+                    
+                    //
+                    // Create and express genetic elements
+                    
                     for (int a=0; a < numberOfGenes; a++) {
                         
                         if (!streamBuffer[i].actor->mGenes[a].doExpress) 
@@ -257,20 +275,15 @@ void EngineSystemManager::Update(void) {
                         newRenderer->mesh = meshes.cube;
                         newRenderer->material = newMaterial;
                         
-                        // Position
-                        newRenderer->transform.position.x = streamBuffer[i].actor->mGenes[a].position.x;
-                        newRenderer->transform.position.y = streamBuffer[i].actor->mGenes[a].position.y;
-                        newRenderer->transform.position.z = streamBuffer[i].actor->mGenes[a].position.z;
-                        
-                        // Offset
-                        glm::vec3 offset(streamBuffer[i].actor->mGenes[a].offset.x, 
-                                         streamBuffer[i].actor->mGenes[a].offset.y, 
-                                         streamBuffer[i].actor->mGenes[a].offset.z);
+                        // Position offset
+                        glm::vec3 offset( streamBuffer[i].actor->mGenes[a].offset.x, 
+                                          streamBuffer[i].actor->mGenes[a].offset.y, 
+                                          streamBuffer[i].actor->mGenes[a].offset.z );
                         
                         // Rotation
-                        newRenderer->transform.RotateAxis(streamBuffer[i].actor->mGenes[a].rotation.x, glm::vec3(1, 0, 0));
-                        newRenderer->transform.RotateAxis(streamBuffer[i].actor->mGenes[a].rotation.y, glm::vec3(0, 1, 0));
-                        newRenderer->transform.RotateAxis(streamBuffer[i].actor->mGenes[a].rotation.z, glm::vec3(0, 0, 1));
+                        newRenderer->transform.RotateAxis( streamBuffer[i].actor->mGenes[a].rotation.x, glm::vec3(1, 0, 0) );
+                        newRenderer->transform.RotateAxis( streamBuffer[i].actor->mGenes[a].rotation.y, glm::vec3(0, 1, 0) );
+                        newRenderer->transform.RotateAxis( streamBuffer[i].actor->mGenes[a].rotation.z, glm::vec3(0, 0, 1) );
                         
                         // Scale
                         newRenderer->transform.scale.x = streamBuffer[i].actor->mGenes[a].scale.x;
@@ -278,9 +291,7 @@ void EngineSystemManager::Update(void) {
                         newRenderer->transform.scale.z = streamBuffer[i].actor->mGenes[a].scale.z;
                         
                         streamBuffer[i].actor->mGeneticRenderers.push_back( newRenderer );
-                        streamBuffer[i].actor->mGeneticOffsets.push_back( offset );
-                        
-                        newRenderer->transform.UpdateMatrix();
+                        streamBuffer[i].actor->mAnimationValues .push_back( glm::vec3(1) );
                         
                         sceneMain->AddMeshRendererToSceneRoot(newRenderer);
                         
@@ -290,13 +301,42 @@ void EngineSystemManager::Update(void) {
                     streamBuffer[i].actor->mDoUpdateGenetics = false;
                 } else {
                     
+                    //
                     // Update genetic renderers
+                    //
+                    
                     for (int a=0; a < streamBuffer[i].actor->mGeneticRenderers.size(); a++) {
                         
-                        streamBuffer[i].actor->mGeneticRenderers[a]->transform.position  = streamBuffer[i].actor->mPosition;
-                        streamBuffer[i].actor->mGeneticRenderers[a]->transform.position += streamBuffer[i].actor->mGeneticOffsets[a];
+                        MeshRenderer* geneRenderer = streamBuffer[i].actor->mGeneticRenderers[a];
+                        geneRenderer->transform.position  = streamBuffer[i].actor->mPosition;
                         
-                        streamBuffer[i].actor->mGeneticRenderers[a]->transform.UpdateMatrix();
+                        // Initiate the transform
+                        glm::mat4 modelTranslation = glm::translate(glm::mat4(1), geneRenderer->transform.position);
+                        glm::mat4 modelScale       = glm::scale(glm::mat4(1), geneRenderer->transform.scale);
+                        
+                        glm::mat4 matrix = modelTranslation * modelScale;
+                        
+                        // Rotate around center mass
+                        matrix = glm::rotate(matrix, 
+                                             glm::radians( glm::length( streamBuffer[i].actor->mRotation ) ), 
+                                             glm::normalize( streamBuffer[i].actor->mRotation ));
+                        
+                        // Offset from center
+                        matrix = glm::translate( matrix, glm::vec3(streamBuffer[i].actor->mGenes[a].offset.x,
+                                                                   streamBuffer[i].actor->mGenes[a].offset.y,
+                                                                   streamBuffer[i].actor->mGenes[a].offset.z));
+                        
+                        if (!streamBuffer[i].actor->mGenes[a].useAnimation) {
+                            geneRenderer->transform.matrix = matrix;
+                            continue;
+                        }
+                        
+                        // Factor in animation state values
+                        matrix = glm::rotate(matrix, 
+                                             glm::radians( glm::length( streamBuffer[i].actor->mAnimationValues[a] ) ), 
+                                             glm::normalize( streamBuffer[i].actor->mAnimationValues[a] ));
+                        
+                        geneRenderer->transform.matrix = matrix;
                         
                         continue;
                     }
@@ -310,7 +350,7 @@ void EngineSystemManager::Update(void) {
                     
                     glm::vec3 actorVelocity = streamBuffer[i].actor->mVelocity;
                     
-                    // Update actor
+                    // Sync actor position
                     streamBuffer[i].actor->mPosition = currentTransform.position;
                     
                     // Apply force velocity

@@ -4,7 +4,7 @@
 
 extern Logger Log;
 extern ActorSystem AI;
-extern RandomGen Random;
+extern NumberGeneration Random;
 extern MathCore Math;
 
 // Actor system thread

@@ -5,7 +5,7 @@
 
 extern EngineComponents     Components;
 extern ColorPreset          Colors;
-extern RandomGen            Random;
+extern NumberGeneration     Random;
 extern Logger               Log;
 extern Timer                PhysicsTime;
 extern Timer                Time;
@@ -75,18 +75,6 @@ void Start() {
     skyObject->parent = cameraController;
     cameraController->DisableGravity();
     
-    // Camera light
-    /*
-    cameraController->AddComponent( Engine.CreateComponent<Light>() );
-    Light* light = cameraController->GetComponent<Light>();
-    light->color = Colors.MakeRandom();
-    light->attenuation = 4;
-    light->range = 300;
-    light->intensity = 1000;
-    
-    Engine.sceneMain->AddLightToSceneRoot(light);
-    */
-    
     // Scene overlay
     sceneOverlay = Engine.Create<Scene>();
     Renderer.AddSceneToRenderQueue(sceneOverlay);
@@ -118,36 +106,43 @@ void Start() {
     }
     
     
-    //Mesh* cubeMeshPtr = Resources.CreateMeshFromTag("cube");
-    
-    
     
     //
     // Generate some AI actors
     //
     
-    GameObject* newActorObject = Engine.CreateAIActor(Vector3(0, 0, 0), Engine.meshes.cube);
-    newActorObject->GetComponent<Transform>()->scale = Vector3(1, 1, 1);
-    newActorObject->DisableGravity();
-    
-    MeshRenderer* actorMeshRenderer = newActorObject->GetComponent<MeshRenderer>();
-    actorMeshRenderer->material->shader  = Engine.shaders.colorUnlit;
-    actorMeshRenderer->material->diffuse = Colors.blue;
-    
-    Actor* actor = newActorObject->GetComponent<Actor>();
-    
-    for (int i=0; i < 10; i++) {
-        Gene gene;
+    for (int i=0; i < 200; i++) {
         
-        gene.offset    = BaseGene(Random.Range(0, 3) - Random.Range(0, 3), 
-                                  Random.Range(0, 3) - Random.Range(0, 3), 
-                                  Random.Range(0, 3) - Random.Range(0, 3));
+        Vector3 position(Random.Range(0, 100) - Random.Range(0, 100),
+                         Random.Range(0, 100) - Random.Range(0, 100),
+                         Random.Range(0, 100) - Random.Range(0, 100));
         
-        gene.color     = BaseGene(Random.Range(0, 10) * 0.1, 
-                                  Random.Range(0, 10) * 0.1, 
-                                  Random.Range(0, 10) * 0.1);
+        GameObject* newActorObject = Engine.CreateAIActor(position, Engine.meshes.cube);
+        newActorObject->GetComponent<Transform>()->scale = Vector3(1, 1, 1);
+        newActorObject->DisableGravity();
         
-        actor->AddGene(gene);
+        Actor* actor = newActorObject->GetComponent<Actor>();
+        
+        for (int i=0; i < 20; i++) {
+            Gene gene;
+            
+            if (Random.Range(0, 100) > 49) {gene.useAnimation = true;} else {gene.useAnimation = false;}
+            
+            gene.position  = BaseGene(Random.Range(0, 10) - Random.Range(0, 10), 
+                                      Random.Range(0, 10) - Random.Range(0, 10), 
+                                      Random.Range(0, 10) - Random.Range(0, 10));
+            
+            gene.offset    = BaseGene(Random.Range(0, 10) - Random.Range(0, 10), 
+                                      Random.Range(0, 10) - Random.Range(0, 10), 
+                                      Random.Range(0, 10) - Random.Range(0, 10));
+            
+            gene.color     = BaseGene(Random.Range(0, 100) * 0.01, 
+                                      Random.Range(0, 100) * 0.01, 
+                                      Random.Range(0, 100) * 0.01);
+            
+            actor->AddGene(gene);
+        }
+        
     }
     
     return;
