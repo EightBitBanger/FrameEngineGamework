@@ -76,6 +76,8 @@ public:
     void RotateEuler(float yaw, float pitch, float roll);
     /// Rotate the transform by the given Euler angles.
     void RotateEuler(glm::vec3 eulerAngle);
+    /// Rotate and translate the transform by the given amounts.
+    void RotateWorldAxis(float angle, glm::vec3 axis, glm::vec3 worldPosition);
     
     /// Scale the transform by the given amount.
     void Scale(float x, float y, float z);

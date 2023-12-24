@@ -14,6 +14,9 @@ public:
     /// Should this gene be expressed.
     bool doExpress;
     
+    /// This gene should be animated.
+    bool useAnimation;
+    
     // Base genes in this gene.
     
     /// Model position offset.

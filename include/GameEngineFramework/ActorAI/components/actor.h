@@ -92,14 +92,17 @@ private:
     // Position of the actor in the world
     glm::vec3 mPosition;
     
+    // Forward facing direction of the actor in the world
+    glm::vec3 mRotation;
+    
     // Genetic expression
     std::vector<Gene> mGenes;
     
     // List of render components representing the genetic components
     std::vector<MeshRenderer*> mGeneticRenderers;
     
-    // List of offset positions for each genetic component
-    std::vector<glm::vec3> mGeneticOffsets;
+    // List of animation states for each genetic component
+    std::vector<glm::vec3> mAnimationValues;
     
     // Layers of weighted neurological expression
     std::vector<WeightedLayer> mWeightedLayers;

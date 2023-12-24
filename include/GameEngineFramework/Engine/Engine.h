@@ -37,7 +37,7 @@
 #ifndef BUILD_CORE
     extern EngineComponents     Components;
     extern ColorPreset          Colors;
-    extern RandomGen            Random;
+    extern NumberGeneration     Random;
     extern Logger               Log;
     extern ProfilerTimer        Profiler;
     extern Timer                PhysicsTime;

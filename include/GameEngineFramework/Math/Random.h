@@ -3,11 +3,11 @@
 
 #include <GameEngineFramework/configuration.h>
 
-class ENGINE_API RandomGen {
+class ENGINE_API NumberGeneration {
     
 public:
     
-    RandomGen();
+    NumberGeneration();
     
     /// Set the seed for the random number generator.
     void Seed(int value);
