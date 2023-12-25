@@ -65,8 +65,8 @@ void Start() {
     
     
     // Create a camera controller
-    Vector3 position = Vector3(-100, 0, 0);
-    Vector3 colliderScale = Vector3(1, 8, 1);
+    Vector3 position = Vector3(0, 120, 0);
+    Vector3 colliderScale = Vector3(1, 1, 1);
     
     cameraController = Engine.CreateCameraController(position, colliderScale);
     Engine.sceneMain->camera = cameraController->GetComponent<Camera>();
@@ -108,41 +108,148 @@ void Start() {
     
     
     //
-    // Generate some AI actors
+    // Generate some chunks
     //
     
-    for (int i=0; i < 200; i++) {
+    Material* plainMaterial = Resources.CreateMaterialFromTag("chunk");
+    plainMaterial->shader = Engine.shaders.texture;
+    
+    int chunkSize   = 100;
+    int chunkWidth  = 16;
+    int chunkHeight = 16;
+    
+    for (int z=0; z <= chunkHeight; z++) {
         
-        Vector3 position(Random.Range(0, 100) - Random.Range(0, 100),
-                         Random.Range(0, 100) - Random.Range(0, 100),
-                         Random.Range(0, 100) - Random.Range(0, 100));
+        for (int x=0; x <= chunkWidth; x++) {
+            
+            float xx = (x * chunkSize) - (chunkSize * (chunkWidth / 2));
+            float zz = (z * chunkSize) - (chunkSize * (chunkWidth / 2));
+            
+            GameObject* plainObject = Engine.Create<GameObject>();
+            plainObject->AddComponent( Engine.CreateComponentMeshRenderer( Engine.meshes.plain, plainMaterial ) );
+            
+            Transform* transform  = plainObject->GetComponent<Transform>();
+            transform->position = Vector3(xx, 0, zz);
+            transform->scale    = Vector3(chunkSize, 1, chunkSize);
+            
+            //MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
+            //plainRenderer->mesh = Engine.meshes.plain;
+            //plainRenderer->material = Resources.CreateMaterialFromTag("grassy");
+            //plainRenderer->material->shader = Engine.shaders.texture;
+            
+            //Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer );
+            
+            continue;
+        }
         
-        GameObject* newActorObject = Engine.CreateAIActor(position, Engine.meshes.cube);
+        continue;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    //
+    // Generate AI actor
+    //
+    float spread = 80;
+    
+    for (int i=0; i < 100; i++) {
+        
+        Vector3 position;
+        position.x = Random.Range(0.0f, spread) - Random.Range(0.0f, spread);
+        position.z = Random.Range(0.0f, spread) - Random.Range(0.0f, spread);
+        
+        GameObject* newActorObject = Engine.CreateAIActor( position );
         newActorObject->GetComponent<Transform>()->scale = Vector3(1, 1, 1);
         newActorObject->DisableGravity();
         
         Actor* actor = newActorObject->GetComponent<Actor>();
+        actor->SetSpeed( 2.4 );
         
-        for (int i=0; i < 20; i++) {
-            Gene gene;
-            
-            if (Random.Range(0, 100) > 49) {gene.useAnimation = true;} else {gene.useAnimation = false;}
-            
-            gene.position  = BaseGene(Random.Range(0, 10) - Random.Range(0, 10), 
-                                      Random.Range(0, 10) - Random.Range(0, 10), 
-                                      Random.Range(0, 10) - Random.Range(0, 10));
-            
-            gene.offset    = BaseGene(Random.Range(0, 10) - Random.Range(0, 10), 
-                                      Random.Range(0, 10) - Random.Range(0, 10), 
-                                      Random.Range(0, 10) - Random.Range(0, 10));
-            
-            gene.color     = BaseGene(Random.Range(0, 100) * 0.01, 
-                                      Random.Range(0, 100) * 0.01, 
-                                      Random.Range(0, 100) * 0.01);
-            
-            actor->AddGene(gene);
-        }
+        float variantR = Random.Range(0, 10) * 0.1;
+        float variantG = Random.Range(0, 10) * 0.1;
+        float variantB = Random.Range(0, 10) * 0.1;
         
+        // Body gene
+        Gene geneBody;
+        geneBody.offset    = BaseGene(0, 0, 0);
+        geneBody.position  = BaseGene(0, 0.7, 0);
+        geneBody.scale     = BaseGene(0.4, 0.4, 0.9);
+        geneBody.color     = BaseGene(variantR, variantG, variantB);
+        
+        // Head gene
+        Gene geneHead;
+        geneHead.offset    = BaseGene(0, 1.02, 0.254);
+        geneHead.position  = BaseGene(0, 0, 0.3);
+        geneHead.scale     = BaseGene(0.415, 0.395, 0.415);
+        geneHead.color     = BaseGene(0.4, 0.4, 0.4);
+        
+        // Limb FL gene
+        Gene geneLimbFrontLeft;
+        geneLimbFrontLeft.offset    = BaseGene(0.17, 0.75, 0.4);
+        geneLimbFrontLeft.position  = BaseGene(0, -0.4, 0);
+        geneLimbFrontLeft.scale     = BaseGene(0.2, 0.65, 0.2);
+        geneLimbFrontLeft.color     = BaseGene(0.4, 0.4, 0.4);
+        
+        geneLimbFrontLeft.doAnimationCycle = true;
+        geneLimbFrontLeft.animationAxis    = BaseGene(2, 0, 0);
+        geneLimbFrontLeft.animationRange   = 15;
+        
+        // Limb FR gene
+        Gene geneLimbFrontRight;
+        geneLimbFrontRight.offset    = BaseGene(-0.17, 0.75, 0.4);
+        geneLimbFrontRight.position  = BaseGene(0, -0.4, 0);
+        geneLimbFrontRight.scale     = BaseGene(0.2, 0.65, 0.2);
+        geneLimbFrontRight.color     = BaseGene(0.4, 0.4, 0.4);
+        
+        geneLimbFrontRight.doAnimationCycle   = true;
+        geneLimbFrontRight.doInverseAnimation = true;
+        geneLimbFrontRight.animationAxis      = BaseGene(2, 0, 0);
+        geneLimbFrontRight.animationRange     = 15;
+        
+        // Limb RL gene
+        Gene geneLimbRearLeft;
+        geneLimbRearLeft.offset    = BaseGene(0.17, 0.75, -0.4);
+        geneLimbRearLeft.position  = BaseGene(0, -0.4, 0);
+        geneLimbRearLeft.scale     = BaseGene(0.2, 0.65, 0.2);
+        geneLimbRearLeft.color     = BaseGene(0.4, 0.4, 0.4);
+        
+        geneLimbRearLeft.doAnimationCycle = true;
+        geneLimbRearLeft.animationAxis    = BaseGene(2, 0, 0);
+        geneLimbRearLeft.animationRange   = 15;
+        
+        // Limb RR gene
+        Gene geneLimbReadRight;
+        geneLimbReadRight.offset    = BaseGene(-0.17, 0.75, -0.4);
+        geneLimbReadRight.position  = BaseGene(0, -0.4, 0);
+        geneLimbReadRight.scale     = BaseGene(0.2, 0.65, 0.2);
+        geneLimbReadRight.color     = BaseGene(0.4, 0.4, 0.4);
+        
+        geneLimbReadRight.doAnimationCycle   = true;
+        geneLimbReadRight.doInverseAnimation = true;
+        geneLimbReadRight.animationAxis      = BaseGene(2, 0, 0);
+        geneLimbReadRight.animationRange     = 15;
+        
+        
+        // Apply genes to the actor
+        actor->AddGene(geneBody);
+        actor->AddGene(geneHead);
+        
+        actor->AddGene(geneLimbFrontLeft);
+        actor->AddGene(geneLimbFrontRight);
+        actor->AddGene(geneLimbRearLeft);
+        actor->AddGene(geneLimbReadRight);
+        
+        continue;
     }
     
     return;
@@ -185,9 +292,9 @@ void Run() {
         if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         
         
-            force *= 2;
+        force *= 0.3;
         
-        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 5;
+        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 10;
         
         cameraController->AddForce(force.x, force.y, force.z);
         

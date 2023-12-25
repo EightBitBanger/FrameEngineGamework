@@ -145,7 +145,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     return skyObject;
 }
 
-GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position, Mesh* mesh) {
+GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     
     GameObject* newGameObject = CreateGameObject();
     newGameObject->AddComponent( CreateComponent(Components.Actor) );
@@ -157,11 +157,6 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position, Mesh* mesh) {
     materialPtr->shader = shaders.color;
     
     float scale = 1.0;
-    
-    // Collider
-    //BoxShape* boxShape = Physics.CreateColliderBox(scale, scale, scale);
-    //newGameObject->AddColliderBox(boxShape, 0, 0, 0);
-    //newGameObject->EnableGravity();
     
     // Physics
     newGameObject->SetMass(10);

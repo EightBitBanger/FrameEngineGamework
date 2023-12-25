@@ -10,10 +10,20 @@ Actor::Actor() :
     
     mDoUpdateGenetics(false),
     
+    mIsWalking(false),
+    mIsRunning(false),
+    
     mAge(0),
     
+    mSpeed(1),
+    
+    mSpeedMul(1),
+    
+    mSnapSpeed(0.3),
+    
     mVelocity(glm::vec3(0, 0, 0)),
-    mPosition(glm::vec3(0, 0, 0))
+    mPosition(glm::vec3(0, 0, 0)),
+    mRotateTo(glm::vec3(0, 0, 0))
 {
     
     
@@ -61,6 +71,20 @@ unsigned long int Actor::GetAge(void) {
     unsigned long int ageValue = mAge;
     mux.unlock();
     return ageValue;
+}
+
+void Actor::SetSpeed(float newSpeed) {
+    mux.lock();
+    mSpeed = newSpeed;
+    mux.unlock();
+    return;
+}
+
+float Actor::GetSpeed(void) {
+    mux.lock();
+    float speedValue = mSpeed;
+    mux.unlock();
+    return speedValue;
 }
 
 // Genetics

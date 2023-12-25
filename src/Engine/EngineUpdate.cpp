@@ -212,22 +212,97 @@ void EngineSystemManager::Update(void) {
         //
         if (streamBuffer[i].actor != nullptr) {
             
-            //streamBuffer[i].actor->mVelocity = glm::vec3(0, 0.01, 0);
-            
-            streamBuffer[i].actor->mRotation += glm::vec3(0, 1, 0);
-            if (streamBuffer[i].actor->mRotation.y > 359) streamBuffer[i].actor->mRotation.y -= 359;
-            
-            
-            
-            for (int a=0; a < streamBuffer[i].actor->mGeneticRenderers.size(); a++) {
-                streamBuffer[i].actor->mAnimationValues[a].y -= 1;
-            }
-            
-            
-            
             // Update actor
             
             if (streamBuffer[i].actor->mIsActive) {
+                
+                
+                
+                // TESTING random movement
+                
+                if (Random.Range(0, 100) > 98) 
+                    streamBuffer[i].actor->mIsWalking = false;
+                
+                if (Random.Range(0, 100) > 98) 
+                    streamBuffer[i].actor->mIsWalking = true;
+                
+                if (Random.Range(0, 100) > 97) 
+                    streamBuffer[i].actor->mRotateTo.y = Random.Range(0, 360);
+                
+                
+                
+                
+                
+                
+                
+                
+                // Check walking state
+                if (streamBuffer[i].actor->mIsWalking) {
+                    
+                    // Apply forward velocity
+                    glm::vec3 forward;
+                    
+                    forward.x = cos( glm::radians( -(streamBuffer[i].actor->mRotation.y - 90) ) );
+                    //forward.y = tan( glm::radians( -(streamBuffer[i].actor->mRotation.x - 90) ) );
+                    forward.z = sin( glm::radians( -(streamBuffer[i].actor->mRotation.y - 90) ) );
+                    
+                    streamBuffer[i].actor->mVelocity = forward * (streamBuffer[i].actor->mSpeed * 0.01f);
+                    
+                    // Check running speed multiplier
+                    if (streamBuffer[i].actor->mIsRunning) 
+                        streamBuffer[i].actor->mVelocity *= streamBuffer[i].actor->mSpeedMul;
+                    
+                } else {
+                    
+                    // Stop moving
+                    streamBuffer[i].actor->mVelocity = glm::vec3(0);
+                    
+                }
+                
+                //
+                // Check actor target direction range
+                
+                // Max rotation angles
+                if (streamBuffer[i].actor->mRotateTo.x >= 360) {
+                    streamBuffer[i].actor->mRotateTo.x -= 360;
+                    streamBuffer[i].actor->mRotation.x -= 360;
+                }
+                if (streamBuffer[i].actor->mRotateTo.y >= 360) {
+                    streamBuffer[i].actor->mRotateTo.y -= 360;
+                    streamBuffer[i].actor->mRotation.y -= 360;
+                }
+                if (streamBuffer[i].actor->mRotateTo.z >= 360) {
+                    streamBuffer[i].actor->mRotateTo.z -= 360;
+                    streamBuffer[i].actor->mRotation.z -= 360;
+                }
+                
+                // Min rotation angles
+                if (streamBuffer[i].actor->mRotateTo.x < 0) {
+                    streamBuffer[i].actor->mRotateTo.x += 360;
+                    streamBuffer[i].actor->mRotation.x += 360;
+                }
+                if (streamBuffer[i].actor->mRotateTo.y < 0) {
+                    streamBuffer[i].actor->mRotateTo.y += 360;
+                    streamBuffer[i].actor->mRotation.y += 360;
+                }
+                if (streamBuffer[i].actor->mRotateTo.z < 0) {
+                    streamBuffer[i].actor->mRotateTo.z += 360;
+                    streamBuffer[i].actor->mRotation.z += 360;
+                }
+                
+                // Rotate actor toward the focal point
+                if (streamBuffer[i].actor->mRotation != streamBuffer[i].actor->mRotateTo) {
+                    
+                    glm::vec3 fadeValue( streamBuffer[i].actor->mRotation );
+                    glm::vec3 fadeTo   ( streamBuffer[i].actor->mRotateTo );
+                    
+                    fadeValue.x = Math.Lerp(fadeValue.x, fadeTo.x, streamBuffer[i].actor->mSnapSpeed);
+                    fadeValue.y = Math.Lerp(fadeValue.y, fadeTo.y, streamBuffer[i].actor->mSnapSpeed);
+                    fadeValue.z = Math.Lerp(fadeValue.z, fadeTo.z, streamBuffer[i].actor->mSnapSpeed);
+                    
+                    streamBuffer[i].actor->mRotation = fadeValue;
+                }
+                
                 
                 //
                 // Update genetic expression
@@ -254,11 +329,12 @@ void EngineSystemManager::Update(void) {
                         continue;
                     }
                     streamBuffer[i].actor->mGeneticRenderers.clear();
-                    streamBuffer[i].actor->mAnimationValues.clear();
+                    streamBuffer[i].actor->mAnimationStates.clear();
                     
                     
                     //
                     // Create and express genetic elements
+                    //
                     
                     for (int a=0; a < numberOfGenes; a++) {
                         
@@ -291,9 +367,9 @@ void EngineSystemManager::Update(void) {
                         newRenderer->transform.scale.z = streamBuffer[i].actor->mGenes[a].scale.z;
                         
                         streamBuffer[i].actor->mGeneticRenderers.push_back( newRenderer );
-                        streamBuffer[i].actor->mAnimationValues .push_back( glm::vec3(1) );
+                        streamBuffer[i].actor->mAnimationStates .push_back( glm::vec4(1) );
                         
-                        sceneMain->AddMeshRendererToSceneRoot(newRenderer);
+                        sceneMain->AddMeshRendererToSceneRoot( newRenderer );
                         
                         continue;
                     }
@@ -311,32 +387,135 @@ void EngineSystemManager::Update(void) {
                         geneRenderer->transform.position  = streamBuffer[i].actor->mPosition;
                         
                         // Initiate the transform
-                        glm::mat4 modelTranslation = glm::translate(glm::mat4(1), geneRenderer->transform.position);
-                        glm::mat4 modelScale       = glm::scale(glm::mat4(1), geneRenderer->transform.scale);
-                        
-                        glm::mat4 matrix = modelTranslation * modelScale;
+                        glm::mat4 matrix = glm::translate(glm::mat4(1), geneRenderer->transform.position);
                         
                         // Rotate around center mass
-                        matrix = glm::rotate(matrix, 
-                                             glm::radians( glm::length( streamBuffer[i].actor->mRotation ) ), 
-                                             glm::normalize( streamBuffer[i].actor->mRotation ));
+                        float orientationCenterMass = glm::length( streamBuffer[i].actor->mRotation );
+                        if (orientationCenterMass > 0) {
+                            matrix = glm::rotate(matrix, 
+                                                glm::radians( orientationCenterMass ), 
+                                                glm::normalize( streamBuffer[i].actor->mRotation ));
+                        }
                         
                         // Offset from center
                         matrix = glm::translate( matrix, glm::vec3(streamBuffer[i].actor->mGenes[a].offset.x,
                                                                    streamBuffer[i].actor->mGenes[a].offset.y,
                                                                    streamBuffer[i].actor->mGenes[a].offset.z));
                         
-                        if (!streamBuffer[i].actor->mGenes[a].useAnimation) {
-                            geneRenderer->transform.matrix = matrix;
+                        // Check should use animation
+                        if ((!streamBuffer[i].actor->mGenes[a].doAnimationCycle) | (!streamBuffer[i].actor->mIsWalking)) {
+                            
+                            matrix = glm::translate( matrix, glm::vec3(streamBuffer[i].actor->mGenes[a].position.x,
+                                                                   streamBuffer[i].actor->mGenes[a].position.y,
+                                                                   streamBuffer[i].actor->mGenes[a].position.z));
+                            
+                            geneRenderer->transform.matrix = matrix * glm::scale(glm::mat4(1), geneRenderer->transform.scale);
+                            
                             continue;
                         }
                         
-                        // Factor in animation state values
-                        matrix = glm::rotate(matrix, 
-                                             glm::radians( glm::length( streamBuffer[i].actor->mAnimationValues[a] ) ), 
-                                             glm::normalize( streamBuffer[i].actor->mAnimationValues[a] ));
+                        // Rotate current animation state
+                        glm::vec3 animationFactor(streamBuffer[i].actor->mGenes[a].animationAxis.x, 
+                                                  streamBuffer[i].actor->mGenes[a].animationAxis.y, 
+                                                  streamBuffer[i].actor->mGenes[a].animationAxis.z);
                         
-                        geneRenderer->transform.matrix = matrix;
+                        // Step the animation swing direction
+                        float animationMaxSwingRange = streamBuffer[i].actor->mGenes[a].animationRange;
+                        
+                        if (streamBuffer[i].actor->mAnimationStates[a].w < 0) {
+                            
+                            // Check inverted animation cycle
+                            if (streamBuffer[i].actor->mGenes[a].doInverseAnimation) {
+                                
+                                streamBuffer[i].actor->mAnimationStates[a].x += animationFactor.x;
+                                streamBuffer[i].actor->mAnimationStates[a].y += animationFactor.y;
+                                streamBuffer[i].actor->mAnimationStates[a].z += animationFactor.z;
+                                
+                                if ((streamBuffer[i].actor->mAnimationStates[a].x > animationMaxSwingRange) | 
+                                    (streamBuffer[i].actor->mAnimationStates[a].y > animationMaxSwingRange) | 
+                                    (streamBuffer[i].actor->mAnimationStates[a].z > animationMaxSwingRange)) {
+                                    
+                                    if (streamBuffer[i].actor->mGenes[a].doInverseAnimation) {
+                                        streamBuffer[i].actor->mAnimationStates[a].w = 1;
+                                    } else {
+                                        streamBuffer[i].actor->mAnimationStates[a].w = -1;
+                                    }
+                                }
+                                
+                            } else {
+                                
+                                streamBuffer[i].actor->mAnimationStates[a].x -= animationFactor.x;
+                                streamBuffer[i].actor->mAnimationStates[a].y -= animationFactor.y;
+                                streamBuffer[i].actor->mAnimationStates[a].z -= animationFactor.z;
+                                
+                                if ((streamBuffer[i].actor->mAnimationStates[a].x < -animationMaxSwingRange) | 
+                                    (streamBuffer[i].actor->mAnimationStates[a].y < -animationMaxSwingRange) | 
+                                    (streamBuffer[i].actor->mAnimationStates[a].z < -animationMaxSwingRange)) {
+                                    
+                                    if (streamBuffer[i].actor->mGenes[a].doInverseAnimation) {
+                                        streamBuffer[i].actor->mAnimationStates[a].w = -1;
+                                    } else {
+                                        streamBuffer[i].actor->mAnimationStates[a].w = 1;
+                                    }
+                                }
+                                
+                            }
+                            
+                        } else {
+                            
+                            // Check inverted animation cycle
+                            if (streamBuffer[i].actor->mGenes[a].doInverseAnimation) {
+                                
+                                streamBuffer[i].actor->mAnimationStates[a].x -= animationFactor.x;
+                                streamBuffer[i].actor->mAnimationStates[a].y -= animationFactor.y;
+                                streamBuffer[i].actor->mAnimationStates[a].z -= animationFactor.z;
+                                
+                                if ((streamBuffer[i].actor->mAnimationStates[a].x < -animationMaxSwingRange) | 
+                                    (streamBuffer[i].actor->mAnimationStates[a].y < -animationMaxSwingRange) | 
+                                    (streamBuffer[i].actor->mAnimationStates[a].z < -animationMaxSwingRange)) {
+                                    
+                                    if (streamBuffer[i].actor->mGenes[a].doInverseAnimation) {
+                                        streamBuffer[i].actor->mAnimationStates[a].w = -1;
+                                    } else {
+                                        streamBuffer[i].actor->mAnimationStates[a].w = 1;
+                                    }
+                                }
+                                
+                            } else {
+                                
+                                streamBuffer[i].actor->mAnimationStates[a].x += animationFactor.x;
+                                streamBuffer[i].actor->mAnimationStates[a].y += animationFactor.y;
+                                streamBuffer[i].actor->mAnimationStates[a].z += animationFactor.z;
+                                
+                                if ((streamBuffer[i].actor->mAnimationStates[a].x > animationMaxSwingRange) | 
+                                    (streamBuffer[i].actor->mAnimationStates[a].y > animationMaxSwingRange) | 
+                                    (streamBuffer[i].actor->mAnimationStates[a].z > animationMaxSwingRange)) {
+                                    
+                                    if (streamBuffer[i].actor->mGenes[a].doInverseAnimation) {
+                                        streamBuffer[i].actor->mAnimationStates[a].w = 1;
+                                    } else {
+                                        streamBuffer[i].actor->mAnimationStates[a].w = -1;
+                                    }
+                                }
+                                
+                            }
+                            
+                        }
+                        
+                        
+                        // Apply animation rotation state
+                        matrix = glm::rotate(matrix, 
+                                             glm::radians( glm::length( streamBuffer[i].actor->mAnimationStates[a] ) ), 
+                                             glm::normalize( glm::vec3(streamBuffer[i].actor->mAnimationStates[a].x, 
+                                                                       streamBuffer[i].actor->mAnimationStates[a].y, 
+                                                                       streamBuffer[i].actor->mAnimationStates[a].z) ));
+                        
+                        // Final position after animation rotation
+                        matrix = glm::translate( matrix, glm::vec3(streamBuffer[i].actor->mGenes[a].position.x,
+                                                                   streamBuffer[i].actor->mGenes[a].position.y,
+                                                                   streamBuffer[i].actor->mGenes[a].position.z));
+                        
+                        geneRenderer->transform.matrix = matrix * glm::scale(glm::mat4(1), geneRenderer->transform.scale);
                         
                         continue;
                     }

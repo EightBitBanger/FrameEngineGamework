@@ -144,9 +144,6 @@ void ActorSystem::Update(void) {
             continue;
         }
         
-        // Apply forward velocity
-        actor->mVelocity = forward;
-        
         actor->mux.unlock();
         
         continue;
