@@ -13,6 +13,8 @@ public:
     
     bool isActive;
     
+    short int type;
+    
     float renderDistance;
     
     glm::vec3 position;

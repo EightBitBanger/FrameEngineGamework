@@ -159,7 +159,8 @@ private:
     // Light list
     unsigned int mNumberOfLights=0;
     glm::vec3    mLightPosition    [RENDER_NUMBER_OF_LIGHTS];
-    glm::vec3    mLightAttenuation [RENDER_NUMBER_OF_LIGHTS];
+    glm::vec3    mLightDirection   [RENDER_NUMBER_OF_LIGHTS];
+    glm::vec4    mLightAttenuation [RENDER_NUMBER_OF_LIGHTS];
     glm::vec3    mLightColor       [RENDER_NUMBER_OF_LIGHTS];
     
     // Render component allocators

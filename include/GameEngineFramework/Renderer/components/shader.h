@@ -18,6 +18,9 @@ public:
     
     /// Set the uniform model matrix.
     void SetModelMatrix(glm::mat4 &ModelMatrix);
+    /// Set the uniform inverse model matrix.
+    void SetInverseModelMatrix(glm::mat3 &InverseModelMatrix);
+    
     /// Set the uniform projection matrix.
     void SetProjectionMatrix(glm::mat4 &projectionMatrix);
     /// Set the uniform camera position.
@@ -37,8 +40,10 @@ public:
     void SetLightCount(unsigned int numberOfLights);
     /// Set the array of light positions.
     void SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPositions);
+    /// Set the array of light directions.
+    void SetLightDirections(unsigned int numberOfLights, glm::vec3* lightDirections);
     /// Set the array of light attenuation.
-    void SetLightAttenuation(unsigned int numberOfLights, glm::vec3* lightAttenuation);
+    void SetLightAttenuation(unsigned int numberOfLights, glm::vec4* lightAttenuation);
     /// Set the array of light colors.
     void SetLightColors(unsigned int numberOfLights, glm::vec3* lightColors);
     
@@ -59,14 +64,19 @@ private:
     // Uniform locations
     int mProjectionMatrixLocation;
     int mModelMatrixLocation;
+    int mModelInvMatrixLocation;
     int mCameraPosition;
+    
     int mMaterialColorLocation;
     int mMaterialAmbientLocation;
     int mMaterialDiffuseLocation;
     int mMaterialSpecularLocation;
+    
     int mSamplerLocation;
+    
     int mLightCount;
     int mLightPosition;
+    int mLightDirection;
     int mLightAttenuation;
     int mLightColor;
     
