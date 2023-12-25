@@ -9,6 +9,7 @@ layout(location = 3) in vec2 l_uv;
 
 uniform mat4 u_proj;
 uniform mat4 u_model;
+uniform mat3 u_inv_model;
 uniform vec3 u_eye;
 
 varying vec2 v_coord;
@@ -21,7 +22,8 @@ uniform vec3 m_specular;
 
 uniform int   u_light_count;
 uniform vec3  u_light_position[100];
-uniform vec3  u_light_attenuation[100];
+uniform vec3  u_light_direction[100];
+uniform vec4  u_light_attenuation[100];
 uniform vec3  u_light_color[100];
 
 void main() {
