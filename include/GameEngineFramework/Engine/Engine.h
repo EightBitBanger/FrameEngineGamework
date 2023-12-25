@@ -139,7 +139,7 @@ public:
     Component* CreateComponentLight(glm::vec3 position);
     
     /// Create an AI actor component and return its pointer.
-    GameObject* CreateAIActor(glm::vec3 position, Mesh* mesh);
+    GameObject* CreateAIActor(glm::vec3 position);
     
     
     // UI elements

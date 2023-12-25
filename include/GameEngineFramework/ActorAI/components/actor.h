@@ -26,22 +26,23 @@ public:
     
     /// Set the name of the actor.
     void SetName(std::string newName);
-    
-    /// Set the active state of the actor.
-    void SetActive(bool state);
-    
-    /// Set the age of the actor.
-    void SetAge(unsigned long int newAge);
-    
     /// Get the name of the actor.
     std::string GetName(void);
     
+    /// Set the active state of the actor.
+    void SetActive(bool state);
     /// Get the active state of the actor.
     bool GetActive(void);
     
+    /// Set the age of the actor.
+    void SetAge(unsigned long int newAge);
     /// Get the age of the actor.
     unsigned long int GetAge(void);
     
+    /// Set the speed of the actor.
+    void SetSpeed(float newSpeed);
+    /// Get the speed of the actor.
+    float GetSpeed(void);
     
     /// Add a new gene to the actors genome. The index location will be returned.
     void AddGene(Gene& newGene);
@@ -75,6 +76,7 @@ public:
     
 private:
     
+    // Actor name string
     std::string mName;
     
     // Is this actor active in the simulation
@@ -83,8 +85,23 @@ private:
     // Should the genetic data be re-expressed
     bool mDoUpdateGenetics;
     
+    // Is this actor currently walking
+    bool mIsWalking;
+    
+    // Is this actor currently running
+    bool mIsRunning;
+    
     // Number of ticks this actor has accumulated in its lifetime
     unsigned long int mAge;
+    
+    // Max speed this actor can travel
+    float mSpeed;
+    
+    // Running speed multiplier
+    float mSpeedMul;
+    
+    // Rotation speed when changing directions
+    float mSnapSpeed;
     
     // Movement vector
     glm::vec3 mVelocity;
@@ -95,6 +112,9 @@ private:
     // Forward facing direction of the actor in the world
     glm::vec3 mRotation;
     
+    // Direction toward which the actor must turn
+    glm::vec3 mRotateTo;
+    
     // Genetic expression
     std::vector<Gene> mGenes;
     
@@ -102,7 +122,7 @@ private:
     std::vector<MeshRenderer*> mGeneticRenderers;
     
     // List of animation states for each genetic component
-    std::vector<glm::vec3> mAnimationValues;
+    std::vector<glm::vec4> mAnimationStates;
     
     // Layers of weighted neurological expression
     std::vector<WeightedLayer> mWeightedLayers;

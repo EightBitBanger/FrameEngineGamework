@@ -14,17 +14,34 @@ public:
     /// Should this gene be expressed.
     bool doExpress;
     
-    /// This gene should be animated.
-    bool useAnimation;
+    /// Should this gene be animated.
+    bool doAnimationCycle;
+    
+    /// Should the animation cycle be inverted.
+    bool doInverseAnimation;
     
     // Base genes in this gene.
     
-    /// Model position offset.
+    /// Offset position from center.
     BaseGene offset;
+    
+    /// Final position.
     BaseGene position;
+    
+    /// Final rotation.
     BaseGene rotation;
+    
+    /// Final scale.
     BaseGene scale;
+    
+    /// Render color.
     BaseGene color;
+    
+    /// Animation max swing range.
+    float animationRange;
+    
+    /// Animation swing rate multiplier.
+    BaseGene animationAxis;
     
     Gene();
     
