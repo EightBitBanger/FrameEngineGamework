@@ -49,6 +49,9 @@ void Start() {
     // Add the scene to the render system
     Renderer.AddSceneToRenderQueue(Engine.sceneMain);
     
+    Physics.SetWorldGravity(0, -0.01, 0);
+    
+    
     // Create a sky
     float skyFadeBias = 0.0001;
     Color skyHigh(Colors.blue);
@@ -56,6 +59,10 @@ void Start() {
     
     skyHigh += Colors.MakeGrayScale(0.2);
     skyLow  += Colors.MakeGrayScale(0.6);
+    
+    // Override sky with black
+    skyHigh = Colors.MakeGrayScale(0.01);
+    skyLow  = Colors.MakeGrayScale(0.0001);
     
     GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, skyFadeBias);
     
@@ -65,7 +72,7 @@ void Start() {
     
     
     // Create a camera controller
-    Vector3 position = Vector3(0, 120, 0);
+    Vector3 position = Vector3(0, 40, 0);
     Vector3 colliderScale = Vector3(1, 1, 1);
     
     cameraController = Engine.CreateCameraController(position, colliderScale);
@@ -74,6 +81,22 @@ void Start() {
     // Attach the sky object to the camera controller
     skyObject->parent = cameraController;
     cameraController->DisableGravity();
+    
+    cameraController->SetAngularDamping( 1 );
+    cameraController->SetLinearDamping( 3 );
+    cameraController->SetMass( 10 );
+    
+    // Camera light
+    GameObject* lightObject = Engine.Create<GameObject>();
+    lightObject->AddComponent( Engine.CreateComponent<Light>() );
+    lightObject->GetComponent<Transform>()->position = Vector3(0, 30, 0);
+    
+    Light* cameraLight = lightObject->GetComponent<Light>();
+    Engine.sceneMain->AddLightToSceneRoot(cameraLight);
+    cameraLight->intensity = 4;
+    cameraLight->range     = 1000;
+    cameraLight->color     = Colors.white;
+    
     
     // Scene overlay
     sceneOverlay = Engine.Create<Scene>();
@@ -94,7 +117,7 @@ void Start() {
     // Initiate text elements
     for (int i=0; i < 10; i++) {
         
-        GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", 9, Colors.black, "font");
+        GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", 9, Colors.white, "font");
         
         sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
         text[i] = textObject->GetComponent<Text>();
@@ -111,33 +134,50 @@ void Start() {
     // Generate some chunks
     //
     
-    Material* plainMaterial = Resources.CreateMaterialFromTag("chunk");
+    // Chunk mesh
+    Mesh* chunkMesh = Resources.CreateMeshFromTag("plain");
+    //chunkMesh->AddPlainSubDivided(0, 0, 0, 10, 10, Colors.white, 10, 10);
+    
+    //SubMesh subMesh;
+    //chunkMesh->CopySubMesh(0, subMesh);
+    
+    
+    // Chunk material
+    Material* plainMaterial = Resources.CreateMaterialFromTag("grassy");
     plainMaterial->shader = Engine.shaders.texture;
+    plainMaterial->diffuse = Colors.MakeGrayScale(0.1);
     
     int chunkSize   = 100;
-    int chunkWidth  = 16;
-    int chunkHeight = 16;
     
-    for (int z=0; z <= chunkHeight; z++) {
+    int areaWidth  = 20;
+    int areaHeight = 20;
+    
+    for (int h=0; h < areaHeight; h++) {
         
-        for (int x=0; x <= chunkWidth; x++) {
+        for (int w=0; w < areaWidth; w++) {
             
-            float xx = (x * chunkSize) - (chunkSize * (chunkWidth / 2));
-            float zz = (z * chunkSize) - (chunkSize * (chunkWidth / 2));
+            float xx = (w * chunkSize) - (chunkSize * (areaWidth / 2));
+            float zz = (h * chunkSize) - (chunkSize * (areaWidth / 2));
             
             GameObject* plainObject = Engine.Create<GameObject>();
-            plainObject->AddComponent( Engine.CreateComponentMeshRenderer( Engine.meshes.plain, plainMaterial ) );
+            plainObject->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, plainMaterial ) );
+            plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
+            plainObject->DisableGravity();
+            
+            plainObject->SetAngularAxisLockFactor(0, 0, 0);
+            plainObject->SetLinearAxisLockFactor(0, 0, 0);
+            plainObject->SetStatic();
+            plainObject->SetMass(0);
+            plainObject->CalculatePhysics();
+            
+            BoxShape* plainCollider = Physics.CreateColliderBox(chunkSize, 100, chunkSize);
+            
+            plainObject->AddColliderBox(plainCollider, 0, -100, 0);
             
             Transform* transform  = plainObject->GetComponent<Transform>();
-            transform->position = Vector3(xx, 0, zz);
             transform->scale    = Vector3(chunkSize, 1, chunkSize);
             
-            //MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
-            //plainRenderer->mesh = Engine.meshes.plain;
-            //plainRenderer->material = Resources.CreateMaterialFromTag("grassy");
-            //plainRenderer->material->shader = Engine.shaders.texture;
-            
-            //Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer );
+            plainObject->SetPosition(xx, 0, zz);
             
             continue;
         }
@@ -147,22 +187,13 @@ void Start() {
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     //
-    // Generate AI actor
+    // Generate AI actors
     //
-    float spread = 80;
     
-    for (int i=0; i < 100; i++) {
+    float spread = 500;
+    
+    for (int i=0; i < 300; i++) {
         
         Vector3 position;
         position.x = Random.Range(0.0f, spread) - Random.Range(0.0f, spread);
@@ -175,9 +206,12 @@ void Start() {
         Actor* actor = newActorObject->GetComponent<Actor>();
         actor->SetSpeed( 2.4 );
         
-        float variantR = Random.Range(0, 10) * 0.1;
-        float variantG = Random.Range(0, 10) * 0.1;
-        float variantB = Random.Range(0, 10) * 0.1;
+        float variantR = Random.Range(0, 10) * 0.01;
+        float variantG = Random.Range(0, 10) * 0.01;
+        float variantB = Random.Range(0, 10) * 0.01;
+        
+        variantG = variantR;
+        variantB = variantR;
         
         // Body gene
         Gene geneBody;
@@ -267,10 +301,15 @@ void Start() {
 
 void Run() {
     
+    
     text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
     text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
     text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
     //text[4]->text = "ActorAI  - " + FloatToString( Engine.profileActorAI );
+    
+    
+    
+    
     
     
     if (cameraController == nullptr) 
@@ -292,9 +331,9 @@ void Run() {
         if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         
         
-        force *= 0.3;
+        force *= 2.4;
         
-        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 10;
+        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 1.8;
         
         cameraController->AddForce(force.x, force.y, force.z);
         

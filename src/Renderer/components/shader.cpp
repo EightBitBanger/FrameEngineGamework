@@ -11,6 +11,7 @@ Shader::Shader() :
     
     mProjectionMatrixLocation(0),
     mModelMatrixLocation(0),
+    mModelInvMatrixLocation(0),
     mCameraPosition(0),
     
     mMaterialAmbientLocation(0),
@@ -20,6 +21,7 @@ Shader::Shader() :
     
     mLightCount(0),
     mLightPosition(0),
+    mLightDirection(0),
     mLightAttenuation(0),
     mLightColor(0),
     
@@ -34,6 +36,10 @@ Shader::~Shader() {
 
 void Shader::SetModelMatrix(glm::mat4 &ModelMatrix) {
     glUniformMatrix4fv(mModelMatrixLocation, 1, 0, &ModelMatrix[0][0]);
+}
+
+void Shader::SetInverseModelMatrix(glm::mat3 &InverseModelMatrix) {
+    glUniformMatrix3fv(mModelInvMatrixLocation, 1, 0, &InverseModelMatrix[0][0]);
 }
 
 void Shader::SetProjectionMatrix(glm::mat4 &projectionMatrix) {
@@ -68,8 +74,12 @@ void Shader::SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPosi
     glUniform3fv(mLightPosition, numberOfLights, &lightPositions[0][0]);
 }
 
-void Shader::SetLightAttenuation(unsigned int numberOfLights, glm::vec3* lightAttenuation) {
-    glUniform3fv(mLightAttenuation, numberOfLights, &lightAttenuation[0][0]);
+void Shader::SetLightDirections(unsigned int numberOfLights, glm::vec3* lightDirections) {
+    glUniform3fv(mLightDirection, numberOfLights, &lightDirections[0][0]);
+}
+
+void Shader::SetLightAttenuation(unsigned int numberOfLights, glm::vec4* lightAttenuation) {
+    glUniform4fv(mLightAttenuation, numberOfLights, &lightAttenuation[0][0]);
 }
 
 void Shader::SetLightColors(unsigned int numberOfLights, glm::vec3* lightColors) {
@@ -80,19 +90,25 @@ void Shader::SetUniformLocations(void) {
     
     std::string projUniformName         = "u_proj";
     std::string modelUniformName        = "u_model";
+    std::string modelInvUniformName     = "u_inv_model";
     std::string eyeUniformName          = "u_eye";
+    
     std::string matAmbientUniformName   = "m_ambient";
     std::string matDiffuseUniformName   = "m_diffuse";
     std::string matSpecularUniformName  = "m_specular";
+    
     std::string samplerUniformName      = "u_sampler";
+    
     std::string lightCountUniformName        = "u_light_count";
     std::string lightPositionUniformName     = "u_light_position";
+    std::string lightDirectionUniformName    = "u_light_direction";
     std::string lightAttenuationUniformName  = "u_light_attenuation";
     std::string lightColorUniformName        = "u_light_color";
     
     // Model projection
     mProjectionMatrixLocation  = glGetUniformLocation(mShaderProgram, projUniformName.c_str());;
     mModelMatrixLocation       = glGetUniformLocation(mShaderProgram, modelUniformName.c_str());
+    mModelInvMatrixLocation    = glGetUniformLocation(mShaderProgram, modelInvUniformName.c_str());
     mCameraPosition            = glGetUniformLocation(mShaderProgram, eyeUniformName.c_str());
     // Material
     mMaterialAmbientLocation   = glGetUniformLocation(mShaderProgram, matAmbientUniformName.c_str());
@@ -102,6 +118,7 @@ void Shader::SetUniformLocations(void) {
     // Lighting
     mLightCount                = glGetUniformLocation(mShaderProgram, lightCountUniformName.c_str());
     mLightPosition             = glGetUniformLocation(mShaderProgram, lightPositionUniformName.c_str());
+    mLightDirection            = glGetUniformLocation(mShaderProgram, lightDirectionUniformName.c_str());
     mLightAttenuation          = glGetUniformLocation(mShaderProgram, lightAttenuationUniformName.c_str());
     mLightColor                = glGetUniformLocation(mShaderProgram, lightColorUniformName.c_str());
 }

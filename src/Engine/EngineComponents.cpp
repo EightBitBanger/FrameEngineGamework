@@ -137,8 +137,7 @@ Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Mater
     meshRenderer->mesh = meshPtr;
     meshRenderer->material = materialPtr;
     
-    if (sceneMain != nullptr) 
-        sceneMain->AddMeshRendererToSceneRoot( meshRenderer );
+    sceneMain->AddMeshRendererToSceneRoot( meshRenderer );
     
     doUpdateDataStream = true;
     return rendererComponent;
@@ -150,8 +149,7 @@ Component* EngineSystemManager::CreateComponentLight(glm::vec3 position) {
     
     lightPoint->position = position;
     
-    if (sceneMain != nullptr) 
-        sceneMain->AddLightToSceneRoot( lightPoint );
+    sceneMain->AddLightToSceneRoot( lightPoint );
     
     doUpdateDataStream = true;
     return lightComponent;

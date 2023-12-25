@@ -147,6 +147,7 @@ void RenderSystem::RenderFrame(void) {
                 // Send in the light list
                 currentShader->SetLightCount(mNumberOfLights);
                 currentShader->SetLightPositions(mNumberOfLights, mLightPosition);
+                currentShader->SetLightDirections(mNumberOfLights, mLightDirection);
                 currentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
                 currentShader->SetLightColors(mNumberOfLights, mLightColor);
                 
@@ -159,6 +160,11 @@ void RenderSystem::RenderFrame(void) {
             // Set the projection
             currentShader->SetProjectionMatrix( viewProjection );
             currentShader->SetModelMatrix( currentEntity->transform.matrix );
+            
+            // Inverse transpose model matrix
+            glm::mat3 invTransposeMatrix = glm::transpose( glm::inverse( currentEntity->transform.matrix ) );
+            currentShader->SetInverseModelMatrix( invTransposeMatrix );
+            
             currentShader->SetCameraPosition(eye);
             
             // Set the material and texture
@@ -213,7 +219,7 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
     // View angle
     glm::mat4 view = glm::lookAt(eye, lookingAngle, currentCamera->up);
     
-    // Calculate projection / orthographic angle
+    // Calculate perspective / orthographic angle
     glm::mat4 projection = glm::mat4(0);
     
     if (!currentCamera->isOrthographic) {
@@ -244,17 +250,19 @@ unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 
         
         Light* lightPtr = lightList[i];
         
+        if (glm::distance(eye, lightPtr->position) > lightPtr->renderDistance) {
+            continue;
+        
         if (!lightPtr->isActive) 
             continue;
         
-        if (glm::distance(eye, lightPtr->position) > lightPtr->renderDistance) 
-            continue;
+        mLightPosition[i]  = lightPtr->position;
+        mLightDirection[i] = lightPtr->direction;
         
-        mLightPosition[i] = lightPtr->position;
-        
-        mLightAttenuation[i].x = lightPtr->intensity;
-        mLightAttenuation[i].y = lightPtr->range;
-        mLightAttenuation[i].z = lightPtr->attenuation;
+        mLightAttenuation[i].r = lightPtr->intensity;
+        mLightAttenuation[i].g = lightPtr->range;
+        mLightAttenuation[i].b = lightPtr->attenuation;
+        mLightAttenuation[i].a = lightPtr->type;
         
         mLightColor[i].r = lightPtr->color.r;
         mLightColor[i].g = lightPtr->color.g;
