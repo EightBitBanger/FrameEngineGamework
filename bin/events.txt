@@ -10,7 +10,10 @@ Intel(R) HD Graphics 4400
   - Depth = 32 bit
 
 
+Resource definitions
+
   + color  core/shaders/color.shader
+  + colorUnlit  core/shaders/colorUnlit.shader
   + texture  core/shaders/texture.shader
   + textureUnlit  core/shaders/textureUnlit.shader
   + UI  core/shaders/UI.shader
@@ -21,8 +24,19 @@ Intel(R) HD Graphics 4400
   + sky  core/models/sky.obj
   + barrel  core/materials/barrel.png
   + chunk  core/materials/chunk.png
-  + cross  core/materials/cross.png_
-  + cross_black  core/materials/cross_black.png
-  + cross_white  core/materials/cross_white.png
+  + cobble  core/materials/cobble.png
   + font  core/materials/font.png
+  + food  core/materials/food.png
   + grassy  core/materials/grassy.png
+  + panel_blue  core/materials/panel_blue.png
+  + panel_gray  core/materials/panel_gray.png
+
+ >> Starting thread AI
+ >> Starting thread renderer
+ >> Starting thread audio
+
+<MainScene>
+
+ >> Shutting down on thread audio
+ >> Shutting down on thread renderer
+ >> Shutting down on thread AI

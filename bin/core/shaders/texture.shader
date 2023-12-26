@@ -40,14 +40,15 @@ void main() {
         float attenuation  = u_light_attenuation[i].b;
         float type         = u_light_attenuation[i].a;
         
-        // Light MAX distance
-        float dist = length( u_light_position[i] - vec3(vertPos));
-        
-        if (dist > range) 
-            continue;
-        
-        // Point light
-        if (type == 0) {
+        // 0 - Point light
+        if (type < 1) {
+            
+            // Light MAX distance
+            float dist = length( u_light_position[i] - vec3(vertPos));
+            
+            if (dist > range) 
+                continue;
+            
             vec3 lightDir = normalize(u_light_position[i] - vec3(vertPos));
             
             float diff = max(dot(norm, lightDir), 0.0);
@@ -60,6 +61,19 @@ void main() {
             vec3 specular = u_light_color[i] * (spec * m_specular);
             
             lightColor += ((diff * u_light_color[i]) * intensity) / (1.0 + (dist * attenuation)) + specular;
+            lightColor = clamp(lightColor, 0.0, 2.0);
+            
+            continue;
+        }
+        
+        // 1 - Directional light
+        if (type < 2) {
+            
+            vec3 lightDir = normalize( (-u_light_direction[i]) + vec3(vertPos) );
+            
+            float diff = max(dot(norm, lightDir), 0.0);
+            
+            lightColor += (diff * u_light_color[i]) * intensity;
             lightColor = clamp(lightColor, 0.0, 2.0);
             
             continue;
