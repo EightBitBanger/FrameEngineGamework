@@ -424,8 +424,8 @@ set (CORE_SOURCES
     "src/Engine/types/viewport.cpp"
     
     "src/ActorAI/ActorSystem.cpp"
-    "src/ActorAI/genetics/gene.h"
-    "src/ActorAI/genetics/base.h"
+    "src/ActorAI/genetics/gene.cpp"
+    "src/ActorAI/genetics/base.cpp"
     "src/ActorAI/components/actor.cpp"
     "src/ActorAI/neurons/NeuralLayer.cpp"
     "src/ActorAI/neurons/WeightedLayer.cpp"

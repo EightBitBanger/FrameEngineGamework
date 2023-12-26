@@ -144,6 +144,9 @@ private:
     // Draw call counter
     unsigned int mNumberOfDrawCalls;
     
+    // Frame counter
+    unsigned long long int mNumberOfFrames;
+    
     // Device render context
     HWND  mWindowHandle;
     HDC   mDeviceContext;

@@ -18,6 +18,7 @@ public:
     float renderDistance;
     
     glm::vec3 position;
+    glm::vec3 offset;
     glm::vec3 direction;
     
     Color color;
