@@ -61,7 +61,7 @@ void Start() {
     skyLow  += Colors.MakeGrayScale(0.6);
     
     // Override sky with black
-    skyHigh = Colors.MakeGrayScale(0.01);
+    skyHigh = Colors.MakeGrayScale(0.1);
     skyLow  = Colors.MakeGrayScale(0.0001);
     
     GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, skyFadeBias);
@@ -86,17 +86,18 @@ void Start() {
     cameraController->SetLinearDamping( 3 );
     cameraController->SetMass( 10 );
     
-    // Camera light
-    GameObject* lightObject = Engine.Create<GameObject>();
-    lightObject->AddComponent( Engine.CreateComponent<Light>() );
-    lightObject->GetComponent<Transform>()->position = Vector3(0, 30, 0);
+    cameraController->AddComponent( Engine.CreateComponent<Light>() );
+    Light* cameraLight = cameraController->GetComponent<Light>();
+    cameraLight->renderDistance = 1000;
+    cameraLight->attenuation  = 4;
+    cameraLight->intensity    = 2000;
+    //cameraLight->range        = 1000;
+    cameraLight->type         = 1; // Directional
+    cameraLight->color        = Colors.white;
+    cameraLight->direction    = Vector3(0, -1, 0);
     
-    Light* cameraLight = lightObject->GetComponent<Light>();
-    Engine.sceneMain->AddLightToSceneRoot(cameraLight);
-    cameraLight->intensity = 4;
-    cameraLight->range     = 1000;
-    cameraLight->color     = Colors.white;
     
+    Engine.sceneMain->AddLightToSceneRoot( cameraLight );
     
     // Scene overlay
     sceneOverlay = Engine.Create<Scene>();
@@ -131,33 +132,77 @@ void Start() {
     
     
     //
-    // Generate some chunks
+    // Generate some ground chunks
     //
-    
-    // Chunk mesh
-    Mesh* chunkMesh = Resources.CreateMeshFromTag("plain");
-    //chunkMesh->AddPlainSubDivided(0, 0, 0, 10, 10, Colors.white, 10, 10);
-    
-    //SubMesh subMesh;
-    //chunkMesh->CopySubMesh(0, subMesh);
-    
     
     // Chunk material
     Material* plainMaterial = Resources.CreateMaterialFromTag("grassy");
     plainMaterial->shader = Engine.shaders.texture;
-    plainMaterial->diffuse = Colors.MakeGrayScale(0.1);
+    plainMaterial->diffuse = Colors.MakeGrayScale(0.01);
     
-    int chunkSize   = 100;
     
-    int areaWidth  = 20;
-    int areaHeight = 20;
+    // Chunk layout
     
-    for (int h=0; h < areaHeight; h++) {
+    int chunkSize   = 50;
+    
+    int worldWidth  = 20;
+    int worldHeight = 20;
+    
+    // Noise
+    
+    float noiseX   = 0.1;
+    float noiseZ   = 0.1;
+    float noiseMul = 100;
+    
+    
+    for (int z=0; z < worldHeight; z++) {
         
-        for (int w=0; w < areaWidth; w++) {
+        for (int x=0; x < worldWidth; x++) {
             
-            float xx = (w * chunkSize) - (chunkSize * (areaWidth / 2));
-            float zz = (h * chunkSize) - (chunkSize * (areaWidth / 2));
+            float chunkX = x * chunkSize;
+            float chunkZ = z * chunkSize;
+            
+            Mesh* chunkMesh = Engine.Create<Mesh>();
+            Color meshColor = Colors.green;
+            meshColor *= Colors.dkgray;
+            
+            chunkMesh->AddPlainSubDivided(-4.5, 0, -4.5, 1, 1, meshColor, 10, 10);
+            
+            //chunkMesh->SetPrimitive(MESH_LINES);
+            
+            
+            /*
+            
+            for (unsigned int index=0; index < chunkMesh->GetNumberOfVertices(); index++) {
+                
+                Vertex vertex = chunkMesh->GetVertex(index);
+                
+                //  float xCoord = (vertex.x * noiseX) + (chunkX * noiseX);
+                //  float zCoord = (vertex.z * noiseZ) + (chunkZ * noiseZ);
+                
+                float coordX = (vertex.x * noiseX) + (chunkX * noiseX);
+                float coordZ = (vertex.z * noiseZ) + (chunkZ * noiseZ);
+                
+                float noiseTotal = Random.Perlin(coordX, 0, coordZ) * noiseMul;
+                
+                if (noiseTotal > 40.0f) noiseTotal = 40.0f;
+                if (noiseTotal < 0.0f)   noiseTotal = 0.0f;
+                
+                noiseTotal = Math.Round( noiseTotal );
+                
+                vertex.r = noiseTotal * 0.001;
+                vertex.g = noiseTotal * 0.001;
+                vertex.b = noiseTotal * 0.001;
+                
+                chunkMesh->SetVertex(index, vertex);
+                
+                continue;
+            }
+            
+            */
+            
+            chunkMesh->UploadToGPU();
+            
             
             GameObject* plainObject = Engine.Create<GameObject>();
             plainObject->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, plainMaterial ) );
@@ -175,9 +220,12 @@ void Start() {
             plainObject->AddColliderBox(plainCollider, 0, -100, 0);
             
             Transform* transform  = plainObject->GetComponent<Transform>();
-            transform->scale    = Vector3(chunkSize, 1, chunkSize);
+            transform->scale = Vector3(chunkSize * 0.05f, 1, chunkSize * 0.05f);
             
-            plainObject->SetPosition(xx, 0, zz);
+            float chunkPosX = (x * chunkSize) - ((worldWidth  / 2) * chunkSize);
+            float chunkPosZ = (z * chunkSize) - ((worldHeight / 2) * chunkSize);
+            
+            plainObject->SetPosition(chunkPosX, 0, chunkPosZ);
             
             continue;
         }
@@ -191,9 +239,9 @@ void Start() {
     // Generate AI actors
     //
     
-    float spread = 500;
+    float spread = 80;
     
-    for (int i=0; i < 300; i++) {
+    for (int i=0; i < 500; i++) {
         
         Vector3 position;
         position.x = Random.Range(0.0f, spread) - Random.Range(0.0f, spread);
@@ -206,9 +254,11 @@ void Start() {
         Actor* actor = newActorObject->GetComponent<Actor>();
         actor->SetSpeed( 2.4 );
         
-        float variantR = Random.Range(0, 10) * 0.01;
-        float variantG = Random.Range(0, 10) * 0.01;
-        float variantB = Random.Range(0, 10) * 0.01;
+        float variantR = Random.Range(0, 10) * 0.001;
+        float variantG = Random.Range(0, 10) * 0.001;
+        float variantB = Random.Range(0, 10) * 0.001;
+        
+        Color baseColor = Colors.MakeGrayScale(0.01);
         
         variantG = variantR;
         variantB = variantR;
@@ -219,6 +269,9 @@ void Start() {
         geneBody.position  = BaseGene(0, 0.7, 0);
         geneBody.scale     = BaseGene(0.4, 0.4, 0.9);
         geneBody.color     = BaseGene(variantR, variantG, variantB);
+        geneBody.color.x  *= baseColor.r;
+        geneBody.color.y  *= baseColor.g;
+        geneBody.color.z  *= baseColor.b;
         
         // Head gene
         Gene geneHead;
@@ -226,6 +279,9 @@ void Start() {
         geneHead.position  = BaseGene(0, 0, 0.3);
         geneHead.scale     = BaseGene(0.415, 0.395, 0.415);
         geneHead.color     = BaseGene(0.4, 0.4, 0.4);
+        geneHead.color.x  *= baseColor.r;
+        geneHead.color.y  *= baseColor.g;
+        geneHead.color.z  *= baseColor.b;
         
         // Limb FL gene
         Gene geneLimbFrontLeft;
@@ -233,6 +289,9 @@ void Start() {
         geneLimbFrontLeft.position  = BaseGene(0, -0.4, 0);
         geneLimbFrontLeft.scale     = BaseGene(0.2, 0.65, 0.2);
         geneLimbFrontLeft.color     = BaseGene(0.4, 0.4, 0.4);
+        geneLimbFrontLeft.color.x  *= baseColor.r;
+        geneLimbFrontLeft.color.y  *= baseColor.g;
+        geneLimbFrontLeft.color.z  *= baseColor.b;
         
         geneLimbFrontLeft.doAnimationCycle = true;
         geneLimbFrontLeft.animationAxis    = BaseGene(2, 0, 0);
@@ -244,6 +303,9 @@ void Start() {
         geneLimbFrontRight.position  = BaseGene(0, -0.4, 0);
         geneLimbFrontRight.scale     = BaseGene(0.2, 0.65, 0.2);
         geneLimbFrontRight.color     = BaseGene(0.4, 0.4, 0.4);
+        geneLimbFrontRight.color.x  *= baseColor.r;
+        geneLimbFrontRight.color.y  *= baseColor.g;
+        geneLimbFrontRight.color.z  *= baseColor.b;
         
         geneLimbFrontRight.doAnimationCycle   = true;
         geneLimbFrontRight.doInverseAnimation = true;
@@ -256,6 +318,9 @@ void Start() {
         geneLimbRearLeft.position  = BaseGene(0, -0.4, 0);
         geneLimbRearLeft.scale     = BaseGene(0.2, 0.65, 0.2);
         geneLimbRearLeft.color     = BaseGene(0.4, 0.4, 0.4);
+        geneLimbRearLeft.color.x  *= baseColor.r;
+        geneLimbRearLeft.color.y  *= baseColor.g;
+        geneLimbRearLeft.color.z  *= baseColor.b;
         
         geneLimbRearLeft.doAnimationCycle = true;
         geneLimbRearLeft.animationAxis    = BaseGene(2, 0, 0);
@@ -267,6 +332,9 @@ void Start() {
         geneLimbReadRight.position  = BaseGene(0, -0.4, 0);
         geneLimbReadRight.scale     = BaseGene(0.2, 0.65, 0.2);
         geneLimbReadRight.color     = BaseGene(0.4, 0.4, 0.4);
+        geneLimbReadRight.color.x  *= baseColor.r;
+        geneLimbReadRight.color.y  *= baseColor.g;
+        geneLimbReadRight.color.z  *= baseColor.b;
         
         geneLimbReadRight.doAnimationCycle   = true;
         geneLimbReadRight.doInverseAnimation = true;
@@ -311,7 +379,6 @@ void Run() {
     
     
     
-    
     if (cameraController == nullptr) 
         return;
     
@@ -331,11 +398,12 @@ void Run() {
         if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         
         
-        force *= 2.4;
+        force *= 0.3;
         
         if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 1.8;
         
-        cameraController->AddForce(force.x, force.y, force.z);
+        if (force != glm::vec3(0)) 
+            cameraController->AddForce(force.x, force.y, force.z);
         
     }
     

@@ -8,6 +8,7 @@ Light::Light() :
     renderDistance(30.0),
     
     position(glm::vec3(0)),
+    offset(glm::vec3(0)),
     direction(glm::vec3(0)),
     
     intensity(100),

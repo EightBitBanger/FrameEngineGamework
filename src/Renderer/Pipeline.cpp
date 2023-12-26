@@ -33,12 +33,16 @@ void RenderSystem::RenderFrame(void) {
         // Set the camera projection angle
         setTargetCamera( scenePtr->camera, eye, viewProjection );
         
-        // Gather the list of active lights in this scene
-        mNumberOfLights += accumulateSceneLights( scenePtr, eye );
+        //
+        // Gather active lights in this scene
         
-        if (mNumberOfLights >= RENDER_NUMBER_OF_LIGHTS) 
+        accumulateSceneLights( scenePtr, eye );
+        
+        if (mNumberOfLights > RENDER_NUMBER_OF_LIGHTS) 
             mNumberOfLights = RENDER_NUMBER_OF_LIGHTS;
         
+        
+        //
         // Draw the mesh renderers
         
         std::vector<MeshRenderer*>& meshRenderers = scenePtr->mMeshRendererList;
@@ -181,7 +185,10 @@ void RenderSystem::RenderFrame(void) {
         
     }
     
-    SwapBuffers(mDeviceContext);
+    mNumberOfFrames++;
+    
+    if (mNumberOfFrames > 7) 
+        SwapBuffers(mDeviceContext);
     
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::EndFrame::");
@@ -238,37 +245,41 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
 
 unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye) {
     
-    unsigned int numberOfLights=0;
-    
     if (!currentScene->doUpdateLights) 
         return 0;
     
     std::vector<Light*>& lightList = currentScene->mLightList;
     unsigned int totalNumberOfLights = lightList.size();
     
-    for (unsigned int i=0; i < totalNumberOfLights; i++) {
+    unsigned int i;
+    for (i=0; i < totalNumberOfLights; i++) {
         
         Light* lightPtr = lightList[i];
         
-        if (glm::distance(eye, lightPtr->position) > lightPtr->renderDistance) {
+        if (glm::distance(eye, lightPtr->position) > lightPtr->renderDistance) 
             continue;
         
         if (!lightPtr->isActive) 
             continue;
         
-        mLightPosition[i]  = lightPtr->position;
-        mLightDirection[i] = lightPtr->direction;
+        mLightPosition[mNumberOfLights]  = lightPtr->position + lightPtr->offset;
+        mLightDirection[mNumberOfLights] = lightPtr->direction;
         
-        mLightAttenuation[i].r = lightPtr->intensity;
-        mLightAttenuation[i].g = lightPtr->range;
-        mLightAttenuation[i].b = lightPtr->attenuation;
-        mLightAttenuation[i].a = lightPtr->type;
+        mLightAttenuation[mNumberOfLights].r = lightPtr->intensity;
+        mLightAttenuation[mNumberOfLights].g = lightPtr->range;
+        mLightAttenuation[mNumberOfLights].b = lightPtr->attenuation;
+        mLightAttenuation[mNumberOfLights].a = lightPtr->type;
         
-        mLightColor[i].r = lightPtr->color.r;
-        mLightColor[i].g = lightPtr->color.g;
-        mLightColor[i].b = lightPtr->color.b;
+        mLightColor[mNumberOfLights].r = lightPtr->color.r;
+        mLightColor[mNumberOfLights].g = lightPtr->color.g;
+        mLightColor[mNumberOfLights].b = lightPtr->color.b;
         
-        numberOfLights++;
+        mNumberOfLights++;
+        
+        if (mNumberOfLights >= RENDER_NUMBER_OF_LIGHTS) {
+            mNumberOfLights = RENDER_NUMBER_OF_LIGHTS;
+            break;
+        }
         
         continue;
     }
@@ -277,5 +288,5 @@ unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 
     if (!doUpdateLightsEveryFrame) 
         currentScene->doUpdateLights = false;
     
-    return numberOfLights;
+    return i;
 }

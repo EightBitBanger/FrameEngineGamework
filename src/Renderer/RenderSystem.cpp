@@ -24,6 +24,7 @@ RenderSystem::RenderSystem() :
     doUpdateLightsEveryFrame(true),
     
     mNumberOfDrawCalls(0),
+    mNumberOfFrames(0),
     
     mWindowHandle(NULL),
     mDeviceContext(NULL),
