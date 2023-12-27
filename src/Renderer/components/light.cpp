@@ -5,7 +5,7 @@ Light::Light() :
     isActive(true),
     type(0),
     
-    renderDistance(30.0),
+    renderDistance(300),
     
     position(glm::vec3(0)),
     offset(glm::vec3(0)),

@@ -30,6 +30,8 @@ GameObject*  cameraController;
 
 Material* skyMaterial;
 
+GameObject* directionalLight;
+
 Text* text[20];
 
 
@@ -86,18 +88,28 @@ void Start() {
     cameraController->SetLinearDamping( 3 );
     cameraController->SetMass( 10 );
     
-    cameraController->AddComponent( Engine.CreateComponent<Light>() );
-    Light* cameraLight = cameraController->GetComponent<Light>();
-    cameraLight->renderDistance = 1000;
-    cameraLight->attenuation  = 4;
-    cameraLight->intensity    = 2000;
-    //cameraLight->range        = 1000;
-    cameraLight->type         = 1; // Directional
-    cameraLight->color        = Colors.white;
-    cameraLight->direction    = Vector3(0, -1, 0);
     
     
-    Engine.sceneMain->AddLightToSceneRoot( cameraLight );
+    // Directional light
+    directionalLight = Engine.Create<GameObject>();
+    Transform* transform = directionalLight->GetComponent<Transform>();
+    transform->position = Vector3(0, 50, 0);
+    transform->RotateAxis( -1, Vector3(0.3, 1, 0) ); // Face the light toward the ground
+    
+    directionalLight->AddComponent( Engine.CreateComponent<Light>() );
+    Light* RandomLight = directionalLight->GetComponent<Light>();
+    
+    Engine.sceneMain->AddLightToSceneRoot( RandomLight );
+    
+    RandomLight->renderDistance = 1000;
+    RandomLight->attenuation  = 4;
+    RandomLight->range        = 1000;
+    
+    RandomLight->intensity    = 0.1;
+    RandomLight->type         = LIGHT_TYPE_DIRECTIONAL;
+    RandomLight->color        = Colors.white;
+    
+    
     
     // Scene overlay
     sceneOverlay = Engine.Create<Scene>();
@@ -374,6 +386,45 @@ void Run() {
     text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
     text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
     //text[4]->text = "ActorAI  - " + FloatToString( Engine.profileActorAI );
+    
+    
+    
+    
+    //
+    // Lighting day night cycle experimentation 
+    //
+    
+    /*
+    
+    Transform* transform = directionalLight->GetComponent<Transform>();
+    Light* light = directionalLight->GetComponent<Light>();
+    
+    //transform->RotateAxis(-10, Vector3(1, 0, 0));
+    
+    transform->RotateEuler(0.001, 0, 0);
+    
+    Vector3 direction = transform->EulerAngles();
+    
+    if ((direction.x > -90) & (direction.x < 90)) {
+        
+        light->isActive = true;
+        
+    } else {
+        
+        light->isActive = false;
+        transform->SetIdentity();
+        
+        transform->RotateEuler(-90, 0, 0);
+        
+    }
+    
+    Vector3 direction = transform->EulerAngles();
+    text[5]->text = Float.ToString( direction.x );
+    text[6]->text = Float.ToString( direction.y );
+    text[7]->text = Float.ToString( direction.z );
+    
+    */
+    
     
     
     

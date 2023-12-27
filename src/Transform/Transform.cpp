@@ -97,12 +97,12 @@ void Transform::RotateWorldAxis(float angle, glm::vec3 axis, glm::vec3 worldPosi
 }
 
 void Transform::RotateEuler(glm::vec3 eulerAngle) {
-    orientation = glm::quat(glm::radians(eulerAngle));
+    orientation *= glm::quat(glm::radians(eulerAngle));
     matrix *= glm::toMat4(orientation);
 }
 
 void Transform::RotateEuler(float yaw, float pitch, float roll) {
-    orientation = glm::quat( glm::radians( glm::vec3(yaw, pitch, roll) ) );
+    orientation *= glm::quat( glm::radians( glm::vec3(yaw, pitch, roll) ) );
     matrix *= glm::toMat4(orientation);
 }
 
@@ -117,7 +117,7 @@ void Transform::Scale(float x, float y, float z) {
 }
 
 glm::vec3 Transform::EulerAngles(void) {
-    return glm::eulerAngles(orientation);
+    return glm::degrees( glm::eulerAngles(orientation) );
 }
 
 void Transform::SetIdentity(void) {
