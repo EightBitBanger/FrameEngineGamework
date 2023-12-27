@@ -69,7 +69,7 @@ void main() {
         // 1 - Directional light
         if (type < 2) {
             
-            vec3 lightDir = normalize( (-u_light_direction[i]) + vec3(vertPos) );
+            vec3 lightDir = normalize(-u_light_direction[i]);
             
             float diff = max(dot(norm, lightDir), 0.0);
             
