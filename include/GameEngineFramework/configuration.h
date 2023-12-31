@@ -80,6 +80,13 @@
 #define  TICK_UPDATES_PER_SECOND           30
 
 
+//
+// AI
+//
+
+#define NEURAL_LAYER_WIDTH  5
+
+
 
 
 

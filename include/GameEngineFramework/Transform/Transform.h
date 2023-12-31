@@ -12,9 +12,6 @@
 
 #include <vector>
 
-typedef glm::vec2  Vector2;
-typedef glm::vec3  Vector3;
-
 
 class ENGINE_API Transform {
     

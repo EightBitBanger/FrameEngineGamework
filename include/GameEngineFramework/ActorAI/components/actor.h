@@ -44,6 +44,7 @@ public:
     /// Get the speed of the actor.
     float GetSpeed(void);
     
+    
     /// Add a new gene to the actors genome. The index location will be returned.
     void AddGene(Gene& newGene);
     
@@ -72,24 +73,45 @@ public:
     /// Set the input data to be fed through the neural network.
     void SetNeuralInputLayer(NeuralLayer inputLayer);
     
+    
+    /// Set the chance for the actor to change direction.
+    void SetChanceToChangeDirection(float chance);
+    
+    /// Set the chance to focus on a nearby actor.
+    void SetChanceToFocusOnActor(float chance);
+    
+    /// Set the chance to begin walking.
+    void SetChanceToWalk(float chance);
+    
+    /// Set the chance to stop walking.
+    void SetChanceToStopWalking(float chance);
+    
+    /// Set the distance to walk when selecting new random positions.
+    void SetDistanceToWalk(float distance);
+    
+    /// Set the distance to begin attacking a pray actor if any.
+    void SetDistanceToAttack(float distance);
+    
+    /// Set the distance to begin running from a predator actor if any.
+    void SetDistanceToFlee(float distance);
+    
+    // Memories
+    
+    /// Add a memory to this actor.
+    void AddMemory(std::string memory);
+    
+    /// Remove a memory from this actor.
+    bool RemoveMemory(std::string memory);
+    
+    /// Check if a memory exists in this actor.
+    bool CheckMemoryExists(std::string memory);
+    
     Actor();
     
 private:
     
     // Actor name string
     std::string mName;
-    
-    // Is this actor active in the simulation
-    bool mIsActive;
-    
-    // Should the genetic data be re-expressed
-    bool mDoUpdateGenetics;
-    
-    // Is this actor currently walking
-    bool mIsWalking;
-    
-    // Is this actor currently running
-    bool mIsRunning;
     
     // Number of ticks this actor has accumulated in its lifetime
     unsigned long int mAge;
@@ -112,13 +134,87 @@ private:
     // Forward facing direction of the actor in the world
     glm::vec3 mRotation;
     
-    // Direction toward which the actor must turn
+    // Direction toward which the actor should face
     glm::vec3 mRotateTo;
+    
+    // World target point toward which the actor should face
+    glm::vec3 mTargetPoint;
+    
+    
+    
+    // Is this actor active in the simulation
+    bool mIsActive;
+    
+    // Should the genetic data be re-expressed
+    bool mDoUpdateGenetics;
+    
+    // Is the actor walking
+    bool mIsWalking;
+    
+    // Is the actor running
+    bool mIsRunning;
+    
+    // Is the actor attacking another actor
+    bool mIsAttacking;
+	
+	// Is the actor fleeing from a predator
+	bool mIsFleeing;
+	
+	// Is the actor consuming
+	bool mIsConsuming;
+	
+	// Should the actor face toward or away from the target point
+	bool mIsFacing;
+	
+    // Chance to suddenly change direction
+    float mChanceToChangeDirection;
+	
+	// Chance to focus on a near by actor
+	float mChanceToFocusOnActor;
+	
+	// Chance to begin walking
+	float mChanceToWalk;
+    
+    // Chance to suddenly stop moving
+    float mChanceToStopWalking;
+	
+    // Distance to focus on a near by actor
+	float mDistanceToFocusOnActor;
+	
+	// Distance to travel when moving to a random target position
+	float mDistanceToWalk;
+    
+    // Distance to begin attacking a pray actor
+	float mDistanceToAttack;
+	
+    // Distance to begin fleeing from a predator actor
+	float mDistanceToFlee;
+    
+    // Minimum world height this actor prefers to inhabit
+	float mHeightPreferenceMin;
+	
+	// Maximum world height this actor prefers to inhabit
+	float mHeightPreferenceMax;
+    
+    // Cool down period before changing direction again
+    unsigned int mReorientationCoolDownCounter;
+    
+    // Cool down period before focusing on another actor
+    unsigned int mObservationCoolDownCounter;
+    
+    // List of actor names considered to be pray
+    std::vector<std::string> mAttackActors;
+    
+    // List of actor names considered to be predator actors
+    std::vector<std::string> mFleeFromActors;
+    
+    // List of memories collected by this entity
+    std::vector<std::string> mMemories;
     
     // Genetic expression
     std::vector<Gene> mGenes;
     
-    // List of render components representing the genetic components
+    // List of render components representing genetic expression
     std::vector<MeshRenderer*> mGeneticRenderers;
     
     // List of animation states for each genetic component

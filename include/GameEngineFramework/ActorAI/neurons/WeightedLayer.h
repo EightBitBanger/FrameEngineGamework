@@ -3,7 +3,6 @@
 
 #include <GameEngineFramework/configuration.h>
 
-#define NEURAL_LAYER_WIDTH  3
 
 class ENGINE_API WeightedLayer {
     

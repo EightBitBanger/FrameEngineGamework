@@ -29,6 +29,9 @@ public:
     /// Set the player position in the simulation.
     void SetPlayerWorldPosition(glm::vec3 position);
     
+    /// Get the player position in the simulation.
+    glm::vec3 GetPlayerWorldPosition(void);
+    
     /// Get the number of actors in the AI simulation.
     unsigned int GetNumberOfActors(void);
     
@@ -51,11 +54,11 @@ public:
 private:
     
     // Current position of the player in the world
-    glm::vec3 playerPosition;
+    glm::vec3 mPlayerPosition;
     
     // Threading
-    std::thread* actorSystemThread;
-    std::mutex mux;
+    std::thread* mActorSystemThread;
+    std::mutex   mux;
     
     // Actor object pool
     PoolAllocator<Actor> mActors;

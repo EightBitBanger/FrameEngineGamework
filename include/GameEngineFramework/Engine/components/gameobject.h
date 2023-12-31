@@ -97,15 +97,15 @@ public:
     void AddTorque(glm::vec3 force);
     
     /// Add a collider from a resource tag at the offset position x, y and z.
-    void AddCollider(ColliderTag* colliderTag, float x, float y, float z);
+    void AddCollider(ColliderTag* colliderTag, float x, float y, float z, LayerMask layer = LayerMask::Default);
     /// Add a box collider shape at the offset position x, y and z.
-    void AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z);
+    void AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
     /// Add a capsule collider shape at the offset position x, y and z.
-    void AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z);
+    void AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
     /// Add a sphere collider shape at the offset position x, y and z.
-    void AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z);
+    void AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
     /// Add a mesh collider.
-    void AddColliderMesh(MeshCollider* meshCollider);
+    void AddColliderMesh(MeshCollider* meshCollider, LayerMask layer);
     
     /// Set the rigid body mass.
     void SetMass(float mass);
@@ -131,7 +131,8 @@ public:
     void SetStatic(void);
     /// Make the rigid body dynamically movable.
     void SetDynamic(void);
-    
+    /// Make the rigid body kinematic.
+    void SetKinematic(void);
     
 private:
     
