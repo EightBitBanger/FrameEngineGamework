@@ -9,6 +9,12 @@ PhysicsSystem::PhysicsSystem() :
     return;
 }
 
+RaybackCastCaller::RaybackCastCaller() : 
+    isHit(false),
+    point(glm::vec3(0, 0, 0))
+{
+}
+
 void PhysicsSystem::Initiate(void) {
     assert(world == nullptr);
     rp3d::PhysicsWorld::WorldSettings worldSettings;
@@ -189,3 +195,33 @@ rp3d::RigidBody* PhysicsSystem::RemoveRigidBodyFromFreeList(void) {
     mRigidBodyFreeList.erase( mRigidBodyFreeList.end()-1 );
     return bodyPtr;
 }
+
+bool PhysicsSystem::Raycast(glm::vec3 from, glm::vec3 direction, float distance, Hit& hit, LayerMask layer) {
+    
+    direction = glm::normalize( direction ) * distance;
+    
+    rp3d::Vector3 fromVec(from.x, 
+                          from.y, 
+                          from.z);
+    
+    rp3d::Vector3 toVec(direction.x, 
+                        direction.y, 
+                        direction.z);
+    
+    rp3d::Ray ray(fromVec, fromVec + toVec);
+    
+    mRaybackCastCaller.isHit = false;
+    
+    world->raycast( ray, &mRaybackCastCaller, (unsigned short)layer );
+    
+    if (!mRaybackCastCaller.isHit) 
+        return false;
+    
+    hit.point  = mRaybackCastCaller.point;
+    hit.normal = mRaybackCastCaller.normal;
+    
+    return true;
+}
+
+
+

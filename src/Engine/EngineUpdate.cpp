@@ -24,6 +24,12 @@ ENGINE_API extern EngineSystemManager   Engine;
 
 void EngineSystemManager::Update(void) {
     
+    // Get the camera position
+    glm::vec3 cameraPosition(0);
+    if (sceneMain != nullptr) 
+        if (sceneMain->camera != nullptr) 
+            cameraPosition = sceneMain->camera->transform.position;
+    
     // Update player position in the AI simulation
     if (sceneMain != nullptr) {
         
@@ -216,26 +222,6 @@ void EngineSystemManager::Update(void) {
             
             if (streamBuffer[i].actor->mIsActive) {
                 
-                
-                
-                // TESTING random movement
-                
-                if (Random.Range(0, 100) > 98) 
-                    streamBuffer[i].actor->mIsWalking = false;
-                
-                if (Random.Range(0, 100) > 98) 
-                    streamBuffer[i].actor->mIsWalking = true;
-                
-                if (Random.Range(0, 100) > 97) 
-                    streamBuffer[i].actor->mRotateTo.y = Random.Range(0, 360);
-                
-                
-                
-                
-                
-                
-                
-                
                 // Check walking state
                 if (streamBuffer[i].actor->mIsWalking) {
                     
@@ -246,7 +232,7 @@ void EngineSystemManager::Update(void) {
                     //forward.y = tan( glm::radians( -(streamBuffer[i].actor->mRotation.x - 90) ) );
                     forward.z = sin( glm::radians( -(streamBuffer[i].actor->mRotation.y - 90) ) );
                     
-                    streamBuffer[i].actor->mVelocity = forward * (streamBuffer[i].actor->mSpeed * 0.01f);
+                    streamBuffer[i].actor->mVelocity = forward * (streamBuffer[i].actor->mSpeed * 0.1f) * 0.1f;
                     
                     // Check running speed multiplier
                     if (streamBuffer[i].actor->mIsRunning) 
@@ -259,36 +245,39 @@ void EngineSystemManager::Update(void) {
                     
                 }
                 
+                // Face toward target point
+                glm::vec3 position = streamBuffer[i].actor->mPosition;
+                
+                float xx = position.x - streamBuffer[i].actor->mTargetPoint.x;
+                float zz = position.z - streamBuffer[i].actor->mTargetPoint.z;
+                
+                streamBuffer[i].actor->mRotateTo.y = glm::degrees( glm::atan(xx, zz) ) + 180;
+                
+                // Check invert facing direction
+                if (!streamBuffer[i].actor->mIsFacing) {
+                    streamBuffer[i].actor->mRotateTo.y += 180;
+                    if (streamBuffer[i].actor->mRotateTo.y > 360) 
+                        streamBuffer[i].actor->mRotateTo.y -= 360;
+                }
+                
+                // Check arrived at target point
+                float distance = glm::distance( streamBuffer[i].actor->mTargetPoint, 
+                                                streamBuffer[i].actor->mPosition );
+                
+                if (distance < 1.5) 
+                    streamBuffer[i].actor->mIsWalking = false;
+                
                 //
                 // Check actor target direction range
                 
-                // Max rotation angles
-                if (streamBuffer[i].actor->mRotateTo.x >= 360) {
-                    streamBuffer[i].actor->mRotateTo.x -= 360;
-                    streamBuffer[i].actor->mRotation.x -= 360;
-                }
-                if (streamBuffer[i].actor->mRotateTo.y >= 360) {
-                    streamBuffer[i].actor->mRotateTo.y -= 360;
-                    streamBuffer[i].actor->mRotation.y -= 360;
-                }
-                if (streamBuffer[i].actor->mRotateTo.z >= 360) {
-                    streamBuffer[i].actor->mRotateTo.z -= 360;
-                    streamBuffer[i].actor->mRotation.z -= 360;
-                }
+                // Wrap euler rotations
+                if (streamBuffer[i].actor->mRotation.y < 90) 
+                    if (streamBuffer[i].actor->mRotateTo.y > 270) 
+                        streamBuffer[i].actor->mRotation.y += 360;
                 
-                // Min rotation angles
-                if (streamBuffer[i].actor->mRotateTo.x < 0) {
-                    streamBuffer[i].actor->mRotateTo.x += 360;
-                    streamBuffer[i].actor->mRotation.x += 360;
-                }
-                if (streamBuffer[i].actor->mRotateTo.y < 0) {
-                    streamBuffer[i].actor->mRotateTo.y += 360;
-                    streamBuffer[i].actor->mRotation.y += 360;
-                }
-                if (streamBuffer[i].actor->mRotateTo.z < 0) {
-                    streamBuffer[i].actor->mRotateTo.z += 360;
-                    streamBuffer[i].actor->mRotation.z += 360;
-                }
+                if (streamBuffer[i].actor->mRotation.y > 270) 
+                    if (streamBuffer[i].actor->mRotateTo.y < 90) 
+                        streamBuffer[i].actor->mRotation.y -= 360;
                 
                 // Rotate actor toward the focal point
                 if (streamBuffer[i].actor->mRotation != streamBuffer[i].actor->mRotateTo) {
@@ -315,7 +304,7 @@ void EngineSystemManager::Update(void) {
                     //
                     // Destroy and clear old genetic renderers
                     
-                    for (int a=0; a < streamBuffer[i].actor->mGeneticRenderers.size(); a++) {
+                    for (unsigned int a=0; a < streamBuffer[i].actor->mGeneticRenderers.size(); a++) {
                         
                         MeshRenderer* geneRenderer = streamBuffer[i].actor->mGeneticRenderers[a];
                         
@@ -366,8 +355,16 @@ void EngineSystemManager::Update(void) {
                         newRenderer->transform.scale.y = streamBuffer[i].actor->mGenes[a].scale.y;
                         newRenderer->transform.scale.z = streamBuffer[i].actor->mGenes[a].scale.z;
                         
+                        Transform transform;
+                        
+                        
+                        glm::vec4 orientation(transform.orientation.w, 
+                                              transform.orientation.x, 
+                                              transform.orientation.y, 
+                                              transform.orientation.z);
+                        
                         streamBuffer[i].actor->mGeneticRenderers.push_back( newRenderer );
-                        streamBuffer[i].actor->mAnimationStates .push_back( glm::vec4(1) );
+                        streamBuffer[i].actor->mAnimationStates .push_back( orientation );
                         
                         sceneMain->AddMeshRendererToSceneRoot( newRenderer );
                         
@@ -381,7 +378,7 @@ void EngineSystemManager::Update(void) {
                     // Update genetic renderers
                     //
                     
-                    for (int a=0; a < streamBuffer[i].actor->mGeneticRenderers.size(); a++) {
+                    for (unsigned int a=0; a < streamBuffer[i].actor->mGeneticRenderers.size(); a++) {
                         
                         MeshRenderer* geneRenderer = streamBuffer[i].actor->mGeneticRenderers[a];
                         geneRenderer->transform.position  = streamBuffer[i].actor->mPosition;
@@ -402,7 +399,10 @@ void EngineSystemManager::Update(void) {
                                                                    streamBuffer[i].actor->mGenes[a].offset.y,
                                                                    streamBuffer[i].actor->mGenes[a].offset.z));
                         
-                        // Check should use animation
+                        //
+                        // Update animation
+                        //
+                        
                         if ((!streamBuffer[i].actor->mGenes[a].doAnimationCycle) | (!streamBuffer[i].actor->mIsWalking)) {
                             
                             matrix = glm::translate( matrix, glm::vec3(streamBuffer[i].actor->mGenes[a].position.x,
@@ -528,6 +528,24 @@ void EngineSystemManager::Update(void) {
                 if (streamBuffer[i].rigidBody != nullptr) {
                     
                     glm::vec3 actorVelocity = streamBuffer[i].actor->mVelocity;
+                    
+                    // Raycast here
+                    glm::vec3 from      = streamBuffer[i].actor->mPosition;
+                    glm::vec3 direction = glm::vec3(0, -1, 0);
+                    
+                    Hit hit;
+                    
+                    float distance = 1;
+                    
+                    if (Physics.Raycast(from, direction, distance, hit, LayerMask::Default)) {
+                        
+                    } else {
+                        
+                        // Not on ground
+                        actorVelocity.y = -0.15;
+                        
+                    }
+                    
                     
                     // Sync actor position
                     streamBuffer[i].actor->mPosition = currentTransform.position;

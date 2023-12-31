@@ -4,7 +4,21 @@ extern PhysicsSystem  Physics;
 
 
 Actor::Actor() : 
+    
     mName(""),
+    
+    mAge(0),
+    
+    mSpeed(1.0f),
+    
+    mSpeedMul(1.3),
+    
+    mSnapSpeed(0.24),
+    
+    mVelocity(glm::vec3(0, 0, 0)),
+    mPosition(glm::vec3(0, 0, 0)),
+    mRotation(glm::vec3(0, 0, 0)),
+    mRotateTo(glm::vec3(0, 0, 0)),
     
     mIsActive(true),
     
@@ -12,22 +26,27 @@ Actor::Actor() :
     
     mIsWalking(false),
     mIsRunning(false),
+    mIsAttacking(false),
+	mIsFleeing(false),
+	mIsConsuming(false),
+	mIsFacing(true),
+	
+	mChanceToChangeDirection(400),
+	mChanceToFocusOnActor   (100),
+	mChanceToWalk           (800),
+    mChanceToStopWalking    (0),
+	
+	mDistanceToFocusOnActor (10),
+    mDistanceToWalk         (30),
+    mDistanceToAttack       (30),
+	mDistanceToFlee         (20),
     
-    mAge(0),
+    mHeightPreferenceMin    (0),
+	mHeightPreferenceMax    (0),
     
-    mSpeed(1),
-    
-    mSpeedMul(1),
-    
-    mSnapSpeed(0.3),
-    
-    mVelocity(glm::vec3(0, 0, 0)),
-    mPosition(glm::vec3(0, 0, 0)),
-    mRotateTo(glm::vec3(0, 0, 0))
+    mReorientationCoolDownCounter(0),
+    mObservationCoolDownCounter(0)
 {
-    
-    
-    
     return;
 }
 
@@ -87,7 +106,9 @@ float Actor::GetSpeed(void) {
     return speedValue;
 }
 
+
 // Genetics
+
 
 void Actor::AddGene(Gene& newGene) {
     mux.lock();
@@ -119,7 +140,9 @@ unsigned int Actor::GetNumberOfGenes(void) {
     return sizeValue;
 }
 
+
 // Neural networking
+
 
 void Actor::AddWeightedLayer(WeightedLayer& newNeuralLayer) {
     mux.lock();
@@ -156,3 +179,79 @@ void Actor::SetNeuralInputLayer(NeuralLayer inputLayer) {
     mux.unlock();
     return;
 }
+
+
+// State
+
+
+void Actor::SetChanceToChangeDirection(float chance) {
+    mux.lock();
+    mChanceToChangeDirection = chance;
+    mux.unlock();
+    return;
+}
+
+void Actor::SetChanceToFocusOnActor(float chance) {
+    mux.lock();
+    mChanceToFocusOnActor = chance;
+    mux.unlock();
+    return;
+}
+
+void Actor::SetChanceToWalk(float chance) {
+    mux.lock();
+    mChanceToWalk = chance;
+    mux.unlock();
+    return;
+}
+
+void Actor::SetChanceToStopWalking(float chance) {
+    mux.lock();
+    mChanceToStopWalking = chance;
+    mux.unlock();
+    return;
+}
+
+void Actor::SetDistanceToWalk(float distance) {
+    mux.lock();
+    mDistanceToWalk = distance;
+    mux.unlock();
+    return;
+}
+
+void Actor::SetDistanceToAttack(float distance) {
+    mux.lock();
+    mDistanceToAttack = distance;
+    mux.unlock();
+    return;
+}
+
+void Actor::SetDistanceToFlee(float distance) {
+    mux.lock();
+    mDistanceToFlee = distance;
+    mux.unlock();
+    return;
+}
+
+void Actor::AddMemory(std::string memory) {
+    mMemories.push_back( memory );
+    return;
+}
+
+bool Actor::RemoveMemory(std::string memory) {
+    for (unsigned int i=0; i < mMemories.size(); i++) {
+        if (mMemories[i] == memory) {
+            mMemories.erase( mMemories.begin() + i );
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Actor::CheckMemoryExists(std::string memory) {
+    for (unsigned int i=0; i < mMemories.size(); i++) 
+        if (mMemories[i] == memory) 
+            return true;
+    return false;
+}
+

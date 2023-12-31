@@ -151,7 +151,7 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     newGameObject->AddComponent( CreateComponent(Components.Actor) );
     newGameObject->AddComponent( CreateComponent(Components.RigidBody) );
     newGameObject->AddComponent( CreateComponent(Components.MeshRenderer) );
-    
+    newGameObject->GetComponent<Actor>()->mTargetPoint = position;
     Material* materialPtr = Renderer.CreateMaterial();
     
     materialPtr->shader = shaders.color;

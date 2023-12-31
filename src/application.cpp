@@ -51,7 +51,7 @@ void Start() {
     // Add the scene to the render system
     Renderer.AddSceneToRenderQueue(Engine.sceneMain);
     
-    Physics.SetWorldGravity(0, -0.01, 0);
+    Physics.SetWorldGravity(0, -9.81, 0);
     
     
     // Create a sky
@@ -63,8 +63,8 @@ void Start() {
     skyLow  += Colors.MakeGrayScale(0.6);
     
     // Override sky with black
-    skyHigh = Colors.MakeGrayScale(0.1);
-    skyLow  = Colors.MakeGrayScale(0.0001);
+    //skyHigh = Colors.MakeGrayScale(0.1);
+    //skyLow  = Colors.MakeGrayScale(0.0001);
     
     GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, skyFadeBias);
     
@@ -74,7 +74,7 @@ void Start() {
     
     
     // Create a camera controller
-    Vector3 position = Vector3(0, 40, 0);
+    Vector3 position = Vector3(-10, 10, 0);
     Vector3 colliderScale = Vector3(1, 1, 1);
     
     cameraController = Engine.CreateCameraController(position, colliderScale);
@@ -219,13 +219,13 @@ void Start() {
             GameObject* plainObject = Engine.Create<GameObject>();
             plainObject->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, plainMaterial ) );
             plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
-            plainObject->DisableGravity();
             
             plainObject->SetAngularAxisLockFactor(0, 0, 0);
             plainObject->SetLinearAxisLockFactor(0, 0, 0);
+            plainObject->DisableGravity();
             plainObject->SetStatic();
-            plainObject->SetMass(0);
-            plainObject->CalculatePhysics();
+            //plainObject->SetMass(0);
+            //plainObject->CalculatePhysics();
             
             BoxShape* plainCollider = Physics.CreateColliderBox(chunkSize, 100, chunkSize);
             
@@ -251,20 +251,28 @@ void Start() {
     // Generate AI actors
     //
     
-    float spread = 80;
+    float spread = 1;
     
-    for (int i=0; i < 500; i++) {
+    for (int i=0; i < 1; i++) {
         
         Vector3 position;
-        position.x = Random.Range(0.0f, spread) - Random.Range(0.0f, spread);
-        position.z = Random.Range(0.0f, spread) - Random.Range(0.0f, spread);
+        position.x = (Random.Range(0.0f, spread) * 0.1) - (Random.Range(0.0f, spread) * 0.1);
+        position.y = 10;
+        position.z = (Random.Range(0.0f, spread) * 0.1) - (Random.Range(0.0f, spread) * 0.1);
         
         GameObject* newActorObject = Engine.CreateAIActor( position );
         newActorObject->GetComponent<Transform>()->scale = Vector3(1, 1, 1);
+        
+        
+        //BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);
+        //newActorObject->AddColliderBox(boxShape, 0, 0, 0);
+        
         newActorObject->DisableGravity();
+        newActorObject->SetKinematic();
         
         Actor* actor = newActorObject->GetComponent<Actor>();
-        actor->SetSpeed( 2.4 );
+        
+        actor->SetSpeed( 2 );
         
         float variantR = Random.Range(0, 10) * 0.001;
         float variantG = Random.Range(0, 10) * 0.001;
@@ -363,6 +371,38 @@ void Start() {
         actor->AddGene(geneLimbRearLeft);
         actor->AddGene(geneLimbReadRight);
         
+        
+        
+        //
+        // Add neural layers
+        //
+        /*
+        for (int i=0; i < 3; i++) {
+            
+            WeightedLayer weightedLayer;
+            
+            for (int a=0; a < NEURAL_LAYER_WIDTH; a++) {
+                
+                weightedLayer.weight[a] = 1.0 + ((Random.Range(0, 10) * 0.01) - (Random.Range(0, 10) * 0.01));
+                
+                if (Random.Range(0, 100) < 10) {
+                    weightedLayer.plasticity = 0.1;
+                } else {
+                    weightedLayer.plasticity = 0;
+                }
+                
+            }
+            
+            actor->AddWeightedLayer( weightedLayer );
+            
+        }
+        */
+        
+        
+        //actor->SetChanceToWalk(0.1);
+        //actor->SetChanceToStopWalking(0);
+        //actor->SetChanceToChangeDirection(80);
+        
         continue;
     }
     
@@ -382,10 +422,17 @@ void Start() {
 void Run() {
     
     
+    //text[1]->text = "Renderer - " + Float.ToString( AI.GetPlayerWorldPosition().x ) + " , " + 
+    //                                Float.ToString( AI.GetPlayerWorldPosition().z );
+    
+    
     text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
     text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
     text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
-    //text[4]->text = "ActorAI  - " + FloatToString( Engine.profileActorAI );
+    
+    //text[5]->text = "x - " + Float.ToString( cameraController->GetComponent<Transform>()->position.x );
+    //text[6]->text = "y - " + Float.ToString( cameraController->GetComponent<Transform>()->position.y );
+    //text[7]->text = "z - " + Float.ToString( cameraController->GetComponent<Transform>()->position.z );
     
     
     
@@ -419,9 +466,9 @@ void Run() {
     }
     
     Vector3 direction = transform->EulerAngles();
-    text[5]->text = Float.ToString( direction.x );
-    text[6]->text = Float.ToString( direction.y );
-    text[7]->text = Float.ToString( direction.z );
+    text[8]->text  = Float.ToString( direction.x );
+    text[9]->text  = Float.ToString( direction.y );
+    text[10]->text = Float.ToString( direction.z );
     
     */
     
