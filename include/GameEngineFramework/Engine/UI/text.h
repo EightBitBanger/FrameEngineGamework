@@ -12,6 +12,9 @@ class Text {
     
 public:
     
+    friend class EngineSystemManager;
+    
+    
     /// Text to be rendered.
     std::string text;
     
@@ -51,12 +54,18 @@ public:
         height(0.9),
         
         glyphWidth(0.9),
-        glyphHeight(0.9)
+        glyphHeight(0.9),
+        
+        mCurrentText("")
     {
         color = Color(0, 0, 0);
         return;
     }
     
+private:
+    
+    // Current state of the text string
+    std::string mCurrentText;
     
 };
 

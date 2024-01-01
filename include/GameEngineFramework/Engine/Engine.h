@@ -182,9 +182,6 @@ public:
     /// Call update on engine components.
     void Update(void);
     
-    /// Call update on UI components.
-    void UpdateUI(void);
-    
     /// Shutdown the engine.
     void Shutdown(void);
     
@@ -255,6 +252,19 @@ public:
     
     
 private:
+    
+    // Batch update engine components
+    void UpdateTransformationChains(void);
+    void UpdateUI(void);
+    
+    // Update component by index
+    void UpdateMeshRenderer(unsigned int index);
+    void UpdateRigidBody(unsigned int index);
+    void UpdatePanelUI(unsigned int index);
+    void UpdateTextUI(unsigned int index);
+    void UpdateCamera(unsigned int index);
+    void UpdateActor(unsigned int index);
+    void UpdateLight(unsigned int index);
     
     // List of active game objects
     std::vector<GameObject*> mGameObjectActive;

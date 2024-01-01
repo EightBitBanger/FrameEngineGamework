@@ -52,7 +52,6 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Application/applicationlayer.h"
     "include/GameEngineFramework/Application/winproc.h"
     "include/GameEngineFramework/Application/main.h"
-    "include/GameEngineFramework/Application/SystemInitiation.h"
     
     "include/GameEngineFramework/Audio/AudioSystem.h"
     
@@ -139,7 +138,6 @@ set (RUNTIME_SOURCES
     
     "src/Application/properties.rc"
     "src/Application/main.cpp"
-    "src/Application/SystemInitiation.cpp"
     
 )
 
@@ -414,7 +412,16 @@ set (CORE_SOURCES
     "src/Engine/EngineGameObjects.cpp"
     "src/Engine/EngineComponents.cpp"
     "src/Engine/EngineUpdate.cpp"
-    "src/Engine/EngineUpdateUI.cpp"
+    
+    "src/Engine/componentUpdate/EngineUpdateUI.cpp"
+    "src/Engine/componentUpdate/EngineUpdateAI.cpp"
+    "src/Engine/componentUpdate/EngineUpdateCamera.cpp"
+    "src/Engine/componentUpdate/EngineUpdatePanel.cpp"
+    "src/Engine/componentUpdate/EngineUpdateText.cpp"
+    "src/Engine/componentUpdate/EngineUpdateRigidBody.cpp"
+    "src/Engine/componentUpdate/EngineUpdateTransforms.cpp"
+    "src/Engine/componentUpdate/EngineUpdateLight.cpp"
+    "src/Engine/componentUpdate/EngineUpdateMeshRenderer.cpp"
     
     "src/Engine/components/component.cpp"
     "src/Engine/components/gameobject.cpp"

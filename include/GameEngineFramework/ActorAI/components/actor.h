@@ -39,11 +39,17 @@ public:
     /// Get the age of the actor.
     unsigned long int GetAge(void);
     
-    /// Set the speed of the actor.
+    /// Set the walking speed of the actor.
     void SetSpeed(float newSpeed);
-    /// Get the speed of the actor.
+    /// Get the walking speed of the actor.
     float GetSpeed(void);
     
+    /// Set the running speed multiplier of the actor.
+    void SetSpeedMultiplier(float newSpeedMul);
+    /// Get the running speed multiplier of the actor.
+    float GetSpeedMultiplier(void);
+    
+    // Genetics
     
     /// Add a new gene to the actors genome. The index location will be returned.
     void AddGene(Gene& newGene);
@@ -57,6 +63,7 @@ public:
     /// Get a gene from the genome.
     Gene GetGeneFromGenome(unsigned int index);
     
+    // Neural networking
     
     /// Add a weighted layer to the neural network.
     void AddWeightedLayer(WeightedLayer& newNeuralLayer);
@@ -64,15 +71,16 @@ public:
     /// Remove a weighted layer from the neural network by the given index location.
     void RemoveWeightedLayer(unsigned int index);
     
-    /// Get a weighted layer from the neural network.
-    WeightedLayer GetWeightedLayer(unsigned int index);
-    
     /// Get the number of weighted layers in the neural network.
     unsigned int GetNumberOfWeightedLayers(void);
+    
+    /// Get a weighted layer from the neural network.
+    WeightedLayer GetWeightedLayerFromNetwork(unsigned int index);
     
     /// Set the input data to be fed through the neural network.
     void SetNeuralInputLayer(NeuralLayer inputLayer);
     
+    // AI state behavioral hardwiring
     
     /// Set the chance for the actor to change direction.
     void SetChanceToChangeDirection(float chance);
@@ -116,6 +124,7 @@ private:
     // Number of ticks this actor has accumulated in its lifetime
     unsigned long int mAge;
     
+    
     // Max speed this actor can travel
     float mSpeed;
     
@@ -124,6 +133,7 @@ private:
     
     // Rotation speed when changing directions
     float mSnapSpeed;
+    
     
     // Movement vector
     glm::vec3 mVelocity;
@@ -139,7 +149,6 @@ private:
     
     // World target point toward which the actor should face
     glm::vec3 mTargetPoint;
-    
     
     
     // Is this actor active in the simulation
@@ -166,6 +175,7 @@ private:
 	// Should the actor face toward or away from the target point
 	bool mIsFacing;
 	
+	
     // Chance to suddenly change direction
     float mChanceToChangeDirection;
 	
@@ -177,6 +187,7 @@ private:
     
     // Chance to suddenly stop moving
     float mChanceToStopWalking;
+	
 	
     // Distance to focus on a near by actor
 	float mDistanceToFocusOnActor;
@@ -190,17 +201,20 @@ private:
     // Distance to begin fleeing from a predator actor
 	float mDistanceToFlee;
     
+    
     // Minimum world height this actor prefers to inhabit
 	float mHeightPreferenceMin;
 	
 	// Maximum world height this actor prefers to inhabit
 	float mHeightPreferenceMax;
     
+    
     // Cool down period before changing direction again
     unsigned int mReorientationCoolDownCounter;
     
     // Cool down period before focusing on another actor
     unsigned int mObservationCoolDownCounter;
+    
     
     // List of actor names considered to be pray
     std::vector<std::string> mAttackActors;
