@@ -30,9 +30,6 @@ public:
     /// State whether the object is active.
     bool isActive;
     
-    /// Pointer to a parent object. Setting to nullptr represents the game object as a root node in the scene.
-    GameObject* parent;
-    
     GameObject();
     
     //

@@ -74,6 +74,7 @@ struct ComponentDataStreamBuffer {
     GameObject*    gameObject;
     
     // Components
+    Transform*     transform;
     
     // Rendering
     Light*         light;
@@ -110,18 +111,6 @@ public:
     
     /// Return a pointer to a game object at the index position.
     GameObject* GetGameObject(unsigned int index);
-    
-    
-    // Components
-    
-    /// Create a component object with initial type information and return its pointer.
-    Component* CreateComponent(ComponentType type);
-    
-    /// Destroy a component object.
-    bool DestroyComponent(Component* componentPtr);
-    
-    /// Get the number of component objects.
-    unsigned int GetComponentCount(void);
     
     
     // Special components and game objects
@@ -250,8 +239,18 @@ public:
         return rendererComponent;
     }
     
+    /// Destroy a component object.
+    bool DestroyComponent(Component* componentPtr);
+    
+    /// Get the number of component objects.
+    unsigned int GetComponentCount(void);
+    
     
 private:
+    
+    // Create a component object with initial type information and return its pointer.
+    Component* CreateComponent(ComponentType type);
+    
     
     // Batch update engine components
     void UpdateTransformationChains(void);
@@ -267,7 +266,7 @@ private:
     void UpdateLight(unsigned int index);
     
     // List of active game objects
-    std::vector<GameObject*> mGameObjectActive;
+    std::vector<GameObject*>  mGameObjectActive;
     
     // Component allocators
     PoolAllocator<GameObject> mGameObjects;
@@ -278,10 +277,6 @@ private:
     PoolAllocator<Button>     mButtons;
     
     PoolAllocator<Transform>  mTransforms;
-    
-    // UI state
-    int mouseOldX;
-    int mouseOldY;
     
     // Default shaders
     struct DefaultShaders {
@@ -298,11 +293,11 @@ private:
         Mesh* plain;
     };
     
-    // Buffer for streaming component data
-    bool doUpdateDataStream;
-    unsigned int streamSize;
+    // Component data streaming
+    bool mDoUpdateDataStream;
+    unsigned int mStreamSize;
     
-    ComponentDataStreamBuffer streamBuffer[ COMPONENT_STREAM_BUFFER_SIZE ];
+    ComponentDataStreamBuffer mStreamBuffer[ COMPONENT_STREAM_BUFFER_SIZE ];
     
 public:
     

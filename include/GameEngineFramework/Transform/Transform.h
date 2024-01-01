@@ -17,17 +17,17 @@ class ENGINE_API Transform {
     
 public:
     
-    /// Local translation
+    /// Translation to world space.
     glm::vec3 position;
     /// Local rotation
-    glm::quat orientation;
+    glm::quat localRotation;
     /// Local scale
-    glm::vec3 scale;
+    glm::vec3 localScale;
     
     /// Transform matrix
     glm::mat4 matrix;
     
-    /// Parent transformation matrix.
+    /// Pointer to a parent transform.
     Transform* parent;
     
     Transform();
