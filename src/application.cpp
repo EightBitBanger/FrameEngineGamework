@@ -251,28 +251,26 @@ void Start() {
     // Generate AI actors
     //
     
-    float spread = 1;
+    float spread = 1300;
     
-    for (int i=0; i < 1; i++) {
+    for (int i=0; i < 800; i++) {
         
         Vector3 position;
         position.x = (Random.Range(0.0f, spread) * 0.1) - (Random.Range(0.0f, spread) * 0.1);
-        position.y = 10;
+        position.y = 100;
         position.z = (Random.Range(0.0f, spread) * 0.1) - (Random.Range(0.0f, spread) * 0.1);
         
         GameObject* newActorObject = Engine.CreateAIActor( position );
-        newActorObject->GetComponent<Transform>()->scale = Vector3(1, 1, 1);
+        Transform* transform = newActorObject->GetComponent<Transform>();
+        transform->scale = Vector3(1, 1, 1);
         
+        // Collision
+        BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);
+        newActorObject->AddColliderBox(boxShape, 0, 0, 0, LayerMask::Actor);
         
-        //BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);
-        //newActorObject->AddColliderBox(boxShape, 0, 0, 0);
-        
-        newActorObject->DisableGravity();
-        newActorObject->SetKinematic();
-        
+        // Actor
         Actor* actor = newActorObject->GetComponent<Actor>();
-        
-        actor->SetSpeed( 2 );
+        actor->SetSpeed( 2.3 );
         
         float variantR = Random.Range(0, 10) * 0.001;
         float variantG = Random.Range(0, 10) * 0.001;
@@ -498,7 +496,7 @@ void Run() {
         
         force *= 0.3;
         
-        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 1.8;
+        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 5;
         
         if (force != glm::vec3(0)) 
             cameraController->AddForce(force.x, force.y, force.z);

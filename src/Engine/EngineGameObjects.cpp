@@ -150,26 +150,18 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     GameObject* newGameObject = CreateGameObject();
     newGameObject->AddComponent( CreateComponent(Components.Actor) );
     newGameObject->AddComponent( CreateComponent(Components.RigidBody) );
-    newGameObject->AddComponent( CreateComponent(Components.MeshRenderer) );
+    
     newGameObject->GetComponent<Actor>()->mTargetPoint = position;
-    Material* materialPtr = Renderer.CreateMaterial();
+    newGameObject->SetPosition(position);
     
-    materialPtr->shader = shaders.color;
+    newGameObject->DisableGravity();
+    newGameObject->SetDynamic();
     
-    float scale = 1.0;
-    
-    // Physics
-    newGameObject->SetMass(10);
-    newGameObject->SetLinearDamping(3);
-    newGameObject->SetAngularDamping(1);
-    
-    //newGameObject->CalculatePhysics();
+    newGameObject->SetLinearDamping(30);
+    newGameObject->SetAngularDamping(100);
     
     newGameObject->SetLinearAxisLockFactor(1, 1, 1);
-    newGameObject->SetAngularAxisLockFactor(0, 1, 0);
-    
-    newGameObject->mTransformCache->SetScale(scale, scale, scale);
-    newGameObject->SetPosition(position);
+    newGameObject->SetAngularAxisLockFactor(0, 0, 0);
     
     doUpdateDataStream = true;
     return newGameObject;

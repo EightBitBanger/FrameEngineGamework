@@ -201,8 +201,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 
                 Scripting.Update();
                 
-                Engine.UpdateUI();
-                
                 Engine.Update();
                 
                 Network.Update();

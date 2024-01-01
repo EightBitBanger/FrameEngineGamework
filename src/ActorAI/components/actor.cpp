@@ -19,6 +19,7 @@ Actor::Actor() :
     mPosition(glm::vec3(0, 0, 0)),
     mRotation(glm::vec3(0, 0, 0)),
     mRotateTo(glm::vec3(0, 0, 0)),
+    mTargetPoint(glm::vec3(0, 0, 0)),
     
     mIsActive(true),
     
@@ -31,7 +32,7 @@ Actor::Actor() :
 	mIsConsuming(false),
 	mIsFacing(true),
 	
-	mChanceToChangeDirection(400),
+	mChanceToChangeDirection(500),
 	mChanceToFocusOnActor   (100),
 	mChanceToWalk           (800),
     mChanceToStopWalking    (0),
@@ -106,6 +107,19 @@ float Actor::GetSpeed(void) {
     return speedValue;
 }
 
+void Actor::SetSpeedMultiplier(float newSpeedMul) {
+    mux.lock();
+    mSpeedMul = newSpeedMul;
+    mux.unlock();
+    return;
+}
+
+float Actor::GetSpeedMultiplier(void) {
+    mux.lock();
+    float speedMul = mSpeedMul;
+    mux.unlock();
+    return speedMul;
+}
 
 // Genetics
 
@@ -126,18 +140,18 @@ void Actor::RemoveGene(unsigned int index) {
     return;
 }
 
-Gene Actor::GetGeneFromGenome(unsigned int index) {
-    mux.lock();
-    Gene geneValue = mGenes[index];
-    mux.unlock();
-    return geneValue;
-}
-
 unsigned int Actor::GetNumberOfGenes(void) {
     mux.lock();
     unsigned int sizeValue = mGenes.size();
     mux.unlock();
     return sizeValue;
+}
+
+Gene Actor::GetGeneFromGenome(unsigned int index) {
+    mux.lock();
+    Gene geneValue = mGenes[index];
+    mux.unlock();
+    return geneValue;
 }
 
 
@@ -158,18 +172,18 @@ void Actor::RemoveWeightedLayer(unsigned int index) {
     return;
 }
 
-WeightedLayer Actor::GetWeightedLayer(unsigned int index) {
-    mux.lock();
-    WeightedLayer layer = mWeightedLayers[index];
-    mux.unlock();
-    return layer;
-}
-
 unsigned int Actor::GetNumberOfWeightedLayers(void) {
     mux.lock();
     unsigned int sizeValue = mWeightedLayers.size();
     mux.unlock();
     return sizeValue;
+}
+
+WeightedLayer Actor::GetWeightedLayerFromNetwork(unsigned int index) {
+    mux.lock();
+    WeightedLayer layer = mWeightedLayers[index];
+    mux.unlock();
+    return layer;
 }
 
 void Actor::SetNeuralInputLayer(NeuralLayer inputLayer) {
@@ -181,7 +195,7 @@ void Actor::SetNeuralInputLayer(NeuralLayer inputLayer) {
 }
 
 
-// State
+// AI state behavioral hardwiring
 
 
 void Actor::SetChanceToChangeDirection(float chance) {
