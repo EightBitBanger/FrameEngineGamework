@@ -14,7 +14,7 @@ void TestFramework::TestGameObject(void) {
     std::cout << "Game objects............ ";
     
     GameObject* gameObject1     = Engine.CreateGameObject();
-    Component*  componentEntity = Engine.CreateComponent(Components.MeshRenderer);
+    Component*  componentEntity = Engine.CreateComponent<MeshRenderer>();
     
     // Check object creation
     if (gameObject1 == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
@@ -36,7 +36,7 @@ void TestFramework::TestGameObject(void) {
     
     // Check game object`s get and set functions
     GameObject* gameObject2     = Engine.CreateGameObject();
-    Component*  componentRigidBody = Engine.CreateComponent(Components.RigidBody);
+    Component*  componentRigidBody = Engine.CreateComponent<RigidBody>();
     gameObject2->AddComponent(componentRigidBody);
     rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)componentRigidBody->GetComponent();
     

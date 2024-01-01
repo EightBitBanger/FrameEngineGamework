@@ -12,11 +12,11 @@ void TestFramework::TestComponentObject(void) {
     std::cout << "Component objects....... ";
     
     // Create components
-    Component* componentEntity    = Engine.CreateComponent(Components.MeshRenderer);
-    Component* componentRigidBody = Engine.CreateComponent(Components.RigidBody);
-    Component* componentCamera    = Engine.CreateComponent(Components.Camera);
-    Component* componentScript    = Engine.CreateComponent(Components.Script);
-    Component* componentLight     = Engine.CreateComponent(Components.Light);
+    Component* componentEntity    = Engine.CreateComponent<MeshRenderer>();
+    Component* componentRigidBody = Engine.CreateComponent<RigidBody>();
+    Component* componentCamera    = Engine.CreateComponent<Camera>();
+    Component* componentScript    = Engine.CreateComponent<Script>();
+    Component* componentLight     = Engine.CreateComponent<Light>();
     
     void* entityObject    = componentEntity->GetComponent();
     void* rigidBodyObject = componentRigidBody->GetComponent();
