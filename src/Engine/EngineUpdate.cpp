@@ -21,7 +21,6 @@ ENGINE_API extern ApplicationLayer      Application;
 ENGINE_API extern EngineSystemManager   Engine;
 
 
-
 void EngineSystemManager::Update(void) {
     
     // Update player/camera position in the AI simulation
@@ -35,24 +34,25 @@ void EngineSystemManager::Update(void) {
     }
     
     // Check to update the data stream
-    if (doUpdateDataStream) {
+    if (mDoUpdateDataStream) {
         
-        doUpdateDataStream = true;
+        mDoUpdateDataStream = false;
         
-        streamSize = mGameObjects.Size();
+        mStreamSize = mGameObjects.Size();
         
-        for (unsigned int i=0; i < streamSize; i++ ) {
+        for (unsigned int i=0; i < mStreamSize; i++ ) {
             
-            streamBuffer[i].gameObject    = mGameObjects[i];
+            mStreamBuffer[i].gameObject    = mGameObjects[i];
+            mStreamBuffer[i].transform     = mGameObjects[i]->mTransformCache;
             
-            streamBuffer[i].light         = mGameObjects[i]->mLightCache;
-            streamBuffer[i].actor         = mGameObjects[i]->mActorCache;
-            streamBuffer[i].camera        = mGameObjects[i]->mCameraCache;
-            streamBuffer[i].rigidBody     = mGameObjects[i]->mRigidBodyCache;
-            streamBuffer[i].meshRenderer  = mGameObjects[i]->mMeshRendererCache;
+            mStreamBuffer[i].light         = mGameObjects[i]->mLightCache;
+            mStreamBuffer[i].actor         = mGameObjects[i]->mActorCache;
+            mStreamBuffer[i].camera        = mGameObjects[i]->mCameraCache;
+            mStreamBuffer[i].rigidBody     = mGameObjects[i]->mRigidBodyCache;
+            mStreamBuffer[i].meshRenderer  = mGameObjects[i]->mMeshRendererCache;
             
-            streamBuffer[i].text          = mGameObjects[i]->mTextCache;
-            streamBuffer[i].panel         = mGameObjects[i]->mPanelCache;
+            mStreamBuffer[i].text          = mGameObjects[i]->mTextCache;
+            mStreamBuffer[i].panel         = mGameObjects[i]->mPanelCache;
             
             continue;
         }
@@ -67,44 +67,44 @@ void EngineSystemManager::Update(void) {
     
     // Update UI elements
     
-    Engine.UpdateUI();
+    UpdateUI();
     
     
     // Run the game object list
     
-    for (unsigned int i=0; i < streamSize; i++ ) {
+    for (unsigned int i=0; i < mStreamSize; i++ ) {
         
-        if (!streamBuffer[i].gameObject->isActive) 
+        if (!mStreamBuffer[i].gameObject->isActive) 
             continue;
         
         // Rigid bodies
-        if (streamBuffer[i].rigidBody != nullptr) 
+        if (mStreamBuffer[i].rigidBody != nullptr) 
             UpdateRigidBody(i);
         
         // Mesh renderers
-        if (streamBuffer[i].meshRenderer != nullptr) 
+        if (mStreamBuffer[i].meshRenderer != nullptr) 
             UpdateMeshRenderer(i);
         
         // Cameras
-        if (streamBuffer[i].camera != nullptr) 
+        if (mStreamBuffer[i].camera != nullptr) 
             UpdateCamera(i);
         
         // Actors
-        if (streamBuffer[i].actor != nullptr) 
-            if (streamBuffer[i].actor->mIsActive) 
+        if (mStreamBuffer[i].actor != nullptr) 
+            if (mStreamBuffer[i].actor->mIsActive) 
                 UpdateActor(i);
         
         // Lights
-        if (streamBuffer[i].light != nullptr) 
+        if (mStreamBuffer[i].light != nullptr) 
             UpdateLight(i);
         
         // Panel canvases
-        if (streamBuffer[i].panel != nullptr) 
-            if (streamBuffer[i].meshRenderer != nullptr) 
+        if (mStreamBuffer[i].panel != nullptr) 
+            if (mStreamBuffer[i].meshRenderer != nullptr) 
                 UpdatePanelUI(i);
         
         // Text elements
-        if (streamBuffer[i].text != nullptr) 
+        if (mStreamBuffer[i].text != nullptr) 
             UpdateTextUI(i);
         
         continue;

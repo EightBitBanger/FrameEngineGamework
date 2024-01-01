@@ -27,26 +27,18 @@ ENGINE_API extern EngineSystemManager   Engine;
 void EngineSystemManager::UpdateRigidBody(unsigned int index) {
     
     // Get the rigid body transform
-    rp3d::Transform bodyTransform = streamBuffer[index].rigidBody->getTransform();
+    rp3d::Transform bodyTransform = mStreamBuffer[index].rigidBody->getTransform();
     rp3d::Vector3 bodyPosition = bodyTransform.getPosition();
     rp3d::Quaternion quaterion = bodyTransform.getOrientation();
     
-    Transform currentTransform;
-    currentTransform.position.x = bodyPosition.x;
-    currentTransform.position.y = bodyPosition.y;
-    currentTransform.position.z = bodyPosition.z;
+    mStreamBuffer[index].transform->position = glm::vec3(bodyPosition.x, 
+                                                         bodyPosition.y, 
+                                                         bodyPosition.z);
     
-    currentTransform.orientation.w = quaterion.w;
-    currentTransform.orientation.x = quaterion.x;
-    currentTransform.orientation.y = quaterion.y;
-    currentTransform.orientation.z = quaterion.z;
-    
-    // Update the game object transform
-    streamBuffer[index].gameObject->mTransformCache->position    = currentTransform.position;
-    streamBuffer[index].gameObject->mTransformCache->orientation = currentTransform.orientation;
-    
-    // Source the transformation matrix
-    bodyTransform.getOpenGLMatrix( &currentTransform.matrix[0][0] );
+    mStreamBuffer[index].transform->localRotation = glm::quat(quaterion.w, 
+                                                              quaterion.x, 
+                                                              quaterion.y, 
+                                                              quaterion.z);
     
     return;
 }

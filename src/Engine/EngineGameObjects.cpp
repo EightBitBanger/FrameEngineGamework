@@ -25,7 +25,7 @@ ENGINE_API extern EngineSystemManager   Engine;
 GameObject* EngineSystemManager::CreateGameObject(void) {
     GameObject* newGameObject = mGameObjects.Create();
     mGameObjectActive.push_back(newGameObject);
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     
     newGameObject->AddComponent( Engine.CreateComponent<Transform>() );
     
@@ -54,7 +54,7 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     
     mGameObjects.Destroy(gameObjectPtr);
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return true;
 }
 
@@ -101,7 +101,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     BoxShape* boxShape = Physics.CreateColliderBox(scale.x, scale.y, scale.z);
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return cameraController;
 }
 
@@ -141,7 +141,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     
     skyObject->mTransformCache->SetScale(10000, 2000, 10000);
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return skyObject;
 }
 
@@ -163,7 +163,7 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     newGameObject->SetLinearAxisLockFactor(1, 1, 1);
     newGameObject->SetAngularAxisLockFactor(0, 0, 0);
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return newGameObject;
 }
 
@@ -185,7 +185,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     
     overlayObject->AddComponent( CreateComponent<MeshRenderer>(overlayMesh, overlayMaterial) );
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return overlayObject;
 }
 
@@ -199,7 +199,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     textElement->color = color;
     textElement->size = textSize;
     
-    overlayObject->mTransformCache->scale = Vector3(textSize, 1, textSize);
+    overlayObject->mTransformCache->localScale = Vector3(textSize, 1, textSize);
     
     textElement->canvas.x = x;
     textElement->canvas.y = y;
@@ -220,7 +220,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     
     overlayRenderer->material->DisableCulling();
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return overlayObject;
 }
 
@@ -257,7 +257,7 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     
     overlayMesh->UploadToGPU();
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return overlayObject;
 }
 

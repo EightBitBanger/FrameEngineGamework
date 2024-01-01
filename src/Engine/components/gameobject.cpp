@@ -6,8 +6,6 @@ GameObject::GameObject() :
     name(""),
     isActive(true),
     
-    parent(nullptr),
-    
     mTransformCache(nullptr),
     mCameraCache(nullptr),
     mRigidBodyCache(nullptr),

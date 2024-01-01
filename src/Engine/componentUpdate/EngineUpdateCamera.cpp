@@ -27,32 +27,32 @@ ENGINE_API extern EngineSystemManager   Engine;
 void EngineSystemManager::UpdateCamera(unsigned int index) {
     
     // Update mouse looking
-    if (streamBuffer[index].camera->useMouseLook) {
+    if (mStreamBuffer[index].camera->useMouseLook) {
         
-        float MouseDiffX = (Input.mouseX - Renderer.displayCenter.x) * streamBuffer[index].camera->MouseSensitivityYaw;
-        float MouseDiffY = (Input.mouseY - Renderer.displayCenter.y) * streamBuffer[index].camera->MouseSensitivityPitch;
+        float MouseDiffX = (Input.mouseX - Renderer.displayCenter.x) * mStreamBuffer[index].camera->MouseSensitivityYaw;
+        float MouseDiffY = (Input.mouseY - Renderer.displayCenter.y) * mStreamBuffer[index].camera->MouseSensitivityPitch;
         
         Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
         
-        streamBuffer[index].camera->lookAngle.x += MouseDiffX * 0.01;
-        streamBuffer[index].camera->lookAngle.y -= MouseDiffY * 0.01;
+        mStreamBuffer[index].camera->lookAngle.x += MouseDiffX * 0.01;
+        mStreamBuffer[index].camera->lookAngle.y -= MouseDiffY * 0.01;
         
         // Yaw limit
-        if (streamBuffer[index].camera->lookAngle.x >= 0.109655) {streamBuffer[index].camera->lookAngle.x -= 0.109655;}
-        if (streamBuffer[index].camera->lookAngle.x <= 0.109655) {streamBuffer[index].camera->lookAngle.x += 0.109655;}
+        if (mStreamBuffer[index].camera->lookAngle.x >= 0.109655) {mStreamBuffer[index].camera->lookAngle.x -= 0.109655;}
+        if (mStreamBuffer[index].camera->lookAngle.x <= 0.109655) {mStreamBuffer[index].camera->lookAngle.x += 0.109655;}
         
         // Pitch limit
-        if (streamBuffer[index].camera->lookAngle.y >  0.0274f) streamBuffer[index].camera->lookAngle.y =  0.0274f;
-        if (streamBuffer[index].camera->lookAngle.y < -0.0274f) streamBuffer[index].camera->lookAngle.y = -0.0274f;
+        if (mStreamBuffer[index].camera->lookAngle.y >  0.0274f) mStreamBuffer[index].camera->lookAngle.y =  0.0274f;
+        if (mStreamBuffer[index].camera->lookAngle.y < -0.0274f) mStreamBuffer[index].camera->lookAngle.y = -0.0274f;
         
     }
     
     // Restore looking angle
-    streamBuffer[index].camera->transform.orientation.x = streamBuffer[index].camera->lookAngle.x;
-    streamBuffer[index].camera->transform.orientation.y = streamBuffer[index].camera->lookAngle.y;
+    mStreamBuffer[index].camera->transform.localRotation.x = mStreamBuffer[index].camera->lookAngle.x;
+    mStreamBuffer[index].camera->transform.localRotation.y = mStreamBuffer[index].camera->lookAngle.y;
     
     // Check camera panel
-    if (streamBuffer[index].panel != nullptr) {
+    if (mStreamBuffer[index].panel != nullptr) {
         
         //
         // TODO: Add ability to align the camera with a panel canvas here
@@ -60,7 +60,7 @@ void EngineSystemManager::UpdateCamera(unsigned int index) {
         
     } else {
         
-        streamBuffer[index].camera->transform.position = streamBuffer[index].gameObject->mTransformCache->position;
+        mStreamBuffer[index].camera->transform.position = mStreamBuffer[index].transform->position;
         
     }
     

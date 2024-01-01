@@ -34,11 +34,8 @@ ENGINE_API UintType          Uint;
 EngineSystemManager::EngineSystemManager(void) : 
     sceneMain(nullptr),
     
-    mouseOldX(0),
-    mouseOldY(0),
-    
-    doUpdateDataStream(true),
-    streamSize(0)
+    mDoUpdateDataStream(true),
+    mStreamSize(0)
 {
 }
 

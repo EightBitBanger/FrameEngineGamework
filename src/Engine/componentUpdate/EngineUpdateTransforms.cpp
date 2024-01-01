@@ -26,32 +26,30 @@ ENGINE_API extern EngineSystemManager   Engine;
 
 void EngineSystemManager::UpdateTransformationChains(void) {
     
-    for (unsigned int i=0; i < streamSize; i++ ) {
+    for (unsigned int i=0; i < mStreamSize; i++ ) {
         
-        // Current transform
-        Transform currentTransform;
-        currentTransform.position    = streamBuffer[i].gameObject->mTransformCache->position;
-        currentTransform.orientation = streamBuffer[i].gameObject->mTransformCache->orientation;
-        currentTransform.scale       = streamBuffer[i].gameObject->mTransformCache->scale;
+        glm::vec3 currentPosition = mStreamBuffer[i].transform->position;
+        glm::quat currentRotation = mStreamBuffer[i].transform->localRotation;
+        glm::vec3 currentScale    = mStreamBuffer[i].transform->localScale;
         
-        // Begin the parent chain
-        GameObject* parent = streamBuffer[i].gameObject->parent;
+        // Roll over the parent matrix transform chain
         
-        // Roll over the parent transform chain
+        Transform* parent = mStreamBuffer[i].transform->parent;
+        
         while (parent != nullptr) {
             
-            currentTransform.position    += parent->mTransformCache->position;
-            currentTransform.orientation *= parent->mTransformCache->orientation;
-            currentTransform.scale       *= parent->mTransformCache->scale;
+            currentPosition += parent->position;
+            currentRotation *= parent->localRotation;
+            currentScale    *= parent->localScale;
             
             parent = parent->parent;
         }
         
-        glm::mat4 translation = glm::translate(glm::mat4(1), currentTransform.position);
-        glm::mat4 rotation    = glm::toMat4(currentTransform.orientation);
-        glm::mat4 scale       = glm::scale(glm::mat4(1), currentTransform.scale);
+        // Finalize the matrix
         
-        streamBuffer[i].gameObject->mTransformCache->matrix = translation * rotation * scale;
+        mStreamBuffer[i].transform->matrix = glm::translate( glm::mat4(1), currentPosition ) * 
+                                             glm::toMat4( currentRotation ) * 
+                                             glm::scale( glm::mat4(1), currentScale );
         
         continue;
     }

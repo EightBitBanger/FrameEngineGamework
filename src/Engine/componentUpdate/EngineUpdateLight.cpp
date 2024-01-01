@@ -26,8 +26,8 @@ ENGINE_API extern EngineSystemManager   Engine;
 
 void EngineSystemManager::UpdateLight(unsigned int index) {
     
-    streamBuffer[index].light->position  = streamBuffer[index].gameObject->mTransformCache->position;
-    streamBuffer[index].light->direction = streamBuffer[index].gameObject->mTransformCache->EulerAngles();
+    mStreamBuffer[index].light->position  = mStreamBuffer[index].transform->position;
+    mStreamBuffer[index].light->direction = mStreamBuffer[index].transform->EulerAngles();
     
     return;
 }

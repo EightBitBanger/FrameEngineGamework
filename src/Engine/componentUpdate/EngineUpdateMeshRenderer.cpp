@@ -26,10 +26,7 @@ ENGINE_API extern EngineSystemManager   Engine;
 
 void EngineSystemManager::UpdateMeshRenderer(unsigned int index) {
     
-    //streamBuffer[index].meshRenderer->transform.position    = streamBuffer[index].gameObject->mTransformCache->position;
-    //streamBuffer[index].meshRenderer->transform.orientation = streamBuffer[index].gameObject->mTransformCache->orientation;
-    //streamBuffer[index].meshRenderer->transform.scale       = streamBuffer[index].gameObject->mTransformCache->scale;
-    streamBuffer[index].meshRenderer->transform.matrix      = streamBuffer[index].gameObject->mTransformCache->matrix;
+    mStreamBuffer[index].meshRenderer->transform.matrix = mStreamBuffer[index].transform->matrix;
     
     return;
 }

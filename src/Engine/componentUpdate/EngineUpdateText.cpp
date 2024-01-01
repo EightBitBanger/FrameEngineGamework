@@ -26,75 +26,75 @@ ENGINE_API extern EngineSystemManager   Engine;
 
 void EngineSystemManager::UpdateTextUI(unsigned int index) {
     
-    if (streamBuffer[index].meshRenderer == nullptr) 
+    if (mStreamBuffer[index].meshRenderer == nullptr) 
         return;
     
     
     //
     // Anchor RIGHT
     
-    if (streamBuffer[index].text->canvas.anchorRight) {
-        streamBuffer[index].gameObject->mTransformCache->position.z = Renderer.viewport.w + 
-                                                                  streamBuffer[index].text->size * 
-                                                                  streamBuffer[index].text->canvas.x;
+    if (mStreamBuffer[index].text->canvas.anchorRight) {
+        mStreamBuffer[index].transform->position.z = Renderer.viewport.w + 
+                                                     mStreamBuffer[index].text->size * 
+                                                     mStreamBuffer[index].text->canvas.x;
         
         // Keep text on screen when anchored right
-        streamBuffer[index].gameObject->mTransformCache->position.z -= streamBuffer[index].text->text.size() * // length of string
-                                                                   streamBuffer[index].text->size;         // Size of font text
+        mStreamBuffer[index].transform->position.z -= mStreamBuffer[index].text->text.size() * // length of string
+                                                                   mStreamBuffer[index].text->size;         // Size of font text
         
     } else {
         
         // Anchor LEFT by default
-        streamBuffer[index].gameObject->mTransformCache->position.z  = (streamBuffer[index].text->canvas.x * streamBuffer[index].text->size);
-        streamBuffer[index].gameObject->mTransformCache->position.z += streamBuffer[index].text->size;
+        mStreamBuffer[index].transform->position.z  = (mStreamBuffer[index].text->canvas.x * mStreamBuffer[index].text->size);
+        mStreamBuffer[index].transform->position.z += mStreamBuffer[index].text->size;
         
         // Anchor CENTER horizontally
-        if (streamBuffer[index].text->canvas.anchorCenterHorz) 
-            streamBuffer[index].gameObject->mTransformCache->position.z = (Renderer.viewport.w / 2) + (streamBuffer[index].text->canvas.x * streamBuffer[index].text->size);
+        if (mStreamBuffer[index].text->canvas.anchorCenterHorz) 
+            mStreamBuffer[index].transform->position.z = (Renderer.viewport.w / 2) + (mStreamBuffer[index].text->canvas.x * mStreamBuffer[index].text->size);
         
     }
     
     //
     // Anchor TOP
     
-    if (streamBuffer[index].text->canvas.anchorTop) {
+    if (mStreamBuffer[index].text->canvas.anchorTop) {
         int topAnchorTotal = Renderer.displaySize.y - Renderer.viewport.h;
         
-        topAnchorTotal += (streamBuffer[index].text->size * streamBuffer[index].text->size) / 2;
-        topAnchorTotal += streamBuffer[index].text->size * streamBuffer[index].text->canvas.y;
+        topAnchorTotal += (mStreamBuffer[index].text->size * mStreamBuffer[index].text->size) / 2;
+        topAnchorTotal += mStreamBuffer[index].text->size * mStreamBuffer[index].text->canvas.y;
         
-        streamBuffer[index].gameObject->mTransformCache->position.y = topAnchorTotal;
+        mStreamBuffer[index].transform->position.y = topAnchorTotal;
     } else {
         
         // Anchor BOTTOM by default
-        streamBuffer[index].gameObject->mTransformCache->position.y  = Renderer.displaySize.y - streamBuffer[index].text->size;
-        streamBuffer[index].gameObject->mTransformCache->position.y -= streamBuffer[index].text->size * -(streamBuffer[index].text->canvas.y);
+        mStreamBuffer[index].transform->position.y  = Renderer.displaySize.y - mStreamBuffer[index].text->size;
+        mStreamBuffer[index].transform->position.y -= mStreamBuffer[index].text->size * -(mStreamBuffer[index].text->canvas.y);
         
         // Anchor CENTER vertically
-        if (streamBuffer[index].text->canvas.anchorCenterVert) {
+        if (mStreamBuffer[index].text->canvas.anchorCenterVert) {
             int topAnchorTotal = Renderer.displaySize.y - Renderer.viewport.h / 2;
             
-            topAnchorTotal += (streamBuffer[index].text->size * streamBuffer[index].text->size) / 2;
-            topAnchorTotal += (streamBuffer[index].text->size * streamBuffer[index].text->canvas.y) - (streamBuffer[index].text->size * 2);
+            topAnchorTotal += (mStreamBuffer[index].text->size * mStreamBuffer[index].text->size) / 2;
+            topAnchorTotal += (mStreamBuffer[index].text->size * mStreamBuffer[index].text->canvas.y) - (mStreamBuffer[index].text->size * 2);
             
-            streamBuffer[index].gameObject->mTransformCache->position.y = topAnchorTotal;
+            mStreamBuffer[index].transform->position.y = topAnchorTotal;
         }
         
     }
     
     // Flip height and width
-    float textGlyphWidth  = streamBuffer[index].text->glyphHeight;
-    float textGlyphHeight = streamBuffer[index].text->glyphWidth;
+    float textGlyphWidth  = mStreamBuffer[index].text->glyphHeight;
+    float textGlyphHeight = mStreamBuffer[index].text->glyphWidth;
     
     // Check to refresh the vertex buffer
-    if (streamBuffer[index].text->mCurrentText != streamBuffer[index].text->text) {
-        streamBuffer[index].text->mCurrentText = streamBuffer[index].text->text;
+    if (mStreamBuffer[index].text->mCurrentText != mStreamBuffer[index].text->text) {
+        mStreamBuffer[index].text->mCurrentText = mStreamBuffer[index].text->text;
         
         // Clear the text mesh
-        streamBuffer[index].meshRenderer->mesh->ClearSubMeshes();
+        mStreamBuffer[index].meshRenderer->mesh->ClearSubMeshes();
         
         // Update the text string characters 
-        Engine.AddMeshText(streamBuffer[index].gameObject, 0, 0, textGlyphWidth, textGlyphHeight, streamBuffer[index].text->text, streamBuffer[index].text->color);
+        Engine.AddMeshText(mStreamBuffer[index].gameObject, 0, 0, textGlyphWidth, textGlyphHeight, mStreamBuffer[index].text->text, mStreamBuffer[index].text->color);
         
     }
     

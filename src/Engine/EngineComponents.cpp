@@ -72,7 +72,7 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
     Component* newComponent = mComponents.Create();
     newComponent->SetComponent(type, component_object);
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return newComponent;
 }
 
@@ -126,7 +126,7 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
     }
     mComponents.Destroy(componentPtr);
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return true;
 }
 
@@ -139,7 +139,7 @@ Component* EngineSystemManager::CreateComponentMeshRenderer(Mesh* meshPtr, Mater
     
     sceneMain->AddMeshRendererToSceneRoot( meshRenderer );
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return rendererComponent;
 }
 
@@ -151,6 +151,6 @@ Component* EngineSystemManager::CreateComponentLight(glm::vec3 position) {
     
     sceneMain->AddLightToSceneRoot( lightPoint );
     
-    doUpdateDataStream = true;
+    mDoUpdateDataStream = true;
     return lightComponent;
 }

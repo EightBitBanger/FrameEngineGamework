@@ -81,7 +81,7 @@ void Start() {
     Engine.sceneMain->camera = cameraController->GetComponent<Camera>();
     
     // Attach the sky object to the camera controller
-    skyObject->parent = cameraController;
+    skyObject->GetComponent<Transform>()->parent = cameraController->GetComponent<Transform>();
     cameraController->DisableGravity();
     
     cameraController->SetAngularDamping( 1 );
@@ -232,7 +232,7 @@ void Start() {
             plainObject->AddColliderBox(plainCollider, 0, -100, 0);
             
             Transform* transform  = plainObject->GetComponent<Transform>();
-            transform->scale = Vector3(chunkSize * 0.05f, 1, chunkSize * 0.05f);
+            transform->localScale = Vector3(chunkSize * 0.05f, 1, chunkSize * 0.05f);
             
             float chunkPosX = (x * chunkSize) - ((worldWidth  / 2) * chunkSize);
             float chunkPosZ = (z * chunkSize) - ((worldHeight / 2) * chunkSize);
@@ -251,7 +251,7 @@ void Start() {
     // Generate AI actors
     //
     
-    float spread = 1300;
+    float spread = 1000;
     
     for (int i=0; i < 800; i++) {
         
@@ -262,7 +262,7 @@ void Start() {
         
         GameObject* newActorObject = Engine.CreateAIActor( position );
         Transform* transform = newActorObject->GetComponent<Transform>();
-        transform->scale = Vector3(1, 1, 1);
+        transform->localScale = Vector3(1, 1, 1);
         
         // Collision
         BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);

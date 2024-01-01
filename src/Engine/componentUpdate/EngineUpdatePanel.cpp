@@ -28,10 +28,10 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
     
     // Anchor RIGHT
     
-    if (streamBuffer[index].panel->canvas.anchorRight) {
-        streamBuffer[index].gameObject->mTransformCache->position.z = Renderer.viewport.w + 
-                                                                  streamBuffer[index].panel->width * 
-                                                                  streamBuffer[index].panel->canvas.y;
+    if (mStreamBuffer[index].panel->canvas.anchorRight) {
+        mStreamBuffer[index].transform->position.z = Renderer.viewport.w + 
+                                                     mStreamBuffer[index].panel->width * 
+                                                     mStreamBuffer[index].panel->canvas.y;
         
     } else {
         
@@ -39,16 +39,16 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
         // Anchor LEFT by default
         //
         
-        streamBuffer[index].gameObject->mTransformCache->position.z  = (streamBuffer[index].panel->canvas.y * streamBuffer[index].panel->width);
-        streamBuffer[index].gameObject->mTransformCache->position.z += streamBuffer[index].panel->width;
+        mStreamBuffer[index].transform->position.z  = (mStreamBuffer[index].panel->canvas.y * mStreamBuffer[index].panel->width);
+        mStreamBuffer[index].transform->position.z += mStreamBuffer[index].panel->width;
         
         //
         // Anchor CENTER horizontally
         //
         
-        if (streamBuffer[index].panel->canvas.anchorCenterHorz) {
+        if (mStreamBuffer[index].panel->canvas.anchorCenterHorz) {
             
-            streamBuffer[index].gameObject->mTransformCache->position.z = (Renderer.viewport.w / 2) + (streamBuffer[index].panel->canvas.y * streamBuffer[index].panel->width);
+            mStreamBuffer[index].transform->position.z = (Renderer.viewport.w / 2) + (mStreamBuffer[index].panel->canvas.y * mStreamBuffer[index].panel->width);
             
         }
         
@@ -58,33 +58,33 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
     // Anchor TOP
     //
     
-    if (streamBuffer[index].panel->canvas.anchorTop) {
+    if (mStreamBuffer[index].panel->canvas.anchorTop) {
         int topAnchorTotal = Renderer.displaySize.y - Renderer.viewport.h;
         
-        topAnchorTotal += (streamBuffer[index].panel->height * streamBuffer[index].panel->height) / 2;
-        topAnchorTotal += streamBuffer[index].panel->height * streamBuffer[index].panel->canvas.x;
+        topAnchorTotal += (mStreamBuffer[index].panel->height * mStreamBuffer[index].panel->height) / 2;
+        topAnchorTotal += mStreamBuffer[index].panel->height * mStreamBuffer[index].panel->canvas.x;
         
-        streamBuffer[index].gameObject->mTransformCache->position.y = topAnchorTotal;
+        mStreamBuffer[index].transform->position.y = topAnchorTotal;
     } else {
         
         //
         // Anchor BOTTOM by default
         //
         
-        streamBuffer[index].gameObject->mTransformCache->position.y  = Renderer.displaySize.y - streamBuffer[index].panel->height;
-        streamBuffer[index].gameObject->mTransformCache->position.y -= streamBuffer[index].panel->height * -(streamBuffer[index].panel->canvas.x);
+        mStreamBuffer[index].transform->position.y  = Renderer.displaySize.y - mStreamBuffer[index].panel->height;
+        mStreamBuffer[index].transform->position.y -= mStreamBuffer[index].panel->height * -(mStreamBuffer[index].panel->canvas.x);
         
         //
         // Anchor CENTER vertically
         //
         
-        if (streamBuffer[index].panel->canvas.anchorCenterVert) {
+        if (mStreamBuffer[index].panel->canvas.anchorCenterVert) {
             int topAnchorTotal = Renderer.displaySize.y - Renderer.viewport.h / 2;
             
-            topAnchorTotal += (streamBuffer[index].panel->height * streamBuffer[index].panel->height) / 2;
-            topAnchorTotal += (streamBuffer[index].panel->height * streamBuffer[index].panel->canvas.x) - (streamBuffer[index].panel->height * 2);
+            topAnchorTotal += (mStreamBuffer[index].panel->height * mStreamBuffer[index].panel->height) / 2;
+            topAnchorTotal += (mStreamBuffer[index].panel->height * mStreamBuffer[index].panel->canvas.x) - (mStreamBuffer[index].panel->height * 2);
             
-            streamBuffer[index].gameObject->mTransformCache->position.y = topAnchorTotal;
+            mStreamBuffer[index].transform->position.y = topAnchorTotal;
         }
         
     }
