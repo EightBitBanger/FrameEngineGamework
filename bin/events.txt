@@ -14,6 +14,7 @@ Resource definitions
 
   + color  core/shaders/color.shader
   + colorUnlit  core/shaders/colorUnlit.shader
+  + shadowCaster  core/shaders/shadowCaster.shader
   + texture  core/shaders/texture.shader
   + textureUnlit  core/shaders/textureUnlit.shader
   + UI  core/shaders/UI.shader

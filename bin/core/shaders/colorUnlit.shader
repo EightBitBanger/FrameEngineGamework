@@ -9,6 +9,7 @@ layout(location = 3) in vec2 l_uv;
 
 uniform mat4 u_proj;
 uniform mat4 u_model;
+uniform mat4 u_shadow;
 uniform mat3 u_inv_model;
 uniform vec3 u_eye;
 
