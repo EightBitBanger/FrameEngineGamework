@@ -69,7 +69,9 @@ Mesh* ResourceManager::CreateMeshFromTag(std::string resourceName) {
         if (!meshTag->Load()) 
             return nullptr;
     Mesh* meshPtr = Renderer.CreateMesh();
-    meshPtr->AddSubMesh(0,0,0, meshTag->mesh.vertexBuffer, meshTag->mesh.indexBuffer);
+    for (int i=0; i < meshTag->subMeshes.size(); i++) 
+        meshPtr->AddSubMesh(0, 0, 0, meshTag->subMeshes[i].vertexBuffer, meshTag->subMeshes[i].indexBuffer, false);
+    meshPtr->UploadToGPU();
     return meshPtr;
 }
 

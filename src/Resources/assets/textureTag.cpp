@@ -1,5 +1,6 @@
 #include <GameEngineFramework/Resources/assets/textureTag.h>
 #include <GameEngineFramework/Logging/Logging.h>
+#include <GameEngineFramework/Types/Types.h>
 
 #define  STB_IMAGE_IMPLEMENTATION
 //#define  STBI_ONLY_JPEG
@@ -15,6 +16,7 @@
 #include "../../../vendor/stb/stb_image.h"
 
 extern Logger Log;
+extern IntType Int;
 
 
 TextureTag::TextureTag() : 
@@ -44,7 +46,7 @@ bool TextureTag::Load(void) {
         return false;
     
 #ifdef EVENT_LOG_DETAILED
-    std::string logstr = "  + " + name + " " + IntToString(width) + " X " + IntToString(height);
+    std::string logstr = "  + " + name + " " + Int.ToString(width) + " X " + Int.ToString(height);
     Log.Write(logstr);
 #endif
     

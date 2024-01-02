@@ -141,6 +141,7 @@ void EngineSystemManager::Initiate() {
     shaders.color         = Resources.CreateShaderFromTag("color");
     shaders.colorUnlit    = Resources.CreateShaderFromTag("colorUnlit");
     shaders.UI            = Resources.CreateShaderFromTag("UI");
+    shaders.shadowCaster  = Resources.CreateShaderFromTag("shadowCaster");
     
     // Load default meshes
     meshes.cube  = Resources.CreateMeshFromTag("cube");
@@ -162,7 +163,9 @@ void EngineSystemManager::Shutdown(void) {
     Renderer.DestroyShader(shaders.texture);
     Renderer.DestroyShader(shaders.textureUnlit);
     Renderer.DestroyShader(shaders.color);
+    Renderer.DestroyShader(shaders.colorUnlit);
     Renderer.DestroyShader(shaders.UI);
+    Renderer.DestroyShader(shaders.shadowCaster);
     
     assert(mComponents.Size() == 0);
     assert(mGameObjects.Size() == 0);

@@ -338,8 +338,6 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
 }
 
 bool Mesh::RemoveSubMesh(unsigned int index) {
-    if (mSubMesh.size() == 0) return false;
-    if (index > mSubMesh.size()) return false;
     
     std::vector<Vertex> destMesh;
     SubMesh sourceMesh = mSubMesh[index];
@@ -361,7 +359,6 @@ bool Mesh::RemoveSubMesh(unsigned int index) {
 }
 
 bool Mesh::CopySubMesh(unsigned int index, SubMesh& mesh) {
-    if (index >= mSubMesh.size()) return false;
     
     SubMesh sourceMesh = mSubMesh[index];
     
@@ -378,7 +375,6 @@ bool Mesh::CopySubMesh(unsigned int index, SubMesh& mesh) {
 }
 
 bool Mesh::CopySubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer) {
-    if (index >= mSubMesh.size()) return false;
     
     SubMesh sourceMesh = mSubMesh[index];
     
@@ -392,7 +388,6 @@ bool Mesh::CopySubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std:
 }
 
 bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) {
-    if (index >= mSubMesh.size()) return false;
     
     std::vector<Vertex> destMesh;
     SubMesh sourceMesh = mSubMesh[index];
@@ -419,7 +414,6 @@ bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) 
 }
 
 bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
-    if (index >= mSubMesh.size()) return false;
     
     std::vector<Vertex> destMesh;
     SubMesh sourceMesh = mSubMesh[index];

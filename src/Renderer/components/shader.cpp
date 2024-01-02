@@ -11,6 +11,7 @@ Shader::Shader() :
     
     mProjectionMatrixLocation(0),
     mModelMatrixLocation(0),
+    mShadowMatrixLocation(0),
     mModelInvMatrixLocation(0),
     mCameraPosition(0),
     
@@ -35,15 +36,19 @@ Shader::~Shader() {
 }
 
 void Shader::SetModelMatrix(glm::mat4 &ModelMatrix) {
-    glUniformMatrix4fv(mModelMatrixLocation, 1, 0, &ModelMatrix[0][0]);
+    glUniformMatrix4fv(mModelMatrixLocation, 1, GL_FALSE, &ModelMatrix[0][0]);
 }
 
 void Shader::SetInverseModelMatrix(glm::mat3 &InverseModelMatrix) {
-    glUniformMatrix3fv(mModelInvMatrixLocation, 1, 0, &InverseModelMatrix[0][0]);
+    glUniformMatrix3fv(mModelInvMatrixLocation, 1, GL_FALSE, &InverseModelMatrix[0][0]);
+}
+
+void Shader::SetShadowMatrix(glm::mat4 &shadowMatrix) {
+    glUniformMatrix4fv(mShadowMatrixLocation, 1, GL_FALSE, &shadowMatrix[0][0]);
 }
 
 void Shader::SetProjectionMatrix(glm::mat4 &projectionMatrix) {
-    glUniformMatrix4fv(mProjectionMatrixLocation, 1, 0, &projectionMatrix[0][0]);
+    glUniformMatrix4fv(mProjectionMatrixLocation, 1, GL_FALSE, &projectionMatrix[0][0]);
 }
 
 void Shader::SetCameraPosition(glm::vec3 cameraPosition) {
@@ -90,6 +95,7 @@ void Shader::SetUniformLocations(void) {
     
     std::string projUniformName         = "u_proj";
     std::string modelUniformName        = "u_model";
+    std::string shadowUniformName       = "u_shadow";
     std::string modelInvUniformName     = "u_inv_model";
     std::string eyeUniformName          = "u_eye";
     
@@ -105,9 +111,11 @@ void Shader::SetUniformLocations(void) {
     std::string lightAttenuationUniformName  = "u_light_attenuation";
     std::string lightColorUniformName        = "u_light_color";
     
+    
     // Model projection
     mProjectionMatrixLocation  = glGetUniformLocation(mShaderProgram, projUniformName.c_str());;
     mModelMatrixLocation       = glGetUniformLocation(mShaderProgram, modelUniformName.c_str());
+    mShadowMatrixLocation      = glGetUniformLocation(mShaderProgram, shadowUniformName.c_str());
     mModelInvMatrixLocation    = glGetUniformLocation(mShaderProgram, modelInvUniformName.c_str());
     mCameraPosition            = glGetUniformLocation(mShaderProgram, eyeUniformName.c_str());
     // Material

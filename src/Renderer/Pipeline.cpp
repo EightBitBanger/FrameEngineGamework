@@ -23,6 +23,7 @@ void RenderSystem::RenderFrame(void) {
     GetGLErrorCodes("OnRender::BeginFrame::");
 #endif
     
+    
     //
     // Run the scene list
     
@@ -30,23 +31,32 @@ void RenderSystem::RenderFrame(void) {
         
         Scene* scenePtr = *it;
         
+        if (!scenePtr->isActive) 
+            continue;
+        
         // Set the camera projection angle
         setTargetCamera( scenePtr->camera, eye, viewProjection );
         
         //
         // Gather active lights in this scene
-        
-        accumulateSceneLights( scenePtr, eye );
+        if (scenePtr->doUpdateLights) 
+            accumulateSceneLights( scenePtr, eye );
         
         if (mNumberOfLights > RENDER_NUMBER_OF_LIGHTS) 
             mNumberOfLights = RENDER_NUMBER_OF_LIGHTS;
+        
+        // Check continuous  
+        if (!doUpdateLightsEveryFrame) 
+            scenePtr->doUpdateLights = false;
+        
         
         
         //
         // Draw the mesh renderers
         
         std::vector<MeshRenderer*>& meshRenderers = scenePtr->mMeshRendererList;
-        unsigned int entityListSz = meshRenderers.size();
+        
+        unsigned int entityListSz = scenePtr->mMeshRendererList.size();
         
         for (unsigned int i=0; i < entityListSz; i++) {
             
@@ -119,6 +129,10 @@ void RenderSystem::RenderFrame(void) {
                 if (mCurrentMaterial->doBlending) {
                     glEnable(GL_BLEND);
                     
+                    //glBlendFunc(mCurrentMaterial->blendSource,
+                    //            mCurrentMaterial->blendDestination);
+                    
+                    
                     glBlendFuncSeparate(mCurrentMaterial->blendSource,
                                         mCurrentMaterial->blendDestination,
                                         mCurrentMaterial->blendAlphaSource,
@@ -154,6 +168,9 @@ void RenderSystem::RenderFrame(void) {
                 currentShader->SetLightDirections(mNumberOfLights, mLightDirection);
                 currentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
                 currentShader->SetLightColors(mNumberOfLights, mLightColor);
+                
+                // Send in the shadow angle
+                currentShader->SetShadowMatrix( mShadowTransform.matrix );
                 
             } else {
                 
@@ -227,15 +244,27 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
     glm::mat4 view = glm::lookAt(eye, lookingAngle, currentCamera->up);
     
     // Calculate perspective / orthographic angle
-    glm::mat4 projection = glm::mat4(0);
-    
     if (!currentCamera->isOrthographic) {
-        projection = glm::perspective( glm::radians( currentCamera->fov ), currentCamera->aspect, currentCamera->clipNear, currentCamera->clipFar);
+        
+        glm::mat4 projection = glm::perspective( glm::radians( currentCamera->fov ), 
+                                                 currentCamera->aspect, 
+                                                 currentCamera->clipNear, 
+                                                 currentCamera->clipFar);
+        
+        viewProjection = projection * view;
+        
     } else {
-        projection = glm::ortho(0.0f, (float)displaySize.x, (float)displaySize.y, 0.0f, currentCamera->clipNear, currentCamera->clipFar);
+        
+        glm::mat4 projection = glm::ortho(0.0f, 
+                                          (float)displaySize.x, 
+                                          (float)displaySize.y, 
+                                          0.0f, 
+                                          currentCamera->clipNear, 
+                                          currentCamera->clipFar);
+        
+        viewProjection = projection * view;
+        
     }
-    
-    viewProjection = projection * view;
     
     // Right angle to the looking angle
     currentCamera->right = glm::normalize(glm::cross(currentCamera->up, currentCamera->forward));
@@ -244,9 +273,6 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
 }
 
 unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye) {
-    
-    if (!currentScene->doUpdateLights) 
-        return 0;
     
     std::vector<Light*>& lightList = currentScene->mLightList;
     unsigned int totalNumberOfLights = lightList.size();
@@ -283,10 +309,6 @@ unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 
         
         continue;
     }
-    
-    // Check to reset light update
-    if (!doUpdateLightsEveryFrame) 
-        currentScene->doUpdateLights = false;
     
     return i;
 }

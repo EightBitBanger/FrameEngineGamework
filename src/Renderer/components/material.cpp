@@ -26,8 +26,8 @@ Material::Material() :
     
     shader(nullptr)
 {
-    ambient = Color(0.01, 0.01, 0.01, 1);
-    diffuse = Color(0.87, 0.87, 0.87, 1);
+    ambient = Color(0, 0, 0, 1);
+    diffuse = Color(1, 1, 1, 1);
     specular = Color(0, 0, 0, 1);
     
     glGenTextures(1, &mTextureBuffer);

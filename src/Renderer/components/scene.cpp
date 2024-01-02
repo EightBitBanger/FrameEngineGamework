@@ -3,12 +3,13 @@
 
 Scene::Scene() : 
     doUpdateLights(true),
+    isActive(true),
     camera(nullptr)
 {
 }
 
 void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer) {
-    mMeshRendererList.push_back( meshRenderer );
+    mMeshRendererList.emplace( mMeshRendererList.begin(), meshRenderer );
     return;
 }
 
