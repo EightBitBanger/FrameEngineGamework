@@ -21,6 +21,9 @@ public:
     /// Set the uniform inverse model matrix.
     void SetInverseModelMatrix(glm::mat3 &InverseModelMatrix);
     
+    /// Set the uniform shadow matrix.
+    void SetShadowMatrix(glm::mat4 &shadowMatrix);
+    
     /// Set the uniform projection matrix.
     void SetProjectionMatrix(glm::mat4 &projectionMatrix);
     /// Set the uniform camera position.
@@ -64,6 +67,7 @@ private:
     // Uniform locations
     int mProjectionMatrixLocation;
     int mModelMatrixLocation;
+    int mShadowMatrixLocation;
     int mModelInvMatrixLocation;
     int mCameraPosition;
     

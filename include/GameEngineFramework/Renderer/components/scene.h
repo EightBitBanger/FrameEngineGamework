@@ -15,6 +15,9 @@ public:
     /// Should lights be updated.
     bool doUpdateLights;
     
+    /// Is this scene currently active in the renderer.
+    bool isActive;
+    
     /// The camera associated with this scene.
     Camera* camera;
     

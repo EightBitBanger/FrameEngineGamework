@@ -37,6 +37,10 @@
 #include <windows.h>
 
 
+
+
+
+
 class ENGINE_API RenderSystem {
     
 public:
@@ -166,6 +170,11 @@ private:
     glm::vec4    mLightAttenuation [RENDER_NUMBER_OF_LIGHTS];
     glm::vec3    mLightColor       [RENDER_NUMBER_OF_LIGHTS];
     
+    // Shadow angle
+public:
+    Transform mShadowTransform;
+private:
+    
     // Render component allocators
     PoolAllocator<MeshRenderer>    mEntity;
     PoolAllocator<Mesh>            mMesh;
@@ -186,5 +195,7 @@ private:
     unsigned int accumulateSceneLights(Scene* currentScene, glm::vec3 eye);
     
 };
+
+
 
 #endif

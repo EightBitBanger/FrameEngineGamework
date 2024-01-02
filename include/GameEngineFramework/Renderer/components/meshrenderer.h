@@ -18,6 +18,9 @@ public:
     /// Pointer to the material component.
     Material* material;
     
+    /// Layer in which this mesh renderer will draw.
+    unsigned short layer;
+    
     /// Transformation element.
     Transform transform;
     

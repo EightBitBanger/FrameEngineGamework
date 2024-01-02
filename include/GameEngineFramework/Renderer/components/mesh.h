@@ -9,6 +9,7 @@
 #include <GameEngineFramework/Math/Math.h>
 
 #include <vector>
+#include <string>
 
 #ifndef RENDERER_VERTEX_BUFFER_MAX
   #define RENDERER_VERTEX_BUFFER_MAX  100000
@@ -16,6 +17,9 @@
 
 
 struct ENGINE_API SubMesh {
+    
+    /// Name of the sub mesh.
+    std::string name;
     
     /// Begin offset position.
     unsigned vertexBegin;
@@ -30,6 +34,16 @@ struct ENGINE_API SubMesh {
     std::vector<Vertex>  vertexBuffer;
     /// Index buffer array.
     std::vector<Index>   indexBuffer;
+    
+    SubMesh() : 
+        name(""),
+        vertexBegin(0),
+        vertexCount(0),
+        indexBegin(0),
+        indexCount(0),
+        position(glm::vec3(0, 0, 0))
+    {
+    }
     
 };
 

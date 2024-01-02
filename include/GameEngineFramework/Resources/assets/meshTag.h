@@ -15,7 +15,7 @@ struct ENGINE_API MeshTag {
     bool isLoaded;
     
     /// Mesh vertex and index data.
-    SubMesh mesh;
+    std::vector<SubMesh> subMeshes;
     
     /// Load the data to which this asset points.
     bool Load(void);
