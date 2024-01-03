@@ -47,10 +47,12 @@ void Start() {
     // Create the main world scene 
     Engine.sceneMain   = Engine.Create<Scene>();
     
+    Renderer.mShadowShader = Engine.shaders.shadowCaster;
+    
     
     //
     // Create a sky
-    float skyBrightness = 1.3;
+    float skyBrightness = 0.87;
     
     Color skyHigh(Colors.blue);
     Color skyLow(Colors.blue);
@@ -69,7 +71,7 @@ void Start() {
     skyMaterial = skyRenderer->material;
     skyMaterial->diffuse = Color(0.087, 0.087, 0.087);
     skyMaterial->EnableDepthTest();
-    
+    skyMaterial->DisableShadowPass();
     
     //
     // Create a camera controller
@@ -98,21 +100,25 @@ void Start() {
     // Shadow caster experimentation
     //
     
+    Mesh* shadowMesh = Resources.CreateMeshFromTag("cube");
     
     // Base object
     GameObject* shadowObject = Engine.Create<GameObject>();
     Transform* transformObject = shadowObject->GetComponent<Transform>();
-    transformObject->position.y += 5;
+    transformObject->position.y += 20;
+    transformObject->localScale *= 1;
     
     shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     
     MeshRenderer* objectRenderer = shadowObject->GetComponent<MeshRenderer>();
     
-    objectRenderer->mesh     = Resources.CreateMeshFromTag("cube");
+    objectRenderer->mesh     = shadowMesh;
     objectRenderer->material = Engine.Create<Material>();
     objectRenderer->material->shader = Engine.shaders.color;
     objectRenderer->material->ambient = Color(0.01, 0.01, 0.01);
     objectRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer, RENDER_QUEUE_FOREGROUND );
     
     
     
@@ -121,13 +127,14 @@ void Start() {
     
     GameObject* shadowCaster = Engine.Create<GameObject>();
     Transform* transform = shadowCaster->GetComponent<Transform>();
-    transform->position.y += 5;
+    transform->position.y += 20;
+    transform->localScale *= 1;
     
     shadowCaster->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     
     MeshRenderer* shadowCasterRenderer = shadowCaster->GetComponent<MeshRenderer>();
     
-    shadowCasterRenderer->mesh     = Resources.CreateMeshFromTag("cube");
+    shadowCasterRenderer->mesh     = shadowMesh;
     shadowCasterRenderer->material = Engine.Create<Material>();
     shadowCasterRenderer->material->ambient = Color(0.01, 0.01, 0.01);
     shadowCasterRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
@@ -135,9 +142,10 @@ void Start() {
     shadowCasterRenderer->material->EnableBlending();
     shadowCasterRenderer->material->SetBlendingAlpha(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    
-    
     shadowCasterRenderer->material->shader = Engine.shaders.shadowCaster;
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot( shadowCasterRenderer, RENDER_QUEUE_FOREGROUND );
+    
     
     
     
@@ -207,6 +215,8 @@ void Start() {
     plainMaterial->shader = Engine.shaders.texture;
     plainMaterial->diffuse = Colors.MakeGrayScale(0.001);
     
+    plainMaterial->EnableShadowPass();
+    
     // Chunk layout
     
     int chunkSize   = 50;
@@ -260,13 +270,144 @@ void Start() {
     
     
     
+    
+    
+    
+    
+    
+    //
+    // Generate AI actors
+    //
+    
+    
+    float spread = 50;
+    
+    for (int i=0; i < 8; i++) {
+        
+        Vector3 position;
+        position.x = (Random.Range(0.0f, spread) * 0.1) - (Random.Range(0.0f, spread) * 0.1);
+        position.y = 100;
+        position.z = (Random.Range(0.0f, spread) * 0.1) - (Random.Range(0.0f, spread) * 0.1);
+        
+        GameObject* newActorObject = Engine.CreateAIActor( position );
+        Transform* transform = newActorObject->GetComponent<Transform>();
+        transform->localScale = Vector3(1, 1, 1);
+        
+        // Collision
+        BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);
+        newActorObject->AddColliderBox(boxShape, 0, 0, 0, LayerMask::Actor);
+        
+        // Actor
+        Actor* actor = newActorObject->GetComponent<Actor>();
+        actor->SetSpeed( 2.3 );
+        
+        float variantR = Random.Range(0, 10) * 0.001;
+        float variantG = Random.Range(0, 10) * 0.001;
+        float variantB = Random.Range(0, 10) * 0.001;
+        
+        Color baseColor = Colors.MakeGrayScale(0.001);
+        
+        variantG = variantR;
+        variantB = variantR;
+        
+        // Body gene
+        Gene geneBody;
+        geneBody.offset    = BaseGene(0, 0, 0);
+        geneBody.position  = BaseGene(0, 0.7, 0);
+        geneBody.scale     = BaseGene(0.4, 0.4, 0.9);
+        geneBody.color     = BaseGene(variantR, variantG, variantB);
+        geneBody.color.x  *= baseColor.r;
+        geneBody.color.y  *= baseColor.g;
+        geneBody.color.z  *= baseColor.b;
+        
+        // Head gene
+        Gene geneHead;
+        geneHead.offset    = BaseGene(0, 1.02, 0.254);
+        geneHead.position  = BaseGene(0, 0, 0.3);
+        geneHead.scale     = BaseGene(0.415, 0.395, 0.415);
+        geneHead.color     = BaseGene(0.4, 0.4, 0.4);
+        geneHead.color.x  *= baseColor.r;
+        geneHead.color.y  *= baseColor.g;
+        geneHead.color.z  *= baseColor.b;
+        
+        // Limb FL gene
+        Gene geneLimbFrontLeft;
+        geneLimbFrontLeft.offset    = BaseGene(0.17, 0.75, 0.4);
+        geneLimbFrontLeft.position  = BaseGene(0, -0.4, 0);
+        geneLimbFrontLeft.scale     = BaseGene(0.2, 0.65, 0.2);
+        geneLimbFrontLeft.color     = BaseGene(0.4, 0.4, 0.4);
+        geneLimbFrontLeft.color.x  *= baseColor.r;
+        geneLimbFrontLeft.color.y  *= baseColor.g;
+        geneLimbFrontLeft.color.z  *= baseColor.b;
+        
+        geneLimbFrontLeft.doAnimationCycle = true;
+        geneLimbFrontLeft.animationAxis    = BaseGene(2, 0, 0);
+        geneLimbFrontLeft.animationRange   = 15;
+        
+        // Limb FR gene
+        Gene geneLimbFrontRight;
+        geneLimbFrontRight.offset    = BaseGene(-0.17, 0.75, 0.4);
+        geneLimbFrontRight.position  = BaseGene(0, -0.4, 0);
+        geneLimbFrontRight.scale     = BaseGene(0.2, 0.65, 0.2);
+        geneLimbFrontRight.color     = BaseGene(0.4, 0.4, 0.4);
+        geneLimbFrontRight.color.x  *= baseColor.r;
+        geneLimbFrontRight.color.y  *= baseColor.g;
+        geneLimbFrontRight.color.z  *= baseColor.b;
+        
+        geneLimbFrontRight.doAnimationCycle   = true;
+        geneLimbFrontRight.doInverseAnimation = true;
+        geneLimbFrontRight.animationAxis      = BaseGene(2, 0, 0);
+        geneLimbFrontRight.animationRange     = 15;
+        
+        // Limb RL gene
+        Gene geneLimbRearLeft;
+        geneLimbRearLeft.offset    = BaseGene(0.17, 0.75, -0.4);
+        geneLimbRearLeft.position  = BaseGene(0, -0.4, 0);
+        geneLimbRearLeft.scale     = BaseGene(0.2, 0.65, 0.2);
+        geneLimbRearLeft.color     = BaseGene(0.4, 0.4, 0.4);
+        geneLimbRearLeft.color.x  *= baseColor.r;
+        geneLimbRearLeft.color.y  *= baseColor.g;
+        geneLimbRearLeft.color.z  *= baseColor.b;
+        
+        geneLimbRearLeft.doAnimationCycle = true;
+        geneLimbRearLeft.animationAxis    = BaseGene(2, 0, 0);
+        geneLimbRearLeft.animationRange   = 15;
+        
+        // Limb RR gene
+        Gene geneLimbReadRight;
+        geneLimbReadRight.offset    = BaseGene(-0.17, 0.75, -0.4);
+        geneLimbReadRight.position  = BaseGene(0, -0.4, 0);
+        geneLimbReadRight.scale     = BaseGene(0.2, 0.65, 0.2);
+        geneLimbReadRight.color     = BaseGene(0.4, 0.4, 0.4);
+        geneLimbReadRight.color.x  *= baseColor.r;
+        geneLimbReadRight.color.y  *= baseColor.g;
+        geneLimbReadRight.color.z  *= baseColor.b;
+        
+        geneLimbReadRight.doAnimationCycle   = true;
+        geneLimbReadRight.doInverseAnimation = true;
+        geneLimbReadRight.animationAxis      = BaseGene(2, 0, 0);
+        geneLimbReadRight.animationRange     = 15;
+        
+        
+        // Apply genes to the actor
+        actor->AddGene(geneBody);
+        actor->AddGene(geneHead);
+        
+        actor->AddGene(geneLimbFrontLeft);
+        actor->AddGene(geneLimbFrontRight);
+        actor->AddGene(geneLimbRearLeft);
+        actor->AddGene(geneLimbReadRight);
+        
+        continue;
+    }
+    
+    
+    
+    
     // Add scenes to root node
     
-    Engine.sceneMain->AddMeshRendererToSceneRoot( shadowCasterRenderer );
-    Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer );
-    
-    Engine.sceneMain->AddMeshRendererToSceneRoot( skyRenderer );
-    Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer );
+    Engine.sceneMain->AddMeshRendererToSceneRoot( skyRenderer, RENDER_QUEUE_SKY );
+    Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
     
     
     Renderer.AddSceneToRenderQueue(sceneOverlay);                         // UI
@@ -313,7 +454,7 @@ void Run() {
     
     lightTransform->RotateAxis(20, sunDir);
     
-    sunStep = 45;
+    sunStep = 30;
     
     //if (sunStep > 360) sunStep = 0;
     
@@ -350,24 +491,19 @@ void Run() {
     
     
     
+    //
+    // Profiling
+    //
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    //text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
-    //text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
-    //text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
+    text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
+    text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
+    text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
     
     //text[5]->text = "x - " + Float.ToString( cameraController->GetComponent<Transform>()->position.x );
     //text[6]->text = "y - " + Float.ToString( cameraController->GetComponent<Transform>()->position.y );
     //text[7]->text = "z - " + Float.ToString( cameraController->GetComponent<Transform>()->position.z );
+    
+    
     
     
     

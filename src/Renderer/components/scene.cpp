@@ -8,16 +8,47 @@ Scene::Scene() :
 {
 }
 
-void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer) {
-    mMeshRendererList.emplace( mMeshRendererList.begin(), meshRenderer );
+void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup) {
+    switch (renderQueueGroup) {
+        case RENDER_QUEUE_OVERLAY:
+            mRenderQueueOverlay.emplace( mRenderQueueOverlay.begin(), meshRenderer );
+            break;
+        case RENDER_QUEUE_FOREGROUND:
+            mRenderQueueForeground.emplace( mRenderQueueForeground.begin(), meshRenderer );
+            break;
+        case RENDER_QUEUE_DEFAULT:
+            mRenderQueueDefault.emplace( mRenderQueueDefault.begin(), meshRenderer );
+            break;
+        case RENDER_QUEUE_BACKGROUND:
+            mRenderQueueBackground.emplace( mRenderQueueBackground.begin(), meshRenderer );
+            break;
+        case RENDER_QUEUE_SKY:
+            mRenderQueueSky.emplace( mRenderQueueSky.begin(), meshRenderer );
+            break;
+        default:
+            break;
+    }
     return;
 }
 
-bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer) {
-    for (std::vector<MeshRenderer*>::iterator it = mMeshRendererList.begin(); it != mMeshRendererList.end(); ++it) {
+bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup) {
+    
+    std::vector<MeshRenderer*>* renderQueue = nullptr;
+    
+    switch (renderQueueGroup) {
+        case RENDER_QUEUE_OVERLAY:    renderQueue = &mRenderQueueOverlay; break;
+        case RENDER_QUEUE_FOREGROUND: renderQueue = &mRenderQueueForeground; break;
+        case RENDER_QUEUE_DEFAULT:    renderQueue = &mRenderQueueDefault; break;
+        case RENDER_QUEUE_BACKGROUND: renderQueue = &mRenderQueueBackground; break;
+        case RENDER_QUEUE_SKY:        renderQueue = &mRenderQueueSky; break;
+        default: 
+            break;
+    }
+    
+    for (std::vector<MeshRenderer*>::iterator it = renderQueue->begin(); it != renderQueue->end(); ++it) {
         MeshRenderer* entityPtr = *it;
         if (meshRenderer == entityPtr) {
-            mMeshRendererList.erase(it);
+            renderQueue->erase(it);
             return true;
         }
     }
@@ -38,25 +69,5 @@ bool Scene::RemoveLightFromSceneRoot(Light* light) {
         }
     }
     return false;    
-}
-
-unsigned int Scene::GetMeshRendererQueueSize(void) {
-    return mMeshRendererList.size();
-}
-
-unsigned int Scene::GetLightQueueSize(void) {
-    return mLightList.size();
-}
-
-MeshRenderer* Scene::GetMeshRenderer(unsigned int index) {
-    if (index > mMeshRendererList.size()) 
-        return nullptr;
-    return mMeshRendererList[index];
-}
-
-Light* Scene::GetLight(unsigned int index) {
-    if (index > mLightList.size()) 
-        return nullptr;
-    return mLightList[index];
 }
 

@@ -116,7 +116,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
             if (geneRenderer->material != nullptr) 
                 Renderer.DestroyMaterial(geneRenderer->material);
             
-            sceneMain->RemoveMeshRendererFromSceneRoot( geneRenderer );
+            sceneMain->RemoveMeshRendererFromSceneRoot( geneRenderer, RENDER_QUEUE_DEFAULT);
             
             Renderer.DestroyMeshRenderer( geneRenderer );
             

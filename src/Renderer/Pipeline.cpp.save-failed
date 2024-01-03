@@ -77,16 +77,6 @@ void RenderSystem::RenderFrame(void) {
                 
                 MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
                 
-                
-                
-                
-                
-                
-                
-                //
-                // Geometry pass
-                //
-                
                 // Mesh binding
                 
                 Mesh* mesh = currentEntity->mesh;
@@ -228,7 +218,7 @@ void RenderSystem::RenderFrame(void) {
                 //
                 // Shadow render pass
                 //
-                
+                /*
                 if (!materialPtr->doShadowPass) 
                     continue;
                 
@@ -239,21 +229,19 @@ void RenderSystem::RenderFrame(void) {
                 
                 mShadowShader->SetProjectionMatrix( viewProjection );
                 mShadowShader->SetModelMatrix( currentEntity->transform.matrix );
+                
                 mShadowShader->SetCameraPosition(eye);
+                
                 
                 mShadowShader->SetShadowMatrix( mShadowTransform.matrix );
                 
                 // Shadow geometry blending
-                glEnable( GL_BLEND );
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 
                 // Render the shadow pass
                 mNumberOfDrawCalls++;
-                mesh->DrawIndexArray();
-                
-                // Restore previous shader
-                currentShader->Bind();
-                
+                //mesh->DrawIndexArray();
+                */
                 
                 continue;
             }
@@ -273,10 +261,6 @@ void RenderSystem::RenderFrame(void) {
     
     return;
 }
-
-
-
-
 
 bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::mat4& viewProjection) {
     
@@ -336,9 +320,6 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
     return true;
 }
 
-
-
-
 unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye) {
     
     std::vector<Light*>& lightList = currentScene->mLightList;
@@ -347,90 +328,31 @@ unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 
     unsigned int i;
     for (i=0; i < totalNumberOfLights; i++) {
         
-        // Check light list max
+        Light* lightPtr = lightList[i];
+        
+        if (glm::distance(eye, lightPtr->position) > lightPtr->renderDistance) 
+            continue;
+        
+        if (!lightPtr->isActive) 
+            continue;
+        
+        mLightPosition[mNumberOfLights]  = lightPtr->position + lightPtr->offset;
+        mLightDirection[mNumberOfLights] = lightPtr->direction;
+        
+        mLightAttenuation[mNumberOfLights].r = lightPtr->intensity;
+        mLightAttenuation[mNumberOfLights].g = lightPtr->range;
+        mLightAttenuation[mNumberOfLights].b = lightPtr->attenuation;
+        mLightAttenuation[mNumberOfLights].a = lightPtr->type;
+        
+        mLightColor[mNumberOfLights].r = lightPtr->color.r;
+        mLightColor[mNumberOfLights].g = lightPtr->color.g;
+        mLightColor[mNumberOfLights].b = lightPtr->color.b;
+        
+        mNumberOfLights++;
+        
         if (mNumberOfLights >= RENDER_NUMBER_OF_LIGHTS) {
             mNumberOfLights = RENDER_NUMBER_OF_LIGHTS;
             break;
-        }
-        
-        Light* lightPtr = lightList[i];
-        
-        // Point
-        
-        if (lightPtr->type == LIGHT_TYPE_POINT) {
-            
-            if (glm::distance(eye, lightPtr->position) > lightPtr->renderDistance) 
-                continue;
-            
-            if (!lightPtr->isActive) 
-                continue;
-            
-            mLightPosition[mNumberOfLights]  = lightPtr->position + lightPtr->offset;
-            mLightDirection[mNumberOfLights] = lightPtr->direction;
-            
-            mLightAttenuation[mNumberOfLights].r = lightPtr->intensity;
-            mLightAttenuation[mNumberOfLights].g = lightPtr->range;
-            mLightAttenuation[mNumberOfLights].b = lightPtr->attenuation;
-            mLightAttenuation[mNumberOfLights].a = lightPtr->type;
-            
-            mLightColor[mNumberOfLights].r = lightPtr->color.r;
-            mLightColor[mNumberOfLights].g = lightPtr->color.g;
-            mLightColor[mNumberOfLights].b = lightPtr->color.b;
-            
-            mNumberOfLights++;
-            
-            continue;
-        }
-        
-        // Directional
-        
-        if (lightPtr->type == LIGHT_TYPE_DIRECTIONAL) {
-            
-            if (!lightPtr->isActive) 
-                continue;
-            
-            //mLightPosition[mNumberOfLights]  = lightPtr->position + lightPtr->offset;
-            mLightDirection[mNumberOfLights] = lightPtr->direction;
-            
-            mLightAttenuation[mNumberOfLights].r = lightPtr->intensity;
-            //mLightAttenuation[mNumberOfLights].g = lightPtr->range;
-            //mLightAttenuation[mNumberOfLights].b = lightPtr->attenuation;
-            mLightAttenuation[mNumberOfLights].a = lightPtr->type;
-            
-            mLightColor[mNumberOfLights].r = lightPtr->color.r;
-            mLightColor[mNumberOfLights].g = lightPtr->color.g;
-            mLightColor[mNumberOfLights].b = lightPtr->color.b;
-            
-            mNumberOfLights++;
-            
-            continue;
-        }
-        
-        // Spot
-        
-        if (lightPtr->type == LIGHT_TYPE_SPOT) {
-            
-            if (glm::distance(eye, lightPtr->position) > lightPtr->renderDistance) 
-                continue;
-            
-            if (!lightPtr->isActive) 
-                continue;
-            
-            mLightPosition[mNumberOfLights]  = lightPtr->position + lightPtr->offset;
-            mLightDirection[mNumberOfLights] = lightPtr->direction;
-            
-            mLightAttenuation[mNumberOfLights].r = lightPtr->intensity;
-            mLightAttenuation[mNumberOfLights].g = lightPtr->range;
-            mLightAttenuation[mNumberOfLights].b = lightPtr->attenuation;
-            mLightAttenuation[mNumberOfLights].a = lightPtr->type;
-            
-            mLightColor[mNumberOfLights].r = lightPtr->color.r;
-            mLightColor[mNumberOfLights].g = lightPtr->color.g;
-            mLightColor[mNumberOfLights].b = lightPtr->color.b;
-            
-            mNumberOfLights++;
-            
-            continue;
         }
         
         continue;

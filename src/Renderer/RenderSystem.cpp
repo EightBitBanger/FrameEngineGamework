@@ -33,7 +33,9 @@ RenderSystem::RenderSystem() :
     mCurrentMesh(nullptr),
     mCurrentMaterial(nullptr),
     
-    mNumberOfLights(0)
+    mNumberOfLights(0),
+    
+    mShadowShader(nullptr)
 {
 }
 
@@ -238,20 +240,6 @@ void RenderSystem::SetViewport(unsigned int x, unsigned int y, unsigned int w, u
     viewport.w = w;
     viewport.h = h;
     return;
-}
-
-glm::mat4 RenderSystem::CalculateModelMatrix(Transform& model) {
-    
-    glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3( model.position.x, 
-                                                                       model.position.y, 
-                                                                       model.position.z ));
-    
-    glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3( model.localScale.x, 
-                                                             model.localScale.y, 
-                                                             model.localScale.z ));
-    glm::mat4 rotation = glm::toMat4(model.localRotation);
-    
-    return translation * rotation * scale;
 }
 
 std::vector<std::string> RenderSystem::GetGLErrorCodes(std::string errorLocationString) {

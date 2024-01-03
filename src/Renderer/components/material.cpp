@@ -12,6 +12,7 @@ Material::Material() :
     doDepthTest(true),
     doBlending(false),
     doFaceCulling(true),
+    doShadowPass(true),
     
     textureFiltration(GL_LINEAR_MIPMAP_LINEAR),
     
@@ -58,15 +59,14 @@ void Material::SetBlending(GLint src, GLint dest)  {blendSource = src; blendDest
 void Material::SetBlendingAlpha(GLint srca, GLint desta)  {blendAlphaSource = srca; blendAlphaDestination = desta;}
 void Material::SetBlendingFunction(GLint func)  {blendFunction = func;}
 
-void Material::Bind(void) {
-    glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
-    return;
-}
+void Material::EnableShadowPass(void) {doShadowPass = true; return;}
+void Material::DisableShadowPass(void) {doShadowPass = false; return;}
 
-void Material::BindTextureSlot(unsigned int slot) {
-    glActiveTexture(GL_TEXTURE0 + slot);
-    return;
-}
+
+
+void Material::Bind(void) {glBindTexture(GL_TEXTURE_2D, mTextureBuffer); return;}
+
+void Material::BindTextureSlot(unsigned int slot) {glActiveTexture(GL_TEXTURE0 + slot); return;}
 
 void Material::UpdateTextureBuffer(void* textureData) {
     glBindTexture(GL_TEXTURE_2D, mTextureBuffer);

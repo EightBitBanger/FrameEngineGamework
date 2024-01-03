@@ -2,10 +2,7 @@
 
 
 MeshRenderer::MeshRenderer() : 
-    
     mesh(nullptr),
-    material(nullptr),
-    
-    layer(0)
+    material(nullptr)
 {
 }
