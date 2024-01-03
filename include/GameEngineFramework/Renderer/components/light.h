@@ -9,8 +9,6 @@ class ENGINE_API Light {
     
 public:
     
-    friend class RenderSystem;
-    
     /// State whether the light is active.
     bool isActive;
     
@@ -40,6 +38,9 @@ public:
     
     /// Lighting drop off multiplier.
     float attenuation;
+    
+    
+    friend class RenderSystem;
     
     Light();
     

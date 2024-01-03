@@ -48,10 +48,10 @@ public:
     /// Current rendering view port
     Viewport  viewport;
     
-    /// Current size of the display.
+    /// Size of the display.
     glm::vec2 displaySize;
     
-    /// Current center of the display.
+    /// Center point of the display.
     glm::vec2 displayCenter;
     
     /// Recalculate lights every frame.
@@ -61,6 +61,8 @@ public:
     RenderSystem();
     
     Scene* operator[] (unsigned int const i) {return mRenderQueue[i];}
+    
+    // Components
     
     /// Create a mesh renderer object and return its pointer.
     MeshRenderer* CreateMeshRenderer(void);
@@ -104,6 +106,22 @@ public:
     /// Destroy a scene object and return true on success.
     bool DestroyScene(Scene* scenePtr);
     
+    // Render queue
+    
+    /// Add a scene to the render queue for rendering.
+    void AddSceneToRenderQueue(Scene* scenePtr);
+    
+    /// Remove a scene from the render queue.
+    bool RemoveSceneFromRenderQueue(Scene* scene);
+    
+    /// Get the number of scenes in the render queue.
+    unsigned int GetRenderQueueSize(void);
+    
+    /// Return the number of mesh renderers that have been created.
+    unsigned int GetMeshRendererCount(void);
+    
+    // Internal
+    
     /// Prepare the render system.
     void Initiate(void);
     
@@ -111,7 +129,7 @@ public:
     void Shutdown(void);
     
     /// Set the target render context.
-    GLenum  SetRenderTarget(HWND wHndl);
+    GLenum SetRenderTarget(HWND wHndl);
     
     /// Free the target render context.
     void ReleaseRenderTarget(void);
@@ -121,21 +139,6 @@ public:
     
     /// Draw the current frame as it stands.
     void RenderFrame(void);
-    
-    /// Add a scene to the render queue for drawing.
-    void AddSceneToRenderQueue(Scene* scene);
-    
-    /// Remove a scene from the render queue.
-    bool RemoveSceneFromRenderQueue(Scene* scene);
-    
-    /// Get the number of scenes in the render queue.
-    unsigned int GetRenderQueueSize(void);
-    
-    /// Return the number of entities that have been created.
-    unsigned int GetMeshRendererCount(void);
-    
-    /// Calculate the model matrix from a given transform.
-    glm::mat4 CalculateModelMatrix(Transform& modelTransform);
     
     /// Return a list of any and all openGL error codes.
     std::vector<std::string> GetGLErrorCodes(std::string errorLocationString);
@@ -170,9 +173,13 @@ private:
     glm::vec4    mLightAttenuation [RENDER_NUMBER_OF_LIGHTS];
     glm::vec3    mLightColor       [RENDER_NUMBER_OF_LIGHTS];
     
-    // Shadow angle
+    // Shadow casting
 public:
+    
     Transform mShadowTransform;
+    
+    Shader* mShadowShader;
+    
 private:
     
     // Render component allocators

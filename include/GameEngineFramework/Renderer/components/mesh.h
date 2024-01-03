@@ -21,10 +21,16 @@ struct ENGINE_API SubMesh {
     /// Name of the sub mesh.
     std::string name;
     
-    /// Begin offset position.
+    /// Starting offset position in the vertex buffer.
     unsigned vertexBegin;
+    
+    /// Number of vertices in the vertex buffer.
     unsigned vertexCount;
+    
+    /// Starting offset position in the index buffer.
     unsigned indexBegin;
+    
+    /// Number of indices in the index buffer.
     unsigned indexCount;
     
     /// Current mesh position offset.
@@ -32,6 +38,7 @@ struct ENGINE_API SubMesh {
     
     /// Vertex buffer array.
     std::vector<Vertex>  vertexBuffer;
+    
     /// Index buffer array.
     std::vector<Index>   indexBuffer;
     
@@ -53,11 +60,6 @@ class ENGINE_API Mesh {
     
 public:
     
-    friend class RenderSystem;
-    
-    Mesh();
-    ~Mesh();
-    
     /// Reallocate new GPU memory.
     void Reallocate(unsigned int newBufferSize);
     
@@ -66,18 +68,24 @@ public:
     
     /// Set and enable a vertex attribute layout.
     void SetAttribute(int index, int attributeCount, int vertexSize, int byteOffset);
+    
     /// Disable a vertex attribute.
     void DisableAttribute(int index);
     
+    
     /// Load vertex buffer data onto the GPU.
     void LoadVertexBuffer(Vertex* bufferData, int vertexCount);
+    
     /// Load index buffer data onto the GPU.
     void LoadIndexBuffer(Index* bufferData, int indexCount);
     
+    
     /// Bind the mesh buffer for rendering.
     void Bind(void);
+    
     /// Run a draw call on this vertex buffer.
     void DrawVertexArray(void);
+    
     /// Run a draw call on this index buffer.
     void DrawIndexArray(void);
     
@@ -86,30 +94,37 @@ public:
     
     /// Add a plain sub mesh to the vertex buffer.
     void AddPlain(float x, float y, float z, float width, float height, Color color, float uCoord=1, float vCoord=1, float uStart=0, float vStart=0, unsigned int uOffset=0, unsigned int vOffset=0);
+    
     /// Add a sub divided plain sub mesh to the vertex buffer.
     void AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
     
     /// Add a wall sub mesh to the vertex buffer.
     void AddWall(float x, float y, float z, float width, float height, Color color);
+    
     /// Add a sub divided wall sub mesh to the vertex buffer.
     void AddWallSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
+    
     /// Add a quad sub mesh to the vertex buffer.
     void AddQuad(float x, float y, float z, float width, float height, Color color, float uCoord=1, float vCoord=1, float uStart=0, float vStart=0, unsigned int uOffset=0, unsigned int vOffset=0);
     
     /// Add a sub mesh into this vertex buffer.
     bool AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu=true);
+    
     /// Add a vertex buffer directly into this vertex buffer.
     bool AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu=true);
     
     /// Remove a sub mesh from this vertex buffer.
     bool RemoveSubMesh(unsigned int index);
+    
     /// Copy this vertex buffer into a sub mesh.
     bool CopySubMesh(unsigned int index, SubMesh& mesh);
+    
     /// Copy this vertex buffer directly into a vertex buffer.
     bool CopySubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer);
     
     /// Update the color of a sub mesh.
     bool ChangeSubMeshColor(unsigned int index, Color newColor);
+    
     /// Update the position of a sub mesh.
     bool ChangeSubMeshPosition(unsigned int index, float x, float y, float z);
     
@@ -121,18 +136,28 @@ public:
     
     /// Get the number of index locations in the index buffer.
     unsigned int GetNumberOfIndices(void);
+    
     /// Get the number of vertex locations in the vertex buffer.
     unsigned int GetNumberOfVertices(void);
     
     /// Get a vertex from the internal vertex array.
     Vertex GetVertex(unsigned int index);
+    
     /// Set a vertex to the internal vertex array.
     void SetVertex(unsigned int index, Vertex vertex);
     
     /// Get an index from the internal index array.
     Index GetIndex(unsigned int index);
+    
     /// Set an index to the internal index array.
     void SetIndex(unsigned int index, Index position);
+    
+    
+    friend class RenderSystem;
+    
+    Mesh();
+    ~Mesh();
+    
     
 private:
     

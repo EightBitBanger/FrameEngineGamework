@@ -11,20 +11,20 @@ class ENGINE_API MeshRenderer {
     
 public:
     
-    friend class RenderSystem;
-    
     /// Pointer to the mesh component.
     Mesh*     mesh;
+    
     /// Pointer to the material component.
     Material* material;
-    
-    /// Layer in which this mesh renderer will draw.
-    unsigned short layer;
     
     /// Transformation element.
     Transform transform;
     
+    
+    friend class RenderSystem;
+    
     MeshRenderer();
+    
     
 };
 

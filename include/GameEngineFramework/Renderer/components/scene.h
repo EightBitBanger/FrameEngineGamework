@@ -10,8 +10,6 @@ class ENGINE_API Scene {
     
 public:
     
-    friend class RenderSystem;
-    
     /// Should lights be updated.
     bool doUpdateLights;
     
@@ -21,35 +19,33 @@ public:
     /// The camera associated with this scene.
     Camera* camera;
     
-    Scene();
     
     /// Add a mesh renderer to this scene.
-    void AddMeshRendererToSceneRoot(MeshRenderer* MeshRenderer);
+    void AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup = RENDER_QUEUE_DEFAULT);
+    
     /// Remove a mesh renderer from this scene.
-    bool RemoveMeshRendererFromSceneRoot(MeshRenderer* MeshRenderer);
+    bool RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup);
     
     /// Add a light to this scene.
     void AddLightToSceneRoot(Light* light);
+    
     /// Remove a light from this scene.
     bool RemoveLightFromSceneRoot(Light* light);
     
-    /// Return the number of mesh renderers in this scene.
-    unsigned int GetMeshRendererQueueSize(void);
     
-    /// Return the number of lights in this scene.
-    unsigned int GetLightQueueSize(void);
+    friend class RenderSystem;
     
-    /// Return a mesh renderer from an index location in the entity list.
-    MeshRenderer* GetMeshRenderer(unsigned int index);
-    
-    /// Return a light from an index location in the light list.
-    Light* GetLight(unsigned int index);
+    Scene();
     
     
 private:
     
-    /// List of mesh renderers in this scene.
-    std::vector<MeshRenderer*>  mMeshRendererList;
+    /// List of mesh renderer queue groups in this scene.
+    std::vector<MeshRenderer*>  mRenderQueueOverlay;
+    std::vector<MeshRenderer*>  mRenderQueueForeground;
+    std::vector<MeshRenderer*>  mRenderQueueDefault;
+    std::vector<MeshRenderer*>  mRenderQueueBackground;
+    std::vector<MeshRenderer*>  mRenderQueueSky;
     
     /// List of lights in this scene.
     std::vector<Light*>  mLightList;

@@ -1,6 +1,17 @@
 //
 // Render system enumerators
 
+//
+//
+
+#define RENDER_QUEUE_OVERLAY      7
+#define RENDER_QUEUE_FOREGROUND   6
+#define RENDER_QUEUE_DEFAULT      5
+#define RENDER_QUEUE_BACKGROUND   4
+#define RENDER_QUEUE_SKY          3
+
+
+
 // ============================================
 // Mesh primitive drawing types
 
@@ -93,5 +104,6 @@
 
 #define  LIGHT_TYPE_POINT                0
 #define  LIGHT_TYPE_DIRECTIONAL          1
+#define  LIGHT_TYPE_SPOT                 2
 
 
