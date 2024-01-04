@@ -22,6 +22,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <algorithm>
 
 #define GLEW_STATIC
 #include "../../../vendor/gl/glew.h"
@@ -146,6 +147,10 @@ public:
     /// Get number of draw calls made in the last frame.
     unsigned int GetNumberOfDrawCalls(void);
     
+    
+    friend class EngineSystemManager;
+    
+    
 private:
     
     // Draw call counter
@@ -173,14 +178,9 @@ private:
     glm::vec4    mLightAttenuation [RENDER_NUMBER_OF_LIGHTS];
     glm::vec3    mLightColor       [RENDER_NUMBER_OF_LIGHTS];
     
-    // Shadow casting
-public:
-    
+    // Shadows
     Transform mShadowTransform;
-    
-    Shader* mShadowShader;
-    
-private:
+    Shader*   mShadowShader;
     
     // Render component allocators
     PoolAllocator<MeshRenderer>    mEntity;
@@ -200,6 +200,10 @@ private:
     bool setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::mat4& viewProjection);
     
     unsigned int accumulateSceneLights(Scene* currentScene, glm::vec3 eye);
+    
+    void GeometryPass(glm::mat4& model, glm::mat4& viewProjection, glm::vec3& eye);
+    
+    void ShadowPass(glm::mat4& model, glm::mat4& viewProjection, glm::vec3& eye);
     
 };
 
