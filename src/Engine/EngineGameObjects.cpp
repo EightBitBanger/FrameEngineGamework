@@ -113,10 +113,12 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     Material* skyMaterial = Renderer.CreateMaterial();
     
     skyMaterial->diffuse = Color(1, 1, 1);
-    skyMaterial->DisableDepthTest();
     skyMaterial->ambient = Colors.MakeGrayScale(0.4);
     skyMaterial->diffuse = Colors.MakeGrayScale(0.4);
     skyMaterial->shader = shaders.color;
+    
+    skyMaterial->DisableDepthTest();
+    skyMaterial->DisableShadowPass();
     
     for (unsigned int i=0; i < skyMesh->GetNumberOfVertices(); i++) {
         Vertex vertex = skyMesh->GetVertex(i);
@@ -182,6 +184,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
     overlayMaterial->SetTextureFiltration(MATERIAL_FILTER_NONE);
     overlayMaterial->DisableCulling();
+    overlayMaterial->DisableShadowPass();
     
     overlayObject->AddComponent( CreateComponent<MeshRenderer>(overlayMesh, overlayMaterial) );
     
@@ -219,6 +222,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     overlayRenderer->material->SetTextureFiltration(MATERIAL_FILTER_NONE);
     
     overlayRenderer->material->DisableCulling();
+    overlayRenderer->material->DisableShadowPass();
     
     mDoUpdateDataStream = true;
     return overlayObject;
@@ -252,6 +256,7 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     overlayMaterial->SetTextureFiltration(MATERIAL_FILTER_NONE);
     
     overlayMaterial->DisableCulling();
+    overlayMaterial->DisableShadowPass();
     
     overlayMesh->AddPlain(0, 0, 0, height, width, Colors.white, 1, 1);
     
@@ -260,16 +265,6 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     mDoUpdateDataStream = true;
     return overlayObject;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

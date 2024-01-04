@@ -149,6 +149,9 @@ void EngineSystemManager::Initiate() {
     
     sceneMain = Create<Scene>();
     
+    // Initiate shadow shader
+    Renderer.mShadowShader = shaders.shadowCaster;
+    
     return;
 }
 

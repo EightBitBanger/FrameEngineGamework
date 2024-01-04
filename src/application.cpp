@@ -32,6 +32,8 @@ Material* skyMaterial;
 
 GameObject* directionalLight;
 
+Transform* transformObjectA;
+
 Text* text[20];
 
 
@@ -46,12 +48,12 @@ void Start() {
     
     // Create the main world scene 
     Engine.sceneMain   = Engine.Create<Scene>();
-    
-    Renderer.mShadowShader = Engine.shaders.shadowCaster;
+    Renderer.AddSceneToRenderQueue(Engine.sceneMain);
     
     
     //
     // Create a sky
+    
     float skyBrightness = 0.87;
     
     Color skyHigh(Colors.blue);
@@ -68,10 +70,14 @@ void Start() {
     GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, 1);
     MeshRenderer* skyRenderer = skyObject->GetComponent<MeshRenderer>();
     
+    Engine.sceneMain->AddMeshRendererToSceneRoot( skyRenderer, RENDER_QUEUE_SKY );
+    
     skyMaterial = skyRenderer->material;
     skyMaterial->diffuse = Color(0.087, 0.087, 0.087);
     skyMaterial->EnableDepthTest();
     skyMaterial->DisableShadowPass();
+    
+    
     
     //
     // Create a camera controller
@@ -102,49 +108,38 @@ void Start() {
     
     Mesh* shadowMesh = Resources.CreateMeshFromTag("cube");
     
-    // Base object
-    GameObject* shadowObject = Engine.Create<GameObject>();
-    Transform* transformObject = shadowObject->GetComponent<Transform>();
-    transformObject->position.y += 20;
-    transformObject->localScale *= 1;
+    for (int i=0; i < 1000; i++) {
+        
+        GameObject* shadowObject = Engine.Create<GameObject>();
+        
+        transformObjectA = shadowObject->GetComponent<Transform>();
+        transformObjectA->position.y += 20;
+        
+        transformObjectA->position.x = Random.Range(0, 100) - Random.Range(0, 100);
+        transformObjectA->position.z = Random.Range(0, 100) - Random.Range(0, 100);
+        
+        shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+        MeshRenderer* objectRenderer = shadowObject->GetComponent<MeshRenderer>();
+        objectRenderer->mesh = shadowMesh;
+        
+        objectRenderer->material = Engine.Create<Material>();
+        objectRenderer->material->shader = Engine.shaders.color;
+        
+        objectRenderer->material->ambient = Color(0.01, 0.01, 0.01);
+        objectRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
+        
+        
+        
+        objectRenderer->material->EnableShadowPass();
+        
+        
+        
+        Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer, RENDER_QUEUE_DEFAULT );
+        
+    }
     
-    shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-    
-    MeshRenderer* objectRenderer = shadowObject->GetComponent<MeshRenderer>();
-    
-    objectRenderer->mesh     = shadowMesh;
-    objectRenderer->material = Engine.Create<Material>();
-    objectRenderer->material->shader = Engine.shaders.color;
-    objectRenderer->material->ambient = Color(0.01, 0.01, 0.01);
-    objectRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
-    
-    Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer, RENDER_QUEUE_FOREGROUND );
     
     
-    
-    
-    // Shadow caster object
-    
-    GameObject* shadowCaster = Engine.Create<GameObject>();
-    Transform* transform = shadowCaster->GetComponent<Transform>();
-    transform->position.y += 20;
-    transform->localScale *= 1;
-    
-    shadowCaster->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-    
-    MeshRenderer* shadowCasterRenderer = shadowCaster->GetComponent<MeshRenderer>();
-    
-    shadowCasterRenderer->mesh     = shadowMesh;
-    shadowCasterRenderer->material = Engine.Create<Material>();
-    shadowCasterRenderer->material->ambient = Color(0.01, 0.01, 0.01);
-    shadowCasterRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
-    
-    shadowCasterRenderer->material->EnableBlending();
-    shadowCasterRenderer->material->SetBlendingAlpha(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
-    shadowCasterRenderer->material->shader = Engine.shaders.shadowCaster;
-    
-    Engine.sceneMain->AddMeshRendererToSceneRoot( shadowCasterRenderer, RENDER_QUEUE_FOREGROUND );
     
     
     
@@ -154,7 +149,7 @@ void Start() {
     // Directional light
     directionalLight = Engine.Create<GameObject>();
     Transform* lightTransform = directionalLight->GetComponent<Transform>();
-    lightTransform->RotateAxis(1, Vector3(0, -1, 0));
+    lightTransform->RotateAxis(1, Vector3(0.3, -1, 0));
     
     directionalLight->AddComponent( Engine.CreateComponent<Light>() );
     Light* sunLight = directionalLight->GetComponent<Light>();
@@ -169,12 +164,9 @@ void Start() {
     
     
     
-    
-    
-    
-    
     // Scene overlay
     sceneOverlay = Engine.Create<Scene>();
+    Renderer.AddSceneToRenderQueue(sceneOverlay);                         // UI
     
     sceneOverlay->camera = Engine.Create<Camera>();
     sceneOverlay->camera->isOrthographic = true;
@@ -201,6 +193,9 @@ void Start() {
     
     
     
+    
+    
+    
     //
     // Generate some ground chunks
     //
@@ -214,8 +209,7 @@ void Start() {
     Material* plainMaterial = Resources.CreateMaterialFromTag("grassy");
     plainMaterial->shader = Engine.shaders.texture;
     plainMaterial->diffuse = Colors.MakeGrayScale(0.001);
-    
-    plainMaterial->EnableShadowPass();
+    plainMaterial->DisableShadowPass();
     
     // Chunk layout
     
@@ -233,6 +227,9 @@ void Start() {
     plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
     
     MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
+    
     
     plainObject->SetAngularAxisLockFactor(0, 0, 0);
     plainObject->SetLinearAxisLockFactor(0, 0, 0);
@@ -272,6 +269,7 @@ void Start() {
     
     
     
+    return;
     
     
     
@@ -402,17 +400,6 @@ void Start() {
     }
     
     
-    
-    
-    // Add scenes to root node
-    
-    Engine.sceneMain->AddMeshRendererToSceneRoot( skyRenderer, RENDER_QUEUE_SKY );
-    Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
-    
-    
-    Renderer.AddSceneToRenderQueue(sceneOverlay);                         // UI
-    Renderer.AddSceneToRenderQueue(Engine.sceneMain);                     // Main scene
-    
     return;
 }
 
@@ -435,7 +422,7 @@ float shadowRayScale = 0.997;
 
 void Run() {
     
-    
+    //transformObjectA->RotateAxis(1, Vector3(0, 1, 0));
     
     
     //
@@ -447,14 +434,15 @@ void Run() {
     Transform* lightTransform = directionalLight->GetComponent<Transform>();
     
     lightTransform->SetIdentity();
-    //lightTransform->RotateAxis( 90, glm::vec3(0, 1, 0) );
     lightTransform->RotateAxis(1, Vector3(0, -1, 0));
+    
+    //lightTransform->RotateAxis( 90, glm::vec3(0, 1, 0) );
     
     //lightTransform->RotateAxis(45, sunDir);
     
-    lightTransform->RotateAxis(20, sunDir);
+    //lightTransform->RotateAxis(20, sunDir);
     
-    sunStep = 30;
+    //sunStep = 30;
     
     //if (sunStep > 360) sunStep = 0;
     
@@ -463,6 +451,8 @@ void Run() {
     
     
     
+    
+    /*
     
     Renderer.mShadowTransform.SetIdentity();
     
@@ -478,6 +468,8 @@ void Run() {
     
     // Offset by half the distance
     Renderer.mShadowTransform.Translate( glm::vec3(0, -1, 0) * 0.5f );
+    
+    */
     
     
     

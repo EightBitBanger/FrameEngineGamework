@@ -70,12 +70,53 @@ void RenderSystem::RenderFrame(void) {
                 case 4: renderQueueGroup = &scenePtr->mRenderQueueOverlay; break;
             }
             
+            
             unsigned int entityListSz = renderQueueGroup->size();
+            
+            
+            // Sort TEST
+            std::vector< std::pair<float, MeshRenderer*> > renderQueueSort;
+            
+            // Accumulate list of distance \ object pairs
+            for (unsigned int i=0; i < entityListSz; i++) {
+                
+                MeshRenderer* meshRenderer = *(renderQueueGroup->data() + i);
+                
+                float distance = glm::distance( meshRenderer->transform.position, eye );
+                
+                std::pair<float, MeshRenderer*> distPair;
+                
+                distPair.first  = distance;     // Distance
+                distPair.second = meshRenderer; // Object
+                
+                renderQueueSort.push_back( distPair );
+                
+                continue;
+            }
+            
+            std::sort( renderQueueSort.begin(), renderQueueSort.end() );
+            
+            for (unsigned int i=0; i < entityListSz; i++) {
+                
+                //MeshRenderer* meshRenderer = *(renderQueueGroup->data() + i);
+                
+                *(renderQueueGroup->data() + i) = renderQueueSort[i].second;
+            }
+            
+            
             
             // Draw the mesh renderers
             for (unsigned int i=0; i < entityListSz; i++) {
                 
                 MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
+                
+                //
+                // Sorting
+                //
+                
+                //MeshRenderer* renderSortFrom = *( renderQueueGroup->data() + Random.Range(0, entityListSz) );
+                //MeshRenderer* renderSortTo   = *( renderQueueGroup->data() + Random.Range(0, entityListSz) );
+                
                 
                 
                 
@@ -190,13 +231,8 @@ void RenderSystem::RenderFrame(void) {
                     currentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
                     currentShader->SetLightColors(mNumberOfLights, mLightColor);
                     
-                    
-                    
                     // Send in the shadow angle
-                    currentShader->SetShadowMatrix( mShadowTransform.matrix );
-                    
-                    
-                    
+                    //currentShader->SetShadowMatrix( mShadowTransform.matrix );
                     
                 } else {
                     
@@ -219,40 +255,37 @@ void RenderSystem::RenderFrame(void) {
                 currentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
                 currentShader->SetMaterialSpecular(mCurrentMaterial->specular);
                 
-                // Render the geometry pass
+                // Render the geometry
                 mesh->DrawIndexArray();
                 mNumberOfDrawCalls++;
                 
                 
                 
+                
+                
+                
                 //
-                // Shadow render pass
+                // Shadow pass
                 //
                 
-                if (!materialPtr->doShadowPass) 
-                    continue;
+                if (materialPtr->doShadowPass) {
+                    
+                    if (mShadowShader != nullptr) {
+                        
+                        ShadowPass( currentEntity->transform.matrix, viewProjection, eye );
+                        
+                        // Render the shadow pass
+                        mNumberOfDrawCalls++;
+                        mesh->DrawIndexArray();
+                        
+                        // Restore previous shader
+                        currentShader->Bind();
+                        
+                    }
+                    
+                }
                 
-                if (mShadowShader == nullptr) 
-                    continue;
                 
-                mShadowShader->Bind();
-                
-                mShadowShader->SetProjectionMatrix( viewProjection );
-                mShadowShader->SetModelMatrix( currentEntity->transform.matrix );
-                mShadowShader->SetCameraPosition(eye);
-                
-                mShadowShader->SetShadowMatrix( mShadowTransform.matrix );
-                
-                // Shadow geometry blending
-                glEnable( GL_BLEND );
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                
-                // Render the shadow pass
-                mNumberOfDrawCalls++;
-                mesh->DrawIndexArray();
-                
-                // Restore previous shader
-                currentShader->Bind();
                 
                 
                 continue;
@@ -273,6 +306,74 @@ void RenderSystem::RenderFrame(void) {
     
     return;
 }
+
+
+
+
+
+
+
+void RenderSystem::GeometryPass(glm::mat4& model, glm::mat4& viewProjection, glm::vec3& eye) {
+    
+}
+
+void RenderSystem::ShadowPass(glm::mat4& model, glm::mat4& viewProjection, glm::vec3& eye) {
+    
+    mShadowShader->Bind();
+    
+    // Send in the light list
+    mShadowShader->SetLightCount(mNumberOfLights);
+    mShadowShader->SetLightPositions(mNumberOfLights, mLightPosition);
+    mShadowShader->SetLightDirections(mNumberOfLights, mLightDirection);
+    mShadowShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
+    mShadowShader->SetLightColors(mNumberOfLights, mLightColor);
+    
+    mShadowShader->SetProjectionMatrix( viewProjection );
+    mShadowShader->SetModelMatrix( model );
+    mShadowShader->SetCameraPosition(eye);
+    
+    
+    // Calculate shadow angle
+    
+    for (int s=0; s < mNumberOfLights; s++) {
+        
+        // 1 - Directional light
+        if ((mLightAttenuation[s].a < 1) | (mLightAttenuation[s].a > 1)) 
+            continue;
+        
+        
+        float shadowRayScale = 0.997;
+        float shadowLength   = 4;
+        
+        mShadowTransform.SetIdentity();
+        
+        // Correct the sun cycle rotation
+        mShadowTransform.RotateAxis( 90, glm::vec3(0, 1, 0) );
+        
+        // Rotate by the inverse sun angle
+        //Renderer.mShadowTransform.RotateAxis( -sunStep, sunDir );
+        //mShadowTransform.RotateWorldAxis( -90, mLightDirection[s], glm::vec3(0, -0.2, 0) );
+        
+        // Scale the length of the shadow
+        mShadowTransform.Scale( glm::vec3(shadowRayScale, shadowLength * 2, shadowRayScale) );
+        
+        // Offset by half the distance
+        mShadowTransform.Translate( glm::vec3(0, -1, 0) * 0.5f );
+        
+        break;
+    }
+    
+    mShadowShader->SetShadowMatrix( mShadowTransform.matrix );
+    
+    
+    // Shadow geometry blending
+    glEnable( GL_BLEND );
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+}
+
+
+
 
 
 
@@ -438,3 +539,5 @@ unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 
     
     return i;
 }
+
+
