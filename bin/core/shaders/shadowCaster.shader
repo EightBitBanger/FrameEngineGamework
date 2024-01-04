@@ -1,6 +1,6 @@
 [begin] vertex
 
-#version 440 core
+#version 330 core
 
 layout(location = 0) in vec3 l_position;
 layout(location = 1) in vec3 l_color;
@@ -47,20 +47,23 @@ void main() {
         // Directional light shadows
         if (type < 2) {
             
-            float shadowOffset     = 1.1;
             float shadowColor      = 0.03;
-            float shadowIntensity  = 0.8;
-            float shadowLength     = 1;
-            
-            //mat4 shadowScale;
+            float shadowIntensity  = 0.087;
             
             vec3 lightDir = normalize(-u_light_direction[i]);
             
-            v_color = vec4(shadowColor, shadowColor, shadowColor, shadowIntensity);
+            v_color = vec4(shadowColor, shadowColor, shadowColor, 0);
             
-            vec4 vertPos = u_model * u_shadow * vec4(l_position, 1);
+            vec4 shadowPos = u_model * u_shadow * vec4(l_position, 1);
             
-            gl_Position = vec4(u_proj * vertPos);
+            vec4 vertexPos = u_model * vec4(l_position, 1);
+            //float dist = length( vec3(vertexPos) - vec3(shadowPos) );
+            
+            
+            if (shadowPos.y > (vertexPos.y - 1)) 
+                v_color = vec4(0, 0, 0, shadowIntensity);
+            
+            gl_Position = vec4(u_proj * shadowPos);
             
             return;
         }
@@ -79,7 +82,7 @@ void main() {
 
 [begin] fragment
 
-#version 440 core
+#version 330 core
 
 varying vec4 v_color;
 varying vec2 v_coord;
