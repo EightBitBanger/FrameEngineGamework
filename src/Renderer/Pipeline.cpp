@@ -4,6 +4,7 @@
 //
 // Frame rendering pipeline
 //
+int dbgCounter = 0;
 
 void RenderSystem::RenderFrame(void) {
     
@@ -16,8 +17,6 @@ void RenderSystem::RenderFrame(void) {
     
     // Clear the view port
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    
-    Shader* currentShader = nullptr;
     
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::BeginFrame::");
@@ -58,11 +57,11 @@ void RenderSystem::RenderFrame(void) {
         //
         // Draw the render queues
         
-        for (unsigned int g=0; g < 5; g++) {
+        for (unsigned int group=0; group < 5; group++) {
             
             std::vector<MeshRenderer*>* renderQueueGroup;
             
-            switch (g) {
+            switch (group) {
                 case 0: renderQueueGroup = &scenePtr->mRenderQueueSky; break;
                 case 1: renderQueueGroup = &scenePtr->mRenderQueueBackground; break;
                 case 2: renderQueueGroup = &scenePtr->mRenderQueueDefault; break;
@@ -75,223 +74,171 @@ void RenderSystem::RenderFrame(void) {
             
             
             // Sort TEST
+            
+            /*
             std::vector< std::pair<float, MeshRenderer*> > renderQueueSort;
             
-            // Accumulate list of distance \ object pairs
             for (unsigned int i=0; i < entityListSz; i++) {
                 
                 MeshRenderer* meshRenderer = *(renderQueueGroup->data() + i);
                 
-                float distance = glm::distance( meshRenderer->transform.position, eye );
+                meshRenderer->distance = glm::distance( eye, meshRenderer->transform.position );
                 
                 std::pair<float, MeshRenderer*> distPair;
                 
-                distPair.first  = distance;     // Distance
-                distPair.second = meshRenderer; // Object
+                distPair.first  = meshRenderer->distance;
+                distPair.second = meshRenderer;
                 
                 renderQueueSort.push_back( distPair );
                 
                 continue;
             }
             
-            std::sort( renderQueueSort.begin(), renderQueueSort.end() );
+            
+            std::sort(renderQueueSort.begin(), renderQueueSort.end(), [](std::pair<float, MeshRenderer*> a, std::pair<float, MeshRenderer*> b) {
+                return a.first > b.first;
+            });
+            
+            // Apply the sorted data back to the render queue
+            for (unsigned int i=0; i < entityListSz; i++) 
+                *(renderQueueGroup->data() + i) = renderQueueSort[i].second;
+            */
+            
+            
+            
+            //
+            // Sorting pass
+            
             
             for (unsigned int i=0; i < entityListSz; i++) {
                 
-                //MeshRenderer* meshRenderer = *(renderQueueGroup->data() + i);
+                MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
                 
-                *(renderQueueGroup->data() + i) = renderQueueSort[i].second;
+                // Sort render distance
+                currentEntity->distance = glm::distance( eye, currentEntity->transform.position );
+                
+                //
+                // Sorting
+                
+                if (i < entityListSz-1) {
+                    
+                    MeshRenderer* nextEntity = *(renderQueueGroup->data() + i + 1);
+                    
+                    nextEntity->distance = glm::distance( eye, nextEntity->transform.position );
+                    
+                    if (currentEntity->distance < nextEntity->distance) {
+                        
+                        *(renderQueueGroup->data() + i)      = nextEntity;
+                        *(renderQueueGroup->data() + i + 1)  = currentEntity;
+                        
+                    }
+                    
+                }
+                
+                continue;
             }
             
             
             
-            // Draw the mesh renderers
+            
+            //
+            // Geometry pass
+            //
+            
             for (unsigned int i=0; i < entityListSz; i++) {
                 
                 MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
                 
                 //
-                // Sorting
-                //
-                
-                //MeshRenderer* renderSortFrom = *( renderQueueGroup->data() + Random.Range(0, entityListSz) );
-                //MeshRenderer* renderSortTo   = *( renderQueueGroup->data() + Random.Range(0, entityListSz) );
-                
-                
-                
-                
-                
-                
-                
-                
-                //
-                // Geometry pass
-                //
-                
                 // Mesh binding
                 
-                Mesh* mesh = currentEntity->mesh;
-                if (mesh == nullptr) 
+                Mesh* meshPtr = currentEntity->mesh;
+                
+                if (meshPtr == nullptr) 
                     continue;
                 
-                if (mCurrentMesh != mesh) {
-                    
-                    mCurrentMesh = mesh;
-                    mCurrentMesh->Bind();
-                }
+                BindMesh( meshPtr );
                 
-                
+                //
                 // Material binding
                 
                 Material* materialPtr = currentEntity->material;
+                
                 if (materialPtr == nullptr) 
                     continue;
                 
-                if (mCurrentMaterial != materialPtr) {
-                    mCurrentMaterial = materialPtr;
-                    
-                    mCurrentMaterial->Bind();
-                    mCurrentMaterial->BindTextureSlot(0);
-                    
-                    // Depth testing
-                    
-                    if (mCurrentMaterial->doDepthTest) {
-                        glEnable(GL_DEPTH_TEST);
-                        glDepthMask(mCurrentMaterial->doDepthTest);
-                        glDepthFunc(mCurrentMaterial->depthFunc);
-                        
-#ifdef RENDERER_CHECK_OPENGL_ERRORS
-    GetGLErrorCodes("OnRender::Material::DepthTest::");
-#endif
-                        
-                    } else {
-                        glDisable(GL_DEPTH_TEST);
-                    }
-                    
-                    // Face culling and winding
-                    
-                    if (mCurrentMaterial->doFaceCulling) {
-                        glEnable(GL_CULL_FACE);
-                        glCullFace(mCurrentMaterial->faceCullSide);
-                        
-#ifdef RENDERER_CHECK_OPENGL_ERRORS
-    GetGLErrorCodes("OnRender::Material::Culling::");
-#endif
-                        
-                    } else {
-                        glDisable(GL_CULL_FACE);
-                    }
-                    
-                    
-                    // Face winding order
-                    glFrontFace(mCurrentMaterial->faceWinding);
-                    
-#ifdef RENDERER_CHECK_OPENGL_ERRORS
-    GetGLErrorCodes("OnRender::Material::FaceWinding::");
-#endif
-                    
-                    // Blending
-                    
-                    if (mCurrentMaterial->doBlending) {
-                        glEnable(GL_BLEND);
-                        
-                        glBlendFuncSeparate(mCurrentMaterial->blendSource,
-                                            mCurrentMaterial->blendDestination,
-                                            mCurrentMaterial->blendAlphaSource,
-                                            mCurrentMaterial->blendAlphaDestination);
-                        
-#ifdef RENDERER_CHECK_OPENGL_ERRORS
-    GetGLErrorCodes("OnRender::Material::Blending::");
-#endif
-                        
-                    } else {
-                        glDisable(GL_BLEND);
-                    }
-                    
-                }
+                BindMaterial( materialPtr );
                 
-                
+                //
                 // Shader binding
                 
                 Shader* shaderPtr = materialPtr->shader;
-                if (shaderPtr != nullptr) {
-                    
-                    if (currentShader != shaderPtr) {
-                        
-                        currentShader = shaderPtr;
-                        currentShader->Bind();
-                        
-                        currentShader->SetTextureSampler(0);
-                    }
-                    
-                    // Send in the light list
-                    currentShader->SetLightCount(mNumberOfLights);
-                    currentShader->SetLightPositions(mNumberOfLights, mLightPosition);
-                    currentShader->SetLightDirections(mNumberOfLights, mLightDirection);
-                    currentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
-                    currentShader->SetLightColors(mNumberOfLights, mLightColor);
-                    
-                    // Send in the shadow angle
-                    //currentShader->SetShadowMatrix( mShadowTransform.matrix );
-                    
-                } else {
-                    
-                    // No shader assigned
+                
+                if (shaderPtr == nullptr) 
                     continue;
-                }
                 
+                BindShader( shaderPtr );
+                
+                //
                 // Set the projection
-                currentShader->SetProjectionMatrix( viewProjection );
-                currentShader->SetModelMatrix( currentEntity->transform.matrix );
                 
-                // Inverse transpose model matrix
+                mCurrentShader->SetProjectionMatrix( viewProjection );
+                mCurrentShader->SetModelMatrix( currentEntity->transform.matrix );
+                
+                // Inverse transpose model matrix for non linear scaling
                 glm::mat3 invTransposeMatrix = glm::transpose( glm::inverse( currentEntity->transform.matrix ) );
-                currentShader->SetInverseModelMatrix( invTransposeMatrix );
                 
-                currentShader->SetCameraPosition(eye);
+                mCurrentShader->SetInverseModelMatrix( invTransposeMatrix );
+                
+                mCurrentShader->SetCameraPosition(eye);
                 
                 // Set the material and texture
-                currentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
-                currentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
-                currentShader->SetMaterialSpecular(mCurrentMaterial->specular);
+                mCurrentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
+                mCurrentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
+                mCurrentShader->SetMaterialSpecular(mCurrentMaterial->specular);
                 
                 // Render the geometry
-                mesh->DrawIndexArray();
+                meshPtr->DrawIndexArray();
                 mNumberOfDrawCalls++;
-                
-                
-                
-                
-                
-                
-                //
-                // Shadow pass
-                //
-                
-                if (materialPtr->doShadowPass) {
-                    
-                    if (mShadowShader != nullptr) {
-                        
-                        ShadowPass( currentEntity->transform.matrix, viewProjection, eye );
-                        
-                        // Render the shadow pass
-                        mNumberOfDrawCalls++;
-                        mesh->DrawIndexArray();
-                        
-                        // Restore previous shader
-                        currentShader->Bind();
-                        
-                    }
-                    
-                }
-                
-                
-                
                 
                 continue;
             }
             
+            
+            //
+            // Shadow pass
+            //
+            
+            mShadowShader->Bind();
+            
+            // Send in the light list
+            mShadowShader->SetLightCount(mNumberOfLights);
+            mShadowShader->SetLightPositions(mNumberOfLights, mLightPosition);
+            mShadowShader->SetLightDirections(mNumberOfLights, mLightDirection);
+            mShadowShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
+            mShadowShader->SetLightColors(mNumberOfLights, mLightColor);
+            
+            for (unsigned int i=0; i < entityListSz; i++) {
+                
+                MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
+                
+                ShadowPass( currentEntity->transform.matrix, viewProjection, eye );
+                
+                // Render the shadow pass
+                mNumberOfDrawCalls++;
+                currentEntity->mesh->DrawIndexArray();
+                
+                continue;
+            }
+            
+            mCurrentShader->Bind();
+            
+            
+            continue;
         }
+        
+        
+        
         
     }
     
@@ -310,7 +257,119 @@ void RenderSystem::RenderFrame(void) {
 
 
 
+void RenderSystem::BindMesh(Mesh* meshPtr) {
+    
+    if (mCurrentMesh == meshPtr) 
+        return;
+    
+    mCurrentMesh = meshPtr;
+    
+    mCurrentMesh->Bind();
+    
+    return;
+}
 
+
+void RenderSystem::BindMaterial(Material* materialPtr) {
+    
+    if (mCurrentMaterial == materialPtr) 
+        return;
+    
+    mCurrentMaterial = materialPtr;
+    
+    mCurrentMaterial->Bind();
+    mCurrentMaterial->BindTextureSlot(0);
+    
+    // Depth testing
+    
+    if (mCurrentMaterial->doDepthTest) {
+        
+        glEnable(GL_DEPTH_TEST);
+        
+        glDepthMask(mCurrentMaterial->doDepthTest);
+        
+        glDepthFunc(mCurrentMaterial->depthFunc);
+        
+#ifdef RENDERER_CHECK_OPENGL_ERRORS
+    GetGLErrorCodes("OnRender::Material::DepthTest::");
+#endif
+        
+    } else {
+        
+        glDisable(GL_DEPTH_TEST);
+        
+    }
+    
+    // Face culling and winding
+    
+    if (mCurrentMaterial->doFaceCulling) {
+        
+        glEnable(GL_CULL_FACE);
+        
+        glCullFace(mCurrentMaterial->faceCullSide);
+        
+#ifdef RENDERER_CHECK_OPENGL_ERRORS
+    GetGLErrorCodes("OnRender::Material::Culling::");
+#endif
+        
+    } else {
+        
+        glDisable(GL_CULL_FACE);
+        
+    }
+    
+    // Face winding order
+    glFrontFace(mCurrentMaterial->faceWinding);
+    
+#ifdef RENDERER_CHECK_OPENGL_ERRORS
+    GetGLErrorCodes("OnRender::Material::FaceWinding::");
+#endif
+    
+    // Blending
+    
+    if (mCurrentMaterial->doBlending) {
+        
+        glEnable(GL_BLEND);
+        
+        glBlendFuncSeparate(mCurrentMaterial->blendSource,
+                            mCurrentMaterial->blendDestination,
+                            mCurrentMaterial->blendAlphaSource,
+                            mCurrentMaterial->blendAlphaDestination);
+        
+#ifdef RENDERER_CHECK_OPENGL_ERRORS
+    GetGLErrorCodes("OnRender::Material::Blending::");
+#endif
+        
+    } else {
+        
+        glDisable(GL_BLEND);
+        
+    }
+    
+    return;
+}
+
+
+void RenderSystem::BindShader(Shader* shaderPtr) {
+    
+    if (mCurrentShader == shaderPtr) 
+        return;
+    
+    mCurrentShader = shaderPtr;
+    
+    mCurrentShader->Bind();
+    
+    mCurrentShader->SetTextureSampler(0);
+    
+    // Send in the light list
+    mCurrentShader->SetLightCount(mNumberOfLights);
+    mCurrentShader->SetLightPositions(mNumberOfLights, mLightPosition);
+    mCurrentShader->SetLightDirections(mNumberOfLights, mLightDirection);
+    mCurrentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
+    mCurrentShader->SetLightColors(mNumberOfLights, mLightColor);
+    
+    return;
+}
 
 
 void RenderSystem::GeometryPass(glm::mat4& model, glm::mat4& viewProjection, glm::vec3& eye) {
@@ -319,19 +378,9 @@ void RenderSystem::GeometryPass(glm::mat4& model, glm::mat4& viewProjection, glm
 
 void RenderSystem::ShadowPass(glm::mat4& model, glm::mat4& viewProjection, glm::vec3& eye) {
     
-    mShadowShader->Bind();
-    
-    // Send in the light list
-    mShadowShader->SetLightCount(mNumberOfLights);
-    mShadowShader->SetLightPositions(mNumberOfLights, mLightPosition);
-    mShadowShader->SetLightDirections(mNumberOfLights, mLightDirection);
-    mShadowShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
-    mShadowShader->SetLightColors(mNumberOfLights, mLightColor);
-    
     mShadowShader->SetProjectionMatrix( viewProjection );
     mShadowShader->SetModelMatrix( model );
     mShadowShader->SetCameraPosition(eye);
-    
     
     // Calculate shadow angle
     
@@ -340,7 +389,6 @@ void RenderSystem::ShadowPass(glm::mat4& model, glm::mat4& viewProjection, glm::
         // 1 - Directional light
         if ((mLightAttenuation[s].a < 1) | (mLightAttenuation[s].a > 1)) 
             continue;
-        
         
         float shadowRayScale = 0.997;
         float shadowLength   = 4;
@@ -365,11 +413,11 @@ void RenderSystem::ShadowPass(glm::mat4& model, glm::mat4& viewProjection, glm::
     
     mShadowShader->SetShadowMatrix( mShadowTransform.matrix );
     
-    
     // Shadow geometry blending
     glEnable( GL_BLEND );
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
+    return;
 }
 
 

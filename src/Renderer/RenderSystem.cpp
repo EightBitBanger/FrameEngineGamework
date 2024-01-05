@@ -32,6 +32,7 @@ RenderSystem::RenderSystem() :
     
     mCurrentMesh(nullptr),
     mCurrentMaterial(nullptr),
+    mCurrentShader(nullptr),
     
     mNumberOfLights(0),
     

@@ -32,7 +32,8 @@ Material* skyMaterial;
 
 GameObject* directionalLight;
 
-Transform* transformObjectA;
+MeshRenderer* objectRendererA;
+MeshRenderer* objectRendererB;
 
 Text* text[20];
 
@@ -108,33 +109,27 @@ void Start() {
     
     Mesh* shadowMesh = Resources.CreateMeshFromTag("cube");
     
-    for (int i=0; i < 1000; i++) {
+    for (int i=0; i < 10000; i++) {
         
         GameObject* shadowObject = Engine.Create<GameObject>();
         
-        transformObjectA = shadowObject->GetComponent<Transform>();
+        Transform* transformObjectA = shadowObject->GetComponent<Transform>();
+        transformObjectA->position.x = Random.Range(0, 200) - Random.Range(0, 200);
         transformObjectA->position.y += 20;
-        
-        transformObjectA->position.x = Random.Range(0, 100) - Random.Range(0, 100);
-        transformObjectA->position.z = Random.Range(0, 100) - Random.Range(0, 100);
+        transformObjectA->position.z = Random.Range(0, 200) - Random.Range(0, 200);
         
         shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-        MeshRenderer* objectRenderer = shadowObject->GetComponent<MeshRenderer>();
-        objectRenderer->mesh = shadowMesh;
+        objectRendererA = shadowObject->GetComponent<MeshRenderer>();
+        objectRendererA->mesh = shadowMesh;
         
-        objectRenderer->material = Engine.Create<Material>();
-        objectRenderer->material->shader = Engine.shaders.color;
+        objectRendererA->material = Engine.Create<Material>();
+        objectRendererA->material->shader = Engine.shaders.color;
         
-        objectRenderer->material->ambient = Color(0.01, 0.01, 0.01);
-        objectRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
+        objectRendererA->material->ambient = Color(0.01, 0.01, 0.01);
+        objectRendererA->material->diffuse = Color(0.01, 0.01, 0.01);
         
-        
-        
-        objectRenderer->material->EnableShadowPass();
-        
-        
-        
-        Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer, RENDER_QUEUE_DEFAULT );
+        objectRendererA->material->EnableShadowPass();
+        Engine.sceneMain->AddMeshRendererToSceneRoot( objectRendererA, RENDER_QUEUE_DEFAULT );
         
     }
     

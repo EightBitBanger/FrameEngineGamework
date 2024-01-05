@@ -3,6 +3,7 @@
 
 MeshRenderer::MeshRenderer() : 
     mesh(nullptr),
-    material(nullptr)
+    material(nullptr),
+    distance(0)
 {
 }

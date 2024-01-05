@@ -166,6 +166,10 @@ int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentSc
     return 1;
 }
 
+unsigned int Shader::GetProgram(void) {
+    return mShaderProgram;
+}
+
 unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
     
     unsigned int ShaderID = glCreateShader(Type);
