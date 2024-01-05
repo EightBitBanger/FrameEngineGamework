@@ -62,6 +62,9 @@ public:
     /// Compile a vertex and fragment script into a shader program.
     int CreateShaderProgram(std::string VertexScript, std::string FragmentScript);
     
+    /// Return the opengl index of the shader program.
+    unsigned int GetProgram(void);
+    
     /// Bind the shader program for rendering.
     void Bind(void);
     

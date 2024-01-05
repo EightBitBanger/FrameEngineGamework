@@ -170,6 +170,7 @@ private:
     // Current asset bindings
     Mesh*      mCurrentMesh;
     Material*  mCurrentMaterial;
+    Shader*    mCurrentShader;
     
     // Light list
     unsigned int mNumberOfLights=0;
@@ -179,8 +180,8 @@ private:
     glm::vec3    mLightColor       [RENDER_NUMBER_OF_LIGHTS];
     
     // Shadows
-    Transform mShadowTransform;
-    Shader*   mShadowShader;
+    Transform    mShadowTransform;
+    Shader*      mShadowShader;
     
     // Render component allocators
     PoolAllocator<MeshRenderer>    mEntity;
@@ -200,6 +201,13 @@ private:
     bool setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::mat4& viewProjection);
     
     unsigned int accumulateSceneLights(Scene* currentScene, glm::vec3 eye);
+    
+    
+    void BindMesh(Mesh* meshPtr);
+    
+    void BindMaterial(Material* materialPtr);
+    
+    void BindShader(Shader* shaderPtr);
     
     void GeometryPass(glm::mat4& model, glm::mat4& viewProjection, glm::vec3& eye);
     
