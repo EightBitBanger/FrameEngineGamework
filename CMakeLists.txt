@@ -464,6 +464,17 @@ set (CORE_SOURCES
     "src/Renderer/components/light.cpp"
     "src/Renderer/components/shader.cpp"
     
+    "src/Renderer/pipeline/accumulateLights.cpp"
+    "src/Renderer/pipeline/setCamera.cpp"
+    
+    "src/Renderer/pipeline/meshBinding.cpp"
+    "src/Renderer/pipeline/materialBinding.cpp"
+    "src/Renderer/pipeline/shaderBinding.cpp"
+    
+    "src/Renderer/pipeline/passGeometry.cpp"
+    "src/Renderer/pipeline/passShadow.cpp"
+    "src/Renderer/pipeline/passSorting.cpp"
+    
     "src/Resources/FileLoader.cpp"
     "src/Resources/FileSystem.cpp"
     "src/Resources/ResourceManager.cpp"

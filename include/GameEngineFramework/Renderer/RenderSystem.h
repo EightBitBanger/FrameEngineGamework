@@ -172,6 +172,11 @@ private:
     Material*  mCurrentMaterial;
     Shader*    mCurrentShader;
     
+    // Sorting
+    unsigned int mSortingIndex[5];
+    unsigned int mSortingCounter;
+    std::vector<std::pair<float, MeshRenderer*>> mRenderQueueSorter[5];
+    
     // Light list
     unsigned int mNumberOfLights=0;
     glm::vec3    mLightPosition    [RENDER_NUMBER_OF_LIGHTS];
@@ -179,7 +184,15 @@ private:
     glm::vec4    mLightAttenuation [RENDER_NUMBER_OF_LIGHTS];
     glm::vec3    mLightColor       [RENDER_NUMBER_OF_LIGHTS];
     
+    // Shadow lights
+    unsigned int mNumberOfShadows=0;
+    glm::vec3    mShadowPosition    [RENDER_NUMBER_OF_SHADOWS];
+    glm::vec3    mShadowDirection   [RENDER_NUMBER_OF_SHADOWS];
+    glm::vec4    mShadowAttenuation [RENDER_NUMBER_OF_SHADOWS];
+    glm::vec3    mShadowColor       [RENDER_NUMBER_OF_SHADOWS];
+    
     // Shadows
+    float        mShadowDistance;
     Transform    mShadowTransform;
     Shader*      mShadowShader;
     
@@ -209,9 +222,13 @@ private:
     
     void BindShader(Shader* shaderPtr);
     
-    void GeometryPass(glm::mat4& model, glm::mat4& viewProjection, glm::vec3& eye);
+    // Passes
     
-    void ShadowPass(glm::mat4& model, glm::mat4& viewProjection, glm::vec3& eye);
+    void GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::mat4& viewProjection);
+    
+    void ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::mat4& viewProjection);
+    
+    void SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup, unsigned int queueGroupIndex);
     
 };
 
