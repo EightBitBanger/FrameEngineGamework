@@ -142,6 +142,8 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
             newMaterial->diffuse.g = mStreamBuffer[index].actor->mGenes[a].color.y;
             newMaterial->diffuse.b = mStreamBuffer[index].actor->mGenes[a].color.z;
             
+            newMaterial->DisableShadowPass();
+            
             MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
             newRenderer->mesh = meshes.cube;
             newRenderer->material = newMaterial;

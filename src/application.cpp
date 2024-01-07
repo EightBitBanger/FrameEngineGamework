@@ -31,12 +31,13 @@ GameObject*  cameraController;
 Material* skyMaterial;
 
 GameObject* directionalLight;
+Transform*  lightTransform;
 
-MeshRenderer* objectRendererA;
-MeshRenderer* objectRendererB;
+Transform*  objectTransform;
 
 Text* text[20];
 
+std::vector<MeshRenderer*> shadowList;
 
 
 
@@ -75,8 +76,6 @@ void Start() {
     
     skyMaterial = skyRenderer->material;
     skyMaterial->diffuse = Color(0.087, 0.087, 0.087);
-    skyMaterial->EnableDepthTest();
-    skyMaterial->DisableShadowPass();
     
     
     
@@ -109,28 +108,35 @@ void Start() {
     
     Mesh* shadowMesh = Resources.CreateMeshFromTag("cube");
     
-    for (int i=0; i < 10000; i++) {
+    for (int i=0; i < 4; i++) {
         
         GameObject* shadowObject = Engine.Create<GameObject>();
         
-        Transform* transformObjectA = shadowObject->GetComponent<Transform>();
-        transformObjectA->position.x = Random.Range(0, 200) - Random.Range(0, 200);
-        transformObjectA->position.y += 20;
-        transformObjectA->position.z = Random.Range(0, 200) - Random.Range(0, 200);
+        objectTransform = shadowObject->GetComponent<Transform>();
+        objectTransform->position.x = Random.Range(0, 80) - Random.Range(0, 80);
+        objectTransform->position.y += 20;
+        objectTransform->position.z = Random.Range(0, 80) - Random.Range(0, 80);
+        
+        if (objectTransform->position.x > 0) objectTransform->position.x += 1;
+        if (objectTransform->position.z > 0) objectTransform->position.z += 1;
+        if (objectTransform->position.x < 0) objectTransform->position.x -= 1;
+        if (objectTransform->position.z < 0) objectTransform->position.z -= 1;
+        
         
         shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-        objectRendererA = shadowObject->GetComponent<MeshRenderer>();
-        objectRendererA->mesh = shadowMesh;
+        MeshRenderer* objectRenderer = shadowObject->GetComponent<MeshRenderer>();
+        objectRenderer->mesh = shadowMesh;
         
-        objectRendererA->material = Engine.Create<Material>();
-        objectRendererA->material->shader = Engine.shaders.color;
+        objectRenderer->material = Engine.Create<Material>();
+        objectRenderer->material->shader = Engine.shaders.color;
         
-        objectRendererA->material->ambient = Color(0.01, 0.01, 0.01);
-        objectRendererA->material->diffuse = Color(0.01, 0.01, 0.01);
+        objectRenderer->material->ambient = Color(0.01, 0.01, 0.01);
+        objectRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
         
-        objectRendererA->material->EnableShadowPass();
-        Engine.sceneMain->AddMeshRendererToSceneRoot( objectRendererA, RENDER_QUEUE_DEFAULT );
+        objectRenderer->material->EnableShadowPass();
+        Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer, RENDER_QUEUE_DEFAULT );
         
+        shadowList.push_back( objectRenderer );
     }
     
     
@@ -143,17 +149,19 @@ void Start() {
     
     // Directional light
     directionalLight = Engine.Create<GameObject>();
-    Transform* lightTransform = directionalLight->GetComponent<Transform>();
-    lightTransform->RotateAxis(1, Vector3(0.3, -1, 0));
+    lightTransform = directionalLight->GetComponent<Transform>();
+    lightTransform->RotateAxis(1, Vector3(0, -1, -0.3));
     
     directionalLight->AddComponent( Engine.CreateComponent<Light>() );
     Light* sunLight = directionalLight->GetComponent<Light>();
     
     Engine.sceneMain->AddLightToSceneRoot( sunLight );
     
-    sunLight->intensity  = 0.87;
+    sunLight->intensity  = 0.5;
     sunLight->type       = LIGHT_TYPE_DIRECTIONAL;
     sunLight->color      = Colors.white;
+    
+    
     
     
     
@@ -263,8 +271,6 @@ void Start() {
     
     
     
-    
-    return;
     
     
     
@@ -408,7 +414,7 @@ void Start() {
 // Application loop
 //
 glm::vec3 sunDir(0, 0, 1);
-float sunStep = 0;
+float sunStep = 0.5;
 float sunRate = 1;
 
 float shadowLength   = 10;
@@ -417,61 +423,13 @@ float shadowRayScale = 0.997;
 
 void Run() {
     
-    //transformObjectA->RotateAxis(1, Vector3(0, 1, 0));
+    //lightTransform->RotateAxis(1, Vector3(1, 0, 0));
     
+    objectTransform->RotateAxis(1, Vector3(0, 1, 0));
     
     //
     // Shadow experimentation
     //
-    
-    
-    
-    Transform* lightTransform = directionalLight->GetComponent<Transform>();
-    
-    lightTransform->SetIdentity();
-    lightTransform->RotateAxis(1, Vector3(0, -1, 0));
-    
-    //lightTransform->RotateAxis( 90, glm::vec3(0, 1, 0) );
-    
-    //lightTransform->RotateAxis(45, sunDir);
-    
-    //lightTransform->RotateAxis(20, sunDir);
-    
-    //sunStep = 30;
-    
-    //if (sunStep > 360) sunStep = 0;
-    
-    //text[1]->text = Int.ToString( sunStep );
-    
-    
-    
-    
-    
-    /*
-    
-    Renderer.mShadowTransform.SetIdentity();
-    
-    // Correct the sun cycle rotation
-    Renderer.mShadowTransform.RotateAxis( 90, glm::vec3(0, 1, 0) );
-    
-    // Rotate by the inverse sun angle
-    //Renderer.mShadowTransform.RotateAxis( -sunStep, sunDir );
-    Renderer.mShadowTransform.RotateWorldAxis( -sunStep, sunDir, glm::vec3(0, -0.2, 0) );
-    
-    // Scale the length of the shadow
-    Renderer.mShadowTransform.Scale( glm::vec3(shadowRayScale, shadowLength * 2, shadowRayScale) );
-    
-    // Offset by half the distance
-    Renderer.mShadowTransform.Translate( glm::vec3(0, -1, 0) * 0.5f );
-    
-    */
-    
-    
-    
-    
-    
-    
-    
     
     
     
