@@ -98,51 +98,7 @@ void Start() {
     
     
     
-    
-    
-    
-    
     //
-    // Shadow caster experimentation
-    //
-    
-    for (int i=0; i < 1000; i++) {
-        
-        GameObject* shadowObject = Engine.Create<GameObject>();
-        
-        objectTransform = shadowObject->GetComponent<Transform>();
-        objectTransform->position.x = Random.Range(0, 100) - Random.Range(0, 100);
-        objectTransform->position.y += 20;
-        objectTransform->position.z = Random.Range(0, 100) - Random.Range(0, 100);
-        
-        shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-        MeshRenderer* objectRenderer = shadowObject->GetComponent<MeshRenderer>();
-        objectRenderer->mesh = Engine.meshes.cube;
-        
-        objectRenderer->material = Engine.Create<Material>();
-        objectRenderer->material->shader = Engine.shaders.color;
-        
-        objectRenderer->material->ambient = Color(0.01, 0.01, 0.01);
-        objectRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
-        
-        objectRenderer->material->shadowStencilLength = Random.Range(5, 8);
-        
-        if (Random.Range(0, 100) > 90) 
-            objectRenderer->material->EnableShadowPass();
-        
-        Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer, RENDER_QUEUE_DEFAULT );
-        
-        shadowList.push_back( objectRenderer );
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
     // Directional light
     directionalLight = Engine.Create<GameObject>();
     lightTransform = directionalLight->GetComponent<Transform>();
@@ -159,40 +115,11 @@ void Start() {
     
     
     
-    
-    // Point lights
-    for (unsigned int i=0; i < 10; i++) {
-        
-        GameObject* pointLight = Engine.Create<GameObject>();
-        lightTransform = pointLight->GetComponent<Transform>();
-        
-        lightTransform->position = Vector3(Random.Range(0, 300) - Random.Range(0, 300), 
-                                           10, 
-                                           Random.Range(0, 300) - Random.Range(0, 300));
-        
-        //lightTransform->RotateAxis(1, Vector3(0, -1, -0.3));
-        
-        pointLight->AddComponent( Engine.CreateComponent<Light>() );
-        Light* sunLight = pointLight->GetComponent<Light>();
-        
-        Engine.sceneMain->AddLightToSceneRoot( sunLight );
-        //sunLight->doCastShadow = false;
-        sunLight->intensity   = 10;
-        sunLight->range       = 80;
-        sunLight->attenuation = 0.1;
-        
-        sunLight->type       = LIGHT_TYPE_POINT;
-        sunLight->color      = Colors.MakeRandom();
-    }
-    
-    
-    
-    
-    
-    
+    //
     // Scene overlay
+    
     sceneOverlay = Engine.Create<Scene>();
-    Renderer.AddSceneToRenderQueue(sceneOverlay);                         // UI
+    Renderer.AddSceneToRenderQueue(sceneOverlay);
     
     sceneOverlay->camera = Engine.Create<Camera>();
     sceneOverlay->camera->isOrthographic = true;
@@ -217,6 +144,34 @@ void Start() {
     }
     
     
+    
+    
+    // Point lights
+    /*
+    for (unsigned int i=0; i < 1; i++) {
+        
+        GameObject* pointLight = Engine.Create<GameObject>();
+        lightTransform = pointLight->GetComponent<Transform>();
+        
+        lightTransform->position = Vector3(Random.Range(0, 300) - Random.Range(0, 300), 
+                                           10, 
+                                           Random.Range(0, 300) - Random.Range(0, 300));
+        
+        //lightTransform->RotateAxis(1, Vector3(0, -1, -0.3));
+        
+        pointLight->AddComponent( Engine.CreateComponent<Light>() );
+        Light* sunLight = pointLight->GetComponent<Light>();
+        
+        Engine.sceneMain->AddLightToSceneRoot( sunLight );
+        //sunLight->doCastShadow = false;
+        sunLight->intensity   = 10;
+        sunLight->range       = 80;
+        sunLight->attenuation = 0.1;
+        
+        sunLight->type       = LIGHT_TYPE_POINT;
+        sunLight->color      = Colors.MakeRandom();
+    }
+    */
     
     
     
@@ -294,17 +249,62 @@ void Start() {
     
     
     
+    //
+    // Shadow cast example
+    //
     
+    int speadArea = 100;
+    
+    for (int i=0; i < 3000; i++) {
+        
+        GameObject* shadowObject = Engine.Create<GameObject>();
+        
+        objectTransform = shadowObject->GetComponent<Transform>();
+        objectTransform->position.x = Random.Range(0, speadArea) - Random.Range(0, speadArea);
+        objectTransform->position.y += 50;
+        objectTransform->position.z = Random.Range(0, speadArea) - Random.Range(0, speadArea);
+        
+        shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+        MeshRenderer* objectRenderer = shadowObject->GetComponent<MeshRenderer>();
+        objectRenderer->mesh = Engine.meshes.cube;
+        
+        objectRenderer->material = Engine.Create<Material>();
+        objectRenderer->material->shader = Engine.shaders.color;
+        
+        objectRenderer->material->ambient = Color(0.01, 0.01, 0.01);
+        objectRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
+        
+        objectRenderer->material->shadowStencilLength = Random.Range(4, 14);
+        objectRenderer->material->shadowStencilIntensityHigh = Random.Range(0, 10) * 0.3;
+        objectRenderer->material->shadowStencilIntensityLow  = Random.Range(0, 10) * 0.1;
+        objectRenderer->material->shadowStencilColorHigh     = 8;
+        objectRenderer->material->shadowStencilColorLow      = 0.1;
+        
+        objectRenderer->material->shadowStencilColor = Colors.MakeRandom();
+        
+        //if (Random.Range(0, 100) > 90) 
+        //    objectRenderer->material->DisableShadowPass();
+        
+        Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer, RENDER_QUEUE_DEFAULT );
+        
+        shadowList.push_back( objectRenderer );
+    }
+    
+    
+    
+    
+    
+    
+    return;
     
     
     //
     // Generate AI actors
     //
     
+    float spread = 3000;
     
-    float spread = 100;
-    
-    for (int i=0; i < 30; i++) {
+    for (int i=0; i < 400; i++) {
         
         Vector3 position;
         position.x = (Random.Range(0.0f, spread) * 0.1) - (Random.Range(0.0f, spread) * 0.1);

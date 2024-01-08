@@ -48,8 +48,17 @@ void RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::
         
         shadowPosition[0]     = mShadowPosition[s];
         shadowDirection[0]    = mShadowDirection[s];
-        shadowAttenuation[0]  = mShadowAttenuation[s];
-        shadowColor[0]        = mShadowColor[s];
+        
+        // Shadow color
+        shadowColor[0] = glm::vec3(currentEntity->material->shadowStencilColor.r, 
+                                   currentEntity->material->shadowStencilColor.g, 
+                                   currentEntity->material->shadowStencilColor.b);
+        
+        // Shadow intensity
+        shadowAttenuation[0].r = currentEntity->material->shadowStencilColorHigh      * 1;
+        shadowAttenuation[0].g = currentEntity->material->shadowStencilColorLow       * 1;
+        shadowAttenuation[0].b = currentEntity->material->shadowStencilIntensityHigh  * 0.1;
+        shadowAttenuation[0].a = currentEntity->material->shadowStencilIntensityLow   * 0.01;
         
         // Send in the shadow data through the lighting parameters
         shaders.shadowCaster->SetLightCount(1);

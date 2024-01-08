@@ -29,15 +29,15 @@ void EngineSystemManager::UpdateCamera(unsigned int index) {
     // Update mouse looking
     if (mStreamBuffer[index].camera->useMouseLook) {
         
-        double MouseDiffX = Input.mouseX - Renderer.displayCenter.x;
-        double MouseDiffY = Input.mouseY - Renderer.displayCenter.y;
+        double mouseDiffX = Input.mouseX - Renderer.displayCenter.x;
+        double mouseDiffY = Input.mouseY - Renderer.displayCenter.y;
         
         Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
         
-        double movementScale = 0.001;
+        double differenceMul = 0.001;
         
-        double lookAngleX = glm::radians( MouseDiffX * mStreamBuffer[index].camera->mouseSensitivityYaw   * movementScale);
-        double lookAngleY = glm::radians( MouseDiffY * mStreamBuffer[index].camera->mouseSensitivityPitch * movementScale);
+        double lookAngleX = glm::radians( mouseDiffX * mStreamBuffer[index].camera->mouseSensitivityYaw * differenceMul);
+        double lookAngleY = glm::radians( mouseDiffY * mStreamBuffer[index].camera->mouseSensitivityPitch * differenceMul);
         
         mStreamBuffer[index].camera->lookAngle.x += lookAngleX;
         mStreamBuffer[index].camera->lookAngle.y -= lookAngleY;

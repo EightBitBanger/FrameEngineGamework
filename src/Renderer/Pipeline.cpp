@@ -115,7 +115,10 @@ void RenderSystem::RenderFrame(void) {
                     if (!currentEntity->material->doShadowPass)
                         continue;
                     
-                    if (currentEntity->material->shadowDistance > mShadowDistance) 
+                    // Calculate shadow distance
+                    float shadowDistance = glm::distance( eye, currentEntity->transform.position );
+                    
+                    if (shadowDistance > mShadowDistance) 
                         continue;
                     
                     ShadowPass( currentEntity, eye, viewProjection );

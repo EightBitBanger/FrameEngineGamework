@@ -14,14 +14,21 @@ Material::Material() :
     doFaceCulling(true),
     doShadowPass(true),
     
-    shadowDistance(30),
     shadowStencilLength(5),
+    
+    shadowStencilIntensityLow(0),
+    shadowStencilIntensityHigh(1),
+    
+    shadowStencilColorLow(0),
+    shadowStencilColorHigh(1),
     
     textureFiltration(GL_LINEAR_MIPMAP_LINEAR),
     
     depthFunc(MATERIAL_DEPTH_LESS),
+    
     faceWinding(GL_CCW),
     faceCullSide(GL_BACK),
+    
     blendSource(BLEND_SRC_COLOR),
     blendDestination(BLEND_SRC_ALPHA),
     blendAlphaSource(BLEND_ONE_MINUS_SRC_COLOR),
@@ -33,6 +40,7 @@ Material::Material() :
     ambient = Color(0, 0, 0, 1);
     diffuse = Color(1, 1, 1, 1);
     specular = Color(0, 0, 0, 1);
+    shadowStencilColor = Color(1, 1, 1);
     
     glGenTextures(1, &mTextureBuffer);
     
@@ -44,32 +52,97 @@ Material::~Material() {
     return;
 }
 
-void Material::EnableDepthTest(void)  {doDepthTest = true;}
-void Material::DisableDepthTest(void) {doDepthTest = false;}
-void Material::SetDepthFunction(GLint func) {depthFunc = func;}
+void Material::EnableDepthTest(void) {
+    doDepthTest = true;
+    return;
+}
 
-GLint Material::GetTextureFiltration(void) {return textureFiltration;}
-void Material::SetTextureFiltration(GLint filtration) {textureFiltration = filtration;}
+void Material::DisableDepthTest(void) {
+    doDepthTest = false;
+    return;
+}
 
-void Material::EnableCulling(void) {doFaceCulling = true;}
-void Material::DisableCulling(void) {doFaceCulling = false;}
-void Material::SetFaceCullingSide(GLint side) {faceCullSide = side;}
-void Material::SetFaceWindingOrder(GLint direction) {faceWinding = direction;}
+void Material::SetDepthFunction(GLint func) {
+    depthFunc = func;
+    return;
+}
 
-void Material::EnableBlending(void) {doBlending = true;}
-void Material::DisableBlending(void) {doBlending = false;}
-void Material::SetBlending(GLint src, GLint dest)  {blendSource = src; blendDestination = dest;}
-void Material::SetBlendingAlpha(GLint srca, GLint desta)  {blendAlphaSource = srca; blendAlphaDestination = desta;}
-void Material::SetBlendingFunction(GLint func)  {blendFunction = func;}
+GLint Material::GetTextureFiltration(void) {
+    return textureFiltration;
+}
 
-void Material::EnableShadowPass(void) {doShadowPass = true; return;}
-void Material::DisableShadowPass(void) {doShadowPass = false; return;}
+void Material::SetTextureFiltration(GLint filtration) {
+    textureFiltration = filtration;
+    return;
+}
+
+void Material::EnableCulling(void) {
+    doFaceCulling = true;
+    return;
+}
+
+void Material::DisableCulling(void) {
+    doFaceCulling = false;
+    return;
+}
+
+void Material::SetFaceCullingSide(GLint side) {
+    faceCullSide = side;
+    return;
+}
+
+void Material::SetFaceWindingOrder(GLint direction) {
+    faceWinding = direction;
+    return;
+}
+
+void Material::EnableBlending(void) {
+    doBlending = true;
+    return;
+}
+
+void Material::DisableBlending(void) {
+    doBlending = false;
+    return;
+}
+
+void Material::SetBlending(GLint src, GLint dest)  {
+    blendSource = src;
+    blendDestination = dest;
+    return;
+}
+
+void Material::SetBlendingAlpha(GLint srca, GLint desta) {
+    blendAlphaSource = srca;
+    blendAlphaDestination = desta;
+    return;
+}
+
+void Material::SetBlendingFunction(GLint func) {
+    blendFunction = func;
+    return;
+}
+
+void Material::EnableShadowPass(void) {
+    doShadowPass = true;
+    return;
+}
+
+void Material::DisableShadowPass(void) {
+    doShadowPass = false;
+    return;
+}
 
 
+void Material::Bind(void) {
+    glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
+    return;
+}
 
-void Material::Bind(void) {glBindTexture(GL_TEXTURE_2D, mTextureBuffer); return;}
-
-void Material::BindTextureSlot(unsigned int slot) {glActiveTexture(GL_TEXTURE0 + slot); return;}
+void Material::BindTextureSlot(unsigned int slot) {
+    glActiveTexture(GL_TEXTURE0 + slot);
+    return;
+}
 
 void Material::UpdateTextureBuffer(void* textureData) {
     glBindTexture(GL_TEXTURE_2D, mTextureBuffer);

@@ -23,8 +23,8 @@ Camera::Camera() :
     mouseLimitPitchMax(180),
     mouseLimitPitchMin(180),
     
-    mouseSensitivityYaw(1.1),
-    mouseSensitivityPitch(1.2)
+    mouseSensitivityYaw(1.3),
+    mouseSensitivityPitch(1.15)
 {
 }
 
