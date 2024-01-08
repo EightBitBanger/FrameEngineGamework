@@ -21,7 +21,7 @@ Timer::Timer() {
 }
 
 
-float Timer::GetCurrentDelta(void) {
+double Timer::GetCurrentDelta(void) {
     
     LARGE_INTEGER tCurrent;
     QueryPerformanceCounter(&tCurrent);
@@ -57,14 +57,14 @@ bool Timer::Update(void) {
     return false;
 }
 
-float Timer::Current(void) {
+double Timer::Current(void) {
     LARGE_INTEGER tCurrent;
     QueryPerformanceCounter(&tCurrent);
     return tCurrent.QuadPart;
 }
 
 void Timer::SetRefreshRate(int rate) {
-    updateRateMs = 1000.0 / (float)rate;
+    updateRateMs = 1000.0 / (double)rate;
     updateRateMax = updateRateMs + (updateRateMs / 4.0);
     return;
 }

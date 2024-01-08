@@ -46,21 +46,25 @@ unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 
             // Add directional light to the shadow list
             if (lightPtr->type == LIGHT_TYPE_DIRECTIONAL) {
                 
-                if (mNumberOfShadows < RENDER_NUMBER_OF_SHADOWS) {
+                if (lightPtr->doCastShadow) {
                     
-                    mShadowPosition[mNumberOfShadows]  = lightPtr->offset;
-                    mShadowDirection[mNumberOfShadows] = lightPtr->direction;
+                    if (mNumberOfShadows < RENDER_NUMBER_OF_SHADOWS) {
+                        
+                        mShadowPosition[mNumberOfShadows]  = lightPtr->offset;
+                        mShadowDirection[mNumberOfShadows] = lightPtr->direction;
+                        
+                        mShadowAttenuation[mNumberOfShadows].r = lightPtr->intensity;
+                        mShadowAttenuation[mNumberOfShadows].g = lightPtr->range;
+                        mShadowAttenuation[mNumberOfShadows].b = lightPtr->attenuation;
+                        mShadowAttenuation[mNumberOfShadows].a = lightPtr->type;
+                        
+                        mShadowColor[mNumberOfShadows].r = lightPtr->color.r;
+                        mShadowColor[mNumberOfShadows].g = lightPtr->color.g;
+                        mShadowColor[mNumberOfShadows].b = lightPtr->color.b;
+                        
+                        mNumberOfShadows++;
+                    }
                     
-                    mShadowAttenuation[mNumberOfShadows].r = lightPtr->intensity;
-                    mShadowAttenuation[mNumberOfShadows].g = lightPtr->range;
-                    mShadowAttenuation[mNumberOfShadows].b = lightPtr->attenuation;
-                    mShadowAttenuation[mNumberOfShadows].a = lightPtr->type;
-                    
-                    mShadowColor[mNumberOfShadows].r = lightPtr->color.r;
-                    mShadowColor[mNumberOfShadows].g = lightPtr->color.g;
-                    mShadowColor[mNumberOfShadows].b = lightPtr->color.b;
-                    
-                    mNumberOfShadows++;
                 }
                 
                 continue;

@@ -20,11 +20,11 @@ Camera::Camera() :
     clipNear(1),
     clipFar(10000000),
     
-    MouseLimitPitchMax(180),
-    MouseLimitPitchMin(180),
+    mouseLimitPitchMax(180),
+    mouseLimitPitchMin(180),
     
-    MouseSensitivityYaw(0.004),
-    MouseSensitivityPitch(0.0038)
+    mouseSensitivityYaw(1.1),
+    mouseSensitivityPitch(1.2)
 {
 }
 

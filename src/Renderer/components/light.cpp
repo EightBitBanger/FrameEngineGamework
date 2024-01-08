@@ -2,7 +2,11 @@
 
 
 Light::Light() : 
+    
     isActive(true),
+    doCastShadow(true),
+    doHaloEffect(true),
+    
     type(0),
     
     renderDistance(300),

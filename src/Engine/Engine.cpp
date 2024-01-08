@@ -147,10 +147,19 @@ void EngineSystemManager::Initiate() {
     meshes.cube  = Resources.CreateMeshFromTag("cube");
     meshes.plain = Resources.CreateMeshFromTag("plain");
     
+    // Main world scene
     sceneMain = Create<Scene>();
     
-    // Initiate shadow shader
-    Renderer.mShadowShader = shaders.shadowCaster;
+    // Initiate render system defaults
+    Renderer.shaders.texture      = shaders.texture;
+    Renderer.shaders.textureUnlit = shaders.textureUnlit;
+    Renderer.shaders.color        = shaders.color;
+    Renderer.shaders.colorUnlit   = shaders.colorUnlit;
+    Renderer.shaders.UI           = shaders.UI;
+    Renderer.shaders.shadowCaster = shaders.shadowCaster;
+    
+    Renderer.meshes.cube   = meshes.cube;
+    Renderer.meshes.plain  = meshes.plain;
     
     return;
 }

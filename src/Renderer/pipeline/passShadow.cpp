@@ -11,9 +11,9 @@ void RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::
     modelMatrix = glm::translate(modelMatrix, currentEntity->transform.position);
     modelMatrix = glm::scale(modelMatrix, currentEntity->transform.localScale);
     
-    mShadowShader->SetProjectionMatrix( viewProjection );
-    mShadowShader->SetCameraPosition(eye);
-    mShadowShader->SetModelMatrix( modelMatrix );
+    shaders.shadowCaster->SetProjectionMatrix( viewProjection );
+    shaders.shadowCaster->SetCameraPosition(eye);
+    shaders.shadowCaster->SetModelMatrix( modelMatrix );
     
     glEnable( GL_BLEND );
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -24,8 +24,8 @@ void RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::
     
     for (int s=0; s < mNumberOfShadows; s++) {
         
-        float shadowRayScale = 1.15;
-        float shadowLength   = 10;
+        float shadowRayScale = 1.3;
+        float shadowLength   = currentEntity->material->shadowStencilLength;
         
         mShadowTransform.SetIdentity();
         
@@ -52,13 +52,13 @@ void RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::
         shadowColor[0]        = mShadowColor[s];
         
         // Send in the shadow data through the lighting parameters
-        mShadowShader->SetLightCount(1);
-        mShadowShader->SetLightPositions(1, shadowPosition);
-        mShadowShader->SetLightDirections(1, shadowDirection);
-        mShadowShader->SetLightAttenuation(1, shadowAttenuation);
-        mShadowShader->SetLightColors(1, shadowColor);
+        shaders.shadowCaster->SetLightCount(1);
+        shaders.shadowCaster->SetLightPositions(1,   shadowPosition);
+        shaders.shadowCaster->SetLightDirections(1,  shadowDirection);
+        shaders.shadowCaster->SetLightAttenuation(1, shadowAttenuation);
+        shaders.shadowCaster->SetLightColors(1,      shadowColor);
         
-        mShadowShader->SetShadowMatrix( mShadowTransform.matrix );
+        shaders.shadowCaster->SetShadowMatrix( mShadowTransform.matrix );
         
         // Render the shadow pass
         mNumberOfDrawCalls++;

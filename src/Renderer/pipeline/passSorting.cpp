@@ -17,7 +17,7 @@ void RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* rende
             
             std::pair<float, MeshRenderer*> distancePair;
             
-            distancePair.first  = meshRenderer->distance;
+            distancePair.first  = 0;
             distancePair.second = meshRenderer;
             
             mRenderQueueSorter[queueGroupIndex].push_back( distancePair );
@@ -27,26 +27,18 @@ void RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* rende
         
     }
     
+    for (unsigned int i=0; i < renderQueueGroup->size(); i++) 
+        mRenderQueueSorter[queueGroupIndex][i].first = glm::distance( eye, mRenderQueueSorter[queueGroupIndex][i].second->transform.position );
+    
     std::sort(mRenderQueueSorter[queueGroupIndex].begin(), 
               mRenderQueueSorter[queueGroupIndex].end(), 
               [](std::pair<float, MeshRenderer*> a, std::pair<float, MeshRenderer*> b) {
         return a.first > b.first;
     });
     
-    
     // Restore the sorted renderers
-    for (unsigned int i=0; i < renderQueueGroup->size(); i++) {
-        
-        MeshRenderer* meshRenderer = *(renderQueueGroup->data() + i);
-        
-        // Calculate object distance
-        meshRenderer->distance = glm::distance( eye, meshRenderer->transform.position );
-        mRenderQueueSorter[queueGroupIndex][i].first = meshRenderer->distance;
-        
+    for (unsigned int i=0; i < renderQueueGroup->size(); i++) 
         *(renderQueueGroup->data() + i) = mRenderQueueSorter[queueGroupIndex][i].second;
-        
-        continue;
-    }
     
     return;
 }

@@ -199,6 +199,7 @@ void ActorSystem::Update(void) {
         
         
         
+        // TODO: Fix neural networking.
         
         
         //if ((Random.Range(0, 10000) < actor->mChanceToStopWalking)) {

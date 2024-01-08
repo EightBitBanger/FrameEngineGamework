@@ -14,6 +14,9 @@ Material::Material() :
     doFaceCulling(true),
     doShadowPass(true),
     
+    shadowDistance(30),
+    shadowStencilLength(5),
+    
     textureFiltration(GL_LINEAR_MIPMAP_LINEAR),
     
     depthFunc(MATERIAL_DEPTH_LESS),

@@ -119,16 +119,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     // Fixed rate update timer
     Timer fixedTimer;
-    float fixedUpdateTimeout = 1000.0f / TICK_UPDATES_PER_SECOND;
-    float fixedAccumulator=0;
-    float fixedUpdateMax = fixedUpdateTimeout * 100;
+    double fixedUpdateTimeout = 1000.0 / TICK_UPDATES_PER_SECOND;
+    double fixedAccumulator=0;
+    double fixedUpdateMax = fixedUpdateTimeout * 100;
     fixedTimer.Update();
     
     // Tick update timer
     Timer tickTimer;
-    float tickUpdateTimeout = 1000.0f / 8.0;
-    float tickAccumulator=0;
-    float tickUpdateMax = tickUpdateTimeout * 100;
+    double tickUpdateTimeout = 1000.0f / 8.0;
+    double tickAccumulator=0;
+    double tickUpdateMax = tickUpdateTimeout * 100;
     tickTimer.Update();
     AI.UpdateSendSignal();
     
@@ -145,18 +145,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             DispatchMessage(&messages);
         }
         
+        // Reset mouse scroll wheel state
+        Input.mouseWheelDelta = 0;
+        
+        // Update mouse position
+        POINT cursorPos;
+        GetCursorPos(&cursorPos);
+        Input.mouseX = cursorPos.x;
+        Input.mouseY = cursorPos.y;
         
         //
         // Tick update timer (background update)
         //
         
-        tickAccumulator += tickTimer.GetCurrentDelta();
+        tickAccumulator = tickTimer.GetCurrentDelta();
+        
         if (tickAccumulator > tickUpdateMax) 
             tickAccumulator = tickUpdateMax;
         
-        tickTimer.Update();
-        
         if (tickAccumulator >= tickUpdateTimeout) {
+            
+            tickTimer.Update();
             
             tickAccumulator -= tickUpdateTimeout;
             
@@ -181,14 +190,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         // Fixed rate update timer
         //
         
-        fixedAccumulator += fixedTimer.GetCurrentDelta();
+        fixedAccumulator = fixedTimer.GetCurrentDelta();
         
         if (fixedAccumulator > fixedUpdateMax) 
             fixedAccumulator = fixedUpdateMax;
         
-        fixedTimer.Update();
-        
         if (fixedAccumulator >= fixedUpdateTimeout) {
+            
+            fixedTimer.Update();
             
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
@@ -256,15 +265,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         //
         
         if (Time.Update()) {
-            
-            // Reset mouse scroll wheel state
-            Input.mouseWheelDelta = 0;
-            
-            // Update mouse position
-            POINT cursorPos;
-            GetCursorPos(&cursorPos);
-            Input.mouseX = cursorPos.x;
-            Input.mouseY = cursorPos.y;
             
 #ifdef PROFILE_ENGINE_CORE
             Profiler.Begin();

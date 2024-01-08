@@ -38,7 +38,7 @@ void RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     mCurrentShader->SetProjectionMatrix( viewProjection );
     mCurrentShader->SetModelMatrix( currentEntity->transform.matrix );
     
-    // Inverse transpose model matrix for non linear scaling
+    // Inverse transpose model matrix for lighting with non linear scaling
     glm::mat3 invTransposeMatrix = glm::transpose( glm::inverse( currentEntity->transform.matrix ) );
     
     mCurrentShader->SetInverseModelMatrix( invTransposeMatrix );

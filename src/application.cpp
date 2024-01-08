@@ -106,26 +106,18 @@ void Start() {
     // Shadow caster experimentation
     //
     
-    Mesh* shadowMesh = Resources.CreateMeshFromTag("cube");
-    
-    for (int i=0; i < 4; i++) {
+    for (int i=0; i < 1000; i++) {
         
         GameObject* shadowObject = Engine.Create<GameObject>();
         
         objectTransform = shadowObject->GetComponent<Transform>();
-        objectTransform->position.x = Random.Range(0, 80) - Random.Range(0, 80);
+        objectTransform->position.x = Random.Range(0, 100) - Random.Range(0, 100);
         objectTransform->position.y += 20;
-        objectTransform->position.z = Random.Range(0, 80) - Random.Range(0, 80);
-        
-        if (objectTransform->position.x > 0) objectTransform->position.x += 1;
-        if (objectTransform->position.z > 0) objectTransform->position.z += 1;
-        if (objectTransform->position.x < 0) objectTransform->position.x -= 1;
-        if (objectTransform->position.z < 0) objectTransform->position.z -= 1;
-        
+        objectTransform->position.z = Random.Range(0, 100) - Random.Range(0, 100);
         
         shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
         MeshRenderer* objectRenderer = shadowObject->GetComponent<MeshRenderer>();
-        objectRenderer->mesh = shadowMesh;
+        objectRenderer->mesh = Engine.meshes.cube;
         
         objectRenderer->material = Engine.Create<Material>();
         objectRenderer->material->shader = Engine.shaders.color;
@@ -133,7 +125,11 @@ void Start() {
         objectRenderer->material->ambient = Color(0.01, 0.01, 0.01);
         objectRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
         
-        objectRenderer->material->EnableShadowPass();
+        objectRenderer->material->shadowStencilLength = Random.Range(5, 8);
+        
+        if (Random.Range(0, 100) > 90) 
+            objectRenderer->material->EnableShadowPass();
+        
         Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer, RENDER_QUEUE_DEFAULT );
         
         shadowList.push_back( objectRenderer );
@@ -156,11 +152,38 @@ void Start() {
     Light* sunLight = directionalLight->GetComponent<Light>();
     
     Engine.sceneMain->AddLightToSceneRoot( sunLight );
-    
+    //sunLight->doCastShadow = false;
     sunLight->intensity  = 0.5;
     sunLight->type       = LIGHT_TYPE_DIRECTIONAL;
     sunLight->color      = Colors.white;
     
+    
+    
+    
+    // Point lights
+    for (unsigned int i=0; i < 10; i++) {
+        
+        GameObject* pointLight = Engine.Create<GameObject>();
+        lightTransform = pointLight->GetComponent<Transform>();
+        
+        lightTransform->position = Vector3(Random.Range(0, 300) - Random.Range(0, 300), 
+                                           10, 
+                                           Random.Range(0, 300) - Random.Range(0, 300));
+        
+        //lightTransform->RotateAxis(1, Vector3(0, -1, -0.3));
+        
+        pointLight->AddComponent( Engine.CreateComponent<Light>() );
+        Light* sunLight = pointLight->GetComponent<Light>();
+        
+        Engine.sceneMain->AddLightToSceneRoot( sunLight );
+        //sunLight->doCastShadow = false;
+        sunLight->intensity   = 10;
+        sunLight->range       = 80;
+        sunLight->attenuation = 0.1;
+        
+        sunLight->type       = LIGHT_TYPE_POINT;
+        sunLight->color      = Colors.MakeRandom();
+    }
     
     
     
@@ -232,7 +255,7 @@ void Start() {
     MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
     
     Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
-    
+    plainRenderer->mesh->SetPrimitive(MESH_TRIANGLES);
     
     plainObject->SetAngularAxisLockFactor(0, 0, 0);
     plainObject->SetLinearAxisLockFactor(0, 0, 0);
@@ -279,9 +302,9 @@ void Start() {
     //
     
     
-    float spread = 50;
+    float spread = 100;
     
-    for (int i=0; i < 8; i++) {
+    for (int i=0; i < 30; i++) {
         
         Vector3 position;
         position.x = (Random.Range(0.0f, spread) * 0.1) - (Random.Range(0.0f, spread) * 0.1);
@@ -340,7 +363,7 @@ void Start() {
         geneLimbFrontLeft.color.z  *= baseColor.b;
         
         geneLimbFrontLeft.doAnimationCycle = true;
-        geneLimbFrontLeft.animationAxis    = BaseGene(2, 0, 0);
+        geneLimbFrontLeft.animationAxis    = BaseGene(1, 0, 0);
         geneLimbFrontLeft.animationRange   = 15;
         
         // Limb FR gene
@@ -355,7 +378,7 @@ void Start() {
         
         geneLimbFrontRight.doAnimationCycle   = true;
         geneLimbFrontRight.doInverseAnimation = true;
-        geneLimbFrontRight.animationAxis      = BaseGene(2, 0, 0);
+        geneLimbFrontRight.animationAxis      = BaseGene(1, 0, 0);
         geneLimbFrontRight.animationRange     = 15;
         
         // Limb RL gene
@@ -369,7 +392,7 @@ void Start() {
         geneLimbRearLeft.color.z  *= baseColor.b;
         
         geneLimbRearLeft.doAnimationCycle = true;
-        geneLimbRearLeft.animationAxis    = BaseGene(2, 0, 0);
+        geneLimbRearLeft.animationAxis    = BaseGene(1, 0, 0);
         geneLimbRearLeft.animationRange   = 15;
         
         // Limb RR gene
@@ -384,7 +407,7 @@ void Start() {
         
         geneLimbReadRight.doAnimationCycle   = true;
         geneLimbReadRight.doInverseAnimation = true;
-        geneLimbReadRight.animationAxis      = BaseGene(2, 0, 0);
+        geneLimbReadRight.animationAxis      = BaseGene(1, 0, 0);
         geneLimbReadRight.animationRange     = 15;
         
         
@@ -401,6 +424,7 @@ void Start() {
     }
     
     
+    
     return;
 }
 
@@ -413,6 +437,7 @@ void Start() {
 //
 // Application loop
 //
+
 glm::vec3 sunDir(0, 0, 1);
 float sunStep = 0.5;
 float sunRate = 1;
@@ -422,19 +447,6 @@ float shadowRayScale = 0.997;
 
 
 void Run() {
-    
-    //lightTransform->RotateAxis(1, Vector3(1, 0, 0));
-    
-    objectTransform->RotateAxis(1, Vector3(0, 1, 0));
-    
-    //
-    // Shadow experimentation
-    //
-    
-    
-    
-    
-    
     
     //
     // Profiling
@@ -487,6 +499,8 @@ void Run() {
     text[10]->text = Float.ToString( direction.z );
     
     */
+    
+    
     
     
     

@@ -29,13 +29,18 @@ void EngineSystemManager::UpdateCamera(unsigned int index) {
     // Update mouse looking
     if (mStreamBuffer[index].camera->useMouseLook) {
         
-        float MouseDiffX = (Input.mouseX - Renderer.displayCenter.x) * mStreamBuffer[index].camera->MouseSensitivityYaw;
-        float MouseDiffY = (Input.mouseY - Renderer.displayCenter.y) * mStreamBuffer[index].camera->MouseSensitivityPitch;
+        double MouseDiffX = Input.mouseX - Renderer.displayCenter.x;
+        double MouseDiffY = Input.mouseY - Renderer.displayCenter.y;
         
         Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
         
-        mStreamBuffer[index].camera->lookAngle.x += MouseDiffX * 0.01;
-        mStreamBuffer[index].camera->lookAngle.y -= MouseDiffY * 0.01;
+        double movementScale = 0.001;
+        
+        double lookAngleX = glm::radians( MouseDiffX * mStreamBuffer[index].camera->mouseSensitivityYaw   * movementScale);
+        double lookAngleY = glm::radians( MouseDiffY * mStreamBuffer[index].camera->mouseSensitivityPitch * movementScale);
+        
+        mStreamBuffer[index].camera->lookAngle.x += lookAngleX;
+        mStreamBuffer[index].camera->lookAngle.y -= lookAngleY;
         
         // Yaw limit
         if (mStreamBuffer[index].camera->lookAngle.x >= 0.109655) {mStreamBuffer[index].camera->lookAngle.x -= 0.109655;}
@@ -55,7 +60,7 @@ void EngineSystemManager::UpdateCamera(unsigned int index) {
     if (mStreamBuffer[index].panel != nullptr) {
         
         //
-        // TODO: Add ability to align the camera with a panel canvas here
+        // TODO: Add ability to align the camera view port with a panel canvas here
         //
         
     } else {

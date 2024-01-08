@@ -34,20 +34,11 @@ RenderSystem::RenderSystem() :
     mCurrentMaterial(nullptr),
     mCurrentShader(nullptr),
     
-    mSortingCounter(0),
-    
     mNumberOfLights(0),
     mNumberOfShadows(0),
     
-    mShadowDistance(300),
-    mShadowShader(nullptr)
+    mShadowDistance(300)
 {
-    for (unsigned int i=0; i < 5; i++) {
-        
-        mSortingIndex[i] = 0;
-        
-        continue;
-    }
 }
 
 MeshRenderer* RenderSystem::CreateMeshRenderer(void) {

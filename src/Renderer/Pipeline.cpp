@@ -104,9 +104,9 @@ void RenderSystem::RenderFrame(void) {
             //
             // Shadow pass
             
-            if (mNumberOfLights > 0) {
+            if (mNumberOfShadows > 0) {
                 
-                mShadowShader->Bind();
+                shaders.shadowCaster->Bind();
                 
                 for (unsigned int i=0; i < renderQueueGroup->size(); i++) {
                     
@@ -115,7 +115,7 @@ void RenderSystem::RenderFrame(void) {
                     if (!currentEntity->material->doShadowPass)
                         continue;
                     
-                    if (currentEntity->distance > mShadowDistance) 
+                    if (currentEntity->material->shadowDistance > mShadowDistance) 
                         continue;
                     
                     ShadowPass( currentEntity, eye, viewProjection );
@@ -124,15 +124,48 @@ void RenderSystem::RenderFrame(void) {
                 }
                 
                 mCurrentShader->Bind();
+                
             }
             
             continue;
         }
         
+        continue;
+    }
+    
+    
+    //
+    // Light halo effect
+    /*
+    if (mNumberOfLights > 0) {
         
+        shaders.color->Bind();
+        meshes.cube->Bind();
         
+        for (int i=0; i < mNumberOfLights; i++) {
+            
+            // Point lights
+            //if (mLightAttenuation[i].a > 0) 
+            //    continue;
+            
+            glm::mat4 modelMatrix = glm::identity<glm::mat4>();
+            modelMatrix = glm::translate(modelMatrix, mLightPosition[i]);
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(10, 10, 10));
+            
+            shaders.color->SetProjectionMatrix( viewProjection );
+            shaders.color->SetCameraPosition(eye);
+            shaders.color->SetModelMatrix( modelMatrix );
+            
+            meshes.cube->DrawIndexArray();
+            
+            continue;
+        }
+        
+        mCurrentShader->Bind();
+        mCurrentMesh->Bind();
         
     }
+    */
     
     mNumberOfFrames++;
     

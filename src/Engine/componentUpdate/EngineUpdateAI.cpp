@@ -67,7 +67,9 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     
     // Check invert facing direction
     if (!mStreamBuffer[index].actor->mIsFacing) {
+        
         mStreamBuffer[index].actor->mRotateTo.y += 180;
+        
         if (mStreamBuffer[index].actor->mRotateTo.y > 360) 
             mStreamBuffer[index].actor->mRotateTo.y -= 360;
     }
@@ -198,9 +200,11 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         // Rotate around center mass
         float orientationCenterMass = glm::length( mStreamBuffer[index].actor->mRotation );
         if (orientationCenterMass > 0) {
+            
             matrix = glm::rotate(matrix, 
                                 glm::radians( orientationCenterMass ), 
                                 glm::normalize( mStreamBuffer[index].actor->mRotation ));
+            
         }
         
         // Offset from center
@@ -224,9 +228,12 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         }
         
         // Rotate current animation state
-        glm::vec3 animationFactor(mStreamBuffer[index].actor->mGenes[a].animationAxis.x, 
+        glm::vec4 animationFactor(mStreamBuffer[index].actor->mGenes[a].animationAxis.x, 
                                   mStreamBuffer[index].actor->mGenes[a].animationAxis.y, 
-                                  mStreamBuffer[index].actor->mGenes[a].animationAxis.z);
+                                  mStreamBuffer[index].actor->mGenes[a].animationAxis.z, 
+                                  0);
+        
+        animationFactor = glm::normalize(animationFactor);
         
         // Step the animation swing direction
         float animationMaxSwingRange = mStreamBuffer[index].actor->mGenes[a].animationRange;
@@ -236,34 +243,36 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
             // Check inverted animation cycle
             if (mStreamBuffer[index].actor->mGenes[a].doInverseAnimation) {
                 
-                mStreamBuffer[index].actor->mAnimationStates[a].x += animationFactor.x;
-                mStreamBuffer[index].actor->mAnimationStates[a].y += animationFactor.y;
-                mStreamBuffer[index].actor->mAnimationStates[a].z += animationFactor.z;
+                mStreamBuffer[index].actor->mAnimationStates[a] += animationFactor;
                 
                 if ((mStreamBuffer[index].actor->mAnimationStates[a].x > animationMaxSwingRange) | 
                     (mStreamBuffer[index].actor->mAnimationStates[a].y > animationMaxSwingRange) | 
                     (mStreamBuffer[index].actor->mAnimationStates[a].z > animationMaxSwingRange)) {
                     
                     if (mStreamBuffer[index].actor->mGenes[a].doInverseAnimation) {
+                        
                         mStreamBuffer[index].actor->mAnimationStates[a].w = 1;
+                        
                     } else {
+                        
                         mStreamBuffer[index].actor->mAnimationStates[a].w = -1;
                     }
                 }
                 
             } else {
                 
-                mStreamBuffer[index].actor->mAnimationStates[a].x -= animationFactor.x;
-                mStreamBuffer[index].actor->mAnimationStates[a].y -= animationFactor.y;
-                mStreamBuffer[index].actor->mAnimationStates[a].z -= animationFactor.z;
+                mStreamBuffer[index].actor->mAnimationStates[a] -= animationFactor;
                 
                 if ((mStreamBuffer[index].actor->mAnimationStates[a].x < -animationMaxSwingRange) | 
                     (mStreamBuffer[index].actor->mAnimationStates[a].y < -animationMaxSwingRange) | 
                     (mStreamBuffer[index].actor->mAnimationStates[a].z < -animationMaxSwingRange)) {
                     
                     if (mStreamBuffer[index].actor->mGenes[a].doInverseAnimation) {
+                        
                         mStreamBuffer[index].actor->mAnimationStates[a].w = -1;
+                        
                     } else {
+                        
                         mStreamBuffer[index].actor->mAnimationStates[a].w = 1;
                     }
                 }
@@ -272,38 +281,45 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
             
         } else {
             
-            // Check inverted animation cycle
-            if (mStreamBuffer[index].actor->mGenes[a].doInverseAnimation) {
+            // Check to invert the animation
+            if (!mStreamBuffer[index].actor->mGenes[a].doInverseAnimation) {
                 
-                mStreamBuffer[index].actor->mAnimationStates[a].x -= animationFactor.x;
-                mStreamBuffer[index].actor->mAnimationStates[a].y -= animationFactor.y;
-                mStreamBuffer[index].actor->mAnimationStates[a].z -= animationFactor.z;
+                // Animation cycle
                 
-                if ((mStreamBuffer[index].actor->mAnimationStates[a].x < -animationMaxSwingRange) | 
-                    (mStreamBuffer[index].actor->mAnimationStates[a].y < -animationMaxSwingRange) | 
-                    (mStreamBuffer[index].actor->mAnimationStates[a].z < -animationMaxSwingRange)) {
-                    
-                    if (mStreamBuffer[index].actor->mGenes[a].doInverseAnimation) {
-                        mStreamBuffer[index].actor->mAnimationStates[a].w = -1;
-                    } else {
-                        mStreamBuffer[index].actor->mAnimationStates[a].w = 1;
-                    }
-                }
-                
-            } else {
-                
-                mStreamBuffer[index].actor->mAnimationStates[a].x += animationFactor.x;
-                mStreamBuffer[index].actor->mAnimationStates[a].y += animationFactor.y;
-                mStreamBuffer[index].actor->mAnimationStates[a].z += animationFactor.z;
+                mStreamBuffer[index].actor->mAnimationStates[a] += animationFactor;
                 
                 if ((mStreamBuffer[index].actor->mAnimationStates[a].x > animationMaxSwingRange) | 
                     (mStreamBuffer[index].actor->mAnimationStates[a].y > animationMaxSwingRange) | 
                     (mStreamBuffer[index].actor->mAnimationStates[a].z > animationMaxSwingRange)) {
                     
                     if (mStreamBuffer[index].actor->mGenes[a].doInverseAnimation) {
+                        
                         mStreamBuffer[index].actor->mAnimationStates[a].w = 1;
+                        
                     } else {
+                        
                         mStreamBuffer[index].actor->mAnimationStates[a].w = -1;
+                        
+                    }
+                }
+                
+            } else {
+                
+                // Inverse animation cycle
+                
+                mStreamBuffer[index].actor->mAnimationStates[a] -= animationFactor;
+                
+                if ((mStreamBuffer[index].actor->mAnimationStates[a].x < -animationMaxSwingRange) | 
+                    (mStreamBuffer[index].actor->mAnimationStates[a].y < -animationMaxSwingRange) | 
+                    (mStreamBuffer[index].actor->mAnimationStates[a].z < -animationMaxSwingRange)) {
+                    
+                    if (mStreamBuffer[index].actor->mGenes[a].doInverseAnimation) {
+                        
+                        mStreamBuffer[index].actor->mAnimationStates[a].w = -1;
+                        
+                    } else {
+                        
+                        mStreamBuffer[index].actor->mAnimationStates[a].w = 1;
                     }
                 }
                 
