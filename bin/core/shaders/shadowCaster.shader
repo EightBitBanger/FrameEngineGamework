@@ -28,50 +28,24 @@ uniform vec3  u_light_color[100];
 
 void main() {
     
-    vec3 norm = u_inv_model * normalize(l_normal);
+    float shadowColorHigh      = u_light_attenuation[0].r;
+    float shadowColorLow       = u_light_attenuation[0].g;
+    float shadowIntensityHigh  = u_light_attenuation[0].b;
+    float shadowIntensityLow   = u_light_attenuation[0].a;
     
-    vec3 lightColor = vec3(0);
+    vec3 shadowColor = u_light_color[0];
     
-    for (int i=0; i < u_light_count; i++) {
-        
-        float intensity    = u_light_attenuation[i].r;
-        float range        = u_light_attenuation[i].g;
-        float attenuation  = u_light_attenuation[i].b;
-        float type         = u_light_attenuation[i].a;
-        
-        // Ignore point lights
-        if (type < 1) 
-            continue;
-        
-        
-        // Directional light shadows
-        if (type < 2) {
-            
-            float shadowColor      = 0.03;
-            float shadowIntensity  = 0.087;
-            
-            vec3 lightDir = normalize(-u_light_direction[i]);
-            
-            v_color = vec4(shadowColor, shadowColor, shadowColor, 0);
-            
-            vec4 shadowPos = u_model * u_shadow * vec4(l_position, 1);
-            
-            vec4 vertexPos = u_model * vec4(l_position, 1);
-            //float dist = length( vec3(vertexPos) - vec3(shadowPos) );
-            
-            
-            if (shadowPos.y > (vertexPos.y - 1)) 
-                v_color = vec4(0, 0, 0, shadowIntensity);
-            
-            gl_Position = vec4(u_proj * shadowPos);
-            
-            return;
-        }
-        
-        continue;
-    }
+    v_color = vec4( shadowColor, shadowIntensityLow );
     
-    gl_Position = vec4(0, 0, 0, 0);
+    vec4 shadowPos = u_model * u_shadow * vec4(l_position, 1);
+    
+    // Fade off height difference
+    vec4 vertexPos = u_model * vec4(l_position, 1);
+    
+    if (shadowPos.y > (vertexPos.y - 3)) 
+        v_color = vec4( vec3(shadowColorLow,  shadowColorLow,  shadowColorLow), shadowIntensityHigh );
+    
+    gl_Position = vec4(u_proj * shadowPos);
     
     return;
 };
