@@ -20,9 +20,6 @@ public:
     /// Transformation element.
     Transform transform;
     
-    /// Render distance from camera point.
-    float distance;
-    
     friend class RenderSystem;
     
     MeshRenderer();

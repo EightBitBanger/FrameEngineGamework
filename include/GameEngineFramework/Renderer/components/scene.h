@@ -10,7 +10,7 @@ class ENGINE_API Scene {
     
 public:
     
-    /// Should lights be updated.
+    /// Should lights be updated for this scene.
     bool doUpdateLights;
     
     /// Is this scene currently active in the renderer.

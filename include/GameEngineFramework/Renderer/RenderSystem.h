@@ -121,6 +121,7 @@ public:
     /// Return the number of mesh renderers that have been created.
     unsigned int GetMeshRendererCount(void);
     
+    
     // Internal
     
     /// Prepare the render system.
@@ -173,8 +174,6 @@ private:
     Shader*    mCurrentShader;
     
     // Sorting
-    unsigned int mSortingIndex[5];
-    unsigned int mSortingCounter;
     std::vector<std::pair<float, MeshRenderer*>> mRenderQueueSorter[5];
     
     // Light list
@@ -194,7 +193,6 @@ private:
     // Shadows
     float        mShadowDistance;
     Transform    mShadowTransform;
-    Shader*      mShadowShader;
     
     // Render component allocators
     PoolAllocator<MeshRenderer>    mEntity;
@@ -229,6 +227,45 @@ private:
     void ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::mat4& viewProjection);
     
     void SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup, unsigned int queueGroupIndex);
+    
+    
+    // Default assets
+    
+    struct DefaultShaders {
+        Shader*  texture;
+        Shader*  textureUnlit;
+        Shader*  color;
+        Shader*  colorUnlit;
+        Shader*  UI;
+        Shader*  shadowCaster;
+        
+        DefaultShaders() : 
+            texture(nullptr),
+            textureUnlit(nullptr),
+            color(nullptr),
+            colorUnlit(nullptr),
+            UI(nullptr),
+            shadowCaster(nullptr)
+        {}
+    };
+    
+    struct DefaultMeshes {
+        Mesh* cube;
+        Mesh* plain;
+        
+        DefaultMeshes() : 
+            cube(nullptr),
+            plain(nullptr)
+        {}
+    };
+    
+public:
+    
+    /// Default shaders provided by the engine.
+    DefaultShaders shaders;
+    
+    /// Default meshes provided by the engine.
+    DefaultMeshes  meshes;
     
 };
 

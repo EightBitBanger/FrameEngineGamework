@@ -13,8 +13,7 @@
 
 
 
-// TODO:
-// Tell the clients we have shutdown   CPP Line 172
+// TODO: Tell the clients we have shutdown   CPP Line 172
 
 
 

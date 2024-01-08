@@ -28,17 +28,24 @@ public:
     Color specular;
     
     
-    /// State whether depth testing will be used.
+    /// Should depth testing be preformed during rendering.
     bool doDepthTest;
     
-    /// State whether blending will be used.
+    /// Should this material be alpha blended with the scene.
     bool doBlending;
     
-    /// State whether face culling will be used.
+    /// Should back faces be rendered.
     bool doFaceCulling;
     
-    /// State whether a shadow pass will be run.
+    /// Should a shadow be rendered on this material.
     bool doShadowPass;
+    
+    
+    /// Shadow render distance.
+    float shadowDistance;
+    
+    /// Shadow stencil cast length.
+    float shadowStencilLength;
     
     
     /// Texture interpolation

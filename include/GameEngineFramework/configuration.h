@@ -47,9 +47,10 @@
 //
 
 #define  RENDER_FRAMES_PER_SECOND          60
+
 //#define  RENDERER_CHECK_OPENGL_ERRORS
 
-#define RENDER_NUMBER_OF_LIGHTS    30
+#define RENDER_NUMBER_OF_LIGHTS    50
 
 #define RENDER_NUMBER_OF_SHADOWS   8
 
@@ -71,7 +72,7 @@
 // Unit testing
 //
 
-#define RUN_UNIT_TESTS
+//#define RUN_UNIT_TESTS
 
 
 
@@ -79,7 +80,7 @@
 // Tick update
 //
 
-#define  TICK_UPDATES_PER_SECOND           30
+#define  TICK_UPDATES_PER_SECOND           60
 
 
 //

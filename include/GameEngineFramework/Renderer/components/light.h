@@ -9,8 +9,14 @@ class ENGINE_API Light {
     
 public:
     
-    /// State whether the light is active.
+    /// Is this light active in the scene.
     bool isActive;
+    
+    /// Should this light cast a shadow.
+    bool doCastShadow;
+    
+    /// Should this light render with a halo effect.
+    bool doHaloEffect;
     
     /// Type of light. Point or directional.
     short int type;

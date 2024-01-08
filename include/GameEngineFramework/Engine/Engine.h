@@ -62,7 +62,7 @@
     extern UintType    Uint;
 #endif
 
-
+// UI callback type
 typedef void(*ButtonCallBack)();
 
 
@@ -279,7 +279,8 @@ private:
     
     PoolAllocator<Transform>  mTransforms;
     
-    // Default shaders
+    // Default assets
+    
     struct DefaultShaders {
         Shader*  texture;
         Shader*  textureUnlit;
@@ -287,12 +288,25 @@ private:
         Shader*  colorUnlit;
         Shader*  UI;
         Shader*  shadowCaster;
+        
+        DefaultShaders() : 
+            texture(nullptr),
+            textureUnlit(nullptr),
+            color(nullptr),
+            colorUnlit(nullptr),
+            UI(nullptr),
+            shadowCaster(nullptr)
+        {}
     };
     
-    // Default meshes
     struct DefaultMeshes {
         Mesh* cube;
         Mesh* plain;
+        
+        DefaultMeshes() : 
+            cube(nullptr),
+            plain(nullptr)
+        {}
     };
     
     // Component data streaming

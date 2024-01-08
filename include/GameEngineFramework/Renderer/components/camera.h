@@ -29,13 +29,13 @@ public:
     Viewport viewport;
     
     
-    /// Whether mouse look is calculated on update.
+    /// Should mouse look be calculated on update.
     bool useMouseLook;
     
-    /// Whether the camera aspect will update to the window aspect.
+    /// Should the camera aspect be synchronized to the window aspect.
     bool isFixedAspect;
     
-    /// Whether the camera should render orthographically.
+    /// Should the camera be rendered orthographically or perspective.
     bool isOrthographic;
     
     /// Camera looking angle.
@@ -56,17 +56,17 @@ public:
     
     
     /// Maximum pitch angle limit. (in radians)
-    int MouseLimitPitchMax;
+    int mouseLimitPitchMax;
     
     /// Minimum pitch angle limit. (in radians)
-    int MouseLimitPitchMin;
+    int mouseLimitPitchMin;
     
     
     /// Mouse horizontal movement sensitivity. (in radians)
-    float MouseSensitivityYaw;
+    double mouseSensitivityYaw;
     
     /// Mouse vertical movement sensitivity. (in radians)
-    float MouseSensitivityPitch;
+    double mouseSensitivityPitch;
     
     
     /// Enable mouse look.

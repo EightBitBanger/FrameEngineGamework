@@ -19,33 +19,33 @@ class ENGINE_API Timer {
 public:
     
     /// Time difference between frames.
-    float  delta;
+    double  delta;
     
     /// Delta time scaled to seconds.
-    float  units;
+    double  units;
     
     /// Amount of accumulated frame time
-    float accumulator;
+    double accumulator;
     
     /// Rate of update in milliseconds.
-    float  updateRateMs;
+    double  updateRateMs;
     
     /// Maximum update in milliseconds.
-    float  updateRateMax;
+    double  updateRateMax;
     
     /// Time interpolation factor between frames.
-    float  interpolationFactor;
+    double  interpolationFactor;
     
     Timer();
     
     /// Return the current time delta between frames.
-    float GetCurrentDelta(void);
+    double GetCurrentDelta(void);
     
     /// Update and return the timer state.
     bool Update(void);
     
-    /// Return the current time delta without resetting the delta.
-    float Current(void);
+    /// Return the current time delta without resetting the delta value.
+    double Current(void);
     
     /// Set the update rate in milliseconds.
     void SetRefreshRate(int rate);
