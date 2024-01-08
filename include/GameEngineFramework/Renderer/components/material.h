@@ -41,11 +41,23 @@ public:
     bool doShadowPass;
     
     
-    /// Shadow render distance.
-    float shadowDistance;
-    
     /// Shadow stencil cast length.
     float shadowStencilLength;
+    
+    /// Shadow stencil intensity low.
+    float shadowStencilIntensityLow;
+    
+    /// Shadow stencil intensity high.
+    float shadowStencilIntensityHigh;
+    
+    /// Shadow stencil color scale low.
+    float shadowStencilColorLow;
+    
+    /// Shadow stencil color scale high.
+    float shadowStencilColorHigh;
+    
+    /// Shadow stencil color.
+    Color shadowStencilColor;
     
     
     /// Texture interpolation
