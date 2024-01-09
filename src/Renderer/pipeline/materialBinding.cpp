@@ -4,10 +4,10 @@
 #include <GameEngineFramework/Types/types.h>
 
 
-void RenderSystem::BindMaterial(Material* materialPtr) {
+bool RenderSystem::BindMaterial(Material* materialPtr) {
     
     if (mCurrentMaterial == materialPtr) 
-        return;
+        return false;
     
     mCurrentMaterial = materialPtr;
     
@@ -80,6 +80,6 @@ void RenderSystem::BindMaterial(Material* materialPtr) {
         
     }
     
-    return;
+    return true;
 }
 

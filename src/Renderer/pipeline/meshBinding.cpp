@@ -4,15 +4,15 @@
 #include <GameEngineFramework/Types/types.h>
 
 
-void RenderSystem::BindMesh(Mesh* meshPtr) {
+bool RenderSystem::BindMesh(Mesh* meshPtr) {
     
     if (mCurrentMesh == meshPtr) 
-        return;
+        return false;
     
     mCurrentMesh = meshPtr;
     
     mCurrentMesh->Bind();
     
-    return;
+    return true;
 }
 

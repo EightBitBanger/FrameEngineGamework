@@ -90,7 +90,7 @@ void RenderSystem::RenderFrame(void) {
                 
                 MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
                 
-                GeometryPass( currentEntity, eye, viewProjection );
+                GeometryPass( currentEntity, eye, scenePtr->camera->forward, viewProjection );
                 
                 
                 // Render the geometry
@@ -121,7 +121,7 @@ void RenderSystem::RenderFrame(void) {
                     if (shadowDistance > mShadowDistance) 
                         continue;
                     
-                    ShadowPass( currentEntity, eye, viewProjection );
+                    ShadowPass( currentEntity, eye, scenePtr->camera->forward, viewProjection );
                     
                     continue;
                 }

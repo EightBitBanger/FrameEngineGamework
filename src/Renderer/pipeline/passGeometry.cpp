@@ -4,14 +4,14 @@
 #include <GameEngineFramework/Types/types.h>
 
 
-void RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::mat4& viewProjection) {
+bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3 cameraAngle, glm::mat4& viewProjection) {
     
     // Mesh binding
     
     Mesh* meshPtr = currentEntity->mesh;
     
     if (meshPtr == nullptr) 
-        return;
+        return false;
     
     BindMesh( meshPtr );
     
@@ -20,7 +20,7 @@ void RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     Material* materialPtr = currentEntity->material;
     
     if (materialPtr == nullptr) 
-        return;
+        return false;
     
     BindMaterial( materialPtr );
     
@@ -29,7 +29,7 @@ void RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     Shader* shaderPtr = materialPtr->shader;
     
     if (shaderPtr == nullptr) 
-        return;
+        return false;
     
     BindShader( shaderPtr );
     
@@ -44,12 +44,13 @@ void RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     mCurrentShader->SetInverseModelMatrix( invTransposeMatrix );
     
     mCurrentShader->SetCameraPosition(eye);
+    mCurrentShader->SetCameraAngle(cameraAngle);
     
     // Set the material and texture
     mCurrentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
     mCurrentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
     mCurrentShader->SetMaterialSpecular(mCurrentMaterial->specular);
     
-    return;
+    return true;
 }
 

@@ -4,7 +4,7 @@
 #include <GameEngineFramework/Types/types.h>
 
 
-void RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::mat4& viewProjection) {
+bool RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3 cameraAngle, glm::mat4& viewProjection) {
     
     // Strip out model rotation to prevent shadow rotation
     glm::mat4 modelMatrix = glm::identity<glm::mat4>();
@@ -12,8 +12,9 @@ void RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::
     modelMatrix = glm::scale(modelMatrix, currentEntity->transform.localScale);
     
     shaders.shadowCaster->SetProjectionMatrix( viewProjection );
-    shaders.shadowCaster->SetCameraPosition(eye);
     shaders.shadowCaster->SetModelMatrix( modelMatrix );
+    shaders.shadowCaster->SetCameraPosition(eye);
+    shaders.shadowCaster->SetCameraAngle(cameraAngle);
     
     glEnable( GL_BLEND );
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -55,12 +56,12 @@ void RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::
                                    currentEntity->material->shadowStencilColor.b);
         
         // Shadow intensity
-        shadowAttenuation[0].r = currentEntity->material->shadowStencilColorHigh      * 1;
-        shadowAttenuation[0].g = currentEntity->material->shadowStencilColorLow       * 1;
+        shadowAttenuation[0].r = currentEntity->material->shadowStencilAngleOfView;
+        shadowAttenuation[0].g = currentEntity->material->shadowStencilColorIntensity;
         shadowAttenuation[0].b = currentEntity->material->shadowStencilIntensityHigh  * 0.1;
         shadowAttenuation[0].a = currentEntity->material->shadowStencilIntensityLow   * 0.01;
         
-        // Send in the shadow data through the lighting parameters
+        // Send in the shadow data through the lighting parameters for this pass
         shaders.shadowCaster->SetLightCount(1);
         shaders.shadowCaster->SetLightPositions(1,   shadowPosition);
         shaders.shadowCaster->SetLightDirections(1,  shadowDirection);
@@ -99,6 +100,6 @@ void RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::
         
     }
     
-    return;
+    return true;
 }
 

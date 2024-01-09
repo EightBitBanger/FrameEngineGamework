@@ -4,10 +4,10 @@
 #include <GameEngineFramework/Types/types.h>
 
 
-void RenderSystem::BindShader(Shader* shaderPtr) {
+bool RenderSystem::BindShader(Shader* shaderPtr) {
     
     if (mCurrentShader == shaderPtr) 
-        return;
+        return false;
     
     mCurrentShader = shaderPtr;
     
@@ -22,6 +22,6 @@ void RenderSystem::BindShader(Shader* shaderPtr) {
     mCurrentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
     mCurrentShader->SetLightColors(mNumberOfLights, mLightColor);
     
-    return;
+    return true;
 }
 

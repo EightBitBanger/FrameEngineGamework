@@ -19,10 +19,8 @@ Material::Material() :
     shadowStencilIntensityLow(0),
     shadowStencilIntensityHigh(1),
     
-    shadowStencilColorLow(0),
-    shadowStencilColorHigh(1),
-    
-    textureFiltration(GL_LINEAR_MIPMAP_LINEAR),
+    shadowStencilColorIntensity(0),
+    shadowStencilAngleOfView(0),
     
     depthFunc(MATERIAL_DEPTH_LESS),
     
@@ -34,6 +32,8 @@ Material::Material() :
     blendAlphaSource(BLEND_ONE_MINUS_SRC_COLOR),
     blendAlphaDestination(BLEND_ONE_MINUS_SRC_ALPHA),
     blendFunction(BLEND_EQUATION_ADD),
+    
+    textureFiltration(MATERIAL_FILTER_TRILINEAR),
     
     shader(nullptr)
 {
@@ -133,6 +133,35 @@ void Material::DisableShadowPass(void) {
     return;
 }
 
+void Material::SetShadowStencilLength(float length) {
+    shadowStencilLength = length;
+    return;
+}
+
+void Material::SetShadowStencilIntensityLow(float intensity) {
+    shadowStencilIntensityLow = intensity;
+    return;
+}
+
+void Material::SetShadowStencilIntensityHigh(float intensity) {
+    shadowStencilIntensityHigh = intensity;
+    return;
+}
+
+void Material::SetShadowStencilColorIntensity(float intensity) {
+    shadowStencilColorIntensity = intensity;
+    return;
+}
+
+void Material::SetShadowStencilAngleOfView(float angle) {
+    shadowStencilAngleOfView = angle;
+    return;
+}
+
+void Material::SetShadowStencilColor(Color color) {
+    shadowStencilColor = color;
+    return;
+}
 
 void Material::Bind(void) {
     glBindTexture(GL_TEXTURE_2D, mTextureBuffer);

@@ -102,7 +102,7 @@ void Start() {
     // Directional light
     directionalLight = Engine.Create<GameObject>();
     lightTransform = directionalLight->GetComponent<Transform>();
-    lightTransform->RotateAxis(1, Vector3(0, -1, -0.3));
+    lightTransform->RotateAxis(1, Vector3(0, -1, -0.5));
     
     directionalLight->AddComponent( Engine.CreateComponent<Light>() );
     Light* sunLight = directionalLight->GetComponent<Light>();
@@ -250,19 +250,19 @@ void Start() {
     
     
     //
-    // Shadow cast example
+    // Shadow casting example objects
     //
     
-    int speadArea = 100;
+    int speadArea = 300;
     
-    for (int i=0; i < 3000; i++) {
+    for (int i=0; i < 5000; i++) {
         
         GameObject* shadowObject = Engine.Create<GameObject>();
         
         objectTransform = shadowObject->GetComponent<Transform>();
-        objectTransform->position.x = Random.Range(0, speadArea) - Random.Range(0, speadArea);
-        objectTransform->position.y += 50;
-        objectTransform->position.z = Random.Range(0, speadArea) - Random.Range(0, speadArea);
+        objectTransform->position.x  = Random.Range(0, speadArea) - Random.Range(0, speadArea);
+        objectTransform->position.y += Random.Range(0, 80);
+        objectTransform->position.z  = Random.Range(0, speadArea) - Random.Range(0, speadArea);
         
         shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
         MeshRenderer* objectRenderer = shadowObject->GetComponent<MeshRenderer>();
@@ -274,16 +274,20 @@ void Start() {
         objectRenderer->material->ambient = Color(0.01, 0.01, 0.01);
         objectRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
         
-        objectRenderer->material->shadowStencilLength = Random.Range(4, 14);
-        objectRenderer->material->shadowStencilIntensityHigh = Random.Range(0, 10) * 0.3;
-        objectRenderer->material->shadowStencilIntensityLow  = Random.Range(0, 10) * 0.1;
-        objectRenderer->material->shadowStencilColorHigh     = 8;
-        objectRenderer->material->shadowStencilColorLow      = 0.1;
+        // Shadows
         
-        objectRenderer->material->shadowStencilColor = Colors.MakeRandom();
+        objectRenderer->material->SetShadowStencilLength( Random.Range(4, 14) );
         
-        //if (Random.Range(0, 100) > 90) 
-        //    objectRenderer->material->DisableShadowPass();
+        objectRenderer->material->SetShadowStencilIntensityHigh( Random.Range(0, 10) * 0.9 );
+        objectRenderer->material->SetShadowStencilIntensityLow(  Random.Range(0, 10) * 0.001 );
+        
+        objectRenderer->material->SetShadowStencilColorIntensity( 200.001 );
+        objectRenderer->material->SetShadowStencilAngleOfView( 8 );
+        
+        objectRenderer->material->SetShadowStencilColor( Colors.MakeRandom() );
+        
+        if (Random.Range(0, 100) > 90) 
+            objectRenderer->material->DisableShadowPass();
         
         Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer, RENDER_QUEUE_DEFAULT );
         
@@ -295,16 +299,14 @@ void Start() {
     
     
     
-    return;
-    
     
     //
     // Generate AI actors
     //
     
-    float spread = 3000;
+    float spread = 800;
     
-    for (int i=0; i < 400; i++) {
+    for (int i=0; i < 10; i++) {
         
         Vector3 position;
         position.x = (Random.Range(0.0f, spread) * 0.1) - (Random.Range(0.0f, spread) * 0.1);
