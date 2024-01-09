@@ -27,32 +27,36 @@ public:
     /// Set the uniform camera position.
     void SetCameraPosition(glm::vec3 cameraPosition);
     
-    /// Set the ambient color of the material.
+    /// Set the uniform camera looking angle.
+    void SetCameraAngle(glm::vec3 cameraAngle);
+    
+    
+    /// Set the uniform ambient color of the material.
     void SetMaterialAmbient(Color color);
     
-    /// Set the diffuse color of the material.
+    /// Set the uniform diffuse color of the material.
     void SetMaterialDiffuse(Color color);
     
-    /// Set the specular color of the material.
+    /// Set the uniform specular color of the material.
     void SetMaterialSpecular(Color color);
     
-    /// Set the texture sampler index.
+    /// Set the uniform texture sampler index.
     void SetTextureSampler(unsigned int index);
     
     
-    /// Set the number of lights.
+    /// Set the number of uniform lights.
     void SetLightCount(unsigned int numberOfLights);
     
-    /// Set the array of light positions.
+    /// Set the array of uniform light positions.
     void SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPositions);
     
-    /// Set the array of light directions.
+    /// Set the array of uniform light directions.
     void SetLightDirections(unsigned int numberOfLights, glm::vec3* lightDirections);
     
-    /// Set the array of light attenuation.
+    /// Set the array of uniform light attenuation.
     void SetLightAttenuation(unsigned int numberOfLights, glm::vec4* lightAttenuation);
     
-    /// Set the array of light colors.
+    /// Set the array of uniform light colors.
     void SetLightColors(unsigned int numberOfLights, glm::vec3* lightColors);
     
     
@@ -84,7 +88,9 @@ private:
     int mModelMatrixLocation;
     int mShadowMatrixLocation;
     int mModelInvMatrixLocation;
+    
     int mCameraPosition;
+    int mCameraAngle;
     
     int mMaterialColorLocation;
     int mMaterialAmbientLocation;

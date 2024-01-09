@@ -214,19 +214,19 @@ private:
     unsigned int accumulateSceneLights(Scene* currentScene, glm::vec3 eye);
     
     
-    void BindMesh(Mesh* meshPtr);
+    bool BindMesh(Mesh* meshPtr);
     
-    void BindMaterial(Material* materialPtr);
+    bool BindMaterial(Material* materialPtr);
     
-    void BindShader(Shader* shaderPtr);
+    bool BindShader(Shader* shaderPtr);
     
     // Passes
     
-    void GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::mat4& viewProjection);
+    bool GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3 cameraAngle, glm::mat4& viewProjection);
     
-    void ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::mat4& viewProjection);
+    bool ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3 cameraAngle, glm::mat4& viewProjection);
     
-    void SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup, unsigned int queueGroupIndex);
+    bool SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup, unsigned int queueGroupIndex);
     
     
     // Default assets

@@ -12,7 +12,7 @@ class ENGINE_API MeshRenderer {
 public:
     
     /// Pointer to the mesh component.
-    Mesh*     mesh;
+    Mesh* mesh;
     
     /// Pointer to the material component.
     Material* material;

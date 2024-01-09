@@ -27,7 +27,7 @@ public:
     /// Object name.
     std::string name;
     
-    /// State whether the object is active.
+    /// Should this game object be active in the scene.
     bool isActive;
     
     GameObject();

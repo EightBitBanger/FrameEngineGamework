@@ -32,10 +32,10 @@
 // ============================================
 // Material filtering
 
-#define  MATERIAL_FILTER_NONE              0
-#define  MATERIAL_FILTER_LINEAR            1
-#define  MATERIAL_FILTER_TRILINEAR         2
-#define  MATERIAL_FILTER_ANISOTROPIC       3
+#define  MATERIAL_FILTER_NONE              GL_NEAREST
+#define  MATERIAL_FILTER_LINEAR            GL_LINEAR
+#define  MATERIAL_FILTER_TRILINEAR         GL_LINEAR_MIPMAP_NEAREST
+#define  MATERIAL_FILTER_ANISOTROPIC       GL_LINEAR_MIPMAP_LINEAR
 
 // Depth filter
 #define  MATERIAL_DEPTH_NEVER              GL_NEVER

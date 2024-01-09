@@ -11,20 +11,20 @@ class ENGINE_API Material {
     
 public:
     
-    /// Texture image width.
+    /// Width of the texture.
     unsigned int width;
     
-    /// Texture image height.
+    /// Height of the texture.
     unsigned int height;
     
     
-    /// Ambient material color.
+    /// Ambient color for this material.
     Color ambient;
     
-    /// Diffuse material color.
+    /// Diffuse color for this material.
     Color diffuse;
     
-    /// Specular material color.
+    /// Specular color for this material.
     Color specular;
     
     
@@ -34,10 +34,10 @@ public:
     /// Should this material be alpha blended with the scene.
     bool doBlending;
     
-    /// Should back faces be rendered.
+    /// Should the back side of faces be rendered.
     bool doFaceCulling;
     
-    /// Should a shadow be rendered on this material.
+    /// Should a shadow pass be rendered with this material.
     bool doShadowPass;
     
     
@@ -50,18 +50,14 @@ public:
     /// Shadow stencil intensity high.
     float shadowStencilIntensityHigh;
     
-    /// Shadow stencil color scale low.
-    float shadowStencilColorLow;
+    /// Shadow stencil color intensity multiplier.
+    float shadowStencilColorIntensity;
     
-    /// Shadow stencil color scale high.
-    float shadowStencilColorHigh;
+    /// Shadow stencil visible angle.
+    float shadowStencilAngleOfView;
     
     /// Shadow stencil color.
     Color shadowStencilColor;
-    
-    
-    /// Texture interpolation
-    int textureFiltration;
     
     
     /// Depth function used for rendering with the depth buffer.
@@ -89,6 +85,9 @@ public:
     /// The function used to blend colors.
     int blendFunction;
     
+    
+    /// Interpolation filter type used during rendering.
+    int textureFiltration;
     
     /// Shader used by this material for rendering.
     Shader* shader;
@@ -145,6 +144,25 @@ public:
     
     /// Disable the shadow pass.
     void DisableShadowPass(void);
+    
+    /// Set the length of the shadow stencil.
+    void SetShadowStencilLength(float length);
+    
+    /// Set the intensity of the alpha blend for the shadow stencil at the tail end of the stencil trail.
+    void SetShadowStencilIntensityLow(float intensity);
+    
+    /// Set the intensity of the alpha blend for the shadow stencil at the head end of the stencil trail.
+    void SetShadowStencilIntensityHigh(float intensity);
+    
+    /// Set the intensity of the color for the shadow stencil.
+    void SetShadowStencilColorIntensity(float intensity);
+    
+    /// Set the visible angle to render the shadow stencil.
+    void SetShadowStencilAngleOfView(float angle);
+    
+    /// Set the color modifier of the shadow stencil.
+    void SetShadowStencilColor(Color color);
+    
     
     
     /// Bind the material texture for rendering.
