@@ -25,13 +25,10 @@ bool RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::
     
     for (int s=0; s < mNumberOfShadows; s++) {
         
-        float shadowRayScale = 1.3;
-        float shadowLength   = currentEntity->material->shadowStencilLength;
+        float shadowRayScale  = 0.98;
+        float shadowLength    = currentEntity->material->shadowStencilLength;
         
         mShadowTransform.SetIdentity();
-        
-        // Initial angle rotation
-        mShadowTransform.RotateAxis( 1, glm::vec3(0, -1, 0) );
         
         // Rotate by the inverse light angle
         mShadowTransform.RotateWorldAxis( -180, mShadowDirection[s], Vector3(0, 0, 0) );
@@ -40,7 +37,8 @@ bool RenderSystem::ShadowPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::
         mShadowTransform.Scale( glm::vec3(shadowRayScale, shadowLength * 2, shadowRayScale) );
         
         // Offset by half the distance
-        mShadowTransform.Translate( glm::vec3(0, -1, 0) * .5f );
+        glm::vec3 shadowTranslation = (glm::vec3(0, -1, 0) * 0.5f);
+        mShadowTransform.Translate( shadowTranslation );
         
         glm::vec3 shadowPosition[1];
         glm::vec3 shadowDirection[1];

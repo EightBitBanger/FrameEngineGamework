@@ -98,6 +98,22 @@ bool RenderSystem::DestroyScene(Scene* scenePtr) {
     return mScene.Destroy(scenePtr);
 }
 
+Texture* RenderSystem::CreateTexture(void) {
+    Texture* texturePtr = mTexture.Create();
+    return texturePtr;
+}
+bool RenderSystem::DestroyTexture(Texture* texturePtr) {
+    return mTexture.Destroy(texturePtr);
+}
+
+FrameBuffer* RenderSystem::CreateFrameBuffer(void) {
+    FrameBuffer* frameBufferPtr = mFrameBuffer.Create();
+    return frameBufferPtr;
+}
+bool RenderSystem::DestroyFrameBuffer(FrameBuffer* frameBufferPtr) {
+    return mFrameBuffer.Destroy(frameBufferPtr);
+}
+
 void RenderSystem::Initiate(void) {
     
 #ifdef RENDERER_CHECK_OPENGL_ERRORS

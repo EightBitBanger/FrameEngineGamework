@@ -11,8 +11,8 @@ bool RenderSystem::BindMaterial(Material* materialPtr) {
     
     mCurrentMaterial = materialPtr;
     
-    mCurrentMaterial->Bind();
-    mCurrentMaterial->BindTextureSlot(0);
+    mCurrentMaterial->texture.Bind();
+    mCurrentMaterial->texture.BindTextureSlot(0);
     
     // Depth testing
     

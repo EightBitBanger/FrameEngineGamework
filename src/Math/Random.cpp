@@ -17,18 +17,15 @@ void  NumberGeneration::Seed(int value) {
 }
 
 int  NumberGeneration::Range(int min, int max) {
-    if (min >= max) return 0;
-    return (rand() % (max)) + min;
+    return (rand() % max) + min;
 }
 
 float  NumberGeneration::Range(float min, float max) {
-    if (min >= max) return 0;
-    return ((float)(rand() % (int)max) + min);
+    return ((float)(rand() % (int)(max * 100.0f)) * 0.01f) + min;
 }
 
 double  NumberGeneration::Range(double min, double max) {
-    if (min >= max) return 0;
-    return ((double)(rand() % (int)max) + min);
+    return ((float)(rand() % (int)(max * 100.0d)) * 0.01d) + min;
 }
 
 float NumberGeneration::Perlin(float xcoord, float ycoord, float zcoord) {

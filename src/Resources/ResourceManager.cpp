@@ -81,10 +81,7 @@ Material* ResourceManager::CreateMaterialFromTag(std::string resourceName) {
     if (!texTag->isLoaded) 
         texTag->Load();
     Material* materialPtr = Renderer.CreateMaterial();
-    materialPtr->width  = texTag->width;
-    materialPtr->height = texTag->height;
-    materialPtr->UpdateTextureBuffer(texTag->buffer);
-    materialPtr->GenerateMipMaps();
+    materialPtr->texture.UploadTextureToGPU(texTag->buffer, texTag->width, texTag->height, texTag->filtration);
     return materialPtr;
 }
 

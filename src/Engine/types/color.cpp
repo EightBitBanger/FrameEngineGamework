@@ -1,4 +1,5 @@
 #include <GameEngineFramework/Engine/types/color.h>
+#include <GameEngineFramework/Math/Math.h>
 
 Color Color::operator+ (const Color& color) {
     Color newColor;
@@ -26,6 +27,31 @@ Color Color::operator- (const Color& color) {
     newColor.a = a - color.a;
     return newColor;
 }
+
+Color Color::operator+ (const float& grayScale) {
+    Color newColor;
+    newColor.r = r + grayScale;
+    newColor.g = g + grayScale;
+    newColor.b = b + grayScale;
+    return newColor;
+}
+
+Color Color::operator* (const float& grayScale) {
+    Color newColor;
+    newColor.r = r * grayScale;
+    newColor.g = g * grayScale;
+    newColor.b = b * grayScale;
+    return newColor;
+}
+
+Color Color::operator- (const float& grayScale) {
+    Color newColor;
+    newColor.r = r - grayScale;
+    newColor.g = g - grayScale;
+    newColor.b = b - grayScale;
+    return newColor;
+}
+
 
 Color Color::operator-= (const Color& color) {
     Color newColor;
@@ -76,6 +102,39 @@ Color Color::operator*= (const Color& color) {
     newColor.g *= g;
     newColor.b *= b;
     newColor.a *= a;
+    return newColor;
+}
+
+Color Color::operator+= (const float& grayScale) {
+    Color newColor;
+    r += grayScale;
+    g += grayScale;
+    b += grayScale;
+    newColor.r += grayScale;
+    newColor.g += grayScale;
+    newColor.b += grayScale;
+    return newColor;
+}
+
+Color Color::operator-= (const float& grayScale) {
+    Color newColor;
+    r -= grayScale;
+    g -= grayScale;
+    b -= grayScale;
+    newColor.r -= grayScale;
+    newColor.g -= grayScale;
+    newColor.b -= grayScale;
+    return newColor;
+}
+
+Color Color::operator*= (const float& grayScale) {
+    Color newColor;
+    r *= grayScale;
+    g *= grayScale;
+    b *= grayScale;
+    newColor.r *= grayScale;
+    newColor.g *= grayScale;
+    newColor.b *= grayScale;
     return newColor;
 }
 
@@ -135,6 +194,15 @@ Color::Color(Color& color) :
 {
 }
 
+Color::Color(float grayScale) :  
+    r(grayScale),
+    g(grayScale),
+    b(grayScale),
+    a(1)
+{
+}
+
+
 Color::Color(float red, float green, float blue, float alpha) : 
     r(red),
     g(green),
@@ -178,4 +246,11 @@ Color& ColorPreset::MakeRandomGrayScale(void) {
     mRandom.g = randomScale;
     mRandom.b = randomScale;
     return mRandom;
+}
+
+Color& ColorPreset::Lerp(Color min, Color max, float bias) {
+    mCustom = Color( glm::lerp(min.r, max.r, bias), 
+                     glm::lerp(min.g, max.g, bias), 
+                     glm::lerp(min.b, max.b, bias) );
+    return mCustom;
 }

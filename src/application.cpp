@@ -102,13 +102,12 @@ void Start() {
     // Directional light
     directionalLight = Engine.Create<GameObject>();
     lightTransform = directionalLight->GetComponent<Transform>();
-    lightTransform->RotateAxis(1, Vector3(0, -1, -0.5));
+    lightTransform->RotateAxis(1, Vector3(0, -1, 0));
     
     directionalLight->AddComponent( Engine.CreateComponent<Light>() );
     Light* sunLight = directionalLight->GetComponent<Light>();
     
     Engine.sceneMain->AddLightToSceneRoot( sunLight );
-    //sunLight->doCastShadow = false;
     sunLight->intensity  = 0.5;
     sunLight->type       = LIGHT_TYPE_DIRECTIONAL;
     sunLight->color      = Colors.white;
@@ -253,41 +252,44 @@ void Start() {
     // Shadow casting example objects
     //
     
-    int speadArea = 300;
+    int speadArea = 100;
     
-    for (int i=0; i < 5000; i++) {
+    Mesh*     barrelMesh     = Renderer.meshes.cube;//Resources.CreateMeshFromTag("barrel");
+    Material* barrelMaterial = Resources.CreateMaterialFromTag("barrel");
+    
+    barrelMaterial->shader = Engine.shaders.color;
+    
+    barrelMaterial->ambient = Color(0.01, 0.01, 0.01);
+    barrelMaterial->diffuse = Color(0.01, 0.01, 0.01);
+    
+    // Shadows
+    
+    barrelMaterial->SetShadowStencilLength( Random.Range(8, 14) );
+    
+    barrelMaterial->SetShadowStencilIntensityHigh( 1 );
+    barrelMaterial->SetShadowStencilIntensityLow( -2 );
+    
+    barrelMaterial->SetShadowStencilColorIntensity( 16 );
+    barrelMaterial->SetShadowStencilAngleOfView( 32 );
+    
+    Color stencilColor( Colors.Lerp(Colors.yellow, Colors.red, 0.7) );
+    
+    barrelMaterial->SetShadowStencilColor( stencilColor );
+    
+    
+    for (int i=0; i < 3000; i++) {
         
         GameObject* shadowObject = Engine.Create<GameObject>();
         
         objectTransform = shadowObject->GetComponent<Transform>();
         objectTransform->position.x  = Random.Range(0, speadArea) - Random.Range(0, speadArea);
-        objectTransform->position.y += Random.Range(0, 80);
+        objectTransform->position.y += Random.Range(80, 20);
         objectTransform->position.z  = Random.Range(0, speadArea) - Random.Range(0, speadArea);
         
         shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
         MeshRenderer* objectRenderer = shadowObject->GetComponent<MeshRenderer>();
-        objectRenderer->mesh = Engine.meshes.cube;
-        
-        objectRenderer->material = Engine.Create<Material>();
-        objectRenderer->material->shader = Engine.shaders.color;
-        
-        objectRenderer->material->ambient = Color(0.01, 0.01, 0.01);
-        objectRenderer->material->diffuse = Color(0.01, 0.01, 0.01);
-        
-        // Shadows
-        
-        objectRenderer->material->SetShadowStencilLength( Random.Range(4, 14) );
-        
-        objectRenderer->material->SetShadowStencilIntensityHigh( Random.Range(0, 10) * 0.9 );
-        objectRenderer->material->SetShadowStencilIntensityLow(  Random.Range(0, 10) * 0.001 );
-        
-        objectRenderer->material->SetShadowStencilColorIntensity( 200.001 );
-        objectRenderer->material->SetShadowStencilAngleOfView( 8 );
-        
-        objectRenderer->material->SetShadowStencilColor( Colors.MakeRandom() );
-        
-        if (Random.Range(0, 100) > 90) 
-            objectRenderer->material->DisableShadowPass();
+        objectRenderer->mesh     = barrelMesh;
+        objectRenderer->material = barrelMaterial;
         
         Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer, RENDER_QUEUE_DEFAULT );
         

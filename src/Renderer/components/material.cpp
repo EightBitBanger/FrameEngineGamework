@@ -5,9 +5,7 @@
 
 
 Material::Material() : 
-    
-    width(0),
-    height(0),
+    shader(nullptr),
     
     doDepthTest(true),
     doBlending(false),
@@ -31,24 +29,13 @@ Material::Material() :
     blendDestination(BLEND_SRC_ALPHA),
     blendAlphaSource(BLEND_ONE_MINUS_SRC_COLOR),
     blendAlphaDestination(BLEND_ONE_MINUS_SRC_ALPHA),
-    blendFunction(BLEND_EQUATION_ADD),
-    
-    textureFiltration(MATERIAL_FILTER_TRILINEAR),
-    
-    shader(nullptr)
+    blendFunction(BLEND_EQUATION_ADD)
 {
     ambient = Color(0, 0, 0, 1);
     diffuse = Color(1, 1, 1, 1);
     specular = Color(0, 0, 0, 1);
     shadowStencilColor = Color(1, 1, 1);
     
-    glGenTextures(1, &mTextureBuffer);
-    
-    return;
-}
-
-Material::~Material() {
-    glDeleteTextures(1, &mTextureBuffer);
     return;
 }
 
@@ -64,15 +51,6 @@ void Material::DisableDepthTest(void) {
 
 void Material::SetDepthFunction(GLint func) {
     depthFunc = func;
-    return;
-}
-
-GLint Material::GetTextureFiltration(void) {
-    return textureFiltration;
-}
-
-void Material::SetTextureFiltration(GLint filtration) {
-    textureFiltration = filtration;
     return;
 }
 
@@ -163,32 +141,3 @@ void Material::SetShadowStencilColor(Color color) {
     return;
 }
 
-void Material::Bind(void) {
-    glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
-    return;
-}
-
-void Material::BindTextureSlot(unsigned int slot) {
-    glActiveTexture(GL_TEXTURE0 + slot);
-    return;
-}
-
-void Material::UpdateTextureBuffer(void* textureData) {
-    glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFiltration);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    return;
-}
-
-void Material::GenerateMipMaps(void) {
-    glBindTexture(GL_TEXTURE_2D, mTextureBuffer);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    return;
-}
-    

@@ -25,6 +25,8 @@ TextureTag::TextureTag() :
     name(""),
     isLoaded(false),
     
+    filtration(MATERIAL_FILTER_LINEAR),
+    
     width(0),
     height(0),
     

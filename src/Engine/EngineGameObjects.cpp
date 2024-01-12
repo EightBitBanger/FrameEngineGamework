@@ -182,7 +182,6 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     overlayMaterial->ambient = Colors.black;
     
     overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
-    overlayMaterial->SetTextureFiltration(MATERIAL_FILTER_NONE);
     overlayMaterial->DisableCulling();
     overlayMaterial->DisableShadowPass();
     
@@ -219,7 +218,6 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     overlayRenderer->material->EnableBlending();
     
     overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
-    overlayRenderer->material->SetTextureFiltration(MATERIAL_FILTER_NONE);
     
     overlayRenderer->material->DisableCulling();
     overlayRenderer->material->DisableShadowPass();
@@ -253,7 +251,6 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     overlayMaterial->EnableBlending();
     
     overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
-    overlayMaterial->SetTextureFiltration(MATERIAL_FILTER_NONE);
     
     overlayMaterial->DisableCulling();
     overlayMaterial->DisableShadowPass();
