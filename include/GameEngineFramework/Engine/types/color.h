@@ -23,9 +23,18 @@ public:
     Color operator* (const Color& color);
     Color operator- (const Color& color);
     Color operator= (const Color& color);
+    
+    Color operator+ (const float& grayScale);
+    Color operator* (const float& grayScale);
+    Color operator- (const float& grayScale);
+    
     Color operator+= (const Color& color);
     Color operator-= (const Color& color);
     Color operator*= (const Color& color);
+    
+    Color operator+= (const float& grayScale);
+    Color operator-= (const float& grayScale);
+    Color operator*= (const float& grayScale);
     
     bool operator>  (const Color& color);
     bool operator>= (const Color& color);
@@ -35,6 +44,7 @@ public:
     
     Color();
     Color(Color& color);
+    Color(float grayScale);
     Color(float red, float green, float blue, float alpha);
     Color(float red, float green, float blue);
     
@@ -76,6 +86,9 @@ public:
     
     /// Return a random gray scale color.
     Color& MakeRandomGrayScale(void);
+    
+    /// Interpolate between two colors by a linear bias factor.
+    Color& Lerp(Color min, Color max, float bias);
     
     
 private:

@@ -12,6 +12,8 @@
 #include <GameEngineFramework/Renderer/components/meshrenderer.h>
 #include <GameEngineFramework/Renderer/components/scene.h>
 #include <GameEngineFramework/Renderer/components/shader.h>
+#include <GameEngineFramework/Renderer/components/framebuffer.h>
+#include <GameEngineFramework/Renderer/components/texture.h>
 
 #include <GameEngineFramework/Engine/types/viewport.h>
 
@@ -106,6 +108,18 @@ public:
     
     /// Destroy a scene object and return true on success.
     bool DestroyScene(Scene* scenePtr);
+    
+    /// Create a texture object and return its pointer.
+    Texture* CreateTexture(void);
+    
+    /// Destroy a texture object and return true on success.
+    bool DestroyTexture(Texture* texturePtr);
+    
+    /// Create a frame buffer object and return its pointer.
+    FrameBuffer* CreateFrameBuffer(void);
+    
+    /// Destroy a scene object and return true on success.
+    bool DestroyFrameBuffer(FrameBuffer* frameBufferPtr);
     
     // Render queue
     
@@ -202,6 +216,9 @@ private:
     PoolAllocator<Camera>          mCamera;
     PoolAllocator<Light>           mLight;
     PoolAllocator<Scene>           mScene;
+    PoolAllocator<FrameBuffer>     mFrameBuffer;
+    PoolAllocator<Texture>         mTexture;
+    
     
     // Render support thread
     std::thread* renderThreadMain;

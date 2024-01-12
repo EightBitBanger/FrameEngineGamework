@@ -5,17 +5,18 @@
 
 #include <GameEngineFramework/Renderer/enumerators.h>
 #include <GameEngineFramework/Renderer/components/shader.h>
+#include <GameEngineFramework/Renderer/components/texture.h>
 
 
 class ENGINE_API Material {
     
 public:
     
-    /// Width of the texture.
-    unsigned int width;
+    /// Texture associated with this material.
+    Texture texture;
     
-    /// Height of the texture.
-    unsigned int height;
+    /// Shader used by this material for rendering.
+    Shader* shader;
     
     
     /// Ambient color for this material.
@@ -86,13 +87,6 @@ public:
     int blendFunction;
     
     
-    /// Interpolation filter type used during rendering.
-    int textureFiltration;
-    
-    /// Shader used by this material for rendering.
-    Shader* shader;
-    
-    
     /// Enable depth testing.
     void EnableDepthTest(void);
     
@@ -114,13 +108,6 @@ public:
     
     /// Set the winding direction for drawing triangles.
     void SetFaceWindingOrder(int direction);
-    
-    
-    /// Get texture filtration.
-    int GetTextureFiltration(void);
-    
-    /// Set texture filtration.
-    void SetTextureFiltration(int filtration);
     
     
     /// Enable blending.
@@ -164,29 +151,9 @@ public:
     void SetShadowStencilColor(Color color);
     
     
-    
-    /// Bind the material texture for rendering.
-    void Bind(void);
-    
-    /// Bind the texture slot for textured rendering.
-    void BindTextureSlot(unsigned int slot);
-    
-    /// Reupload the texture buffer onto the GPU.
-    void UpdateTextureBuffer(void* textureData);
-    
-    /// Generate mipmaps for the current texture.
-    void GenerateMipMaps(void);
-    
-    
     friend class RenderSystem;
     
     Material();
-    ~Material();
-    
-    
-private:
-    
-    unsigned int mTextureBuffer;
     
 };
 

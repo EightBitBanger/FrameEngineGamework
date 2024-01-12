@@ -14,6 +14,9 @@ struct ENGINE_API TextureTag {
     /// Is the resource loaded into memory.
     bool isLoaded;
     
+    /// Texture interpolation.
+    int filtration;
+    
     /// Width of the image in pixels.
     int width;
     /// Height of the image in pixels.
