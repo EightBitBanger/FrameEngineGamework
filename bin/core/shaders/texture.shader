@@ -11,7 +11,9 @@ uniform mat4 u_proj;
 uniform mat4 u_model;
 uniform mat4 u_shadow;
 uniform mat3 u_inv_model;
+
 uniform vec3 u_eye;
+uniform vec3 u_angle;
 
 varying vec2 v_coord;
 varying vec3 v_color;
