@@ -16,13 +16,13 @@ bool RenderSystem::BindMaterial(Material* materialPtr) {
     
     // Depth testing
     
-    if (mCurrentMaterial->doDepthTest) {
+    if (mCurrentMaterial->mDoDepthTest) {
         
         glEnable(GL_DEPTH_TEST);
         
-        glDepthMask(mCurrentMaterial->doDepthTest);
+        glDepthMask(mCurrentMaterial->mDoDepthTest);
         
-        glDepthFunc(mCurrentMaterial->depthFunc);
+        glDepthFunc(mCurrentMaterial->mDepthFunc);
         
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::Material::DepthTest::");
@@ -36,11 +36,11 @@ bool RenderSystem::BindMaterial(Material* materialPtr) {
     
     // Face culling and winding
     
-    if (mCurrentMaterial->doFaceCulling) {
+    if (mCurrentMaterial->mDoFaceCulling) {
         
         glEnable(GL_CULL_FACE);
         
-        glCullFace(mCurrentMaterial->faceCullSide);
+        glCullFace(mCurrentMaterial->mFaceCullSide);
         
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::Material::Culling::");
@@ -53,7 +53,7 @@ bool RenderSystem::BindMaterial(Material* materialPtr) {
     }
     
     // Face winding order
-    glFrontFace(mCurrentMaterial->faceWinding);
+    glFrontFace(mCurrentMaterial->mFaceWinding);
     
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::Material::FaceWinding::");
@@ -61,14 +61,14 @@ bool RenderSystem::BindMaterial(Material* materialPtr) {
     
     // Blending
     
-    if (mCurrentMaterial->doBlending) {
+    if (mCurrentMaterial->mDoBlending) {
         
         glEnable(GL_BLEND);
         
-        glBlendFuncSeparate(mCurrentMaterial->blendSource,
-                            mCurrentMaterial->blendDestination,
-                            mCurrentMaterial->blendAlphaSource,
-                            mCurrentMaterial->blendAlphaDestination);
+        glBlendFuncSeparate(mCurrentMaterial->mBlendSource,
+                            mCurrentMaterial->mBlendDestination,
+                            mCurrentMaterial->mBlendAlphaSource,
+                            mCurrentMaterial->mBlendAlphaDestination);
         
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::Material::Blending::");

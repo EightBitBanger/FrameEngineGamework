@@ -32,14 +32,14 @@ void Camera::EnableMouseLook(void)  {useMouseLook = true;}
 void Camera::DisableMouseLook(void) {useMouseLook = false;}
 
 float Camera::GetPitch(void) {
-    return glm::degrees( glm::asin( transform.localRotation.y ) );
+    return glm::degrees( glm::asin( transform.rotation.y ) );
 }
 
 float Camera::GetYaw(void) {
-    return glm::degrees( glm::acos( transform.localRotation.x / 
+    return glm::degrees( glm::acos( transform.rotation.x / 
                                cos( 
                       glm::radians( 
                       glm::degrees( 
-                         glm::asin( transform.localRotation.y ))))));
+                         glm::asin( transform.rotation.y ))))));
 }
 

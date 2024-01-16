@@ -36,11 +36,17 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         //forward.y = tan( glm::radians( -(mStreamBuffer[index].actor->mRotation.x - 90) ) );
         forward.z = sin( glm::radians( -(mStreamBuffer[index].actor->mRotation.y - 90) ) );
         
-        mStreamBuffer[index].actor->mVelocity = forward * (mStreamBuffer[index].actor->mSpeed * 0.1f) * 0.1f;
+        glm::vec3 actorVelocity = forward * (mStreamBuffer[index].actor->mSpeed * 0.1f) * 0.1f;
+        
+        mStreamBuffer[index].actor->mVelocity.x = actorVelocity.x;
+        mStreamBuffer[index].actor->mVelocity.z = actorVelocity.z;
+        
         
         // Check running speed multiplier
-        if (mStreamBuffer[index].actor->mIsRunning) 
-            mStreamBuffer[index].actor->mVelocity *= mStreamBuffer[index].actor->mSpeedMul;
+        if (mStreamBuffer[index].actor->mIsRunning) {
+            mStreamBuffer[index].actor->mVelocity.x *= mStreamBuffer[index].actor->mSpeedMul;
+            mStreamBuffer[index].actor->mVelocity.z *= mStreamBuffer[index].actor->mSpeedMul;
+        }
         
         // Get distance to target
         float targetDistance = glm::distance( mStreamBuffer[index].actor->mTargetPoint, 
@@ -144,8 +150,6 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
             newMaterial->diffuse.g = mStreamBuffer[index].actor->mGenes[a].color.y;
             newMaterial->diffuse.b = mStreamBuffer[index].actor->mGenes[a].color.z;
             
-            newMaterial->DisableShadowPass();
-            
             MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
             newRenderer->mesh = meshes.cube;
             newRenderer->material = newMaterial;
@@ -161,17 +165,17 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
             newRenderer->transform.RotateAxis( mStreamBuffer[index].actor->mGenes[a].rotation.z, glm::vec3(0, 0, 1) );
             
             // Scale
-            newRenderer->transform.localScale.x = mStreamBuffer[index].actor->mGenes[a].scale.x;
-            newRenderer->transform.localScale.y = mStreamBuffer[index].actor->mGenes[a].scale.y;
-            newRenderer->transform.localScale.z = mStreamBuffer[index].actor->mGenes[a].scale.z;
+            newRenderer->transform.scale.x = mStreamBuffer[index].actor->mGenes[a].scale.x;
+            newRenderer->transform.scale.y = mStreamBuffer[index].actor->mGenes[a].scale.y;
+            newRenderer->transform.scale.z = mStreamBuffer[index].actor->mGenes[a].scale.z;
             
             Transform transform;
             
             
-            glm::vec4 orientation(transform.localRotation.w, 
-                                  transform.localRotation.x, 
-                                  transform.localRotation.y, 
-                                  transform.localRotation.z);
+            glm::vec4 orientation(transform.rotation.w, 
+                                  transform.rotation.x, 
+                                  transform.rotation.y, 
+                                  transform.rotation.z);
             
             mStreamBuffer[index].actor->mGeneticRenderers.push_back( newRenderer );
             mStreamBuffer[index].actor->mAnimationStates .push_back( orientation );
@@ -222,7 +226,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
                                                    mStreamBuffer[index].actor->mGenes[a].position.y,
                                                    mStreamBuffer[index].actor->mGenes[a].position.z));
             
-            geneRenderer->transform.matrix = matrix * glm::scale(glm::mat4(1), geneRenderer->transform.localScale);
+            geneRenderer->transform.matrix = matrix * glm::scale(glm::mat4(1), geneRenderer->transform.scale);
             
             continue;
         }
@@ -329,8 +333,18 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         
         
         // Apply animation rotation state
+        float animationLength = glm::length( mStreamBuffer[index].actor->mAnimationStates[a] );
+        
+        // Cannot be zero when rotating
+        if (mStreamBuffer[index].actor->mAnimationStates[a].x == 0) 
+            mStreamBuffer[index].actor->mAnimationStates[a].x += 0.0001f;
+        if (mStreamBuffer[index].actor->mAnimationStates[a].y == 0) 
+            mStreamBuffer[index].actor->mAnimationStates[a].y += 0.0001f;
+        if (mStreamBuffer[index].actor->mAnimationStates[a].z == 0) 
+            mStreamBuffer[index].actor->mAnimationStates[a].z += 0.0001f;
+        
         matrix = glm::rotate(matrix, 
-                             glm::radians( glm::length( mStreamBuffer[index].actor->mAnimationStates[a] ) ), 
+                             glm::radians( animationLength ), 
                              glm::normalize( glm::vec3(mStreamBuffer[index].actor->mAnimationStates[a].x, 
                                                        mStreamBuffer[index].actor->mAnimationStates[a].y, 
                                                        mStreamBuffer[index].actor->mAnimationStates[a].z) ));
@@ -340,7 +354,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
                                                    mStreamBuffer[index].actor->mGenes[a].position.y,
                                                    mStreamBuffer[index].actor->mGenes[a].position.z));
         
-        geneRenderer->transform.matrix = matrix * glm::scale(glm::mat4(1), geneRenderer->transform.localScale);
+        geneRenderer->transform.matrix = matrix * glm::scale(glm::mat4(1), geneRenderer->transform.scale);
         
         continue;
     }
@@ -354,7 +368,6 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     
     glm::vec3 actorPosition = mStreamBuffer[index].actor->mPosition;
     glm::vec3 actorRotation = mStreamBuffer[index].actor->mRotation;
-    glm::vec3 actorVelocity = mStreamBuffer[index].actor->mVelocity;
     
     // Raycast here
     glm::vec3 from      = actorPosition;
@@ -364,6 +377,8 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     Hit hit;
     
     float distance = 2;
+    
+    bool isFalling = false;
     
     // Move the actor out of the way since we cant cast a ray from inside the collider...
     rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
@@ -375,13 +390,14 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     // Check not on ground
     if (!Physics.Raycast(from, direction, distance, hit)) {
         
-        // Apply "gravity"
-        actorVelocity.y -= 0.01;
-        
+        // Apply some falling action
+        mStreamBuffer[index].actor->mVelocity.y -= 0.01;
         
         // Terminal velocity
-        if (actorVelocity.y < -1) 
-            actorVelocity.y = -1;
+        if (mStreamBuffer[index].actor->mVelocity.y < -1) 
+            mStreamBuffer[index].actor->mVelocity.y = -1;
+        
+        isFalling = true;
         
     } else {
         
@@ -389,7 +405,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         actorPosition.y   = hit.point.y;
         currentPosition.y = hit.point.y + 100;
         
-        actorVelocity.y = 0;
+        mStreamBuffer[index].actor->mVelocity.y = 0;
         
     }
     
@@ -399,12 +415,13 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     mStreamBuffer[index].rigidBody->setTransform(transform);
     
     // Apply force velocity
-    mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, actorVelocity.y, actorVelocity.z) );
+    mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(mStreamBuffer[index].actor->mVelocity.x, 
+                                                                                 mStreamBuffer[index].actor->mVelocity.y, 
+                                                                                 mStreamBuffer[index].actor->mVelocity.z) );
     
     // Sync actor position
     mStreamBuffer[index].actor->mPosition = mStreamBuffer[index].transform->position;
     mStreamBuffer[index].actor->mRotation = actorRotation;
-    mStreamBuffer[index].actor->mVelocity = actorVelocity;
     
     return;
 }

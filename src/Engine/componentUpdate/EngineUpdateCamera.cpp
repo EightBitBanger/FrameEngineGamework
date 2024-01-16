@@ -53,8 +53,8 @@ void EngineSystemManager::UpdateCamera(unsigned int index) {
     }
     
     // Restore looking angle
-    mStreamBuffer[index].camera->transform.localRotation.x = mStreamBuffer[index].camera->lookAngle.x;
-    mStreamBuffer[index].camera->transform.localRotation.y = mStreamBuffer[index].camera->lookAngle.y;
+    mStreamBuffer[index].camera->transform.rotation.x = mStreamBuffer[index].camera->lookAngle.x;
+    mStreamBuffer[index].camera->transform.rotation.y = mStreamBuffer[index].camera->lookAngle.y;
     
     // Check camera panel
     if (mStreamBuffer[index].panel != nullptr) {

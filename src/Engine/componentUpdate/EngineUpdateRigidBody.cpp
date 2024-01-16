@@ -35,10 +35,10 @@ void EngineSystemManager::UpdateRigidBody(unsigned int index) {
                                                          bodyPosition.y, 
                                                          bodyPosition.z);
     
-    mStreamBuffer[index].transform->localRotation = glm::quat(quaterion.w, 
-                                                              quaterion.x, 
-                                                              quaterion.y, 
-                                                              quaterion.z);
+    mStreamBuffer[index].transform->rotation = glm::quat(quaterion.w, 
+                                                         quaterion.x, 
+                                                         quaterion.y, 
+                                                         quaterion.z);
     
     return;
 }

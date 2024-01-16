@@ -118,7 +118,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     skyMaterial->shader = shaders.color;
     
     skyMaterial->DisableDepthTest();
-    skyMaterial->DisableShadowPass();
+    skyMaterial->DisableShadowVolumePass();
     
     for (unsigned int i=0; i < skyMesh->GetNumberOfVertices(); i++) {
         Vertex vertex = skyMesh->GetVertex(i);
@@ -174,6 +174,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     
     overlayObject->mTransformCache->RotateAxis(-180, Vector3(0, 1, 0));
     overlayObject->mTransformCache->RotateAxis( -90, Vector3(0, 0, 1));
+    overlayObject->mTransformCache->inheritParentRotation = false;
     
     Mesh*     overlayMesh     = Create<Mesh>();
     Material* overlayMaterial = Create<Material>();
@@ -183,7 +184,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     
     overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
     overlayMaterial->DisableCulling();
-    overlayMaterial->DisableShadowPass();
+    overlayMaterial->DisableShadowVolumePass();
     
     overlayObject->AddComponent( CreateComponent<MeshRenderer>(overlayMesh, overlayMaterial) );
     
@@ -201,7 +202,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     textElement->color = color;
     textElement->size = textSize;
     
-    overlayObject->mTransformCache->localScale = Vector3(textSize, 1, textSize);
+    overlayObject->mTransformCache->scale = Vector3(textSize, 1, textSize);
     
     textElement->canvas.x = x;
     textElement->canvas.y = y;
@@ -220,7 +221,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     overlayRenderer->material->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
     
     overlayRenderer->material->DisableCulling();
-    overlayRenderer->material->DisableShadowPass();
+    overlayRenderer->material->DisableShadowVolumePass();
     
     mDoUpdateDataStream = true;
     return overlayObject;
@@ -253,7 +254,7 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     overlayMaterial->SetDepthFunction(MATERIAL_DEPTH_ALWAYS);
     
     overlayMaterial->DisableCulling();
-    overlayMaterial->DisableShadowPass();
+    overlayMaterial->DisableShadowVolumePass();
     
     overlayMesh->AddPlain(0, 0, 0, height, width, Colors.white, 1, 1);
     

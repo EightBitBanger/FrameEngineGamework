@@ -7,137 +7,137 @@
 Material::Material() : 
     shader(nullptr),
     
-    doDepthTest(true),
-    doBlending(false),
-    doFaceCulling(true),
-    doShadowPass(true),
+    mDoDepthTest   (true),
+    mDoBlending    (false),
+    mDoFaceCulling (true),
+    mDoShadowPass  (false),
     
-    shadowStencilLength(5),
+    mShadowVolumeLength(5),
     
-    shadowStencilIntensityLow(0),
-    shadowStencilIntensityHigh(1),
+    mShadowVolumeIntensityLow(0),
+    mShadowVolumeIntensityHigh(1),
     
-    shadowStencilColorIntensity(0),
-    shadowStencilAngleOfView(0),
+    mShadowVolumeColorIntensity(0),
+    mShadowVolumeAngleOfView(0),
     
-    depthFunc(MATERIAL_DEPTH_LESS),
+    mDepthFunc(MATERIAL_DEPTH_LESS),
     
-    faceWinding(GL_CCW),
-    faceCullSide(GL_BACK),
+    mFaceWinding(GL_CCW),
+    mFaceCullSide(GL_BACK),
     
-    blendSource(BLEND_SRC_COLOR),
-    blendDestination(BLEND_SRC_ALPHA),
-    blendAlphaSource(BLEND_ONE_MINUS_SRC_COLOR),
-    blendAlphaDestination(BLEND_ONE_MINUS_SRC_ALPHA),
-    blendFunction(BLEND_EQUATION_ADD)
+    mBlendSource(BLEND_SRC_COLOR),
+    mBlendDestination(BLEND_SRC_ALPHA),
+    mBlendAlphaSource(BLEND_ONE_MINUS_SRC_COLOR),
+    mBlendAlphaDestination(BLEND_ONE_MINUS_SRC_ALPHA),
+    mBlendFunction(BLEND_EQUATION_ADD)
 {
     ambient = Color(0, 0, 0, 1);
     diffuse = Color(1, 1, 1, 1);
     specular = Color(0, 0, 0, 1);
-    shadowStencilColor = Color(1, 1, 1);
+    mShadowVolumeColor = Color(1, 1, 1);
     
     return;
 }
 
 void Material::EnableDepthTest(void) {
-    doDepthTest = true;
+    mDoDepthTest = true;
     return;
 }
 
 void Material::DisableDepthTest(void) {
-    doDepthTest = false;
+    mDoDepthTest = false;
     return;
 }
 
 void Material::SetDepthFunction(GLint func) {
-    depthFunc = func;
+    mDepthFunc = func;
     return;
 }
 
 void Material::EnableCulling(void) {
-    doFaceCulling = true;
+    mDoFaceCulling = true;
     return;
 }
 
 void Material::DisableCulling(void) {
-    doFaceCulling = false;
+    mDoFaceCulling = false;
     return;
 }
 
 void Material::SetFaceCullingSide(GLint side) {
-    faceCullSide = side;
+    mFaceCullSide = side;
     return;
 }
 
 void Material::SetFaceWindingOrder(GLint direction) {
-    faceWinding = direction;
+    mFaceWinding = direction;
     return;
 }
 
 void Material::EnableBlending(void) {
-    doBlending = true;
+    mDoBlending = true;
     return;
 }
 
 void Material::DisableBlending(void) {
-    doBlending = false;
+    mDoBlending = false;
     return;
 }
 
 void Material::SetBlending(GLint src, GLint dest)  {
-    blendSource = src;
-    blendDestination = dest;
+    mBlendSource = src;
+    mBlendDestination = dest;
     return;
 }
 
 void Material::SetBlendingAlpha(GLint srca, GLint desta) {
-    blendAlphaSource = srca;
-    blendAlphaDestination = desta;
+    mBlendAlphaSource = srca;
+    mBlendAlphaDestination = desta;
     return;
 }
 
 void Material::SetBlendingFunction(GLint func) {
-    blendFunction = func;
+    mBlendFunction = func;
     return;
 }
 
-void Material::EnableShadowPass(void) {
-    doShadowPass = true;
+void Material::EnableShadowVolumePass(void) {
+    mDoShadowPass = true;
     return;
 }
 
-void Material::DisableShadowPass(void) {
-    doShadowPass = false;
+void Material::DisableShadowVolumePass(void) {
+    mDoShadowPass = false;
     return;
 }
 
-void Material::SetShadowStencilLength(float length) {
-    shadowStencilLength = length;
+void Material::SetShadowVolumeLength(float length) {
+    mShadowVolumeLength = length;
     return;
 }
 
-void Material::SetShadowStencilIntensityLow(float intensity) {
-    shadowStencilIntensityLow = intensity;
+void Material::SetShadowVolumeIntensityLow(float intensity) {
+    mShadowVolumeIntensityLow = intensity;
     return;
 }
 
-void Material::SetShadowStencilIntensityHigh(float intensity) {
-    shadowStencilIntensityHigh = intensity;
+void Material::SetShadowVolumeIntensityHigh(float intensity) {
+    mShadowVolumeIntensityHigh = intensity;
     return;
 }
 
-void Material::SetShadowStencilColorIntensity(float intensity) {
-    shadowStencilColorIntensity = intensity;
+void Material::SetShadowVolumeColorIntensity(float intensity) {
+    mShadowVolumeColorIntensity = intensity;
     return;
 }
 
-void Material::SetShadowStencilAngleOfView(float angle) {
-    shadowStencilAngleOfView = angle;
+void Material::SetShadowVolumeAngleOfView(float angle) {
+    mShadowVolumeAngleOfView = angle;
     return;
 }
 
-void Material::SetShadowStencilColor(Color color) {
-    shadowStencilColor = color;
+void Material::SetShadowVolumeColor(Color color) {
+    mShadowVolumeColor = color;
     return;
 }
 

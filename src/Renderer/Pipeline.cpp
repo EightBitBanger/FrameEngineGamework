@@ -112,7 +112,7 @@ void RenderSystem::RenderFrame(void) {
                     
                     MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
                     
-                    if (!currentEntity->material->doShadowPass)
+                    if (!currentEntity->material->mDoShadowPass)
                         continue;
                     
                     // Calculate shadow distance
@@ -121,7 +121,7 @@ void RenderSystem::RenderFrame(void) {
                     if (shadowDistance > mShadowDistance) 
                         continue;
                     
-                    ShadowPass( currentEntity, eye, scenePtr->camera->forward, viewProjection );
+                    ShadowVolumePass( currentEntity, eye, scenePtr->camera->forward, viewProjection );
                     
                     continue;
                 }
