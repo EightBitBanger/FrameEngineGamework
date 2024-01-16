@@ -106,6 +106,8 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Renderer/components/scene.h"
     "include/GameEngineFramework/Renderer/components/light.h"
     "include/GameEngineFramework/Renderer/components/shader.h"
+    "include/GameEngineFramework/Renderer/components/texture.h"
+    "include/GameEngineFramework/Renderer/components/framebuffer.h"
     
     "include/GameEngineFramework/Resources/FileLoader.h"
     "include/GameEngineFramework/Resources/FileSystem.h"
@@ -250,6 +252,8 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Renderer/components/scene.h"
     "include/GameEngineFramework/Renderer/components/light.h"
     "include/GameEngineFramework/Renderer/components/shader.h"
+    "include/GameEngineFramework/Renderer/components/texture.h"
+    "include/GameEngineFramework/Renderer/components/framebuffer.h"
     
     "include/GameEngineFramework/Resources/FileLoader.h"
     "include/GameEngineFramework/Resources/FileSystem.h"
@@ -379,6 +383,8 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Renderer/components/scene.h"
     "include/GameEngineFramework/Renderer/components/light.h"
     "include/GameEngineFramework/Renderer/components/shader.h"
+    "include/GameEngineFramework/Renderer/components/texture.h"
+    "include/GameEngineFramework/Renderer/components/framebuffer.h"
     
     "include/GameEngineFramework/Resources/FileLoader.h"
     "include/GameEngineFramework/Resources/FileSystem.h"
@@ -463,6 +469,8 @@ set (CORE_SOURCES
     "src/Renderer/components/scene.cpp"
     "src/Renderer/components/light.cpp"
     "src/Renderer/components/shader.cpp"
+    "src/Renderer/components/texture.cpp"
+    "src/Renderer/components/framebuffer.cpp"
     
     "src/Renderer/pipeline/accumulateLights.cpp"
     "src/Renderer/pipeline/setCamera.cpp"
@@ -472,7 +480,7 @@ set (CORE_SOURCES
     "src/Renderer/pipeline/shaderBinding.cpp"
     
     "src/Renderer/pipeline/passGeometry.cpp"
-    "src/Renderer/pipeline/passShadow.cpp"
+    "src/Renderer/pipeline/passShadowVolume.cpp"
     "src/Renderer/pipeline/passSorting.cpp"
     
     "src/Resources/FileLoader.cpp"

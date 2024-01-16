@@ -30,7 +30,7 @@
 // Profiling
 //
 
-//#define PROFILE_ENGINE_CORE
+#define PROFILE_ENGINE_CORE
 
 
 
@@ -38,7 +38,7 @@
 // Event log
 //
 
-//#define  EVENT_LOG_DETAILED
+#define  EVENT_LOG_DETAILED
 
 
 
@@ -72,7 +72,7 @@
 // Unit testing
 //
 
-//#define RUN_UNIT_TESTS
+#define RUN_UNIT_TESTS
 
 
 

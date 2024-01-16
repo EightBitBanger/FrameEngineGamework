@@ -29,64 +29,6 @@ public:
     Color specular;
     
     
-    /// Should depth testing be preformed during rendering.
-    bool doDepthTest;
-    
-    /// Should this material be alpha blended with the scene.
-    bool doBlending;
-    
-    /// Should the back side of faces be rendered.
-    bool doFaceCulling;
-    
-    /// Should a shadow pass be rendered with this material.
-    bool doShadowPass;
-    
-    
-    /// Shadow stencil cast length.
-    float shadowStencilLength;
-    
-    /// Shadow stencil intensity low.
-    float shadowStencilIntensityLow;
-    
-    /// Shadow stencil intensity high.
-    float shadowStencilIntensityHigh;
-    
-    /// Shadow stencil color intensity multiplier.
-    float shadowStencilColorIntensity;
-    
-    /// Shadow stencil visible angle.
-    float shadowStencilAngleOfView;
-    
-    /// Shadow stencil color.
-    Color shadowStencilColor;
-    
-    
-    /// Depth function used for rendering with the depth buffer.
-    int depthFunc;
-    
-    /// The direction in which the triangles will be rendered.
-    int faceWinding;
-    
-    /// The side of the triangle to skip drawing.
-    int faceCullSide;
-    
-    
-    /// Blending source.
-    int blendSource;
-    
-    /// Blending destination.
-    int blendDestination;
-    
-    /// The alpha blend source.
-    int blendAlphaSource;
-    
-    /// The alpha blend destination.
-    int blendAlphaDestination;
-    
-    /// The function used to blend colors.
-    int blendFunction;
-    
-    
     /// Enable depth testing.
     void EnableDepthTest(void);
     
@@ -126,34 +68,94 @@ public:
     void SetBlendingFunction(int func);
     
     
-    /// Enable the shadow pass.
-    void EnableShadowPass(void);
+    /// Enable the shadow volume pass.
+    void EnableShadowVolumePass(void);
     
-    /// Disable the shadow pass.
-    void DisableShadowPass(void);
+    /// Disable the shadow volume pass.
+    void DisableShadowVolumePass(void);
     
-    /// Set the length of the shadow stencil.
-    void SetShadowStencilLength(float length);
+    /// Set the length of the shadow volume.
+    void SetShadowVolumeLength(float length);
     
-    /// Set the intensity of the alpha blend for the shadow stencil at the tail end of the stencil trail.
-    void SetShadowStencilIntensityLow(float intensity);
+    /// Set the intensity of the alpha blending for the shadow volume at the tail end of the volume trail.
+    void SetShadowVolumeIntensityLow(float intensity);
     
-    /// Set the intensity of the alpha blend for the shadow stencil at the head end of the stencil trail.
-    void SetShadowStencilIntensityHigh(float intensity);
+    /// Set the intensity of the alpha blend for the shadow volume at the head end of the volume trail.
+    void SetShadowVolumeIntensityHigh(float intensity);
     
-    /// Set the intensity of the color for the shadow stencil.
-    void SetShadowStencilColorIntensity(float intensity);
+    /// Set the intensity of the color for the shadow volume.
+    void SetShadowVolumeColorIntensity(float intensity);
     
-    /// Set the visible angle to render the shadow stencil.
-    void SetShadowStencilAngleOfView(float angle);
+    /// Set the visible angle within which the shadow volume will be rendered.
+    void SetShadowVolumeAngleOfView(float angle);
     
-    /// Set the color modifier of the shadow stencil.
-    void SetShadowStencilColor(Color color);
+    /// Set the color modifier of the shadow volume.
+    void SetShadowVolumeColor(Color color);
     
     
     friend class RenderSystem;
     
     Material();
+    
+    
+private:
+    
+    // Should depth testing be preformed during rendering.
+    bool mDoDepthTest;
+    
+    // Should this material be alpha blended with the scene.
+    bool mDoBlending;
+    
+    // Should the back side of faces be rendered.
+    bool mDoFaceCulling;
+    
+    // Should a shadow pass be rendered with this material.
+    bool mDoShadowPass;
+    
+    
+    // Shadow stencil cast length.
+    float mShadowVolumeLength;
+    
+    // Shadow stencil intensity low.
+    float mShadowVolumeIntensityLow;
+    
+    // Shadow stencil intensity high.
+    float mShadowVolumeIntensityHigh;
+    
+    // Shadow stencil color intensity multiplier.
+    float mShadowVolumeColorIntensity;
+    
+    // Shadow stencil visible angle.
+    float mShadowVolumeAngleOfView;
+    
+    // Shadow stencil color.
+    Color mShadowVolumeColor;
+    
+    
+    // Depth function used for rendering with the depth buffer.
+    int mDepthFunc;
+    
+    // The direction in which the triangles will be rendered.
+    int mFaceWinding;
+    
+    // The side of the triangle to skip drawing.
+    int mFaceCullSide;
+    
+    
+    // Blending source.
+    int mBlendSource;
+    
+    // Blending destination.
+    int mBlendDestination;
+    
+    // The alpha blend source.
+    int mBlendAlphaSource;
+    
+    // The alpha blend destination.
+    int mBlendAlphaDestination;
+    
+    // The function used to blend colors.
+    int mBlendFunction;
     
 };
 
