@@ -1,8 +1,13 @@
 ## Features
-- Render system - General purpose openGL renderer.
+- Render system
+  - Simple textured mesh renderer.
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
-- ActorAI - Neural network and genetics based actor system.
+- ActorAI
+  - Genetics based physical appearance system
+  - Neural network / state machine hybrid
 - Resource management
+  - Image: PNG BMP
+  - Models: OBJ
 - Multithreading
 
 
