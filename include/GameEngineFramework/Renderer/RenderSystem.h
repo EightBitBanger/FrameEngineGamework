@@ -166,7 +166,7 @@ public:
     friend class EngineSystemManager;
     
     
-private:
+public:
     
     // Draw call counter
     unsigned int mNumberOfDrawCalls;
@@ -197,14 +197,14 @@ private:
     glm::vec4    mLightAttenuation [RENDER_NUMBER_OF_LIGHTS];
     glm::vec3    mLightColor       [RENDER_NUMBER_OF_LIGHTS];
     
-    // Shadow lights
+    // Shadow list
     unsigned int mNumberOfShadows=0;
     glm::vec3    mShadowPosition    [RENDER_NUMBER_OF_SHADOWS];
     glm::vec3    mShadowDirection   [RENDER_NUMBER_OF_SHADOWS];
     glm::vec4    mShadowAttenuation [RENDER_NUMBER_OF_SHADOWS];
     glm::vec3    mShadowColor       [RENDER_NUMBER_OF_SHADOWS];
     
-    // Shadows
+    // Shadows parameters
     float        mShadowDistance;
     Transform    mShadowTransform;
     
@@ -219,17 +219,23 @@ private:
     PoolAllocator<FrameBuffer>     mFrameBuffer;
     PoolAllocator<Texture>         mTexture;
     
+    // TODO: Sorting and other non openGL related render functions could be threaded out here
     
     // Render support thread
     std::thread* renderThreadMain;
     
     
+    //
     // Render pipeline
+    //
     
+    // Set the camera with which the renderer will draw the frame
     bool setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::mat4& viewProjection);
     
+    // Gather a list of active lights for rendering
     unsigned int accumulateSceneLights(Scene* currentScene, glm::vec3 eye);
     
+    // Asset binding
     
     bool BindMesh(Mesh* meshPtr);
     

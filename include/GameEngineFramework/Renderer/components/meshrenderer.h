@@ -11,6 +11,9 @@ class ENGINE_API MeshRenderer {
     
 public:
     
+    /// Should this renderer be included in the scene.
+    bool isActive;
+    
     /// Pointer to the mesh component.
     Mesh* mesh;
     

@@ -1,6 +1,8 @@
 #ifndef _ACTOR_AI_SYSTEM__
 #define _ACTOR_AI_SYSTEM__
 
+#include <GameEngineFramework/ActorAI/ActorStates.h>
+
 #include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
 #include <GameEngineFramework/ActorAI/neurons/NeuralLayer.h>
@@ -42,6 +44,10 @@ public:
     void UpdateSendSignal(void);
     
     
+    /// Set the update distance from the camera position.
+    void SetActorUpdateDistance(float distance);
+    
+    
     /// Initiate the actor AI system. (called internally)
     void Initiate(void);
     
@@ -55,6 +61,10 @@ private:
     
     // Current position of the player in the world
     glm::vec3 mPlayerPosition;
+    
+    // Distance beyond which the actors will no longer update
+    float mActorUpdateDistance;
+    
     
     // Threading
     std::thread* mActorSystemThread;

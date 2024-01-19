@@ -1,6 +1,8 @@
 #ifndef _AI_ACTOR__
 #define _AI_ACTOR__
 
+#include <GameEngineFramework/ActorAI/ActorStates.h>
+
 #include <GameEngineFramework/ActorAI/Genetics/Gene.h>
 #include <GameEngineFramework/ActorAI/neurons/NeuralLayer.h>
 #include <GameEngineFramework/ActorAI/neurons/WeightedLayer.h>
@@ -125,7 +127,7 @@ private:
     unsigned long int mAge;
     
     
-    // Max speed this actor can travel
+    // Maximum speed this actor can travel
     float mSpeed;
     
     // Running speed multiplier
@@ -150,12 +152,23 @@ private:
     // World target point toward which the actor should face
     glm::vec3 mTargetPoint;
     
+    // Distance to the player
+    float mDistance;
+    
+    //
+    // States
     
     // Is this actor active in the simulation
     bool mIsActive;
     
     // Should the genetic data be re-expressed
     bool mDoUpdateGenetics;
+    
+    
+    
+    // TODO: Replace these bool states with an int containing the actor state.
+    
+    
     
     // Is the actor walking
     bool mIsWalking;
@@ -169,7 +182,7 @@ private:
 	// Is the actor fleeing from a predator
 	bool mIsFleeing;
 	
-	// Is the actor consuming
+	// Is the actor consuming a food source
 	bool mIsConsuming;
 	
 	// Should the actor face toward or away from the target point
@@ -216,7 +229,7 @@ private:
     unsigned int mObservationCoolDownCounter;
     
     
-    // List of actor names considered to be pray
+    // List of actor names considered to be pray actors
     std::vector<std::string> mAttackActors;
     
     // List of actor names considered to be predator actors
