@@ -56,6 +56,7 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Audio/AudioSystem.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
+    "include/GameEngineFramework/ActorAI/ActorStates.h"
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
@@ -201,6 +202,7 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Audio/AudioSystem.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
+    "include/GameEngineFramework/ActorAI/ActorStates.h"
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
@@ -332,6 +334,7 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Audio/AudioSystem.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
+    "include/GameEngineFramework/ActorAI/ActorStates.h"
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"

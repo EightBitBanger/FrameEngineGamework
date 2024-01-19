@@ -46,10 +46,14 @@ bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     mCurrentShader->SetCameraPosition(eye);
     mCurrentShader->SetCameraAngle(cameraAngle);
     
-    // Set the material and texture
+    // Set the material
     mCurrentShader->SetMaterialAmbient(mCurrentMaterial->ambient);
     mCurrentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
     mCurrentShader->SetMaterialSpecular(mCurrentMaterial->specular);
+    
+    // Render the geometry
+    currentEntity->mesh->DrawIndexArray();
+    mNumberOfDrawCalls++;
     
     return true;
 }

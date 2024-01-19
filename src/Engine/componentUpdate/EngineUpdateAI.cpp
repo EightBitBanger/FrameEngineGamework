@@ -26,6 +26,19 @@ ENGINE_API extern EngineSystemManager   Engine;
 
 void EngineSystemManager::UpdateActor(unsigned int index) {
     
+    if (!mStreamBuffer[index].actor->mIsActive) {
+        
+        for (unsigned int a=0; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
+            
+            MeshRenderer* geneRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
+            
+            geneRenderer->isActive = false;
+            
+        }
+        
+        return;
+    }
+    
     // Check walking state
     if (mStreamBuffer[index].actor->mIsWalking) {
         
@@ -189,6 +202,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         
     }
     
+    
     //
     // Update animations
     //
@@ -196,13 +210,17 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     for (unsigned int a=0; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
         
         MeshRenderer* geneRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
-        geneRenderer->transform.position  = mStreamBuffer[index].actor->mPosition;
+        
+        geneRenderer->isActive = true;
+        
+        geneRenderer->transform.position = mStreamBuffer[index].actor->mPosition;
         
         // Initiate the transform
         glm::mat4 matrix = glm::translate(glm::mat4(1), geneRenderer->transform.position);
         
         // Rotate around center mass
         float orientationCenterMass = glm::length( mStreamBuffer[index].actor->mRotation );
+        
         if (orientationCenterMass > 0) {
             
             matrix = glm::rotate(matrix, 
@@ -213,8 +231,8 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         
         // Offset from center
         matrix = glm::translate( matrix, glm::vec3(mStreamBuffer[index].actor->mGenes[a].offset.x,
-                                                   mStreamBuffer[index].actor->mGenes[a].offset.y,
-                                                   mStreamBuffer[index].actor->mGenes[a].offset.z));
+                                                mStreamBuffer[index].actor->mGenes[a].offset.y,
+                                                mStreamBuffer[index].actor->mGenes[a].offset.z));
         
         //
         // Update animation
@@ -223,8 +241,8 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         if ((!mStreamBuffer[index].actor->mGenes[a].doAnimationCycle) | (!mStreamBuffer[index].actor->mIsWalking)) {
             
             matrix = glm::translate( matrix, glm::vec3(mStreamBuffer[index].actor->mGenes[a].position.x,
-                                                   mStreamBuffer[index].actor->mGenes[a].position.y,
-                                                   mStreamBuffer[index].actor->mGenes[a].position.z));
+                                                mStreamBuffer[index].actor->mGenes[a].position.y,
+                                                mStreamBuffer[index].actor->mGenes[a].position.z));
             
             geneRenderer->transform.matrix = matrix * glm::scale(glm::mat4(1), geneRenderer->transform.scale);
             
@@ -233,9 +251,9 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         
         // Rotate current animation state
         glm::vec4 animationFactor(mStreamBuffer[index].actor->mGenes[a].animationAxis.x, 
-                                  mStreamBuffer[index].actor->mGenes[a].animationAxis.y, 
-                                  mStreamBuffer[index].actor->mGenes[a].animationAxis.z, 
-                                  0);
+                                mStreamBuffer[index].actor->mGenes[a].animationAxis.y, 
+                                mStreamBuffer[index].actor->mGenes[a].animationAxis.z, 
+                                0);
         
         animationFactor = glm::normalize(animationFactor);
         
@@ -344,20 +362,22 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
             mStreamBuffer[index].actor->mAnimationStates[a].z += 0.0001f;
         
         matrix = glm::rotate(matrix, 
-                             glm::radians( animationLength ), 
-                             glm::normalize( glm::vec3(mStreamBuffer[index].actor->mAnimationStates[a].x, 
-                                                       mStreamBuffer[index].actor->mAnimationStates[a].y, 
-                                                       mStreamBuffer[index].actor->mAnimationStates[a].z) ));
+                            glm::radians( animationLength ), 
+                            glm::normalize( glm::vec3(mStreamBuffer[index].actor->mAnimationStates[a].x, 
+                                                    mStreamBuffer[index].actor->mAnimationStates[a].y, 
+                                                    mStreamBuffer[index].actor->mAnimationStates[a].z) ));
         
         // Final position after animation rotation
         matrix = glm::translate( matrix, glm::vec3(mStreamBuffer[index].actor->mGenes[a].position.x,
-                                                   mStreamBuffer[index].actor->mGenes[a].position.y,
-                                                   mStreamBuffer[index].actor->mGenes[a].position.z));
+                                                mStreamBuffer[index].actor->mGenes[a].position.y,
+                                                mStreamBuffer[index].actor->mGenes[a].position.z));
         
         geneRenderer->transform.matrix = matrix * glm::scale(glm::mat4(1), geneRenderer->transform.scale);
         
         continue;
     }
+    
+    
     
     //
     // Update actor physics
@@ -369,7 +389,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     glm::vec3 actorPosition = mStreamBuffer[index].actor->mPosition;
     glm::vec3 actorRotation = mStreamBuffer[index].actor->mRotation;
     
-    // Raycast here
+    // Ray cast here
     glm::vec3 from      = actorPosition;
     glm::vec3 direction = glm::vec3(0, -1, 0);
     from.y += 0.5;

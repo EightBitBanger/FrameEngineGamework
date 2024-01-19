@@ -2,6 +2,7 @@
 
 
 MeshRenderer::MeshRenderer() : 
+    isActive(true),
     mesh(nullptr),
     material(nullptr)
 {

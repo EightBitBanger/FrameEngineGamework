@@ -91,8 +91,7 @@ void EngineSystemManager::Update(void) {
         
         // Actors
         if (mStreamBuffer[i].actor != nullptr) 
-            if (mStreamBuffer[i].actor->mIsActive) 
-                UpdateActor(i);
+            UpdateActor(i);
         
         // Lights
         if (mStreamBuffer[i].light != nullptr) 

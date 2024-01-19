@@ -90,12 +90,10 @@ void RenderSystem::RenderFrame(void) {
                 
                 MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
                 
+                if (!currentEntity->isActive) 
+                    continue;
+                
                 GeometryPass( currentEntity, eye, scenePtr->camera->forward, viewProjection );
-                
-                
-                // Render the geometry
-                currentEntity->mesh->DrawIndexArray();
-                mNumberOfDrawCalls++;
                 
                 continue;
             }
@@ -112,13 +110,7 @@ void RenderSystem::RenderFrame(void) {
                     
                     MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
                     
-                    if (!currentEntity->material->mDoShadowPass)
-                        continue;
-                    
-                    // Calculate shadow distance
-                    float shadowDistance = glm::distance( eye, currentEntity->transform.position );
-                    
-                    if (shadowDistance > mShadowDistance) 
+                    if (!currentEntity->isActive) 
                         continue;
                     
                     ShadowVolumePass( currentEntity, eye, scenePtr->camera->forward, viewProjection );
@@ -138,7 +130,7 @@ void RenderSystem::RenderFrame(void) {
     
     
     //
-    // Light halo effect
+    // Light halo effect ???
     /*
     if (mNumberOfLights > 0) {
         

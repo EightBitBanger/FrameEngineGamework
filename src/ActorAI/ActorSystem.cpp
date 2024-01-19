@@ -16,7 +16,8 @@ int actorCounter=0;
 
 
 ActorSystem::ActorSystem() : 
-    mPlayerPosition(0)
+    mPlayerPosition(0),
+    mActorUpdateDistance(300)
 {
 }
 
@@ -90,6 +91,14 @@ Actor* ActorSystem::GetActor(unsigned int index) {
 }
 
 
+void ActorSystem::SetActorUpdateDistance(float distance) {
+    mux.lock();
+    mActorUpdateDistance = distance;
+    mux.unlock();
+    return;
+}
+
+
 //
 // AI actor processing
 //
@@ -112,6 +121,8 @@ void ActorSystem::Update(void) {
         Actor* actor = mActors[actorCounter];
         
         actorCounter++;
+        
+        
         
         actor->mux.lock();
         
@@ -157,6 +168,18 @@ void ActorSystem::Update(void) {
         
         */
         
+        actor->mDistance = glm::distance( mPlayerPosition, actor->mPosition );
+        
+        if (actor->mDistance > mActorUpdateDistance) {
+            
+            actor->mIsActive = false;
+            
+        } else {
+            
+            actor->mIsActive = true;
+            
+        }
+        
         
         if (!actor->mIsActive) {
             actor->mux.unlock();
@@ -167,10 +190,43 @@ void ActorSystem::Update(void) {
         actor->mAge++;
         
         
-        
-        if ((Random.Range(0, 1000) < actor->mChanceToWalk)) {
+        // Chance to start walking
+        if ((Random.Range(0, 1000) < actor->mChanceToWalk)) 
             actor->mIsWalking = true;
-            actor->mRotateTo.y = Random.Range(0, 360);
+        
+        // Cool down after a change in direction
+        if (actor->mReorientationCoolDownCounter < 10) {
+            
+            actor->mReorientationCoolDownCounter++;
+            
+            actor->mIsWalking = false;
+            
+        }
+            
+        
+        // Chance to focus on a near by actor or player
+        if ((Random.Range(0, 1000) < actor->mChanceToFocusOnActor)) {
+            
+            // Distance to focus on player
+            if (actor->mDistance < actor->mDistanceToFocusOnActor) {
+                
+                // Focus on player position
+                actor->mTargetPoint = mPlayerPosition;
+                
+                actor->mReorientationCoolDownCounter = 0;
+                
+                actor->mIsWalking = false;
+                
+                actor->mIsRunning = false;
+                
+            } else {
+                
+                // TODO: Focus on nearby actor. Probably islanding into regions.
+                
+                
+                
+            }
+            
         }
         
         if (!actor->mIsWalking) {
@@ -187,6 +243,7 @@ void ActorSystem::Update(void) {
             
         } else {
             
+            // Match the height for the target
             actor->mTargetPoint.y = actor->mPosition.y;
             
             // Check reached destination

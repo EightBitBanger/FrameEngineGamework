@@ -6,6 +6,15 @@
 
 bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3 cameraAngle, glm::mat4& viewProjection) {
     
+    if (!currentEntity->material->mDoShadowPass)
+        return false;
+    
+    // Calculate shadow distance
+    float shadowDistance = glm::distance( eye, currentEntity->transform.position );
+    
+    if (shadowDistance > mShadowDistance) 
+        return false;
+    
     // Strip out model rotation to prevent shadow rotation
     glm::mat4 modelMatrix = glm::identity<glm::mat4>();
     modelMatrix = glm::translate(modelMatrix, currentEntity->transform.position);
@@ -21,12 +30,9 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
     
     glEnable( GL_CULL_FACE );
     
-    // Calculate shadow angle
-    
     for (int s=0; s < mNumberOfShadows; s++) {
         
-        float shadowRayScale  = 0.98;
-        float shadowLength    = currentEntity->material->mShadowVolumeLength;
+        float shadowLength = currentEntity->material->mShadowVolumeLength;
         
         mShadowTransform.SetIdentity();
         
@@ -39,12 +45,12 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
         mShadowTransform.RotateWorldAxis( angles.y, glm::vec3(0, 1, 0), Vector3(0, 0, 0) );
         mShadowTransform.RotateWorldAxis( angles.z, glm::vec3(0, 0, 1), Vector3(0, 0, 0) );
         
-        // Scale the length of the shadow
-        mShadowTransform.Scale( glm::vec3(shadowRayScale, shadowLength * 2, shadowRayScale) );
-        
         // Offset by half the distance
-        glm::vec3 shadowTranslation = (glm::vec3(0, -1, 0) * 0.5f);
+        glm::vec3 shadowTranslation = (glm::vec3(0, -1, 0) * shadowLength);
         mShadowTransform.Translate( shadowTranslation );
+        
+        // Scale the length of the shadow
+        mShadowTransform.Scale( glm::vec3(1, shadowLength * 2, 1) );
         
         glm::vec3 shadowPosition[1];
         glm::vec3 shadowDirection[1];
@@ -63,7 +69,7 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
         shadowAttenuation[0].r = currentEntity->material->mShadowVolumeAngleOfView;
         shadowAttenuation[0].g = currentEntity->material->mShadowVolumeColorIntensity;
         shadowAttenuation[0].b = currentEntity->material->mShadowVolumeIntensityHigh  * 0.1;
-        shadowAttenuation[0].a = currentEntity->material->mShadowVolumeIntensityLow   * 0.01;
+        shadowAttenuation[0].a = currentEntity->material->mShadowVolumeIntensityLow   * 0.1;
         
         // Send in the shadow data through the lighting parameters for this pass
         shaders.shadowCaster->SetLightCount(1);

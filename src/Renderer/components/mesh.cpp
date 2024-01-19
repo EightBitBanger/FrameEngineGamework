@@ -234,6 +234,7 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
         return false;
     
     if (mFreeMesh.size() > 0) {
+        
         // Find an open slot in the buffer for the mesh
         for (std::vector<SubMesh>::iterator it = mFreeMesh.begin(); it != mFreeMesh.end(); ++it) {
             SubMesh freeMeshPtr = *it;

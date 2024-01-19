@@ -20,6 +20,7 @@ Actor::Actor() :
     mRotation(glm::vec3(0, 0, 0)),
     mRotateTo(glm::vec3(0, 0, 0)),
     mTargetPoint(glm::vec3(0, 0, 0)),
+    mDistance(0),
     
     mIsActive(true),
     
@@ -32,7 +33,7 @@ Actor::Actor() :
 	mIsConsuming(false),
 	mIsFacing(true),
 	
-	mChanceToChangeDirection(500),
+	mChanceToChangeDirection(100),
 	mChanceToFocusOnActor   (100),
 	mChanceToWalk           (800),
     mChanceToStopWalking    (0),

@@ -22,6 +22,7 @@ extern MathCore             Math;
 extern ActorSystem          AI;
 
 
+
 // User functions
 void spawnActor(glm::vec3 position);
 
@@ -41,6 +42,10 @@ Transform* bendJoint = nullptr;
 
 GameObject* shadowObject;
 
+
+
+MeshRenderer* combineRenderer;
+SubMesh submesh;
 
 
 
@@ -101,7 +106,7 @@ void Start() {
     //
     // Create a camera controller
     
-    Vector3 position = Vector3(-13, 8, 0);
+    Vector3 position = Vector3(-20, 5, 0);
     Vector3 colliderScale = Vector3(1, 1, 1);
     
     cameraController = Engine.CreateCameraController(position, colliderScale);
@@ -161,6 +166,40 @@ void Start() {
         text[i]->canvas.x = 0;
         text[i]->canvas.y = 2 * i + 4;
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // Joined mesh shadow test
+    
+    GameObject* meshCombine = Engine.Create<GameObject>();
+    
+    
+    
+    Material* objectMaterial = Engine.Create<Material>();
+    
+    objectMaterial->shader = Engine.shaders.color;
+    
+    objectMaterial->ambient = Colors.black;
+    objectMaterial->diffuse = Colors.black;
+    
+    meshCombine->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+    combineRenderer = meshCombine->GetComponent<MeshRenderer>();
+    combineRenderer->mesh     = Engine.Create<Mesh>();
+    combineRenderer->material = objectMaterial;
+    
+    Renderer.meshes.cube->CopySubMesh(0, submesh);
+    
+    
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot( combineRenderer, RENDER_QUEUE_DEFAULT );
+    
+    
     
     
     
@@ -245,12 +284,14 @@ void Start() {
     
     
     
+    
+    
+    
     //
     // Rendering testing
     //
     
     Mesh*     objectMesh     = Renderer.meshes.cube;
-    Material* objectMaterial = Engine.Create<Material>();
     
     objectMaterial->shader = Engine.shaders.color;
     
@@ -262,11 +303,11 @@ void Start() {
     
     objectMaterial->SetShadowVolumeLength( Random.Range(8, 14) );
     
-    objectMaterial->SetShadowVolumeIntensityHigh( 0.85 );
-    objectMaterial->SetShadowVolumeIntensityLow( -0.83 );
+    objectMaterial->SetShadowVolumeIntensityHigh( 0.9 );
+    objectMaterial->SetShadowVolumeIntensityLow( 0.01 );
     
-    objectMaterial->SetShadowVolumeColorIntensity( 24 );
-    objectMaterial->SetShadowVolumeAngleOfView( 5 );
+    objectMaterial->SetShadowVolumeColorIntensity( 16 );
+    objectMaterial->SetShadowVolumeAngleOfView( 7 );
     
     Color volumeColor( Colors.Lerp(Colors.yellow, Colors.red, 0.1) );
     volumeColor = Colors.Lerp(volumeColor, Colors.black, 0.95);
@@ -294,18 +335,13 @@ void Start() {
     
     
     
-    
-    
-    
-    
-    
     //
     // Generate AI actors
     //
     
-    unsigned int spread = 100;
+    unsigned int spread = 10;
     
-    for (unsigned int i=0; i < 100; i++) {
+    for (unsigned int i=0; i < 30; i++) {
         
         float xx = Random.Range(0, spread) - Random.Range(0, spread);
         float yy = 100;
@@ -313,6 +349,8 @@ void Start() {
         
         spawnActor(glm::vec3(xx, yy, zz));
     }
+    
+    
     
     return;
 }
@@ -355,11 +393,11 @@ void Run() {
     text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
     text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
     
-    //text[5]->text = "x - " + Float.ToString( cameraController->GetComponent<Transform>()->position.x );
-    //text[6]->text = "y - " + Float.ToString( cameraController->GetComponent<Transform>()->position.y );
-    //text[7]->text = "z - " + Float.ToString( cameraController->GetComponent<Transform>()->position.z );
+    text[5]->text = "x - " + Float.ToString( cameraController->GetComponent<Transform>()->position.x );
+    text[6]->text = "y - " + Float.ToString( cameraController->GetComponent<Transform>()->position.y );
+    text[7]->text = "z - " + Float.ToString( cameraController->GetComponent<Transform>()->position.z );
     
-    
+    //text[7]->text = Int.ToString( Renderer.mNumberOfShadows );
     
     //if (bendJoint != nullptr) 
     //    bendJoint->RotateAxis(0.00001, glm::vec3(0, 0.001, 0));
@@ -368,18 +406,74 @@ void Run() {
     
     
     
-    Transform* objectTransform = shadowObject->GetComponent<Transform>();
     
-    glm::vec3 oldPosition = objectTransform->position;
-    glm::vec3 oldScale    = objectTransform->scale;
     
-    objectTransform->SetIdentity();
     
-    objectTransform->position = oldPosition;
-    objectTransform->scale    = oldScale;
-    objectTransform->RotateAxis(sunRate, glm::vec3(0, 1, 0));
     
-    sunRate += 0.8;
+    //
+    // ?
+    //
+    
+    /*
+    unsigned int width  = 10;
+    unsigned int depth  = 10;
+    unsigned int height = 10;
+    
+    float thickness  = -0.1;
+    
+    float xCord = 0.159;
+    float yCord = 0.159;
+    float zCord = 0.159;
+    
+    
+    for (unsigned int z=0; z < height; z++) {
+        
+        float zz = z * zCord;
+        
+        for (unsigned int y=0; y < depth; y++) {
+            
+            float yy = y * yCord;
+            
+            for (unsigned int x=0; x < width; x++) {
+                
+                float xx = x * xCord;
+                
+                if (Random.Range(0, 100) > 30) 
+                    continue;
+                
+                float noise = Random.Perlin(xx, yy, zz);
+                
+                if (noise < thickness) 
+                    continue;
+                
+                combineRenderer->mesh->AddSubMesh(x, y, z, submesh, false);
+                
+                continue;
+            }
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    combineRenderer->mesh->UploadToGPU();
+    */
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -409,12 +503,12 @@ void Run() {
     }
     
     skyMaterial->diffuse   = ambientLight;
-    plainMaterial->diffuse = ambientLight * 0.1f;
+    //plainMaterial->diffuse = ambientLight * 0.1f;
     
     if (ambientLight > 3.0f) ambientLight = 3.0f;
     if (ambientLight < 0.1f) ambientLight = 0.1f;
     
-    text[5]->text = "Day cycle - " + Float.ToString( ambientLight );
+    //text[5]->text = "Day cycle - " + Float.ToString( ambientLight );
     
     Light* sunLight = directionalLight->GetComponent<Light>();
     sunLight->intensity = ambientLight * 0.087;
@@ -424,11 +518,30 @@ void Run() {
     
     
     
-    
-    
-    
-    
     /*
+    
+    
+    Transform* objectTransform = shadowObject->GetComponent<Transform>();
+    
+    glm::vec3 oldPosition = objectTransform->position;
+    glm::vec3 oldScale    = objectTransform->scale;
+    
+    objectTransform->SetIdentity();
+    
+    objectTransform->position = oldPosition;
+    objectTransform->scale    = oldScale;
+    objectTransform->RotateAxis(sunRate, glm::vec3(0, 1, 0));
+    
+    sunRate += 0.8;
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     Transform* transform = directionalLight->GetComponent<Transform>();
     Light* light = directionalLight->GetComponent<Light>();
@@ -453,9 +566,9 @@ void Run() {
     }
     
     Vector3 direction = transform->EulerAngles();
-    text[8]->text  = Float.ToString( direction.x );
-    text[9]->text  = Float.ToString( direction.y );
-    text[10]->text = Float.ToString( direction.z );
+    //text[8]->text  = Float.ToString( direction.x );
+    //text[9]->text  = Float.ToString( direction.y );
+    //text[10]->text = Float.ToString( direction.z );
     
     */
     
