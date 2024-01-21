@@ -51,6 +51,12 @@ public:
     /// Get the running speed multiplier of the actor.
     float GetSpeedMultiplier(void);
     
+    /// Set the position of the actor.
+    void SetPosition(glm::vec3 position);
+    /// Get the position of the actor.
+    glm::vec3 GetPosition(void);
+    
+    
     // Genetics
     
     /// Add a new gene to the actors genome. The index location will be returned.
@@ -99,10 +105,10 @@ public:
     /// Set the distance to walk when selecting new random positions.
     void SetDistanceToWalk(float distance);
     
-    /// Set the distance to begin attacking a pray actor if any.
+    /// Set the distance to begin attacking a pray actor if any are nearby.
     void SetDistanceToAttack(float distance);
     
-    /// Set the distance to begin running from a predator actor if any.
+    /// Set the distance to begin running from a predator actor if any are nearby.
     void SetDistanceToFlee(float distance);
     
     // Memories
@@ -125,6 +131,15 @@ private:
     
     // Number of ticks this actor has accumulated in its lifetime
     unsigned long int mAge;
+    
+    // Age when the actor will no longer grow
+    float mAdultAge;
+    
+    // Scale of the actor before it begins growing
+    float mYouthScale;
+    
+    // Scale of the actor after it has stopped growing
+    float mAdultScale;
     
     
     // Maximum speed this actor can travel
@@ -163,11 +178,6 @@ private:
     
     // Should the genetic data be re-expressed
     bool mDoUpdateGenetics;
-    
-    
-    
-    // TODO: Replace these bool states with an int containing the actor state.
-    
     
     
     // Is the actor walking
@@ -221,9 +231,6 @@ private:
 	// Maximum world height this actor prefers to inhabit
 	float mHeightPreferenceMax;
     
-    
-    // Cool down period before changing direction again
-    unsigned int mReorientationCoolDownCounter;
     
     // Cool down period before focusing on another actor
     unsigned int mObservationCoolDownCounter;

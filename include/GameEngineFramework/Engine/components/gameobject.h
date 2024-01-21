@@ -30,6 +30,9 @@ public:
     /// Should this game object be active in the scene.
     bool isActive;
     
+    /// Distance within which this object will be updated.
+    float renderDistance;
+    
     GameObject();
     
     //

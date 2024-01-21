@@ -263,8 +263,13 @@ private:
     void UpdatePanelUI(unsigned int index);
     void UpdateTextUI(unsigned int index);
     void UpdateCamera(unsigned int index);
-    void UpdateActor(unsigned int index);
     void UpdateLight(unsigned int index);
+    
+    // AI update functions
+    void UpdateActor(unsigned int index);
+    void UpdateActorTargetRotation(unsigned int index);
+    void UpdateActorGenetics(unsigned int index);
+    void UpdateActorAnimation(unsigned int index);
     
     // List of active game objects
     std::vector<GameObject*>  mGameObjectActive;
@@ -309,8 +314,10 @@ private:
         {}
     };
     
+    
     // Component data streaming
-    bool mDoUpdateDataStream;
+    unsigned int mDataStreamIndex;
+    unsigned int mObjectIndex;
     unsigned int mStreamSize;
     
     ComponentDataStreamBuffer mStreamBuffer[ COMPONENT_STREAM_BUFFER_SIZE ];
