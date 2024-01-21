@@ -25,7 +25,6 @@ ENGINE_API extern EngineSystemManager   Engine;
 GameObject* EngineSystemManager::CreateGameObject(void) {
     GameObject* newGameObject = mGameObjects.Create();
     mGameObjectActive.push_back(newGameObject);
-    mDoUpdateDataStream = true;
     
     newGameObject->AddComponent( Engine.CreateComponent<Transform>() );
     
@@ -54,7 +53,6 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     
     mGameObjects.Destroy(gameObjectPtr);
     
-    mDoUpdateDataStream = true;
     return true;
 }
 
@@ -101,7 +99,6 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     BoxShape* boxShape = Physics.CreateColliderBox(scale.x, scale.y, scale.z);
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
-    mDoUpdateDataStream = true;
     return cameraController;
 }
 
@@ -140,20 +137,25 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     GameObject* skyObject = CreateGameObject();
     skyObject->name = "sky";
     skyObject->AddComponent( CreateComponentMeshRenderer(skyMesh, skyMaterial) );
+    skyObject->renderDistance = -1;
     
     skyObject->mTransformCache->SetScale(10000, 2000, 10000);
     
-    mDoUpdateDataStream = true;
     return skyObject;
 }
 
 GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     
     GameObject* newGameObject = CreateGameObject();
+    
+    newGameObject->renderDistance = 300;
+    
     newGameObject->AddComponent( CreateComponent(Components.Actor) );
     newGameObject->AddComponent( CreateComponent(Components.RigidBody) );
     
+    newGameObject->GetComponent<Actor>()->mPosition    = position;
     newGameObject->GetComponent<Actor>()->mTargetPoint = position;
+    
     newGameObject->SetPosition(position);
     
     newGameObject->DisableGravity();
@@ -165,12 +167,13 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     newGameObject->SetLinearAxisLockFactor(1, 1, 1);
     newGameObject->SetAngularAxisLockFactor(0, 0, 0);
     
-    mDoUpdateDataStream = true;
     return newGameObject;
 }
 
 GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     GameObject* overlayObject = Create<GameObject>();
+    
+    overlayObject->renderDistance = -1;
     
     overlayObject->mTransformCache->RotateAxis(-180, Vector3(0, 1, 0));
     overlayObject->mTransformCache->RotateAxis( -90, Vector3(0, 0, 1));
@@ -188,13 +191,15 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     
     overlayObject->AddComponent( CreateComponent<MeshRenderer>(overlayMesh, overlayMaterial) );
     
-    mDoUpdateDataStream = true;
     return overlayObject;
 }
 
 GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::string text, unsigned int textSize, Color color, std::string materialTag) {
     
     GameObject* overlayObject = CreateOverlayRenderer();
+    
+    overlayObject->renderDistance = -1;
+    
     overlayObject->AddComponent( CreateComponent<Text>() );
     Text* textElement = overlayObject->GetComponent<Text>();
     
@@ -223,13 +228,15 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     overlayRenderer->material->DisableCulling();
     overlayRenderer->material->DisableShadowVolumePass();
     
-    mDoUpdateDataStream = true;
     return overlayObject;
 }
 
 GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int width, int height, std::string materialTag) {
     
     GameObject* overlayObject = CreateOverlayRenderer();
+    
+    overlayObject->renderDistance = -1;
+    
     overlayObject->AddComponent( CreateComponent<Panel>() );
     Panel* overPanel = overlayObject->GetComponent<Panel>();
     
@@ -260,7 +267,6 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     
     overlayMesh->UploadToGPU();
     
-    mDoUpdateDataStream = true;
     return overlayObject;
 }
 

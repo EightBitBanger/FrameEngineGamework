@@ -23,6 +23,8 @@ ENGINE_API extern EngineSystemManager   Engine;
 
 void EngineSystemManager::Update(void) {
     
+    glm::vec3 eye = sceneMain->camera->transform.position;
+    
     // Update player/camera position in the AI simulation
     if (sceneMain != nullptr) {
         
@@ -32,32 +34,83 @@ void EngineSystemManager::Update(void) {
             AI.SetPlayerWorldPosition( activeCamera->transform.position );
         
     }
+    if (mGameObjects.Size() == 0) 
+        return;
     
-    // Check to update the data stream
-    if (mDoUpdateDataStream) {
+    unsigned int objectsPerTick = mGameObjects.Size() / 8;
+    
+    for (unsigned int i=0; i < objectsPerTick; i++) {
         
-        mDoUpdateDataStream = false;
+        mObjectIndex++;
         
-        mStreamSize = mGameObjects.Size();
+        if (mObjectIndex >= mGameObjects.Size()) 
+            mObjectIndex = 0;
         
-        for (unsigned int i=0; i < mStreamSize; i++ ) {
+        // Check game object render distance
+        if (mGameObjects[mObjectIndex]->renderDistance > 0) {
             
-            mStreamBuffer[i].gameObject    = mGameObjects[i];
-            mStreamBuffer[i].transform     = mGameObjects[i]->mTransformCache;
+            if (glm::distance(mGameObjects[mObjectIndex]->mTransformCache->position, eye) < mGameObjects[mObjectIndex]->renderDistance) {
+                
+                mGameObjects[mObjectIndex]->isActive = true;
+                
+            } else {
+                
+                mGameObjects[mObjectIndex]->isActive = false;
+                
+            }
             
-            mStreamBuffer[i].light         = mGameObjects[i]->mLightCache;
-            mStreamBuffer[i].actor         = mGameObjects[i]->mActorCache;
-            mStreamBuffer[i].camera        = mGameObjects[i]->mCameraCache;
-            mStreamBuffer[i].rigidBody     = mGameObjects[i]->mRigidBodyCache;
-            mStreamBuffer[i].meshRenderer  = mGameObjects[i]->mMeshRendererCache;
+            // Set the state of associated components
             
-            mStreamBuffer[i].text          = mGameObjects[i]->mTextCache;
-            mStreamBuffer[i].panel         = mGameObjects[i]->mPanelCache;
+            bool activeState = mGameObjects[mObjectIndex]->isActive;
             
-            continue;
+            if (mGameObjects[mObjectIndex]->mActorCache) 
+                mGameObjects[mObjectIndex]->mActorCache->SetActive( activeState );
+            
+            if (mGameObjects[mObjectIndex]->mMeshRendererCache) 
+                mGameObjects[mObjectIndex]->mMeshRendererCache->isActive = activeState;
+            
+            if (mGameObjects[mObjectIndex]->mLightCache) 
+                mGameObjects[mObjectIndex]->mLightCache->isActive = activeState;
+            
+            if (mGameObjects[mObjectIndex]->mRigidBodyCache) 
+                mGameObjects[mObjectIndex]->mRigidBodyCache->setIsActive( activeState );
+            
         }
         
+        // Check last object
+        if (mObjectIndex == mGameObjects.Size() - 1) {
+            
+            mStreamSize = mDataStreamIndex;
+            
+            mDataStreamIndex = 0;
+        }
+        
+        if (!mGameObjects[mObjectIndex]->isActive) 
+            continue;
+        
+        // Add the object to the object buffer stream
+        mStreamBuffer[mDataStreamIndex].gameObject    = mGameObjects[mObjectIndex];
+        mStreamBuffer[mDataStreamIndex].transform     = mGameObjects[mObjectIndex]->mTransformCache;
+        
+        mStreamBuffer[mDataStreamIndex].light         = mGameObjects[mObjectIndex]->mLightCache;
+        mStreamBuffer[mDataStreamIndex].actor         = mGameObjects[mObjectIndex]->mActorCache;
+        mStreamBuffer[mDataStreamIndex].camera        = mGameObjects[mObjectIndex]->mCameraCache;
+        mStreamBuffer[mDataStreamIndex].rigidBody     = mGameObjects[mObjectIndex]->mRigidBodyCache;
+        mStreamBuffer[mDataStreamIndex].meshRenderer  = mGameObjects[mObjectIndex]->mMeshRendererCache;
+        
+        mStreamBuffer[mDataStreamIndex].text          = mGameObjects[mObjectIndex]->mTextCache;
+        mStreamBuffer[mDataStreamIndex].panel         = mGameObjects[mObjectIndex]->mPanelCache;
+        
+        mDataStreamIndex++;
+        
+        if (mStreamSize < mDataStreamIndex)
+            mStreamSize++;
+        
+        continue;
     }
+    
+    
+    
     
     
     // Run the parent matrix transform chains
@@ -74,37 +127,16 @@ void EngineSystemManager::Update(void) {
     
     for (unsigned int i=0; i < mStreamSize; i++ ) {
         
-        if (!mStreamBuffer[i].gameObject->isActive) 
-            continue;
-        
         // Rigid bodies
-        if (mStreamBuffer[i].rigidBody != nullptr) 
-            UpdateRigidBody(i);
+        if (mStreamBuffer[i].rigidBody != nullptr)       UpdateRigidBody(i);
+        if (mStreamBuffer[i].meshRenderer != nullptr)    UpdateMeshRenderer(i);
+        if (mStreamBuffer[i].camera != nullptr)          UpdateCamera(i);
+        if (mStreamBuffer[i].actor != nullptr)           UpdateActor(i);
+        if (mStreamBuffer[i].light != nullptr)           UpdateLight(i);
+        if (mStreamBuffer[i].text != nullptr)            UpdateTextUI(i);
         
-        // Mesh renderers
-        if (mStreamBuffer[i].meshRenderer != nullptr) 
-            UpdateMeshRenderer(i);
-        
-        // Cameras
-        if (mStreamBuffer[i].camera != nullptr) 
-            UpdateCamera(i);
-        
-        // Actors
-        if (mStreamBuffer[i].actor != nullptr) 
-            UpdateActor(i);
-        
-        // Lights
-        if (mStreamBuffer[i].light != nullptr) 
-            UpdateLight(i);
-        
-        // Panel canvases
-        if (mStreamBuffer[i].panel != nullptr) 
-            if (mStreamBuffer[i].meshRenderer != nullptr) 
-                UpdatePanelUI(i);
-        
-        // Text elements
-        if (mStreamBuffer[i].text != nullptr) 
-            UpdateTextUI(i);
+        if ((mStreamBuffer[i].panel != nullptr) & 
+            (mStreamBuffer[i].meshRenderer != nullptr))  UpdatePanelUI(i);
         
         continue;
     }

@@ -5,6 +5,7 @@ GameObject::GameObject() :
     
     name(""),
     isActive(true),
+    renderDistance(-1),
     
     mTransformCache(nullptr),
     mCameraCache(nullptr),
@@ -109,6 +110,9 @@ void GameObject::SetPosition(float x, float y, float z) {
     }
     if (mCameraCache != nullptr) {
         mCameraCache->transform.position = glm::vec3(x, y, z);
+    }
+    if (mActorCache!= nullptr) {
+        mActorCache->SetPosition( glm::vec3(x, y, z) );
     }
     if (mLightCache != nullptr) {
         mLightCache->position = glm::vec3(x, y, z);

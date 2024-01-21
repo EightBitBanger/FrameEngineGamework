@@ -126,7 +126,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     // Tick update timer
     Timer tickTimer;
-    double tickUpdateTimeout = 1000.0f / 8.0;
+    double tickUpdateTimeout = 1000.0f / 3;
     double tickAccumulator=0;
     double tickUpdateMax = tickUpdateTimeout * 100;
     tickTimer.Update();

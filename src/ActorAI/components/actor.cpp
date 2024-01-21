@@ -8,11 +8,12 @@ Actor::Actor() :
     mName(""),
     
     mAge(0),
+    mAdultAge(300),
+    mYouthScale(0.4),
+    mAdultScale(1.0),
     
-    mSpeed(1.0f),
-    
+    mSpeed(1.5f),
     mSpeedMul(1.3),
-    
     mSnapSpeed(0.24),
     
     mVelocity(glm::vec3(0, 0, 0)),
@@ -33,8 +34,8 @@ Actor::Actor() :
 	mIsConsuming(false),
 	mIsFacing(true),
 	
-	mChanceToChangeDirection(100),
-	mChanceToFocusOnActor   (100),
+	mChanceToChangeDirection(40),
+	mChanceToFocusOnActor   (70),
 	mChanceToWalk           (800),
     mChanceToStopWalking    (0),
 	
@@ -46,7 +47,6 @@ Actor::Actor() :
     mHeightPreferenceMin    (0),
 	mHeightPreferenceMax    (0),
     
-    mReorientationCoolDownCounter(0),
     mObservationCoolDownCounter(0)
 {
     return;
@@ -63,6 +63,9 @@ void Actor::SetActive(bool state) {
     mux.lock();
     mIsActive = state;
     mux.unlock();
+    
+    for (unsigned int i=0; i < mGeneticRenderers.size(); i++) 
+        mGeneticRenderers[i]->isActive = state;
     return;
 }
 
@@ -120,6 +123,21 @@ float Actor::GetSpeedMultiplier(void) {
     float speedMul = mSpeedMul;
     mux.unlock();
     return speedMul;
+}
+
+void Actor::SetPosition(glm::vec3 position) {
+    mux.lock();
+    mPosition = position;
+    mux.unlock();
+    return;
+}
+
+glm::vec3 Actor::GetPosition(void) {
+    glm::vec3 position;
+    mux.lock();
+    position = mPosition;
+    mux.unlock();
+    return position;
 }
 
 // Genetics

@@ -24,7 +24,7 @@ extern ActorSystem          AI;
 
 
 // User functions
-void spawnActor(glm::vec3 position);
+GameObject* spawnActor(glm::vec3 position);
 
 
 
@@ -41,6 +41,10 @@ Text* text[20];
 Transform* bendJoint = nullptr;
 
 GameObject* shadowObject;
+
+
+Actor* testActor;
+
 
 
 
@@ -291,7 +295,7 @@ void Start() {
     // Rendering testing
     //
     
-    Mesh*     objectMesh     = Renderer.meshes.cube;
+    Mesh* objectMesh = Renderer.meshes.cube;
     
     objectMaterial->shader = Engine.shaders.color;
     
@@ -339,15 +343,19 @@ void Start() {
     // Generate AI actors
     //
     
-    unsigned int spread = 10;
+    unsigned int spread = 200;
     
-    for (unsigned int i=0; i < 30; i++) {
+    for (unsigned int i=0; i < 1000; i++) {
         
         float xx = Random.Range(0, spread) - Random.Range(0, spread);
-        float yy = 100;
+        float yy = 10;
         float zz = Random.Range(0, spread) - Random.Range(0, spread);
         
-        spawnActor(glm::vec3(xx, yy, zz));
+        GameObject* actorObject = spawnActor(glm::vec3(xx, yy, zz));
+        actorObject->renderDistance = 80;
+        
+        testActor = actorObject->GetComponent<Actor>();
+        
     }
     
     
@@ -403,7 +411,7 @@ void Run() {
     //    bendJoint->RotateAxis(0.00001, glm::vec3(0, 0.001, 0));
     
     
-    
+    text[9]->text = Int.ToString( testActor->GetAge() );
     
     
     
@@ -676,7 +684,23 @@ void Shutdown(void) {
 
 
 
-void spawnActor(glm::vec3 position) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GameObject* spawnActor(glm::vec3 position) {
     
     GameObject* newActorObject = Engine.CreateAIActor( position );
     
@@ -686,7 +710,7 @@ void spawnActor(glm::vec3 position) {
     
     // Actor
     Actor* actor = newActorObject->GetComponent<Actor>();
-    actor->SetSpeed( 1.3 );
+    actor->SetActive(false);
     
     // Setup actor genetics
     float variantR = Random.Range(0, 10) * 0.001;
@@ -786,7 +810,7 @@ void spawnActor(glm::vec3 position) {
     actor->AddGene(geneLimbRearLeft);
     actor->AddGene(geneLimbReadRight);
     
-    return;
+    return newActorObject;
 }
 
 

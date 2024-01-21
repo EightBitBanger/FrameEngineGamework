@@ -26,19 +26,6 @@ ENGINE_API extern EngineSystemManager   Engine;
 
 void EngineSystemManager::UpdateActor(unsigned int index) {
     
-    if (!mStreamBuffer[index].actor->mIsActive) {
-        
-        for (unsigned int a=0; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
-            
-            MeshRenderer* geneRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
-            
-            geneRenderer->isActive = false;
-            
-        }
-        
-        return;
-    }
-    
     // Check walking state
     if (mStreamBuffer[index].actor->mIsWalking) {
         
@@ -49,7 +36,12 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         //forward.y = tan( glm::radians( -(mStreamBuffer[index].actor->mRotation.x - 90) ) );
         forward.z = sin( glm::radians( -(mStreamBuffer[index].actor->mRotation.y - 90) ) );
         
-        glm::vec3 actorVelocity = forward * (mStreamBuffer[index].actor->mSpeed * 0.1f) * 0.1f;
+        float actorSpeed = mStreamBuffer[index].actor->mSpeed;
+        
+        if (mStreamBuffer[index].actor->mAge < mStreamBuffer[index].actor->mAdultAge) 
+            actorSpeed *= 0.8f;
+        
+        glm::vec3 actorVelocity = forward * (actorSpeed * 0.1f) * 0.1f;
         
         mStreamBuffer[index].actor->mVelocity.x = actorVelocity.x;
         mStreamBuffer[index].actor->mVelocity.z = actorVelocity.z;
@@ -76,6 +68,90 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         
     }
     
+    
+    UpdateActorTargetRotation(index);
+    
+    UpdateActorGenetics(index);
+    
+    UpdateActorAnimation(index);
+    
+    
+    //
+    // Update actor physics
+    
+    if (mStreamBuffer[index].rigidBody == nullptr) 
+        return;
+    
+    
+    glm::vec3 actorPosition = mStreamBuffer[index].transform->position;
+    glm::vec3 actorRotation = mStreamBuffer[index].actor->mRotation;
+    glm::vec3 actorVelocity = mStreamBuffer[index].actor->mVelocity;
+    
+    // Ray cast here
+    glm::vec3 from      = actorPosition;
+    glm::vec3 direction = glm::vec3(0, -1, 0);
+    from.y += 0.5;
+    
+    Hit hit;
+    
+    float distance = 2;
+    
+    bool isFalling = false;
+    
+    // Move the actor out of the way since we cant cast a ray from inside the collider...
+    rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
+    rp3d::Vector3 currentPosition = transform.getPosition();
+    currentPosition.y += 100;
+    transform.setPosition(currentPosition);
+    mStreamBuffer[index].rigidBody->setTransform(transform);
+    
+    // Check not on ground
+    if (!Physics.Raycast(from, direction, distance, hit)) {
+        
+        // Apply some falling action
+        actorVelocity.y -= 0.01;
+        
+        // Terminal velocity
+        if (actorVelocity.y < -1) 
+            actorVelocity.y = -1;
+        
+        isFalling = true;
+        
+    } else {
+        
+        // Standing on ground
+        actorPosition.y   = hit.point.y;
+        currentPosition.y = hit.point.y + 100;
+        
+        actorVelocity.y = 0;
+        
+    }
+    
+    // Move the actor back into position since we are finished casting rays...
+    currentPosition.y -= 100;
+    transform.setPosition(currentPosition);
+    mStreamBuffer[index].rigidBody->setTransform(transform);
+    
+    // Apply force velocity
+    mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, 
+                                                                                 actorVelocity.y, 
+                                                                                 actorVelocity.z) );
+    
+    // Sync actor position
+    mStreamBuffer[index].actor->mPosition = actorPosition;
+    mStreamBuffer[index].actor->mRotation = actorRotation;
+    mStreamBuffer[index].actor->mVelocity = actorVelocity;
+    
+    return;
+}
+
+
+
+
+
+
+void EngineSystemManager::UpdateActorTargetRotation(unsigned int index) {
+    
     // Face toward target point
     glm::vec3 position = mStreamBuffer[index].actor->mPosition;
     
@@ -84,7 +160,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     
     mStreamBuffer[index].actor->mRotateTo.y = glm::degrees( glm::atan(xx, zz) ) + 180;
     
-    // Check invert facing direction
+    // Check to invert facing direction
     if (!mStreamBuffer[index].actor->mIsFacing) {
         
         mStreamBuffer[index].actor->mRotateTo.y += 180;
@@ -94,7 +170,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     }
     
     //
-    // Check actor target direction range
+    // Check actor target direction
     
     // Wrap euler rotations
     if (mStreamBuffer[index].actor->mRotation.y < 90) 
@@ -118,10 +194,13 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         mStreamBuffer[index].actor->mRotation = fadeValue;
     }
     
-    
-    //
-    // Update genetic expression
-    //
+    return;
+}
+
+
+
+
+void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
     
     if (mStreamBuffer[index].actor->mDoUpdateGenetics) {
         
@@ -164,8 +243,13 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
             newMaterial->diffuse.b = mStreamBuffer[index].actor->mGenes[a].color.z;
             
             MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
+            newRenderer->isActive = false;
+            
             newRenderer->mesh = meshes.cube;
             newRenderer->material = newMaterial;
+            
+            // Position
+            newRenderer->transform.position = mStreamBuffer[index].actor->mPosition;
             
             // Position offset
             glm::vec3 offset( mStreamBuffer[index].actor->mGenes[a].offset.x, 
@@ -202,6 +286,19 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         
     }
     
+    return;
+}
+
+
+
+
+
+
+
+
+void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
+    
+    
     
     //
     // Update animations
@@ -221,6 +318,23 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         // Rotate around center mass
         float orientationCenterMass = glm::length( mStreamBuffer[index].actor->mRotation );
         
+        
+        // Scale by age
+        float ageScale = (mStreamBuffer[index].actor->mAge * 0.0001f);
+        
+        if (ageScale < 1) {
+            
+            matrix = glm::scale( matrix, Math.Lerp(glm::vec3(mStreamBuffer[index].actor->mYouthScale), 
+                                                   glm::vec3(mStreamBuffer[index].actor->mAdultScale), 
+                                                   ageScale) );
+            
+        } else {
+            
+            matrix = glm::scale( matrix, glm::vec3(mStreamBuffer[index].actor->mAdultScale) );
+            
+        }
+        
+        // Rotate around center
         if (orientationCenterMass > 0) {
             
             matrix = glm::rotate(matrix, 
@@ -228,6 +342,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
                                 glm::normalize( mStreamBuffer[index].actor->mRotation ));
             
         }
+        
         
         // Offset from center
         matrix = glm::translate( matrix, glm::vec3(mStreamBuffer[index].actor->mGenes[a].offset.x,
@@ -241,19 +356,19 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         if ((!mStreamBuffer[index].actor->mGenes[a].doAnimationCycle) | (!mStreamBuffer[index].actor->mIsWalking)) {
             
             matrix = glm::translate( matrix, glm::vec3(mStreamBuffer[index].actor->mGenes[a].position.x,
-                                                mStreamBuffer[index].actor->mGenes[a].position.y,
-                                                mStreamBuffer[index].actor->mGenes[a].position.z));
+                                                       mStreamBuffer[index].actor->mGenes[a].position.y,
+                                                       mStreamBuffer[index].actor->mGenes[a].position.z));
             
-            geneRenderer->transform.matrix = matrix * glm::scale(glm::mat4(1), geneRenderer->transform.scale);
+            geneRenderer->transform.matrix = glm::scale(matrix, geneRenderer->transform.scale);
             
             continue;
         }
         
         // Rotate current animation state
         glm::vec4 animationFactor(mStreamBuffer[index].actor->mGenes[a].animationAxis.x, 
-                                mStreamBuffer[index].actor->mGenes[a].animationAxis.y, 
-                                mStreamBuffer[index].actor->mGenes[a].animationAxis.z, 
-                                0);
+                                  mStreamBuffer[index].actor->mGenes[a].animationAxis.y, 
+                                  mStreamBuffer[index].actor->mGenes[a].animationAxis.z, 
+                                  0);
         
         animationFactor = glm::normalize(animationFactor);
         
@@ -372,76 +487,12 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
                                                 mStreamBuffer[index].actor->mGenes[a].position.y,
                                                 mStreamBuffer[index].actor->mGenes[a].position.z));
         
-        geneRenderer->transform.matrix = matrix * glm::scale(glm::mat4(1), geneRenderer->transform.scale);
+        geneRenderer->transform.matrix = glm::scale(matrix, geneRenderer->transform.scale);
         
         continue;
     }
     
     
-    
-    //
-    // Update actor physics
-    
-    if (mStreamBuffer[index].rigidBody == nullptr) 
-        return;
-    
-    
-    glm::vec3 actorPosition = mStreamBuffer[index].actor->mPosition;
-    glm::vec3 actorRotation = mStreamBuffer[index].actor->mRotation;
-    
-    // Ray cast here
-    glm::vec3 from      = actorPosition;
-    glm::vec3 direction = glm::vec3(0, -1, 0);
-    from.y += 0.5;
-    
-    Hit hit;
-    
-    float distance = 2;
-    
-    bool isFalling = false;
-    
-    // Move the actor out of the way since we cant cast a ray from inside the collider...
-    rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
-    rp3d::Vector3 currentPosition = transform.getPosition();
-    currentPosition.y += 100;
-    transform.setPosition(currentPosition);
-    mStreamBuffer[index].rigidBody->setTransform(transform);
-    
-    // Check not on ground
-    if (!Physics.Raycast(from, direction, distance, hit)) {
-        
-        // Apply some falling action
-        mStreamBuffer[index].actor->mVelocity.y -= 0.01;
-        
-        // Terminal velocity
-        if (mStreamBuffer[index].actor->mVelocity.y < -1) 
-            mStreamBuffer[index].actor->mVelocity.y = -1;
-        
-        isFalling = true;
-        
-    } else {
-        
-        // Standing on ground
-        actorPosition.y   = hit.point.y;
-        currentPosition.y = hit.point.y + 100;
-        
-        mStreamBuffer[index].actor->mVelocity.y = 0;
-        
-    }
-    
-    // Move the actor back into position since we are finished casting rays...
-    currentPosition.y -= 100;
-    transform.setPosition(currentPosition);
-    mStreamBuffer[index].rigidBody->setTransform(transform);
-    
-    // Apply force velocity
-    mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(mStreamBuffer[index].actor->mVelocity.x, 
-                                                                                 mStreamBuffer[index].actor->mVelocity.y, 
-                                                                                 mStreamBuffer[index].actor->mVelocity.z) );
-    
-    // Sync actor position
-    mStreamBuffer[index].actor->mPosition = mStreamBuffer[index].transform->position;
-    mStreamBuffer[index].actor->mRotation = actorRotation;
     
     return;
 }

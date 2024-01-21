@@ -114,7 +114,11 @@ void ActorSystem::Update(void) {
     for (int i = 0; i < 80; i++) {
         
         if (actorCounter >= numberOfActors) {
+            
             actorCounter = 0;
+            
+            doUpdate = false;
+            
             break;
         }
         
@@ -122,7 +126,8 @@ void ActorSystem::Update(void) {
         
         actorCounter++;
         
-        
+        if (!actor->mIsActive) 
+            continue;
         
         actor->mux.lock();
         
@@ -168,23 +173,15 @@ void ActorSystem::Update(void) {
         
         */
         
+        
+        // Check actor update distance
         actor->mDistance = glm::distance( mPlayerPosition, actor->mPosition );
         
         if (actor->mDistance > mActorUpdateDistance) {
-            
-            actor->mIsActive = false;
-            
-        } else {
-            
-            actor->mIsActive = true;
-            
-        }
-        
-        
-        if (!actor->mIsActive) {
             actor->mux.unlock();
             continue;
         }
+        
         
         // Advance actor age
         actor->mAge++;
@@ -195,14 +192,12 @@ void ActorSystem::Update(void) {
             actor->mIsWalking = true;
         
         // Cool down after a change in direction
-        if (actor->mReorientationCoolDownCounter < 10) {
+        if (actor->mObservationCoolDownCounter < 100) {
             
-            actor->mReorientationCoolDownCounter++;
-            
-            actor->mIsWalking = false;
+            actor->mObservationCoolDownCounter++;
             
         }
-            
+        
         
         // Chance to focus on a near by actor or player
         if ((Random.Range(0, 1000) < actor->mChanceToFocusOnActor)) {
@@ -213,7 +208,7 @@ void ActorSystem::Update(void) {
                 // Focus on player position
                 actor->mTargetPoint = mPlayerPosition;
                 
-                actor->mReorientationCoolDownCounter = 0;
+                actor->mObservationCoolDownCounter = 0;
                 
                 actor->mIsWalking = false;
                 
@@ -229,7 +224,9 @@ void ActorSystem::Update(void) {
             
         }
         
-        if (!actor->mIsWalking) {
+        if ((!actor->mIsWalking) & (actor->mObservationCoolDownCounter != 0)) {
+            
+            actor->mObservationCoolDownCounter = 0;
             
             // Chance to pick new target destination
             if ((Random.Range(0, 1000) < actor->mChanceToChangeDirection)) {
@@ -243,7 +240,7 @@ void ActorSystem::Update(void) {
             
         } else {
             
-            // Match the height for the target
+            // Match the height to the target
             actor->mTargetPoint.y = actor->mPosition.y;
             
             // Check reached destination
@@ -358,7 +355,6 @@ void actorThreadMain() {
         
         AI.Update();
         
-        doUpdate = false;
         continue;
     }
     
