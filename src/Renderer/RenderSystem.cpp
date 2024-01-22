@@ -26,10 +26,6 @@ RenderSystem::RenderSystem() :
     mNumberOfDrawCalls(0),
     mNumberOfFrames(0),
     
-    mWindowHandle(NULL),
-    mDeviceContext(NULL),
-    mRenderContext(NULL),
-    
     mCurrentMesh(nullptr),
     mCurrentMaterial(nullptr),
     mCurrentShader(nullptr),
@@ -160,96 +156,6 @@ unsigned int RenderSystem::GetRenderQueueSize(void) {
 
 unsigned int RenderSystem::GetMeshRendererCount(void) {
     return mEntity.Size();
-}
-
-GLenum RenderSystem::SetRenderTarget(HWND wHndl) {
-    
-    int iFormat;
-    std::string gcVendor, gcRenderer, gcExtensions, gcVersion, Line;
-    
-    // Set the window handle and get the device context
-    mWindowHandle = wHndl;
-    HDC hDC = GetDC(wHndl);
-    mDeviceContext = hDC;
-    
-    // Get display size
-    displaySize.x = GetDeviceCaps(mDeviceContext, HORZRES);
-    displaySize.y = GetDeviceCaps(mDeviceContext, VERTRES);
-    displayCenter.x = displaySize.x / 2;
-    displayCenter.y = displaySize.y / 2;
-    
-    // Get window size
-    RECT wRect;
-    GetWindowRect(mWindowHandle, &wRect);
-    
-    SetViewport(0, 0, wRect.right - wRect.left, wRect.bottom - wRect.top);
-    
-    // Pixel format descriptor
-    PIXELFORMATDESCRIPTOR pfd;
-    ZeroMemory (&pfd, sizeof (pfd));
-    pfd.nSize       = sizeof (pfd);
-    pfd.nVersion    = 1;
-    pfd.dwFlags     = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType  = PFD_TYPE_RGBA;
-    pfd.cColorBits  = 32;
-    pfd.cDepthBits  = 32;
-    pfd.iLayerType  = PFD_MAIN_PLANE;
-    
-    // Setup pixel format
-    iFormat = ChoosePixelFormat(mDeviceContext, &pfd);
-    SetPixelFormat(mDeviceContext, iFormat, &pfd);
-    
-    HGLRC hRC = wglCreateContext(hDC);
-    mRenderContext = hRC;
-    
-    wglMakeCurrent(mDeviceContext, hRC);
-    
-    // Initiate glew after setting the render target
-    GLenum glpassed = glewInit();
-    
-    //
-    // Log hardware details
-#ifdef  LOG_RENDER_DETAILS
-    const char* gcVendorConst     = (const char*)glGetString(GL_VENDOR);
-    const char* gcRendererConst   = (const char*)glGetString(GL_RENDERER);
-    const char* gcExtensionsConst = (const char*)glGetString(GL_EXTENSIONS);
-    const char* gcVersionConst    = (const char*)glGetString(GL_VERSION);
-    
-    gcVendor     = std::string(gcVendorConst);
-    gcRenderer   = std::string(gcRendererConst);
-    gcExtensions = std::string(gcExtensionsConst);
-    gcVersion    = std::string(gcVersionConst);
-    
-    // Log details
-    Log.Write("== Hardware details =="); Line = "" + gcRenderer;
-    Log.Write(Line);
-    Log.WriteLn();
-    
-    std::string DetailStringHead = "  - ";
-    std::string DetailStringEqu  = " = ";
-    
-    Line = " Device"; Log.Write(Line);
-    Line = DetailStringHead + "Name   " + DetailStringEqu + gcVendor;  Log.Write(Line);
-    Line = DetailStringHead + "Version" + DetailStringEqu + gcVersion; Log.Write(Line);
-    Log.WriteLn();
-    
-    Line = " Colors"; Log.Write(Line);
-    Line = DetailStringHead + "Color" + DetailStringEqu + Int.ToString(pfd.cColorBits) + " bit"; Log.Write(Line);
-    Line = DetailStringHead + "Depth" + DetailStringEqu + Int.ToString(pfd.cDepthBits) + " bit"; Log.Write(Line);
-    Log.WriteLn();
-    Log.WriteLn();
-#endif
-    return glpassed;
-}
-
-void RenderSystem::ReleaseRenderTarget(void) {
-    
-    wglMakeCurrent (NULL, NULL);
-    wglDeleteContext(mRenderContext);
-    
-    ReleaseDC(mWindowHandle, mDeviceContext);
-    
-    return;
 }
 
 void RenderSystem::SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {

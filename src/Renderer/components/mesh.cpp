@@ -1,7 +1,10 @@
 #include <GameEngineFramework/Renderer/components/mesh.h>
+#include <GameEngineFramework/Math/Math.h>
 
 #define GLEW_STATIC
 #include <gl/glew.h>
+
+extern MathCore Math;
 
 
 Mesh::Mesh() : 
@@ -22,105 +25,6 @@ Mesh::~Mesh() {
     return;
 }
 
-void Mesh::Reallocate(unsigned int newBufferSize) {
-    FreeBuffers();
-    AllocateBuffers(newBufferSize);
-    
-    SetDefaultAttributes();
-    return;
-}
-
-void Mesh::SetPrimitive(int primitiveType) {
-    mPrimitive = primitiveType;
-    return;
-}
-
-void Mesh::SetAttribute(int index, int attributeCount, int vertexSize, int byteOffset) {
-    Bind();
-    glEnableVertexAttribArray(index);
-    GLintptr offset = byteOffset;
-    glVertexAttribPointer(index, attributeCount, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*)offset);
-    return;
-}
-
-void Mesh::DisableAttribute(int index) {
-    Bind();
-    glDisableVertexAttribArray(index);
-    return;
-}
-
-void Mesh::LoadVertexBuffer(Vertex* bufferData, int vertexCount) {
-    glBindVertexArray(mVertexArray);
-    glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), &bufferData[0], GL_DYNAMIC_DRAW);
-    return;
-}
-
-void Mesh::LoadIndexBuffer(Index* bufferData, int indexCount) {
-    glBindVertexArray(mVertexArray);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(Index), &bufferData[0], GL_DYNAMIC_DRAW);
-    return;
-}
-
-void Mesh::Bind() {
-    glBindVertexArray(mVertexArray);
-    return;
-}
-
-void Mesh::AllocateBuffers(unsigned int maxBufferSize) {
-    mMaxSize = maxBufferSize;
-    
-    glGenVertexArrays(1, &mVertexArray);
-    glBindVertexArray(mVertexArray);
-    
-    glGenBuffers(1, &mBufferVertex);
-    glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
-    glBufferData(GL_ARRAY_BUFFER, mMaxSize * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
-    
-    glGenBuffers(1, &mBufferIndex);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mMaxSize * sizeof(Index), NULL, GL_DYNAMIC_DRAW);
-    
-    return;
-}
-
-void Mesh::FreeBuffers(void) {
-    glDeleteBuffers(1, &mVertexArray);
-    glDeleteBuffers(1, &mBufferVertex);
-    glDeleteBuffers(1, &mBufferIndex);
-    return;
-}
-
-void Mesh::DrawVertexArray(void) {
-    
-    glDrawArrays(mPrimitive, 0, mVertexBufferSz);
-    
-    return;
-}
-
-void Mesh::DrawIndexArray(void) {
-    
-    glDrawElements(mPrimitive, mIndexBufferSz, GL_UNSIGNED_INT, (void*)0);
-    
-    return;
-}
-
-unsigned int Mesh::GetSubMeshCount(void) {
-    return mSubMesh.size();
-}
-
-void Mesh::SetDefaultAttributes(void) {
-    
-    Bind();
-    
-    SetAttribute(0, 3, sizeof(Vertex), 0);
-    SetAttribute(1, 3, sizeof(Vertex), 12);
-    SetAttribute(2, 3, sizeof(Vertex), 24);
-    SetAttribute(3, 2, sizeof(Vertex), 36);
-    
-    return;
-}
 
 void Mesh::AddPlain(float x, float y, float z, float width, float height, Color color, float uCoord, float vCoord, float uStart, float vStart, unsigned int uOffset, unsigned int vOffset) {
     
@@ -134,6 +38,7 @@ void Mesh::AddPlain(float x, float y, float z, float width, float height, Color 
     vertex[3] = Vertex( x-width, y, z-height,   color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + vCoord);
     
     SubMesh subBuffer;
+    
     subBuffer.vertexBuffer.push_back(vertex[0]);
     subBuffer.vertexBuffer.push_back(vertex[1]);
     subBuffer.vertexBuffer.push_back(vertex[2]);
@@ -142,6 +47,7 @@ void Mesh::AddPlain(float x, float y, float z, float width, float height, Color 
     subBuffer.indexBuffer.push_back(0);
     subBuffer.indexBuffer.push_back(1);
     subBuffer.indexBuffer.push_back(2);
+    
     subBuffer.indexBuffer.push_back(0);
     subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(3);
@@ -151,11 +57,18 @@ void Mesh::AddPlain(float x, float y, float z, float width, float height, Color 
 }
 
 void Mesh::AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub) {
-    for (unsigned int h=0; h < heightSub; h++) {
-        for (unsigned int w=0; w < widthSub; w++) {
+    for (unsigned int w=0; w < widthSub; w++) {
+        
+        for (unsigned int h=0; h < heightSub; h++) {
             
-            AddPlain( x + (w * width), y, z + (h * height), width, height, color);
+            AddPlain(x + (w * width), 
+                     y, 
+                     z + (h * height), 
+                     width, height, 
+                     color);
+            
         }
+        
     }
     return;
 }
@@ -172,6 +85,7 @@ void Mesh::AddWall(float x, float y, float z, float width, float height, Color c
     vertex[3] = Vertex( x-width, y-height, z,   color.r, color.g, color.b,   0,0,1,  1, 1 );
     
     SubMesh subBuffer;
+    
     subBuffer.vertexBuffer.push_back(vertex[0]);
     subBuffer.vertexBuffer.push_back(vertex[1]);
     subBuffer.vertexBuffer.push_back(vertex[2]);
@@ -180,6 +94,7 @@ void Mesh::AddWall(float x, float y, float z, float width, float height, Color c
     subBuffer.indexBuffer.push_back(0);
     subBuffer.indexBuffer.push_back(1);
     subBuffer.indexBuffer.push_back(2);
+    
     subBuffer.indexBuffer.push_back(0);
     subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(3);
@@ -215,6 +130,7 @@ void Mesh::AddQuad(float x, float y, float z, float width, float height, Color c
     subBuffer.indexBuffer.push_back(0);
     subBuffer.indexBuffer.push_back(3);
     subBuffer.indexBuffer.push_back(1);
+    
     subBuffer.indexBuffer.push_back(0);
     subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(3);
@@ -480,3 +396,162 @@ void Mesh::SetIndex(unsigned int index, Index position) {
     return;
 }
 
+void Mesh::GenerateNormals(void) {
+    
+    glm::vec3 prevNormal(0);
+    
+    for (unsigned int i=0; i < mIndexBufferSz; i += 3) {
+        
+        unsigned int indexA = mIndexBuffer[i].index;
+        unsigned int indexB = mIndexBuffer[i+1].index;
+        unsigned int indexC = mIndexBuffer[i+2].index;
+        
+        Vertex vertA = mVertexBuffer[indexA];
+        Vertex vertB = mVertexBuffer[indexB];
+        Vertex vertC = mVertexBuffer[indexC];
+        
+        glm::vec3 U;
+        U.x = vertB.x - vertA.x;
+        U.y = vertB.y - vertA.y;
+        U.z = vertB.z - vertA.z;
+        
+        glm::vec3 V;
+        V.x = vertC.x - vertA.x;
+        V.y = vertC.y - vertA.y;
+        V.z = vertC.z - vertA.z;
+        
+        
+        glm::vec3 normal;
+        normal.x = (U.y * V.z) - (U.z * V.y);
+        normal.y = (U.z * V.x) - (U.x * V.z);
+        normal.z = (U.x * V.y) - (U.y * V.x);
+        
+        //
+        // TODO: Attempted normal interpolation
+        //
+        
+        glm::vec3 currentNormal = normal;
+        
+        if (prevNormal != glm::vec3(0)) {
+            normal = Math.Lerp(normal, prevNormal, 0.5f);
+        }
+        
+        prevNormal = currentNormal;
+        
+        mVertexBuffer[indexA].nx = normal.x;
+        mVertexBuffer[indexA].ny = normal.y;
+        mVertexBuffer[indexA].nz = normal.z;
+        
+        mVertexBuffer[indexB].nx = normal.x;
+        mVertexBuffer[indexB].ny = normal.y;
+        mVertexBuffer[indexB].nz = normal.z;
+        
+        mVertexBuffer[indexC].nx = normal.x;
+        mVertexBuffer[indexC].ny = normal.y;
+        mVertexBuffer[indexC].nz = normal.z;
+        
+        continue;
+    }
+    
+    return;
+}
+
+void Mesh::Reallocate(unsigned int newBufferSize) {
+    FreeBuffers();
+    AllocateBuffers(newBufferSize);
+    
+    SetDefaultAttributes();
+    return;
+}
+
+void Mesh::SetPrimitive(int primitiveType) {
+    mPrimitive = primitiveType;
+    return;
+}
+
+void Mesh::SetAttribute(int index, int attributeCount, int vertexSize, int byteOffset) {
+    Bind();
+    glEnableVertexAttribArray(index);
+    GLintptr offset = byteOffset;
+    glVertexAttribPointer(index, attributeCount, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*)offset);
+    return;
+}
+
+void Mesh::DisableAttribute(int index) {
+    Bind();
+    glDisableVertexAttribArray(index);
+    return;
+}
+
+void Mesh::LoadVertexBuffer(Vertex* bufferData, int vertexCount) {
+    glBindVertexArray(mVertexArray);
+    glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), &bufferData[0], GL_DYNAMIC_DRAW);
+    return;
+}
+
+void Mesh::LoadIndexBuffer(Index* bufferData, int indexCount) {
+    glBindVertexArray(mVertexArray);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(Index), &bufferData[0], GL_DYNAMIC_DRAW);
+    return;
+}
+
+void Mesh::Bind() {
+    glBindVertexArray(mVertexArray);
+    return;
+}
+
+void Mesh::AllocateBuffers(unsigned int maxBufferSize) {
+    mMaxSize = maxBufferSize;
+    
+    glGenVertexArrays(1, &mVertexArray);
+    glBindVertexArray(mVertexArray);
+    
+    glGenBuffers(1, &mBufferVertex);
+    glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
+    glBufferData(GL_ARRAY_BUFFER, mMaxSize * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
+    
+    glGenBuffers(1, &mBufferIndex);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mMaxSize * sizeof(Index), NULL, GL_DYNAMIC_DRAW);
+    
+    return;
+}
+
+void Mesh::FreeBuffers(void) {
+    glDeleteBuffers(1, &mVertexArray);
+    glDeleteBuffers(1, &mBufferVertex);
+    glDeleteBuffers(1, &mBufferIndex);
+    return;
+}
+
+void Mesh::DrawVertexArray(void) {
+    
+    glDrawArrays(mPrimitive, 0, mVertexBufferSz);
+    
+    return;
+}
+
+void Mesh::DrawIndexArray(void) {
+    
+    glDrawElements(mPrimitive, mIndexBufferSz, GL_UNSIGNED_INT, (void*)0);
+    
+    return;
+}
+
+unsigned int Mesh::GetSubMeshCount(void) {
+    return mSubMesh.size();
+}
+
+void Mesh::SetDefaultAttributes(void) {
+    
+    Bind();
+    
+    SetAttribute(0, 3, sizeof(Vertex), 0);
+    SetAttribute(1, 3, sizeof(Vertex), 12);
+    SetAttribute(2, 3, sizeof(Vertex), 24);
+    SetAttribute(3, 2, sizeof(Vertex), 36);
+    
+    return;
+}

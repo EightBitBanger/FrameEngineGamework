@@ -164,9 +164,6 @@ void RenderSystem::RenderFrame(void) {
     
     mNumberOfFrames++;
     
-    if (mNumberOfFrames > 7) 
-        SwapBuffers(mDeviceContext);
-    
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::EndFrame::");
 #endif

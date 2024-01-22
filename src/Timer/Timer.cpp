@@ -1,5 +1,15 @@
 #include <GameEngineFramework/Timer/timer.h>
 
+#ifndef _WIN32_WINNT
+  #define _WIN32_WINNT 0x500
+#endif
+
+#define WIN32_LEAN_AND_MEAN
+
+#include <sdkddkver.h>
+#include <windows.h>
+
+
 Timer::Timer() {
     
     delta=0;
@@ -16,7 +26,10 @@ Timer::Timer() {
     QueryPerformanceFrequency(&tFrequency);
     timeFrequency = tFrequency.QuadPart / 1000.0;
     
-    QueryPerformanceCounter(&tLast);
+    LARGE_INTEGER integerLarge;
+    integerLarge.QuadPart = tLast;
+    
+    QueryPerformanceCounter(&integerLarge);
     return;
 }
 
@@ -26,7 +39,10 @@ double Timer::GetCurrentDelta(void) {
     LARGE_INTEGER tCurrent;
     QueryPerformanceCounter(&tCurrent);
     
-    return (tCurrent.QuadPart - tLast.QuadPart) / timeFrequency;
+    LARGE_INTEGER integerLarge;
+    integerLarge.QuadPart = tLast;
+    
+    return (tCurrent.QuadPart - integerLarge.QuadPart) / timeFrequency;
 }
 
 
@@ -35,8 +51,11 @@ bool Timer::Update(void) {
     LARGE_INTEGER tCurrent;
     QueryPerformanceCounter(&tCurrent);
     
-    delta = (tCurrent.QuadPart - tLast.QuadPart) / timeFrequency;
-    tLast = tCurrent;
+    LARGE_INTEGER integerLarge;
+    integerLarge.QuadPart = tLast;
+    
+    delta = (tCurrent.QuadPart - integerLarge.QuadPart) / timeFrequency;
+    tLast = tCurrent.QuadPart;
     
     accumulator += delta;
     

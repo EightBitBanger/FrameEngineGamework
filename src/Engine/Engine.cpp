@@ -19,7 +19,7 @@ ENGINE_API InputSystem       Input;
 ENGINE_API MathCore          Math;
 ENGINE_API ActorSystem       AI;
 
-ENGINE_API ApplicationLayer      Application;
+ENGINE_API PlatformLayer         Platform;
 ENGINE_API EngineSystemManager   Engine;
 
 ENGINE_API FileSystemDir     Directory;

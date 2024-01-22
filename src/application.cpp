@@ -11,7 +11,7 @@ extern Timer                PhysicsTime;
 extern Timer                Time;
 
 extern EngineSystemManager  Engine;
-extern ApplicationLayer     Application;
+extern PlatformLayer        Platform;
 extern ResourceManager      Resources;
 extern Serialization        Serializer;
 extern ScriptSystem         Scripting;
@@ -40,8 +40,6 @@ Text* text[20];
  
 Transform* bendJoint = nullptr;
 
-GameObject* shadowObject;
-
 
 Actor* testActor;
 
@@ -66,6 +64,9 @@ Material* plainMaterial;
 
 
 
+// Height field testing
+
+float* heightField;
 
 
 
@@ -78,7 +79,6 @@ void Start() {
     // Create the main world scene 
     Engine.sceneMain   = Engine.Create<Scene>();
     Renderer.AddSceneToRenderQueue(Engine.sceneMain);
-    
     
     //
     // Create a sky
@@ -110,7 +110,7 @@ void Start() {
     //
     // Create a camera controller
     
-    Vector3 position = Vector3(-20, 5, 0);
+    Vector3 position = Vector3(0, 10, 0);
     Vector3 colliderScale = Vector3(1, 1, 1);
     
     cameraController = Engine.CreateCameraController(position, colliderScale);
@@ -131,13 +131,13 @@ void Start() {
     // Directional light
     directionalLight = Engine.Create<GameObject>();
     lightTransform = directionalLight->GetComponent<Transform>();
-    lightTransform->RotateAxis(1, Vector3(0, -0.9, 0.1));
+    lightTransform->RotateAxis(1, Vector3(0, -0.5, 0.8));
     
     directionalLight->AddComponent( Engine.CreateComponent<Light>() );
     Light* sunLight = directionalLight->GetComponent<Light>();
     
     Engine.sceneMain->AddLightToSceneRoot( sunLight );
-    sunLight->intensity  = 0.87;
+    sunLight->intensity  = 1;
     sunLight->type       = LIGHT_TYPE_DIRECTIONAL;
     sunLight->color      = Colors.white;
     
@@ -179,33 +179,6 @@ void Start() {
     
     
     
-    // Joined mesh shadow test
-    
-    GameObject* meshCombine = Engine.Create<GameObject>();
-    
-    
-    
-    Material* objectMaterial = Engine.Create<Material>();
-    
-    objectMaterial->shader = Engine.shaders.color;
-    
-    objectMaterial->ambient = Colors.black;
-    objectMaterial->diffuse = Colors.black;
-    
-    meshCombine->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-    combineRenderer = meshCombine->GetComponent<MeshRenderer>();
-    combineRenderer->mesh     = Engine.Create<Mesh>();
-    combineRenderer->material = objectMaterial;
-    
-    Renderer.meshes.cube->CopySubMesh(0, submesh);
-    
-    
-    
-    Engine.sceneMain->AddMeshRendererToSceneRoot( combineRenderer, RENDER_QUEUE_DEFAULT );
-    
-    
-    
-    
     
     
     
@@ -221,26 +194,23 @@ void Start() {
     // Chunk material
     plainMaterial = Engine.Create<Material>();
     
-    TextureTag* plainTexture = Resources.FindTextureTag("grassy");
-    plainTexture->Load();
+    //TextureTag* plainTexture = Resources.FindTextureTag("grassy");
+    //plainTexture->Load();
     
-    plainMaterial->texture.UploadTextureToGPU( plainTexture->buffer, plainTexture->width, plainTexture->height, MATERIAL_FILTER_ANISOTROPIC );
+    //plainMaterial->texture.UploadTextureToGPU( plainTexture->buffer, plainTexture->width, plainTexture->height, MATERIAL_FILTER_ANISOTROPIC );
     
-    plainMaterial->shader = Engine.shaders.texture;
-    plainMaterial->diffuse = Colors.MakeGrayScale(0.03);
+    plainMaterial->shader = Engine.shaders.color;
+    plainMaterial->diffuse = Colors.Make(0, 0.01f, 0);
+    plainMaterial->ambient = Colors.black;
+    
     plainMaterial->DisableShadowVolumePass();
     
-    // Chunk layout
     
-    int chunkSize   = 50;
     
-    int worldWidth  = 20;
-    int worldHeight = 20;
-    
-    // Chunk mesh
-    Mesh* chunkMesh = Engine.Create<Mesh>();
     
     // Chunk object
+    Mesh* chunkMesh = Engine.Create<Mesh>();
+    
     GameObject* plainObject = Engine.Create<GameObject>();
     plainObject->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, plainMaterial ) );
     plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
@@ -254,24 +224,70 @@ void Start() {
     plainObject->SetLinearAxisLockFactor(0, 0, 0);
     plainObject->SetStatic();
     
+    
+    
+    
+    unsigned int worldWidth  = 1;
+    unsigned int worldHeight = 1;
+    
+    unsigned int chunkWidth  = 4;
+    unsigned int chunkHeight = 4;
+    
+    float heightMul = 1.3;
+    
+    
     // Transform the chunk
     Transform* chunkTransform = plainObject->GetComponent<Transform>();
-    chunkTransform->scale = Vector3(chunkSize * 0.013, 1, chunkSize * 0.013);
+    chunkTransform->scale = Vector3(1, 1, 1);
     
     
-    for (int z=0; z < worldHeight; z++) {
+    
+    
+    
+    
+    //
+    // Generate chunk
+    //
+    
+    
+    // Plain collider
+    //BoxShape* plainCollider = Physics.CreateColliderBox(1000, 100, 1000);
+    
+    //plainObject->AddColliderBox(plainCollider, 0, -100, 0);
+    
+    
+    for (unsigned int x=0; x < worldWidth; x++) {
         
-        float chunkZ = (z * chunkSize) - ((worldHeight / 2) * chunkSize);
-        
-        for (int x=0; x < worldWidth; x++) {
+        for (unsigned int z=0; z < worldHeight; z++) {
             
-            float chunkX = (x * chunkSize) - ((worldWidth  / 2) * chunkSize);
+            float chunkX = (x * 1.0f) - ((worldWidth  / 2) * 1.0f);
+            float chunkZ = (z * 1.0f) - ((worldHeight / 2) * 1.0f);
             
             chunkMesh->AddSubMesh(chunkX, 0, chunkZ, chunkSubMesh, false);
             
-            // Collider
-            BoxShape* plainCollider = Physics.CreateColliderBox(chunkSize, 100, chunkSize);
-            plainObject->AddColliderBox(plainCollider, chunkX, -100, chunkZ);
+            
+            // Generate perlin
+            
+            for (unsigned int index=0; index < chunkMesh->GetNumberOfVertices(); index++) {
+                
+                Vertex vert = chunkMesh->GetVertex(index);
+                
+                float xCoord = vert.x;
+                float zCoord = vert.z;
+                
+                float height = Random.Perlin(xCoord, 0, zCoord) * heightMul;
+                
+                if (height < 0) 
+                    height = 0;
+                
+                vert.y = height;
+                
+                chunkMesh->SetVertex(index, vert);
+                
+                continue;
+            }
+            
+            chunkMesh->GenerateNormals();
             
             continue;
         }
@@ -285,57 +301,64 @@ void Start() {
     
     
     
+    //
+    // Generate height field map collider
+    //
     
+    heightField = new float[ chunkWidth * chunkHeight ];
+    unsigned int heightFieldIndex = 0;
     
-    
+    for (unsigned int i=0; i < chunkMesh->GetNumberOfIndices(); i += 3) {
+        
+        unsigned int indexA = chunkMesh->GetIndex(i)  .index;
+        unsigned int indexB = chunkMesh->GetIndex(i+1).index;
+        unsigned int indexC = chunkMesh->GetIndex(i+2).index;
+        
+        Vertex vertA = chunkMesh->GetVertex(indexA);
+        Vertex vertB = chunkMesh->GetVertex(indexB);
+        Vertex vertC = chunkMesh->GetVertex(indexC);
+        
+        //heightField[heightFieldIndex] = vertA.y;
+        
+        heightFieldIndex++;
+        continue;
+    }
     
     
     
     //
-    // Rendering testing
+    // Generate a physics heights field map
     //
     
-    Mesh* objectMesh = Renderer.meshes.cube;
-    
-    objectMaterial->shader = Engine.shaders.color;
-    
-    //objectMaterial->ambient = Color(0.01, 0.01, 0.01);
-    //objectMaterial->diffuse = Color(0.01, 0.01, 0.01);
-    
-    // Shadows
-    objectMaterial->EnableShadowVolumePass();
-    
-    objectMaterial->SetShadowVolumeLength( Random.Range(8, 14) );
-    
-    objectMaterial->SetShadowVolumeIntensityHigh( 0.9 );
-    objectMaterial->SetShadowVolumeIntensityLow( 0.01 );
-    
-    objectMaterial->SetShadowVolumeColorIntensity( 16 );
-    objectMaterial->SetShadowVolumeAngleOfView( 7 );
-    
-    Color volumeColor( Colors.Lerp(Colors.yellow, Colors.red, 0.1) );
-    volumeColor = Colors.Lerp(volumeColor, Colors.black, 0.95);
-    
-    objectMaterial->SetShadowVolumeColor( volumeColor );
+    rp3d::HeightFieldShape* heightFieldShape = Physics.common.createHeightFieldShape(chunkWidth, chunkHeight, 
+                                                                                    -1000, 1000, 
+                                                                                     heightField, 
+                                                                                     rp3d::HeightFieldShape::HeightDataType::HEIGHT_FLOAT_TYPE);
     
     
-    shadowObject = Engine.Create<GameObject>();
     
     
-    Transform* objectTransform = shadowObject->GetComponent<Transform>();
+    heightFieldShape->setScale(rp3d::Vector3(3, 8, 3));
     
-    objectTransform->position = glm::vec3(0, 50, 0);
-    objectTransform->scale    = glm::vec3(10, 1, 10);
+    RigidBody* rigidBody = plainObject->GetComponent<RigidBody>();
+    
+    rp3d::Transform offsetTransform;
+    offsetTransform.setPosition(rp3d::Vector3(0, 0, 0));
+    
+    rp3d::Collider* collider = rigidBody->addCollider( heightFieldShape, offsetTransform );
     
     
-    shadowObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     
-    MeshRenderer* renderer = shadowObject->GetComponent<MeshRenderer>();
     
-    renderer->mesh     = objectMesh;
-    renderer->material = objectMaterial;
     
-    Engine.sceneMain->AddMeshRendererToSceneRoot( renderer, RENDER_QUEUE_DEFAULT );
+    
+    
+    
+    
+    
+    return;
+    
+    
     
     
     
@@ -343,18 +366,23 @@ void Start() {
     // Generate AI actors
     //
     
-    unsigned int spread = 200;
+    unsigned int spread = 400;
     
     for (unsigned int i=0; i < 1000; i++) {
         
         float xx = Random.Range(0, spread) - Random.Range(0, spread);
-        float yy = 10;
+        float yy = 100;
         float zz = Random.Range(0, spread) - Random.Range(0, spread);
         
         GameObject* actorObject = spawnActor(glm::vec3(xx, yy, zz));
-        actorObject->renderDistance = 80;
+        actorObject->renderDistance = 100;
         
         testActor = actorObject->GetComponent<Actor>();
+        
+        //testActor->SetChanceToChangeDirection(0);
+        //testActor->SetChanceToFocusOnActor(0);
+        //testActor->SetChanceToStopWalking(0);
+        //testActor->SetChanceToWalk(0);
         
     }
     
@@ -411,7 +439,7 @@ void Run() {
     //    bendJoint->RotateAxis(0.00001, glm::vec3(0, 0.001, 0));
     
     
-    text[9]->text = Int.ToString( testActor->GetAge() );
+    //text[9]->text = Int.ToString( testActor->GetAge() );
     
     
     
@@ -494,7 +522,7 @@ void Run() {
     if (Input.CheckKeyCurrent(VK_I)) {cycleDirection = true;  adjustCycle = true;}
     if (Input.CheckKeyCurrent(VK_K)) {cycleDirection = false; adjustCycle = true;}
     
-    ambientLight += 0.01f;
+    //ambientLight += 0.01f;
     
     if (adjustCycle) {
         
@@ -527,21 +555,6 @@ void Run() {
     
     
     /*
-    
-    
-    Transform* objectTransform = shadowObject->GetComponent<Transform>();
-    
-    glm::vec3 oldPosition = objectTransform->position;
-    glm::vec3 oldScale    = objectTransform->scale;
-    
-    objectTransform->SetIdentity();
-    
-    objectTransform->position = oldPosition;
-    objectTransform->scale    = oldScale;
-    objectTransform->RotateAxis(sunRate, glm::vec3(0, 1, 0));
-    
-    sunRate += 0.8;
-    
     
     
     
@@ -625,15 +638,15 @@ void Run() {
     
     if (Input.CheckKeyPressed(VK_ESCAPE)) {
         
-        Application.Pause();
+        Platform.Pause();
         
-        if (Application.isPaused) {
+        if (Platform.isPaused) {
             
             mainCamera->DisableMouseLook();
             
             Input.ClearKeys();
             
-            Application.ShowMouseCursor();
+            Platform.ShowMouseCursor();
             
         } else {
             
@@ -641,7 +654,7 @@ void Run() {
             
             mainCamera->EnableMouseLook();
             
-            Application.HideMouseCursor();
+            Platform.HideMouseCursor();
             
             Time.Update();
             PhysicsTime.Update();

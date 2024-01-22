@@ -1,5 +1,4 @@
 #include <GameEngineFramework/Application/main.h>
-#include <GameEngineFramework/Application/winproc.h>
 
 #ifdef RUN_UNIT_TESTS
  #include "../../tests/framework.h"
@@ -19,12 +18,12 @@ extern NetworkSystem        Network;
 extern RenderSystem         Renderer;
 extern ScriptSystem         Scripting;
 extern ResourceManager      Resources;
-extern ApplicationLayer     Application;
+extern PlatformLayer        Platform;
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
-    HWND wHndl = Application.CreateWindowHandle("windowFrame", "Render window", NULL, WindowProc);
+    HWND wHndl = (HWND)Platform.CreateWindowHandle("windowFrame", "Render window", NULL);
     
     HWND cHnd = GetConsoleWindow();
     
@@ -33,31 +32,36 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     Log.Clear();
     
-    if (Renderer.SetRenderTarget(wHndl) != GLEW_OK) {
-        Application.ShowMouseCursor();
-        
-        DestroyWindow(wHndl);
-        ShowWindow(cHnd, SW_HIDE);
-        
-        MessageBox(NULL, "Cannot locate the OpenGL library. Please update your graphics drivers...", "Error", MB_OK);
-        return 0;
-    }
+    Platform.SetRenderTarget();
+    
+    // Set the window handle and get the device context
+    HDC hDC = GetDC( wHndl );
+    
+    // Get display size
+    Renderer.displaySize.x = GetDeviceCaps(hDC, HORZRES);
+    Renderer.displaySize.y = GetDeviceCaps(hDC, VERTRES);
+    Renderer.displayCenter.x = Renderer.displaySize.x / 2;
+    Renderer.displayCenter.y = Renderer.displaySize.y / 2;
     
     // Get window area
     RECT windowRect;
     GetWindowRect(wHndl, &windowRect);
     
-    Application.windowLeft   = windowRect.left;
-    Application.windowTop    = windowRect.top;
-    Application.windowRight  = windowRect.right;
-    Application.windowBottom = windowRect.bottom;
+    Renderer.SetViewport(0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top);
     
-    // Initiate window size
-    Application.SetWindowCenterScale(WINDOW_WIDTH, WINDOW_HEIGHT);
-    Viewport windowSz = Application.GetWindowArea();
-    Renderer.SetViewport(0, 0, windowSz.w, windowSz.h);
+    Platform.windowLeft   = windowRect.left;
+    Platform.windowTop    = windowRect.top;
+    Platform.windowRight  = windowRect.right;
+    Platform.windowBottom = windowRect.bottom;
     
+    // Initiate window region
+    Platform.SetWindowCenterScale(WINDOW_WIDTH, WINDOW_HEIGHT);
+    
+    
+    //
     // Initiate engine sub systems
+    //
+    
     Resources.Initiate();
     
     Log.WriteLn(); // For event log layout
@@ -137,7 +141,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // Game loop
     //
     
-    while (Application.isActive) {
+    while (Platform.isActive) {
         
         MSG messages;
         while (PeekMessage(&messages, NULL, 0, 0, PM_REMOVE)) {
@@ -218,10 +222,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 RECT windowRect;
                 GetWindowRect(wHndl, &windowRect);
                 
-                Application.windowLeft   =  windowRect.left;
-                Application.windowTop    =  windowRect.top;
-                Application.windowRight  = (windowRect.right  - windowRect.left);
-                Application.windowBottom = (windowRect.bottom - windowRect.top);
+                Platform.windowLeft   =  windowRect.left;
+                Platform.windowTop    =  windowRect.top;
+                Platform.windowRight  = (windowRect.right  - windowRect.left);
+                Platform.windowBottom = (windowRect.bottom - windowRect.top);
                 
 #ifdef PROFILE_ENGINE_CORE
                 Profiler.profileGameEngineUpdate = Profiler.Query();
@@ -273,6 +277,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             // Draw the current frame state
             Renderer.RenderFrame();
             
+            // Turn over the frame buffer
+            SwapBuffers( (HDC)Platform.deviceContext );
+            
 #ifdef PROFILE_ENGINE_CORE
             Profiler.profileRenderSystem = Profiler.Query();
 #endif
@@ -282,17 +289,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #ifdef APPLICATION_ESCAPE_KEY_PAUSE
         if (Input.CheckKeyPressed(VK_ESCAPE)) {
             
-            Application.Pause();
+            Platform.Pause();
             
-            if (Application.isPaused) {
+            if (Platform.isPaused) {
                 Input.ClearKeys();
                 
-                Application.ShowMouseCursor();
+                Platform.ShowMouseCursor();
                 
             } else {
                 SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
                 
-                Application.HideMouseCursor();
+                Platform.HideMouseCursor();
                 
                 Time.Update();
                 PhysicsTime.Update();
@@ -319,13 +326,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Audio.Shutdown();
     
     Renderer.Shutdown();
-    Renderer.ReleaseRenderTarget();
     
     AI.Shutdown();
     
     Resources.DestroyAssets();
     
-    Application.DestroyWindowHandle();
+    Platform.DestroyWindowHandle();
     
     return 0;
 }

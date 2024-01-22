@@ -1,14 +1,12 @@
 #include <GameEngineFramework/Application/winproc.h>
 
+extern "C" ENGINE_API LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam);
+
 extern InputSystem    Input;
 extern RenderSystem   Renderer;
 
-extern ApplicationLayer Application;
+extern PlatformLayer Platform;
 
-
-LRESULT CALLBACK WindowProc2(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam) {
-    return 0;
-}
 
 LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam) {
     
@@ -66,10 +64,10 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             Renderer.viewport.w = WindowRect.right - WindowRect.left;
             Renderer.viewport.h = WindowRect.bottom - WindowRect.top;
             
-            Application.windowLeft   = Renderer.viewport.x;
-            Application.windowTop    = Renderer.viewport.y;
-            Application.windowRight  = Renderer.viewport.w;
-            Application.windowBottom = Renderer.viewport.h;
+            Platform.windowLeft   = Renderer.viewport.x;
+            Platform.windowTop    = Renderer.viewport.y;
+            Platform.windowRight  = Renderer.viewport.w;
+            Platform.windowBottom = Renderer.viewport.h;
             
             // Update scene cameras
             for (unsigned int i=0; i < Renderer.GetRenderQueueSize(); i++) {
@@ -112,7 +110,7 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
         
         case WM_CLOSE: // Window (X) close button
             
-            Application.isActive = false;
+            Platform.isActive = false;
             PostQuitMessage(0);
             
             break;

@@ -20,7 +20,7 @@ ENGINE_API extern InputSystem       Input;
 ENGINE_API extern MathCore          Math;
 ENGINE_API extern ActorSystem       AI;
 
-ENGINE_API extern ApplicationLayer      Application;
+ENGINE_API extern PlatformLayer         Platform;
 ENGINE_API extern EngineSystemManager   Engine;
 
 
@@ -31,8 +31,8 @@ void EngineSystemManager::UpdateUI(void) {
     // Check mouse / button interaction
     //
     
-    unsigned int windowMouseX = Input.mouseX - Application.windowLeft;
-    unsigned int windowMouseY = Input.mouseY - Application.windowTop;
+    unsigned int windowMouseX = Input.mouseX - Platform.windowLeft;
+    unsigned int windowMouseY = Input.mouseY - Platform.windowTop;
     
     for (unsigned int i=0; i < mButtons.Size(); i++) {
         

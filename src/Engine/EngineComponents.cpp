@@ -17,7 +17,7 @@ ENGINE_API extern InputSystem       Input;
 ENGINE_API extern MathCore          Math;
 ENGINE_API extern ActorSystem       AI;
 
-ENGINE_API extern ApplicationLayer      Application;
+ENGINE_API extern PlatformLayer         Platform;
 ENGINE_API extern EngineSystemManager   Engine;
 
 
