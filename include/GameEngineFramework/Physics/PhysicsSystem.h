@@ -101,10 +101,10 @@ public:
     rp3d::SphereShape* CreateColliderSphere(float radius);
     /// Create a capsule collider scaled by radius and height.
     rp3d::CapsuleShape* CreateColliderCapsule(float radius, float height);
-    /// Create a concave mesh shape collider.
-    MeshCollider* CreateColliderFromMesh(Mesh* sourceMesh);
-    /// Create a height map collider from a mesh grid of heights.
-    MeshCollider* CreateColliderHeightMapFromMesh(Mesh* sourceMesh);
+    
+    /// Create a height field collider and return the collider.
+    MeshCollider* CreateHeightFieldMap(float* heightField, unsigned int width, unsigned int height);
+    
     
     /// Cast a ray and return the hit data of any objects that intersected the ray.
     bool Raycast(glm::vec3 from, glm::vec3 direction, float distance, Hit& hit, LayerMask layer=LayerMask::Default);

@@ -30,15 +30,6 @@
 #include "../../../vendor/gl/glew.h"
 
 
-#ifndef _WIN32_WINNT
-  #define _WIN32_WINNT 0x500
-#endif
-
-#define WIN32_LEAN_AND_MEAN
-
-#include <sdkddkver.h>
-#include <windows.h>
-
 
 
 
@@ -144,12 +135,6 @@ public:
     /// Shutdown the render system.
     void Shutdown(void);
     
-    /// Set the target render context.
-    GLenum SetRenderTarget(HWND wHndl);
-    
-    /// Free the target render context.
-    void ReleaseRenderTarget(void);
-    
     /// Set the render area within the display.
     void SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
     
@@ -173,11 +158,6 @@ public:
     
     // Frame counter
     unsigned long long int mNumberOfFrames;
-    
-    // Device render context
-    HWND  mWindowHandle;
-    HDC   mDeviceContext;
-    HGLRC mRenderContext;
     
     // Render queue group
     std::vector<Scene*>  mRenderQueue;

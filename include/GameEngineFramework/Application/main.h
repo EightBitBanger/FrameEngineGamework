@@ -14,6 +14,6 @@
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Timer/timer.h>
 
-#include <GameEngineFrameWork/Application/applicationlayer.h>
+#include <GameEngineFrameWork/Application/Platform.h>
 
 #include <GameEngineFrameWork/Engine/Engine.h>

@@ -10,7 +10,7 @@
 #include <GameEngineFramework/Engine/UI/text.h>
 #include <GameEngineFramework/Engine/UI/button.h>
 
-#include <GameEngineFramework/application/applicationlayer.h>
+#include <GameEngineFramework/application/Platform.h>
 
 #include <GameEngineFramework/Resources/ResourceManager.h>
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
@@ -43,7 +43,7 @@
     extern Timer                PhysicsTime;
     extern Timer                Time;
     
-    extern ApplicationLayer     Application;
+    extern PlatformLayer        Platform;
     extern ResourceManager      Resources;
     extern Serialization        Serializer;
     extern ScriptSystem         Scripting;

@@ -96,16 +96,17 @@ public:
     /// Add rotational torque to the rigid body.
     void AddTorque(glm::vec3 force);
     
-    /// Add a collider from a resource tag at the offset position x, y and z.
-    void AddCollider(ColliderTag* colliderTag, float x, float y, float z, LayerMask layer = LayerMask::Default);
     /// Add a box collider shape at the offset position x, y and z.
     void AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
     /// Add a capsule collider shape at the offset position x, y and z.
     void AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
     /// Add a sphere collider shape at the offset position x, y and z.
     void AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
-    /// Add a mesh collider.
-    void AddColliderMesh(MeshCollider* meshCollider, LayerMask layer);
+    
+    /// Add a collider from a resource tag at the offset position x, y and z.
+    void AddCollider(ColliderTag* colliderTag, float x, float y, float z, LayerMask layer = LayerMask::Default);
+    /// Add a collider from a height map at the offset position x, y and z.
+    void AddCollider(MeshCollider* meshCollider, float x, float y, float z, LayerMask layer = LayerMask::Default);
     
     /// Set the rigid body mass.
     void SetMass(float mass);

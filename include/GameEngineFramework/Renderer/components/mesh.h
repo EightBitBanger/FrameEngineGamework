@@ -60,8 +60,69 @@ class ENGINE_API Mesh {
     
 public:
     
-    /// Reallocate new GPU memory.
-    void Reallocate(unsigned int newBufferSize);
+    /// Add a plain sub mesh to the vertex buffer.
+    void AddPlain(float x, float y, float z, float width, float height, Color color, float uCoord=1, float vCoord=1, float uStart=0, float vStart=0, unsigned int uOffset=0, unsigned int vOffset=0);
+    
+    /// Add a sub divided plain sub mesh to the vertex buffer.
+    void AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
+    
+    /// Add a wall sub mesh to the vertex buffer.
+    void AddWall(float x, float y, float z, float width, float height, Color color);
+    
+    /// Add a sub divided wall sub mesh to the vertex buffer.
+    void AddWallSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
+    
+    /// Add a quad sub mesh to the vertex buffer.
+    void AddQuad(float x, float y, float z, float width, float height, Color color, float uCoord=1, float vCoord=1, float uStart=0, float vStart=0, unsigned int uOffset=0, unsigned int vOffset=0);
+    
+    
+    /// Add a sub mesh into this vertex buffer.
+    bool AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu=true);
+    
+    /// Add a vertex buffer directly into this vertex buffer.
+    bool AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu=true);
+    
+    /// Remove a sub mesh from this vertex buffer.
+    bool RemoveSubMesh(unsigned int index);
+    
+    /// Copy this vertex buffer into a sub mesh.
+    bool CopySubMesh(unsigned int index, SubMesh& mesh);
+    
+    /// Copy this vertex buffer directly into a vertex buffer.
+    bool CopySubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer);
+    
+    
+    /// Update the color of a sub mesh.
+    bool ChangeSubMeshColor(unsigned int index, Color newColor);
+    
+    /// Update the position of a sub mesh.
+    bool ChangeSubMeshPosition(unsigned int index, float x, float y, float z);
+    
+    /// Clear all sub meshes in the mesh.
+    void ClearSubMeshes(void);
+    
+    
+    /// Fully re-upload the vertex buffer onto the GPU buffer.
+    void UploadToGPU(void);
+    
+    /// Get the number of index locations in the index buffer.
+    unsigned int GetNumberOfIndices(void);
+    
+    /// Get the number of vertex locations in the vertex buffer.
+    unsigned int GetNumberOfVertices(void);
+    
+    /// Get a vertex from the internal vertex array.
+    Vertex GetVertex(unsigned int index);
+    
+    /// Set a vertex to the internal vertex array.
+    void SetVertex(unsigned int index, Vertex vertex);
+    
+    /// Get an index from the internal index array.
+    Index GetIndex(unsigned int index);
+    
+    /// Set an index to the internal index array.
+    void SetIndex(unsigned int index, Index position);
+    
     
     /// Set the primitive drawing type for the vertex data.
     void SetPrimitive(int primitiveType);
@@ -89,68 +150,12 @@ public:
     /// Run a draw call on this index buffer.
     void DrawIndexArray(void);
     
+    
     /// Return the number of sub meshes in this vertex buffer.
     unsigned int GetSubMeshCount(void);
     
-    /// Add a plain sub mesh to the vertex buffer.
-    void AddPlain(float x, float y, float z, float width, float height, Color color, float uCoord=1, float vCoord=1, float uStart=0, float vStart=0, unsigned int uOffset=0, unsigned int vOffset=0);
-    
-    /// Add a sub divided plain sub mesh to the vertex buffer.
-    void AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
-    
-    /// Add a wall sub mesh to the vertex buffer.
-    void AddWall(float x, float y, float z, float width, float height, Color color);
-    
-    /// Add a sub divided wall sub mesh to the vertex buffer.
-    void AddWallSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
-    
-    /// Add a quad sub mesh to the vertex buffer.
-    void AddQuad(float x, float y, float z, float width, float height, Color color, float uCoord=1, float vCoord=1, float uStart=0, float vStart=0, unsigned int uOffset=0, unsigned int vOffset=0);
-    
-    /// Add a sub mesh into this vertex buffer.
-    bool AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu=true);
-    
-    /// Add a vertex buffer directly into this vertex buffer.
-    bool AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu=true);
-    
-    /// Remove a sub mesh from this vertex buffer.
-    bool RemoveSubMesh(unsigned int index);
-    
-    /// Copy this vertex buffer into a sub mesh.
-    bool CopySubMesh(unsigned int index, SubMesh& mesh);
-    
-    /// Copy this vertex buffer directly into a vertex buffer.
-    bool CopySubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer);
-    
-    /// Update the color of a sub mesh.
-    bool ChangeSubMeshColor(unsigned int index, Color newColor);
-    
-    /// Update the position of a sub mesh.
-    bool ChangeSubMeshPosition(unsigned int index, float x, float y, float z);
-    
-    /// Clear all sub meshes in the mesh.
-    void ClearSubMeshes(void);
-    
-    /// Fully re-upload the vertex buffer into the GPU buffer.
-    void UploadToGPU(void);
-    
-    /// Get the number of index locations in the index buffer.
-    unsigned int GetNumberOfIndices(void);
-    
-    /// Get the number of vertex locations in the vertex buffer.
-    unsigned int GetNumberOfVertices(void);
-    
-    /// Get a vertex from the internal vertex array.
-    Vertex GetVertex(unsigned int index);
-    
-    /// Set a vertex to the internal vertex array.
-    void SetVertex(unsigned int index, Vertex vertex);
-    
-    /// Get an index from the internal index array.
-    Index GetIndex(unsigned int index);
-    
-    /// Set an index to the internal index array.
-    void SetIndex(unsigned int index, Index position);
+    /// Generate normals for the current vertex buffer.
+    void GenerateNormals(void);
     
     
     friend class RenderSystem;
@@ -190,6 +195,9 @@ private:
     // Allocate/deallocate 
     void AllocateBuffers(unsigned int maxBufferSize);
     void FreeBuffers(void);
+    
+    // Reallocate new GPU memory.
+    void Reallocate(unsigned int newBufferSize);
     
 };
 
