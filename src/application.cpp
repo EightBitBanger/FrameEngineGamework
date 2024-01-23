@@ -56,7 +56,7 @@ SubMesh submesh;
 
 bool cycleDirection = false;
 
-float ambientLight = 0;
+float ambientLight = 0.3;
 
 Material* skyMaterial;
 Material* plainMaterial;
@@ -102,8 +102,8 @@ void Start() {
     Engine.sceneMain->AddMeshRendererToSceneRoot( skyRenderer, RENDER_QUEUE_SKY );
     
     skyMaterial = skyRenderer->material;
-    skyMaterial->diffuse = Color(0, 0, 0);
-    skyMaterial->ambient = Color(0, 0, 0);
+    skyMaterial->diffuse = Colors.black;
+    skyMaterial->ambient = Colors.black;
     
     
     
@@ -131,7 +131,7 @@ void Start() {
     // Directional light
     directionalLight = Engine.Create<GameObject>();
     lightTransform = directionalLight->GetComponent<Transform>();
-    lightTransform->RotateAxis(1, Vector3(0, -0.5, 0.8));
+    lightTransform->RotateAxis(1, Vector3(0, -0.8, 0.3));
     
     directionalLight->AddComponent( Engine.CreateComponent<Light>() );
     Light* sunLight = directionalLight->GetComponent<Light>();
@@ -188,19 +188,20 @@ void Start() {
     
     // Base chunk mesh
     Mesh* plainBaseMesh = Resources.CreateMeshFromTag("chunk");
+    
     SubMesh chunkSubMesh;
     plainBaseMesh->CopySubMesh(0, chunkSubMesh);
     
     // Chunk material
     plainMaterial = Engine.Create<Material>();
     
-    //TextureTag* plainTexture = Resources.FindTextureTag("grassy");
-    //plainTexture->Load();
+    TextureTag* plainTexture = Resources.FindTextureTag("grassy");
+    plainTexture->Load();
     
-    //plainMaterial->texture.UploadTextureToGPU( plainTexture->buffer, plainTexture->width, plainTexture->height, MATERIAL_FILTER_ANISOTROPIC );
+    plainMaterial->texture.UploadTextureToGPU( plainTexture->buffer, plainTexture->width, plainTexture->height, MATERIAL_FILTER_ANISOTROPIC );
     
     plainMaterial->shader = Engine.shaders.color;
-    plainMaterial->diffuse = Colors.Make(0, 0.01f, 0);
+    plainMaterial->diffuse = Colors.black;
     plainMaterial->ambient = Colors.black;
     
     plainMaterial->DisableShadowVolumePass();
@@ -227,18 +228,24 @@ void Start() {
     
     
     
-    unsigned int worldWidth  = 1;
-    unsigned int worldHeight = 1;
+    // Area of chunks
+    unsigned int worldWidth  = 80;
+    unsigned int worldHeight = 80;
     
+    // Points in the mesh
     unsigned int chunkWidth  = 4;
     unsigned int chunkHeight = 4;
     
-    float heightMul = 1.3;
+    // Noise scaling
+    float noiseWidth  = 0.03;
+    float noiseHeight = 0.03;
+    
+    float heightMul = 3;
     
     
     // Transform the chunk
     Transform* chunkTransform = plainObject->GetComponent<Transform>();
-    chunkTransform->scale = Vector3(1, 1, 1);
+    chunkTransform->scale = Vector3(2, 2, 2);
     
     
     
@@ -251,9 +258,70 @@ void Start() {
     
     
     // Plain collider
-    //BoxShape* plainCollider = Physics.CreateColliderBox(1000, 100, 1000);
+    BoxShape* plainCollider = Physics.CreateColliderBox(10000, 10, 10000);
     
-    //plainObject->AddColliderBox(plainCollider, 0, -100, 0);
+    plainObject->AddColliderBox(plainCollider, 0, -10, 0);
+    
+    
+    for (unsigned int x=0; x < worldWidth; x++) {
+        
+        for (unsigned int z=0; z < worldHeight; z++) {
+            
+            float chunkX = (float)x - (worldWidth  / 2.0f);
+            float chunkZ = (float)z - (worldHeight / 2.0f);
+            
+            chunkMesh->AddSubMesh(chunkX, 0, chunkZ, chunkSubMesh, false);
+            
+            // Generate perlin
+            
+            /*
+            
+            for (unsigned int index=0; index < chunkMesh->GetNumberOfVertices(); index++) {
+                
+                Vertex vert = chunkMesh->GetVertex(index);
+                
+                float xCoord = vert.x * noiseWidth;
+                float zCoord = vert.z * noiseHeight;
+                
+                float height = Random.Perlin(xCoord, 0, zCoord) * heightMul;
+                
+                // Height step effect
+                float heightMul = 5;
+                height = glm::round( height * heightMul ) / heightMul;
+                
+                //if (height < 0) 
+                //    height = 0;
+                
+                vert.y = height;
+                
+                chunkMesh->SetVertex(index, vert);
+                
+                continue;
+            }
+            
+            */
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    chunkMesh->CalculateNormals();
+    
+    chunkMesh->UploadToGPU();
+    
+    
+    
+    
+    
+    //
+    // Generate height field map collider
+    //
+    /*
+    
+    heightField = new float[ chunkWidth * chunkHeight ];
+    unsigned int heightFieldIndex = 0;
     
     
     for (unsigned int x=0; x < worldWidth; x++) {
@@ -265,48 +333,13 @@ void Start() {
             
             chunkMesh->AddSubMesh(chunkX, 0, chunkZ, chunkSubMesh, false);
             
-            
-            // Generate perlin
-            
-            for (unsigned int index=0; index < chunkMesh->GetNumberOfVertices(); index++) {
-                
-                Vertex vert = chunkMesh->GetVertex(index);
-                
-                float xCoord = vert.x;
-                float zCoord = vert.z;
-                
-                float height = Random.Perlin(xCoord, 0, zCoord) * heightMul;
-                
-                if (height < 0) 
-                    height = 0;
-                
-                vert.y = height;
-                
-                chunkMesh->SetVertex(index, vert);
-                
-                continue;
-            }
-            
-            chunkMesh->GenerateNormals();
-            
-            continue;
         }
         
-        continue;
     }
     
-    chunkMesh->UploadToGPU();
+    */
     
-    
-    
-    
-    
-    //
-    // Generate height field map collider
-    //
-    
-    heightField = new float[ chunkWidth * chunkHeight ];
-    unsigned int heightFieldIndex = 0;
+    /*
     
     for (unsigned int i=0; i < chunkMesh->GetNumberOfIndices(); i += 3) {
         
@@ -318,17 +351,21 @@ void Start() {
         Vertex vertB = chunkMesh->GetVertex(indexB);
         Vertex vertC = chunkMesh->GetVertex(indexC);
         
-        //heightField[heightFieldIndex] = vertA.y;
+        heightField[heightFieldIndex] = vertA.y;
         
         heightFieldIndex++;
         continue;
     }
     
+    */
+    
     
     
     //
-    // Generate a physics heights field map
+    // Generate a physics height field map
     //
+    
+    /*
     
     rp3d::HeightFieldShape* heightFieldShape = Physics.common.createHeightFieldShape(chunkWidth, chunkHeight, 
                                                                                     -1000, 1000, 
@@ -347,16 +384,11 @@ void Start() {
     
     rp3d::Collider* collider = rigidBody->addCollider( heightFieldShape, offsetTransform );
     
+    */
     
     
     
     
-    
-    
-    
-    
-    
-    return;
     
     
     
@@ -366,12 +398,12 @@ void Start() {
     // Generate AI actors
     //
     
-    unsigned int spread = 400;
+    unsigned int spread = 50;
     
-    for (unsigned int i=0; i < 1000; i++) {
+    for (unsigned int i=0; i < 200; i++) {
         
         float xx = Random.Range(0, spread) - Random.Range(0, spread);
-        float yy = 100;
+        float yy = 10;
         float zz = Random.Range(0, spread) - Random.Range(0, spread);
         
         GameObject* actorObject = spawnActor(glm::vec3(xx, yy, zz));
@@ -386,6 +418,33 @@ void Start() {
         
     }
     
+    
+    
+    
+    
+    //
+    // Generate static AI actors
+    //
+    
+    unsigned int plantSpread = 50;
+    
+    for (unsigned int i=0; i < 200; i++) {
+        
+        float xx = Random.Range(0, plantSpread) - Random.Range(0, plantSpread);
+        float yy = 10;
+        float zz = Random.Range(0, plantSpread) - Random.Range(0, plantSpread);
+        
+        GameObject* actorObject = spawnActor(glm::vec3(xx, yy, zz));
+        actorObject->renderDistance = 100;
+        
+        testActor = actorObject->GetComponent<Actor>();
+        
+        //testActor->SetChanceToChangeDirection(0);
+        //testActor->SetChanceToFocusOnActor(0);
+        //testActor->SetChanceToStopWalking(0);
+        //testActor->SetChanceToWalk(0);
+        
+    }
     
     
     return;
@@ -548,6 +607,12 @@ void Run() {
     
     Light* sunLight = directionalLight->GetComponent<Light>();
     sunLight->intensity = ambientLight * 0.087;
+    
+    // Light direction
+    lightTransform = directionalLight->GetComponent<Transform>();
+    
+    if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis(0.01, Vector3(1, 0, 0));}
+    if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.01, Vector3(1, 0, 0));}
     
     
     
@@ -723,105 +788,11 @@ GameObject* spawnActor(glm::vec3 position) {
     
     // Actor
     Actor* actor = newActorObject->GetComponent<Actor>();
+    
+    // Use sheep actor preset
+    AI.genomes.SheepGene( actor );
+    
     actor->SetActive(false);
-    
-    // Setup actor genetics
-    float variantR = Random.Range(0, 10) * 0.001;
-    float variantG = Random.Range(0, 10) * 0.001;
-    float variantB = Random.Range(0, 10) * 0.001;
-    
-    Color baseColor = Colors.MakeGrayScale(0.1);
-    
-    variantG = variantR;
-    variantB = variantR;
-    
-    // Body gene
-    Gene geneBody;
-    geneBody.offset    = BaseGene(0, 0, 0);
-    geneBody.position  = BaseGene(0, 0.7, 0);
-    geneBody.scale     = BaseGene(0.4, 0.4, 0.9);
-    geneBody.color     = BaseGene(variantR, variantG, variantB);
-    geneBody.color.x  *= baseColor.r;
-    geneBody.color.y  *= baseColor.g;
-    geneBody.color.z  *= baseColor.b;
-    
-    // Head gene
-    Gene geneHead;
-    geneHead.offset    = BaseGene(0, 1.02, 0.254);
-    geneHead.position  = BaseGene(0, 0, 0.3);
-    geneHead.scale     = BaseGene(0.415, 0.395, 0.415);
-    geneHead.color     = BaseGene(0.4, 0.4, 0.4);
-    geneHead.color.x  *= baseColor.r;
-    geneHead.color.y  *= baseColor.g;
-    geneHead.color.z  *= baseColor.b;
-    
-    // Limb FL gene
-    Gene geneLimbFrontLeft;
-    geneLimbFrontLeft.offset    = BaseGene(0.17, 0.75, 0.4);
-    geneLimbFrontLeft.position  = BaseGene(0, -0.4, 0);
-    geneLimbFrontLeft.scale     = BaseGene(0.2, 0.65, 0.2);
-    geneLimbFrontLeft.color     = BaseGene(0.4, 0.4, 0.4);
-    geneLimbFrontLeft.color.x  *= baseColor.r;
-    geneLimbFrontLeft.color.y  *= baseColor.g;
-    geneLimbFrontLeft.color.z  *= baseColor.b;
-    
-    geneLimbFrontLeft.doAnimationCycle = true;
-    geneLimbFrontLeft.animationAxis    = BaseGene(1, 0, 0);
-    geneLimbFrontLeft.animationRange   = 15;
-    
-    // Limb FR gene
-    Gene geneLimbFrontRight;
-    geneLimbFrontRight.offset    = BaseGene(-0.17, 0.75, 0.4);
-    geneLimbFrontRight.position  = BaseGene(0, -0.4, 0);
-    geneLimbFrontRight.scale     = BaseGene(0.2, 0.65, 0.2);
-    geneLimbFrontRight.color     = BaseGene(0.4, 0.4, 0.4);
-    geneLimbFrontRight.color.x  *= baseColor.r;
-    geneLimbFrontRight.color.y  *= baseColor.g;
-    geneLimbFrontRight.color.z  *= baseColor.b;
-    
-    geneLimbFrontRight.doAnimationCycle   = true;
-    geneLimbFrontRight.doInverseAnimation = true;
-    geneLimbFrontRight.animationAxis      = BaseGene(1, 0, 0);
-    geneLimbFrontRight.animationRange     = 15;
-    
-    // Limb RL gene
-    Gene geneLimbRearLeft;
-    geneLimbRearLeft.offset    = BaseGene(0.17, 0.75, -0.4);
-    geneLimbRearLeft.position  = BaseGene(0, -0.4, 0);
-    geneLimbRearLeft.scale     = BaseGene(0.2, 0.65, 0.2);
-    geneLimbRearLeft.color     = BaseGene(0.4, 0.4, 0.4);
-    geneLimbRearLeft.color.x  *= baseColor.r;
-    geneLimbRearLeft.color.y  *= baseColor.g;
-    geneLimbRearLeft.color.z  *= baseColor.b;
-    
-    geneLimbRearLeft.doAnimationCycle = true;
-    geneLimbRearLeft.animationAxis    = BaseGene(1, 0, 0);
-    geneLimbRearLeft.animationRange   = 15;
-    
-    // Limb RR gene
-    Gene geneLimbReadRight;
-    geneLimbReadRight.offset    = BaseGene(-0.17, 0.75, -0.4);
-    geneLimbReadRight.position  = BaseGene(0, -0.4, 0);
-    geneLimbReadRight.scale     = BaseGene(0.2, 0.65, 0.2);
-    geneLimbReadRight.color     = BaseGene(0.4, 0.4, 0.4);
-    geneLimbReadRight.color.x  *= baseColor.r;
-    geneLimbReadRight.color.y  *= baseColor.g;
-    geneLimbReadRight.color.z  *= baseColor.b;
-    
-    geneLimbReadRight.doAnimationCycle   = true;
-    geneLimbReadRight.doInverseAnimation = true;
-    geneLimbReadRight.animationAxis      = BaseGene(1, 0, 0);
-    geneLimbReadRight.animationRange     = 15;
-    
-    
-    // Apply genes to the actor
-    actor->AddGene(geneBody);
-    actor->AddGene(geneHead);
-    
-    actor->AddGene(geneLimbFrontLeft);
-    actor->AddGene(geneLimbFrontRight);
-    actor->AddGene(geneLimbRearLeft);
-    actor->AddGene(geneLimbReadRight);
     
     return newActorObject;
 }

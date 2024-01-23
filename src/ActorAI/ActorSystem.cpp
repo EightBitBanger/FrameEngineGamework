@@ -76,6 +76,20 @@ bool ActorSystem::DestroyActor(Actor* actorPtr) {
     return state;
 }
 
+Plant* ActorSystem::CreatePlant(void) {
+    mux.lock();
+    Plant* newPlant = mPlants.Create();
+    mux.unlock();
+    return newPlant;
+}
+
+bool ActorSystem::DestroyPlant(Plant* plantPtr) {
+    mux.lock();
+    bool state = mPlants.Destroy(plantPtr);
+    mux.unlock();
+    return state;
+}
+
 unsigned int ActorSystem::GetNumberOfActors(void) {
     mux.lock();
     unsigned int value = mActors.GetObjectCount();
@@ -97,6 +111,7 @@ void ActorSystem::SetActorUpdateDistance(float distance) {
     mux.unlock();
     return;
 }
+
 
 
 //

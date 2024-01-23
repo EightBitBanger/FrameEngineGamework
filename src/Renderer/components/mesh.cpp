@@ -396,9 +396,7 @@ void Mesh::SetIndex(unsigned int index, Index position) {
     return;
 }
 
-void Mesh::GenerateNormals(void) {
-    
-    glm::vec3 prevNormal(0);
+void Mesh::CalculateNormals(void) {
     
     for (unsigned int i=0; i < mIndexBufferSz; i += 3) {
         
@@ -420,23 +418,10 @@ void Mesh::GenerateNormals(void) {
         V.y = vertC.y - vertA.y;
         V.z = vertC.z - vertA.z;
         
-        
         glm::vec3 normal;
         normal.x = (U.y * V.z) - (U.z * V.y);
         normal.y = (U.z * V.x) - (U.x * V.z);
         normal.z = (U.x * V.y) - (U.y * V.x);
-        
-        //
-        // TODO: Attempted normal interpolation
-        //
-        
-        glm::vec3 currentNormal = normal;
-        
-        if (prevNormal != glm::vec3(0)) {
-            normal = Math.Lerp(normal, prevNormal, 0.5f);
-        }
-        
-        prevNormal = currentNormal;
         
         mVertexBuffer[indexA].nx = normal.x;
         mVertexBuffer[indexA].ny = normal.y;
