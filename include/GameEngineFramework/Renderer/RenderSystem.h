@@ -31,10 +31,6 @@
 
 
 
-
-
-
-
 class ENGINE_API RenderSystem {
     
 public:

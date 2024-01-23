@@ -49,7 +49,7 @@ set (RUNTIME_HEADERS
     
     "include/GameEngineFramework/configuration.h"
     
-    "include/GameEngineFramework/Application/applicationlayer.h"
+    "include/GameEngineFramework/Application/Platform.h"
     "include/GameEngineFramework/Application/winproc.h"
     "include/GameEngineFramework/Application/main.h"
     
@@ -60,6 +60,7 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
+    "include/GameEngineFramework/ActorAI/components/plant.h"
     "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
     "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
     
@@ -195,7 +196,7 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/configuration.h"
     
-    "include/GameEngineFramework/Application/applicationlayer.h"
+    "include/GameEngineFramework/Application/Platform.h"
     "include/GameEngineFramework/Application/winproc.h"
     "include/GameEngineFramework/Application/main.h"
     
@@ -206,6 +207,7 @@ set (GAME_HEADERS
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
+    "include/GameEngineFramework/ActorAI/components/plant.h"
     "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
     "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
     
@@ -328,7 +330,7 @@ endif()
 
 set (CORE_HEADERS
     
-    "include/GameEngineFramework/Application/applicationlayer.h"
+    "include/GameEngineFramework/Application/Platform.h"
     "include/GameEngineFramework/Application/winproc.h"
     
     "include/GameEngineFramework/Audio/AudioSystem.h"
@@ -338,6 +340,7 @@ set (CORE_HEADERS
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
+    "include/GameEngineFramework/ActorAI/components/plant.h"
     "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
     "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
     
@@ -410,7 +413,7 @@ set (CORE_HEADERS
 
 set (CORE_SOURCES
     
-    "src/Application/ApplicationLayer.cpp"
+    "src/Application/Platform.cpp"
     "src/Application/winproc.cpp"
     
     "src/Audio/AudioSystem.cpp"
@@ -443,6 +446,7 @@ set (CORE_SOURCES
     "src/ActorAI/genetics/gene.cpp"
     "src/ActorAI/genetics/base.cpp"
     "src/ActorAI/components/actor.cpp"
+    "src/ActorAI/components/plant.cpp"
     "src/ActorAI/neurons/NeuralLayer.cpp"
     "src/ActorAI/neurons/WeightedLayer.cpp"
     

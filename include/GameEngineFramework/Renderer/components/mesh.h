@@ -12,7 +12,7 @@
 #include <string>
 
 #ifndef RENDERER_VERTEX_BUFFER_MAX
-  #define RENDERER_VERTEX_BUFFER_MAX  100000
+  #define RENDERER_VERTEX_BUFFER_MAX  1000000
 #endif
 
 
@@ -155,7 +155,7 @@ public:
     unsigned int GetSubMeshCount(void);
     
     /// Generate normals for the current vertex buffer.
-    void GenerateNormals(void);
+    void CalculateNormals(void);
     
     
     friend class RenderSystem;

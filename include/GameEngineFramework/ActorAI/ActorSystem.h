@@ -2,6 +2,7 @@
 #define _ACTOR_AI_SYSTEM__
 
 #include <GameEngineFramework/ActorAI/ActorStates.h>
+#include <GameEngineFramework/ActorAI/GeneticPresets.h>
 
 #include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
@@ -10,6 +11,7 @@
 #include <GameEngineFramework/ActorAI/Genetics/Gene.h>
 
 #include <GameEngineFramework/ActorAI/components/actor.h>
+#include <GameEngineFramework/ActorAI/components/plant.h>
 
 #include <thread>
 #include <mutex>
@@ -27,6 +29,12 @@ public:
     
     /// Destroy an actor.
     bool DestroyActor(Actor* actorPtr);
+    
+    /// Create a static actor plant and return its pointer.
+    Plant* CreatePlant(void);
+    
+    /// Destroy a static actor plant.
+    bool DestroyPlant(Plant* plantPtr);
     
     /// Set the player position in the simulation.
     void SetPlayerWorldPosition(glm::vec3 position);
@@ -54,8 +62,11 @@ public:
     /// Shutdown the actor AI system. (called internally)
     void Shutdown(void);
     
-    /// Update simulation actors (called internally from another thread)
+    /// Update the actors in the simulation. (called internally from another thread)
     void Update();
+    
+    /// Genetic entity definitions.
+    GeneticPresets genomes;
     
 private:
     
@@ -65,13 +76,13 @@ private:
     // Distance beyond which the actors will no longer update
     float mActorUpdateDistance;
     
-    
     // Threading
     std::thread* mActorSystemThread;
     std::mutex   mux;
     
-    // Actor object pool
+    // Object pools
     PoolAllocator<Actor> mActors;
+    PoolAllocator<Plant> mPlants;
     
 };
 
