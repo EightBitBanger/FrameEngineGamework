@@ -17,7 +17,7 @@ Camera::Camera() :
     
     fov(60),
     aspect(1.33),
-    clipNear(1),
+    clipNear(0.1),
     clipFar(10000000),
     
     mouseLimitPitchMax(180),

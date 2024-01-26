@@ -109,10 +109,8 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     
     Material* skyMaterial = Renderer.CreateMaterial();
     
-    skyMaterial->diffuse = Color(1, 1, 1);
-    skyMaterial->ambient = Colors.MakeGrayScale(0.4);
-    skyMaterial->diffuse = Colors.MakeGrayScale(0.4);
-    skyMaterial->shader = shaders.color;
+    skyMaterial->ambient = Colors.MakeGrayScale(0.1);
+    skyMaterial->shader = shaders.sky;
     
     skyMaterial->DisableDepthTest();
     skyMaterial->DisableShadowVolumePass();
@@ -158,6 +156,7 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     
     newGameObject->SetPosition(position);
     
+    // Actor controllers do not use conventional physics gravity
     newGameObject->DisableGravity();
     newGameObject->SetDynamic();
     

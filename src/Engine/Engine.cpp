@@ -143,10 +143,15 @@ void EngineSystemManager::Initiate() {
     shaders.colorUnlit    = Resources.CreateShaderFromTag("colorUnlit");
     shaders.UI            = Resources.CreateShaderFromTag("UI");
     shaders.shadowCaster  = Resources.CreateShaderFromTag("shadowCaster");
+    shaders.sky           = Resources.CreateShaderFromTag("sky");
     
     // Load default meshes
-    meshes.cube  = Resources.CreateMeshFromTag("cube");
-    meshes.plain = Resources.CreateMeshFromTag("plain");
+    meshes.cube            = Resources.CreateMeshFromTag("cube");
+    meshes.chunk           = Resources.CreateMeshFromTag("chunk");
+    meshes.plain           = Resources.CreateMeshFromTag("plain");
+    meshes.sphere          = Resources.CreateMeshFromTag("sphere");
+    meshes.wallHorizontal  = Resources.CreateMeshFromTag("wallh");
+    meshes.wallVertical    = Resources.CreateMeshFromTag("wallv");
     
     // Main world scene
     sceneMain = Create<Scene>();
@@ -158,9 +163,14 @@ void EngineSystemManager::Initiate() {
     Renderer.shaders.colorUnlit   = shaders.colorUnlit;
     Renderer.shaders.UI           = shaders.UI;
     Renderer.shaders.shadowCaster = shaders.shadowCaster;
+    Renderer.shaders.sky          = shaders.sky;
     
-    Renderer.meshes.cube   = meshes.cube;
-    Renderer.meshes.plain  = meshes.plain;
+    Renderer.meshes.cube            = meshes.cube;
+    Renderer.meshes.chunk           = meshes.chunk;
+    Renderer.meshes.plain           = meshes.plain;
+    Renderer.meshes.sphere          = meshes.sphere;
+    Renderer.meshes.wallHorizontal  = meshes.wallHorizontal;
+    Renderer.meshes.wallVertical    = meshes.wallVertical;
     
     return;
 }

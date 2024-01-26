@@ -139,15 +139,15 @@ void Mesh::AddQuad(float x, float y, float z, float width, float height, Color c
     return;
 }
 
-bool Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu) {
+int Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu) {
     return AddSubMesh(x, y, z, mesh.vertexBuffer, mesh.indexBuffer, doUploadToGpu);
 }
 
-bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu) {
+int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu) {
     
     // Buffer MAX check
-    if ((mVertexBuffer.size() + vrtxBuffer.size()) > RENDERER_VERTEX_BUFFER_MAX) 
-        return false;
+    //if ((mVertexBuffer.size() + vrtxBuffer.size()) > RENDERER_VERTEX_BUFFER_MAX) 
+    //    return ;
     
     if (mFreeMesh.size() > 0) {
         
@@ -193,7 +193,7 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
                 glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, freeMeshPtr.indexBegin * sizeof(Index),  freeMeshPtr.indexCount * sizeof(Index), &mIndexBuffer[freeMeshPtr.indexBegin]);
             }
             
-            return false;
+            return -1;
         }
     }
     
@@ -225,12 +225,11 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
         mIndexBuffer.push_back(index);
     }
     
+    if (!doUploadToGpu) 
+        return startVertex;
     
     mVertexBufferSz = mVertexBuffer.size();
     mIndexBufferSz  = mIndexBuffer.size();
-    
-    if (!doUploadToGpu) 
-        return true;
     
     // Check to allocate new GPU memory
     if ((mVertexBufferSz > mMaxSize) | (mIndexBufferSz > mMaxSize)) {
@@ -243,7 +242,7 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
         glBufferSubData(GL_ARRAY_BUFFER, 0, mVertexBufferSz * sizeof(Vertex), &mVertexBuffer[0]);
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0]);
         
-        return true;
+        return startVertex;
     }
     
     glBindVertexArray(mVertexArray);
@@ -251,7 +250,7 @@ bool Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer
     glBufferSubData(GL_ARRAY_BUFFER, 0, mVertexBufferSz * sizeof(Vertex), &mVertexBuffer[0]);
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0]);
     
-    return true;
+    return startVertex;
 }
 
 bool Mesh::RemoveSubMesh(unsigned int index) {
@@ -400,7 +399,7 @@ void Mesh::CalculateNormals(void) {
     
     for (unsigned int i=0; i < mIndexBufferSz; i += 3) {
         
-        unsigned int indexA = mIndexBuffer[i].index;
+        unsigned int indexA = mIndexBuffer[i]  .index;
         unsigned int indexB = mIndexBuffer[i+1].index;
         unsigned int indexC = mIndexBuffer[i+2].index;
         

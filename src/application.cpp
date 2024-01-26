@@ -24,7 +24,7 @@ extern ActorSystem          AI;
 
 
 // User functions
-GameObject* spawnActor(glm::vec3 position);
+
 
 
 
@@ -102,8 +102,8 @@ void Start() {
     Engine.sceneMain->AddMeshRendererToSceneRoot( skyRenderer, RENDER_QUEUE_SKY );
     
     skyMaterial = skyRenderer->material;
-    skyMaterial->diffuse = Colors.black;
-    skyMaterial->ambient = Colors.black;
+    skyMaterial->diffuse = Colors.white;
+    skyMaterial->ambient = Colors.white;
     
     
     
@@ -131,7 +131,7 @@ void Start() {
     // Directional light
     directionalLight = Engine.Create<GameObject>();
     lightTransform = directionalLight->GetComponent<Transform>();
-    lightTransform->RotateAxis(1, Vector3(0, -0.8, 0.3));
+    lightTransform->RotateAxis(1, Vector3(0.8, -0.7, 0.3));
     
     directionalLight->AddComponent( Engine.CreateComponent<Light>() );
     Light* sunLight = directionalLight->GetComponent<Light>();
@@ -187,7 +187,7 @@ void Start() {
     //
     
     // Base chunk mesh
-    Mesh* plainBaseMesh = Resources.CreateMeshFromTag("chunk");
+    Mesh* plainBaseMesh = Resources.CreateMeshFromTag("plain");
     
     SubMesh chunkSubMesh;
     plainBaseMesh->CopySubMesh(0, chunkSubMesh);
@@ -200,9 +200,9 @@ void Start() {
     
     plainMaterial->texture.UploadTextureToGPU( plainTexture->buffer, plainTexture->width, plainTexture->height, MATERIAL_FILTER_ANISOTROPIC );
     
-    plainMaterial->shader = Engine.shaders.color;
-    plainMaterial->diffuse = Colors.black;
-    plainMaterial->ambient = Colors.black;
+    plainMaterial->shader = Engine.shaders.texture;
+    plainMaterial->diffuse = Colors.white;
+    plainMaterial->ambient = Colors.white;
     
     plainMaterial->DisableShadowVolumePass();
     
@@ -229,16 +229,16 @@ void Start() {
     
     
     // Area of chunks
-    unsigned int worldWidth  = 80;
-    unsigned int worldHeight = 80;
+    unsigned int worldWidth  = 100;
+    unsigned int worldHeight = 100;
     
     // Points in the mesh
     unsigned int chunkWidth  = 4;
     unsigned int chunkHeight = 4;
     
     // Noise scaling
-    float noiseWidth  = 0.03;
-    float noiseHeight = 0.03;
+    float noiseWidth  = 0.7;
+    float noiseHeight = 0.7;
     
     float heightMul = 3;
     
@@ -272,9 +272,11 @@ void Start() {
             
             chunkMesh->AddSubMesh(chunkX, 0, chunkZ, chunkSubMesh, false);
             
-            // Generate perlin
             
-            /*
+            continue;
+            
+            
+            // Generate perlin
             
             for (unsigned int index=0; index < chunkMesh->GetNumberOfVertices(); index++) {
                 
@@ -286,11 +288,11 @@ void Start() {
                 float height = Random.Perlin(xCoord, 0, zCoord) * heightMul;
                 
                 // Height step effect
-                float heightMul = 5;
-                height = glm::round( height * heightMul ) / heightMul;
+                //float heightMul = 1;
+                //height = glm::round( height * heightMul ) / heightMul;
                 
-                //if (height < 0) 
-                //    height = 0;
+                if (height < 0) 
+                    height = 0;
                 
                 vert.y = height;
                 
@@ -299,7 +301,6 @@ void Start() {
                 continue;
             }
             
-            */
             
             continue;
         }
@@ -307,7 +308,7 @@ void Start() {
         continue;
     }
     
-    chunkMesh->CalculateNormals();
+    //chunkMesh->CalculateNormals();
     
     chunkMesh->UploadToGPU();
     
@@ -394,57 +395,260 @@ void Start() {
     
     
     
+    
+    
+    //
+    // Generate plant life
+    //
+    
+    Mesh* batchRenderer = Engine.Create<Mesh>();
+    
+    Mesh* crossBaseMesh = Resources.CreateMeshFromTag("treebase");
+    Mesh* logMesh       = Resources.CreateMeshFromTag("log");
+    
+    Material* treeBaseMaterial = Engine.Create<Material>();
+    
+    
+    SubMesh logSubMesh;
+    crossBaseMesh->CopySubMesh(0, logSubMesh);
+    crossBaseMesh->CopySubMesh(1, logSubMesh);
+    
+    SubMesh baseSubMesh;
+    crossBaseMesh->CopySubMesh(0, baseSubMesh);
+    crossBaseMesh->CopySubMesh(1, baseSubMesh);
+    
+    
+    treeBaseMaterial->shader = Engine.shaders.color;
+    treeBaseMaterial->diffuse = Colors.white;
+    treeBaseMaterial->ambient = Colors.white;
+    
+    treeBaseMaterial->DisableCulling();
+    
+    
+    GameObject* treeBase = Engine.Create<GameObject>();
+    
+    treeBase->AddComponent( Engine.CreateComponentMeshRenderer(batchRenderer, treeBaseMaterial) );
+    MeshRenderer* treeRenderer = treeBase->GetComponent<MeshRenderer>();
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot(treeRenderer);
+    
+    
+    unsigned int numberOfLeaves = 5;
+    unsigned int treeSpread     = 800;
+    
+    float leafHeightOffset  = 3;
+    float treeBaseHeightMin = 3;
+    float treeBaseHeightMax = 8;
+    float leafOffset        = 0.01;
+    
+    Color treeBaseColor;
+    Color leafColor;
+    treeBaseColor = Colors.red * Colors.green;
+    leafColor     = Colors.green * Colors.dkgray;
+    
+    for (unsigned int i=0; i < 1000; i++) {
+        
+        float xx = ((Random.Range(0, treeSpread) * 0.1) - (Random.Range(0, treeSpread) * 0.1));
+        float yy = 0;
+        float zz = ((Random.Range(0, treeSpread) * 0.1) - (Random.Range(0, treeSpread) * 0.1));
+        
+        unsigned int index = batchRenderer->AddSubMesh(xx, yy, zz, baseSubMesh, false);
+        
+        for (unsigned int a=0; a < 2; a++) {
+            
+            unsigned indexOffset = index + (a * 4);
+            
+            Vertex vertA = batchRenderer->GetVertex(indexOffset);
+            Vertex vertB = batchRenderer->GetVertex(indexOffset+1);
+            Vertex vertC = batchRenderer->GetVertex(indexOffset+2);
+            Vertex vertD = batchRenderer->GetVertex(indexOffset+3);
+            
+            if (vertA.y > 0) vertA.y += Random.Range(treeBaseHeightMin, treeBaseHeightMax);
+            if (vertB.y > 0) vertB.y += Random.Range(treeBaseHeightMin, treeBaseHeightMax);
+            if (vertC.y > 0) vertC.y += Random.Range(treeBaseHeightMin, treeBaseHeightMax);
+            if (vertD.y > 0) vertD.y += Random.Range(treeBaseHeightMin, treeBaseHeightMax);
+            
+            if (vertA.r > 0) vertA.r = treeBaseColor.r;
+            if (vertB.r > 0) vertB.r = treeBaseColor.r;
+            if (vertC.r > 0) vertC.r = treeBaseColor.r;
+            if (vertD.r > 0) vertD.r = treeBaseColor.r;
+            
+            if (vertA.g > 0) vertA.g = treeBaseColor.g;
+            if (vertB.g > 0) vertB.g = treeBaseColor.g;
+            if (vertC.g > 0) vertC.g = treeBaseColor.g;
+            if (vertD.g > 0) vertD.g = treeBaseColor.g;
+            
+            if (vertA.b > 0) vertA.b = treeBaseColor.b;
+            if (vertB.b > 0) vertB.b = treeBaseColor.b;
+            if (vertC.b > 0) vertC.b = treeBaseColor.b;
+            if (vertD.b > 0) vertD.b = treeBaseColor.b;
+            
+            batchRenderer->SetVertex(indexOffset,   vertA);
+            batchRenderer->SetVertex(indexOffset+1, vertB);
+            batchRenderer->SetVertex(indexOffset+2, vertC);
+            batchRenderer->SetVertex(indexOffset+3, vertD);
+            
+            continue;
+        }
+        
+        
+        continue;
+        
+        
+        //
+        // Generate leaves
+        
+        for (unsigned int a=0; a < numberOfLeaves; a++) {
+            
+            float xl = xx + ((Random.Range(0, treeSpread) * 0.1) - (Random.Range(0, treeSpread) * 0.1)) * leafOffset;
+            float yl = yy + ((Random.Range(0, treeSpread) * 0.1) - (Random.Range(0, treeSpread) * 0.1)) * leafOffset;
+            float zl = zz + ((Random.Range(0, treeSpread) * 0.1) - (Random.Range(0, treeSpread) * 0.1)) * leafOffset;
+            
+            unsigned int index = batchRenderer->AddSubMesh(xl, yl + leafHeightOffset, zl, baseSubMesh, false);
+            
+            for (unsigned int b=0; b < 2; b++) {
+                
+                unsigned indexOffset = index + (b * 4);
+                
+                Vertex vertA = batchRenderer->GetVertex(indexOffset);
+                Vertex vertB = batchRenderer->GetVertex(indexOffset+1);
+                Vertex vertC = batchRenderer->GetVertex(indexOffset+2);
+                Vertex vertD = batchRenderer->GetVertex(indexOffset+3);
+                
+                if (vertA.r > 0) vertA.r = leafColor.r;
+                if (vertB.r > 0) vertB.r = leafColor.r;
+                if (vertC.r > 0) vertC.r = leafColor.r;
+                if (vertD.r > 0) vertD.r = leafColor.r;
+                
+                if (vertA.g > 0) vertA.g = leafColor.g;
+                if (vertB.g > 0) vertB.g = leafColor.g;
+                if (vertC.g > 0) vertC.g = leafColor.g;
+                if (vertD.g > 0) vertD.g = leafColor.g;
+                
+                if (vertA.b > 0) vertA.b = leafColor.b;
+                if (vertB.b > 0) vertB.b = leafColor.b;
+                if (vertC.b > 0) vertC.b = leafColor.b;
+                if (vertD.b > 0) vertD.b = leafColor.b;
+                
+                batchRenderer->SetVertex(indexOffset,   vertA);
+                batchRenderer->SetVertex(indexOffset+1, vertB);
+                batchRenderer->SetVertex(indexOffset+2, vertC);
+                batchRenderer->SetVertex(indexOffset+3, vertD);
+                
+            }
+            
+            continue;
+        }
+        
+        
+        
+        
+        
+        
+        
+        /*
+        
+        
+        
+        
+        
+        
+        
+        float leafNoise   = 0.008;
+        float leafHeight  = 0.07;
+        
+        //Vertex vertA = batchRenderer->GetVertex(index);
+        //Vertex vertB = batchRenderer->GetVertex(index+1);
+        //Vertex vertC = batchRenderer->GetVertex(index+2);
+        //Vertex vertD = batchRenderer->GetVertex(index+3);
+        
+        
+        float randomHeight = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        float leafX  = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        float leafZ  = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        
+        vertA.x += leafX;
+        vertA.y += randomHeight;
+        vertA.z += leafZ;
+        
+        
+        randomHeight = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        leafX  = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        leafZ  = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        
+        vertB.x += leafX;
+        vertB.y += randomHeight;
+        vertB.z += leafZ;
+        
+        
+        randomHeight = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        leafX  = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        leafZ  = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        
+        vertC.x += leafX;
+        vertC.y += randomHeight;
+        vertC.z += leafZ;
+        
+        
+        randomHeight = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        leafX  = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        leafZ  = (Random.Range(0.0f, 10.0f) - Random.Range(0.0f, 10.0f)) * leafHeight;
+        
+        vertD.x += leafX;
+        vertD.y += randomHeight;
+        vertD.z += leafZ;
+        
+        batchRenderer->SetVertex(index,   vertA);
+        batchRenderer->SetVertex(index+1, vertB);
+        batchRenderer->SetVertex(index+2, vertC);
+        batchRenderer->SetVertex(index+3, vertD);
+        */
+        
+    }
+    
+    //batchRenderer->CalculateNormals();
+    
+    batchRenderer->UploadToGPU();
+    
+    
+    
+    
+    
+    
+    
+    
+    
     //
     // Generate AI actors
     //
     
-    unsigned int spread = 50;
+    unsigned int spread = 100;
     
-    for (unsigned int i=0; i < 200; i++) {
+    
+    for (unsigned int i=0; i < 100; i++) {
         
         float xx = Random.Range(0, spread) - Random.Range(0, spread);
         float yy = 10;
         float zz = Random.Range(0, spread) - Random.Range(0, spread);
         
-        GameObject* actorObject = spawnActor(glm::vec3(xx, yy, zz));
-        actorObject->renderDistance = 100;
+        GameObject* actorObject = Engine.CreateAIActor( glm::vec3(xx, yy, zz) );
         
-        testActor = actorObject->GetComponent<Actor>();
+        actorObject->renderDistance = 300;
         
-        //testActor->SetChanceToChangeDirection(0);
-        //testActor->SetChanceToFocusOnActor(0);
-        //testActor->SetChanceToStopWalking(0);
-        //testActor->SetChanceToWalk(0);
+        // Collision
+        BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);
+        actorObject->AddColliderBox(boxShape, 0, 0, 0, LayerMask::Actor);
         
-    }
-    
-    
-    
-    
-    
-    //
-    // Generate static AI actors
-    //
-    
-    unsigned int plantSpread = 50;
-    
-    for (unsigned int i=0; i < 200; i++) {
+        // Actor
+        Actor* actor = actorObject->GetComponent<Actor>();
         
-        float xx = Random.Range(0, plantSpread) - Random.Range(0, plantSpread);
-        float yy = 10;
-        float zz = Random.Range(0, plantSpread) - Random.Range(0, plantSpread);
+        // Use sheep actor preset
+        AI.genomes.SheepGene( actor );
         
-        GameObject* actorObject = spawnActor(glm::vec3(xx, yy, zz));
-        actorObject->renderDistance = 100;
-        
-        testActor = actorObject->GetComponent<Actor>();
-        
-        //testActor->SetChanceToChangeDirection(0);
-        //testActor->SetChanceToFocusOnActor(0);
-        //testActor->SetChanceToStopWalking(0);
-        //testActor->SetChanceToWalk(0);
+        actor->SetActive(false);
         
     }
+    
     
     
     return;
@@ -474,9 +678,6 @@ glm::vec3 sunDir(0, 0, 1);
 float sunStep = 0.5;
 float sunRate = 1;
 
-float shadowLength   = 10;
-float shadowRayScale = 0.997;
-
 
 void Run() {
     
@@ -488,75 +689,11 @@ void Run() {
     text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
     text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
     
-    text[5]->text = "x - " + Float.ToString( cameraController->GetComponent<Transform>()->position.x );
-    text[6]->text = "y - " + Float.ToString( cameraController->GetComponent<Transform>()->position.y );
-    text[7]->text = "z - " + Float.ToString( cameraController->GetComponent<Transform>()->position.z );
+    text[4]->text = "Draw calls - " + Float.ToString( Renderer.GetNumberOfDrawCalls() );
     
-    //text[7]->text = Int.ToString( Renderer.mNumberOfShadows );
-    
-    //if (bendJoint != nullptr) 
-    //    bendJoint->RotateAxis(0.00001, glm::vec3(0, 0.001, 0));
-    
-    
-    //text[9]->text = Int.ToString( testActor->GetAge() );
-    
-    
-    
-    
-    
-    
-    //
-    // ?
-    //
-    
-    /*
-    unsigned int width  = 10;
-    unsigned int depth  = 10;
-    unsigned int height = 10;
-    
-    float thickness  = -0.1;
-    
-    float xCord = 0.159;
-    float yCord = 0.159;
-    float zCord = 0.159;
-    
-    
-    for (unsigned int z=0; z < height; z++) {
-        
-        float zz = z * zCord;
-        
-        for (unsigned int y=0; y < depth; y++) {
-            
-            float yy = y * yCord;
-            
-            for (unsigned int x=0; x < width; x++) {
-                
-                float xx = x * xCord;
-                
-                if (Random.Range(0, 100) > 30) 
-                    continue;
-                
-                float noise = Random.Perlin(xx, yy, zz);
-                
-                if (noise < thickness) 
-                    continue;
-                
-                combineRenderer->mesh->AddSubMesh(x, y, z, submesh, false);
-                
-                continue;
-            }
-            
-            continue;
-        }
-        
-        continue;
-    }
-    
-    combineRenderer->mesh->UploadToGPU();
-    */
-    
-    
-    
+    text[6]->text = "x - " + Float.ToString( cameraController->GetComponent<Transform>()->position.x );
+    text[7]->text = "y - " + Float.ToString( cameraController->GetComponent<Transform>()->position.y );
+    text[8]->text = "z - " + Float.ToString( cameraController->GetComponent<Transform>()->position.z );
     
     
     
@@ -581,6 +718,7 @@ void Run() {
     if (Input.CheckKeyCurrent(VK_I)) {cycleDirection = true;  adjustCycle = true;}
     if (Input.CheckKeyCurrent(VK_K)) {cycleDirection = false; adjustCycle = true;}
     
+    
     //ambientLight += 0.01f;
     
     if (adjustCycle) {
@@ -597,22 +735,20 @@ void Run() {
         
     }
     
-    skyMaterial->diffuse   = ambientLight;
-    //plainMaterial->diffuse = ambientLight * 0.1f;
+    // Ambient limits
+    if (ambientLight > 1.1)   ambientLight = 1.1;
+    if (ambientLight < 0.0087) ambientLight = 0.0087;
     
-    if (ambientLight > 3.0f) ambientLight = 3.0f;
-    if (ambientLight < 0.1f) ambientLight = 0.1f;
-    
-    //text[5]->text = "Day cycle - " + Float.ToString( ambientLight );
+    skyMaterial->ambient = ambientLight;
     
     Light* sunLight = directionalLight->GetComponent<Light>();
-    sunLight->intensity = ambientLight * 0.087;
+    sunLight->intensity = ambientLight * 0.87;
     
     // Light direction
     lightTransform = directionalLight->GetComponent<Transform>();
     
-    if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis(0.01, Vector3(1, 0, 0));}
-    if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.01, Vector3(1, 0, 0));}
+    if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis( 0.1, Vector3(1, 0, 0));}
+    if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.1, Vector3(1, 0, 0));}
     
     
     
@@ -762,40 +898,6 @@ void Shutdown(void) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-GameObject* spawnActor(glm::vec3 position) {
-    
-    GameObject* newActorObject = Engine.CreateAIActor( position );
-    
-    // Collision
-    BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);
-    newActorObject->AddColliderBox(boxShape, 0, 0, 0, LayerMask::Actor);
-    
-    // Actor
-    Actor* actor = newActorObject->GetComponent<Actor>();
-    
-    // Use sheep actor preset
-    AI.genomes.SheepGene( actor );
-    
-    actor->SetActive(false);
-    
-    return newActorObject;
-}
 
 
 

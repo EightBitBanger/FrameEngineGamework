@@ -213,6 +213,7 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
             
             MeshRenderer* geneRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
             
+            // Destroy old material
             if (geneRenderer->material != nullptr) 
                 Renderer.DestroyMaterial(geneRenderer->material);
             
@@ -241,6 +242,8 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
             newMaterial->diffuse.r = mStreamBuffer[index].actor->mGenes[a].color.x;
             newMaterial->diffuse.g = mStreamBuffer[index].actor->mGenes[a].color.y;
             newMaterial->diffuse.b = mStreamBuffer[index].actor->mGenes[a].color.z;
+            
+            newMaterial->ambient = Colors.white;
             
             MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
             newRenderer->isActive = false;

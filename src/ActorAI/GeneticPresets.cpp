@@ -11,17 +11,20 @@ extern ColorPreset       Colors;
 
 void GeneticPresets::SheepGene(Actor* targetActor) {
     
+    // Personality parameters
+    targetActor->SetChanceToChangeDirection(80);
+    targetActor->SetChanceToFocusOnActor(200);
+    targetActor->SetChanceToStopWalking(100);
+    targetActor->SetChanceToWalk(100);
+    
     // Color variant
-    float variantR = Random.Range(0, 10) * 0.003;
-    float variantG = Random.Range(0, 10) * 0.003;
-    float variantB = Random.Range(0, 10) * 0.003;
+    float variantR = Random.Range(0, 10) * 0.1;
+    float variantG = Random.Range(0, 10) * 0.1;
+    float variantB = Random.Range(0, 10) * 0.1;
     
-    Color headColor = Colors.MakeGrayScale(0.4);
-    Color bodyColor = Colors.MakeGrayScale(0.3);
-    Color limbColor = Colors.MakeGrayScale(0.1);
-    
-    //variantG = variantR;
-    //variantB = variantR;
+    Color headColor = Colors.white;
+    Color bodyColor = Colors.white;
+    Color limbColor = Colors.white;
     
     // Body gene
     Gene geneBody;
@@ -100,7 +103,6 @@ void GeneticPresets::SheepGene(Actor* targetActor) {
     geneLimbReadRight.doInverseAnimation = true;
     geneLimbReadRight.animationAxis      = BaseGene(1, 0, 0);
     geneLimbReadRight.animationRange     = 15;
-    
     
     // Apply genes to the actor
     targetActor->AddGene(geneBody);
