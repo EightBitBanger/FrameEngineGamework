@@ -287,31 +287,22 @@ private:
     // Default assets
     
     struct DefaultShaders {
-        Shader*  texture;
-        Shader*  textureUnlit;
-        Shader*  color;
-        Shader*  colorUnlit;
-        Shader*  UI;
-        Shader*  shadowCaster;
-        
-        DefaultShaders() : 
-            texture(nullptr),
-            textureUnlit(nullptr),
-            color(nullptr),
-            colorUnlit(nullptr),
-            UI(nullptr),
-            shadowCaster(nullptr)
-        {}
+        Shader*  texture = nullptr;
+        Shader*  textureUnlit = nullptr;
+        Shader*  color = nullptr;
+        Shader*  colorUnlit = nullptr;
+        Shader*  UI = nullptr;
+        Shader*  shadowCaster = nullptr;
+        Shader*  sky = nullptr;
     };
     
     struct DefaultMeshes {
-        Mesh* cube;
-        Mesh* plain;
-        
-        DefaultMeshes() : 
-            cube(nullptr),
-            plain(nullptr)
-        {}
+        Mesh* cube = nullptr;
+        Mesh* chunk = nullptr;
+        Mesh* plain = nullptr;
+        Mesh* sphere = nullptr;
+        Mesh* wallHorizontal = nullptr;
+        Mesh* wallVertical = nullptr;
     };
     
     

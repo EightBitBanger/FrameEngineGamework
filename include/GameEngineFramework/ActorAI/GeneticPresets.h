@@ -8,8 +8,6 @@ class ENGINE_API GeneticPresets {
     
 public:
     
-    // Construct actors by genetics
-    
     void SheepGene(Actor* targetActor);
     
 };

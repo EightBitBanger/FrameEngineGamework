@@ -7,13 +7,12 @@
 
 #include <GameEngineFramework/engine/types/color.h>
 #include <GameEngineFramework/Math/Math.h>
+#include <GameEngineFramework/Math/Random.h>
 
 #include <vector>
 #include <string>
 
-#ifndef RENDERER_VERTEX_BUFFER_MAX
-  #define RENDERER_VERTEX_BUFFER_MAX  1000000
-#endif
+extern NumberGeneration Random;
 
 
 struct ENGINE_API SubMesh {
@@ -76,11 +75,11 @@ public:
     void AddQuad(float x, float y, float z, float width, float height, Color color, float uCoord=1, float vCoord=1, float uStart=0, float vStart=0, unsigned int uOffset=0, unsigned int vOffset=0);
     
     
-    /// Add a sub mesh into this vertex buffer.
-    bool AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu=true);
+    /// Add a sub mesh into this vertex buffer. The index of the sub mesh in the mesh will be returned. A return value of negative one indicated an error.
+    int AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu=true);
     
-    /// Add a vertex buffer directly into this vertex buffer.
-    bool AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu=true);
+    /// Add a vertex buffer directly into this vertex buffer. The index of the sub mesh in the mesh will be returned. A return value of negative one indicated an error.
+    int AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu=true);
     
     /// Remove a sub mesh from this vertex buffer.
     bool RemoveSubMesh(unsigned int index);
