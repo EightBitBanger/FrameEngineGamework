@@ -72,7 +72,7 @@ public:
     void AddWallSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub);
     
     /// Add a quad sub mesh to the vertex buffer.
-    void AddQuad(float x, float y, float z, float width, float height, Color color, float uCoord=1, float vCoord=1, float uStart=0, float vStart=0, unsigned int uOffset=0, unsigned int vOffset=0);
+    int AddQuad(float x, float y, float z, float width, float height, Color color);
     
     
     /// Add a sub mesh into this vertex buffer. The index of the sub mesh in the mesh will be returned. A return value of negative one indicated an error.

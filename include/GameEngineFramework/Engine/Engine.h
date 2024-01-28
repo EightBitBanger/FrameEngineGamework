@@ -163,6 +163,17 @@ public:
     void AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float width, float height, int index, Color meshColor);
     
     
+    //
+    // Chunk generation
+    //
+    
+    /// Generate a height field grid array from perlin noise.
+    void GenerateHeightFieldMap(float* heightMap, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ);
+    
+    /// Generate a height field mesh from perlin noise.
+    void GenerateHeightFieldMesh(Mesh* mesh, float* heightMap, unsigned int width, unsigned int height, float offsetX, float offsetZ);
+    
+    
     EngineSystemManager();
     
     /// Initiate the engine.
@@ -247,6 +258,13 @@ public:
     unsigned int GetComponentCount(void);
     
     
+    /// Initiate rendering for the physics debugging meshes.
+    void EnablePhysicsDebugRenderer(void);
+    
+    /// Render the physics debug lines / triangles.
+    void UpdatePhysicsDebugRenderer(void);
+    
+    
 private:
     
     // Create a component object with initial type information and return its pointer.
@@ -312,6 +330,13 @@ private:
     unsigned int mStreamSize;
     
     ComponentDataStreamBuffer mStreamBuffer[ COMPONENT_STREAM_BUFFER_SIZE ];
+    
+    // Debug rendering
+    bool usePhysicsDebugRenderer;
+    
+    Mesh* debugMesh;
+    Mesh* debugLines;
+    
     
 public:
     

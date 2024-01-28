@@ -76,6 +76,7 @@ public:
     
     /// Physical world simulation.
     rp3d::PhysicsWorld* world;
+    
     /// Physics library common access singleton.
     rp3d::PhysicsCommon common;
     
@@ -102,9 +103,8 @@ public:
     /// Create a capsule collider scaled by radius and height.
     rp3d::CapsuleShape* CreateColliderCapsule(float radius, float height);
     
-    /// Create a height field collider and return the collider.
-    MeshCollider* CreateHeightFieldMap(float* heightField, unsigned int width, unsigned int height);
-    
+    /// Create a height field collider from a height field map and return its pointer.
+    MeshCollider* CreateHeightFieldMap(float* heightField, unsigned int width, unsigned int height, float scaleX=1, float scaleY=1, float scaleZ=1);
     
     /// Cast a ray and return the hit data of any objects that intersected the ray.
     bool Raycast(glm::vec3 from, glm::vec3 direction, float distance, Hit& hit, LayerMask layer=LayerMask::Default);

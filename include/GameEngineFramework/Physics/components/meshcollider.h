@@ -11,8 +11,10 @@ class ENGINE_API MeshCollider {
     
 public:
     
+    /// Pointer to the physics height field map.
     rp3d::HeightFieldShape* heightFieldShape;
     
+    /// Height field grid array.
     float* heightMapBuffer;
     
     MeshCollider();
