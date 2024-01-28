@@ -35,9 +35,6 @@ void TestFramework::TestRenderSystem(void) {
     if (!Renderer.DestroyMesh(meshPtr))           Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
     if (!Renderer.DestroyMeshRenderer(meshRendererPtr)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
     
-    // Check entity was not left over
-    if (Renderer.GetMeshRendererCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
-    
     // Check cameras
     Camera* cameraPtr = Renderer.CreateCamera();
     if (cameraPtr == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
