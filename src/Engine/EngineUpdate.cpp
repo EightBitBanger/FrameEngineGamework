@@ -34,6 +34,7 @@ void EngineSystemManager::Update(void) {
             AI.SetPlayerWorldPosition( activeCamera->transform.position );
         
     }
+    
     if (mGameObjects.Size() == 0) 
         return;
     
@@ -110,9 +111,6 @@ void EngineSystemManager::Update(void) {
     }
     
     
-    
-    
-    
     // Run the parent matrix transform chains
     
     UpdateTransformationChains();
@@ -127,7 +125,6 @@ void EngineSystemManager::Update(void) {
     
     for (unsigned int i=0; i < mStreamSize; i++ ) {
         
-        // Rigid bodies
         if (mStreamBuffer[i].rigidBody != nullptr)       UpdateRigidBody(i);
         if (mStreamBuffer[i].meshRenderer != nullptr)    UpdateMeshRenderer(i);
         if (mStreamBuffer[i].camera != nullptr)          UpdateCamera(i);
@@ -140,6 +137,7 @@ void EngineSystemManager::Update(void) {
         
         continue;
     }
+    
     
     return;
 }

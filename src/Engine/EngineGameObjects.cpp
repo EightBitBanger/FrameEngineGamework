@@ -95,10 +95,6 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     cameraController->SetAngularDamping(1);
     cameraController->SetMass(10);
     
-    // Collider
-    BoxShape* boxShape = Physics.CreateColliderBox(scale.x, scale.y, scale.z);
-    cameraController->AddColliderBox(boxShape, 0, 0, 0);
-    
     return cameraController;
 }
 

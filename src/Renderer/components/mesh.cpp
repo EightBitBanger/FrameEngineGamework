@@ -1,10 +1,13 @@
 #include <GameEngineFramework/Renderer/components/mesh.h>
 #include <GameEngineFramework/Math/Math.h>
 
+#include <GameEngineFramework/Math/Random.h>
+
 #define GLEW_STATIC
 #include <gl/glew.h>
 
 extern MathCore Math;
+extern NumberGeneration Random;
 
 
 Mesh::Mesh() : 
@@ -113,13 +116,13 @@ void Mesh::AddWallSubDivided(float x, float y, float z, float width, float heigh
     return;
 }
 
-void Mesh::AddQuad(float x, float y, float z, float width, float height, Color color, float uCoord, float vCoord, float uStart, float vStart, unsigned int uOffset, unsigned int vOffset) {
+int Mesh::AddQuad(float x, float y, float z, float width, float height, Color color) {
     
     Vertex vertex[4];
-    vertex[0] = Vertex( x, y,       z,         color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + 0,      vStart + (vOffset * vCoord) + vCoord);
-    vertex[1] = Vertex( x+width, y, z,         color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + 0,      vStart + (vOffset * vCoord) + 0 );
-    vertex[2] = Vertex( x-width, y, z-height,  color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + 0 );
-    vertex[3] = Vertex( x, y,       z-height,  color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + uCoord, vStart + (vOffset * vCoord) + vCoord);
+    vertex[0] = Vertex( x, y,       z,         color.r, color.g, color.b,   0, 1, 0,  0, 0 );
+    vertex[1] = Vertex( x+width, y, z,         color.r, color.g, color.b,   0, 1, 0,  1, 0 );
+    vertex[2] = Vertex( x+width, y, z+height,  color.r, color.g, color.b,   0, 1, 0,  1, 1 );
+    vertex[3] = Vertex( x, y,       z+height,  color.r, color.g, color.b,   0, 1, 0,  0, 1 );
     
     SubMesh subBuffer;
     subBuffer.vertexBuffer.push_back(vertex[0]);
@@ -128,15 +131,14 @@ void Mesh::AddQuad(float x, float y, float z, float width, float height, Color c
     subBuffer.vertexBuffer.push_back(vertex[3]);
     
     subBuffer.indexBuffer.push_back(0);
-    subBuffer.indexBuffer.push_back(3);
+    subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(1);
     
     subBuffer.indexBuffer.push_back(0);
-    subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(3);
+    subBuffer.indexBuffer.push_back(2);
     
-    AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
-    return;
+    return AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
 }
 
 int Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu) {
@@ -144,10 +146,6 @@ int Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGp
 }
 
 int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu) {
-    
-    // Buffer MAX check
-    //if ((mVertexBuffer.size() + vrtxBuffer.size()) > RENDERER_VERTEX_BUFFER_MAX) 
-    //    return ;
     
     if (mFreeMesh.size() > 0) {
         
@@ -185,13 +183,8 @@ int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer,
                 i++;
             }
             
-            if (doUploadToGpu) {
-                glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
-                glBufferSubData(GL_ARRAY_BUFFER, freeMeshPtr.vertexBegin * sizeof(Vertex), freeMeshPtr.vertexCount * sizeof(Vertex), &mVertexBuffer[freeMeshPtr.vertexBegin]);
-                
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
-                glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, freeMeshPtr.indexBegin * sizeof(Index),  freeMeshPtr.indexCount * sizeof(Index), &mIndexBuffer[freeMeshPtr.indexBegin]);
-            }
+            if (doUploadToGpu) 
+                UploadToGPU();
             
             return -1;
         }
@@ -225,35 +218,15 @@ int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer,
         mIndexBuffer.push_back(index);
     }
     
-    if (!doUploadToGpu) 
-        return startVertex;
-    
-    mVertexBufferSz = mVertexBuffer.size();
-    mIndexBufferSz  = mIndexBuffer.size();
-    
-    // Check to allocate new GPU memory
-    if ((mVertexBufferSz > mMaxSize) | (mIndexBufferSz > mMaxSize)) {
-        if (mVertexBufferSz > mIndexBufferSz) 
-        {mMaxSize = mVertexBufferSz;} else {mMaxSize = mIndexBufferSz;}
-        
-        glBufferData(GL_ARRAY_BUFFER, mVertexBufferSz * sizeof(Vertex) + (vrtxBuffer.size() * sizeof(Vertex)), NULL, GL_DYNAMIC_DRAW);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index) + (indxBuffer.size() * sizeof(Vertex)), NULL, GL_DYNAMIC_DRAW);
-        
-        glBufferSubData(GL_ARRAY_BUFFER, 0, mVertexBufferSz * sizeof(Vertex), &mVertexBuffer[0]);
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0]);
-        
-        return startVertex;
-    }
-    
-    glBindVertexArray(mVertexArray);
-    
-    glBufferSubData(GL_ARRAY_BUFFER, 0, mVertexBufferSz * sizeof(Vertex), &mVertexBuffer[0]);
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0]);
+    if (doUploadToGpu) 
+        UploadToGPU();
     
     return startVertex;
 }
 
 bool Mesh::RemoveSubMesh(unsigned int index) {
+    if (index >= mSubMesh.size()) 
+        return false;
     
     std::vector<Vertex> destMesh;
     SubMesh sourceMesh = mSubMesh[index];
@@ -276,6 +249,9 @@ bool Mesh::RemoveSubMesh(unsigned int index) {
 
 bool Mesh::CopySubMesh(unsigned int index, SubMesh& mesh) {
     
+    if (index >= mSubMesh.size()) 
+        return false;
+    
     SubMesh sourceMesh = mSubMesh[index];
     
     for (std::vector<Vertex>::iterator it = mVertexBuffer.begin() + sourceMesh.vertexBegin; it != mVertexBuffer.begin() + sourceMesh.vertexBegin + sourceMesh.vertexCount; ++it) 
@@ -291,6 +267,9 @@ bool Mesh::CopySubMesh(unsigned int index, SubMesh& mesh) {
 }
 
 bool Mesh::CopySubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer) {
+    
+    if (index >= mSubMesh.size()) 
+        return false;
     
     SubMesh sourceMesh = mSubMesh[index];
     
@@ -362,10 +341,10 @@ void Mesh::UploadToGPU(void) {
     glBindVertexArray(mVertexArray);
     
     glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
-    glBufferData(GL_ARRAY_BUFFER, mVertexBufferSz * sizeof(Vertex), &mVertexBuffer[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mVertexBufferSz * sizeof(Vertex), &mVertexBuffer[0], GL_STATIC_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0], GL_STATIC_DRAW);
     return;
 }
 
@@ -397,15 +376,11 @@ void Mesh::SetIndex(unsigned int index, Index position) {
 
 void Mesh::CalculateNormals(void) {
     
-    for (unsigned int i=0; i < mIndexBufferSz; i += 3) {
+    for (unsigned int i=0; i < mVertexBufferSz; i += 3) {
         
-        unsigned int indexA = mIndexBuffer[i]  .index;
-        unsigned int indexB = mIndexBuffer[i+1].index;
-        unsigned int indexC = mIndexBuffer[i+2].index;
-        
-        Vertex vertA = mVertexBuffer[indexA];
-        Vertex vertB = mVertexBuffer[indexB];
-        Vertex vertC = mVertexBuffer[indexC];
+        Vertex vertA = mVertexBuffer[i  ];
+        Vertex vertB = mVertexBuffer[i+1];
+        Vertex vertC = mVertexBuffer[i+2];
         
         glm::vec3 U;
         U.x = vertB.x - vertA.x;
@@ -422,17 +397,17 @@ void Mesh::CalculateNormals(void) {
         normal.y = (U.z * V.x) - (U.x * V.z);
         normal.z = (U.x * V.y) - (U.y * V.x);
         
-        mVertexBuffer[indexA].nx = normal.x;
-        mVertexBuffer[indexA].ny = normal.y;
-        mVertexBuffer[indexA].nz = normal.z;
+        mVertexBuffer[i].nx   = -normal.x;
+        mVertexBuffer[i].ny   = -normal.y;
+        mVertexBuffer[i].nz   = -normal.z;
         
-        mVertexBuffer[indexB].nx = normal.x;
-        mVertexBuffer[indexB].ny = normal.y;
-        mVertexBuffer[indexB].nz = normal.z;
+        mVertexBuffer[i+1].nx = -normal.x;
+        mVertexBuffer[i+1].ny = -normal.y;
+        mVertexBuffer[i+1].nz = -normal.z;
         
-        mVertexBuffer[indexC].nx = normal.x;
-        mVertexBuffer[indexC].ny = normal.y;
-        mVertexBuffer[indexC].nz = normal.z;
+        mVertexBuffer[i+2].nx = -normal.x;
+        mVertexBuffer[i+2].ny = -normal.y;
+        mVertexBuffer[i+2].nz = -normal.z;
         
         continue;
     }

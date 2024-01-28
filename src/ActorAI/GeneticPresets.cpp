@@ -17,6 +17,8 @@ void GeneticPresets::SheepGene(Actor* targetActor) {
     targetActor->SetChanceToStopWalking(100);
     targetActor->SetChanceToWalk(100);
     
+    targetActor->SetSpeed(0.7);
+    
     // Color variant
     float variantR = Random.Range(0, 10) * 0.1;
     float variantG = Random.Range(0, 10) * 0.1;
@@ -90,19 +92,19 @@ void GeneticPresets::SheepGene(Actor* targetActor) {
     geneLimbRearLeft.animationRange   = 15;
     
     // Limb RR gene
-    Gene geneLimbReadRight;
-    geneLimbReadRight.offset    = BaseGene(-0.17, 0.75, -0.4);
-    geneLimbReadRight.position  = BaseGene(0, -0.4, 0);
-    geneLimbReadRight.scale     = BaseGene(0.2, 0.65, 0.2);
-    geneLimbReadRight.color     = BaseGene(0.4, 0.4, 0.4);
-    geneLimbReadRight.color.x  *= limbColor.r;
-    geneLimbReadRight.color.y  *= limbColor.g;
-    geneLimbReadRight.color.z  *= limbColor.b;
+    Gene geneLimbRearRight;
+    geneLimbRearRight.offset    = BaseGene(-0.17, 0.75, -0.4);
+    geneLimbRearRight.position  = BaseGene(0, -0.4, 0);
+    geneLimbRearRight.scale     = BaseGene(0.2, 0.65, 0.2);
+    geneLimbRearRight.color     = BaseGene(0.4, 0.4, 0.4);
+    geneLimbRearRight.color.x  *= limbColor.r;
+    geneLimbRearRight.color.y  *= limbColor.g;
+    geneLimbRearRight.color.z  *= limbColor.b;
     
-    geneLimbReadRight.doAnimationCycle   = true;
-    geneLimbReadRight.doInverseAnimation = true;
-    geneLimbReadRight.animationAxis      = BaseGene(1, 0, 0);
-    geneLimbReadRight.animationRange     = 15;
+    geneLimbRearRight.doAnimationCycle   = true;
+    geneLimbRearRight.doInverseAnimation = true;
+    geneLimbRearRight.animationAxis      = BaseGene(1, 0, 0);
+    geneLimbRearRight.animationRange     = 15;
     
     // Apply genes to the actor
     targetActor->AddGene(geneBody);
@@ -111,7 +113,7 @@ void GeneticPresets::SheepGene(Actor* targetActor) {
     targetActor->AddGene(geneLimbFrontLeft);
     targetActor->AddGene(geneLimbFrontRight);
     targetActor->AddGene(geneLimbRearLeft);
-    targetActor->AddGene(geneLimbReadRight);
+    targetActor->AddGene(geneLimbRearRight);
     
     return;
 }

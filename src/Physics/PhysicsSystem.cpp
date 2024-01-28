@@ -94,41 +94,34 @@ rp3d::CapsuleShape* PhysicsSystem::CreateColliderCapsule(float radius, float hei
     return common.createCapsuleShape(radius, height);
 }
 
-MeshCollider* PhysicsSystem::CreateHeightFieldMap(float* heightField, unsigned int width, unsigned int height) {
+MeshCollider* PhysicsSystem::CreateHeightFieldMap(float* heightField, unsigned int width, unsigned int height, float scaleX, float scaleY, float scaleZ) {
     
     MeshCollider* collider = meshCollider.Create();
     
-    //if (collider->heightMapBuffer != nullptr) 
-    //    delete collider->heightMapBuffer;
+    unsigned int mapSize = width * height;
     
-    collider->heightMapBuffer = new float( width * height );
+    int maximumHeight =  100;
+    int minimumHeight = -100;
     
-    unsigned int xWidth  = width  - 1;
-    unsigned int zHeight = height - 1;
+    collider->heightMapBuffer = new float[width * height];
     
-    for (unsigned int x=0; x < xWidth; x++) {
+    for (unsigned int index=0; index < mapSize; index++) {
         
-        for (unsigned int z=0; z < zHeight; z++) {
-            
-            unsigned int index = z * xWidth + x;
-            
-            collider->heightMapBuffer[index] = heightField[index];
-            
-        }
+        collider->heightMapBuffer[index] = heightField[index];
         
     }
     
-    collider->heightFieldShape = common.createHeightFieldShape(width, 
-                                                               height, 
-                                                              -100, 
-                                                               100, 
+    collider->heightFieldShape = common.createHeightFieldShape(width, height, 
+                                                               minimumHeight, maximumHeight, 
                                                                collider->heightMapBuffer, 
                                                                rp3d::HeightFieldShape::HeightDataType::HEIGHT_FLOAT_TYPE);
     
-    collider->heightFieldShape->setScale(rp3d::Vector3(10, 10, 10));
+    collider->heightFieldShape->setScale( rp3d::Vector3(scaleX, scaleY, scaleZ) );
     
     return collider;
 }
+
+
 
 
 

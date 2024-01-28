@@ -244,27 +244,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         
         
         //
-        // Physics timer
-        //
-        
-        if (PhysicsTime.Update()) {
-            
-#ifdef PROFILE_ENGINE_CORE
-            Profiler.Begin();
-#endif
-            
-            Physics.world->update( PHYSICS_UPDATES_PER_SECOND );
-            
-#ifdef PROFILE_ENGINE_CORE
-            Profiler.profilePhysicsSystem = Profiler.Query();
-#endif
-            
-            // Interpolation factor
-            //physicsAlpha = physicsAccumulator / physicsUpdateTimeout;
-            
-        }
-        
-        //
         // Render timer
         //
         
@@ -285,6 +264,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 #endif
             
         }
+        
+        
+        //
+        // Physics timer
+        //
+        
+        if (PhysicsTime.Update()) {
+            
+#ifdef PROFILE_ENGINE_CORE
+            Profiler.Begin();
+#endif
+            
+            Physics.world->update( PHYSICS_UPDATES_PER_SECOND );
+            
+            // Generate the physics debug meshes
+            Engine.UpdatePhysicsDebugRenderer();
+            
+#ifdef PROFILE_ENGINE_CORE
+            Profiler.profilePhysicsSystem = Profiler.Query();
+#endif
+            
+        }
+        
         
 #ifdef APPLICATION_ESCAPE_KEY_PAUSE
         if (Input.CheckKeyPressed(VK_ESCAPE)) {

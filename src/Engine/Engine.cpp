@@ -36,9 +36,119 @@ EngineSystemManager::EngineSystemManager(void) :
     
     mDataStreamIndex(0),
     mObjectIndex(0),
-    mStreamSize(0)
+    mStreamSize(0),
+    
+    usePhysicsDebugRenderer(false),
+    debugMesh(nullptr),
+    debugLines(nullptr)
 {
 }
+
+
+void EngineSystemManager::GenerateHeightFieldMap(float* heightMap, unsigned int width, unsigned int height, 
+                                                 float noiseWidth, float noiseHeight, float noiseMul, 
+                                                 int offsetX, int offsetZ) {
+    
+    for (int x=0; x < width; x ++) {
+        
+        for (int z=0; z < height; z ++) {
+            
+            float xCoord = (x + offsetX) * noiseWidth;
+            float zCoord = (z + offsetZ) * noiseHeight;
+            
+            float noise = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
+            
+            //noise = glm::round(noise * 1.5f) / 1.5f;
+            
+            //if (noise < 0) 
+            //    noise = 0;
+            
+            unsigned int index = z * width + x;
+            
+            heightMap[index] = noise;
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    return;
+}
+
+
+void EngineSystemManager::GenerateHeightFieldMesh(Mesh* mesh, float* heightMap, unsigned int width, unsigned int height, float offsetX, float offsetZ) {
+    
+    for (unsigned int x=0; x < width-1; x ++) {
+        
+        for (unsigned int z=0; z < height-1; z ++) {
+            
+            float xp =  ((float)x + offsetX) + ((float)width / 2)    + 0.5f;
+            float zp = (((float)z + offsetZ) - (offsetX / 2)) + ((float)height / 4);
+            
+            float xx = (xp / 2) - ((float)width  / 2);
+            float zz = ((zp - ((float)x / 2)) - ((float)height / 2))  + 0.25f;
+            
+            unsigned int index = mesh->AddQuad(xx, 0, zz, 1, 1, Colors.white);
+            
+            Vertex vertA = mesh->GetVertex( index   );
+            Vertex vertB = mesh->GetVertex( index+1 );
+            Vertex vertC = mesh->GetVertex( index+2 );
+            Vertex vertD = mesh->GetVertex( index+3 );
+            
+            vertA.y = heightMap[ z    * width +  x  ];
+            vertB.y = heightMap[ z    * width + (x+1)];
+            vertC.y = heightMap[(z+1) * width + (x+1)];
+            vertD.y = heightMap[(z+1) * width +  x  ];
+            
+            // Calculate vertex normals
+            
+            glm::vec3 U;
+            glm::vec3 V;
+            
+            V.x = vertB.x - vertA.x;
+            V.y = vertB.y - vertA.y;
+            V.z = vertB.z - vertA.z;
+            
+            U.x = vertC.x - vertA.x;
+            U.y = vertC.y - vertA.y;
+            U.z = vertC.z - vertA.z;
+            
+            glm::vec3 normal;
+            normal.x = (U.y * V.z) - (U.z * V.y);
+            normal.y = (U.z * V.x) - (U.x * V.z);
+            normal.z = (U.x * V.y) - (U.y * V.x);
+            
+            vertA.nx = normal.x;
+            vertA.ny = normal.y;
+            vertA.nz = normal.z;
+            
+            vertB.nx = normal.x;
+            vertB.ny = normal.y;
+            vertB.nz = normal.z;
+            
+            vertC.nx = normal.x;
+            vertC.ny = normal.y;
+            vertC.nz = normal.z;
+            
+            vertD.nx = normal.x;
+            vertD.ny = normal.y;
+            vertD.nz = normal.z;
+            
+            mesh->SetVertex( index  , vertA );
+            mesh->SetVertex( index+1, vertB );
+            mesh->SetVertex( index+2, vertC );
+            mesh->SetVertex( index+3, vertD );
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    return;
+}
+
 
 Button* EngineSystemManager::CreateOverlayButtonCallback(int x, int y, int width, int height, ButtonCallBack callback) {
     Button* newButton = mButtons.Create();
@@ -155,6 +265,7 @@ void EngineSystemManager::Initiate() {
     
     // Main world scene
     sceneMain = Create<Scene>();
+    Renderer.AddSceneToRenderQueue( sceneMain );
     
     // Initiate render system defaults
     Renderer.shaders.texture      = shaders.texture;
@@ -193,6 +304,187 @@ void EngineSystemManager::Shutdown(void) {
     assert(mComponents.Size() == 0);
     assert(mGameObjects.Size() == 0);
     assert(mTextObjects.Size() == 0);
+    
+    return;
+}
+
+
+
+//
+// Physics debug renderer
+//
+
+void EngineSystemManager::EnablePhysicsDebugRenderer(void) {
+    
+    usePhysicsDebugRenderer = true;
+    
+    Physics.world->setIsDebugRenderingEnabled(true);
+    
+    rp3d::DebugRenderer& debugRenderer = Physics.world->getDebugRenderer();
+    
+    debugRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLISION_SHAPE, true);
+    //debugRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_AABB, true);
+    //debugRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_BROADPHASE_AABB, true);
+    
+    debugMesh  = Create<Mesh>();
+    debugLines = Create<Mesh>();
+    
+    Material* debugMaterialLines = Create<Material>();
+    Material* debugMaterialMesh  = Create<Material>();
+    
+    debugMaterialLines->shader = shaders.colorUnlit;
+    debugMaterialLines->ambient = Colors.white;
+    debugMaterialLines->diffuse = Colors.white;
+    
+    debugMaterialMesh->shader = shaders.colorUnlit;
+    debugMaterialMesh->ambient = Colors.white;
+    debugMaterialMesh->diffuse = Colors.white;
+    
+    debugLines->SetPrimitive( MESH_LINES );
+    debugMesh->SetPrimitive( MESH_LINES );
+    
+    
+    MeshRenderer* lineRenderer = Renderer.CreateMeshRenderer();
+    lineRenderer->mesh     = debugLines;
+    lineRenderer->material = debugMaterialLines;
+    
+    MeshRenderer* triangleRenderer = Renderer.CreateMeshRenderer();
+    triangleRenderer->mesh     = debugMesh;
+    triangleRenderer->material = debugMaterialMesh;
+    
+    
+    sceneMain->AddMeshRendererToSceneRoot( lineRenderer );
+    
+    sceneMain->AddMeshRendererToSceneRoot( triangleRenderer );
+    
+    return;
+}
+
+void EngineSystemManager::UpdatePhysicsDebugRenderer(void) {
+    
+    if (!usePhysicsDebugRenderer) 
+        return;
+    
+    rp3d::DebugRenderer& debugRenderer = Physics.world->getDebugRenderer();
+    
+    
+    //
+    // Lines
+    //
+    
+    unsigned int numberOfLines = debugRenderer.getNbLines();
+    rp3d::Array<rp3d::DebugRenderer::DebugLine> lineArray = debugRenderer.getLines();
+    
+    SubMesh subMeshLines;
+    for (unsigned int i=0; i < numberOfLines; i++) {
+        
+        rp3d::DebugRenderer::DebugLine line = lineArray[i];
+        
+        Vertex vertA;
+        vertA.x = line.point1.x;
+        vertA.y = line.point1.y;
+        vertA.z = line.point1.z;
+        vertA.r = 1;
+        vertA.g = 1;
+        vertA.b = 1;
+        vertA.nx = 0;
+        vertA.ny = 1;
+        vertA.nz = 0;
+        
+        Vertex vertB;
+        vertB.x = line.point2.x;
+        vertB.y = line.point2.y;
+        vertB.z = line.point2.z;
+        vertB.r = 1;
+        vertB.g = 1;
+        vertB.b = 1;
+        vertB.nx = 0;
+        vertB.ny = 1;
+        vertB.nz = 0;
+        
+        subMeshLines.vertexBuffer.push_back(vertA);
+        subMeshLines.vertexBuffer.push_back(vertB);
+        
+        subMeshLines.indexBuffer.push_back( (i * 2) + 0 );
+        subMeshLines.indexBuffer.push_back( (i * 2) + 1 );
+        
+    }
+    
+    subMeshLines.indexCount  = numberOfLines * 2;
+    subMeshLines.vertexCount = numberOfLines * 2;
+    
+    debugLines->RemoveSubMesh(0);
+    
+    debugLines->AddSubMesh(0, 0, 0, subMeshLines, true);
+    
+    
+    //
+    // Triangles
+    //
+    
+    unsigned int numberOfTriangles = debugRenderer.getNbTriangles();
+    rp3d::Array<rp3d::DebugRenderer::DebugTriangle> triangleArray = debugRenderer.getTriangles();
+    
+    SubMesh subMeshTriangles;
+    for (unsigned int i=0; i < numberOfTriangles; i++) {
+        
+        rp3d::DebugRenderer::DebugTriangle triangle = triangleArray[i];
+        
+        Vertex vertA;
+        vertA.x = triangle.point1.x;
+        vertA.y = triangle.point1.y;
+        vertA.z = triangle.point1.z;
+        vertA.r = 1;
+        vertA.g = 1;
+        vertA.b = 1;
+        vertA.nx = 0;
+        vertA.ny = 1;
+        vertA.nz = 0;
+        vertA.u = 0;
+        vertA.v = 0;
+        
+        Vertex vertB;
+        vertB.x = triangle.point2.x;
+        vertB.y = triangle.point2.y;
+        vertB.z = triangle.point2.z;
+        vertB.r = 1;
+        vertB.g = 1;
+        vertB.b = 1;
+        vertB.nx = 0;
+        vertB.ny = 1;
+        vertB.nz = 0;
+        vertB.u = 1;
+        vertB.v = 0;
+        
+        Vertex vertC;
+        vertC.x = triangle.point3.x;
+        vertC.y = triangle.point3.y;
+        vertC.z = triangle.point3.z;
+        vertC.r = 1;
+        vertC.g = 1;
+        vertC.b = 1;
+        vertC.nx = 0;
+        vertC.ny = 1;
+        vertC.nz = 0;
+        vertC.u = 1;
+        vertC.v = 1;
+        
+        subMeshTriangles.vertexBuffer.push_back(vertA);
+        subMeshTriangles.vertexBuffer.push_back(vertB);
+        subMeshTriangles.vertexBuffer.push_back(vertC);
+        
+        subMeshTriangles.indexBuffer.push_back( (i * 3) + 0 );
+        subMeshTriangles.indexBuffer.push_back( (i * 3) + 1 );
+        subMeshTriangles.indexBuffer.push_back( (i * 3) + 2 );
+        
+    }
+    
+    subMeshTriangles.indexCount  = numberOfTriangles * 3;
+    subMeshTriangles.vertexCount = numberOfTriangles * 3;
+    
+    debugMesh->RemoveSubMesh(0);
+    
+    debugMesh->AddSubMesh(0, 0, 0, subMeshTriangles, true);
     
     return;
 }
