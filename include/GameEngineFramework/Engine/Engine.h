@@ -164,14 +164,32 @@ public:
     
     
     //
-    // Chunk generation
+    // Height field chunk generation
     //
     
-    /// Generate a height field grid array from perlin noise.
-    void GenerateHeightFieldMap(float* heightMap, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ);
+    // Perlin generation
+    
+    /// Initiates a height field grid array of points and set them to zero.
+    void SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value);
+    
+    /// Generate perlin noise and add it to a height field.
+    void GenerateHeightFieldByPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ);
+    
+    // Color field
+    
+    /// Initiates a color field grid array of colors and set them to zero.
+    void SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color);
+    
+    /// Generate a color field containing a color range from a height field.
+    void GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color low, Color high, float bias);
+    
+    // Mapping
+    
+    /// Apply the height field values to a mesh.
+    void AddHeightFieldToMesh(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
     
     /// Generate a height field mesh from perlin noise.
-    void GenerateHeightFieldMesh(Mesh* mesh, float* heightMap, unsigned int width, unsigned int height, float offsetX, float offsetZ);
+    Mesh* CreateMeshFromHeightField(float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
     
     
     EngineSystemManager();

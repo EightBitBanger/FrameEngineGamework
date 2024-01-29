@@ -75,6 +75,8 @@ public:
     Color white    = {1, 1, 1, 1};
     Color black    = {0, 0, 0, 1};
     
+    Color brown    = {0.266, 0.18, 0.07};
+    
     /// Return a color from given red, green and blue values.
     Color& Make(float r, float g, float b);
     
