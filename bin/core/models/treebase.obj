@@ -1,0 +1,52 @@
+# Created with Anim8or 1.00
+# Object "object01":
+
+mtllib treebase.mtl
+
+# Shape "cross":
+g cross
+# No. points 8:
+v -0.50000 -0.50000 0
+v -0.50000 0.50000 0
+v 0.50000 0.50000 0
+v 0.50000 -0.50000 0
+v 0 -0.50000 -0.50000
+v 0 0.50000 -0.50000
+v 0 0.50000 0.50000
+v 0 -0.50000 0.50000
+
+# No. normals 12:
+vn 0 0 1
+vn -1 0 0
+vn 0 0 1
+vn 0 0 1
+vn 0 0 1
+vn 0 0 1
+vn -1 0 0
+vn -1 0 0
+vn -1 0 0
+vn -1 0 0
+vn 0 0 1
+vn -1 0 0
+
+# No. texture coordinates 8:
+vt 0 0
+vt 0 1
+vt 1 1
+vt 1 0
+vt 0 0
+vt 0 1
+vt 1 1
+vt 1 0
+
+# No. faces 2:
+
+usemtl ___default___
+
+f 4/4/6 3/3/5 2/2/4 1/1/3
+
+usemtl ___default___
+
+f 8/8/10 7/7/9 6/6/8 5/5/7
+
+# End of Object "object01"

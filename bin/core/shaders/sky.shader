@@ -69,7 +69,7 @@ void main() {
     if (lightColor.g < 1) lightColor.g = 1;
     if (lightColor.b < 1) lightColor.b = 1;
     
-    v_color = (m_ambient * l_color) * lightColor;
+    v_color = l_color * lightColor * m_ambient;
     v_coord = l_uv;
     
     gl_Position = u_proj * vertPos;

@@ -34,7 +34,7 @@ void main() {
     
     vec3 norm = u_inv_model * normalize(l_normal);
     
-    vec3 lightColor = vec3(0);
+    vec3 lightColor = m_ambient;
     
     for (int i=0; i < u_light_count; i++) {
         
@@ -64,7 +64,6 @@ void main() {
             vec3 specular = u_light_color[i] * (spec * m_specular);
             
             lightColor += ((diff * u_light_color[i]) * intensity) / (1.0 + (dist * attenuation)) + specular;
-            lightColor = clamp(lightColor, 0.0, 2.0);
             
             continue;
         }
@@ -77,7 +76,6 @@ void main() {
             float diff = max(dot(norm, lightDir), 0.0);
             
             lightColor += (diff * u_light_color[i]) * intensity;
-            lightColor = clamp(lightColor, 0.0, 2.0);
             
             continue;
         }
@@ -85,7 +83,7 @@ void main() {
         continue;
     }
     
-    v_color = ((m_ambient * m_diffuse) * l_color) * lightColor;
+    v_color = m_diffuse * l_color * lightColor;
     v_coord = l_uv;
     
     gl_Position = u_proj * vertPos;

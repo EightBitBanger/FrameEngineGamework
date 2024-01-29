@@ -63,15 +63,10 @@ void main() {
     
     vec4 texColor = texture(u_sampler, v_coord);
     
-    float threshold = 1;
-    if (texColor.r > threshold) texColor.r = 1;
-    if (texColor.g > threshold) texColor.g = 1;
-    if (texColor.b > threshold) texColor.b = 1;
-    
-    if (texColor.a < 0.58) 
+    if (texColor.a < v_ambient.r) 
         discard;
     
-    color = vec4(v_color, 1) * texColor;
+    color = vec4(texColor.grb, v_ambient.g);
     
     return;
 }

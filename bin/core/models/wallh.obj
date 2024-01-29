@@ -1,28 +1,30 @@
 # Created with Anim8or 1.00
 # Object "object01":
 
-mtllib leaf.mtl
+mtllib wallh.mtl
 
 # Shape "mesh01":
 g mesh01
 # No. points 4:
-v -0.28324 0 0
-v 0 0 0.70711
-v 0 0 -0.70711
-v 0.28324 0 0
+v 0 -0.50000 -0.50000
+v 0 -0.50000 0.50000
+v 0 0.50000 -0.50000
+v 0 0.50000 0.50000
 
-# No. normals 5:
-vn 0 1 0
-vn 0 1 0
-vn 0 1 0
-vn 0 1 0
-vn 0 1 0
+# No. normals 7:
+vn -1 0 0
+vn -1 0 0
+vn -1 0 0
+vn -1 0 0
+vn -1 0 0
+vn -1 0 0
+vn -1 0 0
 
 # No. texture coordinates 4:
+vt 0 0
 vt 0 1
 vt 1 1
 vt 1 0
-vt 0 0
 
 # No. faces 1:
 
