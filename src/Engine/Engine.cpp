@@ -45,27 +45,15 @@ EngineSystemManager::EngineSystemManager(void) :
 }
 
 
-void EngineSystemManager::GenerateHeightFieldMap(float* heightMap, unsigned int width, unsigned int height, 
-                                                 float noiseWidth, float noiseHeight, float noiseMul, 
-                                                 int offsetX, int offsetZ) {
+void EngineSystemManager::SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value) {
     
     for (int x=0; x < width; x ++) {
         
         for (int z=0; z < height; z ++) {
             
-            float xCoord = (x + offsetX) * noiseWidth;
-            float zCoord = (z + offsetZ) * noiseHeight;
-            
-            float noise = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
-            
-            //noise = glm::round(noise * 1.5f) / 1.5f;
-            
-            //if (noise < 0) 
-            //    noise = 0;
-            
             unsigned int index = z * width + x;
             
-            heightMap[index] = noise;
+            heightField[index] = value;
             
             continue;
         }
@@ -76,30 +64,126 @@ void EngineSystemManager::GenerateHeightFieldMap(float* heightMap, unsigned int 
     return;
 }
 
+void EngineSystemManager::SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color) {
+    
+    for (int x=0; x < width; x ++) {
+        
+        for (int z=0; z < height; z ++) {
+            
+            unsigned int index = z * width + x;
+            
+            colorField[index] = glm::vec3(color.r, color.g, color.b);
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    return;
+}
 
-void EngineSystemManager::GenerateHeightFieldMesh(Mesh* mesh, float* heightMap, unsigned int width, unsigned int height, float offsetX, float offsetZ) {
+void EngineSystemManager::GenerateHeightFieldByPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
+                                                           float noiseWidth, float noiseHeight, 
+                                                           float noiseMul, int offsetX, int offsetZ) {
+    
+    for (int x=0; x < width; x ++) {
+        
+        for (int z=0; z < height; z ++) {
+            
+            float xCoord = ((float)x + offsetX) * noiseWidth;
+            float zCoord = ((float)z + offsetZ) * noiseHeight;
+            
+            float noise = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
+            
+            //noise = glm::round(noise * 1.5f) / 1.5f;
+            
+            //if (noise < 0) 
+            //    noise = 0;
+            
+            unsigned int index = z * width + x;
+            
+            heightField[index] += noise;
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    return;
+}
+
+void EngineSystemManager::GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color low, Color high, float bias) {
+    
+    for (int x=0; x < width; x ++) {
+        
+        for (int z=0; z < height; z ++) {
+            
+            unsigned int index = z * width + x;
+            
+            float heightPoint = heightField[index] * bias;
+            
+            if (heightPoint < 0) 
+                heightPoint = 0;
+            
+            Color color = Colors.Lerp(low, high, heightPoint);
+            
+            colorField[index] = glm::vec3( color.r, color.g, color.b );
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    return;
+}
+
+Mesh* EngineSystemManager::CreateMeshFromHeightField(float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ) {
+    
+    Mesh* mesh = Create<Mesh>();
+    
+    AddHeightFieldToMesh(mesh, heightField, colorField, width, height, offsetX, offsetZ);
+    
+    return mesh;
+}
+
+void EngineSystemManager::AddHeightFieldToMesh(Mesh* mesh, 
+                                               float* heightField, glm::vec3* colorField, 
+                                               unsigned int width, unsigned int height, 
+                                               float offsetX, float offsetZ) {
     
     for (unsigned int x=0; x < width-1; x ++) {
         
         for (unsigned int z=0; z < height-1; z ++) {
             
-            float xp =  ((float)x + offsetX) + ((float)width / 2)    + 0.5f;
-            float zp = (((float)z + offsetZ) - (offsetX / 2)) + ((float)height / 4);
+            // Get height values
+            float yyA = heightField[ z    * width +  x   ];
+            float yyB = heightField[ z    * width + (x+1)];
+            float yyC = heightField[(z+1) * width + (x+1)];
+            float yyD = heightField[(z+1) * width +  x   ];
             
-            float xx = (xp / 2) - ((float)width  / 2);
-            float zz = ((zp - ((float)x / 2)) - ((float)height / 2))  + 0.25f;
+            glm::vec3 cA = colorField[ z    * width +  x   ];
+            glm::vec3 cB = colorField[ z    * width + (x+1)];
+            glm::vec3 cC = colorField[(z+1) * width + (x+1)];
+            glm::vec3 cD = colorField[(z+1) * width +  x   ];
             
-            unsigned int index = mesh->AddQuad(xx, 0, zz, 1, 1, Colors.white);
+            // Calculate chunk position and offset
+            float xx = ( ( ( (float)x + offsetX) - (float)width  / 2) / 2) + 0.25;
+            float zz = ( ( ( (float)z + offsetZ) - (float)height / 2) / 2) + 0.25;
             
-            Vertex vertA = mesh->GetVertex( index   );
-            Vertex vertB = mesh->GetVertex( index+1 );
-            Vertex vertC = mesh->GetVertex( index+2 );
-            Vertex vertD = mesh->GetVertex( index+3 );
+            // Generate quad
+            Vertex vertex[4];
+            vertex[0] = Vertex( xx,   yyA, zz,    cA.x, cA.y, cA.z,   0, 1, 0,  0, 0 );
+            vertex[1] = Vertex( xx+1, yyB, zz,    cB.x, cB.y, cB.z,   0, 1, 0,  1, 0 );
+            vertex[2] = Vertex( xx+1, yyC, zz+1,  cC.x, cC.y, cC.z,   0, 1, 0,  1, 1 );
+            vertex[3] = Vertex( xx,   yyD, zz+1,  cD.x, cD.y, cD.z,   0, 1, 0,  0, 1 );
             
-            vertA.y = heightMap[ z    * width +  x  ];
-            vertB.y = heightMap[ z    * width + (x+1)];
-            vertC.y = heightMap[(z+1) * width + (x+1)];
-            vertD.y = heightMap[(z+1) * width +  x  ];
+            Vertex vertA = vertex[0];
+            Vertex vertB = vertex[1];
+            Vertex vertC = vertex[2];
+            Vertex vertD = vertex[3];
             
             // Calculate vertex normals
             
@@ -135,10 +219,28 @@ void EngineSystemManager::GenerateHeightFieldMesh(Mesh* mesh, float* heightMap, 
             vertD.ny = normal.y;
             vertD.nz = normal.z;
             
-            mesh->SetVertex( index  , vertA );
-            mesh->SetVertex( index+1, vertB );
-            mesh->SetVertex( index+2, vertC );
-            mesh->SetVertex( index+3, vertD );
+            vertex[0] = vertA;
+            vertex[1] = vertB;
+            vertex[2] = vertC;
+            vertex[3] = vertD;
+            
+            
+            // Load the sub mesh into the buffer
+            SubMesh subBuffer;
+            subBuffer.vertexBuffer.push_back(vertex[0]);
+            subBuffer.vertexBuffer.push_back(vertex[1]);
+            subBuffer.vertexBuffer.push_back(vertex[2]);
+            subBuffer.vertexBuffer.push_back(vertex[3]);
+            
+            subBuffer.indexBuffer.push_back(0);
+            subBuffer.indexBuffer.push_back(2);
+            subBuffer.indexBuffer.push_back(1);
+            
+            subBuffer.indexBuffer.push_back(0);
+            subBuffer.indexBuffer.push_back(3);
+            subBuffer.indexBuffer.push_back(2);
+            
+            mesh->AddSubMesh(xx, 0, zz, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
             
             continue;
         }

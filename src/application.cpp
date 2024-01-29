@@ -74,21 +74,13 @@ Material* plainMaterial;
 
 void Start() {
     
-    Engine.EnablePhysicsDebugRenderer();
+    //Engine.EnablePhysicsDebugRenderer();
     
     //
     // Create a sky
     
     Color skyHigh(Colors.blue);
     Color skyLow(Colors.blue);
-    
-    skyHigh += Colors.MakeGrayScale(0.997);
-    skyLow  += Colors.MakeGrayScale(0.799);
-    
-    skyHigh *= Colors.MakeGrayScale(0.961);
-    
-    skyHigh *= Colors.MakeGrayScale(0.1);
-    skyLow  *= Colors.MakeGrayScale(0.1);
     
     GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, 1);
     
@@ -106,7 +98,7 @@ void Start() {
     //
     // Create a camera controller
     
-    Vector3 position = Vector3(0, 3, 0);
+    Vector3 position = Vector3(-400, 100, 0);
     Vector3 colliderScale = Vector3(1, 1, 1);
     
     cameraController = Engine.CreateCameraController(position, colliderScale);
@@ -118,7 +110,7 @@ void Start() {
     skyTransform->parent = cameraTransform;
     
     cameraController->SetAngularDamping( 1 );
-    cameraController->SetLinearDamping( 3 );
+    cameraController->SetLinearDamping( 1 );
     cameraController->SetMass( 10 );
     cameraController->DisableGravity();
     
@@ -160,11 +152,15 @@ void Start() {
     sceneOverlay->camera->clipFar  =  100;
     sceneOverlay->camera->clipNear = -100;
     
+    
+    
+    
     // Initiate text elements
     for (int i=0; i < 20; i++) {
         GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", 9, Colors.white, "font");
         
         sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
+        
         text[i] = textObject->GetComponent<Text>();
         text[i]->canvas.anchorTop = true;
         
@@ -174,13 +170,21 @@ void Start() {
     
     
     
+    //
+    // Profiler overlay renderer
+    //
     
+    /*
     
+    GameObject* panelObject = Engine.CreateOverlayPanelRenderer(100, 100, 100, 80, "panel_blue");
+    MeshRenderer* panelRenderer = panelObject->GetComponent<MeshRenderer>();
+    sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer, RENDER_QUEUE_OVERLAY );
     
+    float alphaBlend = 0.5;
+    panelRenderer->material->ambient.g = alphaBlend;
     
-    
-    
-    
+    Panel* panel = panelObject->GetComponent<Panel>();
+    */
     
     
     
@@ -202,10 +206,7 @@ void Start() {
     
     plainMaterial->texture.UploadTextureToGPU( plainTexture->buffer, plainTexture->width, plainTexture->height, MATERIAL_FILTER_ANISOTROPIC );
     
-    plainMaterial->shader = Engine.shaders.texture;
-    
-    plainMaterial->diffuse = Colors.MakeGrayScale(0.87);
-    plainMaterial->ambient = Colors.MakeGrayScale(0.87);
+    plainMaterial->shader = Engine.shaders.color;
     
     plainMaterial->DisableCulling();
     
@@ -237,46 +238,115 @@ void Start() {
     //
     
     // World
-    int worldSize   = 20;
+    int worldSize   = 30;
     
-    // Chunk
-    int chunkSize  = 8;
-    
-    // Noise
-    float noiseWidth  = 0.1;
-    float noiseHeight = 0.1;
-    
-    float heightMul = 8;
+    // Chunk size in multiples of eight
+    int chunkSize  = 1;
     
     
     
     
     RigidBody* heightFieldBody = plainObject->GetComponent<RigidBody>();
     
-    float heightMap[chunkSize * chunkSize];
+    // Chunk size must be a multiple of eight
+    chunkSize *= 8;
+    
+    // Maps
+    float     heightMap[chunkSize * chunkSize];
+    glm::vec3 colorMap[chunkSize * chunkSize];
+    
     
     for (int x = -worldSize; x <= worldSize; x++) {
         
         for (int z = -worldSize; z <= worldSize; z++) {
             
-            Engine.GenerateHeightFieldMap(heightMap, chunkSize, chunkSize, 
-                                          noiseWidth, noiseHeight, heightMul, 
-                                         (chunkSize - 1) * x, (chunkSize - 1) * z);
+            float chunkOffsetX = (chunkSize - 1) * x;
+            float chunkOffsetZ = (chunkSize - 1) * z;
+            
+            // Base height field map values
+            Engine.SetHeightFieldValues(heightMap, chunkSize, chunkSize, 0);
+            
+            Engine.SetColorFieldValues(colorMap, chunkSize, chunkSize, Colors.white);
+            
+            // Apply perlin noise
+            
+            Engine.GenerateHeightFieldByPerlinNoise(heightMap, chunkSize, chunkSize, 
+                                                    0.007, 0.007, 200, 
+                                                    chunkOffsetX, chunkOffsetZ);
+            
+            Engine.GenerateHeightFieldByPerlinNoise(heightMap, chunkSize, chunkSize, 
+                                                    0.05, 0.05, 20, 
+                                                    chunkOffsetX, chunkOffsetZ);
+            
+            Engine.GenerateHeightFieldByPerlinNoise(heightMap, chunkSize, chunkSize, 
+                                                    0.09, 0.09, 5, 
+                                                    chunkOffsetX, chunkOffsetZ);
             
             
-            MeshCollider* collider = Physics.CreateHeightFieldMap(heightMap, chunkSize, chunkSize);
             
-            rp3d::Transform offsetTransform;
-            offsetTransform.setPosition(rp3d::Vector3((chunkSize - 1) * x, 0, (chunkSize - 1) * z));
+            // Apply terrain color by height value
+            Color colorLow = Colors.green;
+            colorLow *= Colors.MakeGrayScale(0.1);
             
-            rp3d::Collider* colliderBody = heightFieldBody->addCollider( collider->heightFieldShape, offsetTransform );
+            Color colorHigh = Colors.brown;
+            
+            //Engine.GenerateColorFieldFromHeightField(colorMap, heightMap, chunkSize, chunkSize, colorLow, colorHigh, 0.9f);
+            
+            
+            float bias = 0.01;
+            
+            for (int x=0; x < chunkSize; x ++) {
+                
+                for (int z=0; z < chunkSize; z ++) {
+                    
+                    unsigned int index = z * chunkSize + x;
+                    
+                    if (heightMap[index] < 0) heightMap[index] *= 0.3;
+                    
+                    float heightPoint = heightMap[index] * bias;
+                    
+                    Color color = colorLow;
+                    
+                    if (heightPoint < 0) 
+                        heightPoint = 0;
+                    
+                    if (heightPoint > 1) 
+                        heightPoint = 1;
+                    
+                    color = Colors.Lerp(colorLow, colorHigh, heightPoint);
+                    
+                    colorMap[index] = glm::vec3( color.r, color.g, color.b );
+                    
+                    continue;
+                }
+                
+                continue;
+            }
             
             
             
-            Engine.GenerateHeightFieldMesh(chunkMesh, heightMap, chunkSize, chunkSize, (chunkSize - 1) * x, (chunkSize - 1) * z);
             
+            
+            
+            
+            
+            // Generate a height field collider
+            
+            //MeshCollider* collider = Physics.CreateHeightFieldMap(heightMap, chunkSize, chunkSize);
+            
+            //rp3d::Transform offsetTransform;
+            //offsetTransform.setPosition(rp3d::Vector3((chunkSize - 1) * x, 0, (chunkSize - 1) * z));
+            
+            //rp3d::Collider* colliderBody = heightFieldBody->addCollider( collider->heightFieldShape, offsetTransform );
+            
+            
+            // Add the chunk to the mesh
+            Engine.AddHeightFieldToMesh(chunkMesh, heightMap, colorMap, chunkSize, chunkSize, chunkOffsetX, chunkOffsetZ);
+            
+            continue;
         }
         
+        continue;
     }
     
     chunkMesh->UploadToGPU();
@@ -337,27 +407,11 @@ void Start() {
 
 
 
-
-
-
-
-
-
-
-
-
-
 //
 // Application loop
 //
 
-
-
-
-glm::vec3 sunDir(0, 0, 1);
-float sunStep = 0.5;
-float sunRate = 1;
-
+glm::vec3 force(0);
 
 void Run() {
     
@@ -380,49 +434,56 @@ void Run() {
     
     
     
-    
-    
-    
-    
-    
-    
     //
     // Lighting day night cycle experimentation 
     //
     
-    bool adjustCycle = false;
+    float lightingMax       = 0.87;
+    float lightingMin       = 0.087;
     
+    float skyLightingMax    = 0.87;
+    float skyLightingMin    = 0.0034;
+    
+    float worldLightingMax  = 0.87;
+    float worldLightingMin  = 0.34;
+    
+    
+    
+    bool adjustCycle = false;
     if (Input.CheckKeyCurrent(VK_I)) {cycleDirection = true;  adjustCycle = true;}
     if (Input.CheckKeyCurrent(VK_K)) {cycleDirection = false; adjustCycle = true;}
     
-    
-    //ambientLight += 0.01f;
-    
     if (adjustCycle) {
-        
         if (cycleDirection) {
-            
-            ambientLight += 0.03f;
-            
+            ambientLight += 0.01f;
         } else {
-            
-            ambientLight -= 0.03f;
-            
+            ambientLight -= 0.01f;
         }
-        
     }
     
-    // Ambient limits
-    if (ambientLight > 1.1)   ambientLight = 1.1;
-    if (ambientLight < 0.0087) ambientLight = 0.0087;
     
-    skyMaterial->ambient = ambientLight;
+    // Ambient limits
+    if (ambientLight > 0.87f) ambientLight = 0.87f;
+    if (ambientLight < 0.0f)  ambientLight = 0.0f;
+    
+    // Sky brightness
+    skyMaterial->ambient = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
+    
+    // World brightness
+    plainMaterial->diffuse = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
+    
     
     Light* sunLight = directionalLight->GetComponent<Light>();
-    sunLight->intensity = ambientLight * 0.87;
+    sunLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);;
     
     // Light direction
     lightTransform = directionalLight->GetComponent<Transform>();
+    
+    
+    
+    //
+    // DEBUG - Manually adjust light direction
+    //
     
     if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis( 0.1, Vector3(1, 0, 0));}
     if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.1, Vector3(1, 0, 0));}
@@ -442,26 +503,45 @@ void Run() {
     
     Camera* mainCamera = Engine.sceneMain->camera;
     
-    glm::vec3 force(0);
+    float forceAccelerate = 0.03;
+    float forceDecelerate = 0.02;
+    float forceMax        = 10;
+    
     if (mainCamera != nullptr) {
         
         // Directional movement
-        if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward;}
-        if (Input.CheckKeyCurrent(VK_S)) {force -= mainCamera->forward;}
-        if (Input.CheckKeyCurrent(VK_A)) {force += mainCamera->right;}
-        if (Input.CheckKeyCurrent(VK_D)) {force -= mainCamera->right;}
+        bool moving = false;
+        if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward; moving = true;}
+        if (Input.CheckKeyCurrent(VK_S)) {force -= mainCamera->forward; moving = true;}
+        if (Input.CheckKeyCurrent(VK_A)) {force += mainCamera->right; moving = true;}
+        if (Input.CheckKeyCurrent(VK_D)) {force -= mainCamera->right; moving = true;}
         
         // Elevation
-        if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
-        if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
+        if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up; moving = true;}
+        if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up; moving = true;}
         
+        // Accelerate
+        if (glm::length(force) < forceMax) force += (force * forceAccelerate) * glm::vec3(0.1);
         
-        force *= 0.2;
+        // Decelerate
+        if ( glm::length(force) >  0.0001) force -= (force * forceDecelerate);
+        if (-glm::length(force) < -0.0001) force -= (force * forceDecelerate);
         
-        if (Input.CheckKeyCurrent(VK_CONTROL)) force *= 3;
+        glm::vec3 forceMul = force * forceAccelerate;
         
-        if (force != glm::vec3(0)) 
-            cameraController->AddForce(force.x, force.y, force.z);
+        // Minimum speed cut off
+        if (glm::length(force) < 0.001f) 
+            force = glm::vec3(0.0f);
+        
+        if (moving) 
+            if (Input.CheckKeyCurrent(VK_CONTROL)) forceMul *= 2;
+        
+        // Max force
+        if ( glm::length(forceMul) >  forceMax) forceMul = glm::vec3(forceMax);
+        if (-glm::length(forceMul) < -forceMax) forceMul = glm::vec3(-forceMax);
+        
+        if (forceMul != glm::vec3(0)) 
+            cameraController->AddForce(forceMul.x, forceMul.y, forceMul.z);
         
         
         

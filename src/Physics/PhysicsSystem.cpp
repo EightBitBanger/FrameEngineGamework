@@ -100,8 +100,8 @@ MeshCollider* PhysicsSystem::CreateHeightFieldMap(float* heightField, unsigned i
     
     unsigned int mapSize = width * height;
     
-    int maximumHeight =  100;
-    int minimumHeight = -100;
+    int maximumHeight =  1000;
+    int minimumHeight = -1000;
     
     collider->heightMapBuffer = new float[width * height];
     

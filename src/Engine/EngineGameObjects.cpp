@@ -103,10 +103,27 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     Mesh* skyMesh = Resources.CreateMeshFromTag(meshTagName);
     if (skyMesh == nullptr) return nullptr;
     
+    Color skyHigh = colorHigh;
+    Color skyLow  = colorLow;
+    
+    // Set the base range
+    skyHigh += Colors.MakeGrayScale(0.997f);
+    skyLow  += Colors.MakeGrayScale(0.799f);
+    
+    // Tweak the values
+    skyHigh *= Colors.MakeGrayScale(0.961f);
+    skyLow  *= Colors.MakeGrayScale(1.01f);
+    
+    // Uniform scale down
+    skyHigh *= Colors.MakeGrayScale(0.24f);
+    skyLow  *= Colors.MakeGrayScale(0.24f);
+    
     Material* skyMaterial = Renderer.CreateMaterial();
     
-    skyMaterial->ambient = Colors.MakeGrayScale(0.1);
-    skyMaterial->shader = shaders.sky;
+    skyMaterial->ambient = Colors.MakeGrayScale(0.0f);
+    skyMaterial->diffuse = Colors.MakeGrayScale(0.0f);
+    
+    skyMaterial->shader  = shaders.sky;
     
     skyMaterial->DisableDepthTest();
     skyMaterial->DisableShadowVolumePass();
@@ -115,13 +132,13 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
         Vertex vertex = skyMesh->GetVertex(i);
         
         if (vertex.y > 0) {
-            vertex.r = Math.Lerp(colorHigh.r, colorLow.r, vertex.y * biasMul);
-            vertex.g = Math.Lerp(colorHigh.g, colorLow.g, vertex.y * biasMul);
-            vertex.b = Math.Lerp(colorHigh.b, colorLow.b, vertex.y * biasMul);
+            vertex.r = Math.Lerp(skyHigh.r, skyLow.r, vertex.y * biasMul);
+            vertex.g = Math.Lerp(skyHigh.g, skyLow.g, vertex.y * biasMul);
+            vertex.b = Math.Lerp(skyHigh.b, skyLow.b, vertex.y * biasMul);
         } else {
-            vertex.r = Math.Lerp(colorLow.r, colorHigh.r, vertex.y * biasMul);
-            vertex.g = Math.Lerp(colorLow.g, colorHigh.g, vertex.y * biasMul);
-            vertex.b = Math.Lerp(colorLow.b, colorHigh.b, vertex.y * biasMul);
+            vertex.r = skyLow.r;
+            vertex.g = skyLow.g;
+            vertex.b = skyLow.b;
         }
         
         skyMesh->SetVertex(i, vertex);
@@ -212,7 +229,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     // Sprite sheet material
     Destroy<Material>( overlayRenderer->material );
     overlayRenderer->material = Resources.CreateMaterialFromTag( materialTag );
-    overlayRenderer->material->ambient  = Colors.black;
+    overlayRenderer->material->ambient  = Color(0.58f, 0, 0);
     overlayRenderer->material->shader = shaders.UI;
     
     overlayRenderer->material->SetBlending(BLEND_ONE, BLEND_ONE_MINUS_SRC_ALPHA);
@@ -247,8 +264,10 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     Destroy<Material>( overlayMaterial );
     overlayMaterial = Resources.CreateMaterialFromTag( materialTag );
     
-    overlayMaterial->ambient  = Colors.black;
-    overlayMaterial->shader = shaders.texture;
+    float alphaCutoff = 0;
+    
+    overlayMaterial->ambient = Color(alphaCutoff, 0, 0);
+    overlayMaterial->shader  = shaders.UI;
     
     overlayMaterial->SetBlending(BLEND_ONE, BLEND_ONE_MINUS_SRC_ALPHA);
     overlayMaterial->EnableBlending();

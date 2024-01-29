@@ -138,7 +138,7 @@ int Mesh::AddQuad(float x, float y, float z, float width, float height, Color co
     subBuffer.indexBuffer.push_back(3);
     subBuffer.indexBuffer.push_back(2);
     
-    return AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
+    return AddSubMesh(x, y, z, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
 }
 
 int Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu) {
