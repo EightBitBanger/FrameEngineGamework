@@ -172,18 +172,26 @@ public:
     /// Initiates a height field grid array of points and set them to zero.
     void SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value);
     
-    /// Generate perlin noise and add it to a height field.
-    void GenerateHeightFieldByPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ);
+    /// Add a layer of perlin noise into a height field.
+    void AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ);
     
     // Color field
     
     /// Initiates a color field grid array of colors and set them to zero.
     void SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color);
     
-    /// Generate a color field containing a color range from a height field.
+    /// Generate a color field containing a color range from from low to high. The bias will determine the fade 
+    /// from the low color to the high color based on the height field values.
     void GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color low, Color high, float bias);
     
-    // Mapping
+    /// Set a layer of perlin noise into a color field. The perlin noise is used to fade from the first color to the second.
+    void SetColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseThreshold, Color first, Color second, int offsetX, int offsetZ);
+    
+    /// Generate a snow cap effect of a given color capColor and starting at the height beginHeight.
+    /// The bias will determine how much snow will be added.
+    void AddColorFieldSnowCap(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color capColor, float beginHeight, float bias);
+    
+    // Mapping to a mesh
     
     /// Apply the height field values to a mesh.
     void AddHeightFieldToMesh(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
