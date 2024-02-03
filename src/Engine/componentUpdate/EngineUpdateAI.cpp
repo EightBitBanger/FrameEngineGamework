@@ -90,18 +90,18 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     // Ray cast here
     glm::vec3 from      = actorPosition;
     glm::vec3 direction = glm::vec3(0, -1, 0);
-    from.y += 0.5;
+    from.y = 900;
     
     Hit hit;
     
-    float distance = 2;
+    float distance = 1000;
     
     bool isFalling = false;
     
     // Move the actor out of the way since we cant cast a ray from inside the collider...
     rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
     rp3d::Vector3 currentPosition = transform.getPosition();
-    currentPosition.y += 100;
+    currentPosition.y += 1000;
     transform.setPosition(currentPosition);
     mStreamBuffer[index].rigidBody->setTransform(transform);
     
@@ -121,14 +121,14 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         
         // Standing on ground
         actorPosition.y   = hit.point.y;
-        currentPosition.y = hit.point.y + 100;
+        currentPosition.y = hit.point.y + 1000;
         
         actorVelocity.y = 0;
         
     }
     
     // Move the actor back into position since we are finished casting rays...
-    currentPosition.y -= 100;
+    currentPosition.y -= 1000;
     transform.setPosition(currentPosition);
     mStreamBuffer[index].rigidBody->setTransform(transform);
     

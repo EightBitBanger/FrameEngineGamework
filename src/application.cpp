@@ -24,8 +24,9 @@ extern ActorSystem          AI;
 
 
 // User functions
-void RenderPhysicsDebugger(void);
-void InitiatePhysicsDebugger(void);
+void GeneratePhysicsCollider(RigidBody* rigidBody, float* heightField, unsigned int chunkSize);
+
+GameObject* CreateBaseChunk(float x, float z, Material* material);
 
 
 
@@ -66,6 +67,14 @@ Material* plainMaterial;
 
 
 
+// Chunk manager
+
+std::vector<glm::vec2> chunkList;
+
+unsigned int currentChunkX = 0;
+unsigned int currentChunkZ = 0;
+
+
 
 
 
@@ -98,7 +107,7 @@ void Start() {
     //
     // Create a camera controller
     
-    Vector3 position = Vector3(-400, 100, 0);
+    Vector3 position = Vector3(0, 30, 0);
     Vector3 colliderScale = Vector3(1, 1, 1);
     
     cameraController = Engine.CreateCameraController(position, colliderScale);
@@ -124,7 +133,7 @@ void Start() {
     // Directional light
     directionalLight = Engine.Create<GameObject>();
     lightTransform = directionalLight->GetComponent<Transform>();
-    lightTransform->RotateAxis(1, Vector3(0.8, -0.7, 0.3));
+    lightTransform->RotateAxis(1, Vector3(0.8, -0.7, 0.0));
     
     directionalLight->AddComponent( Engine.CreateComponent<Light>() );
     Light* sunLight = directionalLight->GetComponent<Light>();
@@ -201,52 +210,29 @@ void Start() {
     
     plainMaterial = Engine.Create<Material>();
     
-    TextureTag* plainTexture = Resources.FindTextureTag("grassy");
-    plainTexture->Load();
-    
-    plainMaterial->texture.UploadTextureToGPU( plainTexture->buffer, plainTexture->width, plainTexture->height, MATERIAL_FILTER_ANISOTROPIC );
-    
     plainMaterial->shader = Engine.shaders.color;
     
-    plainMaterial->DisableCulling();
     
     
     
-    
-    // Chunk mesh
-    
-    Mesh* chunkMesh = Engine.Create<Mesh>();
-    
-    GameObject* plainObject = Engine.Create<GameObject>();
-    plainObject->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, plainMaterial ) );
-    plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
-    
-    MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
-    
-    Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
-    plainRenderer->mesh->SetPrimitive(MESH_TRIANGLES);
-    
-    plainObject->SetAngularAxisLockFactor(0, 0, 0);
-    plainObject->SetLinearAxisLockFactor(0, 0, 0);
-    plainObject->SetStatic();
     
     
     
     
     //
-    // Generate height field map
+    // Generate chunks
     //
     
-    // World
-    int worldSize   = 30;
+    
+    int worldSize   = 20;
     
     // Chunk size in multiples of eight
-    int chunkSize  = 1;
+    int chunkSize  = 4;
     
     
     
     
-    RigidBody* heightFieldBody = plainObject->GetComponent<RigidBody>();
+    
     
     // Chunk size must be a multiple of eight
     chunkSize *= 8;
@@ -263,24 +249,33 @@ void Start() {
             float chunkOffsetX = (chunkSize - 1) * x;
             float chunkOffsetZ = (chunkSize - 1) * z;
             
-            // Base height field map values
-            Engine.SetHeightFieldValues(heightMap, chunkSize, chunkSize, 0);
             
+            
+            
+            
+            
+            Engine.SetHeightFieldValues(heightMap, chunkSize, chunkSize, 0);
             Engine.SetColorFieldValues(colorMap, chunkSize, chunkSize, Colors.white);
             
-            // Apply perlin noise
             
-            Engine.GenerateHeightFieldByPerlinNoise(heightMap, chunkSize, chunkSize, 
-                                                    0.007, 0.007, 200, 
-                                                    chunkOffsetX, chunkOffsetZ);
             
-            Engine.GenerateHeightFieldByPerlinNoise(heightMap, chunkSize, chunkSize, 
-                                                    0.05, 0.05, 20, 
-                                                    chunkOffsetX, chunkOffsetZ);
+            // Generate perlin noise
             
-            Engine.GenerateHeightFieldByPerlinNoise(heightMap, chunkSize, chunkSize, 
-                                                    0.09, 0.09, 5, 
-                                                    chunkOffsetX, chunkOffsetZ);
+            Engine.AddHeightFieldFromPerlinNoise(heightMap, chunkSize, chunkSize, 0.1, 0.1, 1, chunkOffsetX, chunkOffsetZ);
+            
+            Engine.AddHeightFieldFromPerlinNoise(heightMap, chunkSize, chunkSize, 0.05, 0.05, 4, chunkOffsetX, chunkOffsetZ);
+            
+            Engine.AddHeightFieldFromPerlinNoise(heightMap, chunkSize, chunkSize, 0.007, 0.007, 50, chunkOffsetX, chunkOffsetZ);
+            
+            
+            
+            
+            
+            
+            
+            Engine.SetColorFieldFromPerlinNoise(colorMap, chunkSize, chunkSize, 0.01, 0.01, 0.4, Colors.blue, Colors.red, chunkOffsetX, chunkOffsetZ);
+            
+            
             
             
             
@@ -290,58 +285,40 @@ void Start() {
             
             Color colorHigh = Colors.brown;
             
-            //Engine.GenerateColorFieldFromHeightField(colorMap, heightMap, chunkSize, chunkSize, colorLow, colorHigh, 0.9f);
+            Engine.GenerateColorFieldFromHeightField(colorMap, heightMap, chunkSize, chunkSize, colorLow, colorHigh, 0.008f);
             
             
-            float bias = 0.01;
-            
-            for (int x=0; x < chunkSize; x ++) {
-                
-                for (int z=0; z < chunkSize; z ++) {
-                    
-                    unsigned int index = z * chunkSize + x;
-                    
-                    if (heightMap[index] < 0) heightMap[index] *= 0.3;
-                    
-                    float heightPoint = heightMap[index] * bias;
-                    
-                    Color color = colorLow;
-                    
-                    if (heightPoint < 0) 
-                        heightPoint = 0;
-                    
-                    if (heightPoint > 1) 
-                        heightPoint = 1;
-                    
-                    color = Colors.Lerp(colorLow, colorHigh, heightPoint);
-                    
-                    colorMap[index] = glm::vec3( color.r, color.g, color.b );
-                    
-                    continue;
-                }
-                
-                continue;
-            }
-            
-            
-            
+            Engine.AddColorFieldSnowCap(colorMap, heightMap, chunkSize, chunkSize, Colors.white, 70, 5.0);
             
             
             
             
             
             // Generate a height field collider
+            //GeneratePhysicsCollider( plainBody, heightMap, chunkSize );
             
-            //MeshCollider* collider = Physics.CreateHeightFieldMap(heightMap, chunkSize, chunkSize);
             
-            //rp3d::Transform offsetTransform;
-            //offsetTransform.setPosition(rp3d::Vector3((chunkSize - 1) * x, 0, (chunkSize - 1) * z));
             
-            //rp3d::Collider* colliderBody = heightFieldBody->addCollider( collider->heightFieldShape, offsetTransform );
+            // Chunk object
             
+            GameObject* plainObject = CreateBaseChunk(chunkOffsetX, chunkOffsetZ, plainMaterial);
+            
+            plainObject->renderDistance = 500;
+            
+            MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
+            Mesh* plainMesh = plainRenderer->mesh;
+            
+            RigidBody* plainBody = plainObject->GetComponent<RigidBody>();
+            
+            // Generate a height field collider
+            
+            GeneratePhysicsCollider( plainBody, heightMap, chunkSize );
             
             // Add the chunk to the mesh
-            Engine.AddHeightFieldToMesh(chunkMesh, heightMap, colorMap, chunkSize, chunkSize, chunkOffsetX, chunkOffsetZ);
+            
+            Engine.AddHeightFieldToMesh(plainMesh, heightMap, colorMap, chunkSize, chunkSize, 0, 0);
+            
+            plainMesh->UploadToGPU();
             
             continue;
         }
@@ -349,7 +326,9 @@ void Start() {
         continue;
     }
     
-    chunkMesh->UploadToGPU();
+    
+    
+    
     
     
     
@@ -359,17 +338,19 @@ void Start() {
     
     
     
+    
+    
     //
     // Generate AI actors
     //
     
-    unsigned int spread = 40;
+    unsigned int spread = 800;
     
     
-    for (unsigned int i=0; i < 500; i++) {
+    for (unsigned int i=0; i < 100; i++) {
         
         float xx = (Random.Range(0, spread) * 0.5) - (Random.Range(0, spread) * 0.5);
-        float yy = 10;
+        float yy = -10;
         float zz = (Random.Range(0, spread) * 0.5) - (Random.Range(0, spread) * 0.5);
         
         GameObject* actorObject = Engine.CreateAIActor( glm::vec3(xx, yy, zz) );
@@ -400,6 +381,71 @@ void Start() {
     
     return;
 }
+
+
+
+
+
+
+
+
+
+
+void GeneratePhysicsCollider(RigidBody* rigidBody, float* heightField, unsigned int chunkSize) {
+    
+    MeshCollider* collider = Physics.CreateHeightFieldMap(heightField, chunkSize, chunkSize);
+    
+    rp3d::Transform offsetTransform;
+    //offsetTransform.setPosition(rp3d::Vector3((chunkSize - 1) * x, 0, (chunkSize - 1) * z));
+    
+    rp3d::Collider* colliderBody = rigidBody->addCollider( collider->heightFieldShape, offsetTransform );
+    
+    return;
+}
+
+
+
+
+
+
+
+GameObject* CreateBaseChunk(float x, float z, Material* material) {
+    
+    Mesh* chunkMesh = Engine.Create<Mesh>();
+    
+    GameObject* plainObject = Engine.Create<GameObject>();
+    
+    plainObject->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, plainMaterial ) );
+    plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
+    
+    MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
+    
+    RigidBody* plainBody = plainObject->GetComponent<RigidBody>();
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
+    plainRenderer->mesh->SetPrimitive( MESH_TRIANGLES );
+    
+    plainObject->SetAngularAxisLockFactor(0, 0, 0);
+    plainObject->SetLinearAxisLockFactor(0, 0, 0);
+    plainObject->SetStatic();
+    
+    plainObject->renderDistance = 500;
+    
+    plainObject->SetPosition(x, 0, z);
+    
+    return plainObject;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -604,12 +650,10 @@ void Run() {
 
 
 //
-// Called once every tick (every 20 frames)
+// Called once every tick (20 frames)
 //
 
 void TickUpdate(void) {
-    
-    
     
     return;
 }

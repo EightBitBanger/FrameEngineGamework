@@ -83,9 +83,9 @@ void EngineSystemManager::SetColorFieldValues(glm::vec3* colorField, unsigned in
     return;
 }
 
-void EngineSystemManager::GenerateHeightFieldByPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
-                                                           float noiseWidth, float noiseHeight, 
-                                                           float noiseMul, int offsetX, int offsetZ) {
+void EngineSystemManager::AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
+                                                        float noiseWidth, float noiseHeight, 
+                                                        float noiseMul, int offsetX, int offsetZ) {
     
     for (int x=0; x < width; x ++) {
         
@@ -95,11 +95,6 @@ void EngineSystemManager::GenerateHeightFieldByPerlinNoise(float* heightField, u
             float zCoord = ((float)z + offsetZ) * noiseHeight;
             
             float noise = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
-            
-            //noise = glm::round(noise * 1.5f) / 1.5f;
-            
-            //if (noise < 0) 
-            //    noise = 0;
             
             unsigned int index = z * width + x;
             
@@ -114,7 +109,9 @@ void EngineSystemManager::GenerateHeightFieldByPerlinNoise(float* heightField, u
     return;
 }
 
-void EngineSystemManager::GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color low, Color high, float bias) {
+void EngineSystemManager::GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, 
+                                                            unsigned int width, unsigned int height, 
+                                                            Color low, Color high, float bias) {
     
     for (int x=0; x < width; x ++) {
         
@@ -122,13 +119,85 @@ void EngineSystemManager::GenerateColorFieldFromHeightField(glm::vec3* colorFiel
             
             unsigned int index = z * width + x;
             
-            float heightPoint = heightField[index] * bias;
+            if (heightField[index] < 0) heightField[index] *= 0.3;
             
-            if (heightPoint < 0) 
-                heightPoint = 0;
+            float heightBias = heightField[index] * bias;
             
-            Color color = Colors.Lerp(low, high, heightPoint);
+            Color color = low;
             
+            // Caps
+            if (heightBias < 0) heightBias = 0;
+            if (heightBias > 1) heightBias = 1;
+            
+            color = Colors.Lerp(low, high, heightBias);
+            
+            // Apply the final color
+            colorField[index] = glm::vec3( color.r, color.g, color.b );
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    return;
+}
+
+void EngineSystemManager::SetColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, 
+                                                       float noiseWidth, float noiseHeight, float noiseThreshold, 
+                                                       Color first, Color second, int offsetX, int offsetZ) {
+    
+    for (int x=0; x < width; x ++) {
+        
+        for (int z=0; z < height; z ++) {
+            
+            float xCoord = ((float)x + offsetX) * noiseWidth;
+            float zCoord = ((float)z + offsetZ) * noiseHeight;
+            
+            float noise = Random.Perlin(xCoord, 0, zCoord) + noiseThreshold;
+            
+            if (noise > 1) noise = 1;
+            if (noise < 0) noise = 0;
+            
+            Color result = Colors.Lerp(first, second, noise);
+            
+            unsigned int index = z * width + x;
+            
+            colorField[index] = glm::vec3(result.r, result.g, result.b);
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    return;
+}
+
+void EngineSystemManager::AddColorFieldSnowCap(glm::vec3* colorField, float* heightField, 
+                                               unsigned int width, unsigned int height, 
+                                               Color capColor, float beginHeight, float bias) {
+    
+    for (int x=0; x < width; x ++) {
+        
+        for (int z=0; z < height; z ++) {
+            
+            unsigned int index = z * width + x;
+            
+            float heightBias = heightField[index] * 0.01;
+            
+            Color color( colorField[index].x, colorField[index].y, colorField[index].z );
+            
+            // Caps
+            if (heightBias < 0) heightBias = 0;
+            if (heightBias > 1) heightBias = 1;
+            
+            int diff = ((beginHeight - (beginHeight - 20)) - (heightField[index] - beginHeight)) * bias;
+            
+            if (Random.Range(0, 100) > diff) 
+                color = Colors.Lerp(color, capColor, heightField[index] * 0.07);
+            
+            // Apply the final color
             colorField[index] = glm::vec3( color.r, color.g, color.b );
             
             continue;
