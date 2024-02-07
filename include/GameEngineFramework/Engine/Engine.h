@@ -33,6 +33,8 @@
 
 #include <GameEngineFramework/Networking/NetworkSystem.h>
 
+#define  CONSOLE_NUMBER_OF_ELEMENTS  32
+
 
 #ifndef BUILD_CORE
     extern EngineComponents     Components;
@@ -68,28 +70,6 @@ typedef void(*ButtonCallBack)();
 
 #define COMPONENT_STREAM_BUFFER_SIZE   1024 * 32
 
-struct ComponentDataStreamBuffer {
-    
-    // Base object
-    GameObject*    gameObject;
-    
-    // Components
-    Transform*     transform;
-    
-    // Rendering
-    Light*         light;
-    Actor*         actor;
-    Camera*        camera;
-    RigidBody*     rigidBody;
-    MeshRenderer*  meshRenderer;
-    
-    // UI
-    Text*          text;
-    Panel*         panel;
-    
-};
-
-
 
 class ENGINE_API EngineSystemManager {
     
@@ -97,6 +77,10 @@ public:
     
     /// Main active rendering scene.
     Scene* sceneMain;
+    
+    /// Overlay rendering scene. (For UI elements)
+    Scene* sceneOverlay;
+    
     
     // Game objects
     
@@ -107,7 +91,7 @@ public:
     bool DestroyGameObject(GameObject* gameObjectPtr);
     
     /// Get the number of game objects.
-    unsigned int GetGameObjectCount(void);
+    unsigned int GetNumberOfGameObjects(void);
     
     /// Return a pointer to a game object at the index position.
     GameObject* GetGameObject(unsigned int index);
@@ -150,6 +134,26 @@ public:
     
     /// Destroy a button 
     bool DestroyOverlayButtonCallback(Button* button);
+    
+    // Console
+    
+    /// Enable and render the console text elements.
+    void EnableConsole(void);
+    
+    /// Disable and deactivate the rendering of the console text elements.
+    void DisableConsole(void);
+    
+    /// Register a command function into the console to be used at runtime.
+    void ConsoleRegisterCommand(std::string name, void(*function)(std::vector<std::string>));
+    
+    /// Clear the text in the console input string.
+    void ConsoleClearInputString(void);
+    
+    /// Clear the logged messaged above the console input string.
+    void ConsoleClearLog(void);
+    
+    /// Shift the console log text elements up and add the text string into the console log.
+    void ConsoleShiftUp(std::string text);
     
     
     //
@@ -213,11 +217,9 @@ public:
     
     /// Create an object of the type specified.
     template <typename T> T* Create(void) {
-        
         // Engine
         if (std::is_same<T, GameObject>::value)    return (T*)CreateGameObject();
         if (std::is_same<T, Component>::value)     return (T*)CreateComponent( COMPONENT_TYPE_UNDEFINED );
-        
         // Renderer
         if (std::is_same<T, Mesh>::value)          return (T*)Renderer.CreateMesh();
         if (std::is_same<T, Material>::value)      return (T*)Renderer.CreateMaterial();
@@ -225,17 +227,16 @@ public:
         if (std::is_same<T, Scene>::value)         return (T*)Renderer.CreateScene();
         if (std::is_same<T, Camera>::value)        return (T*)Renderer.CreateCamera();
         if (std::is_same<T, MeshRenderer>::value)  return (T*)Renderer.CreateMeshRenderer();
-        
         return nullptr;
     }
     
     /// Destroy an object of the type specified.
     template <typename T> bool Destroy(T* objectPtr) {
-        
         // Engine
-        if (std::is_same<T, GameObject>::value)    return DestroyGameObject( (GameObject*)objectPtr );
+        if (std::is_same<T, GameObject>::value)    {GameObject* ptr = (GameObject*)objectPtr;
+                                                    ptr->isGarbage = true;
+                                                    return true;}
         if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
-        
         // Render system
         if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh( (Mesh*)objectPtr );
         if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial( (Material*)objectPtr );
@@ -243,7 +244,6 @@ public:
         if (std::is_same<T, Scene>::value)         return Renderer.DestroyScene( (Scene*)objectPtr );
         if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera( (Camera*)objectPtr );
         if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer( (MeshRenderer*)objectPtr );
-        
         return false;
     }
     
@@ -281,8 +281,7 @@ public:
     bool DestroyComponent(Component* componentPtr);
     
     /// Get the number of component objects.
-    unsigned int GetComponentCount(void);
-    
+    unsigned int GetNumberOfComponents(void);
     
     /// Initiate rendering for the physics debugging meshes.
     void EnablePhysicsDebugRenderer(void);
@@ -296,10 +295,44 @@ private:
     // Create a component object with initial type information and return its pointer.
     Component* CreateComponent(ComponentType type);
     
+    // Process the objects marked as garbage
+    void ProcessDeferredDeletion(void);
+    
+    // Console text
+    bool mIsConsoleEnabled;
+    
+    std::string mConsolePrompt;
+    std::string mConsoleString;
+    
+    Text* mConsoleInput;
+    Text* mConsoleText[CONSOLE_NUMBER_OF_ELEMENTS];
+    
+    GameObject* mConsoleInputObject;
+    GameObject* mConsoleTextObjects[CONSOLE_NUMBER_OF_ELEMENTS];
+    
+    GameObject* mConsolePanelObject;
+    
+    unsigned int mConsoleTimers[CONSOLE_NUMBER_OF_ELEMENTS];
+    
+    // Command function routing type
+    struct ConsoleCommand {
+        std::string name;
+        void(*function)(std::vector<std::string>);
+        ConsoleCommand() : 
+            name(""),
+            function(nullptr)
+        {}
+    };
+    
+    std::vector<ConsoleCommand> mConsoleCommands;
+    
     
     // Batch update engine components
     void UpdateTransformationChains(void);
     void UpdateUI(void);
+    
+    // Console
+    void UpdateConsole(void);
     
     // Update component by index
     void UpdateMeshRenderer(unsigned int index);
@@ -317,6 +350,9 @@ private:
     
     // List of active game objects
     std::vector<GameObject*>  mGameObjectActive;
+    
+    // List of garbage game objects
+    std::vector<GameObject*>  mGarbageObjects;
     
     // Component allocators
     PoolAllocator<GameObject> mGameObjects;
@@ -349,11 +385,26 @@ private:
         Mesh* wallVertical = nullptr;
     };
     
-    
-    // Component data streaming
+    // Component streaming
     unsigned int mDataStreamIndex;
     unsigned int mObjectIndex;
     unsigned int mStreamSize;
+    
+    struct ComponentDataStreamBuffer {
+        // Base object
+        GameObject*    gameObject;
+        // Components
+        Transform*     transform;
+        // Rendering
+        Light*         light;
+        Actor*         actor;
+        Camera*        camera;
+        RigidBody*     rigidBody;
+        MeshRenderer*  meshRenderer;
+        // UI
+        Text*          text;
+        Panel*         panel;
+    };
     
     ComponentDataStreamBuffer mStreamBuffer[ COMPONENT_STREAM_BUFFER_SIZE ];
     

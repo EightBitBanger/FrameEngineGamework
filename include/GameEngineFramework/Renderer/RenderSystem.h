@@ -50,7 +50,7 @@ public:
     
     RenderSystem();
     
-    Scene* operator[] (unsigned int const i) {return mRenderQueue[i];}
+    Scene* operator[] (unsigned int const i) {return mActiveScenes[i];}
     
     // Components
     
@@ -60,11 +60,19 @@ public:
     /// Destroy a mesh renderer object and return true on success.
     bool DestroyMeshRenderer(MeshRenderer* meshRendererPtr);
     
+    /// Return the number of mesh renderer objects.
+    unsigned int GetNumberOfMeshRenderers(void);
+    
+    
     /// Create a mesh object and return its pointer.
     Mesh* CreateMesh(void);
     
     /// Destroy a mesh object and return true on success.
     bool DestroyMesh(Mesh* meshPtr);
+    
+    /// Return the number of mesh objects.
+    unsigned int GetNumberOfMeshes(void);
+    
     
     /// Create a shader object and return its pointer.
     Shader* CreateShader(void);
@@ -72,11 +80,19 @@ public:
     /// Destroy a shader object and return true on success.
     bool DestroyShader(Shader* shaderPtr);
     
+    /// Return the number of shader objects.
+    unsigned int GetNumberOfShaders(void);
+    
+    
     /// Create a camera object and return its pointer.
     Camera* CreateCamera(void);
     
     /// Destroy a camera object and return true on success.
     bool DestroyCamera(Camera* cameraPtr);
+    
+    /// Return the number of camera objects.
+    unsigned int GetNumberOfCameras(void);
+    
     
     /// Create a material object and return its pointer.
     Material* CreateMaterial(void);
@@ -84,11 +100,19 @@ public:
     /// Destroy a material object and return true on success.
     bool DestroyMaterial(Material* materialPtr);
     
+    /// Return the number of material objects.
+    unsigned int GetNumberOfMaterials(void);
+    
+    
     /// Create a light object and return its pointer.
     Light* CreateLight(void);
     
     /// Destroy a light object and return true on success.
     bool DestroyLight(Light* lightPtr);
+    
+    /// Return the number of light objects.
+    unsigned int GetNumberOfLights(void);
+    
     
     /// Create a scene object and return its pointer.
     Scene* CreateScene(void);
@@ -96,17 +120,29 @@ public:
     /// Destroy a scene object and return true on success.
     bool DestroyScene(Scene* scenePtr);
     
+    /// Return the number of scene objects.
+    unsigned int GetNumberOfScenes(void);
+    
+    
     /// Create a texture object and return its pointer.
     Texture* CreateTexture(void);
     
     /// Destroy a texture object and return true on success.
     bool DestroyTexture(Texture* texturePtr);
     
+    /// Return the number of texture objects.
+    unsigned int GetNumberOfTextures(void);
+    
+    
     /// Create a frame buffer object and return its pointer.
     FrameBuffer* CreateFrameBuffer(void);
     
     /// Destroy a scene object and return true on success.
     bool DestroyFrameBuffer(FrameBuffer* frameBufferPtr);
+    
+    /// Return the number of frame buffer objects.
+    unsigned int GetNumberOfFrameBuffers(void);
+    
     
     // Render queue
     
@@ -118,9 +154,6 @@ public:
     
     /// Get the number of scenes in the render queue.
     unsigned int GetRenderQueueSize(void);
-    
-    /// Return the number of mesh renderers that have been created.
-    unsigned int GetMeshRendererCount(void);
     
     
     // Internal
@@ -147,7 +180,7 @@ public:
     friend class EngineSystemManager;
     
     
-public:
+private:
     
     // Draw call counter
     unsigned int mNumberOfDrawCalls;
@@ -156,7 +189,7 @@ public:
     unsigned long long int mNumberOfFrames;
     
     // Render queue group
-    std::vector<Scene*>  mRenderQueue;
+    std::vector<Scene*>  mActiveScenes;
     
     // Current asset bindings
     Mesh*      mCurrentMesh;
@@ -180,7 +213,7 @@ public:
     glm::vec4    mShadowAttenuation [RENDER_NUMBER_OF_SHADOWS];
     glm::vec3    mShadowColor       [RENDER_NUMBER_OF_SHADOWS];
     
-    // Shadows parameters
+    // Shadow parameters
     float        mShadowDistance;
     Transform    mShadowTransform;
     

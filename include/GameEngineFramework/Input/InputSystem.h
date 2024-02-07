@@ -14,7 +14,8 @@ public:
     
     InputSystem(void);
     
-    int  LastKeyPressed;
+    int lastKeyPressed;
+    int lastKeyReleased;
     
     /// Mouse X position in screen coordinates.
     int mouseX;

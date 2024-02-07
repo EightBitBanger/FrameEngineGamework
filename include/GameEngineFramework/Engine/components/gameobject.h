@@ -30,6 +30,9 @@ public:
     /// Should this game object be active in the scene.
     bool isActive;
     
+    /// Is this object marked for destruction by garbage collection.
+    bool isGarbage;
+    
     /// Distance within which this object will be updated.
     float renderDistance;
     
@@ -86,6 +89,11 @@ public:
     void SetPosition(float x, float y, float z);
     /// Set the position of the object from a vector3.
     void SetPosition(glm::vec3 newPosition);
+    
+    /// Activate the game object and any associated components.
+    void Activate(void);
+    /// Deactivate the game object and any associated components.
+    void Deactivate(void);
     
     /// Add directional force to the rigid body.
     void AddForce(float x, float y, float z);
