@@ -5,6 +5,7 @@ GameObject::GameObject() :
     
     name(""),
     isActive(true),
+    isGarbage(false),
     renderDistance(-1),
     
     mTransformCache(nullptr),
@@ -24,9 +25,6 @@ GameObject::GameObject() :
 //
 
 void GameObject::AddComponent(Component* component) {
-    assert(component != nullptr);
-    
-    // Cache component objects
     
     switch (component->GetType()) {
         
@@ -51,39 +49,42 @@ void GameObject::AddComponent(Component* component) {
 }
 
 bool GameObject::RemoveComponent(Component* component) {
-    assert(component != nullptr);
+    
     for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
+        
         Component* thisComponentPtr = *it;
-        if (component == thisComponentPtr) {
+        
+        if (component != thisComponentPtr) 
+            continue;
+        
+        // Null the cache pointer
+        switch (component->GetType()) {
             
-            // Null the cache pointer
-            switch (component->GetType()) {
-                
-                case Components.Transform:     mTransformCache = nullptr; break;
-                case Components.MeshRenderer:  mMeshRendererCache = nullptr; break;
-                case Components.RigidBody:     {
-                    mRigidBodyCache->setUserData( nullptr );
-                    mRigidBodyCache = nullptr;
-                    break;
-                }
-                case Components.Camera:        mCameraCache = nullptr; break;
-                case Components.Light:         mLightCache = nullptr; break;
-                case Components.Actor:         mActorCache = nullptr; break;
-                case Components.Text:          mTextCache = nullptr; break;
-                case Components.Panel:         mPanelCache = nullptr; break;
-                
-                default: break;
+            case Components.Transform:     mTransformCache = nullptr; break;
+            case Components.MeshRenderer:  mMeshRendererCache = nullptr; break;
+            case Components.RigidBody:     {
+                mRigidBodyCache->setUserData( nullptr );
+                mRigidBodyCache = nullptr;
+                break;
             }
-            mComponentList.erase(it);
-            return true;
+            case Components.Camera:        mCameraCache = nullptr; break;
+            case Components.Light:         mLightCache = nullptr; break;
+            case Components.Actor:         mActorCache = nullptr; break;
+            case Components.Text:          mTextCache = nullptr; break;
+            case Components.Panel:         mPanelCache = nullptr; break;
+            
+            default: break;
         }
+        
+        mComponentList.erase(it);
+        
+        return true;
     }
     
     return false;
 }
 
 Component* GameObject::GetComponentIndex(unsigned int index) {
-    assert(index < mComponentList.size());
     return mComponentList[index];
 }
 
@@ -122,6 +123,44 @@ void GameObject::SetPosition(float x, float y, float z) {
 
 void GameObject::SetPosition(glm::vec3 newPosition) {
     SetPosition(newPosition.x, newPosition.y, newPosition.z);
+    return;
+}
+
+void GameObject::Activate(void) {
+    
+    for (unsigned int i=0; i < mComponentList.size(); i++) {
+        
+        Component* componentPtr = mComponentList[i];
+        
+        ComponentType type = componentPtr->GetType();
+        
+        if (type == Components.Script)       {Script*       script       = (Script*)componentPtr->GetComponent();       script->isActive = true;}
+        if (type == Components.RigidBody)    {RigidBody*    rigidBody    = (RigidBody*)componentPtr->GetComponent();    rigidBody->setIsActive(true);}
+        if (type == Components.MeshRenderer) {MeshRenderer* meshRenderer = (MeshRenderer*)componentPtr->GetComponent(); meshRenderer->isActive = true;}
+        if (type == Components.Light)        {Light*        light        = (Light*)componentPtr->GetComponent();        light->isActive = true;}
+        if (type == Components.Actor)        {Actor*        actor        = (Actor*)componentPtr->GetComponent();        actor->SetActive(true);}
+        
+    }
+    
+    return;
+}
+
+void GameObject::Deactivate(void) {
+    
+    for (unsigned int i=0; i < mComponentList.size(); i++) {
+        
+        Component* componentPtr = mComponentList[i];
+        
+        ComponentType type = componentPtr->GetType();
+        
+        if (type == Components.Script)       {Script*       script       = (Script*)componentPtr->GetComponent();       script->isActive = false;}
+        if (type == Components.RigidBody)    {RigidBody*    rigidBody    = (RigidBody*)componentPtr->GetComponent();    rigidBody->setIsActive(false);}
+        if (type == Components.MeshRenderer) {MeshRenderer* meshRenderer = (MeshRenderer*)componentPtr->GetComponent(); meshRenderer->isActive = false;}
+        if (type == Components.Light)        {Light*        light        = (Light*)componentPtr->GetComponent();        light->isActive = false;}
+        if (type == Components.Actor)        {Actor*        actor        = (Actor*)componentPtr->GetComponent();        actor->SetActive(false);}
+        
+    }
+    
     return;
 }
 

@@ -11,7 +11,8 @@
 
 extern InputSystem::InputSystem(void) : 
     
-    LastKeyPressed(-1),
+    lastKeyPressed(-1),
+    lastKeyReleased(-1),
     
     mouseX(0),
     mouseY(0),
@@ -28,6 +29,8 @@ extern InputSystem::InputSystem(void) :
 
 void InputSystem::SetMousePosition(unsigned int x, unsigned int y) {
     SetCursorPos( (int)x, (int)y );
+    mouseX = x;
+    mouseY = y;
     return;
 }
 

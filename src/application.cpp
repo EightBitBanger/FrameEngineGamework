@@ -24,10 +24,6 @@ extern ActorSystem          AI;
 
 
 // User functions
-void GeneratePhysicsCollider(RigidBody* rigidBody, float* heightField, unsigned int chunkSize);
-
-GameObject* CreateBaseChunk(float x, float z, Material* material);
-
 
 
 
@@ -46,11 +42,14 @@ Transform* bendJoint = nullptr;
 
 Actor* testActor;
 
+Material* plainMaterial;
 
 
 
 MeshRenderer* combineRenderer;
 SubMesh submesh;
+
+
 
 
 
@@ -63,16 +62,336 @@ bool cycleDirection = false;
 float ambientLight = 0.3;
 
 Material* skyMaterial;
-Material* plainMaterial;
 
 
 
-// Chunk manager
 
-std::vector<glm::vec2> chunkList;
 
-unsigned int currentChunkX = 0;
-unsigned int currentChunkZ = 0;
+
+
+
+
+
+
+
+//
+// Chunk management
+//
+
+class ChunkManager {
+    
+public:
+    
+    std::vector<glm::vec2>   chunkList;
+    std::vector<GameObject*> chunkObjects;
+    
+    /// Distance to stop generating chunks.
+    int generationDistance;
+    int destructionDistance;
+    
+    /// Chunk size (must be a multiple of eight).
+    int chunkSize;
+    
+    /// Current chunk being generated.
+    int currentChunkX;
+    int currentChunkZ;
+    
+    /// Chunk update cycle index.
+    int chunkIndex;
+    
+    /// Material used for rendering the world chunks.
+    Material* mMaterial;
+    
+    
+    ChunkManager() : 
+        generationDistance(400),
+        destructionDistance(500),
+        
+        chunkSize(128),
+        
+        currentChunkX(0),
+        currentChunkZ(0),
+        
+        chunkIndex(0),
+        
+        mMaterial(nullptr),
+        mNumberOfChunksToUpdate(100)
+    {}
+    
+    
+    void SetMaterial(Material* material) {
+        mMaterial = material;
+        return;
+    }
+    
+    void AddChunk(glm::vec2 position) {
+        chunkList.push_back( position );
+        return;
+    }
+    
+    void RemoveChunk(unsigned int index) {
+        chunkList.erase( (chunkList.begin() + index) );
+        return;
+    }
+    
+    int FindChunk(glm::vec2 position) {
+        for (unsigned int i=0; i < chunkList.size(); i++) {
+            if (chunkList[i] != position) 
+                continue;
+            return i;
+        }
+        return -1;
+    }
+    
+    
+    
+    void GeneratePhysicsCollider(RigidBody* rigidBody, float* heightField, unsigned int chunkSize) {
+        
+        MeshCollider* collider = Physics.CreateHeightFieldMap(heightField, chunkSize, chunkSize);
+        
+        rp3d::Transform offsetTransform;
+        //offsetTransform.setPosition(rp3d::Vector3((chunkSize - 1) * x, 0, (chunkSize - 1) * z));
+        
+        rp3d::Collider* colliderBody = rigidBody->addCollider( collider->heightFieldShape, offsetTransform );
+        
+        return;
+    }
+    
+    
+    GameObject* CreateBaseChunk(float x, float z, Material* material) {
+        
+        Mesh* chunkMesh = Engine.Create<Mesh>();
+        
+        GameObject* plainObject = Engine.Create<GameObject>();
+        
+        plainObject->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, mMaterial ) );
+        plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
+        
+        MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
+        
+        Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
+        plainRenderer->mesh->SetPrimitive( MESH_TRIANGLES );
+        
+        plainObject->SetAngularAxisLockFactor(0, 0, 0);
+        plainObject->SetLinearAxisLockFactor(0, 0, 0);
+        plainObject->SetStatic();
+        
+        plainObject->renderDistance = 5000;// generationDistance * 1.2;
+        
+        plainObject->SetPosition(x, 0, z);
+        
+        return plainObject;
+    }
+    
+    void GenerateChunk(float chunkX, float chunkZ, float* heightField, glm::vec3* colorField) {
+        
+        Engine.SetHeightFieldValues(heightField, chunkSize, chunkSize, 0);
+        Engine.SetColorFieldValues(colorField, chunkSize, chunkSize, Colors.white);
+        
+        // Generate game object
+        
+        GameObject* plainObject = CreateBaseChunk(chunkX, chunkZ, mMaterial);
+        
+        chunkObjects.push_back(plainObject);
+        
+        MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
+        
+        plainRenderer->isActive = false;
+        
+        //RigidBody* plainBody = plainObject->GetComponent<RigidBody>();
+        
+        
+        
+        // Main noise channels
+        
+        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.2, 0.2,       1, chunkX, chunkZ);
+        
+        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.07, 0.07,     10, chunkX, chunkZ);
+        
+        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.02, 0.02,     40, chunkX, chunkZ);
+        
+        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.0007, 0.0007, 300, chunkX, chunkZ);
+        
+        
+        //
+        // Biome effect on terrain color
+        //
+        
+        //Engine.SetColorFieldFromPerlinNoise(colorField, chunkSize, chunkSize, 0.01, 0.01, 0.4, Colors.blue, Colors.red, chunkX, chunkZ);
+        
+        
+        
+        // Apply terrain color by height value
+        Color colorLow = Colors.green;
+        colorLow *= Colors.MakeGrayScale(0.1);
+        
+        Color colorHigh = Colors.brown;
+        
+        Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.008f);
+        
+        // Snow cap
+        Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize, chunkSize, Colors.white, 70, 5.0);
+        
+        // Generate a height field collider
+        //GeneratePhysicsCollider( plainBody, heightField, chunkSize );
+        
+        // Add the chunk to the mesh
+        
+        Mesh* plainMesh = plainRenderer->mesh;
+        
+        Engine.AddHeightFieldToMesh(plainMesh, heightField, colorField, chunkSize, chunkSize, 0, 0);
+        
+        plainMesh->UploadToGPU();
+        
+        return;
+    }
+    
+    void DestroyChunk(unsigned int index) {
+        
+        
+        
+        
+        
+    }
+    
+    void Update(void) {
+        
+        //
+        // Chunk destruction
+        //
+        
+        if (chunkObjects.size() > 0) {
+            
+            if (chunkIndex >= chunkObjects.size()) 
+                chunkIndex = 0;
+            
+            GameObject* chunk = chunkObjects[chunkIndex];
+            Transform* transform = chunk->GetComponent<Transform>();
+            
+            glm::vec3 chunkPosition  = transform->position;
+            glm::vec3 playerPosition = Engine.sceneMain->camera->transform.position;
+            
+            // Ignore height
+            chunkPosition.y = 0;
+            playerPosition.y = 0;
+            
+            if (glm::distance(chunkPosition, playerPosition) > destructionDistance) {
+                
+                int index = FindChunk( glm::vec2(chunkPosition.x, chunkPosition.z) );
+                
+                if (index >= 0) {
+                    
+                    
+                    // Remove the chunk from the chunk index
+                    RemoveChunk( index );
+                    
+                    // Remove the chunk object from the objects list
+                    chunkObjects.erase( chunkObjects.begin() + chunkIndex );
+                    
+                    // Marked for destruction
+                    chunk->isGarbage = true;
+                    
+                    MeshRenderer* meshRenderer = chunk->GetComponent<MeshRenderer>();
+                    
+                    Renderer.DestroyMesh( meshRenderer->mesh );
+                    
+                    //meshRenderer->mesh = nullptr;
+                    
+                    //meshRenderer->isActive = false;
+                    
+                }
+                
+            }
+            
+            chunkIndex++;
+        }
+        
+        
+        
+        //
+        // Attempt chunk generation
+        //
+        
+        float playerChunkX = glm::round( Engine.sceneMain->camera->transform.position.x / (chunkSize - 1));
+        float playerChunkZ = glm::round( Engine.sceneMain->camera->transform.position.z / (chunkSize - 1));
+        
+        // Decrease chunk update rate
+        mNumberOfChunksToUpdate--;
+        
+        if (mNumberOfChunksToUpdate < 1) 
+            mNumberOfChunksToUpdate = 1;
+        
+        float heightMap    [ chunkSize * chunkSize ];
+        glm::vec3 colorMap [ chunkSize * chunkSize ];
+        
+        
+        for (unsigned int i=0; i < mNumberOfChunksToUpdate; i++) {
+            
+            float chunkX = ((currentChunkX + playerChunkX) * (chunkSize - 1)) - (generationDistance / 2);
+            float chunkZ = ((currentChunkZ + playerChunkZ) * (chunkSize - 1)) - (generationDistance / 2);
+            
+            glm::vec2 chunkPosition = glm::vec2(chunkX, chunkZ);
+            
+            // Chunk counter
+            
+            currentChunkX++;
+            
+            if (currentChunkX > generationDistance / chunkSize) {
+                
+                currentChunkX = 0;
+                
+                currentChunkZ++;
+                
+                if (currentChunkZ > generationDistance / chunkSize) 
+                    currentChunkZ = 0;
+                
+            }
+            
+            // Check chunk does not exist
+            if (FindChunk( chunkPosition ) > -1) 
+                continue;
+            
+            // Increase chunk update rate
+            mNumberOfChunksToUpdate++;
+            
+            if (mNumberOfChunksToUpdate > 2) 
+                mNumberOfChunksToUpdate = 2;
+            
+            AddChunk( chunkPosition );
+            
+            GenerateChunk(chunkX, chunkZ, heightMap, colorMap);
+            
+            continue;
+        }
+        
+        return;
+    }
+    
+private:
+    
+    // Number of chunks being updated per frame
+    unsigned int mNumberOfChunksToUpdate;
+    
+};
+
+ChunkManager chunkManager;
+
+
+
+
+
+
+
+void functionTest(std::vector<std::string> args) {
+    std::string combine;
+    
+    for (unsigned int i=0; i < args.size(); i++) 
+        combine += args[i] + "+";
+    
+    text[15]->text = combine;
+    
+    return;
+}
 
 
 
@@ -179,39 +498,17 @@ void Start() {
     
     
     
-    //
-    // Profiler overlay renderer
-    //
-    
-    /*
-    
-    GameObject* panelObject = Engine.CreateOverlayPanelRenderer(100, 100, 100, 80, "panel_blue");
-    MeshRenderer* panelRenderer = panelObject->GetComponent<MeshRenderer>();
-    sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer, RENDER_QUEUE_OVERLAY );
-    
-    float alphaBlend = 0.5;
-    panelRenderer->material->ambient.g = alphaBlend;
-    
-    Panel* panel = panelObject->GetComponent<Panel>();
-    */
-    
-    
-    
-    
-    
-    
     
     
     //
-    // Generate some ground chunks
-    //
-    
     // Chunk material
+    //
     
     plainMaterial = Engine.Create<Material>();
     
     plainMaterial->shader = Engine.shaders.color;
     
+    chunkManager.SetMaterial( plainMaterial );
     
     
     
@@ -219,112 +516,8 @@ void Start() {
     
     
     
-    //
-    // Generate chunks
-    //
-    
-    
-    int worldSize   = 20;
-    
-    // Chunk size in multiples of eight
-    int chunkSize  = 4;
-    
-    
-    
-    
-    
-    
-    // Chunk size must be a multiple of eight
-    chunkSize *= 8;
-    
-    // Maps
-    float     heightMap[chunkSize * chunkSize];
-    glm::vec3 colorMap[chunkSize * chunkSize];
-    
-    
-    for (int x = -worldSize; x <= worldSize; x++) {
-        
-        for (int z = -worldSize; z <= worldSize; z++) {
-            
-            float chunkOffsetX = (chunkSize - 1) * x;
-            float chunkOffsetZ = (chunkSize - 1) * z;
-            
-            
-            
-            
-            
-            
-            Engine.SetHeightFieldValues(heightMap, chunkSize, chunkSize, 0);
-            Engine.SetColorFieldValues(colorMap, chunkSize, chunkSize, Colors.white);
-            
-            
-            
-            // Generate perlin noise
-            
-            Engine.AddHeightFieldFromPerlinNoise(heightMap, chunkSize, chunkSize, 0.1, 0.1, 1, chunkOffsetX, chunkOffsetZ);
-            
-            Engine.AddHeightFieldFromPerlinNoise(heightMap, chunkSize, chunkSize, 0.05, 0.05, 4, chunkOffsetX, chunkOffsetZ);
-            
-            Engine.AddHeightFieldFromPerlinNoise(heightMap, chunkSize, chunkSize, 0.007, 0.007, 50, chunkOffsetX, chunkOffsetZ);
-            
-            
-            
-            
-            
-            
-            
-            Engine.SetColorFieldFromPerlinNoise(colorMap, chunkSize, chunkSize, 0.01, 0.01, 0.4, Colors.blue, Colors.red, chunkOffsetX, chunkOffsetZ);
-            
-            
-            
-            
-            
-            // Apply terrain color by height value
-            Color colorLow = Colors.green;
-            colorLow *= Colors.MakeGrayScale(0.1);
-            
-            Color colorHigh = Colors.brown;
-            
-            Engine.GenerateColorFieldFromHeightField(colorMap, heightMap, chunkSize, chunkSize, colorLow, colorHigh, 0.008f);
-            
-            
-            Engine.AddColorFieldSnowCap(colorMap, heightMap, chunkSize, chunkSize, Colors.white, 70, 5.0);
-            
-            
-            
-            
-            
-            // Generate a height field collider
-            //GeneratePhysicsCollider( plainBody, heightMap, chunkSize );
-            
-            
-            
-            // Chunk object
-            
-            GameObject* plainObject = CreateBaseChunk(chunkOffsetX, chunkOffsetZ, plainMaterial);
-            
-            plainObject->renderDistance = 500;
-            
-            MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
-            Mesh* plainMesh = plainRenderer->mesh;
-            
-            RigidBody* plainBody = plainObject->GetComponent<RigidBody>();
-            
-            // Generate a height field collider
-            
-            GeneratePhysicsCollider( plainBody, heightMap, chunkSize );
-            
-            // Add the chunk to the mesh
-            
-            Engine.AddHeightFieldToMesh(plainMesh, heightMap, colorMap, chunkSize, chunkSize, 0, 0);
-            
-            plainMesh->UploadToGPU();
-            
-            continue;
-        }
-        
-        continue;
-    }
+    // Register a command function into the console
+    Engine.ConsoleRegisterCommand("shay", functionTest);
     
     
     
@@ -338,16 +531,14 @@ void Start() {
     
     
     
-    
-    
     //
     // Generate AI actors
     //
     
-    unsigned int spread = 800;
+    unsigned int spread = 100;
     
     
-    for (unsigned int i=0; i < 100; i++) {
+    for (unsigned int i=0; i < 800; i++) {
         
         float xx = (Random.Range(0, spread) * 0.5) - (Random.Range(0, spread) * 0.5);
         float yy = -10;
@@ -377,73 +568,8 @@ void Start() {
         
     }
     
-    
-    
     return;
 }
-
-
-
-
-
-
-
-
-
-
-void GeneratePhysicsCollider(RigidBody* rigidBody, float* heightField, unsigned int chunkSize) {
-    
-    MeshCollider* collider = Physics.CreateHeightFieldMap(heightField, chunkSize, chunkSize);
-    
-    rp3d::Transform offsetTransform;
-    //offsetTransform.setPosition(rp3d::Vector3((chunkSize - 1) * x, 0, (chunkSize - 1) * z));
-    
-    rp3d::Collider* colliderBody = rigidBody->addCollider( collider->heightFieldShape, offsetTransform );
-    
-    return;
-}
-
-
-
-
-
-
-
-GameObject* CreateBaseChunk(float x, float z, Material* material) {
-    
-    Mesh* chunkMesh = Engine.Create<Mesh>();
-    
-    GameObject* plainObject = Engine.Create<GameObject>();
-    
-    plainObject->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, plainMaterial ) );
-    plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
-    
-    MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
-    
-    RigidBody* plainBody = plainObject->GetComponent<RigidBody>();
-    
-    Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
-    plainRenderer->mesh->SetPrimitive( MESH_TRIANGLES );
-    
-    plainObject->SetAngularAxisLockFactor(0, 0, 0);
-    plainObject->SetLinearAxisLockFactor(0, 0, 0);
-    plainObject->SetStatic();
-    
-    plainObject->renderDistance = 500;
-    
-    plainObject->SetPosition(x, 0, z);
-    
-    return plainObject;
-}
-
-
-
-
-
-
-
-
-
 
 
 
@@ -459,21 +585,107 @@ GameObject* CreateBaseChunk(float x, float z, Material* material) {
 
 glm::vec3 force(0);
 
+unsigned int gameObjectCount = 0;
+unsigned int ComponentCount  = 0;
+bool init = false;
+
+
 void Run() {
+    
+    Camera* mainCamera = Engine.sceneMain->camera;
+    
+    //
+    // Pausing
+    if (Input.CheckKeyPressed(VK_ESCAPE)) {
+        
+        Platform.Pause();
+        
+        if (Platform.isPaused) {
+            
+            Engine.EnableConsole();
+            
+            mainCamera->DisableMouseLook();
+            
+            Input.ClearKeys();
+            
+            Platform.ShowMouseCursor();
+            
+        } else {
+            
+            Engine.DisableConsole();
+            Engine.ConsoleClearInputString();
+            
+            mainCamera->EnableMouseLook();
+            
+            // Reset mouse position
+            Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            
+            Platform.HideMouseCursor();
+            
+            // Reset timers
+            Time.Update();
+            PhysicsTime.Update();
+        }
+        
+    }
+    
+    
+    
     
     //
     // Profiling
     //
-    
+    /*
     text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
     text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
     text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
     
     text[4]->text = "Draw calls - " + Float.ToString( Renderer.GetNumberOfDrawCalls() );
     
-    text[6]->text = "x - " + Float.ToString( cameraController->GetComponent<Transform>()->position.x );
-    text[7]->text = "y - " + Float.ToString( cameraController->GetComponent<Transform>()->position.y );
-    text[8]->text = "z - " + Float.ToString( cameraController->GetComponent<Transform>()->position.z );
+    text[6]->text = "x - " + Int.ToString( cameraController->GetComponent<Transform>()->position.x );
+    text[7]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );
+    text[8]->text = "z - " + Int.ToString( cameraController->GetComponent<Transform>()->position.z );
+    */
+    
+    
+    
+    //
+    // Resources
+    //
+    
+    if (Input.CheckKeyCurrent(VK_M)) {
+        
+        for (unsigned int i=0; i < 400; i++) {
+            
+            GameObject* gameObject = Engine.Create<GameObject>();
+            
+            
+            gameObject->AddComponent( Engine.CreateComponent<RigidBody>() );
+            gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+            
+            
+            Engine.Destroy<GameObject>( gameObject );
+        }
+    }
+    
+    
+    if (!init) {
+        
+        text[1]->text = "GameObjects ---- " + Float.ToString( Engine.GetNumberOfGameObjects() );
+        text[2]->text = "Components ----- " + Float.ToString( Engine.GetNumberOfComponents() );
+        
+        init = true;
+    }
+    
+    text[3]->text = "GameObjects ---- " + Float.ToString( Engine.GetNumberOfGameObjects() );
+    text[4]->text = "Components ----- " + Float.ToString( Engine.GetNumberOfComponents() );
+    
+    //text[6]->text = "Meshes --------- " + Float.ToString( Renderer.GetNumberOfMeshes() );
+    //text[7]->text = "MeshRenderers -- " + Float.ToString( Renderer.GetNumberOfMeshRenderers() );
+    
+    //text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
+    //text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
+    
     
     
     
@@ -496,8 +708,11 @@ void Run() {
     
     
     bool adjustCycle = false;
-    if (Input.CheckKeyCurrent(VK_I)) {cycleDirection = true;  adjustCycle = true;}
-    if (Input.CheckKeyCurrent(VK_K)) {cycleDirection = false; adjustCycle = true;}
+    
+    if (!Platform.isPaused) {
+        if (Input.CheckKeyCurrent(VK_I)) {cycleDirection = true;  adjustCycle = true;}
+        if (Input.CheckKeyCurrent(VK_K)) {cycleDirection = false; adjustCycle = true;}
+    }
     
     if (adjustCycle) {
         if (cycleDirection) {
@@ -531,8 +746,10 @@ void Run() {
     // DEBUG - Manually adjust light direction
     //
     
-    if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis( 0.1, Vector3(1, 0, 0));}
-    if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.1, Vector3(1, 0, 0));}
+    if (!Platform.isPaused) {
+        if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis( 0.1, Vector3(1, 0, 0));}
+        if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.1, Vector3(1, 0, 0));}
+    }
     
     
     
@@ -543,31 +760,66 @@ void Run() {
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    //
+    // Map generation
+    //
+    
+    chunkManager.Update();
+    
+    
+    
+    
+    //
+    // Camera controller movement
+    //
     
     if (cameraController == nullptr) 
         return;
     
-    Camera* mainCamera = Engine.sceneMain->camera;
-    
     float forceAccelerate = 0.03;
     float forceDecelerate = 0.02;
-    float forceMax        = 10;
+    float forceMax        = 18;
     
     if (mainCamera != nullptr) {
         
-        // Directional movement
+        // No movement when puased
         bool moving = false;
-        if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward; moving = true;}
-        if (Input.CheckKeyCurrent(VK_S)) {force -= mainCamera->forward; moving = true;}
-        if (Input.CheckKeyCurrent(VK_A)) {force += mainCamera->right; moving = true;}
-        if (Input.CheckKeyCurrent(VK_D)) {force -= mainCamera->right; moving = true;}
-        
-        // Elevation
-        if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up; moving = true;}
-        if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up; moving = true;}
+        if (!Platform.isPaused) {
+            if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward; moving = true;}
+            if (Input.CheckKeyCurrent(VK_S)) {force -= mainCamera->forward; moving = true;}
+            if (Input.CheckKeyCurrent(VK_A)) {force += mainCamera->right; moving = true;}
+            if (Input.CheckKeyCurrent(VK_D)) {force -= mainCamera->right; moving = true;}
+            
+            // Elevation
+            if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up; moving = true;}
+            if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up; moving = true;}
+        }
         
         // Accelerate
-        if (glm::length(force) < forceMax) force += (force * forceAccelerate) * glm::vec3(0.1);
+        if (glm::length(force) < forceMax) {
+            force += (force * forceAccelerate) * glm::vec3(0.1);
+        } else {
+            
+            // Check velocity caps
+            if (force.x > forceMax) force.x = forceMax;
+            if (force.y > forceMax) force.y = forceMax;
+            if (force.z > forceMax) force.z = forceMax;
+            
+        }
         
         // Decelerate
         if ( glm::length(force) >  0.0001) force -= (force * forceDecelerate);
@@ -612,36 +864,6 @@ void Run() {
     
     
     
-    
-    
-    //
-    // Pausing
-    
-    if (Input.CheckKeyPressed(VK_ESCAPE)) {
-        
-        Platform.Pause();
-        
-        if (Platform.isPaused) {
-            
-            mainCamera->DisableMouseLook();
-            
-            Input.ClearKeys();
-            
-            Platform.ShowMouseCursor();
-            
-        } else {
-            
-            SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
-            
-            mainCamera->EnableMouseLook();
-            
-            Platform.HideMouseCursor();
-            
-            Time.Update();
-            PhysicsTime.Update();
-        }
-        
-    }
     
     
     

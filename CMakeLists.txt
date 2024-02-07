@@ -424,6 +424,8 @@ set (CORE_SOURCES
     "src/Engine/EngineGameObjects.cpp"
     "src/Engine/EngineComponents.cpp"
     "src/Engine/EngineUpdate.cpp"
+    "src/Engine/EngineDeferredDeletion.cpp"
+    "src/Engine/EngineConsole.cpp"
     
     "src/Engine/componentUpdate/EngineUpdateUI.cpp"
     "src/Engine/componentUpdate/EngineUpdateAI.cpp"

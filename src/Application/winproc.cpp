@@ -12,8 +12,8 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
     
     switch (Messages) {
         
-        case WM_KEYDOWN: Input.SetKeyPressed(wParam); Input.LastKeyPressed = wParam + 0x20; break;
-        case WM_KEYUP:   Input.SetKeyReleased(wParam); break;
+        case WM_KEYDOWN: Input.SetKeyPressed(wParam);  Input.lastKeyPressed  = wParam; break;
+        case WM_KEYUP:   Input.SetKeyReleased(wParam); Input.lastKeyReleased = wParam; break;
         
         case WM_LBUTTONDOWN:
             Input.SetMouseLeftPressed(true);

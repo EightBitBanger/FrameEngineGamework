@@ -33,6 +33,14 @@ ENGINE_API UintType          Uint;
 
 EngineSystemManager::EngineSystemManager(void) : 
     sceneMain(nullptr),
+    sceneOverlay(nullptr),
+    
+    mIsConsoleEnabled(false),
+    mConsolePrompt("-"),
+    mConsoleString(""),
+    mConsoleInput(nullptr),
+    mConsoleInputObject(nullptr),
+    mConsolePanelObject(nullptr),
     
     mDataStreamIndex(0),
     mObjectIndex(0),
@@ -44,6 +52,10 @@ EngineSystemManager::EngineSystemManager(void) :
 {
 }
 
+
+//
+// Generation
+//
 
 void EngineSystemManager::SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value) {
     
@@ -407,14 +419,6 @@ GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
     return nullptr;
 }
 
-unsigned int EngineSystemManager::GetGameObjectCount(void) {
-    return mGameObjects.Size();
-}
-
-unsigned int EngineSystemManager::GetComponentCount(void) {
-    return mComponents.Size();
-}
-
 void EngineSystemManager::Initiate() {
     
     // Load default shaders
@@ -454,6 +458,68 @@ void EngineSystemManager::Initiate() {
     Renderer.meshes.wallHorizontal  = meshes.wallHorizontal;
     Renderer.meshes.wallVertical    = meshes.wallVertical;
     
+    // Initiate overlay scene
+    sceneOverlay = Create<Scene>();
+    Renderer.AddSceneToRenderQueue(sceneOverlay);
+    
+    sceneOverlay->camera = Engine.Create<Camera>();
+    sceneOverlay->camera->isOrthographic = true;
+    sceneOverlay->camera->isFixedAspect  = true;
+    
+    sceneOverlay->camera->viewport.w = Renderer.displaySize.x;
+    sceneOverlay->camera->viewport.h = Renderer.displaySize.y;
+    
+    sceneOverlay->camera->clipFar  =  100;
+    sceneOverlay->camera->clipNear = -100;
+    
+    // Console panel overlay
+    
+    mConsolePanelObject = Engine.CreateOverlayPanelRenderer(20, -8, 10000, 10, "panel_blue");
+    MeshRenderer* panelRenderer = mConsolePanelObject->GetComponent<MeshRenderer>();
+    sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer, RENDER_QUEUE_BACKGROUND );
+    mConsolePanelObject->isActive = false;
+    
+    float alphaBlend = 0.87;
+    panelRenderer->material->ambient.g = alphaBlend;
+    
+    Panel* panel = mConsolePanelObject->GetComponent<Panel>();
+    panel->canvas.anchorTop = false;
+    
+    // Initiate console input text
+    
+    mConsoleInputObject = CreateOverlayTextRenderer(0, 0, "", 9, Colors.ltgray, "font");
+    MeshRenderer* inputRenderer = mConsoleInputObject->GetComponent<MeshRenderer>();
+    inputRenderer->isActive = false;
+    
+    sceneOverlay->AddMeshRendererToSceneRoot( inputRenderer, RENDER_QUEUE_OVERLAY );
+    
+    mConsoleInput = mConsoleInputObject->GetComponent<Text>();
+    mConsoleInput->canvas.anchorTop = false;
+    
+    mConsoleInput->canvas.x = 0;
+    mConsoleInput->canvas.y = 0;
+    
+    // Initiate console text elements
+    
+    for (int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) {
+        
+        mConsoleTextObjects[i] = CreateOverlayTextRenderer(0, 0, "", 9, Colors.MakeGrayScale(0.87), "font");
+        
+        MeshRenderer* meshRenderer = mConsoleTextObjects[i]->GetComponent<MeshRenderer>();
+        meshRenderer->material->EnableBlending();
+        meshRenderer->material->SetBlending(BLEND_SRC_ALPHA, BLEND_ONE_MINUS_SRC_ALPHA);
+        
+        sceneOverlay->AddMeshRendererToSceneRoot( meshRenderer );
+        
+        mConsoleText[i] = mConsoleTextObjects[i]->GetComponent<Text>();
+        mConsoleText[i]->canvas.anchorTop = false;
+        
+        mConsoleText[i]->canvas.x = 0;
+        mConsoleText[i]->canvas.y = -(2 * i + 4);
+        
+        continue;
+    }
+    
     return;
 }
 
@@ -461,7 +527,9 @@ void EngineSystemManager::Shutdown(void) {
     
     Destroy<Scene>(sceneMain);
     
-    while (GetGameObjectCount() > 0) {
+    Destroy<Scene>(sceneOverlay);
+    
+    while (GetNumberOfGameObjects() > 0) {
         DestroyGameObject( GetGameObject(0) );
     }
     

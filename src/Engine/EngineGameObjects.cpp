@@ -47,13 +47,19 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     for (unsigned int i=0; i < gameObjectPtr->GetComponentCount(); i++) {
         
         Component* componentPtr = gameObjectPtr->GetComponentIndex(i);
+        
         DestroyComponent(componentPtr);
+        
         continue;
     }
     
     mGameObjects.Destroy(gameObjectPtr);
     
     return true;
+}
+
+unsigned int EngineSystemManager::GetNumberOfGameObjects(void) {
+    return mGameObjects.Size();
 }
 
 GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm::vec3 scale) {

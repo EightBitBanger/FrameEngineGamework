@@ -29,6 +29,15 @@ void EngineSystemManager::UpdateTextUI(unsigned int index) {
     if (mStreamBuffer[index].meshRenderer == nullptr) 
         return;
     
+    if (mStreamBuffer[index].gameObject->isActive) {
+        
+        mStreamBuffer[index].meshRenderer->isActive = true;
+        
+    } else {
+        
+        mStreamBuffer[index].meshRenderer->isActive = false;
+        
+    }
     
     //
     // Anchor RIGHT

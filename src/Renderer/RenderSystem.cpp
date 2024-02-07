@@ -45,12 +45,19 @@ bool RenderSystem::DestroyMeshRenderer(MeshRenderer* meshRendererPtr) {
     return mEntity.Destroy(meshRendererPtr);
 }
 
+unsigned int RenderSystem::GetNumberOfMeshRenderers(void) {
+    return mEntity.Size();
+}
+
 Mesh* RenderSystem::CreateMesh(void) {
     Mesh* meshPtr = mMesh.Create();
     return meshPtr;
 }
 bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
     return mMesh.Destroy(meshPtr);
+}
+unsigned int RenderSystem::GetNumberOfMeshes(void) {
+    return mMesh.Size();
 }
 
 Shader* RenderSystem::CreateShader(void) {
@@ -59,6 +66,9 @@ Shader* RenderSystem::CreateShader(void) {
 }
 bool RenderSystem::DestroyShader(Shader* shaderPtr) {
     return mShader.Destroy(shaderPtr);
+}
+unsigned int RenderSystem::GetNumberOfShaders(void) {
+    return mShader.Size();
 }
 
 Camera* RenderSystem::CreateCamera(void) {
@@ -69,6 +79,9 @@ Camera* RenderSystem::CreateCamera(void) {
 bool RenderSystem::DestroyCamera(Camera* cameraPtr) {
     return mCamera.Destroy(cameraPtr);
 }
+unsigned int RenderSystem::GetNumberOfCameras(void) {
+    return mCamera.Size();
+}
 
 Material* RenderSystem::CreateMaterial(void) {
     Material* materialPtr = mMaterial.Create();
@@ -76,6 +89,9 @@ Material* RenderSystem::CreateMaterial(void) {
 }
 bool RenderSystem::DestroyMaterial(Material* materialPtr) {
     return mMaterial.Destroy(materialPtr);
+}
+unsigned int RenderSystem::GetNumberOfMaterials(void) {
+    return mMaterial.Size();
 }
 
 Light* RenderSystem::CreateLight(void) {
@@ -85,6 +101,9 @@ Light* RenderSystem::CreateLight(void) {
 bool RenderSystem::DestroyLight(Light* lightPtr) {
     return mLight.Destroy(lightPtr);
 }
+unsigned int RenderSystem::GetNumberOfLights(void) {
+    return mLight.Size();
+}
 
 Scene* RenderSystem::CreateScene(void) {
     Scene* scenePtr = mScene.Create();
@@ -92,6 +111,9 @@ Scene* RenderSystem::CreateScene(void) {
 }
 bool RenderSystem::DestroyScene(Scene* scenePtr) {
     return mScene.Destroy(scenePtr);
+}
+unsigned int RenderSystem::GetNumberOfScenes(void) {
+    return mScene.Size();
 }
 
 Texture* RenderSystem::CreateTexture(void) {
@@ -101,6 +123,9 @@ Texture* RenderSystem::CreateTexture(void) {
 bool RenderSystem::DestroyTexture(Texture* texturePtr) {
     return mTexture.Destroy(texturePtr);
 }
+unsigned int RenderSystem::GetNumberOfTextures(void) {
+    return mTexture.Size();
+}
 
 FrameBuffer* RenderSystem::CreateFrameBuffer(void) {
     FrameBuffer* frameBufferPtr = mFrameBuffer.Create();
@@ -108,6 +133,9 @@ FrameBuffer* RenderSystem::CreateFrameBuffer(void) {
 }
 bool RenderSystem::DestroyFrameBuffer(FrameBuffer* frameBufferPtr) {
     return mFrameBuffer.Destroy(frameBufferPtr);
+}
+unsigned int RenderSystem::GetNumberOfFrameBuffers(void) {
+    return mFrameBuffer.Size();
 }
 
 void RenderSystem::Initiate(void) {
@@ -135,15 +163,15 @@ void RenderSystem::Shutdown(void) {
 
 void RenderSystem::AddSceneToRenderQueue(Scene* scenePtr) {
     assert(scenePtr != nullptr);
-    mRenderQueue.push_back( scenePtr );
+    mActiveScenes.push_back( scenePtr );
     return;
 }
 
 bool RenderSystem::RemoveSceneFromRenderQueue(Scene* scenePtr) {
-    for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
+    for (std::vector<Scene*>::iterator it = mActiveScenes.begin(); it != mActiveScenes.end(); ++it) {
         Scene* thisScenePtr = *it;
         if (scenePtr == thisScenePtr) {
-            mRenderQueue.erase(it);
+            mActiveScenes.erase(it);
             return true;
         }
     }
@@ -151,11 +179,7 @@ bool RenderSystem::RemoveSceneFromRenderQueue(Scene* scenePtr) {
 }
 
 unsigned int RenderSystem::GetRenderQueueSize(void) {
-    return mRenderQueue.size();
-}
-
-unsigned int RenderSystem::GetMeshRendererCount(void) {
-    return mEntity.Size();
+    return mActiveScenes.size();
 }
 
 void RenderSystem::SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {

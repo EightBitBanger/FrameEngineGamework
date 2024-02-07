@@ -29,7 +29,7 @@ void RenderSystem::RenderFrame(void) {
     //
     // Run the scene list
     
-    for (std::vector<Scene*>::iterator it = mRenderQueue.begin(); it != mRenderQueue.end(); ++it) {
+    for (std::vector<Scene*>::iterator it = mActiveScenes.begin(); it != mActiveScenes.end(); ++it) {
         
         Scene* scenePtr = *it;
         
@@ -39,8 +39,6 @@ void RenderSystem::RenderFrame(void) {
         // Set the camera projection angle
         setTargetCamera( scenePtr->camera, eye, viewProjection );
         
-        
-        //
         // Gather active lights in this scene
         if (scenePtr->doUpdateLights) {
             

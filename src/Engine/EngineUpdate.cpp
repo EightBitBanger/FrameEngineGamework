@@ -47,36 +47,50 @@ void EngineSystemManager::Update(void) {
         if (mObjectIndex >= mGameObjects.Size()) 
             mObjectIndex = 0;
         
+        GameObject* gameObject = mGameObjects[mObjectIndex];
+        
         // Check game object render distance
-        if (mGameObjects[mObjectIndex]->renderDistance > 0) {
+        bool shoudRender = true;
+        
+        if (gameObject->renderDistance > 0) {
             
-            if (glm::distance(mGameObjects[mObjectIndex]->mTransformCache->position, eye) < mGameObjects[mObjectIndex]->renderDistance) {
-                
-                mGameObjects[mObjectIndex]->isActive = true;
-                
-            } else {
-                
-                mGameObjects[mObjectIndex]->isActive = false;
-                
-            }
-            
-            // Set the state of associated components
-            
-            bool activeState = mGameObjects[mObjectIndex]->isActive;
-            
-            if (mGameObjects[mObjectIndex]->mActorCache) 
-                mGameObjects[mObjectIndex]->mActorCache->SetActive( activeState );
-            
-            if (mGameObjects[mObjectIndex]->mMeshRendererCache) 
-                mGameObjects[mObjectIndex]->mMeshRendererCache->isActive = activeState;
-            
-            if (mGameObjects[mObjectIndex]->mLightCache) 
-                mGameObjects[mObjectIndex]->mLightCache->isActive = activeState;
-            
-            if (mGameObjects[mObjectIndex]->mRigidBodyCache) 
-                mGameObjects[mObjectIndex]->mRigidBodyCache->setIsActive( activeState );
+            if (glm::distance(gameObject->mTransformCache->position, eye) > gameObject->renderDistance) 
+                shoudRender = false;
             
         }
+        
+        
+        // Check garbage collection
+        
+        if (gameObject->isGarbage) {
+            
+            mGarbageObjects.push_back( gameObject );
+            
+            // Set to inactivate components in the next step
+            gameObject->isActive = false;
+            
+        }
+        
+        
+        // Update the state of associated components
+        
+        bool activeState = true;
+        
+        if ((!gameObject->isActive) | (!shoudRender))
+            activeState = false;
+        
+        if (gameObject->mActorCache) 
+            gameObject->mActorCache->SetActive( activeState );
+        
+        if (gameObject->mMeshRendererCache) 
+            gameObject->mMeshRendererCache->isActive = activeState;
+        
+        if (gameObject->mLightCache) 
+            gameObject->mLightCache->isActive = activeState;
+        
+        if (gameObject->mRigidBodyCache) 
+            gameObject->mRigidBodyCache->setIsActive( activeState );
+        
         
         // Check last object
         if (mObjectIndex == mGameObjects.Size() - 1) {
@@ -86,21 +100,34 @@ void EngineSystemManager::Update(void) {
             mDataStreamIndex = 0;
         }
         
-        if (!mGameObjects[mObjectIndex]->isActive) 
+        // UI elements should always be added to the stream buffer
+        bool isUIElement = false;
+        
+        if (gameObject->mTextCache != nullptr)  isUIElement = true;
+        if (gameObject->mPanelCache != nullptr) isUIElement = true;
+        
+        
+        //
+        // Final check before added to list
+        
+        if (((!gameObject->isActive) | (!shoudRender)) & (!isUIElement)) 
             continue;
         
-        // Add the object to the object buffer stream
-        mStreamBuffer[mDataStreamIndex].gameObject    = mGameObjects[mObjectIndex];
-        mStreamBuffer[mDataStreamIndex].transform     = mGameObjects[mObjectIndex]->mTransformCache;
+        //
+        // Set buffer stream objects and components
+        //
         
-        mStreamBuffer[mDataStreamIndex].light         = mGameObjects[mObjectIndex]->mLightCache;
-        mStreamBuffer[mDataStreamIndex].actor         = mGameObjects[mObjectIndex]->mActorCache;
-        mStreamBuffer[mDataStreamIndex].camera        = mGameObjects[mObjectIndex]->mCameraCache;
-        mStreamBuffer[mDataStreamIndex].rigidBody     = mGameObjects[mObjectIndex]->mRigidBodyCache;
-        mStreamBuffer[mDataStreamIndex].meshRenderer  = mGameObjects[mObjectIndex]->mMeshRendererCache;
+        mStreamBuffer[mDataStreamIndex].gameObject    = gameObject;
+        mStreamBuffer[mDataStreamIndex].transform     = gameObject->mTransformCache;
         
-        mStreamBuffer[mDataStreamIndex].text          = mGameObjects[mObjectIndex]->mTextCache;
-        mStreamBuffer[mDataStreamIndex].panel         = mGameObjects[mObjectIndex]->mPanelCache;
+        mStreamBuffer[mDataStreamIndex].light         = gameObject->mLightCache;
+        mStreamBuffer[mDataStreamIndex].actor         = gameObject->mActorCache;
+        mStreamBuffer[mDataStreamIndex].camera        = gameObject->mCameraCache;
+        mStreamBuffer[mDataStreamIndex].rigidBody     = gameObject->mRigidBodyCache;
+        mStreamBuffer[mDataStreamIndex].meshRenderer  = gameObject->mMeshRendererCache;
+        
+        mStreamBuffer[mDataStreamIndex].text          = gameObject->mTextCache;
+        mStreamBuffer[mDataStreamIndex].panel         = gameObject->mPanelCache;
         
         mDataStreamIndex++;
         
@@ -120,8 +147,12 @@ void EngineSystemManager::Update(void) {
     
     UpdateUI();
     
+    UpdateConsole();
     
-    // Run the game object list
+    
+    //
+    // Update attached components
+    //
     
     for (unsigned int i=0; i < mStreamSize; i++ ) {
         
@@ -139,5 +170,17 @@ void EngineSystemManager::Update(void) {
     }
     
     
+    //
+    // Process garbage objects
+    //
+    
+    ProcessDeferredDeletion();
+    
+    
     return;
 }
+
+
+
+
+

@@ -36,7 +36,7 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
     } else {
         
         //
-        // Anchor LEFT by default
+        // Anchor LEFT
         //
         
         mStreamBuffer[index].transform->position.z  = (mStreamBuffer[index].panel->canvas.y * mStreamBuffer[index].panel->width);
@@ -68,11 +68,11 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
     } else {
         
         //
-        // Anchor BOTTOM by default
+        // Anchor BOTTOM
         //
         
         mStreamBuffer[index].transform->position.y  = Renderer.displaySize.y - mStreamBuffer[index].panel->height;
-        mStreamBuffer[index].transform->position.y -= mStreamBuffer[index].panel->height * -(mStreamBuffer[index].panel->canvas.x);
+        mStreamBuffer[index].transform->position.y -= mStreamBuffer[index].panel->height * -(mStreamBuffer[index].panel->canvas.y);
         
         //
         // Anchor CENTER vertically
