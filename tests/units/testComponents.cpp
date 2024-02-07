@@ -38,7 +38,7 @@ void TestFramework::TestComponentObject(void) {
     Engine.DestroyComponent(componentScript);
     Engine.DestroyComponent(componentLight);
     
-    if (Engine.GetComponentCount() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
+    if (Engine.GetNumberOfComponents() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     return;
 }
