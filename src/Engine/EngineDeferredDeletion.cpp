@@ -33,15 +33,6 @@ void EngineSystemManager::ProcessDeferredDeletion(void) {
         
         if (objectPtr->mMeshRendererCache != nullptr) {
             
-            // Purge mesh
-            if (objectPtr->mMeshRendererCache->mesh != nullptr) 
-                if (!objectPtr->mMeshRendererCache->mesh->isShared) 
-                    Destroy<Mesh>( objectPtr->mMeshRendererCache->mesh );
-            
-            // Check material
-            //if (!objectPtr->mMeshRendererCache->material->isShared) 
-            //    Destroy<Material>( objectPtr->mMeshRendererCache->material );
-            
             // Make damn sure the mesh renderer is removed from the render queues before termination
             for (unsigned int g=0; g < 5; g++) {
                 

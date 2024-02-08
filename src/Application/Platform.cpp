@@ -58,7 +58,7 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     wClassEx.hInstance       = hInstance;
     wClassEx.lpszMenuName    = NULL;
     wClassEx.hCursor         = hCursor;
-    wClassEx.hIcon           = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
+    //wClassEx.hIcon           = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
     wClassEx.hIconSm         = LoadIcon(hInstance, IDI_APPLICATION);
     wClassEx.hbrBackground   = (HBRUSH)GetStockObject(BLACK_BRUSH);
     

@@ -6,6 +6,9 @@
 
 bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3 cameraAngle, glm::mat4& viewProjection) {
     
+    if (!currentEntity->isActive) 
+        return false;
+    
     if (!currentEntity->material->mDoShadowPass)
         return false;
     

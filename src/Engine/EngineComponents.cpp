@@ -84,7 +84,21 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
         
         case COMPONENT_TYPE_TRANSFORM:     {mTransforms.Destroy( (Transform*)componentPtr->GetComponent() ); break;}
         
-        case COMPONENT_TYPE_MESH_RENDERER: {Renderer.DestroyMeshRenderer( (MeshRenderer*)componentPtr->GetComponent() ); break;}
+        case COMPONENT_TYPE_MESH_RENDERER: {
+            MeshRenderer* meshRenderer = (MeshRenderer*)componentPtr->GetComponent();
+            
+            // Purge mesh
+            if (meshRenderer->mesh != nullptr) 
+                if (!meshRenderer->mesh->isShared) 
+                    Renderer.DestroyMesh( meshRenderer->mesh );
+            
+            // Check material
+            //if (!objectPtr->mMeshRendererCache->material->isShared) 
+            //    Destroy<Material>( objectPtr->mMeshRendererCache->material );
+            
+            Renderer.DestroyMeshRenderer( meshRenderer );
+            break;
+        }
         case COMPONENT_TYPE_CAMERA:        {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
         case COMPONENT_TYPE_LIGHT:         {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
         case COMPONENT_TYPE_SCRIPT:        {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
