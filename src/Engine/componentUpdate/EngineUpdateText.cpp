@@ -6,6 +6,7 @@
 ENGINE_API extern EngineComponents  Components;
 ENGINE_API extern ColorPreset       Colors;
 ENGINE_API extern NumberGeneration  Random;
+ENGINE_API extern StringType        String;
 ENGINE_API extern Logger            Log;
 ENGINE_API extern Timer             PhysicsTime;
 ENGINE_API extern Timer             Time;
@@ -20,8 +21,7 @@ ENGINE_API extern InputSystem       Input;
 ENGINE_API extern MathCore          Math;
 ENGINE_API extern ActorSystem       AI;
 
-ENGINE_API extern PlatformLayer         Platform;
-ENGINE_API extern EngineSystemManager   Engine;
+ENGINE_API extern PlatformLayer     Platform;
 
 
 void EngineSystemManager::UpdateTextUI(unsigned int index) {
@@ -103,7 +103,7 @@ void EngineSystemManager::UpdateTextUI(unsigned int index) {
         mStreamBuffer[index].meshRenderer->mesh->ClearSubMeshes();
         
         // Update the text string characters 
-        Engine.AddMeshText(mStreamBuffer[index].gameObject, 0, 0, textGlyphWidth, textGlyphHeight, mStreamBuffer[index].text->text, mStreamBuffer[index].text->color);
+        AddMeshText(mStreamBuffer[index].gameObject, 0, 0, textGlyphWidth, textGlyphHeight, mStreamBuffer[index].text->text, mStreamBuffer[index].text->color);
         
     }
     

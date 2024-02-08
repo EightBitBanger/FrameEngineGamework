@@ -6,6 +6,7 @@
 ENGINE_API extern EngineComponents  Components;
 ENGINE_API extern ColorPreset       Colors;
 ENGINE_API extern NumberGeneration  Random;
+ENGINE_API extern StringType        String;
 ENGINE_API extern Logger            Log;
 ENGINE_API extern Timer             PhysicsTime;
 ENGINE_API extern Timer             Time;
@@ -20,8 +21,7 @@ ENGINE_API extern InputSystem       Input;
 ENGINE_API extern MathCore          Math;
 ENGINE_API extern ActorSystem       AI;
 
-ENGINE_API extern PlatformLayer         Platform;
-ENGINE_API extern EngineSystemManager   Engine;
+ENGINE_API extern PlatformLayer     Platform;
 
 
 void EngineSystemManager::UpdateCamera(unsigned int index) {

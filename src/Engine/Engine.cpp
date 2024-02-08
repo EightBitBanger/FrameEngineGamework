@@ -19,16 +19,16 @@ ENGINE_API InputSystem       Input;
 ENGINE_API MathCore          Math;
 ENGINE_API ActorSystem       AI;
 
-ENGINE_API PlatformLayer         Platform;
-ENGINE_API EngineSystemManager   Engine;
-
-ENGINE_API FileSystemDir     Directory;
-
 ENGINE_API StringType        String;
 ENGINE_API FloatType         Float;
 ENGINE_API DoubleType        Double;
 ENGINE_API IntType           Int;
 ENGINE_API UintType          Uint;
+
+ENGINE_API FileSystemDir        Directory;
+ENGINE_API PlatformLayer        Platform;
+ENGINE_API EngineSystemManager  Engine;
+
 
 
 EngineSystemManager::EngineSystemManager(void) : 
@@ -438,6 +438,15 @@ void EngineSystemManager::Initiate() {
     meshes.wallHorizontal  = Resources.CreateMeshFromTag("wallh");
     meshes.wallVertical    = Resources.CreateMeshFromTag("wallv");
     
+    // Prevent the meshes from being garbage collected
+    meshes.cube->isShared            = true;
+    meshes.chunk->isShared           = true;
+    meshes.plain->isShared           = true;
+    meshes.sphere->isShared          = true;
+    meshes.wallHorizontal->isShared  = true;
+    meshes.wallVertical->isShared    = true;
+    
+    
     // Main world scene
     sceneMain = Create<Scene>();
     Renderer.AddSceneToRenderQueue( sceneMain );
@@ -462,7 +471,7 @@ void EngineSystemManager::Initiate() {
     sceneOverlay = Create<Scene>();
     Renderer.AddSceneToRenderQueue(sceneOverlay);
     
-    sceneOverlay->camera = Engine.Create<Camera>();
+    sceneOverlay->camera = Create<Camera>();
     sceneOverlay->camera->isOrthographic = true;
     sceneOverlay->camera->isFixedAspect  = true;
     
@@ -474,7 +483,7 @@ void EngineSystemManager::Initiate() {
     
     // Console panel overlay
     
-    mConsolePanelObject = Engine.CreateOverlayPanelRenderer(20, -8, 10000, 10, "panel_blue");
+    mConsolePanelObject = CreateOverlayPanelRenderer(20, -8, 10000, 10, "panel_blue");
     MeshRenderer* panelRenderer = mConsolePanelObject->GetComponent<MeshRenderer>();
     sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer, RENDER_QUEUE_BACKGROUND );
     mConsolePanelObject->isActive = false;

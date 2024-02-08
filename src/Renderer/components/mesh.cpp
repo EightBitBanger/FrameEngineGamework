@@ -12,7 +12,10 @@ extern NumberGeneration Random;
 
 Mesh::Mesh() : 
     
+    isShared(false),
+    
     mPrimitive(GL_TRIANGLES),
+    
     mVertexBufferSz(0),
     mIndexBufferSz(0)
 {

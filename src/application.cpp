@@ -104,10 +104,10 @@ public:
     
     
     ChunkManager() : 
-        generationDistance(400),
+        generationDistance(500),
         destructionDistance(500),
         
-        chunkSize(128),
+        chunkSize(32),
         
         currentChunkX(0),
         currentChunkZ(0),
@@ -165,7 +165,7 @@ public:
         GameObject* plainObject = Engine.Create<GameObject>();
         
         plainObject->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, mMaterial ) );
-        plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
+        //plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
         
         MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
         
@@ -176,7 +176,7 @@ public:
         plainObject->SetLinearAxisLockFactor(0, 0, 0);
         plainObject->SetStatic();
         
-        plainObject->renderDistance = 5000;// generationDistance * 1.2;
+        plainObject->renderDistance = generationDistance * 1.2;
         
         plainObject->SetPosition(x, 0, z);
         
@@ -204,13 +204,21 @@ public:
         
         // Main noise channels
         
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.2, 0.2,       1, chunkX, chunkZ);
+        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.004, 0.004,  100, chunkX, chunkZ);
         
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.07, 0.07,     10, chunkX, chunkZ);
+        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.01, 0.01,     40, chunkX, chunkZ);
         
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.02, 0.02,     40, chunkX, chunkZ);
+        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.03, 0.03,     10, chunkX, chunkZ);
         
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.0007, 0.0007, 300, chunkX, chunkZ);
+        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.08, 0.08,      4, chunkX, chunkZ);
+        
+        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.2, 0.2,        1, chunkX, chunkZ);
+        
+        
+        // Biome range
+        //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.001,  0.001, 100, chunkX, chunkZ);
+        //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.0001, 0.0001, 500, chunkX, chunkZ);
+        
         
         
         //
@@ -230,7 +238,7 @@ public:
         Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.008f);
         
         // Snow cap
-        Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize, chunkSize, Colors.white, 70, 5.0);
+        Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize, chunkSize, Colors.white, 50, 7.0);
         
         // Generate a height field collider
         //GeneratePhysicsCollider( plainBody, heightField, chunkSize );
@@ -281,6 +289,7 @@ public:
                 
                 if (index >= 0) {
                     
+                    /*
                     
                     // Remove the chunk from the chunk index
                     RemoveChunk( index );
@@ -298,6 +307,9 @@ public:
                     //meshRenderer->mesh = nullptr;
                     
                     //meshRenderer->isActive = false;
+                    
+                    */
+                    
                     
                 }
                 
@@ -354,8 +366,8 @@ public:
             // Increase chunk update rate
             mNumberOfChunksToUpdate++;
             
-            if (mNumberOfChunksToUpdate > 2) 
-                mNumberOfChunksToUpdate = 2;
+            if (mNumberOfChunksToUpdate > 8) 
+                mNumberOfChunksToUpdate = 8;
             
             AddChunk( chunkPosition );
             
@@ -585,8 +597,8 @@ void Start() {
 
 glm::vec3 force(0);
 
-unsigned int gameObjectCount = 0;
-unsigned int ComponentCount  = 0;
+unsigned int meshRendererCount = 0;
+unsigned int meshCount  = 0;
 bool init = false;
 
 
@@ -659,26 +671,30 @@ void Run() {
             
             GameObject* gameObject = Engine.Create<GameObject>();
             
-            
-            gameObject->AddComponent( Engine.CreateComponent<RigidBody>() );
             gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+            MeshRenderer* meshRenderer = gameObject->GetComponent<MeshRenderer>();
+            
+            meshRenderer->mesh = Engine.Create<Mesh>();
+            
+            //gameObject->AddComponent( Engine.CreateComponent<RigidBody>() );
             
             
             Engine.Destroy<GameObject>( gameObject );
+            
         }
     }
     
     
     if (!init) {
         
-        text[1]->text = "GameObjects ---- " + Float.ToString( Engine.GetNumberOfGameObjects() );
-        text[2]->text = "Components ----- " + Float.ToString( Engine.GetNumberOfComponents() );
+        text[1]->text = "MeshRenderer ---- " + Float.ToString( Renderer.GetNumberOfMeshRenderers() );
+        text[2]->text = "Mesh ------------ " + Float.ToString( Renderer.GetNumberOfMeshes() );
         
         init = true;
     }
     
-    text[3]->text = "GameObjects ---- " + Float.ToString( Engine.GetNumberOfGameObjects() );
-    text[4]->text = "Components ----- " + Float.ToString( Engine.GetNumberOfComponents() );
+    text[3]->text = "MeshRenderer ---- " + Float.ToString( Renderer.GetNumberOfMeshRenderers() );
+    text[4]->text = "Mesh ------------ " + Float.ToString( Renderer.GetNumberOfMeshes() );
     
     //text[6]->text = "Meshes --------- " + Float.ToString( Renderer.GetNumberOfMeshes() );
     //text[7]->text = "MeshRenderers -- " + Float.ToString( Renderer.GetNumberOfMeshRenderers() );
@@ -766,7 +782,7 @@ void Run() {
     
     
     
-    
+    return;
     
     
     

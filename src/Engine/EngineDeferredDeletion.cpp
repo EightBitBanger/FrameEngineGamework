@@ -1,5 +1,5 @@
 //
-// Update console
+// Deferred deletion algorithm
 
 #include <GameEngineFramework/Engine/Engine.h>
 
@@ -21,8 +21,9 @@ ENGINE_API extern InputSystem       Input;
 ENGINE_API extern MathCore          Math;
 ENGINE_API extern ActorSystem       AI;
 
-ENGINE_API extern PlatformLayer         Platform;
-ENGINE_API extern EngineSystemManager   Engine;
+ENGINE_API extern PlatformLayer     Platform;
+
+
 
 void EngineSystemManager::ProcessDeferredDeletion(void) {
     
@@ -30,10 +31,18 @@ void EngineSystemManager::ProcessDeferredDeletion(void) {
         
         GameObject* objectPtr = mGarbageObjects[i];
         
-        // Make damn sure the mesh renderer is removed from the render queues before termination
-        
         if (objectPtr->mMeshRendererCache != nullptr) {
             
+            // Purge mesh
+            if (objectPtr->mMeshRendererCache->mesh != nullptr) 
+                if (!objectPtr->mMeshRendererCache->mesh->isShared) 
+                    Destroy<Mesh>( objectPtr->mMeshRendererCache->mesh );
+            
+            // Check material
+            //if (!objectPtr->mMeshRendererCache->material->isShared) 
+            //    Destroy<Material>( objectPtr->mMeshRendererCache->material );
+            
+            // Make damn sure the mesh renderer is removed from the render queues before termination
             for (unsigned int g=0; g < 5; g++) {
                 
                 int renderQueueIndex = RENDER_QUEUE_SKY + g;

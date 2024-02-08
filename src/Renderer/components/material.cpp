@@ -7,6 +7,8 @@
 Material::Material() : 
     shader(nullptr),
     
+    isShared(false),
+    
     mDoDepthTest   (true),
     mDoBlending    (false),
     mDoFaceCulling (true),
