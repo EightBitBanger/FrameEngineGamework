@@ -15,7 +15,7 @@
 
 
 ## Overview
- The purpose
+ 
 
 
 ## Architecture
