@@ -162,6 +162,9 @@ public:
     Mesh();
     ~Mesh();
     
+    /// Is this mesh shared between multiple mesh renderers. (True to prevent garbage collection)
+    bool isShared;
+    
     
 private:
     
@@ -188,7 +191,7 @@ private:
     // List of freed sub meshes in this mesh
     std::vector<SubMesh> mFreeMesh;
     
-    // Apply default layout settings
+    // Apply default vertex layout settings
     void SetDefaultAttributes(void);
     
     // Allocate/deallocate 

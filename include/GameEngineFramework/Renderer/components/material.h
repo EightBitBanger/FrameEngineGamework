@@ -18,6 +18,9 @@ public:
     /// Shader used by this material for rendering.
     Shader* shader;
     
+    /// Is this material shared between multiple mesh renderers. (True to prevent garbage collection)
+    bool isShared;
+    
     
     /// Ambient color for this material.
     Color ambient;
