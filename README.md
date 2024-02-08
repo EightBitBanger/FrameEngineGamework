@@ -15,7 +15,11 @@
 
 
 ## Overview
-This engine is split up into three parts. The engine core and the game code are located in separate dynamic libraries with a runtime executable to bring it together.
+ The purpose
+
+
+## Architecture
+ This engine has many sub systems which are split up into several dynamic libraries. The engine core and the game code are located in separate dynamic libraries with a runtime executable to launch the application. The physics engine, reactphysics3D, is contained in it's own dynamic library. External resources required by the engine are located in a directory named 'data' in the working directory of the runtime executable. These resources include models, textures, shaders, as well as, any other data file required by the user's code.
 
 
 <br><br/>
