@@ -16,7 +16,7 @@
 
 
 ## Overview
- 
+ This project was started primarily out of the passion that I have for the design of game engines in general. This framework contains several internal systems involving rendering, physics, AI, resource management, data serialization and more. 
 
 
 ## Architecture
