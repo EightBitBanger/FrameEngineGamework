@@ -158,7 +158,7 @@ public:
     }
     
     
-    GameObject* CreateBaseChunk(float x, float z, Material* material) {
+    GameObject* CreateBaseChunk(float x, float z) {
         
         Mesh* chunkMesh = Engine.Create<Mesh>();
         
@@ -190,7 +190,7 @@ public:
         
         // Generate game object
         
-        GameObject* plainObject = CreateBaseChunk(chunkX, chunkZ, mMaterial);
+        GameObject* plainObject = CreateBaseChunk(chunkX, chunkZ);
         
         chunkObjects.push_back(plainObject);
         
@@ -289,8 +289,6 @@ public:
                 
                 if (index >= 0) {
                     
-                    /*
-                    
                     // Remove the chunk from the chunk index
                     RemoveChunk( index );
                     
@@ -302,14 +300,7 @@ public:
                     
                     MeshRenderer* meshRenderer = chunk->GetComponent<MeshRenderer>();
                     
-                    Renderer.DestroyMesh( meshRenderer->mesh );
-                    
-                    //meshRenderer->mesh = nullptr;
-                    
-                    //meshRenderer->isActive = false;
-                    
-                    */
-                    
+                    meshRenderer->isActive = false;
                     
                 }
                 
@@ -366,8 +357,8 @@ public:
             // Increase chunk update rate
             mNumberOfChunksToUpdate++;
             
-            if (mNumberOfChunksToUpdate > 8) 
-                mNumberOfChunksToUpdate = 8;
+            if (mNumberOfChunksToUpdate > 16) 
+                mNumberOfChunksToUpdate = 16;
             
             AddChunk( chunkPosition );
             
@@ -519,6 +510,7 @@ void Start() {
     plainMaterial = Engine.Create<Material>();
     
     plainMaterial->shader = Engine.shaders.color;
+    plainMaterial->isShared = true;
     
     chunkManager.SetMaterial( plainMaterial );
     
@@ -647,60 +639,20 @@ void Run() {
     //
     // Profiling
     //
-    /*
+    
     text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
     text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
     text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
     
     text[4]->text = "Draw calls - " + Float.ToString( Renderer.GetNumberOfDrawCalls() );
     
-    text[6]->text = "x - " + Int.ToString( cameraController->GetComponent<Transform>()->position.x );
-    text[7]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );
-    text[8]->text = "z - " + Int.ToString( cameraController->GetComponent<Transform>()->position.z );
-    */
+    text[6]->text = "MeshRenderer ---- " + Int.ToString( Renderer.GetNumberOfMeshRenderers() );
+    text[7]->text = "Mesh ------------ " + Int.ToString( Renderer.GetNumberOfMeshes() );
+    text[8]->text = "Material--------- " + Int.ToString( Renderer.GetNumberOfMaterials() );
     
-    
-    
-    //
-    // Resources
-    //
-    
-    if (Input.CheckKeyCurrent(VK_M)) {
-        
-        for (unsigned int i=0; i < 400; i++) {
-            
-            GameObject* gameObject = Engine.Create<GameObject>();
-            
-            gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-            MeshRenderer* meshRenderer = gameObject->GetComponent<MeshRenderer>();
-            
-            meshRenderer->mesh = Engine.Create<Mesh>();
-            
-            //gameObject->AddComponent( Engine.CreateComponent<RigidBody>() );
-            
-            
-            Engine.Destroy<GameObject>( gameObject );
-            
-        }
-    }
-    
-    
-    if (!init) {
-        
-        text[1]->text = "MeshRenderer ---- " + Float.ToString( Renderer.GetNumberOfMeshRenderers() );
-        text[2]->text = "Mesh ------------ " + Float.ToString( Renderer.GetNumberOfMeshes() );
-        
-        init = true;
-    }
-    
-    text[3]->text = "MeshRenderer ---- " + Float.ToString( Renderer.GetNumberOfMeshRenderers() );
-    text[4]->text = "Mesh ------------ " + Float.ToString( Renderer.GetNumberOfMeshes() );
-    
-    //text[6]->text = "Meshes --------- " + Float.ToString( Renderer.GetNumberOfMeshes() );
-    //text[7]->text = "MeshRenderers -- " + Float.ToString( Renderer.GetNumberOfMeshRenderers() );
-    
-    //text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
-    //text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
+    //text[6]->text = "x - " + Int.ToString( cameraController->GetComponent<Transform>()->position.x );
+    //text[7]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );
+    //text[8]->text = "z - " + Int.ToString( cameraController->GetComponent<Transform>()->position.z );
     
     
     
@@ -775,21 +727,6 @@ void Run() {
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    return;
-    
-    
-    
-    
-    
-    
-    
     //
     // Map generation
     //
@@ -812,7 +749,7 @@ void Run() {
     
     if (mainCamera != nullptr) {
         
-        // No movement when puased
+        // No movement when paused
         bool moving = false;
         if (!Platform.isPaused) {
             if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward; moving = true;}

@@ -92,9 +92,10 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
                 if (!meshRenderer->mesh->isShared) 
                     Renderer.DestroyMesh( meshRenderer->mesh );
             
-            // Check material
-            //if (!objectPtr->mMeshRendererCache->material->isShared) 
-            //    Destroy<Material>( objectPtr->mMeshRendererCache->material );
+            // Purge material
+            if (meshRenderer->material != nullptr) 
+                if (!meshRenderer->material->isShared) 
+                    Destroy<Material>( meshRenderer->material );
             
             Renderer.DestroyMeshRenderer( meshRenderer );
             break;

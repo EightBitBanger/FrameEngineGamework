@@ -482,7 +482,7 @@ void Mesh::AllocateBuffers(unsigned int maxBufferSize) {
 }
 
 void Mesh::FreeBuffers(void) {
-    glDeleteBuffers(1, &mVertexArray);
+    glDeleteVertexArrays(1, &mVertexArray);
     glDeleteBuffers(1, &mBufferVertex);
     glDeleteBuffers(1, &mBufferIndex);
     return;
