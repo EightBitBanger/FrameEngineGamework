@@ -19,6 +19,9 @@
  This project was started primarily out of the passion that I have for the design of game engines in general. This framework contains several internal systems involving rendering, physics, AI, resource management, data serialization and more. 
 
 
+<br><br/>
+
+
 ## Architecture
  This engine has many sub systems which are split up into several dynamic libraries. The engine core and the game code are located in separate dynamic libraries with a runtime executable to launch the application. The physics engine, reactphysics3D, is contained in it's own dynamic library. External resources are located in a directory named 'data' in the working directory with the runtime executable. These resources include models, textures and shaders that are loaded automatically by the engine`s resource manager.
 
