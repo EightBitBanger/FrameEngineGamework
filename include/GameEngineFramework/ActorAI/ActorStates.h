@@ -1,5 +1,5 @@
-#ifndef _ACTOR_STATES__
-#define _ACTOR_STATES__
+#ifndef ACTOR_STATES
+#define ACTOR_STATES
 
 
 #define  ACTOR_STATE_NONE           0

@@ -1,5 +1,5 @@
-#ifndef __APPLICATION_WINDOW_PROCEDURE__
-#define __APPLICATION_WINDOW_PROCEDURE__
+#ifndef APPLICATION_WINDOW_PROCEDURE
+#define APPLICATION_WINDOW_PROCEDURE
 
 #include <GameEngineFramework/configuration.h>
 

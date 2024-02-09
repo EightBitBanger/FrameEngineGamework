@@ -1,5 +1,5 @@
-#ifndef _AI_ACTOR__
-#define _AI_ACTOR__
+#ifndef AI_ACTOR
+#define AI_ACTOR
 
 #include <GameEngineFramework/ActorAI/ActorStates.h>
 

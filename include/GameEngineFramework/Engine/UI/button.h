@@ -1,5 +1,5 @@
-#ifndef _BUTTON_UI_ELEMENT__
-#define _BUTTON_UI_ELEMENT__
+#ifndef BUTTON_UI_ELEMENT
+#define BUTTON_UI_ELEMENT
 
 
 struct Button {
