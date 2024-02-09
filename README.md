@@ -1,6 +1,7 @@
 ## Features
 - Render system
   - Simple textured mesh renderer.
+  - Point and directional lights.
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 - ActorAI
   - Genetics based physical appearance system
