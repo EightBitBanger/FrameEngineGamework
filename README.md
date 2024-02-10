@@ -1,14 +1,21 @@
 ## Features
+
 - Render system
   - Simple textured mesh renderer.
   - Point and directional lights.
+
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
+
+- Terrain height mapping
+
 - ActorAI
-  - Genetics based physical appearance system
+  - Genetic actor appearance
   - Neural network / state machine hybrid
+
 - Resource management
   - Image: PNG BMP
   - Models: OBJ
+
 - Multithreading
 
 
@@ -16,14 +23,7 @@
 
 
 ## Overview
- This project was started primarily out of the passion that I have for the design of game engines in general. This framework contains several internal systems involving rendering, physics, AI, resource management, data serialization and more. 
-
-
-<br><br/>
-
-
-## Architecture
- This engine has many sub systems which are split up into several dynamic libraries. The engine core and the game code are located in separate dynamic libraries with a runtime executable to launch the application. The physics engine, reactphysics3D, is contained in it's own dynamic library. External resources are located in a directory named 'data' in the working directory with the runtime executable. These resources include models, textures and shaders that are loaded automatically by the engine`s resource manager.
+ This project was started primarily out of the passion. This framework contains several internal systems involving rendering, physics, AI, resource management, data serialization and more.
 
 
 <br><br/>
@@ -68,3 +68,9 @@ The source file "Application.cpp" is the application layer entry point and the s
 The framework will provide you with the functions `Start()` and `Run()`. These functions will serve as an entry point for your application.
 The `Start()` function will be called once during application initiation while `Run()` will be called once per frame.
 
+
+<br><br/>
+
+
+## Architecture
+ This engine has many sub systems which are split up into several dynamic libraries. The engine core and the game code are located in separate dynamic libraries with a runtime executable to launch the application. The physics engine, reactphysics3D, is contained in it's own dynamic library. External resources are located in a directory named 'data' in the working directory with the runtime executable. These resources include models, textures and shaders that are loaded automatically by the engine`s resource manager.
