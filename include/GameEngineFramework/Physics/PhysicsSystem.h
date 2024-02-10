@@ -72,8 +72,6 @@ class ENGINE_API PhysicsSystem {
     
 public:
     
-    PoolAllocator<MeshCollider> meshCollider;
-    
     /// Physical world simulation.
     rp3d::PhysicsWorld* world;
     
@@ -105,6 +103,8 @@ public:
     
     /// Create a height field collider from a height field map and return its pointer.
     MeshCollider* CreateHeightFieldMap(float* heightField, unsigned int width, unsigned int height, float scaleX=1, float scaleY=1, float scaleZ=1);
+    /// Destroy a height field map collider.
+    bool DestroyHeightFieldMap(MeshCollider* collider);
     
     /// Cast a ray and return the hit data of any objects that intersected the ray.
     bool Raycast(glm::vec3 from, glm::vec3 direction, float distance, Hit& hit, LayerMask layer=LayerMask::Default);
@@ -122,6 +122,9 @@ private:
     
     // Callback function for physics ray casting
     RaybackCastCaller mRaybackCastCaller;
+    
+    // Allocator of mesh colliders
+    PoolAllocator<MeshCollider> mMeshColliders;
     
 };
 

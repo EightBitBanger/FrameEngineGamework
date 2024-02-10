@@ -30,9 +30,6 @@ public:
     /// Should this game object be active in the scene.
     bool isActive;
     
-    /// Is this object marked for destruction by garbage collection.
-    bool isGarbage;
-    
     /// Distance within which this object will be updated.
     float renderDistance;
     
@@ -144,6 +141,9 @@ public:
     void SetKinematic(void);
     
 private:
+    
+    // Is this object marked for destruction by garbage collection.
+    bool mIsGarbage;
     
     // List of attached components
     std::vector<Component*> mComponentList;

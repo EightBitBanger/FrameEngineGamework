@@ -6,6 +6,18 @@
 #include <GameEngineFramework/Renderer/components/material.h>
 #include <GameEngineFramework/Renderer/components/mesh.h>
 
+class ENGINE_API LevelOfDetail {
+    
+public:
+    
+    float distance;
+    
+    Mesh* mesh;
+    
+};
+
+
+
 
 class ENGINE_API MeshRenderer {
     
@@ -23,10 +35,11 @@ public:
     /// Transformation element.
     Transform transform;
     
-    friend class RenderSystem;
-    
     MeshRenderer();
     
+private:
+    
+    friend class RenderSystem;
     
 };
 

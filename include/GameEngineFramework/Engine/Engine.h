@@ -234,7 +234,7 @@ public:
     template <typename T> bool Destroy(T* objectPtr) {
         // Engine
         if (std::is_same<T, GameObject>::value)    {GameObject* ptr = (GameObject*)objectPtr;
-                                                    ptr->isGarbage = true;
+                                                    ptr->mIsGarbage = true;
                                                     return true;}
         if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
         // Render system

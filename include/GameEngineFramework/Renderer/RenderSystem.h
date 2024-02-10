@@ -260,6 +260,8 @@ private:
     
     bool SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup, unsigned int queueGroupIndex);
     
+    void LevelOfDetailPass(MeshRenderer* currentEntity, glm::vec3& eye);
+    
     
     // Default assets
     
