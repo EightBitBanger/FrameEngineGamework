@@ -58,7 +58,7 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     wClassEx.hInstance       = hInstance;
     wClassEx.lpszMenuName    = NULL;
     wClassEx.hCursor         = hCursor;
-    //wClassEx.hIcon           = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
+    wClassEx.hIcon           = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
     wClassEx.hIconSm         = LoadIcon(hInstance, IDI_APPLICATION);
     wClassEx.hbrBackground   = (HBRUSH)GetStockObject(BLACK_BRUSH);
     
@@ -84,8 +84,6 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
 }
 
 void PlatformLayer::DestroyWindowHandle(void) {
-    assert((HWND)windowHandle != NULL);
-    
     DestroyWindow((HWND)windowHandle);
     windowHandle = NULL;
     
@@ -94,8 +92,6 @@ void PlatformLayer::DestroyWindowHandle(void) {
 }
 
 void PlatformLayer::SetWindowCenter(void) {
-    assert(windowHandle != NULL);
-    
     displayWidth  = GetDeviceCaps( (HDC)deviceContext, HORZRES );
     displayHeight = GetDeviceCaps( (HDC)deviceContext, VERTRES );
     
@@ -114,8 +110,6 @@ void PlatformLayer::SetWindowCenter(void) {
 }
 
 void PlatformLayer::SetWindowCenterScale(float width, float height) {
-    assert(windowHandle != NULL);
-    
     Viewport newWindowSz;
     newWindowSz.y = 0;
     newWindowSz.x = 0;
@@ -128,14 +122,11 @@ void PlatformLayer::SetWindowCenterScale(float width, float height) {
 }
 
 void PlatformLayer::SetWindowPosition(Viewport windowSize) {
-    assert(windowHandle != NULL);
     SetWindowPos((HWND)windowHandle, NULL, windowSize.x, windowSize.y, windowSize.w, windowSize.h, SWP_SHOWWINDOW);
     return;
 }
 
 Viewport PlatformLayer::GetWindowArea(void) {
-    assert(windowHandle != NULL);
-    
     RECT windowSz;
     GetWindowRect((HWND)windowHandle, &windowSz);
     
@@ -149,13 +140,11 @@ Viewport PlatformLayer::GetWindowArea(void) {
 }
 
 void PlatformLayer::HideWindowHandle(void) {
-    assert(windowHandle != NULL);
     ShowWindow((HWND)windowHandle, false);
     return;
 }
 
 void PlatformLayer::ShowWindowHandle(void) {
-    assert(windowHandle != NULL);
     ShowWindow((HWND)windowHandle, true);
     return;
 }

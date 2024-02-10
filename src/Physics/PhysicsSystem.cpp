@@ -96,20 +96,17 @@ rp3d::CapsuleShape* PhysicsSystem::CreateColliderCapsule(float radius, float hei
 
 MeshCollider* PhysicsSystem::CreateHeightFieldMap(float* heightField, unsigned int width, unsigned int height, float scaleX, float scaleY, float scaleZ) {
     
-    MeshCollider* collider = meshCollider.Create();
+    MeshCollider* collider = mMeshColliders.Create();
     
     unsigned int mapSize = width * height;
     
     int maximumHeight =  1000;
     int minimumHeight = -1000;
     
-    collider->heightMapBuffer = new float[width * height];
+    collider->heightMapBuffer = new float[ mapSize ];
     
-    for (unsigned int index=0; index < mapSize; index++) {
-        
+    for (unsigned int index=0; index < mapSize; index++) 
         collider->heightMapBuffer[index] = heightField[index];
-        
-    }
     
     collider->heightFieldShape = common.createHeightFieldShape(width, height, 
                                                                minimumHeight, maximumHeight, 
@@ -121,9 +118,10 @@ MeshCollider* PhysicsSystem::CreateHeightFieldMap(float* heightField, unsigned i
     return collider;
 }
 
-
-
-
+bool PhysicsSystem::DestroyHeightFieldMap(MeshCollider* collider) {
+    delete(collider->heightMapBuffer);
+    return mMeshColliders.Destroy( collider );
+}
 
 
 void PhysicsSystem::AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr) {

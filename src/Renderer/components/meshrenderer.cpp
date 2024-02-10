@@ -7,3 +7,4 @@ MeshRenderer::MeshRenderer() :
     material(nullptr)
 {
 }
+

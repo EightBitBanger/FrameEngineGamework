@@ -33,7 +33,6 @@ void EngineSystemManager::ProcessDeferredDeletion(void) {
         
         if (objectPtr->mMeshRendererCache != nullptr) {
             
-            // Make damn sure the mesh renderer is removed from the render queues before termination
             for (unsigned int g=0; g < 5; g++) {
                 
                 int renderQueueIndex = RENDER_QUEUE_SKY + g;

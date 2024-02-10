@@ -78,12 +78,40 @@ Material* skyMaterial;
 // Chunk management
 //
 
+class Chunk {
+    
+public:
+    
+    /// Position of the chunk in the world.
+    glm::vec2 position;
+    
+    /// Associated game object.
+    GameObject*   gameObject;
+    
+    /// Associated rigid body.
+    rp3d::RigidBody* rigidBody;
+    
+    /// Associated collider.
+    rp3d::Collider* bodyCollider;
+    
+    /// Height field collision buffer.
+    MeshCollider* collider;
+    
+    /// List of actors in this chunk
+    std::vector<Actor*> mActors;
+    
+};
+
+
+
+
+
+
 class ChunkManager {
     
 public:
     
-    std::vector<glm::vec2>   chunkList;
-    std::vector<GameObject*> chunkObjects;
+    std::vector<Chunk> chunkList;
     
     /// Distance to stop generating chunks.
     int generationDistance;
@@ -102,12 +130,11 @@ public:
     /// Material used for rendering the world chunks.
     Material* mMaterial;
     
-    
     ChunkManager() : 
-        generationDistance(500),
-        destructionDistance(500),
+        generationDistance(900),
+        destructionDistance(900),
         
-        chunkSize(32),
+        chunkSize(64),
         
         currentChunkX(0),
         currentChunkZ(0),
@@ -115,7 +142,12 @@ public:
         chunkIndex(0),
         
         mMaterial(nullptr),
-        mNumberOfChunksToUpdate(100)
+        
+        mNumberOfChunksToGenerate(1),
+        mMaxChunksToGenerate(10),
+        
+        mNumberOfChunksToPurge(1),
+        mMaxChunksToPurge(3)
     {}
     
     
@@ -124,8 +156,8 @@ public:
         return;
     }
     
-    void AddChunk(glm::vec2 position) {
-        chunkList.push_back( position );
+    void AddChunk(Chunk chunk) {
+        chunkList.push_back( chunk );
         return;
     }
     
@@ -136,7 +168,7 @@ public:
     
     int FindChunk(glm::vec2 position) {
         for (unsigned int i=0; i < chunkList.size(); i++) {
-            if (chunkList[i] != position) 
+            if (chunkList[i].position != position) 
                 continue;
             return i;
         }
@@ -145,190 +177,120 @@ public:
     
     
     
-    void GeneratePhysicsCollider(RigidBody* rigidBody, float* heightField, unsigned int chunkSize) {
-        
-        MeshCollider* collider = Physics.CreateHeightFieldMap(heightField, chunkSize, chunkSize);
-        
-        rp3d::Transform offsetTransform;
-        //offsetTransform.setPosition(rp3d::Vector3((chunkSize - 1) * x, 0, (chunkSize - 1) * z));
-        
-        rp3d::Collider* colliderBody = rigidBody->addCollider( collider->heightFieldShape, offsetTransform );
-        
-        return;
-    }
-    
-    
     GameObject* CreateBaseChunk(float x, float z) {
         
         Mesh* chunkMesh = Engine.Create<Mesh>();
         
-        GameObject* plainObject = Engine.Create<GameObject>();
+        GameObject* baseChunk = Engine.Create<GameObject>();
         
-        plainObject->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, mMaterial ) );
-        //plainObject->AddComponent( Engine.CreateComponent<RigidBody>() );
+        baseChunk->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, mMaterial ) );
         
-        MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
+        MeshRenderer* plainRenderer = baseChunk->GetComponent<MeshRenderer>();
         
         Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
         plainRenderer->mesh->SetPrimitive( MESH_TRIANGLES );
         
-        plainObject->SetAngularAxisLockFactor(0, 0, 0);
-        plainObject->SetLinearAxisLockFactor(0, 0, 0);
-        plainObject->SetStatic();
+        baseChunk->renderDistance = generationDistance * 0.9;
         
-        plainObject->renderDistance = generationDistance * 1.2;
+        baseChunk->SetPosition(x, 0, z);
         
-        plainObject->SetPosition(x, 0, z);
-        
-        return plainObject;
+        return baseChunk;
     }
     
-    void GenerateChunk(float chunkX, float chunkZ, float* heightField, glm::vec3* colorField) {
-        
-        Engine.SetHeightFieldValues(heightField, chunkSize, chunkSize, 0);
-        Engine.SetColorFieldValues(colorField, chunkSize, chunkSize, Colors.white);
-        
-        // Generate game object
-        
-        GameObject* plainObject = CreateBaseChunk(chunkX, chunkZ);
-        
-        chunkObjects.push_back(plainObject);
-        
-        MeshRenderer* plainRenderer = plainObject->GetComponent<MeshRenderer>();
-        
-        plainRenderer->isActive = false;
-        
-        //RigidBody* plainBody = plainObject->GetComponent<RigidBody>();
-        
-        
-        
-        // Main noise channels
-        
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.004, 0.004,  100, chunkX, chunkZ);
-        
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.01, 0.01,     40, chunkX, chunkZ);
-        
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.03, 0.03,     10, chunkX, chunkZ);
-        
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.08, 0.08,      4, chunkX, chunkZ);
-        
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.2, 0.2,        1, chunkX, chunkZ);
-        
-        
-        // Biome range
-        //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.001,  0.001, 100, chunkX, chunkZ);
-        //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.0001, 0.0001, 500, chunkX, chunkZ);
-        
-        
-        
-        //
-        // Biome effect on terrain color
-        //
-        
-        //Engine.SetColorFieldFromPerlinNoise(colorField, chunkSize, chunkSize, 0.01, 0.01, 0.4, Colors.blue, Colors.red, chunkX, chunkZ);
-        
-        
-        
-        // Apply terrain color by height value
-        Color colorLow = Colors.green;
-        colorLow *= Colors.MakeGrayScale(0.1);
-        
-        Color colorHigh = Colors.brown;
-        
-        Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.008f);
-        
-        // Snow cap
-        Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize, chunkSize, Colors.white, 50, 7.0);
-        
-        // Generate a height field collider
-        //GeneratePhysicsCollider( plainBody, heightField, chunkSize );
-        
-        // Add the chunk to the mesh
-        
-        Mesh* plainMesh = plainRenderer->mesh;
-        
-        Engine.AddHeightFieldToMesh(plainMesh, heightField, colorField, chunkSize, chunkSize, 0, 0);
-        
-        plainMesh->UploadToGPU();
-        
-        return;
-    }
     
-    void DestroyChunk(unsigned int index) {
-        
-        
-        
-        
-        
-    }
     
     void Update(void) {
         
         //
-        // Chunk destruction
+        // Purge chunks
         //
         
-        if (chunkObjects.size() > 0) {
+        // Decrease chunk update rate
+        mNumberOfChunksToPurge--;
+        
+        if (mNumberOfChunksToPurge < 1) 
+            mNumberOfChunksToPurge = 1;
+        
+        for (unsigned int i=0; i < mNumberOfChunksToPurge; i++) {
             
-            if (chunkIndex >= chunkObjects.size()) 
-                chunkIndex = 0;
-            
-            GameObject* chunk = chunkObjects[chunkIndex];
-            Transform* transform = chunk->GetComponent<Transform>();
-            
-            glm::vec3 chunkPosition  = transform->position;
-            glm::vec3 playerPosition = Engine.sceneMain->camera->transform.position;
-            
-            // Ignore height
-            chunkPosition.y = 0;
-            playerPosition.y = 0;
-            
-            if (glm::distance(chunkPosition, playerPosition) > destructionDistance) {
+            if (chunkList.size() > 0) {
                 
-                int index = FindChunk( glm::vec2(chunkPosition.x, chunkPosition.z) );
+                if (chunkIndex >= chunkList.size()) 
+                    chunkIndex = 0;
                 
-                if (index >= 0) {
+                Chunk chunk = chunkList[chunkIndex];
+                Transform* transform = chunk.gameObject->GetComponent<Transform>();
+                
+                glm::vec3 chunkPosition  = transform->position;
+                glm::vec3 playerPosition = Engine.sceneMain->camera->transform.position;
+                
+                // Ignore height
+                chunkPosition.y = 0;
+                playerPosition.y = 0;
+                
+                if (glm::distance(chunkPosition, playerPosition) > destructionDistance) {
                     
-                    // Remove the chunk from the chunk index
-                    RemoveChunk( index );
+                    int index = FindChunk( glm::vec2(chunkPosition.x, chunkPosition.z) );
                     
-                    // Remove the chunk object from the objects list
-                    chunkObjects.erase( chunkObjects.begin() + chunkIndex );
-                    
-                    // Marked for destruction
-                    chunk->isGarbage = true;
-                    
-                    MeshRenderer* meshRenderer = chunk->GetComponent<MeshRenderer>();
-                    
-                    meshRenderer->isActive = false;
+                    if (index >= 0) {
+                        
+                        // Remove the chunk from the chunk index
+                        RemoveChunk( index );
+                        
+                        // Destroy physics objects
+                        chunk.rigidBody->removeCollider( chunk.bodyCollider );
+                        
+                        Physics.world->destroyRigidBody( chunk.rigidBody );
+                        
+                        Physics.common.destroyHeightFieldShape( chunk.collider->heightFieldShape );
+                        
+                        // Destroy height field collider and associated buffer
+                        MeshCollider* collider = chunk.collider;
+                        Physics.DestroyHeightFieldMap( collider );
+                        
+                        // Marked for destruction
+                        Engine.Destroy<GameObject>( chunk.gameObject );
+                        
+                        // Increase chunk purge rate
+                        mNumberOfChunksToPurge++;
+                        
+                        if (mNumberOfChunksToPurge > mMaxChunksToPurge) 
+                            mNumberOfChunksToPurge = mMaxChunksToPurge;
+                        
+                    }
                     
                 }
                 
+                chunkIndex++;
             }
             
-            chunkIndex++;
+            continue;
         }
         
         
         
+        
         //
-        // Attempt chunk generation
+        // Generation chunks
         //
         
-        float playerChunkX = glm::round( Engine.sceneMain->camera->transform.position.x / (chunkSize - 1));
-        float playerChunkZ = glm::round( Engine.sceneMain->camera->transform.position.z / (chunkSize - 1));
+        //float playerChunkX = glm::round( Engine.sceneMain->camera->transform.position.x / (chunkSize - 1));
+        //float playerChunkZ = glm::round( Engine.sceneMain->camera->transform.position.z / (chunkSize - 1));
+        
+        float playerChunkX = 0;
+        float playerChunkZ = 0;
         
         // Decrease chunk update rate
-        mNumberOfChunksToUpdate--;
+        mNumberOfChunksToGenerate--;
         
-        if (mNumberOfChunksToUpdate < 1) 
-            mNumberOfChunksToUpdate = 1;
+        if (mNumberOfChunksToGenerate < 1) 
+            mNumberOfChunksToGenerate = 1;
         
-        float heightMap    [ chunkSize * chunkSize ];
-        glm::vec3 colorMap [ chunkSize * chunkSize ];
+        float     heightField [ chunkSize * chunkSize ];
+        glm::vec3 colorField  [ chunkSize * chunkSize ];
         
         
-        for (unsigned int i=0; i < mNumberOfChunksToUpdate; i++) {
+        for (unsigned int i=0; i < mNumberOfChunksToGenerate; i++) {
             
             float chunkX = ((currentChunkX + playerChunkX) * (chunkSize - 1)) - (generationDistance / 2);
             float chunkZ = ((currentChunkZ + playerChunkZ) * (chunkSize - 1)) - (generationDistance / 2);
@@ -355,14 +317,110 @@ public:
                 continue;
             
             // Increase chunk update rate
-            mNumberOfChunksToUpdate++;
+            mNumberOfChunksToGenerate++;
             
-            if (mNumberOfChunksToUpdate > 16) 
-                mNumberOfChunksToUpdate = 16;
+            if (mNumberOfChunksToGenerate > mMaxChunksToGenerate) 
+                mNumberOfChunksToGenerate = mMaxChunksToGenerate;
             
-            AddChunk( chunkPosition );
+            //
+            // Generate chunk
+            //
             
-            GenerateChunk(chunkX, chunkZ, heightMap, colorMap);
+            Engine.SetHeightFieldValues(heightField, chunkSize, chunkSize, 0);
+            Engine.SetColorFieldValues(colorField, chunkSize, chunkSize, Colors.white);
+            
+            // Generate game object
+            
+            GameObject* baseObject = CreateBaseChunk(chunkX, chunkZ);
+            
+            MeshRenderer* baseRenderer = baseObject->GetComponent<MeshRenderer>();
+            
+            baseRenderer->isActive = false;
+            
+            
+            
+            // Main noise channels
+            
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.002, 0.002,  240, chunkX, chunkZ);
+            
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.01, 0.01,     80, chunkX, chunkZ);
+            
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.03, 0.03,     10, chunkX, chunkZ);
+            
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.08, 0.08,      4, chunkX, chunkZ);
+            
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.2, 0.2,        1, chunkX, chunkZ);
+            
+            
+            // Biome range
+            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.001,  0.001, 100, chunkX, chunkZ);
+            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.0001, 0.0001, 500, chunkX, chunkZ);
+            
+            
+            
+            //
+            // Biome effect on terrain color
+            //
+            
+            //Engine.SetColorFieldFromPerlinNoise(colorField, chunkSize, chunkSize, 0.01, 0.01, 0.4, Colors.blue, Colors.red, chunkX, chunkZ);
+            
+            
+            
+            // Apply terrain color by height value
+            Color colorLow = Colors.green;
+            colorLow *= Colors.MakeGrayScale(0.1);
+            
+            Color colorHigh = Colors.brown;
+            
+            Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.008f);
+            
+            // Snow cap
+            Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize, chunkSize, Colors.white, 50, 7.0);
+            
+            
+            // Generate rigid body
+            
+            RigidBody* chunkBody = Physics.world->createRigidBody( rp3d::Transform::identity() );
+            
+            chunkBody->setAngularLockAxisFactor( rp3d::Vector3(0, 0, 0) );
+            chunkBody->setLinearLockAxisFactor( rp3d::Vector3(0, 0, 0) );
+            chunkBody->setType(rp3d::BodyType::STATIC);
+            
+            rp3d::Transform bodyTransform = rp3d::Transform::identity();
+            bodyTransform.setPosition( rp3d::Vector3(chunkX, 0, chunkZ) );
+            chunkBody->setTransform(bodyTransform);
+            
+            
+            
+            // Generate a height field collider
+            MeshCollider*   meshCollider = Physics.CreateHeightFieldMap(heightField, chunkSize, chunkSize);
+            
+            rp3d::Collider* BodyCollider = chunkBody->addCollider( meshCollider->heightFieldShape, rp3d::Transform::identity() );
+            
+            
+            // Add the chunk to the mesh
+            
+            Engine.AddHeightFieldToMesh(baseRenderer->mesh, heightField, colorField, chunkSize, chunkSize, 0, 0);
+            
+            baseRenderer->mesh->UploadToGPU();
+            
+            
+            
+            
+            
+            // Add chunk to chunk list
+            
+            Chunk chunk;
+            
+            chunk.position     = chunkPosition;
+            
+            chunk.gameObject   = baseObject;
+            chunk.rigidBody    = chunkBody;
+            
+            chunk.collider     = meshCollider;
+            chunk.bodyCollider = BodyCollider;
+            
+            AddChunk( chunk );
             
             continue;
         }
@@ -373,7 +431,12 @@ public:
 private:
     
     // Number of chunks being updated per frame
-    unsigned int mNumberOfChunksToUpdate;
+    unsigned int mNumberOfChunksToGenerate;
+    unsigned int mMaxChunksToGenerate;
+    
+    // Number of chunks being destroyed per frame
+    unsigned int mNumberOfChunksToPurge;
+    unsigned int mMaxChunksToPurge;
     
 };
 
@@ -640,15 +703,26 @@ void Run() {
     // Profiling
     //
     
-    text[1]->text = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
+    text[1]->text  = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
+    text[1]->color = Colors.white;
+    if (Profiler.profileRenderSystem > 10) text[1]->color = Colors.yellow;
+    if (Profiler.profileRenderSystem > 20) text[1]->color = Colors.orange;
+    if (Profiler.profileRenderSystem > 30) text[1]->color = Colors.red;
+    
     text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
+    text[2]->color = Colors.white;
+    if (Profiler.profilePhysicsSystem > 10) text[2]->color = Colors.yellow;
+    if (Profiler.profilePhysicsSystem > 20) text[2]->color = Colors.orange;
+    if (Profiler.profilePhysicsSystem > 30) text[2]->color = Colors.red;
+    
     text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
     
     text[4]->text = "Draw calls - " + Float.ToString( Renderer.GetNumberOfDrawCalls() );
     
-    text[6]->text = "MeshRenderer ---- " + Int.ToString( Renderer.GetNumberOfMeshRenderers() );
-    text[7]->text = "Mesh ------------ " + Int.ToString( Renderer.GetNumberOfMeshes() );
-    text[8]->text = "Material--------- " + Int.ToString( Renderer.GetNumberOfMaterials() );
+    text[6]->text = "GameObject------- " + Int.ToString( Engine.GetNumberOfGameObjects() );
+    text[7]->text = "Component-------- " + Int.ToString( Engine.GetNumberOfComponents() );
+    text[8]->text = "MeshRenderer ---- " + Int.ToString( Renderer.GetNumberOfMeshRenderers() );
+    text[9]->text = "Mesh ------------ " + Int.ToString( Renderer.GetNumberOfMeshes() );
     
     //text[6]->text = "x - " + Int.ToString( cameraController->GetComponent<Transform>()->position.x );
     //text[7]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );

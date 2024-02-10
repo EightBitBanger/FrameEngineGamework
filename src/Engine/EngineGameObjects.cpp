@@ -43,14 +43,13 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
         }
     }
     
-    // Remove all components
+    // Remove and destroy all components
     for (unsigned int i=0; i < gameObjectPtr->GetComponentCount(); i++) {
         
         Component* componentPtr = gameObjectPtr->GetComponentIndex(i);
         
         DestroyComponent(componentPtr);
         
-        continue;
     }
     
     mGameObjects.Destroy(gameObjectPtr);

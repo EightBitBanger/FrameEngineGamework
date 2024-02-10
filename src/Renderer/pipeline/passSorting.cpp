@@ -27,6 +27,7 @@ bool RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* rende
         
     }
     
+    // Sort them out
     for (unsigned int i=0; i < renderQueueGroup->size(); i++) 
         mRenderQueueSorter[queueGroupIndex][i].first = glm::distance( eye, mRenderQueueSorter[queueGroupIndex][i].second->transform.position );
     

@@ -63,7 +63,7 @@ void EngineSystemManager::Update(void) {
         
         // Check garbage collection
         
-        if (gameObject->isGarbage) {
+        if (gameObject->mIsGarbage) {
             
             mGarbageObjects.push_back( gameObject );
             
