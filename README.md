@@ -23,7 +23,7 @@
 
 
 ## Overview
- This project was started primarily out of the passion. This framework contains several internal systems involving rendering, physics, AI, resource management, data serialization and more.
+ This framework is designed to provide the functionality of a game engine without a full editor. The primary use case would be for the creation of applications that require user interactivity and physical simulation. The core fuctionality of the framework covers rendering, physics, AI and resource management.
 
 
 <br><br/>
@@ -46,7 +46,8 @@ git clone https://github.com/RetroBytes32/FrameEngineGamework
 
 
 ### Dependencies
-Building this repository will require the following libraries.
+Building this repository will require the following libraries. These libraries will be included in the "vendor" directory in this repository.
+The latest version of these libraries could be found below. Note: The latest version of these libraries could be incompatible with the current version of this framework.
 
 * <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 * <a href="https://github.com/nothings/stb">STB-Image</a>⁭
