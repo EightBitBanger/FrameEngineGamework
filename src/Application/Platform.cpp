@@ -46,7 +46,7 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     
     HICON__* hCursor = LoadCursor(NULL, IDC_ARROW);
     
-    HINSTANCE hInstance;
+    HINSTANCE hInstance = NULL;
     
     WNDCLASSEX wClassEx;
     wClassEx.lpszClassName   = className.c_str();

@@ -206,7 +206,13 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     overlayMaterial->DisableCulling();
     overlayMaterial->DisableShadowVolumePass();
     
-    overlayObject->AddComponent( CreateComponent<MeshRenderer>(overlayMesh, overlayMaterial) );
+    Component* component = CreateComponent<MeshRenderer>();
+    
+    overlayObject->AddComponent( component );
+    MeshRenderer* renderer = overlayObject->GetComponent<MeshRenderer>();
+    
+    renderer->mesh     = overlayMesh;
+    renderer->material = overlayMaterial;
     
     return overlayObject;
 }

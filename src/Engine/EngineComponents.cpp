@@ -76,7 +76,6 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
 }
 
 bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
-    assert(componentPtr != nullptr);
     
     ComponentType componentType = componentPtr->GetType();
     

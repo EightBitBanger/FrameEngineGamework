@@ -190,9 +190,6 @@ void EngineSystemManager::UpdateConsole(void) {
                 continue;
             }
             
-            
-            ConsoleShiftUp( mConsoleString );
-            
             Input.lastKeyPressed = -1;
             mConsoleString = "";
             
