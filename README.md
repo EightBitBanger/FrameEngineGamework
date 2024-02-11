@@ -5,12 +5,13 @@
   - Point and directional lights.
 
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
-
-- Terrain height mapping
+  - Rigid body simulation
+  - Terrain height field mapping
+  - Alot more
 
 - ActorAI
-  - Genetic actor appearance
-  - Neural network / state machine hybrid
+  - Actor appearance based on a psudo-genetics system
+  - Neural network / state machine hybrid for actor personality
 
 - Resource management
   - Image: PNG BMP
@@ -38,7 +39,7 @@ While this framework currently only supports windows, I look forward to porting 
 
 
 ##  Building the repository
-First, clone the repository with git. You can then use cmake to generate the project files of your choice. You have three build options in cmake. Each option will generate a project file which will compile the selected part of the framework. To use the framework you would want to select BUILD_APPLICATION_LIBRARY. However, modifying the core requires you to select BUILD_CORE_ENGINE. To build the runtime executable select BUILD_RUNTIME_EXECUTABLE.
+First, clone the repository with git. You can then use cmake to generate the project files of your choice. You have three primary build options in cmake. Each option will generate a project file which will compile the selected part of the framework. To use the framework you would want to select `BUILD_APPLICATION_LIBRARY`. However, modifying the core requires you to select `BUILD_CORE_ENGINE`. To build the runtime executable select `BUILD_RUNTIME_EXECUTABLE`.
 
 ```
 git clone https://github.com/RetroBytes32/FrameEngineGamework
@@ -49,8 +50,8 @@ git clone https://github.com/RetroBytes32/FrameEngineGamework
 
 
 ## Dependencies
-Building this repository will require the following libraries. These libraries will be included in the "vendor" directory in this repository.
-The latest version of these libraries could be found below. However, the latest version of these libraries may be incompatible with the current version of this framework.
+Building this repository will require the following libraries. These libraries and their associated licenses will be included in the "vendor" directory in this repository.
+Links to the latest version of these libraries could be found below. Note: The latest version of these libraries may be incompatible with the current version of this framework.
 
 * <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
 * <a href="https://github.com/nothings/stb">STB-Image</a>⁭
@@ -58,13 +59,6 @@ The latest version of these libraries could be found below. However, the latest 
 * <a href="https://github.com/icaven/glm">glm</a>⁭
 * <a href="https://github.com/nigels-com/glew">glew</a>⁭
 
-
-
-<br><br/>
-
-
-## Screenshots
-You can find screenshots of development progress [here](https://github.com/RetroBytes32/GameEngineFramework/wiki/Screenshots).
 
 
 <br><br/>
@@ -87,6 +81,19 @@ The `Start()` function will be called once during application initiation while `
 
 
 ## Examples
+Below are a few examples covering the use and interaction of objects and components in the framework
+
 [Game objects](https://github.com/RetroBytes32/FrameEngineGamework/wiki/Game-objects)
 <br>
 [Working with components](https://github.com/RetroBytes32/FrameEngineGamework/wiki/Working-with-components)
+
+
+<br><br/>
+
+
+## Screenshots
+You can find screenshots of development progress [here](https://github.com/RetroBytes32/GameEngineFramework/wiki/Screenshots).
+
+
+<br><br/>
+
