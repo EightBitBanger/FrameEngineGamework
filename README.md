@@ -45,7 +45,10 @@ git clone https://github.com/RetroBytes32/FrameEngineGamework
 ```
 
 
-### Dependencies
+<br><br/>
+
+
+## Dependencies
 Building this repository will require the following libraries. These libraries will be included in the "vendor" directory in this repository.
 The latest version of these libraries could be found below. Note: The latest version of these libraries could be incompatible with the current version of this framework.
 
@@ -57,9 +60,18 @@ The latest version of these libraries could be found below. Note: The latest ver
 
 
 
+<br><br/>
+
+
 ## Screenshots
 You can find screenshots of development progress [here](https://github.com/RetroBytes32/GameEngineFramework/wiki/Screenshots).
 
+
+<br><br/>
+
+
+## Architecture
+ This engine has many sub systems which are split up into several dynamic libraries. The engine core and the game code are located in separate dynamic libraries with a runtime executable to launch the application. The physics engine, ReactPhysics3D, is contained in it's own dynamic library. External resources are located in a directory named 'data' in the working directory with the runtime executable. These resources include models, textures and shaders that are loaded automatically by the engine`s resource manager.
 
 <br><br/>
 
@@ -69,9 +81,8 @@ The source file "Application.cpp" is the application layer entry point and the s
 The framework will provide you with the functions `Start()` and `Run()`. These functions will serve as an entry point for your application.
 The `Start()` function will be called once during application initiation while `Run()` will be called once per frame.
 
-
 <br><br/>
 
+## Examples
 
-## Architecture
- This engine has many sub systems which are split up into several dynamic libraries. The engine core and the game code are located in separate dynamic libraries with a runtime executable to launch the application. The physics engine, reactphysics3D, is contained in it's own dynamic library. External resources are located in a directory named 'data' in the working directory with the runtime executable. These resources include models, textures and shaders that are loaded automatically by the engine`s resource manager.
+
