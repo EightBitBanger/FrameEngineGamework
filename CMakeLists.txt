@@ -200,6 +200,8 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Application/winproc.h"
     "include/GameEngineFramework/Application/main.h"
     
+    "include/GameEngineFramework/plugins/ChunkManager.h"
+    
     "include/GameEngineFramework/Audio/AudioSystem.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
