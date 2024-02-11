@@ -35,9 +35,9 @@ endif()
 
 
 
-#
-# Build application code library
-#
+
+
+
 
 if(BUILD_RUNTIME_EXECUTABLE)
 
@@ -57,6 +57,7 @@ set (RUNTIME_HEADERS
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
+    "include/GameEngineFramework/ActorAI/GeneticPresets.h"
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
@@ -182,10 +183,6 @@ endif()
 
 
 
-#
-# Build application code library
-#
-
 if(BUILD_APPLICATION_LIBRARY)
 
 if(BUILD_CORE_ENGINE OR BUILD_RUNTIME_EXECUTABLE)
@@ -206,6 +203,7 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
+    "include/GameEngineFramework/ActorAI/GeneticPresets.h"
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
@@ -320,9 +318,8 @@ endif()
 
 
 
-#
-# Build core engine library
-#
+
+
 
 if(BUILD_CORE_ENGINE)
 
@@ -339,6 +336,7 @@ set (CORE_HEADERS
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
+    "include/GameEngineFramework/ActorAI/GeneticPresets.h"
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
@@ -447,6 +445,7 @@ set (CORE_SOURCES
     "src/Engine/types/viewport.cpp"
     
     "src/ActorAI/ActorSystem.cpp"
+    "src/ActorAI/GeneticPresets.cpp"
     "src/ActorAI/genetics/gene.cpp"
     "src/ActorAI/genetics/base.cpp"
     "src/ActorAI/components/actor.cpp"
