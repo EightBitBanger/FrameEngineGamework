@@ -266,17 +266,6 @@ public:
         return nullptr;
     }
     
-    /// Create a mesh renderer component object.
-    template <typename T> Component* CreateComponent(Mesh* meshPtr, Material* materialPtr) {
-        if (!std::is_same<T, MeshRenderer>::value) 
-            return nullptr;
-        Component* rendererComponent = CreateComponent(Components.MeshRenderer);
-        MeshRenderer* entityRenderer = (MeshRenderer*)rendererComponent->GetComponent();
-        entityRenderer->mesh = meshPtr;
-        entityRenderer->material = materialPtr;
-        return rendererComponent;
-    }
-    
     /// Destroy a component object.
     bool DestroyComponent(Component* componentPtr);
     
