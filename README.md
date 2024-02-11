@@ -87,5 +87,5 @@ The `Start()` function will be called once during application initiation while `
 
 
 ## Examples
-[Game object example](https://github.com/RetroBytes32/FrameEngineGamework/wiki/Game-object-example).
+[Create and destroy a game object](https://github.com/RetroBytes32/FrameEngineGamework/wiki/Game-object-example)
 
