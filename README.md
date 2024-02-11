@@ -1,6 +1,6 @@
 ## Features
 
-- Render system
+- Rendering
   - Simple textured mesh renderer.
   - Point and directional lights.
 
