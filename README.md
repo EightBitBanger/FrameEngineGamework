@@ -71,7 +71,7 @@ You can find screenshots of development progress [here](https://github.com/Retro
 
 
 ## Architecture
- This engine has many sub systems which are split up into several dynamic libraries. The engine core and the game code are located in separate dynamic libraries with a runtime executable to launch the application. The physics engine, ReactPhysics3D, is contained in it's own dynamic library. External resources are located in a directory named 'data' in the working directory with the runtime executable. These resources include models, textures and shaders that are loaded automatically by the engine`s resource manager.
+ This engine has many sub systems which are split up into several dynamic libraries. The engine core and the user application code are located in separate dynamic libraries with a runtime executable to launch the application. The physics engine, ReactPhysics3D, is contained in it's own dynamic library. External resources are located in a directory named 'data' in the working directory of the runtime executable. These resources include models, textures and shaders that are loaded automatically by the engine`s resource manager.
 
 
 <br><br/>
