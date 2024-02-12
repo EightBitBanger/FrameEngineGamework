@@ -53,12 +53,6 @@ public:
     /// Should the chunks be loaded around the player or a fixed position.
     bool doUpdateWithPlayerPosition;
     
-    /// List of chunks in the world.
-    std::vector<Chunk> mChunkList;
-    
-    /// List of actor objects in the world.
-    std::vector<GameObject*> mActorList;
-    
     /// Distance to stop generating chunks.
     int generationDistance;
     int destructionDistance;
@@ -75,9 +69,6 @@ public:
     
     /// Chunk update cycle index.
     int chunkIndex;
-    
-    /// Material used for rendering the world chunks.
-    Material* mMaterial;
     
     ChunkManager() : 
         doUpdateWithPlayerPosition(true),
@@ -100,7 +91,7 @@ public:
         mMaxChunksToGenerate(10),
         
         mNumberOfChunksToPurge(1),
-        mMaxChunksToPurge(3)
+        mMaxChunksToPurge(4)
     {}
     
     
@@ -143,7 +134,7 @@ public:
         Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
         plainRenderer->mesh->SetPrimitive( MESH_TRIANGLES );
         
-        baseChunk->renderDistance = 1000;
+        baseChunk->renderDistance = 500;
         
         if (doUpdateWithPlayerPosition) 
             baseChunk->renderDistance = generationDistance * 0.8;
@@ -169,9 +160,13 @@ public:
             
             GameObject* actorObject = mActorList[ currentActorIndex ];
             
-            //if (glm::distance( actorObject->GetComponent<Transform>()->position, Engine.sceneMain->camera->transform.position ) > 50) 
-            //    Engine.Destroy<GameObject>( actorObject );
-            
+            if (glm::distance( actorObject->GetComponent<Transform>()->position, Engine.sceneMain->camera->transform.position ) > 50) {
+                
+                Engine.Destroy<GameObject>( actorObject );
+                
+                //mActorList.erase( mActorList.begin() + currentActorIndex );
+                
+            }
             currentActorIndex++;
         }
         
@@ -392,7 +387,7 @@ public:
             // Generate actors
             //
             
-            unsigned int actorsPerChunk = 3;
+            unsigned int actorsPerChunk = 100;
             
             for (unsigned int a=0; a < actorsPerChunk; a++) {
                 
@@ -403,7 +398,7 @@ public:
                 
                 mActorList.push_back( actorObject );
                 
-                actorObject->renderDistance = generationDistance * 4;
+                actorObject->renderDistance = generationDistance * 0.7;
                 
                 // Collision
                 BoxShape* boxShape = Physics.CreateColliderBox(0.3, 0.3, 0.3);
@@ -447,6 +442,15 @@ public:
     }
     
 private:
+    
+    /// Material used for rendering the world chunks.
+    Material* mMaterial;
+    
+    /// List of chunks in the world.
+    std::vector<Chunk> mChunkList;
+    
+    /// List of actor objects in the world.
+    std::vector<GameObject*> mActorList;
     
     // Number of chunks being updated per frame
     unsigned int mNumberOfChunksToGenerate;

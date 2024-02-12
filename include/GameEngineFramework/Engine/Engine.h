@@ -84,12 +84,6 @@ public:
     
     // Game objects
     
-    /// Create a game object and return its pointer.
-    GameObject* CreateGameObject(void);
-    
-    /// Destroy a game object.
-    bool DestroyGameObject(GameObject* gameObjectPtr);
-    
     /// Get the number of game objects.
     unsigned int GetNumberOfGameObjects(void);
     
@@ -237,7 +231,7 @@ public:
                                                     ptr->mIsGarbage = true;
                                                     return true;}
         if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
-        // Render system
+        // Renderer
         if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh( (Mesh*)objectPtr );
         if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial( (Material*)objectPtr );
         if (std::is_same<T, Shader>::value)        return Renderer.DestroyShader( (Shader*)objectPtr );
@@ -283,6 +277,12 @@ private:
     
     // Create a component object with initial type information and return its pointer.
     Component* CreateComponent(ComponentType type);
+    
+    // Create a game object and return its pointer.
+    GameObject* CreateGameObject(void);
+    
+    // Destroy a game object.
+    bool DestroyGameObject(GameObject* gameObjectPtr);
     
     // Process the objects marked as garbage
     void ProcessDeferredDeletion(void);
@@ -340,8 +340,13 @@ private:
     // List of active game objects
     std::vector<GameObject*>  mGameObjectActive;
     
+    // Garbage collection
+    
     // List of garbage game objects
     std::vector<GameObject*>  mGarbageObjects;
+    
+    // List of garbage rigid bodies
+    std::vector<RigidBody*>  mGarbageRigidBodies;
     
     // Component allocators
     PoolAllocator<GameObject> mGameObjects;
