@@ -294,6 +294,11 @@ void Run() {
     //text[7]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );
     //text[8]->text = "z - " + Int.ToString( cameraController->GetComponent<Transform>()->position.z );
     
+    text[11]->text = "Garbage game objects - " + Int.ToString( Engine.mGarbageObjects.size() );
+    text[12]->text = "Garbage rigid bodies - " + Int.ToString( Engine.mGarbageRigidBodies.size() );
+    
+    
+    
     
     
     

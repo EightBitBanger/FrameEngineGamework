@@ -81,9 +81,9 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
     
     switch (componentType) {
         
-        case COMPONENT_TYPE_TRANSFORM:     {mTransforms.Destroy( (Transform*)componentPtr->GetComponent() ); break;}
-        
+        // Mesh renderer garbage collection
         case COMPONENT_TYPE_MESH_RENDERER: {
+            
             MeshRenderer* meshRenderer = (MeshRenderer*)componentPtr->GetComponent();
             
             // Purge mesh
@@ -96,24 +96,55 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
                 if (!meshRenderer->material->isShared) 
                     Destroy<Material>( meshRenderer->material );
             
+            // Remove the renderer from the group its attached
+            for (unsigned int g=0; g < 5; g++) {
+                
+                int renderQueueIndex = RENDER_QUEUE_SKY + g;
+                
+                // Remove renderer from the render queue
+                if (sceneMain->RemoveMeshRendererFromSceneRoot( meshRenderer, renderQueueIndex )) 
+                    break;
+            }
+            
             Renderer.DestroyMeshRenderer( meshRenderer );
             break;
         }
         
-        // Garbage collect rigid bodies
+        // Rigid body garbage collection
         case COMPONENT_TYPE_RIGID_BODY: {
             
+            // Add the rigid body garbage list
             mGarbageRigidBodies.push_back( (RigidBody*)componentPtr->GetComponent() );
             
             break;
         }
         
-        case COMPONENT_TYPE_CAMERA:        {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_LIGHT:         {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_SCRIPT:        {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_ACTOR:         {AI.DestroyActor( (Actor*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_TEXT:          {mTextObjects.Destroy( (Text*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_PANEL:         {mPanelObjects.Destroy( (Panel*)componentPtr->GetComponent() ); break;}
+        // Actor garbage collection
+        case COMPONENT_TYPE_ACTOR: {
+            
+            Actor* actorPtr = (Actor*)componentPtr->GetComponent();
+            
+            // Destroy actor genetic renderers
+            for (unsigned int i=0; i < actorPtr->mGeneticRenderers.size(); i++) {
+                
+                MeshRenderer* renderer = actorPtr->mGeneticRenderers[i];
+                
+                // Remove renderer from the render queue
+                sceneMain->RemoveMeshRendererFromSceneRoot( renderer, RENDER_QUEUE_DEFAULT );
+                
+                Destroy<MeshRenderer>( renderer );
+            }
+            
+            AI.DestroyActor( actorPtr );
+            break;
+        }
+        
+        case COMPONENT_TYPE_TRANSFORM: {mTransforms.Destroy( (Transform*)componentPtr->GetComponent() ); break;}
+        case COMPONENT_TYPE_CAMERA:    {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
+        case COMPONENT_TYPE_LIGHT:     {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
+        case COMPONENT_TYPE_SCRIPT:    {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
+        case COMPONENT_TYPE_TEXT:      {mTextObjects.Destroy( (Text*)componentPtr->GetComponent() ); break;}
+        case COMPONENT_TYPE_PANEL:     {mPanelObjects.Destroy( (Panel*)componentPtr->GetComponent() ); break;}
         
         default: break;
     }
