@@ -243,20 +243,43 @@ public:
     
     /// Create a component object containing the type specified.
     template <typename T> Component* CreateComponent(void) {
+        
         // Engine
         if (std::is_same<T, Transform>::value)    return CreateComponent(Components.Transform);
+        
         // Renderer
         if (std::is_same<T, MeshRenderer>::value) return CreateComponent(Components.MeshRenderer);
         if (std::is_same<T, Camera>::value)       return CreateComponent(Components.Camera);
         if (std::is_same<T, Light>::value)        return CreateComponent(Components.Light);
         if (std::is_same<T, Script>::value)       return CreateComponent(Components.Script);
+        
         // Physics
-        if (std::is_same<T, RigidBody>::value)    return CreateComponent(Components.RigidBody);
+        if (std::is_same<T, RigidBody>::value)    {
+            /*
+            // Check for an old rigid body
+            if (mFreeRigidBodies.size() > 0) {
+                
+                RigidBody* rigidBody = mFreeRigidBodies[ mFreeRigidBodies.size() - 1 ];
+                
+                mFreeRigidBodies.erase( mFreeRigidBodies.end() - 1 );
+                
+                Component* component = mComponents.Create();
+                
+                component->SetComponent( Components.RigidBody, (void*)rigidBody );
+                
+                return component;
+            }
+            */
+            return CreateComponent(Components.RigidBody);
+        }
+        
         // AI
         if (std::is_same<T, Actor>::value)        return CreateComponent(Components.Actor);
+        
         // UI
         if (std::is_same<T, Text>::value)         return CreateComponent(Components.Text);
         if (std::is_same<T, Panel>::value)        return CreateComponent(Components.Panel);
+        
         return nullptr;
     }
     
@@ -344,11 +367,14 @@ private:
     
 public:
     
-    // List of garbage game objects
-    std::vector<GameObject*>  mGarbageObjects;
+    // Garbage game objects
+    std::vector<GameObject*>  mGarbageGameObjects;
     
-    // List of garbage rigid bodies
+    // Garbage rigid bodies
     std::vector<RigidBody*>  mGarbageRigidBodies;
+    
+    // Clean rigid bodies
+    std::vector<RigidBody*>  mFreeRigidBodies;
     
     // Component allocators
     PoolAllocator<GameObject> mGameObjects;

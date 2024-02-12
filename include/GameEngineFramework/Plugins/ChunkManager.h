@@ -70,6 +70,14 @@ public:
     /// Chunk update cycle index.
     int chunkIndex;
     
+    /// Render distance multiplier
+    float renderDistance;
+    
+    
+    /// How many actors should be spawned per chunk
+    unsigned int actorsPerChunk;
+    
+    
     ChunkManager() : 
         doUpdateWithPlayerPosition(true),
         
@@ -84,6 +92,10 @@ public:
         currentActorIndex(0),
         
         chunkIndex(0),
+        
+        renderDistance(1),
+        
+        actorsPerChunk(10),
         
         mMaterial(nullptr),
         
@@ -134,10 +146,10 @@ public:
         Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
         plainRenderer->mesh->SetPrimitive( MESH_TRIANGLES );
         
-        baseChunk->renderDistance = 500;
+        baseChunk->renderDistance = 1000 * renderDistance;
         
         if (doUpdateWithPlayerPosition) 
-            baseChunk->renderDistance = generationDistance * 0.8;
+            baseChunk->renderDistance = generationDistance * 0.87 * renderDistance;
         
         baseChunk->SetPosition(x, 0, z);
         
@@ -152,7 +164,7 @@ public:
         // Check actors
         //
         
-        int numberOfActors = mActorList.size();
+        int numberOfActors = mActorList.size() - 1;
         
         if (numberOfActors > 0) {
             if (currentActorIndex >= numberOfActors) 
@@ -387,8 +399,6 @@ public:
             // Generate actors
             //
             
-            unsigned int actorsPerChunk = 100;
-            
             for (unsigned int a=0; a < actorsPerChunk; a++) {
                 
                 float actorX = chunkX + (Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2));
@@ -418,7 +428,6 @@ public:
                 
                 actor->SetActive(false);
             }
-            
             
             
             // Add chunk to chunk list
