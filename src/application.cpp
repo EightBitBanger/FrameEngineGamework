@@ -192,12 +192,17 @@ void Start() {
     
     chunkManager.SetMaterial( plainMaterial );
     
-    chunkManager.generationDistance  = 400;
-    chunkManager.destructionDistance = 400;
+    chunkManager.generationDistance  = 800;
+    chunkManager.destructionDistance = 800;
     
-    chunkManager.doUpdateWithPlayerPosition = false;
+    chunkManager.renderDistance = 4;
     
-    chunkManager.chunkSize = 128;
+    //chunkManager.doUpdateWithPlayerPosition = false;
+    
+    chunkManager.chunkSize = 64;
+    
+    
+    chunkManager.actorsPerChunk = 0;
     
     
     
@@ -294,8 +299,9 @@ void Run() {
     //text[7]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );
     //text[8]->text = "z - " + Int.ToString( cameraController->GetComponent<Transform>()->position.z );
     
-    text[11]->text = "Garbage game objects - " + Int.ToString( Engine.mGarbageObjects.size() );
+    text[11]->text = "Garbage game objects - " + Int.ToString( Engine.mGarbageGameObjects.size() );
     text[12]->text = "Garbage rigid bodies - " + Int.ToString( Engine.mGarbageRigidBodies.size() );
+    text[13]->text = "Clean rigid bodies --- " + Int.ToString( Engine.mFreeRigidBodies.size() );
     
     
     

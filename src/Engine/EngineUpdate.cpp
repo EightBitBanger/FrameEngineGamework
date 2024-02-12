@@ -65,7 +65,7 @@ void EngineSystemManager::Update(void) {
         
         if (gameObject->mIsGarbage) {
             
-            mGarbageObjects.push_back( gameObject );
+            mGarbageGameObjects.push_back( gameObject );
             
             // Set to inactivate components in the next step
             gameObject->isActive = false;

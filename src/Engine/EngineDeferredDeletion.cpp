@@ -28,23 +28,67 @@ ENGINE_API extern PlatformLayer     Platform;
 void EngineSystemManager::ProcessDeferredDeletion(void) {
     
     // Game objects
-    for (unsigned int i=0; i < mGarbageObjects.size(); i++) {
+    for (unsigned int i=0; i < mGarbageGameObjects.size(); i++) {
         
-        GameObject* objectPtr = mGarbageObjects[i];
+        GameObject* objectPtr = mGarbageGameObjects[i];
         
         DestroyGameObject( objectPtr );
         
         continue;
     }
-    mGarbageObjects.clear();
+    mGarbageGameObjects.clear();
     
     // Rigid bodies
     if (mGarbageRigidBodies.size() > 0) {
         
-        RigidBody* rigidBodyPtr = mGarbageRigidBodies.end();
-        mGarbageRigidBodies.erase( mGarbageRigidBodies.end() );
+        rp3d::RigidBody* rigidBody = mGarbageRigidBodies[ mGarbageRigidBodies.size() - 1 ];
         
-        Physics.DestroyRigidBody( rigidBodyPtr );
+        mGarbageRigidBodies.erase( mGarbageRigidBodies.end() - 1 );
+        
+        //
+        // Cleanse the rigid body before handing it back to the user
+        //
+        
+        rigidBody->setUserData(nullptr);
+        
+        // Clear colliders
+        unsigned int numberOfColliders = rigidBody->getNbColliders();
+        for (unsigned int i=0; i < numberOfColliders; i++) {
+            rp3d::Collider* collider = rigidBody->getCollider( i );
+            rigidBody->removeCollider( collider );
+        }
+        
+        // Reset physics
+        rigidBody->resetForce();
+        rigidBody->resetTorque();
+        
+        // Defaults
+        rigidBody->setMass(1);
+        
+        rigidBody->setLinearDamping( 0 );
+        rigidBody->setAngularDamping( 0 );
+        
+        rigidBody->setLinearLockAxisFactor( rp3d::Vector3(0, 0, 0) );
+        rigidBody->setAngularLockAxisFactor( rp3d::Vector3(0, 0, 0) );
+        
+        rigidBody->setLinearVelocity( rp3d::Vector3(0, 0, 0) );
+        
+        rigidBody->setLocalCenterOfMass( rp3d::Vector3(0, 0, 0) );
+        
+        rigidBody->setType( rp3d::BodyType::DYNAMIC );
+        
+        rigidBody->setIsAllowedToSleep(true);
+        rigidBody->setIsActive(false);
+        
+        rigidBody->enableGravity(false);
+        
+        rigidBody->updateLocalCenterOfMassFromColliders();
+        
+        // Add the clean rigid body to a free list
+        mFreeRigidBodies.push_back( rigidBody );
+        
+        //if (rigidBody != nullptr) 
+        //    Physics.DestroyRigidBody( rigidBody );
         
     }
     
