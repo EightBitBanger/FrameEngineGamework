@@ -197,7 +197,7 @@ void Start() {
     
     chunkManager.doUpdateWithPlayerPosition = false;
     
-    chunkManager.chunkSize = 64;
+    chunkManager.chunkSize = 128;
     
     
     

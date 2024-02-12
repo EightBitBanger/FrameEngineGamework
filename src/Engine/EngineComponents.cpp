@@ -99,10 +99,18 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             Renderer.DestroyMeshRenderer( meshRenderer );
             break;
         }
+        
+        // Garbage collect rigid bodies
+        case COMPONENT_TYPE_RIGID_BODY: {
+            
+            mGarbageRigidBodies.push_back( (RigidBody*)componentPtr->GetComponent() );
+            
+            break;
+        }
+        
         case COMPONENT_TYPE_CAMERA:        {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
         case COMPONENT_TYPE_LIGHT:         {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
         case COMPONENT_TYPE_SCRIPT:        {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_RIGID_BODY:    {Physics.DestroyRigidBody( (RigidBody*)componentPtr->GetComponent() ); break;}
         case COMPONENT_TYPE_ACTOR:         {AI.DestroyActor( (Actor*)componentPtr->GetComponent() ); break;}
         case COMPONENT_TYPE_TEXT:          {mTextObjects.Destroy( (Text*)componentPtr->GetComponent() ); break;}
         case COMPONENT_TYPE_PANEL:         {mPanelObjects.Destroy( (Panel*)componentPtr->GetComponent() ); break;}

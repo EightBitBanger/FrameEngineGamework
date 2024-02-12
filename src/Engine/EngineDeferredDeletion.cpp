@@ -31,14 +31,40 @@ void EngineSystemManager::ProcessDeferredDeletion(void) {
         
         GameObject* objectPtr = mGarbageObjects[i];
         
+        //
+        // Clean up mesh renderers
+        //
+        
         if (objectPtr->mMeshRendererCache != nullptr) {
             
             for (unsigned int g=0; g < 5; g++) {
                 
                 int renderQueueIndex = RENDER_QUEUE_SKY + g;
                 
+                // Remove renderer from the render queue
                 if (sceneMain->RemoveMeshRendererFromSceneRoot( objectPtr->mMeshRendererCache, renderQueueIndex )) 
                     break;
+            }
+            
+        }
+        
+        //
+        // Clean up actor mesh renderers
+        //
+        
+        if (objectPtr->mActorCache != nullptr) {
+            
+            Actor* actorPtr = objectPtr->mActorCache;
+            
+            for (unsigned int i=0; i < actorPtr->mGeneticRenderers.size(); i++) {
+                
+                MeshRenderer* renderer = actorPtr->mGeneticRenderers[i];
+                
+                // Remove renderer from the render queue
+                sceneMain->RemoveMeshRendererFromSceneRoot( renderer, RENDER_QUEUE_DEFAULT );
+                
+                Destroy<MeshRenderer>( renderer );
+                
             }
             
         }
