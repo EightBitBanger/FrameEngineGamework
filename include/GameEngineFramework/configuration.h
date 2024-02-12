@@ -70,7 +70,7 @@
 // Unit testing
 //
 
-//#define RUN_UNIT_TESTS
+#define RUN_UNIT_TESTS
 
 
 

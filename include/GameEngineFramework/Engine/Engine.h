@@ -342,6 +342,8 @@ private:
     
     // Garbage collection
     
+public:
+    
     // List of garbage game objects
     std::vector<GameObject*>  mGarbageObjects;
     
