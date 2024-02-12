@@ -13,7 +13,7 @@ void TestFramework::TestGameObject(void) {
     
     std::cout << "Game objects............ ";
     
-    GameObject* gameObject1     = Engine.CreateGameObject();
+    GameObject* gameObject1     = Engine.Create<GameObject>();
     Component*  componentEntity = Engine.CreateComponent<MeshRenderer>();
     
     // Check object creation
@@ -31,11 +31,11 @@ void TestFramework::TestGameObject(void) {
     
     // Test game object should destroy its components
     gameObject1->AddComponent(componentEntity);
-    Engine.DestroyGameObject(gameObject1);
+    Engine.Destroy<GameObject>(gameObject1);
     if (Engine.GetNumberOfComponents() > 0) Throw(msgFailedToDestroyAttachment, __FILE__, __LINE__);
     
     // Check game object`s get and set functions
-    GameObject* gameObject2     = Engine.CreateGameObject();
+    GameObject* gameObject2     = Engine.Create<GameObject>();
     Component*  componentRigidBody = Engine.CreateComponent<RigidBody>();
     gameObject2->AddComponent(componentRigidBody);
     rp3d::RigidBody* rigidBody = (rp3d::RigidBody*)componentRigidBody->GetComponent();
@@ -56,7 +56,7 @@ void TestFramework::TestGameObject(void) {
     gameObject2->SetAngularAxisLockFactor(2.0, 4.0, 6.0);
     if (rigidBody->getAngularLockAxisFactor() != rp3d::Vector3(2.0, 4.0, 6.0)) Throw(msgFailedSetGet, __FILE__, __LINE__);
     
-    Engine.DestroyGameObject(gameObject2);
+    Engine.Destroy<GameObject>(gameObject2);
     
     return;
 }

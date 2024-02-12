@@ -13,10 +13,11 @@ void TestFramework::TestEngineFunctionality(void) {
     std::cout << "Engine functionality.... ";
     
     // Test game object
-    GameObject* gameObject = Engine.CreateGameObject();
+    GameObject* gameObject = Engine.Create<GameObject>();
     if (gameObject == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
-    if (!Engine.DestroyGameObject(gameObject)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
-    if (Engine.GetNumberOfGameObjects() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
+    if (!Engine.Destroy<GameObject>(gameObject)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
+    // Object is garbage collected and cant be tested in one frame
+    //if (Engine.GetNumberOfGameObjects() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
     // Test mesh renderer component
     Component* component = Engine.CreateComponentMeshRenderer(nullptr, nullptr);
