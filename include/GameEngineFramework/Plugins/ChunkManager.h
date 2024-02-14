@@ -327,16 +327,17 @@ public:
             
             
             // Main noise channels
+            float heightMul = 0.1;
             
-            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.002, 0.002,  240, chunkX, chunkZ);
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.002, 0.002,  240 * heightMul, chunkX, chunkZ);
             
-            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.01, 0.01,     80, chunkX, chunkZ);
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.01, 0.01,     80 * heightMul, chunkX, chunkZ);
             
-            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.03, 0.03,     10, chunkX, chunkZ);
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.03, 0.03,     10 * heightMul, chunkX, chunkZ);
             
-            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.08, 0.08,      4, chunkX, chunkZ);
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.08, 0.08,      4 * heightMul, chunkX, chunkZ);
             
-            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.2, 0.2,        1, chunkX, chunkZ);
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.2, 0.2,        1 * heightMul, chunkX, chunkZ);
             
             
             // Biome range

@@ -254,24 +254,7 @@ public:
         if (std::is_same<T, Script>::value)       return CreateComponent(Components.Script);
         
         // Physics
-        if (std::is_same<T, RigidBody>::value)    {
-            /*
-            // Check for an old rigid body
-            if (mFreeRigidBodies.size() > 0) {
-                
-                RigidBody* rigidBody = mFreeRigidBodies[ mFreeRigidBodies.size() - 1 ];
-                
-                mFreeRigidBodies.erase( mFreeRigidBodies.end() - 1 );
-                
-                Component* component = mComponents.Create();
-                
-                component->SetComponent( Components.RigidBody, (void*)rigidBody );
-                
-                return component;
-            }
-            */
-            return CreateComponent(Components.RigidBody);
-        }
+        if (std::is_same<T, RigidBody>::value)    return CreateComponent(Components.RigidBody);
         
         // AI
         if (std::is_same<T, Actor>::value)        return CreateComponent(Components.Actor);
