@@ -49,6 +49,21 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
             break;
         }
         case COMPONENT_TYPE_RIGID_BODY: {
+            
+            // Check the rigid body free list for an old rigid body
+            if (mFreeRigidBodies.size() > 0) {
+                
+                RigidBody* rigidBody = mFreeRigidBodies[ 0 ];
+                
+                mFreeRigidBodies.erase( mFreeRigidBodies.begin() );
+                
+                Component* component = mComponents.Create();
+                
+                component->SetComponent( Components.RigidBody, (void*)rigidBody );
+                
+                return component;
+            }
+            
             component_object = (void*)Physics.CreateRigidBody();
             break;
         }

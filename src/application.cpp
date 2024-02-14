@@ -192,15 +192,14 @@ void Start() {
     
     chunkManager.SetMaterial( plainMaterial );
     
-    chunkManager.generationDistance  = 800;
-    chunkManager.destructionDistance = 800;
+    chunkManager.generationDistance  = 300;
+    chunkManager.destructionDistance = 300;
     
-    chunkManager.renderDistance = 4;
+    chunkManager.renderDistance = 0.8;
     
-    //chunkManager.doUpdateWithPlayerPosition = false;
+    chunkManager.doUpdateWithPlayerPosition = false;
     
-    chunkManager.chunkSize = 64;
-    
+    chunkManager.chunkSize = 8;
     
     chunkManager.actorsPerChunk = 0;
     
@@ -227,6 +226,7 @@ unsigned int meshRendererCount = 0;
 unsigned int meshCount  = 0;
 bool init = false;
 
+GameObject* actorObject;
 
 void Run() {
     
@@ -304,6 +304,19 @@ void Run() {
     text[13]->text = "Clean rigid bodies --- " + Int.ToString( Engine.mFreeRigidBodies.size() );
     
     
+    
+    
+    
+    
+    
+    
+    if (Random.Range(0, 100) > 80) {
+        
+        if (actorObject != nullptr) 
+            Engine.Destroy<GameObject>( actorObject );
+        
+        actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
+    }
     
     
     
