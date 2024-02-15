@@ -8,16 +8,16 @@
 ## Features
 
 - Rendering
-  - Simple textured mesh renderer.
-  - Point and directional lights.
+  - Simple textured mesh renderer
+  - Point and directional lights
 
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
   - Rigid body simulation
   - Terrain height field mapping
-  - Alot more
+  - Much more
 
 - ActorAI
-  - Actor appearance based on a psudo-genetics system
+  - Psudo-genetics based actor generation
   - Neural network / state machine hybrid for actor personality
 
 - Resource management
