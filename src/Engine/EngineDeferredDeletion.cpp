@@ -27,16 +27,26 @@ ENGINE_API extern PlatformLayer     Platform;
 
 void EngineSystemManager::ProcessDeferredDeletion(void) {
     
-    // Game objects
-    for (unsigned int i=0; i < mGarbageGameObjects.size(); i++) {
+    // Purge game objects
+     int numberOfGameObjects = mGarbageGameObjects.size();
+    if (numberOfGameObjects > 0) {
         
-        GameObject* objectPtr = mGarbageGameObjects[i];
+        unsigned int objectsPerCycle = glm::min(1, (numberOfGameObjects / 2));
         
-        DestroyGameObject( objectPtr );
+        for (unsigned int i=0; i < objectsPerCycle; i++) {
+            
+            GameObject* objectPtr = mGarbageGameObjects[i];
+            
+            DestroyGameObject( objectPtr );
+            
+            continue;
+        }
         
-        continue;
     }
+    
     mGarbageGameObjects.clear();
+    
+    
     
     // Rigid bodies
     if (mGarbageRigidBodies.size() > 0) {

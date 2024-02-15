@@ -538,20 +538,12 @@ void EngineSystemManager::Shutdown(void) {
     
     Destroy<Scene>(sceneOverlay);
     
-    while (GetNumberOfGameObjects() > 0) {
-        DestroyGameObject( GetGameObject(0) );
-    }
-    
     Renderer.DestroyShader(shaders.texture);
     Renderer.DestroyShader(shaders.textureUnlit);
     Renderer.DestroyShader(shaders.color);
     Renderer.DestroyShader(shaders.colorUnlit);
     Renderer.DestroyShader(shaders.UI);
     Renderer.DestroyShader(shaders.shadowCaster);
-    
-    assert(mComponents.Size() == 0);
-    assert(mGameObjects.Size() == 0);
-    assert(mTextObjects.Size() == 0);
     
     return;
 }

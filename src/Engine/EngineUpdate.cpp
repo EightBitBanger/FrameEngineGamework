@@ -24,7 +24,13 @@ ENGINE_API extern PlatformLayer     Platform;
 
 void EngineSystemManager::Update(void) {
     
-    glm::vec3 eye = sceneMain->camera->transform.position;
+    
+    //
+    // Process garbage objects
+    //
+    
+    ProcessDeferredDeletion();
+    
     
     // Update player/camera position in the AI simulation
     if (sceneMain != nullptr) {
@@ -55,7 +61,7 @@ void EngineSystemManager::Update(void) {
         
         if (gameObject->renderDistance > 0) {
             
-            if (glm::distance(gameObject->mTransformCache->position, eye) > gameObject->renderDistance) 
+            if (glm::distance(gameObject->mTransformCache->position, sceneMain->camera->transform.position) > gameObject->renderDistance) 
                 shoudRender = false;
             
         }
@@ -169,14 +175,6 @@ void EngineSystemManager::Update(void) {
         
         continue;
     }
-    
-    
-    //
-    // Process garbage objects
-    //
-    
-    ProcessDeferredDeletion();
-    
     
     return;
 }
