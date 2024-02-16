@@ -350,8 +350,6 @@ private:
     
     // Garbage collection
     
-public:
-    
     // Garbage game objects
     std::vector<GameObject*>  mGarbageGameObjects;
     
