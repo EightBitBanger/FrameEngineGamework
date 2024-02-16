@@ -39,14 +39,14 @@ void PlatformLayer::Pause(void) {
     return;
 }
 
-void* PlatformLayer::CreateWindowHandle(std::string className, std::string windowName, void* parentHandle) {
+void* PlatformLayer::CreateWindowHandle(std::string className, std::string windowName, void* parentHandle, void* hInstance) {
     
     isPaused = false;
     isActive = true;
     
     HICON__* hCursor = LoadCursor(NULL, IDC_ARROW);
     
-    HINSTANCE hInstance = NULL;
+    HINSTANCE instanceHandle = (HINSTANCE)hInstance;
     
     WNDCLASSEX wClassEx;
     wClassEx.lpszClassName   = className.c_str();
@@ -55,16 +55,21 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     wClassEx.lpfnWndProc     = (WNDPROC)WindowProc;
     wClassEx.cbClsExtra      = 0;
     wClassEx.cbWndExtra      = 0;
-    wClassEx.hInstance       = hInstance;
+    wClassEx.hInstance       = instanceHandle;
     wClassEx.lpszMenuName    = NULL;
     wClassEx.hCursor         = hCursor;
-    wClassEx.hIcon           = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
-    wClassEx.hIconSm         = LoadIcon(hInstance, IDI_APPLICATION);
+    wClassEx.hIcon           = LoadIcon(instanceHandle, MAKEINTRESOURCE(IDI_ICON));
+    wClassEx.hIconSm         = LoadIcon(instanceHandle, IDI_APPLICATION);
     wClassEx.hbrBackground   = (HBRUSH)GetStockObject(BLACK_BRUSH);
     
     assert( RegisterClassEx(&wClassEx) );
     
-    windowHandle = CreateWindowEx(0, className.c_str(), windowName.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, (HWND)parentHandle, NULL, hInstance, NULL);
+    windowHandle = CreateWindowEx(0, className.c_str(), windowName.c_str(), 
+                                  WS_OVERLAPPEDWINDOW, 
+                                  CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 
+                                  (HWND)parentHandle, NULL, 
+                                  instanceHandle, NULL);
+    
     assert(windowHandle != NULL);
     
     ShowWindow( (HWND)windowHandle, true );

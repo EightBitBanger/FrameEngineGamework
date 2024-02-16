@@ -82,7 +82,6 @@ Material* skyMaterial;
 //
 
 void Start() {
-    
     //Engine.EnablePhysicsDebugRenderer();
     
     
@@ -133,7 +132,7 @@ void Start() {
     
     directionalLight = Engine.Create<GameObject>();
     lightTransform = directionalLight->GetComponent<Transform>();
-    lightTransform->RotateAxis(1, Vector3(0.8, -0.7, 0.0));
+    lightTransform->RotateAxis(1, Vector3(0.1, -0.8, 0.0));
     
     directionalLight->AddComponent( Engine.CreateComponent<Light>() );
     Light* sunLight = directionalLight->GetComponent<Light>();
@@ -192,17 +191,76 @@ void Start() {
     
     chunkManager.SetMaterial( plainMaterial );
     
-    chunkManager.generationDistance  = 300;
-    chunkManager.destructionDistance = 300;
+    chunkManager.generationDistance  = 700;
+    chunkManager.destructionDistance = 700;
     
-    chunkManager.renderDistance = 0.8;
+    chunkManager.renderDistance = 0.7;
     
-    chunkManager.doUpdateWithPlayerPosition = false;
+    chunkManager.doUpdateWithPlayerPosition = true;
     
-    chunkManager.chunkSize = 8;
+    chunkManager.chunkSize = 64;
     
     chunkManager.actorsPerChunk = 0;
     
+    
+    
+    
+    
+    
+    /*
+    
+    //
+    // Random objects in the sky
+    //
+    
+    Material* newMaterial = Engine.Create<Material>();
+    newMaterial->isShared = true;
+    
+    newMaterial->shader = Engine.shaders.color;
+    newMaterial->EnableShadowVolumePass();
+    
+    Color shadowColor = Colors.yellow;
+    shadowColor *= Colors.white;
+    shadowColor *= Colors.white;
+    shadowColor *= Colors.white;
+    
+    newMaterial->SetShadowVolumeColor( shadowColor );
+    
+    newMaterial->SetShadowVolumeColorIntensity( 10 );
+    
+    newMaterial->SetShadowVolumeIntensityHigh( 0.45 );
+    newMaterial->SetShadowVolumeIntensityLow( 0.1 );
+    newMaterial->SetShadowVolumeLength(24);
+    newMaterial->SetShadowVolumeAngleOfView(24);
+    
+    
+    for (unsigned int i=0; i < 1000; i++) {
+        
+        float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 2;
+        float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 2;
+        
+        float sxx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.1;
+        float szz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.1;
+        
+        GameObject* newObject = Engine.Create<GameObject>();
+        Transform* transform = newObject->GetComponent<Transform>();
+        
+        transform->position.x = xx;
+        transform->position.y = 80 + Random.Range(0, 10);
+        transform->position.z = zz;
+        
+        //transform->scale.x = sxx;
+        //transform->scale.z = szz;
+        
+        newObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+        MeshRenderer* meshRenderer = newObject->GetComponent<MeshRenderer>();
+        
+        meshRenderer->mesh     = Engine.meshes.cube;
+        meshRenderer->material = newMaterial;
+        
+        Engine.sceneMain->AddMeshRendererToSceneRoot( meshRenderer );
+    }
+    */
     
     
     return;
@@ -270,6 +328,7 @@ void Run() {
     
     
     
+    
     //
     // Profiling
     //
@@ -310,13 +369,10 @@ void Run() {
     
     
     
-    if (Random.Range(0, 100) > 80) {
-        
-        if (actorObject != nullptr) 
-            Engine.Destroy<GameObject>( actorObject );
-        
-        actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
-    }
+    //if (actorObject != nullptr) 
+    //    Engine.Destroy<GameObject>( actorObject );
+    
+    //actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
     
     
     

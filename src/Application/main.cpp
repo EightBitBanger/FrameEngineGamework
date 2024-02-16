@@ -23,7 +23,7 @@ extern PlatformLayer        Platform;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
-    HWND wHndl = (HWND)Platform.CreateWindowHandle("windowFrame", "Render window", NULL);
+    HWND wHndl = (HWND)Platform.CreateWindowHandle("windowFrame", "Render window", NULL, (void*)hInstance);
     
     HWND cHnd = GetConsoleWindow();
     

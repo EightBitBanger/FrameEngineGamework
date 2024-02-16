@@ -24,14 +24,6 @@ ENGINE_API extern PlatformLayer     Platform;
 
 void EngineSystemManager::Update(void) {
     
-    
-    //
-    // Process garbage objects
-    //
-    
-    ProcessDeferredDeletion();
-    
-    
     // Update player/camera position in the AI simulation
     if (sceneMain != nullptr) {
         
@@ -42,118 +34,19 @@ void EngineSystemManager::Update(void) {
         
     }
     
-    if (mGameObjects.Size() == 0) 
-        return;
+    // Process garbage objects
+    ProcessDeferredDeletion();
     
-    unsigned int objectsPerTick = mGameObjects.Size() / 8;
+    // Update component stream buffer
+    UpdateComponentStream();
     
-    for (unsigned int i=0; i < objectsPerTick; i++) {
-        
-        mObjectIndex++;
-        
-        if (mObjectIndex >= mGameObjects.Size()) 
-            mObjectIndex = 0;
-        
-        GameObject* gameObject = mGameObjects[mObjectIndex];
-        
-        // Check game object render distance
-        bool shoudRender = true;
-        
-        if (gameObject->renderDistance > 0) {
-            
-            if (glm::distance(gameObject->mTransformCache->position, sceneMain->camera->transform.position) > gameObject->renderDistance) 
-                shoudRender = false;
-            
-        }
-        
-        
-        // Check garbage collection
-        
-        if (gameObject->mIsGarbage) {
-            
-            mGarbageGameObjects.push_back( gameObject );
-            
-            // Set to inactivate components in the next step
-            gameObject->isActive = false;
-            
-        }
-        
-        
-        // Update the state of associated components
-        
-        bool activeState = true;
-        
-        if ((!gameObject->isActive) | (!shoudRender))
-            activeState = false;
-        
-        if (gameObject->mActorCache) 
-            gameObject->mActorCache->SetActive( activeState );
-        
-        if (gameObject->mMeshRendererCache) 
-            gameObject->mMeshRendererCache->isActive = activeState;
-        
-        if (gameObject->mLightCache) 
-            gameObject->mLightCache->isActive = activeState;
-        
-        if (gameObject->mRigidBodyCache) 
-            gameObject->mRigidBodyCache->setIsActive( activeState );
-        
-        
-        // Check last object
-        if (mObjectIndex == mGameObjects.Size() - 1) {
-            
-            mStreamSize = mDataStreamIndex;
-            
-            mDataStreamIndex = 0;
-        }
-        
-        // UI elements should always be added to the stream buffer
-        bool isUIElement = false;
-        
-        if (gameObject->mTextCache != nullptr)  isUIElement = true;
-        if (gameObject->mPanelCache != nullptr) isUIElement = true;
-        
-        
-        //
-        // Final check before added to list
-        
-        if (((!gameObject->isActive) | (!shoudRender)) & (!isUIElement)) 
-            continue;
-        
-        //
-        // Set buffer stream objects and components
-        //
-        
-        mStreamBuffer[mDataStreamIndex].gameObject    = gameObject;
-        mStreamBuffer[mDataStreamIndex].transform     = gameObject->mTransformCache;
-        
-        mStreamBuffer[mDataStreamIndex].light         = gameObject->mLightCache;
-        mStreamBuffer[mDataStreamIndex].actor         = gameObject->mActorCache;
-        mStreamBuffer[mDataStreamIndex].camera        = gameObject->mCameraCache;
-        mStreamBuffer[mDataStreamIndex].rigidBody     = gameObject->mRigidBodyCache;
-        mStreamBuffer[mDataStreamIndex].meshRenderer  = gameObject->mMeshRendererCache;
-        
-        mStreamBuffer[mDataStreamIndex].text          = gameObject->mTextCache;
-        mStreamBuffer[mDataStreamIndex].panel         = gameObject->mPanelCache;
-        
-        mDataStreamIndex++;
-        
-        if (mStreamSize < mDataStreamIndex)
-            mStreamSize++;
-        
-        continue;
-    }
-    
-    
-    // Run the parent matrix transform chains
-    
+    // Run through the parent matrix transform chains and apply the matrices therein
     UpdateTransformationChains();
     
-    
-    // Update UI elements
-    
+    // Process UI elements
     UpdateUI();
     
+    // Process console input
     UpdateConsole();
     
     

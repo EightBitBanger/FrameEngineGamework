@@ -193,15 +193,15 @@ void EngineSystemManager::UpdateConsole(void) {
             Input.lastKeyPressed = -1;
             mConsoleString = "";
             
-            DisableConsole();
-            Platform.isPaused = false;
+            //DisableConsole();
+            //Platform.isPaused = false;
             
-            Platform.HideMouseCursor();
+            //Platform.HideMouseCursor();
             
-            sceneMain->camera->EnableMouseLook();
+            //sceneMain->camera->EnableMouseLook();
             
             // Reset mouse position
-            Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            //Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
             
         }
         

@@ -74,7 +74,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     
     // Add a rigid body component
     Component* rigidBodyComponent = CreateComponent(Components.RigidBody);
-    RigidBody* rigidBody = (RigidBody*)rigidBodyComponent->mObject;
+    rp3d::RigidBody* rigidBody = (RigidBody*)rigidBodyComponent->mObject;
     
     rp3d::Vector3 bodyPosition(position.x, position.y, position.z);
     rp3d::Quaternion quat = rp3d::Quaternion::identity();
@@ -82,16 +82,10 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     rp3d::Transform bodyTransform(bodyPosition, quat);
     rigidBody->setTransform(bodyTransform);
     
-    // Add a scripting component
-    Component* scriptComponent = CreateComponent(Components.Script);
-    Script* script = (Script*)scriptComponent->mObject;
-    script->name = "controller";
-    script->gameObject = cameraController;
-    script->isActive = true;
+    rigidBody->enableGravity(false);
     
     cameraController->AddComponent(cameraComponent);
     cameraController->AddComponent(rigidBodyComponent);
-    cameraController->AddComponent(scriptComponent);
     
     cameraController->SetAngularAxisLockFactor(0, 0, 0);
     cameraController->SetLinearDamping(3);
