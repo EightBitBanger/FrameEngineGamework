@@ -159,6 +159,8 @@ void EngineSystemManager::UpdateConsole(void) {
             
             std::vector<std::string> command = String.Explode(mConsoleString, ' ');
             
+            // Find the command function
+            bool doesFunctionExist = false;
             for (unsigned int i=0; i < mConsoleCommands.size(); i++) {
                 
                 if (mConsoleCommands[i].name != command[0]) 
@@ -166,21 +168,31 @@ void EngineSystemManager::UpdateConsole(void) {
                 
                 mConsoleCommands[i].function( command );
                 
-                continue;
+                doesFunctionExist = true;
+                
+                break;
             }
+            
+            // Check no function exists
+            if (!doesFunctionExist) {
+                
+                ConsoleShiftUp("Function not found");
+                
+            }
+            
             
             Input.lastKeyPressed = -1;
             mConsoleString = "";
             
-            //DisableConsole();
-            //Platform.isPaused = false;
+            DisableConsole();
+            Platform.isPaused = false;
             
-            //Platform.HideMouseCursor();
+            Platform.HideMouseCursor();
             
-            //sceneMain->camera->EnableMouseLook();
+            sceneMain->camera->EnableMouseLook();
             
             // Reset mouse position
-            //Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
             
         }
         

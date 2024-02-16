@@ -1,34 +1,13 @@
 // User application code space
 //
 
-#include <GameEngineFramework/Engine/Engine.h>
+#include <GameEngineFramework/Engine/EngineSystems.h>
 
-extern EngineComponents     Components;
-extern ColorPreset          Colors;
-extern NumberGeneration     Random;
-extern Logger               Log;
-extern Timer                PhysicsTime;
-extern Timer                Time;
-
-extern EngineSystemManager  Engine;
-extern PlatformLayer        Platform;
-extern ResourceManager      Resources;
-extern Serialization        Serializer;
-extern ScriptSystem         Scripting;
-extern RenderSystem         Renderer;
-extern PhysicsSystem        Physics;
-extern InputSystem          Input;
-extern MathCore             Math;
-extern ActorSystem          AI;
 
 // User plug-ins
 
 #include <GameEngineFramework/Plugins/ChunkManager.h>
 ChunkManager chunkManager;
-
-
-// User functions
-
 
 
 // User globals
@@ -147,8 +126,9 @@ void Start() {
     //
     // Scene overlay
     
-    sceneOverlay = Engine.Create<Scene>();
-    Renderer.AddSceneToRenderQueue(sceneOverlay);
+    //sceneOverlay = Engine.Create<Scene>();
+    //Renderer.AddSceneToRenderQueue(sceneOverlay);
+    sceneOverlay = Engine.sceneOverlay;
     
     sceneOverlay->camera = Engine.Create<Camera>();
     sceneOverlay->camera->isOrthographic = true;
@@ -358,9 +338,9 @@ void Run() {
     //text[7]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );
     //text[8]->text = "z - " + Int.ToString( cameraController->GetComponent<Transform>()->position.z );
     
-    text[11]->text = "Garbage game objects - " + Int.ToString( Engine.mGarbageGameObjects.size() );
-    text[12]->text = "Garbage rigid bodies - " + Int.ToString( Engine.mGarbageRigidBodies.size() );
-    text[13]->text = "Clean rigid bodies --- " + Int.ToString( Engine.mFreeRigidBodies.size() );
+    //text[11]->text = "Garbage game objects - " + Int.ToString( Engine.mGarbageGameObjects.size() );
+    //text[12]->text = "Garbage rigid bodies - " + Int.ToString( Engine.mGarbageRigidBodies.size() );
+    //text[13]->text = "Clean rigid bodies --- " + Int.ToString( Engine.mFreeRigidBodies.size() );
     
     
     
