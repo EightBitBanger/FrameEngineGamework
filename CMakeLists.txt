@@ -421,11 +421,12 @@ set (CORE_SOURCES
     "src/Networking/NetworkSystem.cpp"
     
     "src/Engine/Engine.cpp"
+    "src/Engine/EngineUpdate.cpp"
+    "src/Engine/EngineConsole.cpp"
     "src/Engine/EngineGameObjects.cpp"
     "src/Engine/EngineComponents.cpp"
-    "src/Engine/EngineUpdate.cpp"
     "src/Engine/EngineDeferredDeletion.cpp"
-    "src/Engine/EngineConsole.cpp"
+    "src/Engine/EngineUpdateComponentStream.cpp"
     
     "src/Engine/componentUpdate/EngineUpdateUI.cpp"
     "src/Engine/componentUpdate/EngineUpdateAI.cpp"
