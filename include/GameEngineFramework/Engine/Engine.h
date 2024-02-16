@@ -293,7 +293,9 @@ private:
     // Process the objects marked as garbage
     void ProcessDeferredDeletion(void);
     
-    // Console text
+    //
+    // Console
+    
     bool mIsConsoleEnabled;
     
     std::string mConsolePrompt;
@@ -309,7 +311,7 @@ private:
     
     unsigned int mConsoleTimers[CONSOLE_NUMBER_OF_ELEMENTS];
     
-    // Command function routing type
+    // Command function routing
     struct ConsoleCommand {
         std::string name;
         void(*function)(std::vector<std::string>);
@@ -390,7 +392,13 @@ public:
         Mesh* wallVertical = nullptr;
     };
     
-    // Component streaming
+    
+    //
+    // Component stream
+    //
+    
+    void UpdateComponentStream(void);
+    
     unsigned int mDataStreamIndex;
     unsigned int mObjectIndex;
     unsigned int mStreamSize;

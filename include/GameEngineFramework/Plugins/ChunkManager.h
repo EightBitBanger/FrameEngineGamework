@@ -163,7 +163,7 @@ public:
         //
         // Check actors
         //
-        
+        /*
         int numberOfActors = mActorList.size() - 1;
         
         if (numberOfActors > 0) {
@@ -176,11 +176,12 @@ public:
                 
                 Engine.Destroy<GameObject>( actorObject );
                 
-                //mActorList.erase( mActorList.begin() + currentActorIndex );
+                mActorList.erase( mActorList.begin() + currentActorIndex );
                 
             }
             currentActorIndex++;
         }
+        */
         
         
         //
@@ -194,6 +195,7 @@ public:
             
             if (mNumberOfChunksToPurge < 1) 
                 mNumberOfChunksToPurge = 1;
+            unsigned int destroyDistance = destructionDistance + 100;
             
             for (unsigned int i=0; i < mNumberOfChunksToPurge; i++) {
                 
@@ -212,7 +214,7 @@ public:
                     chunkPosition.y = 0;
                     playerPosition.y = 0;
                     
-                    if (glm::distance(chunkPosition, playerPosition) > destructionDistance) {
+                    if (glm::distance(chunkPosition, playerPosition) > destroyDistance) {
                         
                         int index = FindChunk( glm::vec2(chunkPosition.x, chunkPosition.z) );
                         
@@ -327,7 +329,7 @@ public:
             
             
             // Main noise channels
-            float heightMul = 0.1;
+            float heightMul = 0.87;
             
             Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.002, 0.002,  240 * heightMul, chunkX, chunkZ);
             

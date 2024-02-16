@@ -53,7 +53,7 @@ public:
     void Pause(void);
     
     /// Create the window and return its handle as a void pointer.
-    void* CreateWindowHandle(std::string className, std::string windowName, void* parentHandle);
+    void* CreateWindowHandle(std::string className, std::string windowName, void* parentHandle, void* hInstance);
     
     /// Destroy the window handle.
     void DestroyWindowHandle(void);
