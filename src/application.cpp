@@ -11,26 +11,9 @@ ChunkManager chunkManager;
 
 
 // User globals
-Scene* sceneOverlay;
-
 GameObject*  cameraController;
 
-GameObject* directionalLight;
-Transform*  lightTransform;
-
 Text* text[20];
-
-Transform* bendJoint = nullptr;
-
-
-Actor* testActor;
-
-Material* plainMaterial;
-
-
-
-MeshRenderer* combineRenderer;
-SubMesh submesh;
 
 
 
@@ -46,7 +29,7 @@ float ambientLight = 0.3;
 
 Material* skyMaterial;
 
-
+Material* plainMaterial;
 
 
 
@@ -61,93 +44,105 @@ Material* skyMaterial;
 //
 
 void Start() {
+    
     //Engine.EnablePhysicsDebugRenderer();
     
     
-    //
-    // Create a sky
-    
-    Color skyHigh(Colors.blue);
-    Color skyLow(Colors.blue);
-    
-    GameObject* skyObject = Engine.CreateSky("sky", skyLow, skyHigh, 1);
-    
-    MeshRenderer* skyRenderer = skyObject->GetComponent<MeshRenderer>();
-    Engine.sceneMain->AddMeshRendererToSceneRoot( skyRenderer, RENDER_QUEUE_SKY );
-    
-    skyMaterial = skyRenderer->material;
-    skyMaterial->diffuse = Colors.white;
-    skyMaterial->ambient = Colors.white;
+    //Engine.EnableConsole();
+    Engine.EnableConsoleBackPanel();
+    Engine.EnableConsoleCloseOnReturn();
     
     
     
     //
     // Create a camera controller
+    //
     
-    Vector3 position = Vector3(0, 30, 0);
-    Vector3 colliderScale = Vector3(1, 1, 1);
+    // The position of the player in the world.
+    Vector3 playerPosition = Vector3(0, 0, 0);
     
-    cameraController = Engine.CreateCameraController(position, colliderScale);
+    // Create a new camera controller object
+    cameraController = Engine.CreateCameraController(playerPosition);
+    
+    // Assign the camera controller's camera for rendering scene main.
     Engine.sceneMain->camera = cameraController->GetComponent<Camera>();
-    rp3d::RigidBody* rigidBody = cameraController->GetComponent<RigidBody>();
     
-    // Attach the sky object to the camera controller
-    Transform* cameraTransform = cameraController->GetComponent<Transform>();
-    skyObject->GetComponent<Transform>()->parent = cameraTransform;
+    // Use the mouse to look around.
+    Engine.sceneMain->camera->EnableMouseLook();
     
-    cameraController->SetAngularDamping( 1 );
-    cameraController->SetLinearDamping( 1 );
-    cameraController->SetMass( 10 );
-    cameraController->DisableGravity();
-    
+    // Create a box collider for the player.
     rp3d::BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);
     
+    // Add the collider to the camera controller game object.
     cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
     
     
     //
     // Directional light
+    //
     
-    directionalLight = Engine.Create<GameObject>();
-    lightTransform = directionalLight->GetComponent<Transform>();
-    lightTransform->RotateAxis(1, Vector3(0.1, -0.8, 0.0));
+    // Create a new game object.
+    GameObject* lightObject = Engine.Create<GameObject>();
     
-    directionalLight->AddComponent( Engine.CreateComponent<Light>() );
-    Light* sunLight = directionalLight->GetComponent<Light>();
+    // Add a new light component to the game object.
+    lightObject->AddComponent( Engine.CreateComponent<Light>() );
     
-    Engine.sceneMain->AddLightToSceneRoot( sunLight );
-    sunLight->intensity  = 1;
-    sunLight->type       = LIGHT_TYPE_DIRECTIONAL;
-    sunLight->color      = Colors.white;
+    // Point the game object downward. This will cause 
+    // the light component to point toward the ground.
+    lightObject->GetComponent<Transform>()->RotateAxis(1, Vector3(0.0, -1.0, 0.0));
     
+    // Get a pointer to the newly created light component.
+    Light* directionalLight = lightObject->GetComponent<Light>();
+    
+    // Setup the parameters for a directional light
+    directionalLight->type       = LIGHT_TYPE_DIRECTIONAL;
+    directionalLight->intensity  = 0.3;
+    directionalLight->color      = Colors.white;
+    
+    // Add the light to the main scene.
+    Engine.sceneMain->AddLightToSceneRoot( directionalLight );
     
     
     //
-    // Scene overlay
+    // Create a sky
+    //
     
-    //sceneOverlay = Engine.Create<Scene>();
-    //Renderer.AddSceneToRenderQueue(sceneOverlay);
-    sceneOverlay = Engine.sceneOverlay;
+    // Sky colors from hight to low.
+    Color skyHigh(Colors.blue);
+    Color skyLow(Colors.blue);
     
-    sceneOverlay->camera = Engine.Create<Camera>();
-    sceneOverlay->camera->isOrthographic = true;
-    sceneOverlay->camera->isFixedAspect  = true;
+    // Ammount of fade bias from the color "skyHigh" to "skyLow".
+    float colorBias = 1.0f;
     
-    sceneOverlay->camera->viewport.w = Renderer.displaySize.x;
-    sceneOverlay->camera->viewport.h = Renderer.displaySize.y;
+    // Sky mesh resource name.
+    // Note: this mesh is loaded by the resource manager.
+    std::string skyResourceName = "sky";
     
-    sceneOverlay->camera->clipFar  =  100;
-    sceneOverlay->camera->clipNear = -100;
+    // Generate the sky which will be returned as a game object.
+    // This game object will contain a mesh renderer to draw the sky.
+    GameObject* skyObject = Engine.CreateSky(skyResourceName, Colors.blue, Colors.blue, colorBias);
+    
+    // Add the sky's mesh renderer to the main scene.
+    Engine.sceneMain->AddMeshRendererToSceneRoot( skyObject->GetComponent<MeshRenderer>(), RENDER_QUEUE_SKY );
+    
+    // Attach the sky object to the camera controller to prevent 
+    // the player from moving outside of the sky.
+    skyObject->GetComponent<Transform>()->parent = cameraController->GetComponent<Transform>();
     
     
+    
+    MeshRenderer* skyRenderer = skyObject->GetComponent<MeshRenderer>();
+    skyMaterial = skyRenderer->material;
+    skyMaterial->diffuse = Colors.white;
+    skyMaterial->ambient = Colors.white;
     
     
     // Initiate text elements
     for (int i=0; i < 20; i++) {
         GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", 9, Colors.white, "font");
         
-        sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
+        Engine.sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
         
         text[i] = textObject->GetComponent<Text>();
         text[i]->canvas.anchorTop = true;
@@ -160,34 +155,37 @@ void Start() {
     
     
     
-    //
-    // Chunk material
-    //
-    
-    plainMaterial = Engine.Create<Material>();
-    
-    plainMaterial->shader = Engine.shaders.color;
-    plainMaterial->isShared = true;
-    
-    chunkManager.SetMaterial( plainMaterial );
-    
-    chunkManager.generationDistance  = 700;
-    chunkManager.destructionDistance = 700;
+    // Setup chunk generation
+    chunkManager.generationDistance  = 800;
+    chunkManager.destructionDistance = 800;
     
     chunkManager.renderDistance = 0.7;
     
-    chunkManager.doUpdateWithPlayerPosition = true;
+    chunkManager.doUpdateWithPlayerPosition = false;
     
     chunkManager.chunkSize = 64;
     
     chunkManager.actorsPerChunk = 0;
     
+    // Chunk material
+    Material* chunkMaterial = Engine.Create<Material>();
+    
+    chunkMaterial->shader = Engine.shaders.color;
+    chunkMaterial->isShared = true;
+    
+    chunkManager.SetMaterial( chunkMaterial );
     
     
     
     
+    plainMaterial = chunkMaterial;
     
-    /*
+    //GameObject* panelObject = Engine.CreateOverlayPanelRenderer(300, 250, 100, 100, "panel_blue");
+    //MeshRenderer* panelRenderer = panelObject->GetComponent<MeshRenderer>();
+    //Engine.sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer );
+    
+    
+    
     
     //
     // Random objects in the sky
@@ -206,9 +204,9 @@ void Start() {
     
     newMaterial->SetShadowVolumeColor( shadowColor );
     
-    newMaterial->SetShadowVolumeColorIntensity( 10 );
+    newMaterial->SetShadowVolumeColorIntensity( 4 );
     
-    newMaterial->SetShadowVolumeIntensityHigh( 0.45 );
+    newMaterial->SetShadowVolumeIntensityHigh( 0.7 );
     newMaterial->SetShadowVolumeIntensityLow( 0.1 );
     newMaterial->SetShadowVolumeLength(24);
     newMaterial->SetShadowVolumeAngleOfView(24);
@@ -240,7 +238,7 @@ void Start() {
         
         Engine.sceneMain->AddMeshRendererToSceneRoot( meshRenderer );
     }
-    */
+    
     
     
     return;
@@ -267,6 +265,35 @@ bool init = false;
 GameObject* actorObject;
 
 void Run() {
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     Camera* mainCamera = Engine.sceneMain->camera;
     
@@ -402,11 +429,11 @@ void Run() {
     plainMaterial->diffuse = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
     
     
-    Light* sunLight = directionalLight->GetComponent<Light>();
-    sunLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);;
+    //Light* sunLight = directionalLight->GetComponent<Light>();
+    //sunLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);;
     
     // Light direction
-    lightTransform = directionalLight->GetComponent<Transform>();
+    //lightTransform = directionalLight->GetComponent<Transform>();
     
     
     
@@ -414,10 +441,10 @@ void Run() {
     // DEBUG - Manually adjust light direction
     //
     
-    if (!Platform.isPaused) {
-        if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis( 0.1, Vector3(1, 0, 0));}
-        if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.1, Vector3(1, 0, 0));}
-    }
+    //if (!Platform.isPaused) {
+    //    if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis( 0.1, Vector3(1, 0, 0));}
+    //    if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.1, Vector3(1, 0, 0));}
+    //}
     
     
     

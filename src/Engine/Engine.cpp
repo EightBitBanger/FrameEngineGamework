@@ -36,6 +36,9 @@ EngineSystemManager::EngineSystemManager(void) :
     sceneOverlay(nullptr),
     
     mIsConsoleEnabled(false),
+    mShowConsoleBackPanel(false),
+    mConsoleCloseAfterCommandEntered(false),
+    
     mConsolePrompt("-"),
     mConsoleString(""),
     mConsoleInput(nullptr),

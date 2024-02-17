@@ -8,7 +8,9 @@ void EngineSystemManager::EnableConsole(void) {
     
     mIsConsoleEnabled = true;
     mConsoleInputObject->isActive = true;
-    mConsolePanelObject->isActive = true;
+    
+    if (mShowConsoleBackPanel) 
+        mConsolePanelObject->isActive = true;
     
     return;
 }
@@ -19,6 +21,26 @@ void EngineSystemManager::DisableConsole(void) {
     mConsoleInputObject->isActive = false;
     mConsolePanelObject->isActive = false;
     
+    return;
+}
+
+void EngineSystemManager::EnableConsoleBackPanel(void) {
+    mShowConsoleBackPanel = true;
+    return;
+}
+
+void EngineSystemManager::DisableConsoleBackPanel(void) {
+    mShowConsoleBackPanel = false;
+    return;
+}
+
+void EngineSystemManager::EnableConsoleCloseOnReturn(void) {
+    mConsoleCloseAfterCommandEntered = true;
+    return;
+}
+
+void EngineSystemManager::DisableConsoleCloseOnReturn(void) {
+    mConsoleCloseAfterCommandEntered = false;
     return;
 }
 
@@ -180,19 +202,24 @@ void EngineSystemManager::UpdateConsole(void) {
                 
             }
             
-            
             Input.lastKeyPressed = -1;
             mConsoleString = "";
             
-            DisableConsole();
-            Platform.isPaused = false;
-            
-            Platform.HideMouseCursor();
-            
-            sceneMain->camera->EnableMouseLook();
-            
-            // Reset mouse position
-            Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            // Check close console after return
+            if (mConsoleCloseAfterCommandEntered) {
+                
+                DisableConsole();
+                Platform.isPaused = false;
+                
+                Platform.HideMouseCursor();
+                
+                if (sceneMain->camera != nullptr) 
+                    sceneMain->camera->EnableMouseLook();
+                
+                // Reset mouse position
+                Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+                
+            }
             
         }
         

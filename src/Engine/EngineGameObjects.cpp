@@ -38,7 +38,7 @@ unsigned int EngineSystemManager::GetNumberOfGameObjects(void) {
     return mGameObjects.Size();
 }
 
-GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm::vec3 scale) {
+GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position) {
     
     GameObject* cameraController = CreateGameObject();
     cameraController->name = "camera";
@@ -67,9 +67,11 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position, glm:
     cameraController->AddComponent(rigidBodyComponent);
     
     cameraController->SetAngularAxisLockFactor(0, 0, 0);
-    cameraController->SetLinearDamping(3);
+    
+    cameraController->SetLinearDamping(1);
     cameraController->SetAngularDamping(1);
     cameraController->SetMass(10);
+    cameraController->DisableGravity();
     
     return cameraController;
 }
