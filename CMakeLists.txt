@@ -76,6 +76,8 @@ set (RUNTIME_HEADERS
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/EngineSystems.h"
+    "include/GameEngineFramework/Engine/ComponentTypes.h"
+    
     "include/GameEngineFramework/Engine/components/component.h"
     "include/GameEngineFramework/Engine/components/gameobject.h"
     
@@ -223,6 +225,8 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/EngineSystems.h"
+    "include/GameEngineFramework/Engine/ComponentTypes.h"
+    
     "include/GameEngineFramework/Engine/components/component.h"
     "include/GameEngineFramework/Engine/components/gameobject.h"
     
@@ -357,6 +361,8 @@ set (CORE_HEADERS
     
     "include/GameEngineFramework/Engine/Engine.h"
     "include/GameEngineFramework/Engine/EngineSystems.h"
+    "include/GameEngineFramework/Engine/ComponentTypes.h"
+    
     "include/GameEngineFramework/Engine/components/component.h"
     "include/GameEngineFramework/Engine/components/gameobject.h"
     
