@@ -38,6 +38,9 @@ EngineSystemManager::EngineSystemManager(void) :
     mIsConsoleEnabled(false),
     mShowConsoleBackPanel(false),
     mConsoleCloseAfterCommandEntered(false),
+    mConsoleDoFadeOutTexts(true),
+    
+    mConsoleFadeOutTimer(700),
     
     mConsolePrompt("-"),
     mConsoleString(""),

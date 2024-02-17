@@ -44,6 +44,21 @@ void EngineSystemManager::DisableConsoleCloseOnReturn(void) {
     return;
 }
 
+void EngineSystemManager::EnableConsoleFadeOutTextElements(void) {
+    mConsoleDoFadeOutTexts = true;
+    return;
+}
+
+void EngineSystemManager::DisableConsoleFadeOutTextElements(void) {
+    mConsoleDoFadeOutTexts = false;
+    return;
+}
+
+void EngineSystemManager::SetConsoleFadeOutTimer(unsigned int numberOfFrames) {
+    mConsoleFadeOutTimer = numberOfFrames;
+    return;
+}
+
 void EngineSystemManager::ConsoleRegisterCommand(std::string name, void(*function)(std::vector<std::string>)) {
     ConsoleCommand command;
     command.name = name;
@@ -91,7 +106,7 @@ void EngineSystemManager::ConsoleShiftUp(std::string text) {
     // Submit new line of text after the up shift
     mConsoleText[0]->text = text;
     mConsoleTextObjects[0]->isActive = true;
-    mConsoleTimers[0] = 600;
+    mConsoleTimers[0] = mConsoleFadeOutTimer;
     
     MeshRenderer* meshRenderer = mConsoleTextObjects[0]->GetComponent<MeshRenderer>();
     meshRenderer->material->ambient.g = 1;
@@ -107,17 +122,21 @@ void EngineSystemManager::UpdateConsole(void) {
         
         mConsoleTimers[i]--;
         
-        if (mConsoleTimers[i] < 250) {
+        if (mConsoleDoFadeOutTexts) {
             
-            float fadeBias = mConsoleTimers[i] * 0.007;
+            if (mConsoleTimers[i] < mConsoleFadeOutTimer - 200) {
+                
+                float fadeBias = mConsoleTimers[i] * 0.007;
+                
+                MeshRenderer* meshRenderer = mConsoleTextObjects[i]->GetComponent<MeshRenderer>();
+                meshRenderer->material->ambient.g = fadeBias;
+                
+            }
             
-            MeshRenderer* meshRenderer = mConsoleTextObjects[i]->GetComponent<MeshRenderer>();
-            meshRenderer->material->ambient.g = fadeBias;
+            if (mConsoleTimers[i] < 1) 
+                mConsoleTextObjects[i]->isActive = false;
             
         }
-        
-        if (mConsoleTimers[i] < 1) 
-            mConsoleTextObjects[i]->isActive = false;
         
     }
     

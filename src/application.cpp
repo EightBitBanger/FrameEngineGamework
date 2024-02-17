@@ -25,7 +25,7 @@ Text* text[20];
 
 bool cycleDirection = false;
 
-float ambientLight = 0.3;
+float ambientLight = 0.9;
 
 Material* skyMaterial;
 
@@ -35,8 +35,12 @@ Material* plainMaterial;
 
 
 
+Button* buttonObject;
 
-
+void buttonCallback() {
+    
+    
+}
 
 
 
@@ -45,10 +49,21 @@ Material* plainMaterial;
 
 void Start() {
     
+    buttonObject = Engine.CreateOverlayButtonCallback(0, 0, 100, 100, buttonCallback);
+    
+    GameObject* panelObject = Engine.CreateOverlayPanelRenderer(300, 250, 100, 100, "panel_blue");
+    MeshRenderer* panelRenderer = panelObject->GetComponent<MeshRenderer>();
+    Engine.sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer );
+    
+    Engine.EnableConsole();
+    Engine.DisableConsoleFadeOutTextElements();
+    
+    return;
+    
+    
     //Engine.EnablePhysicsDebugRenderer();
     
     
-    //Engine.EnableConsole();
     Engine.EnableConsoleBackPanel();
     Engine.EnableConsoleCloseOnReturn();
     
@@ -138,6 +153,9 @@ void Start() {
     skyMaterial->ambient = Colors.white;
     
     
+    
+    
+    
     // Initiate text elements
     for (int i=0; i < 20; i++) {
         GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", 9, Colors.white, "font");
@@ -155,9 +173,10 @@ void Start() {
     
     
     
+    
     // Setup chunk generation
-    chunkManager.generationDistance  = 800;
-    chunkManager.destructionDistance = 800;
+    chunkManager.generationDistance  = 1000;
+    chunkManager.destructionDistance = 1000;
     
     chunkManager.renderDistance = 0.7;
     
@@ -180,9 +199,6 @@ void Start() {
     
     plainMaterial = chunkMaterial;
     
-    //GameObject* panelObject = Engine.CreateOverlayPanelRenderer(300, 250, 100, 100, "panel_blue");
-    //MeshRenderer* panelRenderer = panelObject->GetComponent<MeshRenderer>();
-    //Engine.sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer );
     
     
     
@@ -204,7 +220,7 @@ void Start() {
     
     newMaterial->SetShadowVolumeColor( shadowColor );
     
-    newMaterial->SetShadowVolumeColorIntensity( 4 );
+    newMaterial->SetShadowVolumeColorIntensity( 6 );
     
     newMaterial->SetShadowVolumeIntensityHigh( 0.7 );
     newMaterial->SetShadowVolumeIntensityLow( 0.1 );
@@ -292,7 +308,7 @@ void Run() {
     
     
     
-    
+    return;
     
     
     Camera* mainCamera = Engine.sceneMain->camera;
@@ -340,6 +356,8 @@ void Run() {
     // Profiling
     //
     
+    /*
+    
     text[1]->text  = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
     text[1]->color = Colors.white;
     if (Profiler.profileRenderSystem > 10) text[1]->color = Colors.yellow;
@@ -369,6 +387,7 @@ void Run() {
     //text[12]->text = "Garbage rigid bodies - " + Int.ToString( Engine.mGarbageRigidBodies.size() );
     //text[13]->text = "Clean rigid bodies --- " + Int.ToString( Engine.mFreeRigidBodies.size() );
     
+    */
     
     
     
@@ -423,10 +442,10 @@ void Run() {
     if (ambientLight < 0.0f)  ambientLight = 0.0f;
     
     // Sky brightness
-    skyMaterial->ambient = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
+    //skyMaterial->ambient = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
     
     // World brightness
-    plainMaterial->diffuse = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
+    //plainMaterial->diffuse = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
     
     
     //Light* sunLight = directionalLight->GetComponent<Light>();
@@ -447,6 +466,12 @@ void Run() {
     //}
     
     
+    
+    
+    
+    
+    
+    return;
     
     
     
