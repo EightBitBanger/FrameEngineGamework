@@ -94,7 +94,7 @@ public:
     // Special components and game objects
     
     /// Create a camera controller game object and return its pointer.
-    GameObject* CreateCameraController(glm::vec3 position, glm::vec3 scale);
+    GameObject* CreateCameraController(glm::vec3 position);
     
     /// Generate a sky object and return its pointer.
     GameObject* CreateSky(std::string meshTagName, Color colorLow, Color colorHigh, float biasMul);
@@ -136,6 +136,18 @@ public:
     
     /// Disable and deactivate the rendering of the console text elements.
     void DisableConsole(void);
+    
+    /// Enable console back panel.
+    void EnableConsoleBackPanel(void);
+    
+    /// Disable console back panel.
+    void DisableConsoleBackPanel(void);
+    
+    /// Enable automatic close after a command is entered.
+    void EnableConsoleCloseOnReturn(void);
+    
+    /// Disable automatic close after a command is entered.
+    void DisableConsoleCloseOnReturn(void);
     
     /// Register a command function into the console to be used at runtime.
     void ConsoleRegisterCommand(std::string name, void(*function)(std::vector<std::string>));
@@ -314,6 +326,8 @@ private:
     // Console
     
     bool mIsConsoleEnabled;
+    bool mShowConsoleBackPanel;
+    bool mConsoleCloseAfterCommandEntered;
     
     std::string mConsolePrompt;
     std::string mConsoleString;
