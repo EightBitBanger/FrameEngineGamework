@@ -62,7 +62,7 @@ public:
         return nullptr;
     }
     
-    /// Get a script component by a given name.
+    /// Get a script component by name.
     template <class T> T* GetComponent(std::string scriptName) {
         for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
             Component* currentComponentPtr = *it;
@@ -84,59 +84,82 @@ public:
     
     /// Set the position of the object.
     void SetPosition(float x, float y, float z);
-    /// Set the position of the object from a vector3.
+    
+    /// Set the position of the object from a Vector3.
     void SetPosition(glm::vec3 newPosition);
+    
     
     /// Activate the game object and any associated components.
     void Activate(void);
+    
     /// Deactivate the game object and any associated components.
     void Deactivate(void);
     
+    
     /// Add directional force to the rigid body.
     void AddForce(float x, float y, float z);
+    
     /// Add rotational torque to the rigid body.
     void AddTorque(float x, float y, float z);
+    
     /// Add directional force to the rigid body.
     void AddForce(glm::vec3 force);
+    
     /// Add rotational torque to the rigid body.
     void AddTorque(glm::vec3 force);
     
+    
     /// Add a box collider shape at the offset position x, y and z.
     void AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
+    
     /// Add a capsule collider shape at the offset position x, y and z.
     void AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
+    
     /// Add a sphere collider shape at the offset position x, y and z.
     void AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
     
+    
     /// Add a collider from a resource tag at the offset position x, y and z.
     void AddCollider(ColliderTag* colliderTag, float x, float y, float z, LayerMask layer = LayerMask::Default);
-    /// Add a collider from a height map at the offset position x, y and z.
+    
+    /// Add a collider from a mesh collider at the offset position x, y and z.
     void AddCollider(MeshCollider* meshCollider, float x, float y, float z, LayerMask layer = LayerMask::Default);
+    
     
     /// Set the rigid body mass.
     void SetMass(float mass);
+    
     /// Set the rigid body physical resistance to movement.
     void SetLinearDamping(float damping);
+    
     /// Set the rigid body physical resistance to rotation.
     void SetAngularDamping(float damping);
     
+    
     /// Set the linear movement lock multiplier.
     void SetLinearAxisLockFactor(float x, float y, float z);
+    
     /// Set the angular rotation lock multiplier.
     void SetAngularAxisLockFactor(float x, float y, float z);
     
+    
     /// Enable gravity.
     void EnableGravity(void);
+    
     /// Disable gravity.
     void DisableGravity(void);
+    
     
     /// Calculate the physical weight proportions by the size and offset of attached colliders.
     void CalculatePhysics(void);
     
+    
     /// Make the rigid body statically non movable.
     void SetStatic(void);
+    
     /// Make the rigid body dynamically movable.
     void SetDynamic(void);
+    
     /// Make the rigid body kinematic.
     void SetKinematic(void);
     

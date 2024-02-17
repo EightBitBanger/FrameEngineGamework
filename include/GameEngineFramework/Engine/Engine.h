@@ -68,7 +68,7 @@
 typedef void(*ButtonCallBack)();
 
 
-#define COMPONENT_STREAM_BUFFER_SIZE   1024 * 32
+#define COMPONENT_STREAM_BUFFER_SIZE   1024 * 64
 
 
 class ENGINE_API EngineSystemManager {
@@ -211,9 +211,13 @@ public:
     
     /// Create an object of the type specified.
     template <typename T> T* Create(void) {
+        
+        extern ActorSystem AI;
+        
         // Engine
         if (std::is_same<T, GameObject>::value)    return (T*)CreateGameObject();
         if (std::is_same<T, Component>::value)     return (T*)CreateComponent( COMPONENT_TYPE_UNDEFINED );
+        
         // Renderer
         if (std::is_same<T, Mesh>::value)          return (T*)Renderer.CreateMesh();
         if (std::is_same<T, Material>::value)      return (T*)Renderer.CreateMaterial();
@@ -221,16 +225,24 @@ public:
         if (std::is_same<T, Scene>::value)         return (T*)Renderer.CreateScene();
         if (std::is_same<T, Camera>::value)        return (T*)Renderer.CreateCamera();
         if (std::is_same<T, MeshRenderer>::value)  return (T*)Renderer.CreateMeshRenderer();
+        
+        // AI
+        if (std::is_same<T, Actor>::value)         return (T*)AI.CreateActor();
+        
         return nullptr;
     }
     
     /// Destroy an object of the type specified.
     template <typename T> bool Destroy(T* objectPtr) {
+        
+        extern ActorSystem AI;
+        
         // Engine
         if (std::is_same<T, GameObject>::value)    {GameObject* ptr = (GameObject*)objectPtr;
                                                     ptr->mIsGarbage = true;
                                                     return true;}
         if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
+        
         // Renderer
         if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh( (Mesh*)objectPtr );
         if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial( (Material*)objectPtr );
@@ -238,6 +250,10 @@ public:
         if (std::is_same<T, Scene>::value)         return Renderer.DestroyScene( (Scene*)objectPtr );
         if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera( (Camera*)objectPtr );
         if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer( (MeshRenderer*)objectPtr );
+        
+        // AI
+        if (std::is_same<T, Actor>::value)         return AI.DestroyActor( (Actor*)objectPtr );
+        
         return false;
     }
     
@@ -265,6 +281,7 @@ public:
         
         return nullptr;
     }
+    
     
     /// Destroy a component object.
     bool DestroyComponent(Component* componentPtr);

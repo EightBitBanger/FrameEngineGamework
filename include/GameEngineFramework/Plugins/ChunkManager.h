@@ -195,7 +195,6 @@ public:
             
             if (mNumberOfChunksToPurge < 1) 
                 mNumberOfChunksToPurge = 1;
-            unsigned int destroyDistance = destructionDistance + 100;
             
             for (unsigned int i=0; i < mNumberOfChunksToPurge; i++) {
                 
@@ -214,7 +213,7 @@ public:
                     chunkPosition.y = 0;
                     playerPosition.y = 0;
                     
-                    if (glm::distance(chunkPosition, playerPosition) > destroyDistance) {
+                    if (glm::distance(chunkPosition, playerPosition) > destructionDistance) {
                         
                         int index = FindChunk( glm::vec2(chunkPosition.x, chunkPosition.z) );
                         
@@ -329,7 +328,7 @@ public:
             
             
             // Main noise channels
-            float heightMul = 0.87;
+            float heightMul = 0.99;
             
             Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.002, 0.002,  240 * heightMul, chunkX, chunkZ);
             
