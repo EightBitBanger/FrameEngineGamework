@@ -7,14 +7,14 @@
 void EngineSystemManager::ProcessDeferredDeletion(void) {
     
     // Purge game objects
-     int numberOfGameObjects = mGarbageGameObjects.size();
+    int numberOfGameObjects = mGarbageGameObjects.size();
     if (numberOfGameObjects > 0) {
         
         unsigned int objectsPerCycle = glm::min(1, (numberOfGameObjects / 2));
         
         for (unsigned int i=0; i < objectsPerCycle; i++) {
             
-            GameObject* objectPtr = mGarbageGameObjects[i];
+            GameObject* objectPtr = mGarbageGameObjects[ i ];
             
             DestroyGameObject( objectPtr );
             
