@@ -143,6 +143,15 @@ public:
     /// Disable console back panel.
     void DisableConsoleBackPanel(void);
     
+    /// Enable the fade out of text elements after a period of time.
+    void EnableConsoleFadeOutTextElements(void);
+    
+    /// Disable the fade out of text elements after a period of time.
+    void DisableConsoleFadeOutTextElements(void);
+    
+    /// Set the number of frames after which the text element will begin fading out.
+    void SetConsoleFadeOutTimer(unsigned int numberOfFrames);
+    
     /// Enable automatic close after a command is entered.
     void EnableConsoleCloseOnReturn(void);
     
@@ -328,6 +337,9 @@ private:
     bool mIsConsoleEnabled;
     bool mShowConsoleBackPanel;
     bool mConsoleCloseAfterCommandEntered;
+    bool mConsoleDoFadeOutTexts;
+    
+    unsigned int mConsoleFadeOutTimer;
     
     std::string mConsolePrompt;
     std::string mConsoleString;
