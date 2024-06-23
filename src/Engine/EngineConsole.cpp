@@ -198,6 +198,8 @@ void EngineSystemManager::UpdateConsole(void) {
             if (mConsoleString.size() < 1) 
                 return;
             
+            mConsoleString += " ";
+            
             std::vector<std::string> command = String.Explode(mConsoleString, ' ');
             
             // Find the command function
