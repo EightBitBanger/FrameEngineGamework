@@ -202,6 +202,12 @@ void EngineSystemManager::UpdateConsole(void) {
             
             std::vector<std::string> command = String.Explode(mConsoleString, ' ');
             
+            // Get arguments
+            std::vector<std::string> args;
+            for (unsigned int i=0; i < command.size()-1; i++) {
+                args.push_back( command[i+1] );
+            }
+            
             // Find the command function
             bool doesFunctionExist = false;
             for (unsigned int i=0; i < mConsoleCommands.size(); i++) {
@@ -209,7 +215,7 @@ void EngineSystemManager::UpdateConsole(void) {
                 if (mConsoleCommands[i].name != command[0]) 
                     continue;
                 
-                mConsoleCommands[i].function( command );
+                mConsoleCommands[i].function( args );
                 
                 doesFunctionExist = true;
                 
