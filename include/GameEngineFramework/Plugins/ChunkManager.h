@@ -44,6 +44,51 @@ public:
 };
 
 
+class Perlin {
+    
+public:
+    
+    Perlin() : 
+        heightMultuplier(0.2),
+        noiseWidth(0.2),
+        noiseHeight(0.2)
+    {}
+    
+    /// Mountain height multiplier
+    float heightMultuplier;
+    
+    /// Perlin noise value horizontal
+    float noiseWidth;
+    
+    /// Perlin noise value vertical
+    float noiseHeight;
+    
+};
+
+
+class ENGINE_API WorldGeneration {
+    
+public:
+    
+    WorldGeneration() : 
+        actorsPerChunk(10)
+    {}
+    
+    /// How many actors should be spawned per chunk
+    unsigned int actorsPerChunk;
+    
+    /// Perlin layers to apply to the world
+    std::vector<Perlin> perlinGraph;
+    
+    /// Add a layer of perlin noise to the world generation
+    void AddPerlinLayer(Perlin& perlinLayer) {
+        perlinGraph.push_back(perlinLayer);
+        return;
+    }
+    
+};
+
+
 
 
 class ENGINE_API ChunkManager {
@@ -73,9 +118,8 @@ public:
     /// Render distance multiplier
     float renderDistance;
     
-    
-    /// How many actors should be spawned per chunk
-    unsigned int actorsPerChunk;
+    /// World generation parameters
+    WorldGeneration world;
     
     
     ChunkManager() : 
@@ -94,8 +138,6 @@ public:
         chunkIndex(0),
         
         renderDistance(1),
-        
-        actorsPerChunk(10),
         
         mMaterial(nullptr),
         
@@ -327,18 +369,33 @@ public:
             
             
             
+            
+            
             // Main noise channels
-            float heightMul = 0.99;
             
-            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.002, 0.002,  240 * heightMul, chunkX, chunkZ);
+            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.002, 0.002,  240 * heightMul, chunkX, chunkZ);
             
-            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.01, 0.01,     80 * heightMul, chunkX, chunkZ);
+            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,   0.01,  0.01,   80 * heightMul, chunkX, chunkZ);
             
-            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.03, 0.03,     10 * heightMul, chunkX, chunkZ);
+            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,   0.03,  0.03,   10 * heightMul, chunkX, chunkZ);
             
-            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.08, 0.08,      4 * heightMul, chunkX, chunkZ);
+            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,   0.08,  0.08,    4 * heightMul, chunkX, chunkZ);
             
-            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.2, 0.2,        1 * heightMul, chunkX, chunkZ);
+            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,    0.2,   0.2,    1 * heightMul, chunkX, chunkZ);
+            
+            for (unsigned int n=0; n < world.perlinGraph.size(); n++) {
+                
+                float noiseWidth  = world.perlinGraph[n].noiseWidth;
+                float noiseHeight = world.perlinGraph[n].noiseHeight;
+                
+                float heightMul   = world.perlinGraph[n].heightMultuplier;
+                
+                Engine.AddHeightFieldFromPerlinNoise(heightField, 
+                                                     chunkSize, chunkSize, 
+                                                     noiseWidth, noiseHeight, heightMul, 
+                                                     chunkX, chunkZ);
+                
+            }
             
             
             // Biome range
@@ -401,7 +458,7 @@ public:
             // Generate actors
             //
             
-            for (unsigned int a=0; a < actorsPerChunk; a++) {
+            for (unsigned int a=0; a < world.actorsPerChunk; a++) {
                 
                 float actorX = chunkX + (Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2));
                 float actorZ = chunkZ + (Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2));
