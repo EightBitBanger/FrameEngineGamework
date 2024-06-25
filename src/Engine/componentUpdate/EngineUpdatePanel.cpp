@@ -31,7 +31,7 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
     if (mStreamBuffer[index].panel->canvas.anchorRight) {
         mStreamBuffer[index].transform->position.z = Renderer.viewport.w + 
                                                      mStreamBuffer[index].panel->width * 
-                                                     mStreamBuffer[index].panel->canvas.y;
+                                                     mStreamBuffer[index].panel->canvas.x;
         
     } else {
         
@@ -39,7 +39,7 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
         // Anchor LEFT
         //
         
-        mStreamBuffer[index].transform->position.z  = (mStreamBuffer[index].panel->canvas.y * mStreamBuffer[index].panel->width);
+        mStreamBuffer[index].transform->position.z  = (mStreamBuffer[index].panel->canvas.x * mStreamBuffer[index].panel->width);
         mStreamBuffer[index].transform->position.z += mStreamBuffer[index].panel->width;
         
         //
@@ -48,7 +48,7 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
         
         if (mStreamBuffer[index].panel->canvas.anchorCenterHorz) {
             
-            mStreamBuffer[index].transform->position.z = (Renderer.viewport.w / 2) + (mStreamBuffer[index].panel->canvas.y * mStreamBuffer[index].panel->width);
+            mStreamBuffer[index].transform->position.z = (Renderer.viewport.w / 2) + (mStreamBuffer[index].panel->canvas.x * mStreamBuffer[index].panel->width);
             
         }
         
@@ -62,7 +62,7 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
         int topAnchorTotal = Renderer.displaySize.y - Renderer.viewport.h;
         
         topAnchorTotal += (mStreamBuffer[index].panel->height * mStreamBuffer[index].panel->height) / 2;
-        topAnchorTotal += mStreamBuffer[index].panel->height * mStreamBuffer[index].panel->canvas.x;
+        topAnchorTotal += mStreamBuffer[index].panel->height * mStreamBuffer[index].panel->canvas.y;
         
         mStreamBuffer[index].transform->position.y = topAnchorTotal;
     } else {
@@ -82,7 +82,7 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
             int topAnchorTotal = Renderer.displaySize.y - Renderer.viewport.h / 2;
             
             topAnchorTotal += (mStreamBuffer[index].panel->height * mStreamBuffer[index].panel->height) / 2;
-            topAnchorTotal += (mStreamBuffer[index].panel->height * mStreamBuffer[index].panel->canvas.x) - (mStreamBuffer[index].panel->height * 2);
+            topAnchorTotal += (mStreamBuffer[index].panel->height * mStreamBuffer[index].panel->canvas.y) - (mStreamBuffer[index].panel->height * 2);
             
             mStreamBuffer[index].transform->position.y = topAnchorTotal;
         }
