@@ -36,7 +36,7 @@ EngineSystemManager::EngineSystemManager(void) :
     sceneOverlay(nullptr),
     
     mIsConsoleEnabled(false),
-    mShowConsoleBackPanel(false),
+    mShowConsoleBackPanel(true),
     mConsoleCloseAfterCommandEntered(false),
     mConsoleDoFadeOutTexts(true),
     
@@ -488,8 +488,7 @@ void EngineSystemManager::Initiate() {
     sceneOverlay->camera->clipNear = -100;
     
     // Console panel overlay
-    
-    mConsolePanelObject = CreateOverlayPanelRenderer(20, -8, 10000, 10, "panel_blue");
+    mConsolePanelObject = CreateOverlayPanelRenderer(200, -8, 1000, 10, "panel_blue");
     MeshRenderer* panelRenderer = mConsolePanelObject->GetComponent<MeshRenderer>();
     sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer, RENDER_QUEUE_BACKGROUND );
     mConsolePanelObject->isActive = false;
@@ -498,6 +497,7 @@ void EngineSystemManager::Initiate() {
     panelRenderer->material->ambient.g = alphaBlend;
     
     Panel* panel = mConsolePanelObject->GetComponent<Panel>();
+    panel->canvas.anchorRight = false;
     panel->canvas.anchorTop = false;
     
     // Initiate console input text
