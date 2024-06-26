@@ -15,13 +15,15 @@ GameObject*  cameraController;
 
 Text* text[20];
 
-
+Panel* panel;
 
 
 
 
 
 // Day night cycle
+GameObject* lightObject;
+Light* directionalLight;
 
 bool cycleDirection = false;
 
@@ -44,34 +46,72 @@ void buttonCallback() {
 
 
 
+
 // Application entry point
 //
 
-void Start() {
+void FuncSummon(std::vector<std::string> args) {
     
-    buttonObject = Engine.CreateOverlayButtonCallback(0, 0, 100, 100, buttonCallback);
+    unsigned int entityType = 0;
     
-    GameObject* panelObject = Engine.CreateOverlayPanelRenderer(300, 250, 100, 100, "panel_blue");
-    MeshRenderer* panelRenderer = panelObject->GetComponent<MeshRenderer>();
-    Engine.sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer );
+    if (args[0] == "sheep") {entityType = 1;}
     
-    Engine.EnableConsole();
-    Engine.DisableConsoleFadeOutTextElements();
+    if (entityType == 0) {
+        
+        Engine.ConsoleShiftUp("Unknown actor type");
+        
+        return;
+    }
+    
+    GameObject* newActorObject = Engine.CreateAIActor( Engine.sceneMain->camera->transform.GetPosition() - glm::vec3(0, -2, 0) );
+    Actor* newActor = newActorObject->GetComponent<Actor>();
+    
+    switch (entityType) {
+        
+        default:
+        case 1: AI.genomes.SheepGene( newActor ); break;
+        
+        
+        
+    }
+    
+    Gene gene;
+    
+    gene.position.x = 0;
+    gene.position.y = 0;
+    gene.position.z = 0;
+    
+    gene.scale.x = 0.1;
+    gene.scale.y = 2.1;
+    gene.scale.z = 0.1;
+    
+    newActor->AddGene(gene);
+    
+    Engine.ConsoleShiftUp("Actor summoned");
     
     return;
+}
+
+
+
+
+
+void Start() {
     
     
-    //Engine.EnablePhysicsDebugRenderer();
     
+    Engine.ConsoleRegisterCommand("summon", FuncSummon);
     
-    Engine.EnableConsoleBackPanel();
-    Engine.EnableConsoleCloseOnReturn();
+    Platform.HideMouseCursor();
     
     
     
     //
     // Create a camera controller
     //
+    
+    //Engine.EnablePhysicsDebugRenderer();
+    
     
     // The position of the player in the world.
     Vector3 playerPosition = Vector3(0, 0, 0);
@@ -98,7 +138,7 @@ void Start() {
     //
     
     // Create a new game object.
-    GameObject* lightObject = Engine.Create<GameObject>();
+    lightObject = Engine.Create<GameObject>();
     
     // Add a new light component to the game object.
     lightObject->AddComponent( Engine.CreateComponent<Light>() );
@@ -108,7 +148,7 @@ void Start() {
     lightObject->GetComponent<Transform>()->RotateAxis(1, Vector3(0.0, -1.0, 0.0));
     
     // Get a pointer to the newly created light component.
-    Light* directionalLight = lightObject->GetComponent<Light>();
+    directionalLight = lightObject->GetComponent<Light>();
     
     // Setup the parameters for a directional light
     directionalLight->type       = LIGHT_TYPE_DIRECTIONAL;
@@ -127,7 +167,7 @@ void Start() {
     Color skyHigh(Colors.blue);
     Color skyLow(Colors.blue);
     
-    // Ammount of fade bias from the color "skyHigh" to "skyLow".
+    // Amount of fade bias from the color "skyHigh" to "skyLow".
     float colorBias = 1.0f;
     
     // Sky mesh resource name.
@@ -145,15 +185,11 @@ void Start() {
     // the player from moving outside of the sky.
     skyObject->GetComponent<Transform>()->parent = cameraController->GetComponent<Transform>();
     
-    
-    
+    // Sky rendering colors
     MeshRenderer* skyRenderer = skyObject->GetComponent<MeshRenderer>();
     skyMaterial = skyRenderer->material;
     skyMaterial->diffuse = Colors.white;
     skyMaterial->ambient = Colors.white;
-    
-    
-    
     
     
     // Initiate text elements
@@ -172,19 +208,53 @@ void Start() {
     
     
     
+    //
+    // Chunk generation
+    //
     
-    
-    // Setup chunk generation
-    chunkManager.generationDistance  = 1000;
+    chunkManager.generationDistance  = 2000;
     chunkManager.destructionDistance = 1000;
     
     chunkManager.renderDistance = 0.7;
     
     chunkManager.doUpdateWithPlayerPosition = false;
     
-    chunkManager.chunkSize = 64;
+    chunkManager.chunkSize = 256;
     
-    chunkManager.actorsPerChunk = 0;
+    // World generation
+    
+    Perlin perlinBase;
+    perlinBase.heightMultuplier = 20;
+    perlinBase.noiseWidth  = 0.01;
+    perlinBase.noiseHeight = 0.01;
+    
+    Perlin perlinLayerA;
+    perlinLayerA.heightMultuplier = 8;
+    perlinLayerA.noiseWidth  = 0.05;
+    perlinLayerA.noiseHeight = 0.05;
+    
+    Perlin perlinLayerB;
+    perlinLayerB.heightMultuplier = 4;
+    perlinLayerB.noiseWidth  = 0.1;
+    perlinLayerB.noiseHeight = 0.1;
+    
+    Perlin perlinMountain;
+    perlinMountain.heightMultuplier = 400;
+    perlinMountain.noiseWidth  = 0.001;
+    perlinMountain.noiseHeight = 0.001;
+    
+    
+    
+    
+    chunkManager.world.AddPerlinLayer(perlinBase);
+    chunkManager.world.AddPerlinLayer(perlinLayerA);
+    chunkManager.world.AddPerlinLayer(perlinLayerB);
+    chunkManager.world.AddPerlinLayer(perlinMountain);
+    
+    
+    // Actor generation
+    chunkManager.world.actorsPerChunk = 0;
+    
     
     // Chunk material
     Material* chunkMaterial = Engine.Create<Material>();
@@ -193,9 +263,6 @@ void Start() {
     chunkMaterial->isShared = true;
     
     chunkManager.SetMaterial( chunkMaterial );
-    
-    
-    
     
     plainMaterial = chunkMaterial;
     
@@ -206,6 +273,8 @@ void Start() {
     //
     // Random objects in the sky
     //
+    
+    /*
     
     Material* newMaterial = Engine.Create<Material>();
     newMaterial->isShared = true;
@@ -224,27 +293,33 @@ void Start() {
     
     newMaterial->SetShadowVolumeIntensityHigh( 0.7 );
     newMaterial->SetShadowVolumeIntensityLow( 0.1 );
-    newMaterial->SetShadowVolumeLength(24);
-    newMaterial->SetShadowVolumeAngleOfView(24);
+    newMaterial->SetShadowVolumeLength(20);
+    newMaterial->SetShadowVolumeAngleOfView(1);
     
     
     for (unsigned int i=0; i < 1000; i++) {
         
-        float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 2;
-        float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 2;
+        float xx = Random.Range(0, 100) * 13;
+        float zz = Random.Range(0, 100) * 13;
         
-        float sxx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.1;
-        float szz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.1;
+        float sxx = Random.Range(0, 100) * 0.5;
+        float szz = Random.Range(0, 100) * 0.5;
+        
+        //float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 13;
+        //float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 13;
+        
+        //float sxx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.5;
+        //float szz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.5;
         
         GameObject* newObject = Engine.Create<GameObject>();
         Transform* transform = newObject->GetComponent<Transform>();
         
         transform->position.x = xx;
-        transform->position.y = 80 + Random.Range(0, 10);
+        transform->position.y = 200 + Random.Range(0, 8);
         transform->position.z = zz;
         
-        //transform->scale.x = sxx;
-        //transform->scale.z = szz;
+        transform->scale.x = sxx;
+        transform->scale.z = szz;
         
         newObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
         MeshRenderer* meshRenderer = newObject->GetComponent<MeshRenderer>();
@@ -255,7 +330,7 @@ void Start() {
         Engine.sceneMain->AddMeshRendererToSceneRoot( meshRenderer );
     }
     
-    
+    */
     
     return;
 }
@@ -281,34 +356,6 @@ bool init = false;
 GameObject* actorObject;
 
 void Run() {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    return;
     
     
     Camera* mainCamera = Engine.sceneMain->camera;
@@ -356,8 +403,6 @@ void Run() {
     // Profiling
     //
     
-    /*
-    
     text[1]->text  = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
     text[1]->color = Colors.white;
     if (Profiler.profileRenderSystem > 10) text[1]->color = Colors.yellow;
@@ -387,20 +432,6 @@ void Run() {
     //text[12]->text = "Garbage rigid bodies - " + Int.ToString( Engine.mGarbageRigidBodies.size() );
     //text[13]->text = "Clean rigid bodies --- " + Int.ToString( Engine.mFreeRigidBodies.size() );
     
-    */
-    
-    
-    
-    
-    
-    
-    
-    //if (actorObject != nullptr) 
-    //    Engine.Destroy<GameObject>( actorObject );
-    
-    //actorObject = Engine.CreateAIActor( Vector3(0, 0, 0) );
-    
-    
     
     
     
@@ -420,20 +451,18 @@ void Run() {
     float worldLightingMin  = 0.34;
     
     
+    // Light direction
+    Transform* lightTransform = lightObject->GetComponent<Transform>();
     
-    bool adjustCycle = false;
     
     if (!Platform.isPaused) {
-        if (Input.CheckKeyCurrent(VK_I)) {cycleDirection = true;  adjustCycle = true;}
-        if (Input.CheckKeyCurrent(VK_K)) {cycleDirection = false; adjustCycle = true;}
-    }
-    
-    if (adjustCycle) {
-        if (cycleDirection) {
-            ambientLight += 0.01f;
-        } else {
-            ambientLight -= 0.01f;
-        }
+        
+        if (Input.CheckKeyCurrent(VK_I)) {ambientLight += 0.01f;}
+        if (Input.CheckKeyCurrent(VK_K)) {ambientLight -= 0.01f;}
+        
+        if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis( 0.1, Vector3(1, 0, 0));}
+        if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.1, Vector3(1, 0, 0));}
+        
     }
     
     
@@ -442,36 +471,17 @@ void Run() {
     if (ambientLight < 0.0f)  ambientLight = 0.0f;
     
     // Sky brightness
-    //skyMaterial->ambient = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
+    skyMaterial->ambient = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
     
     // World brightness
-    //plainMaterial->diffuse = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
+    plainMaterial->diffuse = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
     
     
     //Light* sunLight = directionalLight->GetComponent<Light>();
     //sunLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);;
     
-    // Light direction
-    //lightTransform = directionalLight->GetComponent<Transform>();
     
     
-    
-    //
-    // DEBUG - Manually adjust light direction
-    //
-    
-    //if (!Platform.isPaused) {
-    //    if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis( 0.1, Vector3(1, 0, 0));}
-    //    if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.1, Vector3(1, 0, 0));}
-    //}
-    
-    
-    
-    
-    
-    
-    
-    return;
     
     
     
@@ -495,56 +505,51 @@ void Run() {
     if (cameraController == nullptr) 
         return;
     
-    float forceAccelerate = 0.03;
-    float forceDecelerate = 0.02;
-    float forceMax        = 18;
+    float forceAccelerate = 0.004;
+    float forceDecelerate = 0.015;
+    float forceMax        = 20;
     
     if (mainCamera != nullptr) {
         
         // No movement when paused
         bool moving = false;
         if (!Platform.isPaused) {
+            
+            // WASD Directional
             if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward; moving = true;}
             if (Input.CheckKeyCurrent(VK_S)) {force -= mainCamera->forward; moving = true;}
             if (Input.CheckKeyCurrent(VK_A)) {force += mainCamera->right; moving = true;}
             if (Input.CheckKeyCurrent(VK_D)) {force -= mainCamera->right; moving = true;}
             
-            // Elevation
+            // Space/Shift Elevation
             if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up; moving = true;}
             if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up; moving = true;}
         }
         
-        // Accelerate
-        if (glm::length(force) < forceMax) {
-            force += (force * forceAccelerate) * glm::vec3(0.1);
-        } else {
-            
-            // Check velocity caps
-            if (force.x > forceMax) force.x = forceMax;
-            if (force.y > forceMax) force.y = forceMax;
-            if (force.z > forceMax) force.z = forceMax;
-            
-        }
+        // Accumulate force
+        if (glm::length(force) < forceMax) 
+            force += force * forceAccelerate;
         
         // Decelerate
         if ( glm::length(force) >  0.0001) force -= (force * forceDecelerate);
         if (-glm::length(force) < -0.0001) force -= (force * forceDecelerate);
         
-        glm::vec3 forceMul = force * forceAccelerate;
-        
-        // Minimum speed cut off
-        if (glm::length(force) < 0.001f) 
-            force = glm::vec3(0.0f);
-        
-        if (moving) 
-            if (Input.CheckKeyCurrent(VK_CONTROL)) forceMul *= 2;
-        
-        // Max force
-        if ( glm::length(forceMul) >  forceMax) forceMul = glm::vec3(forceMax);
-        if (-glm::length(forceMul) < -forceMax) forceMul = glm::vec3(-forceMax);
+        // Apply the force to the camera controller
+        glm::vec3 forceMul = force * glm::vec3(0.01);
         
         if (forceMul != glm::vec3(0)) 
             cameraController->AddForce(forceMul.x, forceMul.y, forceMul.z);
+        
+        
+        
+        // Minimum speed cut off
+        //if (glm::length(force) < 0.001f) 
+        //    force = glm::vec3(0.0f);
+        
+        // Max force
+        //if ( glm::length(forceMul) >  forceMax) forceMul = glm::vec3(forceMax);
+        //if (-glm::length(forceMul) < -forceMax) forceMul = glm::vec3(-forceMax);
+        
         
         
         
@@ -552,6 +557,7 @@ void Run() {
         // Update camera height
         //
         
+        /*
         RigidBody* rigidBody = cameraController->GetComponent<RigidBody>();
         rp3d::Transform bodyTransform = rigidBody->getTransform();
         
@@ -562,7 +568,7 @@ void Run() {
         bodyTransform.setPosition(position);
         
         rigidBody->setTransform( bodyTransform );
-        
+        */
         
     }
     
