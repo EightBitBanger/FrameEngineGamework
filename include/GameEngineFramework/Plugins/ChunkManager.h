@@ -51,7 +51,8 @@ public:
     Perlin() : 
         heightMultuplier(0.2),
         noiseWidth(0.2),
-        noiseHeight(0.2)
+        noiseHeight(0.2),
+        equation(0)
     {}
     
     /// Mountain height multiplier
@@ -62,6 +63,11 @@ public:
     
     /// Perlin noise value vertical
     float noiseHeight;
+    
+    /// Layer equation
+    /// 0 = Additive
+    /// 1 = Average
+    short int equation;
     
 };
 
@@ -373,19 +379,7 @@ public:
             
             
             
-            
-            
             // Main noise channels
-            
-            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.002, 0.002,  240 * heightMul, chunkX, chunkZ);
-            
-            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,   0.01,  0.01,   80 * heightMul, chunkX, chunkZ);
-            
-            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,   0.03,  0.03,   10 * heightMul, chunkX, chunkZ);
-            
-            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,   0.08,  0.08,    4 * heightMul, chunkX, chunkZ);
-            
-            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,    0.2,   0.2,    1 * heightMul, chunkX, chunkZ);
             
             for (unsigned int n=0; n < world.perlinGraph.size(); n++) {
                 
@@ -394,10 +388,21 @@ public:
                 
                 float heightMul   = world.perlinGraph[n].heightMultuplier;
                 
-                Engine.AddHeightFieldFromPerlinNoise(heightField, 
-                                                     chunkSize, chunkSize, 
-                                                     noiseWidth, noiseHeight, heightMul, 
-                                                     chunkX, chunkZ);
+                if (world.perlinGraph[n].equation == 0) {
+                    
+                    Engine.AddHeightFieldFromPerlinNoise(heightField, 
+                                                        chunkSize, chunkSize, 
+                                                        noiseWidth, noiseHeight, heightMul, 
+                                                        chunkX, chunkZ);
+                    
+                } else {
+                    
+                    Engine.AverageHeightFieldFromPerlinNoise(heightField, 
+                                                             chunkSize, chunkSize, 
+                                                             noiseWidth, noiseHeight, heightMul, 
+                                                             chunkX, chunkZ);
+                    
+                }
                 
             }
             
