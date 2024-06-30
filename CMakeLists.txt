@@ -455,6 +455,7 @@ set (CORE_SOURCES
     "src/Engine/types/viewport.cpp"
     
     "src/ActorAI/ActorSystem.cpp"
+    "src/ActorAI/ActorUpdate.cpp"
     "src/ActorAI/GeneticPresets.cpp"
     "src/ActorAI/genetics/gene.cpp"
     "src/ActorAI/genetics/base.cpp"
