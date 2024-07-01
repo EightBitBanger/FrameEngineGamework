@@ -15,8 +15,6 @@ GameObject*  cameraController;
 
 Text* text[20];
 
-Panel* panel;
-
 
 
 
@@ -52,40 +50,52 @@ void buttonCallback() {
 
 void FuncSummon(std::vector<std::string> args) {
     
-    unsigned int entityType = 0;
-    
-    if (args[0] == "sheep") {entityType = 1;}
-    
-    if (entityType == 0) {
+    for (uint8_t i=0; i < 24; i++) {
         
-        Engine.ConsoleShiftUp("Unknown actor type");
+        unsigned int entityType = 0;
         
-        return;
+        if (args[0] == "sheep") {entityType = 1;}
+        
+        if (entityType == 0) {
+            
+            Engine.ConsoleShiftUp("Unknown actor type");
+            
+            return;
+        }
+        
+        glm::vec3 randomOffset(Random.Range(0, 50) - Random.Range(0, 50), 
+                               0, 
+                               Random.Range(0, 50) - Random.Range(0, 50));
+        
+        GameObject* newActorObject = Engine.CreateAIActor( Engine.sceneMain->camera->transform.GetPosition() - randomOffset );
+        Actor* newActor = newActorObject->GetComponent<Actor>();
+        
+        switch (entityType) {
+            
+            default:
+            case 1: AI.genomes.SheepGene( newActor ); break;
+            
+        }
+        
+        /*
+        
+        Gene gene;
+        gene.attachmentIndex = 1;
+        
+        gene.position.x = 0;
+        gene.position.y = 0.9;
+        gene.position.z = 0;
+        
+        gene.scale.x = 0.35;
+        gene.scale.y = 0.5;
+        gene.scale.z = 0.4;
+        
+        newActor->AddGene(gene);
+        
+        */
+        
+        continue;
     }
-    
-    GameObject* newActorObject = Engine.CreateAIActor( Engine.sceneMain->camera->transform.GetPosition() - glm::vec3(0, -2, 0) );
-    Actor* newActor = newActorObject->GetComponent<Actor>();
-    
-    switch (entityType) {
-        
-        default:
-        case 1: AI.genomes.SheepGene( newActor ); break;
-        
-        
-        
-    }
-    
-    Gene gene;
-    
-    gene.position.x = 0;
-    gene.position.y = 0;
-    gene.position.z = 0;
-    
-    gene.scale.x = 0.1;
-    gene.scale.y = 2.1;
-    gene.scale.z = 0.1;
-    
-    newActor->AddGene(gene);
     
     Engine.ConsoleShiftUp("Actor summoned");
     
@@ -114,7 +124,7 @@ void Start() {
     
     
     // The position of the player in the world.
-    Vector3 playerPosition = Vector3(0, 0, 0);
+    Vector3 playerPosition = Vector3(0, 30, 0);
     
     // Create a new camera controller object
     cameraController = Engine.CreateCameraController(playerPosition);
@@ -212,48 +222,57 @@ void Start() {
     // Chunk generation
     //
     
-    chunkManager.generationDistance  = 2000;
-    chunkManager.destructionDistance = 1000;
+    chunkManager.generationDistance  = 500;
+    chunkManager.destructionDistance = 800;
     
-    chunkManager.renderDistance = 0.7;
+    chunkManager.renderDistance = 4;
     
-    chunkManager.doUpdateWithPlayerPosition = false;
+    chunkManager.doUpdateWithPlayerPosition = true;
     
     chunkManager.chunkSize = 256;
     
     // World generation
     
     Perlin perlinBase;
-    perlinBase.heightMultuplier = 20;
-    perlinBase.noiseWidth  = 0.01;
-    perlinBase.noiseHeight = 0.01;
+    perlinBase.equation = 0;
+    perlinBase.heightMultuplier = 3;
+    perlinBase.noiseWidth  = 0.07;
+    perlinBase.noiseHeight = 0.07;
     
     Perlin perlinLayerA;
-    perlinLayerA.heightMultuplier = 8;
-    perlinLayerA.noiseWidth  = 0.05;
-    perlinLayerA.noiseHeight = 0.05;
+    perlinLayerA.equation = 0;
+    perlinLayerA.heightMultuplier = 5;
+    perlinLayerA.noiseWidth  = 0.03;
+    perlinLayerA.noiseHeight = 0.03;
     
     Perlin perlinLayerB;
-    perlinLayerB.heightMultuplier = 4;
-    perlinLayerB.noiseWidth  = 0.1;
-    perlinLayerB.noiseHeight = 0.1;
+    perlinLayerB.equation = 0;
+    perlinLayerB.heightMultuplier = 10;
+    perlinLayerB.noiseWidth  = 0.02;
+    perlinLayerB.noiseHeight = 0.02;
     
-    Perlin perlinMountain;
-    perlinMountain.heightMultuplier = 400;
-    perlinMountain.noiseWidth  = 0.001;
-    perlinMountain.noiseHeight = 0.001;
+    Perlin perlinMountainA;
+    perlinMountainA.equation = 0;
+    perlinMountainA.heightMultuplier = 40;
+    perlinMountainA.noiseWidth  = 0.009;
+    perlinMountainA.noiseHeight = 0.009;
     
-    
-    
+    Perlin perlinMountainB;
+    perlinMountainB.equation = 0;
+    perlinMountainB.heightMultuplier = 200;
+    perlinMountainB.noiseWidth  = 0.0007;
+    perlinMountainB.noiseHeight = 0.0007;
     
     chunkManager.world.AddPerlinLayer(perlinBase);
     chunkManager.world.AddPerlinLayer(perlinLayerA);
     chunkManager.world.AddPerlinLayer(perlinLayerB);
-    chunkManager.world.AddPerlinLayer(perlinMountain);
+    chunkManager.world.AddPerlinLayer(perlinMountainA);
+    chunkManager.world.AddPerlinLayer(perlinMountainB);
     
     
     // Actor generation
-    chunkManager.world.actorsPerChunk = 0;
+    chunkManager.world.staticPerChunk = 300;
+    chunkManager.world.actorsPerChunk = 10;
     
     
     // Chunk material
@@ -269,68 +288,6 @@ void Start() {
     
     
     
-    
-    //
-    // Random objects in the sky
-    //
-    
-    /*
-    
-    Material* newMaterial = Engine.Create<Material>();
-    newMaterial->isShared = true;
-    
-    newMaterial->shader = Engine.shaders.color;
-    newMaterial->EnableShadowVolumePass();
-    
-    Color shadowColor = Colors.yellow;
-    shadowColor *= Colors.white;
-    shadowColor *= Colors.white;
-    shadowColor *= Colors.white;
-    
-    newMaterial->SetShadowVolumeColor( shadowColor );
-    
-    newMaterial->SetShadowVolumeColorIntensity( 6 );
-    
-    newMaterial->SetShadowVolumeIntensityHigh( 0.7 );
-    newMaterial->SetShadowVolumeIntensityLow( 0.1 );
-    newMaterial->SetShadowVolumeLength(20);
-    newMaterial->SetShadowVolumeAngleOfView(1);
-    
-    
-    for (unsigned int i=0; i < 1000; i++) {
-        
-        float xx = Random.Range(0, 100) * 13;
-        float zz = Random.Range(0, 100) * 13;
-        
-        float sxx = Random.Range(0, 100) * 0.5;
-        float szz = Random.Range(0, 100) * 0.5;
-        
-        //float xx = (Random.Range(0, 100) - Random.Range(0, 100)) * 13;
-        //float zz = (Random.Range(0, 100) - Random.Range(0, 100)) * 13;
-        
-        //float sxx = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.5;
-        //float szz = (Random.Range(0, 100) - Random.Range(0, 100)) * 0.5;
-        
-        GameObject* newObject = Engine.Create<GameObject>();
-        Transform* transform = newObject->GetComponent<Transform>();
-        
-        transform->position.x = xx;
-        transform->position.y = 200 + Random.Range(0, 8);
-        transform->position.z = zz;
-        
-        transform->scale.x = sxx;
-        transform->scale.z = szz;
-        
-        newObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-        MeshRenderer* meshRenderer = newObject->GetComponent<MeshRenderer>();
-        
-        meshRenderer->mesh     = Engine.meshes.cube;
-        meshRenderer->material = newMaterial;
-        
-        Engine.sceneMain->AddMeshRendererToSceneRoot( meshRenderer );
-    }
-    
-    */
     
     return;
 }
