@@ -250,7 +250,7 @@ bool Mesh::RemoveSubMesh(unsigned int index) {
     return true;
 }
 
-bool Mesh::CopySubMesh(unsigned int index, SubMesh& mesh) {
+bool Mesh::GetSubMesh(unsigned int index, SubMesh& mesh) {
     
     if (index >= mSubMesh.size()) 
         return false;
@@ -269,7 +269,7 @@ bool Mesh::CopySubMesh(unsigned int index, SubMesh& mesh) {
     return true;
 }
 
-bool Mesh::CopySubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer) {
+bool Mesh::GetSubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer) {
     
     if (index >= mSubMesh.size()) 
         return false;

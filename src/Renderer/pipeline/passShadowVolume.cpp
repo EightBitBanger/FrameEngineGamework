@@ -33,7 +33,7 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
     
     glEnable( GL_CULL_FACE );
     
-    for (int s=0; s < mNumberOfShadows; s++) {
+    for (unsigned int s=0; s < mNumberOfShadows; s++) {
         
         float shadowLength = currentEntity->material->mShadowVolumeLength;
         

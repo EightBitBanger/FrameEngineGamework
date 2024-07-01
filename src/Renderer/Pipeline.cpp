@@ -88,9 +88,6 @@ void RenderSystem::RenderFrame(void) {
                 
                 MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
                 
-                if (!currentEntity->isActive) 
-                    continue;
-                
                 GeometryPass( currentEntity, eye, scenePtr->camera->forward, viewProjection );
                 
                 continue;
@@ -107,9 +104,6 @@ void RenderSystem::RenderFrame(void) {
                 for (unsigned int i=0; i < renderQueueGroup->size(); i++) {
                     
                     MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
-                    
-                    if (!currentEntity->isActive) 
-                        continue;
                     
                     ShadowVolumePass( currentEntity, eye, scenePtr->camera->forward, viewProjection );
                     
