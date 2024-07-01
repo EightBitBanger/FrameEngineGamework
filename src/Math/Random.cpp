@@ -25,7 +25,7 @@ float  NumberGeneration::Range(float min, float max) {
 }
 
 double  NumberGeneration::Range(double min, double max) {
-    return ((float)(rand() % (int)(max * 100.0d)) * 0.01d) + min;
+    return ((double)(rand() % (int)(max * (double)100.0)) * (double)0.01) + min;
 }
 
 float NumberGeneration::Perlin(float xcoord, float ycoord, float zcoord) {

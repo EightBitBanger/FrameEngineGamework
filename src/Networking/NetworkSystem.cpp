@@ -212,7 +212,7 @@ void NetworkSystem::Update(void) {
         // Process client messages
         //
         
-        for (int i=0; i < mSockets.size(); i++) {
+        for (unsigned int i=0; i < mSockets.size(); i++) {
             
             int messageSz = recv( mSockets[i], buffer, sizeof(buffer), 0 );
             
@@ -251,7 +251,7 @@ void NetworkSystem::Update(void) {
             // Message
             if (messageSz > 0) {
                 
-                for (unsigned int a=0; a < messageSz; a++) 
+                for (int a=0; a < messageSz; a++) 
                     mMessages[i] += buffer[a];
                 
                 continue;
@@ -270,7 +270,7 @@ void NetworkSystem::Update(void) {
         if (messageSz == -1) 
             return;
         
-        for (unsigned int a=0; a < messageSz; a++) 
+        for (int a=0; a < messageSz; a++) 
             mMessages[0] += buffer[a];
         
     }
