@@ -11,7 +11,6 @@
 #include <GameEngineFramework/ActorAI/Genetics/Gene.h>
 
 #include <GameEngineFramework/ActorAI/components/actor.h>
-#include <GameEngineFramework/ActorAI/components/plant.h>
 
 #include <thread>
 #include <mutex>
@@ -29,12 +28,6 @@ public:
     
     /// Destroy an actor.
     bool DestroyActor(Actor* actorPtr);
-    
-    /// Create a static actor plant and return its pointer.
-    Plant* CreatePlant(void);
-    
-    /// Destroy a static actor plant.
-    bool DestroyPlant(Plant* plantPtr);
     
     /// Set the player position in the simulation.
     void SetPlayerWorldPosition(glm::vec3 position);
@@ -82,7 +75,6 @@ private:
     
     // Object pools
     PoolAllocator<Actor> mActors;
-    PoolAllocator<Plant> mPlants;
     
 };
 

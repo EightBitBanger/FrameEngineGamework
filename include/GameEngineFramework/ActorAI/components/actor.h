@@ -55,11 +55,10 @@ public:
     /// Get the position of the actor.
     glm::vec3 GetPosition(void);
     
-    
     // Genetics
     
     /// Add a new gene to the actors genome. The index location will be returned.
-    void AddGene(Gene& newGene);
+    unsigned int AddGene(Gene& newGene);
     
     /// Remove a gene from the actors genome.
     void RemoveGene(unsigned int index);

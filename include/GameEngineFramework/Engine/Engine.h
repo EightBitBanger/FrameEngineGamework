@@ -194,6 +194,9 @@ public:
     /// Add a layer of perlin noise into a height field.
     void AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ);
     
+    /// Average a layer of perlin noise into a height field.
+    void AverageHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ);
+    
     // Color field
     
     /// Initiates a color field grid array of colors and set them to zero.

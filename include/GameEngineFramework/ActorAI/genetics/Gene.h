@@ -20,6 +20,9 @@ public:
     /// Should the animation cycle be inverted.
     bool doInverseAnimation;
     
+    /// Offset gene index to which this gene will attach and generate.
+    unsigned int attachmentIndex;
+    
     // Base genes in this gene.
     
     /// Offset position from center.
@@ -44,8 +47,6 @@ public:
     BaseGene animationAxis;
     
     Gene();
-    
-private:
     
 };
 
