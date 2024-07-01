@@ -37,7 +37,7 @@ EngineSystemManager::EngineSystemManager(void) :
     
     mIsConsoleEnabled(false),
     mShowConsoleBackPanel(true),
-    mConsoleCloseAfterCommandEntered(false),
+    mConsoleCloseAfterCommandEntered(true),
     mConsoleDoFadeOutTexts(true),
     
     mConsoleFadeOutTimer(700),
@@ -65,9 +65,9 @@ EngineSystemManager::EngineSystemManager(void) :
 
 void EngineSystemManager::SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value) {
     
-    for (int x=0; x < width; x ++) {
+    for (unsigned int x=0; x < width; x ++) {
         
-        for (int z=0; z < height; z ++) {
+        for (unsigned int z=0; z < height; z ++) {
             
             unsigned int index = z * width + x;
             
@@ -84,9 +84,9 @@ void EngineSystemManager::SetHeightFieldValues(float* heightField, unsigned int 
 
 void EngineSystemManager::SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color) {
     
-    for (int x=0; x < width; x ++) {
+    for (unsigned int x=0; x < width; x ++) {
         
-        for (int z=0; z < height; z ++) {
+        for (unsigned int z=0; z < height; z ++) {
             
             unsigned int index = z * width + x;
             
@@ -105,9 +105,9 @@ void EngineSystemManager::AddHeightFieldFromPerlinNoise(float* heightField, unsi
                                                         float noiseWidth, float noiseHeight, 
                                                         float noiseMul, int offsetX, int offsetZ) {
     
-    for (int x=0; x < width; x ++) {
+    for (unsigned int x=0; x < width; x ++) {
         
-        for (int z=0; z < height; z ++) {
+        for (unsigned int z=0; z < height; z ++) {
             
             float xCoord = ((float)x + offsetX) * noiseWidth;
             float zCoord = ((float)z + offsetZ) * noiseHeight;
@@ -116,7 +116,35 @@ void EngineSystemManager::AddHeightFieldFromPerlinNoise(float* heightField, unsi
             
             unsigned int index = z * width + x;
             
-            heightField[index] += noise;
+            heightField[index] += Math.Round( (noise * 10.0) ) * 0.1;
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    return;
+}
+
+void EngineSystemManager::AverageHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
+                                                            float noiseWidth, float noiseHeight, 
+                                                            float noiseMul, int offsetX, int offsetZ) {
+    
+    for (unsigned int x=0; x < width; x ++) {
+        
+        for (unsigned int z=0; z < height; z ++) {
+            
+            float xCoord = ((float)x + offsetX) * noiseWidth;
+            float zCoord = ((float)z + offsetZ) * noiseHeight;
+            
+            float noise = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
+            
+            unsigned int index = z * width + x;
+            
+            float currentHeight = (heightField[index] + noise) / 2;
+            
+            heightField[index] = Math.Round( (currentHeight * 10.0) ) * 0.1;
             
             continue;
         }
@@ -131,9 +159,9 @@ void EngineSystemManager::GenerateColorFieldFromHeightField(glm::vec3* colorFiel
                                                             unsigned int width, unsigned int height, 
                                                             Color low, Color high, float bias) {
     
-    for (int x=0; x < width; x ++) {
+    for (unsigned int x=0; x < width; x ++) {
         
-        for (int z=0; z < height; z ++) {
+        for (unsigned int z=0; z < height; z ++) {
             
             unsigned int index = z * width + x;
             
@@ -165,9 +193,9 @@ void EngineSystemManager::SetColorFieldFromPerlinNoise(glm::vec3* colorField, un
                                                        float noiseWidth, float noiseHeight, float noiseThreshold, 
                                                        Color first, Color second, int offsetX, int offsetZ) {
     
-    for (int x=0; x < width; x ++) {
+    for (unsigned int x=0; x < width; x ++) {
         
-        for (int z=0; z < height; z ++) {
+        for (unsigned int z=0; z < height; z ++) {
             
             float xCoord = ((float)x + offsetX) * noiseWidth;
             float zCoord = ((float)z + offsetZ) * noiseHeight;
@@ -196,9 +224,9 @@ void EngineSystemManager::AddColorFieldSnowCap(glm::vec3* colorField, float* hei
                                                unsigned int width, unsigned int height, 
                                                Color capColor, float beginHeight, float bias) {
     
-    for (int x=0; x < width; x ++) {
+    for (unsigned int x=0; x < width; x ++) {
         
-        for (int z=0; z < height; z ++) {
+        for (unsigned int z=0; z < height; z ++) {
             
             unsigned int index = z * width + x;
             
@@ -488,7 +516,7 @@ void EngineSystemManager::Initiate() {
     sceneOverlay->camera->clipNear = -100;
     
     // Console panel overlay
-    mConsolePanelObject = CreateOverlayPanelRenderer(200, -8, 1000, 10, "panel_blue");
+    mConsolePanelObject = CreateOverlayPanelRenderer(200, -8, 5000, 10, "panel_blue");
     MeshRenderer* panelRenderer = mConsolePanelObject->GetComponent<MeshRenderer>();
     sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer, RENDER_QUEUE_BACKGROUND );
     mConsolePanelObject->isActive = false;

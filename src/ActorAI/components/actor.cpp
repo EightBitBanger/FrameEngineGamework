@@ -35,8 +35,8 @@ Actor::Actor() :
 	mIsFacing(true),
 	
 	mChanceToChangeDirection(40),
-	mChanceToFocusOnActor   (70),
-	mChanceToWalk           (800),
+	mChanceToFocusOnActor   (1),
+	mChanceToWalk           (1200),
     mChanceToStopWalking    (0),
 	
 	mDistanceToFocusOnActor (10),
@@ -143,12 +143,12 @@ glm::vec3 Actor::GetPosition(void) {
 // Genetics
 
 
-void Actor::AddGene(Gene& newGene) {
+unsigned int Actor::AddGene(Gene& newGene) {
     mux.lock();
     mGenes.push_back( newGene );
     mDoUpdateGenetics = true;
     mux.unlock();
-    return;
+    return mGenes.size();
 }
 
 void Actor::RemoveGene(unsigned int index) {

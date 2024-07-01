@@ -5,6 +5,7 @@ Gene::Gene() :
     doExpress(true),
     doAnimationCycle(false),
     doInverseAnimation(false),
+    attachmentIndex(0),
     offset(0, 0, 0),
     position(0, 0, 0),
     rotation(0, 0, 0),
