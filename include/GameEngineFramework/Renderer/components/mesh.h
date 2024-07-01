@@ -84,11 +84,11 @@ public:
     /// Remove a sub mesh from this vertex buffer.
     bool RemoveSubMesh(unsigned int index);
     
-    /// Copy this vertex buffer into a sub mesh.
-    bool CopySubMesh(unsigned int index, SubMesh& mesh);
+    /// Get the vertex and index buffer as a sub mesh.
+    bool GetSubMesh(unsigned int index, SubMesh& mesh);
     
-    /// Copy this vertex buffer directly into a vertex buffer.
-    bool CopySubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer);
+    /// Get the vertex and index buffer directly as arrays.
+    bool GetSubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer);
     
     
     /// Update the color of a sub mesh.

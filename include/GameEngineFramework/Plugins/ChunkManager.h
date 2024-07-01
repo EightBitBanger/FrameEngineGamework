@@ -41,6 +41,12 @@ public:
     /// Height field collision buffer.
     MeshCollider* collider;
     
+    /// List of actor objects in this chunk.
+    std::vector<GameObject*> mActorList;
+    
+    /// List of static renderers in this chunk.
+    std::vector<GameObject*> mStaticList;
+    
 };
 
 
@@ -77,11 +83,15 @@ class ENGINE_API WorldGeneration {
 public:
     
     WorldGeneration() : 
-        actorsPerChunk(10)
+        actorsPerChunk(10),
+        staticPerChunk(40)
     {}
     
-    /// How many actors should be spawned per chunk
+    /// Number of actors to spawn.
     unsigned int actorsPerChunk;
+    
+    /// Number of static objects to spawn.
+    unsigned int staticPerChunk;
     
     /// Perlin layers to apply to the world
     std::vector<Perlin> perlinGraph;
@@ -119,7 +129,7 @@ public:
     unsigned int currentActorIndex;
     
     /// Chunk update cycle index.
-    int chunkIndex;
+    unsigned int chunkIndex;
     
     /// Render distance multiplier
     float renderDistance;
@@ -209,33 +219,6 @@ public:
     void Update(void) {
         
         //
-        // Check actors
-        //
-        /*
-        int numberOfActors = mActorList.size() - 1;
-        
-        if (numberOfActors > 0) {
-            if (currentActorIndex >= numberOfActors) 
-                currentActorIndex = 0;
-            
-            GameObject* actorObject = mActorList[ currentActorIndex ];
-            
-            if (glm::distance( actorObject->GetComponent<Transform>()->position, Engine.sceneMain->camera->transform.position ) > 50) {
-                
-                Engine.Destroy<GameObject>( actorObject );
-                
-                mActorList.erase( mActorList.begin() + currentActorIndex );
-                
-            }
-            currentActorIndex++;
-        }
-        
-        */
-        
-        
-        /*
-        
-        //
         // Purge chunks
         //
         
@@ -249,55 +232,99 @@ public:
             
             for (unsigned int i=0; i < mNumberOfChunksToPurge; i++) {
                 
-                if (mChunkList.size() > 0) {
+                if (mChunkList.size() == 0) 
+                    break;
+                
+                Chunk chunk = mChunkList[chunkIndex];
+                
+                chunkIndex++;
+                
+                if (chunkIndex >= mChunkList.size()) 
+                    chunkIndex = 0;
+                
+                Transform* transform = chunk.gameObject->GetComponent<Transform>();
+                
+                glm::vec3 chunkPosition  = transform->position;
+                glm::vec3 playerPosition = Engine.sceneMain->camera->transform.position;
+                
+                // Ignore height
+                chunkPosition.y = 0;
+                playerPosition.y = 0;
+                
+                if (glm::distance(chunkPosition, playerPosition) > destructionDistance) {
                     
-                    if (chunkIndex >= mChunkList.size()) 
-                        chunkIndex = 0;
+                    int index = FindChunk( glm::vec2(chunkPosition.x, chunkPosition.z) );
                     
-                    Chunk chunk = mChunkList[chunkIndex];
-                    Transform* transform = chunk.gameObject->GetComponent<Transform>();
+                    if (index == -1) 
+                        continue;
                     
-                    glm::vec3 chunkPosition  = transform->position;
-                    glm::vec3 playerPosition = Engine.sceneMain->camera->transform.position;
+                    // Destroy chunk actors
+                    unsigned int numberOfActors = chunk.mActorList.size();
                     
-                    // Ignore height
-                    chunkPosition.y = 0;
-                    playerPosition.y = 0;
-                    
-                    if (glm::distance(chunkPosition, playerPosition) > destructionDistance) {
+                    if (numberOfActors > 0) {
                         
-                        int index = FindChunk( glm::vec2(chunkPosition.x, chunkPosition.z) );
-                        
-                        if (index >= 0) {
+                        for (unsigned int i=0; i < numberOfActors; i++) {
                             
-                            // Remove the chunk from the chunk index
-                            RemoveChunk( index );
+                            GameObject* actorObject = chunk.mActorList[i];
                             
-                            // Destroy physics objects
-                            chunk.rigidBody->removeCollider( chunk.bodyCollider );
-                            
-                            Physics.world->destroyRigidBody( chunk.rigidBody );
-                            
-                            Physics.common.destroyHeightFieldShape( chunk.collider->heightFieldShape );
-                            
-                            // Destroy height field collider and associated buffer
-                            MeshCollider* collider = chunk.collider;
-                            Physics.DestroyHeightFieldMap( collider );
-                            
-                            // Marked for destruction
-                            Engine.Destroy<GameObject>( chunk.gameObject );
-                            
-                            // Increase chunk purge rate
-                            mNumberOfChunksToPurge++;
-                            
-                            if (mNumberOfChunksToPurge > mMaxChunksToPurge) 
-                                mNumberOfChunksToPurge = mMaxChunksToPurge;
+                            Engine.Destroy<GameObject>( actorObject );
                             
                         }
                         
                     }
                     
-                    chunkIndex++;
+                    // Destroy chunk static objects
+                    unsigned int numberOfStatics = chunk.mStaticList.size();
+                    
+                    if (numberOfStatics > 0) {
+                        
+                        for (unsigned int i=0; i < numberOfStatics; i++) {
+                            
+                            GameObject* staticObject = chunk.mStaticList[i];
+                            
+                            MeshRenderer* staticRenderer = staticObject->GetComponent<MeshRenderer>();
+                            
+                            if (staticRenderer->mesh != nullptr) {
+                                Engine.Destroy<Mesh>(staticRenderer->mesh);
+                                staticRenderer->mesh = nullptr;
+                            }
+                            
+                            if (staticRenderer->material != nullptr) {
+                                Engine.Destroy<Material>(staticRenderer->material);
+                                staticRenderer->material = nullptr;
+                            }
+                            
+                            Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_DEFAULT );
+                            
+                            Engine.Destroy<GameObject>( staticObject );
+                            
+                        }
+                        
+                    }
+                    
+                    // Remove the chunk from the chunk index
+                    RemoveChunk( index );
+                    
+                    // Destroy physics objects
+                    chunk.rigidBody->removeCollider( chunk.bodyCollider );
+                    
+                    Physics.world->destroyRigidBody( chunk.rigidBody );
+                    
+                    Physics.common.destroyHeightFieldShape( chunk.collider->heightFieldShape );
+                    
+                    // Destroy height field collider and associated buffer
+                    MeshCollider* collider = chunk.collider;
+                    Physics.DestroyHeightFieldMap( collider );
+                    
+                    // Marked for destruction
+                    Engine.Destroy<GameObject>( chunk.gameObject );
+                    
+                    // Increase chunk purge rate
+                    mNumberOfChunksToPurge++;
+                    
+                    if (mNumberOfChunksToPurge > mMaxChunksToPurge) 
+                        mNumberOfChunksToPurge = mMaxChunksToPurge;
+                    
                 }
                 
                 continue;
@@ -305,11 +332,13 @@ public:
             
         }
         
-        */
+        
+        
+        
         
         
         //
-        // Generation chunks
+        // Generate chunks
         //
         
         float playerChunkX = 0;
@@ -370,6 +399,8 @@ public:
             Engine.SetColorFieldValues(colorField, chunkSize, chunkSize, Colors.white);
             
             // Generate game object
+            
+            Chunk chunk;
             
             GameObject* baseObject = CreateBaseChunk(chunkX, chunkZ);
             
@@ -474,14 +505,7 @@ public:
                 
                 GameObject* actorObject = Engine.CreateAIActor( glm::vec3(actorX, 0, actorZ) );
                 
-                mActorList.push_back( actorObject );
-                
-                actorObject->renderDistance = generationDistance * 0.7;
-                
-                // Collision
-                BoxShape* boxShape = Physics.CreateColliderBox(0.3, 0.3, 0.3);
-                actorObject->AddColliderBox(boxShape, 0, 0.3, 0, LayerMask::Actor);
-                
+                chunk.mActorList.push_back( actorObject );
                 
                 // Actor
                 Actor* actor = actorObject->GetComponent<Actor>();
@@ -494,19 +518,87 @@ public:
                 //actor->SetChanceToStopWalking(0);
                 //actor->SetChanceToFocusOnActor(0);
                 
-                actor->SetActive(false);
+                //actor->SetActive(false);
+                
             }
             
             
+            // Chunk mesh for static object batching
+            Mesh* staticMesh = Engine.Create<Mesh>();
+            
+            SubMesh subMesh;
+            
+            Engine.meshes.cube->GetSubMesh(0, subMesh);
+            staticMesh->AddSubMesh(0, 0, 0, subMesh, false);
+            staticMesh->isShared = true;
+            
+            
+            // Chunk material
+            
+            Material* staticMaterial = Engine.Create<Material>();
+            
+            staticMaterial->shader = Engine.shaders.color;
+            
+            staticMaterial->ambient = Colors.black;
+            staticMaterial->diffuse = Colors.black;
+            staticMaterial->specular = Colors.black;
+            
+            staticMaterial->DisableShadowVolumePass();
+            
+            staticMaterial->isShared = true;
+            
+            
+            //
+            // Generate static objects
+            //
+            
+            for (unsigned int a=0; a < world.staticPerChunk; a++) {
+                
+                GameObject* staticObject = Engine.Create<GameObject>();
+                
+                staticObject->Activate();
+                
+                Transform* transform = staticObject->GetComponent<Transform>();
+                
+                transform->position.x = chunkX + (Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2));
+                transform->position.z = chunkZ + (Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2));
+                
+                transform->scale.x = Random.Range(0, 100) * 0.01;
+                transform->scale.y = Random.Range(0, 50);
+                transform->scale.z = Random.Range(0, 100) * 0.01;
+                
+                
+                // Ray cast here to find the ground
+                glm::vec3 from = transform->position;
+                glm::vec3 direction = glm::vec3(0, -1, 0);
+                from.y = 1000;
+                
+                Hit hit;
+                
+                float distance = 2000;
+                
+                if (Physics.Raycast(from, direction, distance, hit)) 
+                    transform->position.y = hit.point.y;
+                
+                // Create mesh and material
+                staticObject->AddComponent( Engine.CreateComponentMeshRenderer(staticMesh, staticMaterial) );
+                
+                MeshRenderer* staticRenderer = staticObject->GetComponent<MeshRenderer>();
+                
+                chunk.mStaticList.push_back(staticObject);
+                
+                Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer);
+                
+                
+                continue;
+            }
+            
+            staticMesh->UploadToGPU();
+            
             // Add chunk to chunk list
-            
-            Chunk chunk;
-            
             chunk.position     = chunkPosition;
-            
             chunk.gameObject   = baseObject;
             chunk.rigidBody    = chunkBody;
-            
             chunk.collider     = meshCollider;
             chunk.bodyCollider = BodyCollider;
             
@@ -525,9 +617,6 @@ private:
     
     /// List of chunks in the world.
     std::vector<Chunk> mChunkList;
-    
-    /// List of actor objects in the world.
-    std::vector<GameObject*> mActorList;
     
     // Number of chunks being updated per frame
     unsigned int mNumberOfChunksToGenerate;
