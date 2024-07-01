@@ -44,8 +44,8 @@ public:
     /// List of actor objects in this chunk.
     std::vector<GameObject*> mActorList;
     
-    /// List of static renderers in this chunk.
-    std::vector<GameObject*> mStaticList;
+    /// Batched static object container
+    GameObject* mStaticObjects;
     
 };
 
@@ -274,33 +274,25 @@ public:
                     }
                     
                     // Destroy chunk static objects
-                    unsigned int numberOfStatics = chunk.mStaticList.size();
                     
-                    if (numberOfStatics > 0) {
-                        
-                        for (unsigned int i=0; i < numberOfStatics; i++) {
-                            
-                            GameObject* staticObject = chunk.mStaticList[i];
-                            
-                            MeshRenderer* staticRenderer = staticObject->GetComponent<MeshRenderer>();
-                            
-                            if (staticRenderer->mesh != nullptr) {
-                                Engine.Destroy<Mesh>(staticRenderer->mesh);
-                                staticRenderer->mesh = nullptr;
-                            }
-                            
-                            if (staticRenderer->material != nullptr) {
-                                Engine.Destroy<Material>(staticRenderer->material);
-                                staticRenderer->material = nullptr;
-                            }
-                            
-                            Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_DEFAULT );
-                            
-                            Engine.Destroy<GameObject>( staticObject );
-                            
-                        }
-                        
+                    MeshRenderer* staticRenderer = chunk.mStaticObjects->GetComponent<MeshRenderer>();
+                    
+                    if (staticRenderer->mesh != nullptr) {
+                        Engine.Destroy<Mesh>(staticRenderer->mesh);
+                        staticRenderer->mesh = nullptr;
                     }
+                    
+                    if (staticRenderer->material != nullptr) {
+                        Engine.Destroy<Material>(staticRenderer->material);
+                        staticRenderer->material = nullptr;
+                    }
+                    
+                    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_DEFAULT );
+                    
+                    Engine.Destroy<GameObject>( chunk.mStaticObjects );
+                    
+                    
+                    
                     
                     // Remove the chunk from the chunk index
                     RemoveChunk( index );
@@ -523,13 +515,16 @@ public:
             }
             
             
+            
+            
+            
+            
             // Chunk mesh for static object batching
             Mesh* staticMesh = Engine.Create<Mesh>();
             
             SubMesh subMesh;
-            
             Engine.meshes.cube->GetSubMesh(0, subMesh);
-            staticMesh->AddSubMesh(0, 0, 0, subMesh, false);
+            
             staticMesh->isShared = true;
             
             
@@ -539,13 +534,34 @@ public:
             
             staticMaterial->shader = Engine.shaders.color;
             
-            staticMaterial->ambient = Colors.black;
-            staticMaterial->diffuse = Colors.black;
-            staticMaterial->specular = Colors.black;
+            staticMaterial->ambient = Colors.white;
+            staticMaterial->diffuse = Colors.white;
+            staticMaterial->specular = Colors.white;
             
             staticMaterial->DisableShadowVolumePass();
             
             staticMaterial->isShared = true;
+            
+            // Generate the static object container
+            GameObject* staticObject = Engine.Create<GameObject>();
+            
+            //staticObject->Deactivate();
+            
+            Transform* transform = staticObject->GetComponent<Transform>();
+            
+            transform->position.x = chunkX;
+            transform->position.z = chunkZ;
+            
+            // Assemble the object components
+            staticObject->AddComponent( Engine.CreateComponentMeshRenderer(staticMesh, staticMaterial) );
+            
+            MeshRenderer* staticRenderer = staticObject->GetComponent<MeshRenderer>();
+            
+            chunk.mStaticObjects = staticObject;
+            
+            Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer);
+            
+            
             
             
             //
@@ -553,6 +569,29 @@ public:
             //
             
             for (unsigned int a=0; a < world.staticPerChunk; a++) {
+                
+                float xx = Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2);
+                float zz = Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2);
+                
+                // Ray cast here to find the ground
+                glm::vec3 from(chunkX + xx, 1000, chunkZ + zz);
+                glm::vec3 direction(0, -1, 0);
+                
+                Hit hit;
+                
+                float distance = 2000;
+                float height = 0;
+                
+                if (Physics.Raycast(from, direction, distance, hit)) 
+                    height = hit.point.y;
+                
+                
+                
+                staticMesh->AddSubMesh(xx, height, zz, subMesh, false);
+                
+                
+                
+                /*
                 
                 GameObject* staticObject = Engine.Create<GameObject>();
                 
@@ -563,9 +602,9 @@ public:
                 transform->position.x = chunkX + (Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2));
                 transform->position.z = chunkZ + (Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2));
                 
-                transform->scale.x = Random.Range(0, 100) * 0.01;
+                transform->scale.x = (Random.Range(0, 100) * 0.001) + 0.3;
                 transform->scale.y = Random.Range(0, 50);
-                transform->scale.z = Random.Range(0, 100) * 0.01;
+                transform->scale.z = (Random.Range(0, 100) * 0.001) + 0.3;
                 
                 
                 // Ray cast here to find the ground
@@ -585,10 +624,11 @@ public:
                 
                 MeshRenderer* staticRenderer = staticObject->GetComponent<MeshRenderer>();
                 
-                chunk.mStaticList.push_back(staticObject);
+                //chunk.mStaticList.push_back(staticObject);
                 
                 Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer);
                 
+                */
                 
                 continue;
             }
