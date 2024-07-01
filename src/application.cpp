@@ -222,10 +222,10 @@ void Start() {
     // Chunk generation
     //
     
-    chunkManager.generationDistance  = 500;
-    chunkManager.destructionDistance = 800;
+    chunkManager.generationDistance  = 1000;
+    chunkManager.destructionDistance = 1500;
     
-    chunkManager.renderDistance = 4;
+    chunkManager.renderDistance = 32;
     
     chunkManager.doUpdateWithPlayerPosition = true;
     
