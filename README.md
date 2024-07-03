@@ -21,6 +21,7 @@
   - Neural network / state machine hybrid for actor personality
 
 - Resource management
+  - Resource files are loaded automatically at startup
   - Image: PNG BMP
   - Models: OBJ
 
