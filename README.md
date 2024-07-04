@@ -19,13 +19,12 @@
 - ActorAI
   - Psudo-genetics based actor generation
   - Neural network / state machine hybrid for actor personality
+  - Updated on a separate thread
 
 - Resource management
   - Resource files are loaded automatically at startup
   - Image: PNG BMP
   - Models: OBJ
-
-- Multithreading
 
 
 <br><br/>
