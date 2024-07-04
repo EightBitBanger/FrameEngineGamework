@@ -33,7 +33,8 @@
 
 #include <GameEngineFramework/Networking/NetworkSystem.h>
 
-#define  CONSOLE_NUMBER_OF_ELEMENTS  32
+#define  CONSOLE_NUMBER_OF_ELEMENTS   32
+#define  PROFILER_NUMBER_OF_ELEMENTS  24
 
 
 #ifndef BUILD_CORE
@@ -80,6 +81,9 @@ public:
     
     /// Overlay rendering scene. (For UI elements)
     Scene* sceneOverlay;
+    
+    /// Assigned game object acting as a camera controller object.
+    GameObject* cameraController;
     
     
     // Game objects
@@ -137,6 +141,9 @@ public:
     /// Disable and deactivate the rendering of the console text elements.
     void DisableConsole(void);
     
+    /// Return whether the console is currently active
+    bool CheckIsConsoleActive(void);
+    
     /// Enable console back panel.
     void EnableConsoleBackPanel(void);
     
@@ -171,9 +178,18 @@ public:
     void ConsoleShiftUp(std::string text);
     
     
-    //
+    // Profiler
+    
+    /// Allow the profiler to print the results to the display.
+    void EnableProfiler(void);
+    
+    /// Disable the profiler from printing to the display.
+    void DisableProfiler(void);
+    
+    /// Return whether the profiler is currently active
+    bool CheckIsProfilerActive(void);
+    
     // Lower level UI rendering
-    //
     
     /// Add a string of sprite quads to a mesh.
     void AddMeshText(GameObject* overlayObject, float xPos, float yPos, float width, float height, std::string text, Color textColor);
@@ -181,10 +197,7 @@ public:
     /// Add a quad to a mesh mapping to a sub sprite from a sprite sheet texture.
     void AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float width, float height, int index, Color meshColor);
     
-    
-    //
     // Height field chunk generation
-    //
     
     // Perlin generation
     
@@ -334,6 +347,17 @@ private:
     // Process the objects marked as garbage
     void ProcessDeferredDeletion(void);
     
+    
+    //
+    // Profiler
+    
+    bool mIsProfilerEnabled;
+    
+    GameObject* mProfilerTextObjects[PROFILER_NUMBER_OF_ELEMENTS];
+    
+    Text* mProfilerText[PROFILER_NUMBER_OF_ELEMENTS];
+    
+    
     //
     // Console
     
@@ -428,6 +452,10 @@ private:
     };
     
     struct DefaultMeshes {
+        Mesh* log = nullptr;
+        Mesh* grass = nullptr;
+        Mesh* leaves = nullptr;
+        
         Mesh* cube = nullptr;
         Mesh* chunk = nullptr;
         Mesh* plain = nullptr;
