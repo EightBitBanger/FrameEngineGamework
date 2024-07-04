@@ -66,7 +66,7 @@ void main() {
     if (texColor.a < v_ambient.r) 
         discard;
     
-    color = vec4(texColor.grb, v_ambient.g);
+    color = vec4(texColor.grb, v_ambient.g) * vec4(v_color, 1);
     
     return;
 }
