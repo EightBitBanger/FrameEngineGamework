@@ -213,7 +213,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     // Sprite sheet material
     Destroy<Material>( overlayRenderer->material );
     overlayRenderer->material = Resources.CreateMaterialFromTag( materialTag );
-    overlayRenderer->material->ambient  = Color(0.58f, 0, 0);
+    overlayRenderer->material->ambient = Color(0.58f, 1, 0);
     overlayRenderer->material->shader = shaders.UI;
     
     overlayRenderer->material->SetBlending(BLEND_ONE, BLEND_ONE_MINUS_SRC_ALPHA);

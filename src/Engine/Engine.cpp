@@ -34,6 +34,9 @@ ENGINE_API EngineSystemManager  Engine;
 EngineSystemManager::EngineSystemManager(void) : 
     sceneMain(nullptr),
     sceneOverlay(nullptr),
+    cameraController(nullptr),
+    
+    mIsProfilerEnabled(false),
     
     mIsConsoleEnabled(false),
     mShowConsoleBackPanel(true),
@@ -465,6 +468,10 @@ void EngineSystemManager::Initiate() {
     shaders.sky           = Resources.CreateShaderFromTag("sky");
     
     // Load default meshes
+    meshes.log             = Resources.CreateMeshFromTag("log");
+    meshes.grass           = Resources.CreateMeshFromTag("grass");
+    meshes.leaves          = Resources.CreateMeshFromTag("leaf");
+    
     meshes.cube            = Resources.CreateMeshFromTag("cube");
     meshes.chunk           = Resources.CreateMeshFromTag("chunk");
     meshes.plain           = Resources.CreateMeshFromTag("plain");
@@ -544,7 +551,7 @@ void EngineSystemManager::Initiate() {
     
     // Initiate console text elements
     
-    for (int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) {
+    for (unsigned int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) {
         
         mConsoleTextObjects[i] = CreateOverlayTextRenderer(0, 0, "", 9, Colors.MakeGrayScale(0.87), "font");
         
@@ -560,7 +567,26 @@ void EngineSystemManager::Initiate() {
         mConsoleText[i]->canvas.x = 0;
         mConsoleText[i]->canvas.y = -(2 * i + 4);
         
-        continue;
+    }
+    
+    // Initiate the profiler text elements
+    
+    for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) {
+        
+        mProfilerTextObjects[i] = CreateOverlayTextRenderer(0, 0, "", 9, Colors.MakeGrayScale(0.87), "font");
+        
+        MeshRenderer* meshRenderer = mProfilerTextObjects[i]->GetComponent<MeshRenderer>();
+        meshRenderer->material->EnableBlending();
+        meshRenderer->material->SetBlending(BLEND_SRC_ALPHA, BLEND_ONE_MINUS_SRC_ALPHA);
+        
+        sceneOverlay->AddMeshRendererToSceneRoot( meshRenderer );
+        
+        mProfilerText[i] = mProfilerTextObjects[i]->GetComponent<Text>();
+        mProfilerText[i]->canvas.anchorTop = true;
+        
+        mProfilerText[i]->canvas.x = 0;
+        mProfilerText[i]->canvas.y = (2 * i + 4);
+        
     }
     
     return;
