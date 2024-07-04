@@ -90,7 +90,7 @@ The `Start()` function will be called once during application initiation while `
 
 
 ## Examples
-Below are a few examples covering the use and interaction of objects and components in the framework
+Below are a few examples covering the use of objects and components in the framework
 
 [Game objects](https://github.com/RetroBytes32/FrameEngineGamework/wiki/Game-objects)
 <br>
