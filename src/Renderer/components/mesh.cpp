@@ -263,8 +263,8 @@ bool Mesh::GetSubMesh(unsigned int index, SubMesh& mesh) {
     for (std::vector<Index>::iterator it = mIndexBuffer.begin() + sourceMesh.indexBegin; it != mIndexBuffer.begin() + sourceMesh.indexBegin + sourceMesh.indexCount; ++it) 
         mesh.indexBuffer.push_back(*it);
     
-    mesh.vertexCount = sourceMesh.vertexCount;
-    mesh.indexCount  = sourceMesh.indexCount;
+    mesh.vertexCount += sourceMesh.vertexCount;
+    mesh.indexCount  += sourceMesh.indexCount;
     
     return true;
 }
@@ -322,6 +322,30 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
         vertex.g = newColor.g;
         vertex.b = newColor.b;
         destMesh.push_back(vertex);
+    }
+    
+    //glBindVertexArray(mVertexArray);
+    //glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
+    
+    return true;
+}
+
+bool Mesh::ChangeSubMeshPoints(unsigned int index, std::vector<glm::vec3> points) {
+    
+    std::vector<Vertex> destMesh;
+    SubMesh sourceMesh = mSubMesh[index];
+    
+    for (unsigned int i=0; i < sourceMesh.vertexCount; i++) {
+        
+        mVertexBuffer[i].x = points[i].x;
+        mVertexBuffer[i].y = points[i].y;
+        mVertexBuffer[i].z = points[i].z;
+        
+        destMesh.push_back(mVertexBuffer[i]);
+        
+        if (points.size() >= i) 
+            return true;
+        
     }
     
     //glBindVertexArray(mVertexArray);
