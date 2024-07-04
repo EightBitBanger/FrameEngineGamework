@@ -13,7 +13,7 @@ ChunkManager chunkManager;
 // User globals
 GameObject*  cameraController;
 
-Text* text[20];
+//Text* text[20];
 
 
 
@@ -77,7 +77,6 @@ void FuncSummon(std::vector<std::string> args) {
             
         }
         
-        /*
         
         Gene gene;
         gene.attachmentIndex = 1;
@@ -91,8 +90,6 @@ void FuncSummon(std::vector<std::string> args) {
         gene.scale.z = 0.4;
         
         newActor->AddGene(gene);
-        
-        */
         
         continue;
     }
@@ -116,6 +113,9 @@ void Start() {
     
     
     
+    
+    
+    
     //
     // Create a camera controller
     //
@@ -127,10 +127,10 @@ void Start() {
     Vector3 playerPosition = Vector3(0, 30, 0);
     
     // Create a new camera controller object
-    cameraController = Engine.CreateCameraController(playerPosition);
+    Engine.cameraController = Engine.CreateCameraController(playerPosition);
     
     // Assign the camera controller's camera for rendering scene main.
-    Engine.sceneMain->camera = cameraController->GetComponent<Camera>();
+    Engine.sceneMain->camera = Engine.cameraController->GetComponent<Camera>();
     
     // Use the mouse to look around.
     Engine.sceneMain->camera->EnableMouseLook();
@@ -139,7 +139,7 @@ void Start() {
     rp3d::BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);
     
     // Add the collider to the camera controller game object.
-    cameraController->AddColliderBox(boxShape, 0, 0, 0);
+    Engine.cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
     
     
@@ -193,7 +193,7 @@ void Start() {
     
     // Attach the sky object to the camera controller to prevent 
     // the player from moving outside of the sky.
-    skyObject->GetComponent<Transform>()->parent = cameraController->GetComponent<Transform>();
+    skyObject->GetComponent<Transform>()->parent = Engine.cameraController->GetComponent<Transform>();
     
     // Sky rendering colors
     MeshRenderer* skyRenderer = skyObject->GetComponent<MeshRenderer>();
@@ -203,6 +203,7 @@ void Start() {
     
     
     // Initiate text elements
+    /*
     for (int i=0; i < 20; i++) {
         GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", 9, Colors.white, "font");
         
@@ -214,7 +215,7 @@ void Start() {
         text[i]->canvas.x = 0;
         text[i]->canvas.y = 2 * i + 4;
     }
-    
+    */
     
     
     
@@ -227,7 +228,7 @@ void Start() {
     
     chunkManager.renderDistance = 32;
     
-    chunkManager.doUpdateWithPlayerPosition = true;
+    chunkManager.doUpdateWithPlayerPosition = false;
     
     chunkManager.chunkSize = 256;
     
@@ -271,8 +272,8 @@ void Start() {
     
     
     // Actor generation
-    chunkManager.world.staticPerChunk = 300;
-    chunkManager.world.actorsPerChunk = 10;
+    chunkManager.world.staticPerChunk = 0;
+    chunkManager.world.actorsPerChunk = 0;
     
     
     // Chunk material
@@ -306,11 +307,6 @@ void Start() {
 
 glm::vec3 force(0);
 
-unsigned int meshRendererCount = 0;
-unsigned int meshCount  = 0;
-bool init = false;
-
-GameObject* actorObject;
 
 void Run() {
     
@@ -353,45 +349,21 @@ void Run() {
     }
     
     
-    
-    
-    
     //
     // Profiling
     //
-    
-    text[1]->text  = "Renderer - " + Float.ToString( Profiler.profileRenderSystem );
-    text[1]->color = Colors.white;
-    if (Profiler.profileRenderSystem > 10) text[1]->color = Colors.yellow;
-    if (Profiler.profileRenderSystem > 20) text[1]->color = Colors.orange;
-    if (Profiler.profileRenderSystem > 30) text[1]->color = Colors.red;
-    
-    text[2]->text = "Physics  - " + Float.ToString( Profiler.profilePhysicsSystem );
-    text[2]->color = Colors.white;
-    if (Profiler.profilePhysicsSystem > 10) text[2]->color = Colors.yellow;
-    if (Profiler.profilePhysicsSystem > 20) text[2]->color = Colors.orange;
-    if (Profiler.profilePhysicsSystem > 30) text[2]->color = Colors.red;
-    
-    text[3]->text = "Engine   - " + Float.ToString( Profiler.profileGameEngineUpdate );
-    
-    text[4]->text = "Draw calls - " + Float.ToString( Renderer.GetNumberOfDrawCalls() );
-    
-    text[6]->text = "GameObject------- " + Int.ToString( Engine.GetNumberOfGameObjects() );
-    text[7]->text = "Component-------- " + Int.ToString( Engine.GetNumberOfComponents() );
-    text[8]->text = "MeshRenderer ---- " + Int.ToString( Renderer.GetNumberOfMeshRenderers() );
-    text[9]->text = "Mesh ------------ " + Int.ToString( Renderer.GetNumberOfMeshes() );
-    
-    //text[6]->text = "x - " + Int.ToString( cameraController->GetComponent<Transform>()->position.x );
-    //text[7]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );
-    //text[8]->text = "z - " + Int.ToString( cameraController->GetComponent<Transform>()->position.z );
-    
-    //text[11]->text = "Garbage game objects - " + Int.ToString( Engine.mGarbageGameObjects.size() );
-    //text[12]->text = "Garbage rigid bodies - " + Int.ToString( Engine.mGarbageRigidBodies.size() );
-    //text[13]->text = "Clean rigid bodies --- " + Int.ToString( Engine.mFreeRigidBodies.size() );
-    
-    
-    
-    
+    if (Input.CheckKeyPressed(VK_F3)) {
+        
+        if (Engine.CheckIsProfilerActive()) {
+            
+            Engine.DisableProfiler();
+            
+        } else {
+            
+            Engine.EnableProfiler();
+        }
+        
+    }
     
     
     //
@@ -459,7 +431,7 @@ void Run() {
     // Camera controller movement
     //
     
-    if (cameraController == nullptr) 
+    if (Engine.cameraController == nullptr) 
         return;
     
     float forceAccelerate = 0.004;
@@ -495,7 +467,7 @@ void Run() {
         glm::vec3 forceMul = force * glm::vec3(0.01);
         
         if (forceMul != glm::vec3(0)) 
-            cameraController->AddForce(forceMul.x, forceMul.y, forceMul.z);
+            Engine.cameraController->AddForce(forceMul.x, forceMul.y, forceMul.z);
         
         
         
@@ -515,7 +487,7 @@ void Run() {
         //
         
         /*
-        RigidBody* rigidBody = cameraController->GetComponent<RigidBody>();
+        RigidBody* rigidBody = Engine.cameraController->GetComponent<RigidBody>();
         rp3d::Transform bodyTransform = rigidBody->getTransform();
         
         rp3d::Vector3 position = bodyTransform.getPosition();
