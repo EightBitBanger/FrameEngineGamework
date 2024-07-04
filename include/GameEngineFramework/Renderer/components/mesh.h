@@ -97,6 +97,9 @@ public:
     /// Update the position of a sub mesh.
     bool ChangeSubMeshPosition(unsigned int index, float x, float y, float z);
     
+    /// Update the scale of a sub mesh.
+    bool ChangeSubMeshPoints(unsigned int index, std::vector<glm::vec3> points);
+    
     /// Clear all sub meshes in the mesh.
     void ClearSubMeshes(void);
     
