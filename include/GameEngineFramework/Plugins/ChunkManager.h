@@ -83,8 +83,8 @@ class ENGINE_API WorldGeneration {
 public:
     
     WorldGeneration() : 
-        actorsPerChunk(10),
-        staticPerChunk(40)
+        actorsPerChunk(0),
+        staticPerChunk(0)
     {}
     
     /// Number of actors to spawn.
@@ -522,8 +522,14 @@ public:
             // Chunk mesh for static object batching
             Mesh* staticMesh = Engine.Create<Mesh>();
             
-            SubMesh subMesh;
-            Engine.meshes.cube->GetSubMesh(0, subMesh);
+            SubMesh subMeshHorz;
+            SubMesh subMeshVert;
+            
+            Engine.meshes.grass->GetSubMesh(0, subMeshHorz);
+            //Engine.meshes.grass->GetSubMesh(1, subMeshVert);
+            
+            Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshHorz);
+            Engine.meshes.wallVertical->GetSubMesh(0, subMeshVert);
             
             staticMesh->isShared = true;
             
@@ -533,7 +539,7 @@ public:
             Material* staticMaterial = Engine.Create<Material>();
             
             staticMaterial->shader = Engine.shaders.color;
-            
+            staticMaterial->DisableCulling();
             staticMaterial->ambient = Colors.white;
             staticMaterial->diffuse = Colors.white;
             staticMaterial->specular = Colors.white;
@@ -586,8 +592,54 @@ public:
                     height = hit.point.y;
                 
                 
+                // Sub segment generation
+                bool counter=0;
                 
-                staticMesh->AddSubMesh(xx, height, zz, subMesh, false);
+                for (unsigned int s=0; s < Random.Range(10, 50); s++) {
+                    
+                    /*
+                    
+                    if (counter) {
+                        staticMesh->AddSubMesh(0, 0, 0, subMeshHorz, false);
+                        counter = !counter;
+                    } else {
+                        staticMesh->AddSubMesh(0, 0, 0, subMeshVert, false);
+                        counter = !counter;
+                    }
+                    
+                    */
+                    
+                    staticMesh->AddSubMesh(0, 0, 0, subMeshHorz, false);
+                    staticMesh->AddSubMesh(0, 0, 0, subMeshVert, false);
+                    
+                    
+                    //staticMesh->AddSubMesh(0, 0, 0, subMeshVert, false);
+                    //staticMesh->AddSubMesh(0, 0, 0, subMeshHorz, false);
+                    
+                    unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
+                    
+                    if (numberOfSubMeshes > 0) {
+                        
+                        unsigned int index = numberOfSubMeshes - 1;
+                        
+                        Color finalColor;
+                        Color lowGreen;
+                        Color highGreen;
+                        
+                        lowGreen  = Colors.dkgreen * 0.2f;
+                        highGreen = Colors.dkgreen * 0.7f;
+                        
+                        finalColor = Colors.Lerp(lowGreen, highGreen, (s * 0.1f));
+                        
+                        staticMesh->ChangeSubMeshColor(index, finalColor);
+                        staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                        
+                        staticMesh->ChangeSubMeshPosition(index, xx, height + s, zz);
+                        staticMesh->ChangeSubMeshPosition(index-1, xx, height + s, zz);
+                        
+                    }
+                    
+                }
                 
                 
                 
