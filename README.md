@@ -15,7 +15,7 @@
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
   - Rigid body simulation
   - Terrain height field mapping
-  - Much more
+  - <a href="https://github.com/DanielChappuis/reactphysics3d/blob/master/documentation/UserDocumentation.md">Much more...</a>⁭
 
 - ActorAI
   - Psudo-genetics based actor generation
