@@ -49,6 +49,13 @@ public:
     void SetActorUpdateDistance(float distance);
     
     
+    /// Set the distance where actor detail will not be drawn
+    void SetActorDetailDistance(float position);
+    
+    /// Get the distance where actor detail will not be drawn
+    float GetActorDetailDistance(void);
+    
+    
     /// Initiate the actor AI system. (called internally)
     void Initiate(void);
     
@@ -68,6 +75,9 @@ private:
     
     // Distance beyond which the actors will no longer update
     float mActorUpdateDistance;
+    
+    // Distance beyond which the actors limbs wont be drawn
+    float mActorDetailDistance;
     
     // Threading
     std::thread* mActorSystemThread;

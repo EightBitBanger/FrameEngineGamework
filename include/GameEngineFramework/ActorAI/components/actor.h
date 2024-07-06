@@ -234,6 +234,10 @@ private:
     unsigned int mObservationCoolDownCounter;
     
     
+    // Is this actor loaded into the scene
+    bool mIsActorActiveInScene;
+    
+    
     // List of actor names considered to be pray actors
     std::vector<std::string> mAttackActors;
     
