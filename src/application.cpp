@@ -6,15 +6,12 @@
 
 // User plug-ins
 
-#include <GameEngineFramework/Plugins/ChunkManager.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 ChunkManager chunkManager;
 
 
 // User globals
 GameObject*  cameraController;
-
-//Text* text[20];
-
 
 
 
@@ -34,13 +31,6 @@ Material* plainMaterial;
 
 
 
-
-Button* buttonObject;
-
-void buttonCallback() {
-    
-    
-}
 
 
 
@@ -162,7 +152,7 @@ void Start() {
     
     // Setup the parameters for a directional light
     directionalLight->type       = LIGHT_TYPE_DIRECTIONAL;
-    directionalLight->intensity  = 0.3;
+    directionalLight->intensity  = 0.7;
     directionalLight->color      = Colors.white;
     
     // Add the light to the main scene.
@@ -202,35 +192,23 @@ void Start() {
     skyMaterial->ambient = Colors.white;
     
     
-    // Initiate text elements
-    /*
-    for (int i=0; i < 20; i++) {
-        GameObject* textObject = Engine.CreateOverlayTextRenderer(0, 0, "", 9, Colors.white, "font");
-        
-        Engine.sceneOverlay->AddMeshRendererToSceneRoot( textObject->GetComponent<MeshRenderer>() );
-        
-        text[i] = textObject->GetComponent<Text>();
-        text[i]->canvas.anchorTop = true;
-        
-        text[i]->canvas.x = 0;
-        text[i]->canvas.y = 2 * i + 4;
-    }
-    */
-    
-    
     
     //
     // Chunk generation
     //
     
-    chunkManager.generationDistance  = 1000;
-    chunkManager.destructionDistance = 1500;
+    chunkManager.generationDistance  = 400;
+    chunkManager.destructionDistance = 1000;
     
-    chunkManager.renderDistance = 32;
+    chunkManager.renderDistance = 10000;
     
-    chunkManager.doUpdateWithPlayerPosition = false;
+    chunkManager.doUpdateWithPlayerPosition = true;
     
-    chunkManager.chunkSize = 256;
+    chunkManager.chunkSize = 128;
+    
+    
+    chunkManager.world.snowCapHeight = 70;
+    
     
     // World generation
     
@@ -260,7 +238,7 @@ void Start() {
     
     Perlin perlinMountainB;
     perlinMountainB.equation = 0;
-    perlinMountainB.heightMultuplier = 200;
+    perlinMountainB.heightMultuplier = 300;
     perlinMountainB.noiseWidth  = 0.0007;
     perlinMountainB.noiseHeight = 0.0007;
     
@@ -272,8 +250,8 @@ void Start() {
     
     
     // Actor generation
-    chunkManager.world.staticPerChunk = 0;
-    chunkManager.world.actorsPerChunk = 0;
+    chunkManager.world.staticPerChunk = 400;
+    chunkManager.world.actorsPerChunk = 10;
     
     
     // Chunk material
@@ -282,10 +260,13 @@ void Start() {
     chunkMaterial->shader = Engine.shaders.color;
     chunkMaterial->isShared = true;
     
+    chunkMaterial->ambient = Colors.Make(0.087, 0.087, 0.087);
+    chunkMaterial->diffuse = Colors.white;
+    chunkMaterial->specular = Colors.white;
+    
     chunkManager.SetMaterial( chunkMaterial );
     
     plainMaterial = chunkMaterial;
-    
     
     
     
