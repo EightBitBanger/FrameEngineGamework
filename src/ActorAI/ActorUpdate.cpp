@@ -97,7 +97,6 @@ void ActorSystem::Update(void) {
             continue;
         }
         
-        
         // Advance actor age
         actor->mAge++;
         

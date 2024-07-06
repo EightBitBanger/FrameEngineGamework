@@ -17,7 +17,8 @@ int actorCounter=0;
 
 ActorSystem::ActorSystem() : 
     mPlayerPosition(0),
-    mActorUpdateDistance(300)
+    mActorUpdateDistance(300),
+    mActorDetailDistance(80)
 {
 }
 
@@ -39,6 +40,15 @@ void ActorSystem::Shutdown(void) {
     mActorSystemThread->join();
     
     return;
+}
+
+void ActorSystem::SetActorDetailDistance(float position) {
+    mActorDetailDistance = position;
+    return;
+}
+
+float ActorSystem::GetActorDetailDistance(void) {
+    return mActorDetailDistance;
 }
 
 void ActorSystem::SetPlayerWorldPosition(glm::vec3 position) {

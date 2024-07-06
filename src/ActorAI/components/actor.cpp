@@ -47,7 +47,9 @@ Actor::Actor() :
     mHeightPreferenceMin    (0),
 	mHeightPreferenceMax    (0),
     
-    mObservationCoolDownCounter(0)
+    mObservationCoolDownCounter(0),
+    
+    mIsActorActiveInScene(false)
 {
     return;
 }

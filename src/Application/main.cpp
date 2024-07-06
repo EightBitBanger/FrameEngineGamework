@@ -206,9 +206,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
                 
-#ifdef PROFILE_ENGINE_CORE
-                Profiler.Begin();
-#endif
+                // --- Profiling ---
+                if (Engine.CheckIsProfilerActive()) 
+                    Profiler.Begin();
+                
                 
                 Run();
                 
@@ -227,9 +228,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 Platform.windowRight  = (windowRect.right  - windowRect.left);
                 Platform.windowBottom = (windowRect.bottom - windowRect.top);
                 
-#ifdef PROFILE_ENGINE_CORE
-                Profiler.profileGameEngineUpdate = Profiler.Query();
-#endif
+                
+                // --- Profiling ---
+                if (Engine.CheckIsProfilerActive()) 
+                    Profiler.profileGameEngineUpdate = Profiler.Query();
+                
                 
                 fixedAccumulator -= fixedUpdateTimeout;
                 
@@ -249,9 +252,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         
         if (Time.Update()) {
             
-#ifdef PROFILE_ENGINE_CORE
-            Profiler.Begin();
-#endif
+            // --- Profiling ---
+            if (Engine.CheckIsProfilerActive()) 
+                Profiler.Begin();
+            
             
             // Draw the current frame state
             Renderer.RenderFrame();
@@ -259,9 +263,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             // Turn over the frame buffer
             SwapBuffers( (HDC)Platform.deviceContext );
             
-#ifdef PROFILE_ENGINE_CORE
-            Profiler.profileRenderSystem = Profiler.Query();
-#endif
+            
+            // --- Profiling ---
+            if (Engine.CheckIsProfilerActive()) 
+                Profiler.profileRenderSystem = Profiler.Query();
             
         }
         
@@ -272,18 +277,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         
         if (PhysicsTime.Update()) {
             
-#ifdef PROFILE_ENGINE_CORE
-            Profiler.Begin();
-#endif
+            // --- Profiling ---
+            if (Engine.CheckIsProfilerActive()) 
+                Profiler.Begin();
             
             Physics.world->update( PHYSICS_UPDATES_PER_SECOND );
             
             // Generate the physics debug meshes
             Engine.UpdatePhysicsDebugRenderer();
             
-#ifdef PROFILE_ENGINE_CORE
-            Profiler.profilePhysicsSystem = Profiler.Query();
-#endif
+            
+            // --- Profiling ---
+            if (Engine.CheckIsProfilerActive()) 
+                Profiler.profilePhysicsSystem = Profiler.Query();
             
         }
         

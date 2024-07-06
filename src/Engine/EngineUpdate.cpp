@@ -78,8 +78,8 @@ void EngineSystemManager::Update(void) {
         
         mProfilerText[4]->text = "Draw calls - " + Float.ToString( Renderer.GetNumberOfDrawCalls() );
         
-        mProfilerText[6]->text = "GameObject------- " + Int.ToString( GetNumberOfGameObjects() );
-        mProfilerText[7]->text = "Component-------- " + Int.ToString( GetNumberOfComponents() );
+        mProfilerText[6]->text = "GameObject ------ " + Int.ToString( GetNumberOfGameObjects() );
+        mProfilerText[7]->text = "Component ------- " + Int.ToString( GetNumberOfComponents() );
         mProfilerText[8]->text = "MeshRenderer ---- " + Int.ToString( Renderer.GetNumberOfMeshRenderers() );
         mProfilerText[9]->text = "Mesh ------------ " + Int.ToString( Renderer.GetNumberOfMeshes() );
         
