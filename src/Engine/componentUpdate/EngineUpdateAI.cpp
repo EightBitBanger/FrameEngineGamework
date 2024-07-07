@@ -292,6 +292,8 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         newRenderer->mesh     = meshes.cube;
         newRenderer->material = newMaterial;
         
+        newRenderer->EnableFrustumCulling();
+        
         // Position
         newRenderer->transform.position = mStreamBuffer[index].actor->mPosition;
         

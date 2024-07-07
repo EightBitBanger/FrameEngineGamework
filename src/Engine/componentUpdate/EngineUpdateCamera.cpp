@@ -34,27 +34,33 @@ void EngineSystemManager::UpdateCamera(unsigned int index) {
         
         Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
         
-        double differenceMul = 0.001;
+        double lookAngleX = mouseDiffX * mStreamBuffer[index].camera->mouseSensitivityYaw * 0.00087f;
+        double lookAngleY = mouseDiffY * mStreamBuffer[index].camera->mouseSensitivityPitch * 0.00087f;
         
-        double lookAngleX = glm::radians( mouseDiffX * mStreamBuffer[index].camera->mouseSensitivityYaw * differenceMul);
-        double lookAngleY = glm::radians( mouseDiffY * mStreamBuffer[index].camera->mouseSensitivityPitch * differenceMul);
+        mStreamBuffer[index].camera->transform.RotateEuler(lookAngleX, -lookAngleY, 0);
         
-        mStreamBuffer[index].camera->lookAngle.x += lookAngleX;
-        mStreamBuffer[index].camera->lookAngle.y -= lookAngleY;
+        mStreamBuffer[index].camera->mouseLookAngle.x += lookAngleX / 128.0f;
+        mStreamBuffer[index].camera->mouseLookAngle.y -= lookAngleY / 128.0f;
         
         // Yaw limit
-        if (mStreamBuffer[index].camera->lookAngle.x >= 0.109655) {mStreamBuffer[index].camera->lookAngle.x -= 0.109655;}
-        if (mStreamBuffer[index].camera->lookAngle.x <= 0.109655) {mStreamBuffer[index].camera->lookAngle.x += 0.109655;}
+        if (mStreamBuffer[index].camera->mouseLookAngle.x >= 0.109655) {mStreamBuffer[index].camera->mouseLookAngle.x -= 0.109655;}
+        if (mStreamBuffer[index].camera->mouseLookAngle.x <= 0.109655) {mStreamBuffer[index].camera->mouseLookAngle.x += 0.109655;}
         
         // Pitch limit
-        if (mStreamBuffer[index].camera->lookAngle.y >  0.0274f) mStreamBuffer[index].camera->lookAngle.y =  0.0274f;
-        if (mStreamBuffer[index].camera->lookAngle.y < -0.0274f) mStreamBuffer[index].camera->lookAngle.y = -0.0274f;
+        if (mStreamBuffer[index].camera->mouseLookAngle.y >  0.0274f) mStreamBuffer[index].camera->mouseLookAngle.y =  0.0274f;
+        if (mStreamBuffer[index].camera->mouseLookAngle.y < -0.0274f) mStreamBuffer[index].camera->mouseLookAngle.y = -0.0274f;
         
     }
     
-    // Restore looking angle
-    mStreamBuffer[index].camera->transform.rotation.x = mStreamBuffer[index].camera->lookAngle.x;
-    mStreamBuffer[index].camera->transform.rotation.y = mStreamBuffer[index].camera->lookAngle.y;
+    // Calculate degree angle from camera looking angle
+    // Yaw
+    mStreamBuffer[index].camera->lookAngle.x = (glm::degrees( mStreamBuffer[index].camera->transform.rotation.x ) - 6.28277f) * 1.907f * 30.0f;
+    mStreamBuffer[index].camera->lookAngle.x = Math.Round( +mStreamBuffer[index].camera->lookAngle.x );
+    mStreamBuffer[index].camera->transform.rotation.x = mStreamBuffer[index].camera->mouseLookAngle.x;
+    // Pitch
+    mStreamBuffer[index].camera->transform.rotation.y = mStreamBuffer[index].camera->mouseLookAngle.y;
+    mStreamBuffer[index].camera->lookAngle.y = (((glm::degrees( mStreamBuffer[index].camera->transform.rotation.y ) - 6.28277f) * 1.91f * 30.0f) + 360.0f);
+    mStreamBuffer[index].camera->lookAngle.y = Math.Round( +mStreamBuffer[index].camera->lookAngle.y );
     
     // Check camera panel
     if (mStreamBuffer[index].panel != nullptr) {

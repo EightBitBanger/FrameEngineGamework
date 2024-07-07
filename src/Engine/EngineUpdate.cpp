@@ -87,9 +87,12 @@ void EngineSystemManager::Update(void) {
         mProfilerText[12]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );
         mProfilerText[13]->text = "z - " + Int.ToString( cameraController->GetComponent<Transform>()->position.z );
         
-        mProfilerText[15]->text = "Garbage game objects - " + Int.ToString( mGarbageGameObjects.size() );
-        mProfilerText[16]->text = "Garbage rigid bodies - " + Int.ToString( mGarbageRigidBodies.size() );
-        mProfilerText[17]->text = "Clean rigid bodies --- " + Int.ToString( mFreeRigidBodies.size() );
+        mProfilerText[15]->text = "Garbage game objects --- " + Int.ToString( mGarbageGameObjects.size() );
+        mProfilerText[16]->text = "Garbage rigid bodies --- " + Int.ToString( mGarbageRigidBodies.size() );
+        mProfilerText[17]->text = "Clean rigid bodies ----- " + Int.ToString( mFreeRigidBodies.size() );
+        
+        mProfilerText[19]->text = "Camera Yaw ---- " + Float.ToString( sceneMain->camera->lookAngle.x );
+        mProfilerText[20]->text = "Camera Pitch -- " + Float.ToString( sceneMain->camera->lookAngle.y );
         
     }
     
