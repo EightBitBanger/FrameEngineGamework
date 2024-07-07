@@ -74,7 +74,6 @@ void RenderSystem::RenderFrame(void) {
             if (renderQueueGroup->size() == 0) 
                 continue;
             
-            
             //
             // Sorting
             
@@ -88,7 +87,14 @@ void RenderSystem::RenderFrame(void) {
                 
                 MeshRenderer* currentEntity = *(renderQueueGroup->data() + i);
                 
-                GeometryPass( currentEntity, eye, scenePtr->camera->forward, viewProjection );
+                bool isCulled = false;
+                
+                if (currentEntity->mDoCulling) 
+                    isCulled = CullingPass(currentEntity, scenePtr->camera);
+                
+                // Render geometry if not culled
+                if (!isCulled) 
+                    GeometryPass( currentEntity, eye, scenePtr->camera->forward, viewProjection );
                 
                 continue;
             }

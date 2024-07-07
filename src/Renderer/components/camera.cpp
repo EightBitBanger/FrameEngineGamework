@@ -13,12 +13,16 @@ Camera::Camera() :
     useMouseLook(false),
     isFixedAspect(false),
     isOrthographic(false),
+    mouseLookAngle(glm::vec2(0, 0)),
     lookAngle(glm::vec2(0, 0)),
     
     fov(60),
     aspect(1.33),
     clipNear(0.1),
     clipFar(10000000),
+    
+    frustumOverlap(30.0f),
+    frustumOffset(100.0f),
     
     mouseLimitPitchMax(180),
     mouseLimitPitchMin(180),
@@ -32,14 +36,10 @@ void Camera::EnableMouseLook(void)  {useMouseLook = true;}
 void Camera::DisableMouseLook(void) {useMouseLook = false;}
 
 float Camera::GetPitch(void) {
-    return glm::degrees( glm::asin( transform.rotation.y ) );
+    return lookAngle.y;
 }
 
 float Camera::GetYaw(void) {
-    return glm::degrees( glm::acos( transform.rotation.x / 
-                               cos( 
-                      glm::radians( 
-                      glm::degrees( 
-                         glm::asin( transform.rotation.y ))))));
+    return lookAngle.x;
 }
 

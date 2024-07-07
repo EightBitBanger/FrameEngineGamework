@@ -2,6 +2,7 @@
 #include <GameEngineFramework/Logging/Logging.h>
 
 #include <GameEngineFramework/Types/types.h>
+extern MathCore  Math;
 
 
 bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::mat4& viewProjection) {
@@ -23,12 +24,11 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
     currentCamera->forward.x = cos( (currentCamera->transform.rotation.x * 180) / glm::pi<float>() );
     currentCamera->forward.y = tan( (currentCamera->transform.rotation.y * 180) / glm::pi<float>() );
     currentCamera->forward.z = sin( (currentCamera->transform.rotation.x * 180) / glm::pi<float>() );
-    currentCamera->forward = glm::normalize(currentCamera->forward);
     
     glm::vec3 lookingAngle;
-    lookingAngle.x = currentCamera->transform.position.x + currentCamera->forward.x;
-    lookingAngle.y = currentCamera->transform.position.y + currentCamera->forward.y;
-    lookingAngle.z = currentCamera->transform.position.z + currentCamera->forward.z;
+    lookingAngle.x = eye.x + currentCamera->forward.x;
+    lookingAngle.y = eye.y + currentCamera->forward.y;
+    lookingAngle.z = eye.z + currentCamera->forward.z;
     
     // View angle
     glm::mat4 view = glm::lookAt(eye, lookingAngle, currentCamera->up);
