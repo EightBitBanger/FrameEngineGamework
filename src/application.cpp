@@ -192,19 +192,18 @@ void Start() {
     skyMaterial->ambient = Colors.white;
     
     
-    
     //
     // Chunk generation
     //
     
-    chunkManager.generationDistance  = 400;
-    chunkManager.destructionDistance = 1000;
+    chunkManager.generationDistance  = 700;
+    chunkManager.destructionDistance = 1500;
     
-    chunkManager.renderDistance = 10000;
+    chunkManager.renderDistance = 15;
     
     chunkManager.doUpdateWithPlayerPosition = true;
     
-    chunkManager.chunkSize = 128;
+    chunkManager.chunkSize = 100;
     
     
     chunkManager.world.snowCapHeight = 70;
@@ -226,19 +225,19 @@ void Start() {
     
     Perlin perlinLayerB;
     perlinLayerB.equation = 0;
-    perlinLayerB.heightMultuplier = 10;
+    perlinLayerB.heightMultuplier = 20;
     perlinLayerB.noiseWidth  = 0.02;
     perlinLayerB.noiseHeight = 0.02;
     
     Perlin perlinMountainA;
     perlinMountainA.equation = 0;
-    perlinMountainA.heightMultuplier = 40;
+    perlinMountainA.heightMultuplier = 80;
     perlinMountainA.noiseWidth  = 0.009;
     perlinMountainA.noiseHeight = 0.009;
     
     Perlin perlinMountainB;
     perlinMountainB.equation = 0;
-    perlinMountainB.heightMultuplier = 300;
+    perlinMountainB.heightMultuplier = 200;
     perlinMountainB.noiseWidth  = 0.0007;
     perlinMountainB.noiseHeight = 0.0007;
     
@@ -257,10 +256,12 @@ void Start() {
     // Chunk material
     Material* chunkMaterial = Engine.Create<Material>();
     
-    chunkMaterial->shader = Engine.shaders.color;
+    chunkMaterial->DisableCulling();
     chunkMaterial->isShared = true;
     
-    chunkMaterial->ambient = Colors.Make(0.087, 0.087, 0.087);
+    chunkMaterial->shader = Engine.shaders.color;
+    
+    chunkMaterial->ambient = Colors.Make(0.27, 0.27, 0.27);
     chunkMaterial->diffuse = Colors.white;
     chunkMaterial->specular = Colors.white;
     
