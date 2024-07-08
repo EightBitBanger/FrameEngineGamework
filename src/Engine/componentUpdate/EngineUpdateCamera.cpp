@@ -34,8 +34,8 @@ void EngineSystemManager::UpdateCamera(unsigned int index) {
         
         Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
         
-        double lookAngleX = mouseDiffX * mStreamBuffer[index].camera->mouseSensitivityYaw * 0.00087f;
-        double lookAngleY = mouseDiffY * mStreamBuffer[index].camera->mouseSensitivityPitch * 0.00087f;
+        double lookAngleX = mouseDiffX * mStreamBuffer[index].camera->mouseSensitivityYaw * 0.002f;
+        double lookAngleY = mouseDiffY * mStreamBuffer[index].camera->mouseSensitivityPitch * 0.002f;
         
         mStreamBuffer[index].camera->transform.RotateEuler(lookAngleX, -lookAngleY, 0);
         

@@ -10,7 +10,7 @@ void EngineSystemManager::ProcessDeferredDeletion(void) {
     int numberOfGameObjects = mGarbageGameObjects.size();
     if (numberOfGameObjects > 0) {
         
-        unsigned int objectsPerCycle = glm::min(1, (numberOfGameObjects / 2));
+        unsigned int objectsPerCycle = glm::max(1, (numberOfGameObjects / 16));
         
         for (unsigned int i=0; i < objectsPerCycle; i++) {
             
@@ -74,10 +74,15 @@ void EngineSystemManager::ProcessDeferredDeletion(void) {
         rigidBody->updateLocalCenterOfMassFromColliders();
         
         // Add the clean rigid body to a free list
-        mFreeRigidBodies.push_back( rigidBody );
+        if (mFreeRigidBodies.size() < 100) {
+            
+            mFreeRigidBodies.push_back( rigidBody );
+            
+            return;
+        }
         
-        //if (rigidBody != nullptr) 
-        //    Physics.DestroyRigidBody( rigidBody );
+        // Purge extra rigid bodies
+        Physics.DestroyRigidBody( rigidBody );
         
     }
     

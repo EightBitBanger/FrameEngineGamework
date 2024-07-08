@@ -270,33 +270,52 @@ Mesh* EngineSystemManager::CreateMeshFromHeightField(float* heightField, glm::ve
 void EngineSystemManager::AddHeightFieldToMesh(Mesh* mesh, 
                                                float* heightField, glm::vec3* colorField, 
                                                unsigned int width, unsigned int height, 
-                                               float offsetX, float offsetZ) {
+                                               float offsetX, float offsetZ, 
+                                               unsigned int subTessX, unsigned int subTessZ) {
     
-    for (unsigned int x=0; x < width-1; x ++) {
+    unsigned int fieldWidth = (width / subTessX) - 1;
+    unsigned int fieldHeight = (height / subTessZ) - 1;
+    
+    unsigned int ww = width;
+    unsigned int hh = height;
+    
+    float sx = 1.0f;
+    float sz = 1.0f;
+    
+    if (subTessX > 1) 
+        sx = subTessX * 4.0f;
+    
+    if (subTessX > 1) 
+        sz = subTessZ * 4.0f;
+    
+    for (unsigned int x=0; x < fieldWidth; x ++) {
         
-        for (unsigned int z=0; z < height-1; z ++) {
+        for (unsigned int z=0; z < fieldHeight; z ++) {
+            
+            unsigned int xa = x * subTessX;
+            unsigned int za = z * subTessZ;
             
             // Get height values
-            float yyA = heightField[ z    * width +  x   ];
-            float yyB = heightField[ z    * width + (x+1)];
-            float yyC = heightField[(z+1) * width + (x+1)];
-            float yyD = heightField[(z+1) * width +  x   ];
+            float yyA = heightField[ za    * ww +  xa   ];
+            float yyB = heightField[ za    * ww + (xa+1)];
+            float yyC = heightField[(za+1) * ww + (xa+1)];
+            float yyD = heightField[(za+1) * ww +  xa   ];
             
-            glm::vec3 cA = colorField[ z    * width +  x   ];
-            glm::vec3 cB = colorField[ z    * width + (x+1)];
-            glm::vec3 cC = colorField[(z+1) * width + (x+1)];
-            glm::vec3 cD = colorField[(z+1) * width +  x   ];
+            glm::vec3 cA = colorField[ za    * ww +  xa   ];
+            glm::vec3 cB = colorField[ za    * ww + (xa+1)];
+            glm::vec3 cC = colorField[(za+1) * ww + (xa+1)];
+            glm::vec3 cD = colorField[(za+1) * ww +  xa   ];
             
             // Calculate chunk position and offset
-            float xx = ( ( ( (float)x + offsetX) - (float)width  / 2) / 2) + 0.25;
-            float zz = ( ( ( (float)z + offsetZ) - (float)height / 2) / 2) + 0.25;
+            float xx = ( ( ( (float)x + offsetX) - (float)ww / 2) / 2) + 0.25;
+            float zz = ( ( ( (float)z + offsetZ) - (float)hh / 2) / 2) + 0.25;
             
             // Generate quad
             Vertex vertex[4];
-            vertex[0] = Vertex( xx,   yyA, zz,    cA.x, cA.y, cA.z,   0, 1, 0,  0, 0 );
-            vertex[1] = Vertex( xx+1, yyB, zz,    cB.x, cB.y, cB.z,   0, 1, 0,  1, 0 );
-            vertex[2] = Vertex( xx+1, yyC, zz+1,  cC.x, cC.y, cC.z,   0, 1, 0,  1, 1 );
-            vertex[3] = Vertex( xx,   yyD, zz+1,  cD.x, cD.y, cD.z,   0, 1, 0,  0, 1 );
+            vertex[0] = Vertex( xx,    yyA, zz,     cA.x, cA.y, cA.z,   0, 1, 0,  0, 0 );
+            vertex[1] = Vertex( xx+sx, yyB, zz,     cB.x, cB.y, cB.z,   0, 1, 0,  1, 0 );
+            vertex[2] = Vertex( xx+sx, yyC, zz+sz,  cC.x, cC.y, cC.z,   0, 1, 0,  1, 1 );
+            vertex[3] = Vertex( xx,    yyD, zz+sz,  cD.x, cD.y, cD.z,   0, 1, 0,  0, 1 );
             
             Vertex vertA = vertex[0];
             Vertex vertB = vertex[1];
@@ -468,16 +487,21 @@ void EngineSystemManager::Initiate() {
     shaders.sky           = Resources.CreateShaderFromTag("sky");
     
     // Load default meshes
+    meshes.grassHorz       = Resources.CreateMeshFromTag("grassHorz");
+    meshes.grassVert       = Resources.CreateMeshFromTag("grassVert");
+    
+    meshes.stemHorz        = Resources.CreateMeshFromTag("stemHorz");
+    meshes.stemVert        = Resources.CreateMeshFromTag("stemVert");
+    
+    meshes.wallHorizontal  = Resources.CreateMeshFromTag("wallh");
+    meshes.wallVertical    = Resources.CreateMeshFromTag("wallv");
+    
     meshes.log             = Resources.CreateMeshFromTag("log");
-    meshes.grass           = Resources.CreateMeshFromTag("grass");
-    meshes.leaves          = Resources.CreateMeshFromTag("leaf");
     
     meshes.cube            = Resources.CreateMeshFromTag("cube");
     meshes.chunk           = Resources.CreateMeshFromTag("chunk");
     meshes.plain           = Resources.CreateMeshFromTag("plain");
     meshes.sphere          = Resources.CreateMeshFromTag("sphere");
-    meshes.wallHorizontal  = Resources.CreateMeshFromTag("wallh");
-    meshes.wallVertical    = Resources.CreateMeshFromTag("wallv");
     
     // Prevent the meshes from being garbage collected
     meshes.cube->isShared            = true;
@@ -559,7 +583,7 @@ void EngineSystemManager::Initiate() {
         meshRenderer->material->EnableBlending();
         meshRenderer->material->SetBlending(BLEND_SRC_ALPHA, BLEND_ONE_MINUS_SRC_ALPHA);
         
-        sceneOverlay->AddMeshRendererToSceneRoot( meshRenderer );
+        sceneOverlay->AddMeshRendererToSceneRoot( meshRenderer, RENDER_QUEUE_OVERLAY );
         
         mConsoleText[i] = mConsoleTextObjects[i]->GetComponent<Text>();
         mConsoleText[i]->canvas.anchorTop = false;
@@ -579,7 +603,7 @@ void EngineSystemManager::Initiate() {
         meshRenderer->material->EnableBlending();
         meshRenderer->material->SetBlending(BLEND_SRC_ALPHA, BLEND_ONE_MINUS_SRC_ALPHA);
         
-        sceneOverlay->AddMeshRendererToSceneRoot( meshRenderer );
+        sceneOverlay->AddMeshRendererToSceneRoot( meshRenderer, RENDER_QUEUE_OVERLAY );
         
         mProfilerText[i] = mProfilerTextObjects[i]->GetComponent<Text>();
         mProfilerText[i]->canvas.anchorTop = true;

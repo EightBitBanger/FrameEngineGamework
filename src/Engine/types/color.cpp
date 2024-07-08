@@ -1,5 +1,8 @@
 #include <GameEngineFramework/Engine/types/color.h>
 #include <GameEngineFramework/Math/Math.h>
+#include <GameEngineFramework/Math/Random.h>
+
+extern NumberGeneration Random;
 
 Color Color::operator+ (const Color& color) {
     Color newColor;
@@ -227,9 +230,9 @@ Color& ColorPreset::Make(float r, float g, float b) {
 }
 
 Color& ColorPreset::MakeRandom(void) {
-    mRandom.r = ((float)(rand() % (int)100) + 1) * 0.01;
-    mRandom.g = ((float)(rand() % (int)100) + 1) * 0.01;
-    mRandom.b = ((float)(rand() % (int)100) + 1) * 0.01;
+    mRandom.r = Random.Range(0, 100) * 0.01f;
+    mRandom.g = Random.Range(0, 100) * 0.01f;
+    mRandom.b = Random.Range(0, 100) * 0.01f;
     return mRandom;
 }
 
@@ -241,7 +244,7 @@ Color& ColorPreset::MakeGrayScale(float grayScale) {
 }
 
 Color& ColorPreset::MakeRandomGrayScale(void) {
-    float randomScale = ((float)(rand() % (int)100) + 1) * 0.01;
+    float randomScale = Random.Range(0, 100) * 0.01f;
     mRandom.r = randomScale;
     mRandom.g = randomScale;
     mRandom.b = randomScale;

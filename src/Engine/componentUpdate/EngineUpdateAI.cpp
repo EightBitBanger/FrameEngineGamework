@@ -26,7 +26,11 @@ ENGINE_API extern PlatformLayer     Platform;
 
 void EngineSystemManager::UpdateActor(unsigned int index) {
     
-    if (mStreamBuffer[index].actor->mDistance > AI.GetActorDetailDistance()) {
+    //
+    // Optimize out actor meshes at distance
+    
+    // Remove from scene
+    if (mStreamBuffer[index].actor->mDistance > AI.GetActorDetailDistance() - 10.0f) {
         
         if (mStreamBuffer[index].actor->mIsActorActiveInScene) {
             
@@ -39,12 +43,16 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
                 
                 MeshRenderer* meshRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
                 
-                sceneMain->RemoveMeshRendererFromSceneRoot(meshRenderer, RENDER_QUEUE_DEFAULT);
+                sceneMain->RemoveMeshRendererFromSceneRoot( meshRenderer, RENDER_QUEUE_DEFAULT );
                 
             }
         }
         
-    } else {
+    }
+    
+    
+    // Add to scene
+    if (mStreamBuffer[index].actor->mDistance < AI.GetActorDetailDistance() + 10.0f) {
         
         if (!mStreamBuffer[index].actor->mIsActorActiveInScene) {
             
@@ -57,7 +65,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
                 
                 MeshRenderer* meshRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
                 
-                sceneMain->AddMeshRendererToSceneRoot( meshRenderer );
+                sceneMain->AddMeshRendererToSceneRoot( meshRenderer, RENDER_QUEUE_DEFAULT );
                 
             }
             
@@ -65,14 +73,14 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         
     }
     
-    
     // Check walking state
     if (mStreamBuffer[index].actor->mIsWalking) {
         
         // Apply forward velocity
         glm::vec3 forward;
         
-        forward.x = cos( glm::radians( -(mStreamBuffer[index].actor->mRotation.y - 90) ) );
+        forward.x = cos( glm::radians( -(mStreamBuffer[index].actor->mRotation.y - 90.0f) ) );
+        // TODO: Actors should flying???
         //forward.y = tan( glm::radians( -(mStreamBuffer[index].actor->mRotation.x - 90) ) );
         forward.z = sin( glm::radians( -(mStreamBuffer[index].actor->mRotation.y - 90) ) );
         
@@ -256,7 +264,7 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         if (geneRenderer->material != nullptr) 
             Renderer.DestroyMaterial(geneRenderer->material);
         
-        sceneMain->RemoveMeshRendererFromSceneRoot( geneRenderer, RENDER_QUEUE_DEFAULT);
+        sceneMain->RemoveMeshRendererFromSceneRoot( geneRenderer, RENDER_QUEUE_DEFAULT );
         
         Renderer.DestroyMeshRenderer( geneRenderer );
         
@@ -284,7 +292,7 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         newMaterial->diffuse.g = mStreamBuffer[index].actor->mGenes[a].color.y;
         newMaterial->diffuse.b = mStreamBuffer[index].actor->mGenes[a].color.z;
         
-        newMaterial->ambient = Colors.white;
+        newMaterial->ambient = Colors.MakeGrayScale(0.01f);
         
         MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
         newRenderer->isActive = false;
@@ -344,7 +352,7 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         mStreamBuffer[index].actor->mAnimationStates .push_back( orientation );
         
         if (a == 0) 
-            sceneMain->AddMeshRendererToSceneRoot( newRenderer );
+            sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_DEFAULT );
         
         continue;
     }
