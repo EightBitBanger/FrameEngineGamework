@@ -196,20 +196,24 @@ void Start() {
     // Chunk generation
     //
     
-    chunkManager.generationDistance  = 700;
-    chunkManager.destructionDistance = 1500;
+    chunkManager.chunkSize = 50;
     
-    chunkManager.renderDistance = 15;
+    // World generation
+    chunkManager.renderDistance = 20;
+    
+    chunkManager.generationDistance  = chunkManager.renderDistance * chunkManager.chunkSize;
+    chunkManager.destructionDistance = chunkManager.generationDistance * 2.2f;
     
     chunkManager.doUpdateWithPlayerPosition = true;
     
-    chunkManager.chunkSize = 100;
+    chunkManager.levelOfDetailDistance = chunkManager.generationDistance * 0.4f;
+    
+    // Start culling at the chunk size boundary
+    Engine.sceneMain->camera->frustumOffset = chunkManager.chunkSize + 10;
     
     
-    chunkManager.world.snowCapHeight = 70;
     
-    
-    // World generation
+    // Perlin layers
     
     Perlin perlinBase;
     perlinBase.equation = 0;
@@ -248,9 +252,13 @@ void Start() {
     chunkManager.world.AddPerlinLayer(perlinMountainB);
     
     
+    
     // Actor generation
-    chunkManager.world.staticPerChunk = 400;
-    chunkManager.world.actorsPerChunk = 10;
+    chunkManager.world.staticDensity = 800;
+    
+    chunkManager.world.treeDensity = 20;
+    
+    chunkManager.world.actorDensity = 10;
     
     
     // Chunk material
@@ -261,7 +269,7 @@ void Start() {
     
     chunkMaterial->shader = Engine.shaders.color;
     
-    chunkMaterial->ambient = Colors.Make(0.27, 0.27, 0.27);
+    chunkMaterial->ambient = Colors.black;
     chunkMaterial->diffuse = Colors.white;
     chunkMaterial->specular = Colors.white;
     
@@ -288,7 +296,7 @@ void Start() {
 //
 
 glm::vec3 force(0);
-
+float forceDblTime=0;
 
 void Run() {
     
@@ -352,14 +360,15 @@ void Run() {
     // Lighting day night cycle experimentation 
     //
     
-    float lightingMax       = 0.87;
-    float lightingMin       = 0.087;
-    
-    float skyLightingMax    = 0.87;
-    float skyLightingMin    = 0.0034;
+    float skyLightingMax    = 0.5;
+    float skyLightingMin    = 0.01;
     
     float worldLightingMax  = 0.87;
-    float worldLightingMin  = 0.34;
+    float worldLightingMin  = 0.7;
+    
+    float lightingMax       = 4.0;
+    float lightingMin       = 0.5;
+    
     
     
     // Light direction
@@ -386,10 +395,10 @@ void Run() {
     
     // World brightness
     plainMaterial->diffuse = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
+    plainMaterial->ambient = Math.Lerp(0.0f, worldLightingMax, ambientLight);
     
-    
-    //Light* sunLight = directionalLight->GetComponent<Light>();
-    //sunLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);;
+    // Light brightness
+    directionalLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);;
     
     
     
@@ -416,9 +425,11 @@ void Run() {
     if (Engine.cameraController == nullptr) 
         return;
     
-    float forceAccelerate = 0.004;
-    float forceDecelerate = 0.015;
-    float forceMax        = 20;
+    float forceAccelerate = 0.002f;
+    float forceDecelerate = 0.015f;
+    
+    float forceMax = 0.08f;
+    
     
     if (mainCamera != nullptr) {
         
@@ -427,66 +438,42 @@ void Run() {
         if (!Platform.isPaused) {
             
             // WASD Directional
-            if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward; moving = true;}
-            if (Input.CheckKeyCurrent(VK_S)) {force -= mainCamera->forward; moving = true;}
-            if (Input.CheckKeyCurrent(VK_A)) {force += mainCamera->right; moving = true;}
-            if (Input.CheckKeyCurrent(VK_D)) {force -= mainCamera->right; moving = true;}
+            if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward;}
+            if (Input.CheckKeyCurrent(VK_S)) {force -= mainCamera->forward;}
+            if (Input.CheckKeyCurrent(VK_A)) {force += mainCamera->right;}
+            if (Input.CheckKeyCurrent(VK_D)) {force -= mainCamera->right;}
             
             // Space/Shift Elevation
-            if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up; moving = true;}
-            if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up; moving = true;}
+            if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
+            if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         }
         
-        // Accumulate force
-        if (glm::length(force) < forceMax) 
-            force += force * forceAccelerate;
+        // Double speed
+        if (Input.CheckKeyCurrent(VK_CONTROL)) forceDblTime += 0.24f;
+        
+        if (forceDblTime > 1.0f) {forceDblTime -= (forceDecelerate * 8.0f);} else {forceDblTime = 1.0f;}
+        
+        if (forceDblTime > 3.5f) 
+            forceDblTime = 3.5f;
+        
+        // Accelerate
+        glm::vec3 forceTotal = force * forceAccelerate * forceDblTime;
         
         // Decelerate
-        if ( glm::length(force) >  0.0001) force -= (force * forceDecelerate);
-        if (-glm::length(force) < -0.0001) force -= (force * forceDecelerate);
+        if ( glm::length(force) >  0.0001f) force -= (force * forceDecelerate);
+        if (-glm::length(force) < -0.0001f) force -= (force * forceDecelerate);
         
-        // Apply the force to the camera controller
-        glm::vec3 forceMul = force * glm::vec3(0.01);
+        Engine.cameraController->AddForce(forceTotal.x, forceTotal.y, forceTotal.z);
         
-        if (forceMul != glm::vec3(0)) 
-            Engine.cameraController->AddForce(forceMul.x, forceMul.y, forceMul.z);
+        // Field of view effect
+        float fovPullback = glm::length(forceTotal) * 80.0f;
         
+        if (fovPullback > 10.0f) 
+            fovPullback = 10.0f;
         
-        
-        // Minimum speed cut off
-        //if (glm::length(force) < 0.001f) 
-        //    force = glm::vec3(0.0f);
-        
-        // Max force
-        //if ( glm::length(forceMul) >  forceMax) forceMul = glm::vec3(forceMax);
-        //if (-glm::length(forceMul) < -forceMax) forceMul = glm::vec3(-forceMax);
-        
-        
-        
-        
-        //
-        // Update camera height
-        //
-        
-        /*
-        RigidBody* rigidBody = Engine.cameraController->GetComponent<RigidBody>();
-        rp3d::Transform bodyTransform = rigidBody->getTransform();
-        
-        rp3d::Vector3 position = bodyTransform.getPosition();
-        
-        //position.y = z + 1;
-        
-        bodyTransform.setPosition(position);
-        
-        rigidBody->setTransform( bodyTransform );
-        */
+        Engine.sceneMain->camera->fov = 60 + fovPullback;
         
     }
-    
-    
-    
-    
-    
     
     
     return;
