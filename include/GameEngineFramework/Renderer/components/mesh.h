@@ -159,6 +159,9 @@ public:
     /// Generate normals for the current vertex buffer.
     void CalculateNormals(void);
     
+    /// Set normals to a default value for the current vertex buffer.
+    void SetNormals(glm::vec3 normals);
+    
     
     friend class RenderSystem;
     

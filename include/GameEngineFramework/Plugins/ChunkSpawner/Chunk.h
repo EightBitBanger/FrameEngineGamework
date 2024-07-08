@@ -14,6 +14,10 @@ public:
     /// Associated game object.
     GameObject* gameObject;
     
+    /// Levels of detail
+    Mesh* lodHigh;
+    Mesh* lodLow;
+    
     /// Associated rigid body.
     rp3d::RigidBody* rigidBody;
     

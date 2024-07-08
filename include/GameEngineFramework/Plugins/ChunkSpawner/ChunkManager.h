@@ -28,27 +28,35 @@ class ENGINE_API WorldGeneration {
 public:
     
     WorldGeneration() : 
-        actorsPerChunk(0),
-        staticPerChunk(0),
+        actorDensity(0),
+        staticDensity(0),
+        treeDensity(0),
         
-        snowCapHeight(50),
+        snowCapHeight(70),
+        
+        actorHeightCutoff(20),
+        staticHeightCutoff(20),
+        treeHeightCutoff(50),
         
         treeHeightLow(5),
-        treeHeightHigh(8),
+        treeHeightHigh(10),
         
         leafSpreadArea(4.0f),
-        leafSpreadHeight(1.0f),
+        leafSpreadHeight(1.7f),
         leafHeightOffset(-0.8f),
-        numberOfLeaves(15)
+        numberOfLeaves(24)
         
         
     {}
     
-    /// Number of actors to spawn.
-    unsigned int actorsPerChunk;
+    /// Range of actors to spawn.
+    unsigned int actorDensity;
     
-    /// Number of static objects to spawn.
-    unsigned int staticPerChunk;
+    /// Range of static objects to spawn.
+    unsigned int staticDensity;
+    
+    /// Range of trees to spawn.
+    unsigned int treeDensity;
     
     /// Height at which the world will generate snow on mountain tops
     float snowCapHeight;
@@ -56,6 +64,16 @@ public:
     /// Perlin layers to apply to the world
     std::vector<Perlin> perlinGraph;
     
+    // Height beyond which the objects will stop spawning
+    
+    /// Maximum height to stop spawning actors.
+    unsigned int actorHeightCutoff;
+    
+    /// Maximum height to stop spawning static objects.
+    unsigned int staticHeightCutoff;
+    
+    /// Maximum height to stop spawning trees.
+    unsigned int treeHeightCutoff;
     
     // Tree trunk
     
@@ -103,6 +121,9 @@ public:
     int generationDistance;
     int destructionDistance;
     
+    /// Chunk level of detail distance.
+    int levelOfDetailDistance;
+    
     /// Chunk size (must be a multiple of eight).
     int chunkSize;
     
@@ -126,10 +147,12 @@ public:
     ChunkManager() : 
         doUpdateWithPlayerPosition(true),
         
-        generationDistance(200),
-        destructionDistance(200),
+        generationDistance(500),
+        destructionDistance(1400),
         
-        chunkSize(128),
+        levelOfDetailDistance(300),
+        
+        chunkSize(50),
         
         currentChunkX(0),
         currentChunkZ(0),
@@ -138,15 +161,19 @@ public:
         
         chunkIndex(0),
         
-        renderDistance(1),
+        renderDistance(18),
         
         mMaterial(nullptr),
         
         mNumberOfChunksToGenerate(1),
-        mMaxChunksToGenerate(10),
+        mMaxChunksToGenerate(3),
         
         mNumberOfChunksToPurge(1),
-        mMaxChunksToPurge(4)
+        mMaxChunksToPurge(3),
+        
+        mNumberOfChunksToUpdate(1),
+        mMaxChunksToUpdate(10)
+        
     {}
     
     
@@ -200,12 +227,83 @@ public:
     void Update(void) {
         
         //
+        // Update levels of detail
+        //
+        
+        // Decrease update rate
+        mNumberOfChunksToUpdate--;
+        
+        if (mNumberOfChunksToUpdate < 2) 
+            mNumberOfChunksToUpdate = 2;
+        
+        for (unsigned int i=0; i < mNumberOfChunksToUpdate; i++) {
+            
+            if (mChunkList.size() == 0) 
+                break;
+            
+            Chunk chunk = mChunkList[chunkIndex];
+            
+            chunkIndex++;
+            
+            if (chunkIndex >= mChunkList.size()) 
+                chunkIndex = 0;
+            
+            Transform* transform = chunk.gameObject->GetComponent<Transform>();
+            
+            glm::vec3 chunkPosition  = transform->position;
+            glm::vec3 playerPosition = Engine.sceneMain->camera->transform.position;
+            
+            // Ignore height
+            chunkPosition.y = 0;
+            playerPosition.y = 0;
+            
+            // Check chunk exists
+            int index = FindChunk( glm::vec2(chunkPosition.x, chunkPosition.z) );
+            
+            if (index == -1) 
+                continue;
+            
+            MeshRenderer* renderer = chunk.gameObject->GetComponent<MeshRenderer>();
+            
+            if (glm::distance(chunkPosition, playerPosition) < levelOfDetailDistance) {
+                
+                // High level of detail
+                
+                renderer->mesh = chunk.lodHigh;
+                
+                transform->scale = glm::vec3(1, 1, 1);
+                transform->position.y = 0.0f;
+                
+            } else {
+                
+                // Low level of detail
+                
+                renderer->mesh = chunk.lodLow;
+                
+                transform->scale = glm::vec3(2.0f, 1.1f, 2.0f);
+                transform->position.y = -5.0f;
+                
+            }
+            
+            // Increase chunk purge rate
+            mNumberOfChunksToUpdate += 3;
+            
+            if (mNumberOfChunksToUpdate > mMaxChunksToUpdate) 
+                mNumberOfChunksToUpdate = mMaxChunksToUpdate;
+            
+        }
+        
+        
+        
+        
+        //
         // Purge chunks
         //
         
+        
         if (doUpdateWithPlayerPosition) {
             
-            // Decrease chunk update rate
+            // Decrease purge rate
             mNumberOfChunksToPurge--;
             
             if (mNumberOfChunksToPurge < 1) 
@@ -256,6 +354,11 @@ public:
                     
                     // Destroy chunk static objects
                     MeshRenderer* staticRenderer = chunk.staticObjects->GetComponent<MeshRenderer>();
+                    staticRenderer->mesh = nullptr;
+                    
+                    // Destroy levels of detail
+                    Engine.Destroy<Mesh>(chunk.lodLow);
+                    Engine.Destroy<Mesh>(chunk.lodHigh);
                     
                     Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_DEFAULT );
                     
@@ -297,17 +400,32 @@ public:
         //
         // Source meshes for world construction
         
-        SubMesh subMeshHorz;
-        SubMesh subMeshVert;
+        SubMesh subMeshWallHorz;
+        SubMesh subMeshWallVert;
+        
+        SubMesh subMeshGrassHorz;
+        SubMesh subMeshGrassVert;
+        
+        SubMesh subMeshStemHorz;
+        SubMesh subMeshStemVert;
+        
         SubMesh subMeshTree;
+        
+        
+        glm::vec3 normalUp(0, 1, 0);
+        //Engine.meshes.wallHorizontal->SetNormals(normalUp);
+        //Engine.meshes.wallVertical->SetNormals(normalUp);
         
         Engine.meshes.log->GetSubMesh(2, subMeshTree);
         
-        //Engine.meshes.grass->GetSubMesh(0, subMeshHorz);
-        //Engine.meshes.grass->GetSubMesh(1, subMeshVert);
+        Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshWallHorz);
+        Engine.meshes.wallVertical  ->GetSubMesh(0, subMeshWallVert);
         
-        Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshHorz);
-        Engine.meshes.wallVertical->GetSubMesh(0, subMeshVert);
+        Engine.meshes.grassHorz->GetSubMesh(0, subMeshGrassHorz);
+        Engine.meshes.grassVert->GetSubMesh(0, subMeshGrassVert);
+        
+        Engine.meshes.stemHorz->GetSubMesh(0, subMeshStemHorz);
+        Engine.meshes.stemVert->GetSubMesh(0, subMeshStemVert);
         
         
         
@@ -324,7 +442,7 @@ public:
             playerChunkZ = glm::round( Engine.sceneMain->camera->transform.position.z / (chunkSize - 1));
         }
         
-        // Decrease chunk update rate
+        // Decrease generation rate
         mNumberOfChunksToGenerate--;
         
         if (mNumberOfChunksToGenerate < 1) 
@@ -366,6 +484,7 @@ public:
             if (mNumberOfChunksToGenerate > mMaxChunksToGenerate) 
                 mNumberOfChunksToGenerate = mMaxChunksToGenerate;
             
+            
             //
             // Generate chunk
             //
@@ -385,6 +504,10 @@ public:
             
             Engine.SetHeightFieldValues(heightField, chunkSize, chunkSize, 0);
             Engine.SetColorFieldValues(colorField, chunkSize, chunkSize, Colors.white);
+            
+            Transform* baseTransform = baseObject->GetComponent<Transform>();
+            baseTransform->scale = glm::vec3(1, 1, 1);
+            
             
             
             //
@@ -508,37 +631,62 @@ public:
             
             // Add the chunk to the mesh
             
-            Engine.AddHeightFieldToMesh(baseRenderer->mesh, heightField, colorField, chunkSize, chunkSize, 0, 0);
+            Engine.AddHeightFieldToMesh(baseRenderer->mesh, heightField, colorField, chunkSize, chunkSize, 0, 0, 1, 1);
+            
+            // Generate lower levels of detail for the terrain
+            
+            chunk.lodLow  = Engine.Create<Mesh>();
+            chunk.lodHigh = baseRenderer->mesh;
+            
+            chunk.lodLow->isShared = false;
+            
+            Engine.AddHeightFieldToMesh(chunk.lodLow, heightField, colorField, chunkSize, chunkSize, chunkSize / 4, chunkSize / 4, 2, 2);
             
             baseRenderer->mesh->UploadToGPU();
+            chunk.lodLow->UploadToGPU();
             
             
             //
             // Generate actors
             //
             
-            for (unsigned int a=0; a < world.actorsPerChunk; a++) {
+            for (unsigned int a=0; a < world.actorDensity; a++) {
                 
-                float actorX = chunkX + (Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2));
-                float actorZ = chunkZ + (Random.Range(0, chunkSize / 2) - Random.Range(0, chunkSize / 2));
+                float xx = chunkX + Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
+                float zz = chunkZ + Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
                 
-                GameObject* actorObject = Engine.CreateAIActor( glm::vec3(actorX, 0, actorZ) );
+                if ((xx >  (chunkSize/2)) | (zz >  (chunkSize/2)) | 
+                    (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
+                    continue;
+                
+                // Ray cast here to find the ground
+                glm::vec3 from(chunkX + xx, 1000, chunkZ + zz);
+                glm::vec3 direction(0, -1, 0);
+                
+                Hit hit;
+                
+                float distance = 2000;
+                float height = 0;
+                
+                if (Physics.Raycast(from, direction, distance, hit)) 
+                    height = hit.point.y;
+                
+                if (height > world.actorHeightCutoff) 
+                    continue;
+                
+                if (height == 0) 
+                    continue;
+                
+                GameObject* actorObject = Engine.CreateAIActor( glm::vec3(xx, 0, zz) );
                 
                 chunk.actorList.push_back( actorObject );
                 
-                // Actor
                 Actor* actor = actorObject->GetComponent<Actor>();
                 
                 // Use sheep actor preset
                 AI.genomes.SheepGene( actor );
                 
-                //actor->SetChanceToWalk(0);
-                //actor->SetChanceToChangeDirection(0);
-                //actor->SetChanceToStopWalking(0);
-                //actor->SetChanceToFocusOnActor(0);
-                
-                //actor->SetActive(false);
-                
+                continue;
             }
             
             
@@ -546,7 +694,7 @@ public:
             // Trees
             //
             
-            for (unsigned int a=0; a < world.staticPerChunk; a++) {
+            for (unsigned int a=0; a < world.treeDensity; a++) {
                 
                 float xx = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
                 float zz = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
@@ -567,7 +715,7 @@ public:
                 if (Physics.Raycast(from, direction, distance, hit)) 
                     height = hit.point.y;
                 
-                if (height > world.snowCapHeight) 
+                if (height > world.treeHeightCutoff) 
                     continue;
                 
                 if (height == 0) 
@@ -611,8 +759,8 @@ public:
                     float offset_yy = Random.Range(0.0f, world.leafSpreadHeight) - Random.Range(0.0f, world.leafSpreadHeight);
                     float offset_zz = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
                     
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshVert, false);
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshHorz, false);
+                    staticMesh->AddSubMesh(0, 0, 0, subMeshWallHorz, false);
+                    staticMesh->AddSubMesh(0, 0, 0, subMeshWallVert, false);
                     
                     unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
                     unsigned int index = numberOfSubMeshes - 1;
@@ -641,15 +789,11 @@ public:
             
             
             
-            
-            
-            
-            
             //
             // Grass
             //
             
-            for (unsigned int a=0; a < world.staticPerChunk; a++) {
+            for (unsigned int a=0; a < world.staticDensity; a++) {
                 
                 float xx = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
                 float zz = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
@@ -670,27 +814,43 @@ public:
                 if (Physics.Raycast(from, direction, distance, hit)) 
                     height = hit.point.y;
                 
-                if (height > world.snowCapHeight) 
+                if (height > world.staticHeightCutoff) 
                     continue;
                 
                 if (height == 0) 
                     continue;
                 
-                staticMesh->AddSubMesh(0, 0, 0, subMeshVert, false);
-                staticMesh->AddSubMesh(0, 0, 0, subMeshHorz, false);
+                int spawnRange = Random.Range(0, 10);
+                
+                
+                if (spawnRange < 4) {
+                    
+                    staticMesh->AddSubMesh(0, 0, 0, subMeshStemHorz, false);
+                    staticMesh->AddSubMesh(0, 0, 0, subMeshStemVert, false);
+                    
+                }
+                
+                if ((spawnRange >= 4) & (spawnRange < 8)) {
+                    
+                    staticMesh->AddSubMesh(0, 0, 0, subMeshGrassHorz, false);
+                    staticMesh->AddSubMesh(0, 0, 0, subMeshGrassVert, false);
+                    
+                }
+                
+                if (spawnRange >= 8) {
+                    
+                    staticMesh->AddSubMesh(0, 0, 0, subMeshWallHorz, false);
+                    staticMesh->AddSubMesh(0, 0, 0, subMeshWallVert, false);
+                    
+                }
                 
                 unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
                 
                 unsigned int index = numberOfSubMeshes - 1;
                 
                 Color finalColor;
-                Color lowGreen;
-                Color highGreen;
                 
-                lowGreen  = (Colors.dkgreen + Colors.MakeRandomGrayScale()) * 0.01f;
-                highGreen = (Colors.green   + Colors.MakeRandomGrayScale()) * 0.08f;
-                
-                finalColor = Colors.Lerp(lowGreen, highGreen, 0.087f);
+                finalColor = (Colors.dkgreen + (Colors.MakeRandomGrayScale() * 0.087f)) * 0.24f;
                 
                 staticMesh->ChangeSubMeshColor(index, finalColor);
                 staticMesh->ChangeSubMeshColor(index-1, finalColor);
@@ -720,6 +880,7 @@ public:
         return;
     }
     
+    
 private:
     
     /// Material used for rendering the world chunks.
@@ -735,5 +896,9 @@ private:
     // Number of chunks being destroyed per frame
     unsigned int mNumberOfChunksToPurge;
     unsigned int mMaxChunksToPurge;
+    
+    // Number of chunks to update per frame
+    unsigned int mNumberOfChunksToUpdate;
+    unsigned int mMaxChunksToUpdate;
     
 };
