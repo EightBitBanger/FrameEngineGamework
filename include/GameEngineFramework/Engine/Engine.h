@@ -229,7 +229,7 @@ public:
     // Mapping to a mesh
     
     /// Apply the height field values to a mesh.
-    void AddHeightFieldToMesh(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
+    void AddHeightFieldToMesh(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int subTessX=1.0f, unsigned int subTessZ=1.0f);
     
     /// Generate a height field mesh from perlin noise.
     Mesh* CreateMeshFromHeightField(float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
@@ -452,16 +452,23 @@ private:
     };
     
     struct DefaultMeshes {
+        
+        Mesh* grassHorz = nullptr;
+        Mesh* grassVert = nullptr;
+        
+        Mesh* stemHorz = nullptr;
+        Mesh* stemVert = nullptr;
+        
+        Mesh* wallHorizontal = nullptr;
+        Mesh* wallVertical = nullptr;
+        
         Mesh* log = nullptr;
-        Mesh* grass = nullptr;
-        Mesh* leaves = nullptr;
         
         Mesh* cube = nullptr;
         Mesh* chunk = nullptr;
         Mesh* plain = nullptr;
         Mesh* sphere = nullptr;
-        Mesh* wallHorizontal = nullptr;
-        Mesh* wallVertical = nullptr;
+        
     };
     
     
