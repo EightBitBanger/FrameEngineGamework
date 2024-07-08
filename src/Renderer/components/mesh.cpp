@@ -442,6 +442,33 @@ void Mesh::CalculateNormals(void) {
     return;
 }
 
+void Mesh::SetNormals(glm::vec3 normals) {
+    
+    for (unsigned int i=0; i < mVertexBufferSz; i += 3) {
+        
+        glm::vec3 normal;
+        normal.x = normals.x;
+        normal.y = normals.y;
+        normal.z = normals.z;
+        
+        mVertexBuffer[i].nx   = normal.x;
+        mVertexBuffer[i].ny   = normal.y;
+        mVertexBuffer[i].nz   = normal.z;
+        
+        mVertexBuffer[i+1].nx = normal.x;
+        mVertexBuffer[i+1].ny = normal.y;
+        mVertexBuffer[i+1].nz = normal.z;
+        
+        mVertexBuffer[i+2].nx = normal.x;
+        mVertexBuffer[i+2].ny = normal.y;
+        mVertexBuffer[i+2].nz = normal.z;
+        
+        continue;
+    }
+    
+    return;
+}
+
 void Mesh::Reallocate(unsigned int newBufferSize) {
     FreeBuffers();
     AllocateBuffers(newBufferSize);

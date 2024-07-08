@@ -16,6 +16,7 @@ void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQue
         case RENDER_QUEUE_FOREGROUND:
             mRenderQueueForeground.emplace( mRenderQueueForeground.begin(), meshRenderer );
             break;
+        default:
         case RENDER_QUEUE_DEFAULT:
             mRenderQueueDefault.emplace( mRenderQueueDefault.begin(), meshRenderer );
             break;
@@ -24,8 +25,6 @@ void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQue
             break;
         case RENDER_QUEUE_SKY:
             mRenderQueueSky.emplace( mRenderQueueSky.begin(), meshRenderer );
-            break;
-        default:
             break;
     }
     return;
@@ -38,11 +37,10 @@ bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int rend
     switch (renderQueueGroup) {
         case RENDER_QUEUE_OVERLAY:    renderQueue = &mRenderQueueOverlay; break;
         case RENDER_QUEUE_FOREGROUND: renderQueue = &mRenderQueueForeground; break;
+        default: 
         case RENDER_QUEUE_DEFAULT:    renderQueue = &mRenderQueueDefault; break;
         case RENDER_QUEUE_BACKGROUND: renderQueue = &mRenderQueueBackground; break;
         case RENDER_QUEUE_SKY:        renderQueue = &mRenderQueueSky; break;
-        default: 
-            break;
     }
     
     for (std::vector<MeshRenderer*>::iterator it = renderQueue->begin(); it != renderQueue->end(); ++it) {
