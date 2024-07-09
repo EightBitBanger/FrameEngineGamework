@@ -292,7 +292,8 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         newMaterial->diffuse.g = mStreamBuffer[index].actor->mGenes[a].color.y;
         newMaterial->diffuse.b = mStreamBuffer[index].actor->mGenes[a].color.z;
         
-        newMaterial->ambient = Colors.MakeGrayScale(0.01f);
+        float ambient = 0.01f;
+        newMaterial->ambient = Colors.Make(ambient, ambient, ambient);
         
         MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
         newRenderer->isActive = false;

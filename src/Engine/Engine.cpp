@@ -93,6 +93,10 @@ void EngineSystemManager::SetColorFieldValues(glm::vec3* colorField, unsigned in
             
             unsigned int index = z * width + x;
             
+            color.r = Random.Range(0, 100) * 0.0001f;
+            color.g = Random.Range(0, 100) * 0.0001f;
+            color.b = Random.Range(0, 100) * 0.0001f;
+            
             colorField[index] = glm::vec3(color.r, color.g, color.b);
             
             continue;
@@ -179,6 +183,14 @@ void EngineSystemManager::GenerateColorFieldFromHeightField(glm::vec3* colorFiel
             if (heightBias > 1) heightBias = 1;
             
             color = Colors.Lerp(low, high, heightBias);
+            
+            float uniformVariantR = (Random.Range(0, 100) * 0.00001f) - (Random.Range(0, 10) * 0.00001f);
+            float uniformVariantG = uniformVariantR;
+            float uniformVariantB = uniformVariantR;
+            
+            color.r += uniformVariantR;
+            color.g += uniformVariantG;
+            color.b += uniformVariantB;
             
             // Apply the final color
             colorField[index] = glm::vec3( color.r, color.g, color.b );
@@ -301,10 +313,15 @@ void EngineSystemManager::AddHeightFieldToMesh(Mesh* mesh,
             float yyC = heightField[(za+1) * ww + (xa+1)];
             float yyD = heightField[(za+1) * ww +  xa   ];
             
-            glm::vec3 cA = colorField[ za    * ww +  xa   ];
-            glm::vec3 cB = colorField[ za    * ww + (xa+1)];
-            glm::vec3 cC = colorField[(za+1) * ww + (xa+1)];
-            glm::vec3 cD = colorField[(za+1) * ww +  xa   ];
+            //glm::vec3 cA = colorField[ za    * ww +  xa   ];
+            //glm::vec3 cB = colorField[ za    * ww + (xa+1)];
+            //glm::vec3 cC = colorField[(za+1) * ww + (xa+1)];
+            //glm::vec3 cD = colorField[(za+1) * ww +  xa   ];
+            
+            glm::vec3 cA = colorField[za * ww + xa];
+            glm::vec3 cB = colorField[za * ww + xa];
+            glm::vec3 cC = colorField[za * ww + xa];
+            glm::vec3 cD = colorField[za * ww + xa];
             
             // Calculate chunk position and offset
             float xx = ( ( ( (float)x + offsetX) - (float)ww / 2) / 2) + 0.25;
