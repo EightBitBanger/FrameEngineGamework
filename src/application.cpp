@@ -193,20 +193,38 @@ void Start() {
     
     
     //
+    // Plain material
+    //
+    
+    plainMaterial = Engine.Create<Material>();
+    
+    plainMaterial->DisableCulling();
+    plainMaterial->isShared = true;
+    
+    plainMaterial->shader = Engine.shaders.color;
+    
+    plainMaterial->ambient = Colors.black;
+    plainMaterial->diffuse = Colors.white;
+    plainMaterial->specular = Colors.white;
+    
+    
+    
+    
+    //
     // Chunk generation
     //
     
     chunkManager.chunkSize = 50;
     
     // World generation
-    chunkManager.renderDistance = 20;
+    chunkManager.renderDistance = 10;
     
     chunkManager.generationDistance  = chunkManager.renderDistance * chunkManager.chunkSize;
     chunkManager.destructionDistance = chunkManager.generationDistance * 2.2f;
     
     chunkManager.doUpdateWithPlayerPosition = true;
     
-    chunkManager.levelOfDetailDistance = chunkManager.generationDistance * 0.4f;
+    chunkManager.levelOfDetailDistance = 200;
     
     // Start culling at the chunk size boundary
     Engine.sceneMain->camera->frustumOffset = chunkManager.chunkSize + 10;
@@ -254,30 +272,11 @@ void Start() {
     
     
     // Actor generation
-    chunkManager.world.staticDensity = 800;
+    chunkManager.world.staticDensity = 1000;
     
-    chunkManager.world.treeDensity = 20;
+    chunkManager.world.treeDensity = 10;
     
     chunkManager.world.actorDensity = 10;
-    
-    
-    // Chunk material
-    Material* chunkMaterial = Engine.Create<Material>();
-    
-    chunkMaterial->DisableCulling();
-    chunkMaterial->isShared = true;
-    
-    chunkMaterial->shader = Engine.shaders.color;
-    
-    chunkMaterial->ambient = Colors.black;
-    chunkMaterial->diffuse = Colors.white;
-    chunkMaterial->specular = Colors.white;
-    
-    chunkManager.SetMaterial( chunkMaterial );
-    
-    plainMaterial = chunkMaterial;
-    
-    
     
     
     return;
@@ -363,8 +362,8 @@ void Run() {
     float skyLightingMax    = 0.5;
     float skyLightingMin    = 0.01;
     
-    float worldLightingMax  = 0.87;
-    float worldLightingMin  = 0.7;
+    float worldLightingMax  = 0.7;
+    float worldLightingMin  = 0.1;
     
     float lightingMax       = 4.0;
     float lightingMin       = 0.5;
@@ -395,7 +394,8 @@ void Run() {
     
     // World brightness
     plainMaterial->diffuse = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
-    plainMaterial->ambient = Math.Lerp(0.0f, worldLightingMax, ambientLight);
+    plainMaterial->ambient = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
+    chunkManager.world.staticTargetColor = plainMaterial->ambient;
     
     // Light brightness
     directionalLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);;
