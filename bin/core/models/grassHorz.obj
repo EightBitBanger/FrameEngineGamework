@@ -1,0 +1,34 @@
+# Created with Anim8or 1.00
+# Object "object01":
+
+mtllib grassHorz.mtl
+
+# Shape "mesh02":
+g mesh02
+# No. points 4:
+v -0.33765 -0.50251 0
+v -0.33765 0.50251 0
+v 0.33765 0.50251 0
+v 0.33765 -0.50251 0
+
+# No. normals 6:
+vn 0 0 1
+vn 0 0 1
+vn 0 0 1
+vn 0 0 1
+vn 0 0 1
+vn 0 0 1
+
+# No. texture coordinates 4:
+vt -0.00690 -0.00015
+vt -0.00690 1.0001
+vt 1.0069 1.0001
+vt 1.0069 -0.00015
+
+# No. faces 1:
+
+usemtl ___default___
+
+f 4/4/5 3/3/4 2/2/3 1/1/2
+
+# End of Object "object01"
