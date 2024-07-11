@@ -1,5 +1,3 @@
-// Chunk management class
-
 #include <GameEngineFramework/Engine/Engine.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Perlin.h>
@@ -843,17 +841,21 @@ public:
                 
                 Color finalColor;
                 
+                finalColor = (Colors.dkgreen + (Colors.MakeRandomGrayScale() * 0.4f)) * 0.087f;
+                
+                /*
                 if (colorRange < 4) {
                     finalColor = (Colors.dkgreen + (Colors.MakeRandomGrayScale() * 0.087f)) * 0.087f;
                 }
                 
                 if ((colorRange >= 4) & (colorRange < 7)) {
-                    finalColor = (Colors.yellow + (Colors.MakeRandomGrayScale() * 0.087f)) * 0.24f;
+                    finalColor = (Colors.yellow - (Colors.MakeRandomGrayScale() * 0.3f)) * 0.01f;
                 }
                 
                 if (colorRange >= 7) {
                     finalColor = (Colors.red + (Colors.MakeRandomGrayScale() * 0.087f)) * 0.02f;
                 }
+                */
                 
                 staticMesh->ChangeSubMeshColor(index, finalColor);
                 staticMesh->ChangeSubMeshColor(index-1, finalColor);
