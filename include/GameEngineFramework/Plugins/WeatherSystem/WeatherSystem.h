@@ -26,6 +26,8 @@ public:
     
     void Update(void) {
         
+        return;
+        
         GameObject* weatherObject = Engine.Create<GameObject>();
         Transform* transform = weatherObject->GetComponent<Transform>();
         

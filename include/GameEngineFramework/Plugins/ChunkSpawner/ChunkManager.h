@@ -168,7 +168,7 @@ public:
         mMaxChunksToGenerate(3),
         
         mNumberOfChunksToPurge(1),
-        mMaxChunksToPurge(3),
+        mMaxChunksToPurge(1),
         
         mNumberOfChunksToUpdate(1),
         mMaxChunksToUpdate(10)
@@ -250,8 +250,14 @@ public:
                 continue;
             
             MeshRenderer* renderer = chunk.gameObject->GetComponent<MeshRenderer>();
-            renderer->material->ambient = world.staticTargetColor;
-            renderer->material->diffuse = world.staticTargetColor;
+            
+            // Update lighting
+            if (Random.Range(0, 10) > 5) {
+                
+                renderer->material->ambient = world.staticTargetColor;
+                renderer->material->diffuse = world.staticTargetColor;
+                
+            }
             
             if (glm::distance(chunkPosition, playerPosition) < levelOfDetailDistance) {
                 
@@ -376,6 +382,7 @@ public:
             }
             
         }
+        
         
         
         
@@ -525,7 +532,7 @@ public:
             staticMaterial->diffuse = Colors.white;
             staticMaterial->specular = Colors.white;
             
-            staticMaterial->isShared = true;
+            staticMaterial->isShared = false;
             
             baseRenderer->material = staticMaterial;
             
@@ -630,11 +637,12 @@ public:
             chunk.lodHigh = baseRenderer->mesh;
             
             chunk.lodLow->isShared = false;
+            chunk.lodHigh->isShared = false;
             
             Engine.AddHeightFieldToMesh(chunk.lodLow, heightField, colorField, chunkSize, chunkSize, chunkSize / 4, chunkSize / 4, 2, 2);
             
-            baseRenderer->mesh->UploadToGPU();
-            chunk.lodLow->UploadToGPU();
+            baseRenderer->mesh->Load();
+            chunk.lodLow->Load();
             
             
             
@@ -824,14 +832,10 @@ public:
                     staticMesh->AddSubMesh(0, 0, 0, subMeshGrassVert, false);
                 }
                 
-                /*
-                
                 if (spawnRange >= 8) {
                     staticMesh->AddSubMesh(0, 0, 0, subMeshWallHorz, false);
                     staticMesh->AddSubMesh(0, 0, 0, subMeshWallVert, false);
                 }
-                
-                */
                 
                 unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
                 
@@ -843,7 +847,6 @@ public:
                 
                 finalColor = (Colors.dkgreen + (Colors.MakeRandomGrayScale() * 0.4f)) * 0.087f;
                 
-                /*
                 if (colorRange < 4) {
                     finalColor = (Colors.dkgreen + (Colors.MakeRandomGrayScale() * 0.087f)) * 0.087f;
                 }
@@ -855,7 +858,6 @@ public:
                 if (colorRange >= 7) {
                     finalColor = (Colors.red + (Colors.MakeRandomGrayScale() * 0.087f)) * 0.02f;
                 }
-                */
                 
                 staticMesh->ChangeSubMeshColor(index, finalColor);
                 staticMesh->ChangeSubMeshColor(index-1, finalColor);
@@ -867,8 +869,7 @@ public:
             }
             
             
-            
-            staticMesh->UploadToGPU();
+            staticMesh->Load();
             
             
             // Add chunk to chunk list
