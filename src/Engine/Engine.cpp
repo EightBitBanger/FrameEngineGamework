@@ -429,7 +429,7 @@ void EngineSystemManager::AddMeshText(GameObject* overlayObject, float xPos, flo
     for (unsigned int i=0; i < text.size(); i++)
         AddMeshSubSprite(overlayObject, xPos + i, yPos, width, height, text[i], textColor);
     
-    meshPtr->UploadToGPU();
+    meshPtr->Load();
     
     return;
 }

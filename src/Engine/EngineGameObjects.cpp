@@ -121,7 +121,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
         
         skyMesh->SetVertex(i, vertex);
     }
-    skyMesh->UploadToGPU();
+    skyMesh->Load();
     
     GameObject* skyObject = CreateGameObject();
     skyObject->name = "sky";
@@ -263,7 +263,7 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     
     overlayMesh->AddPlain(0, 0, 0, height, width, Colors.white, 1, 1);
     
-    overlayMesh->UploadToGPU();
+    overlayMesh->Load();
     
     return overlayObject;
 }
