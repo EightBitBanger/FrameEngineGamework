@@ -47,7 +47,7 @@ While this framework currently only supports windows, I look forward to porting 
 
 
 ##  Building the repository
-First, clone the repository with git. You can then use cmake to generate the project files of your choice. You have three primary build options in cmake. Each option will generate a project file which will compile the selected part of the framework. To use the framework you would want to select `BUILD_APPLICATION_LIBRARY`. However, modifying the core requires you to select `BUILD_CORE_ENGINE`. To build the runtime executable select `BUILD_RUNTIME_EXECUTABLE`.
+First, clone the repository with git. You can then use cmake to generate the project files of your choice. You have three build options in cmake. Each option will generate a project file which will compile the selected part of the framework. To use the framework you would want to select `BUILD_APPLICATION_LIBRARY`. However, modifying the core requires you to select `BUILD_CORE_ENGINE`. To build the runtime executable select `BUILD_RUNTIME_EXECUTABLE`.
 
 ```
 git clone https://github.com/RetroBytes32/FrameEngineGamework
