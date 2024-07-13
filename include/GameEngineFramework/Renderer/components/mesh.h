@@ -8,50 +8,12 @@
 #include <GameEngineFramework/engine/types/color.h>
 #include <GameEngineFramework/Math/Math.h>
 #include <GameEngineFramework/Math/Random.h>
+#include <GameEngineFramework/Renderer/components/submesh.h>
 
 #include <vector>
 #include <string>
 
 extern NumberGeneration Random;
-
-
-struct ENGINE_API SubMesh {
-    
-    /// Name of the sub mesh.
-    std::string name;
-    
-    /// Starting offset position in the vertex buffer.
-    unsigned vertexBegin;
-    
-    /// Number of vertices in the vertex buffer.
-    unsigned vertexCount;
-    
-    /// Starting offset position in the index buffer.
-    unsigned indexBegin;
-    
-    /// Number of indices in the index buffer.
-    unsigned indexCount;
-    
-    /// Current mesh position offset.
-    glm::vec3 position;
-    
-    /// Vertex buffer array.
-    std::vector<Vertex>  vertexBuffer;
-    
-    /// Index buffer array.
-    std::vector<Index>   indexBuffer;
-    
-    SubMesh() : 
-        name(""),
-        vertexBegin(0),
-        vertexCount(0),
-        indexBegin(0),
-        indexCount(0),
-        position(glm::vec3(0, 0, 0))
-    {
-    }
-    
-};
 
 
 
@@ -104,8 +66,15 @@ public:
     void ClearSubMeshes(void);
     
     
-    /// Fully re-upload the vertex buffer onto the GPU buffer.
-    void UploadToGPU(void);
+    /// Fully re-upload the vertex buffer onto the GPU.
+    void Load(void);
+    
+    /// Purge the vertex buffer from the GPU.
+    void Unload(void);
+    
+    /// Return whether the buffers are allocated on the GPU.
+    bool CheckIsAllocatedOnGPU(void);
+    
     
     /// Get the number of index locations in the index buffer.
     unsigned int GetNumberOfIndices(void);
@@ -174,7 +143,7 @@ public:
     
 private:
     
-    // OpenGL buffer indexes
+    // OpenGL buffers
     unsigned int mVertexArray;
     unsigned int mBufferVertex;
     unsigned int mBufferIndex;
@@ -186,6 +155,8 @@ private:
     unsigned int mVertexBufferSz;
     unsigned int mIndexBufferSz;
     unsigned int mMaxSize;
+    
+    bool mAreBuffersAllocated;
     
     // Vertex buffer array
     std::vector<Vertex>   mVertexBuffer;

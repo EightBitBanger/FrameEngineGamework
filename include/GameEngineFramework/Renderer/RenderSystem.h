@@ -9,6 +9,7 @@
 #include <GameEngineFramework/Renderer/components/light.h>
 #include <GameEngineFramework/Renderer/components/material.h>
 #include <GameEngineFramework/Renderer/components/mesh.h>
+#include <GameEngineFramework/Renderer/components/submesh.h>
 #include <GameEngineFramework/Renderer/components/meshrenderer.h>
 #include <GameEngineFramework/Renderer/components/scene.h>
 #include <GameEngineFramework/Renderer/components/shader.h>
