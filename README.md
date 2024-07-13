@@ -32,7 +32,7 @@
 
 
 ## Overview
- This framework is designed to provide the functionality of a game engine without a full editor. The primary use case would be for the creation of applications that require user interactivity and physical simulation. The core fuctionality of the framework covers rendering, physics, AI and resource management.
+ This framework is designed to provide the functionality of a game engine without an editor. The primary use case would be for the creation of applications that require user interactivity and physical simulation. The core fuctionality of the framework covers rendering, physics, AI and resource management.
 
 
 <br><br/>
