@@ -17,7 +17,10 @@ Mesh::Mesh() :
     mPrimitive(GL_TRIANGLES),
     
     mVertexBufferSz(0),
-    mIndexBufferSz(0)
+    mIndexBufferSz(0),
+    mMaxSize(0),
+    
+    mAreBuffersAllocated(false)
 {
     AllocateBuffers(1024);
     
@@ -187,7 +190,7 @@ int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer,
             }
             
             if (doUploadToGpu) 
-                UploadToGPU();
+                Load();
             
             return -1;
         }
@@ -222,7 +225,7 @@ int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer,
     }
     
     if (doUploadToGpu) 
-        UploadToGPU();
+        Load();
     
     return startVertex;
 }
@@ -361,9 +364,28 @@ void Mesh::ClearSubMeshes(void) {
     return;
 }
 
-void Mesh::UploadToGPU(void) {
-    mVertexBufferSz = mVertexBuffer.size();
-    mIndexBufferSz  = mIndexBuffer.size();
+void Mesh::Load(void) {
+    
+    /*
+    
+    if (!mAreBuffersAllocated) {
+        
+        mVertexBufferSz = mVertexBuffer.size();
+        mIndexBufferSz  = mIndexBuffer.size();
+        
+        if (mVertexBufferSz > mIndexBufferSz) {
+            
+            AllocateBuffers( mVertexBufferSz );
+            
+        } else {
+            
+            AllocateBuffers( mIndexBufferSz );
+            
+        }
+        
+    }
+    
+    */
     
     glBindVertexArray(mVertexArray);
     
@@ -372,7 +394,28 @@ void Mesh::UploadToGPU(void) {
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0], GL_STATIC_DRAW);
+    
+    mAreBuffersAllocated = true;
+    
     return;
+}
+
+void Mesh::Unload(void) {
+    /*
+    
+    if (!mAreBuffersAllocated) 
+        return;
+    */
+    
+    FreeBuffers();
+    
+    mAreBuffersAllocated = false;
+    
+    return;
+}
+
+bool Mesh::CheckIsAllocatedOnGPU(void) {
+    return mAreBuffersAllocated;
 }
 
 unsigned int Mesh::GetNumberOfVertices(void) {
