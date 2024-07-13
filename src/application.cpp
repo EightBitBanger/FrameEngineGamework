@@ -9,6 +9,10 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 ChunkManager chunkManager;
 
+#include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
+WeatherSystem Weather;
+
+
 
 // User globals
 GameObject*  cameraController;
@@ -26,7 +30,6 @@ float ambientLight = 0.9;
 
 Material* skyMaterial;
 
-Material* plainMaterial;
 
 
 
@@ -145,7 +148,7 @@ void Start() {
     
     // Point the game object downward. This will cause 
     // the light component to point toward the ground.
-    lightObject->GetComponent<Transform>()->RotateAxis(1, Vector3(0.0, -1.0, 0.0));
+    lightObject->GetComponent<Transform>()->RotateAxis(1, Vector3(0.8, -0.8, 0.0));
     
     // Get a pointer to the newly created light component.
     directionalLight = lightObject->GetComponent<Light>();
@@ -162,10 +165,6 @@ void Start() {
     //
     // Create a sky
     //
-    
-    // Sky colors from hight to low.
-    Color skyHigh(Colors.blue);
-    Color skyLow(Colors.blue);
     
     // Amount of fade bias from the color "skyHigh" to "skyLow".
     float colorBias = 1.0f;
@@ -192,22 +191,6 @@ void Start() {
     skyMaterial->ambient = Colors.white;
     
     
-    //
-    // Plain material
-    //
-    
-    plainMaterial = Engine.Create<Material>();
-    
-    plainMaterial->DisableCulling();
-    plainMaterial->isShared = true;
-    
-    plainMaterial->shader = Engine.shaders.color;
-    
-    plainMaterial->ambient = Colors.black;
-    plainMaterial->diffuse = Colors.white;
-    plainMaterial->specular = Colors.white;
-    
-    
     
     
     //
@@ -220,14 +203,16 @@ void Start() {
     chunkManager.renderDistance = 10;
     
     chunkManager.generationDistance  = chunkManager.renderDistance * chunkManager.chunkSize;
-    chunkManager.destructionDistance = chunkManager.generationDistance * 2.2f;
+    chunkManager.destructionDistance = chunkManager.generationDistance * 1.5f;
     
-    chunkManager.doUpdateWithPlayerPosition = true;
+    chunkManager.renderDistance = 100;
+    
+    chunkManager.doUpdateWithPlayerPosition = false;
     
     chunkManager.levelOfDetailDistance = 200;
     
     // Start culling at the chunk size boundary
-    Engine.sceneMain->camera->frustumOffset = chunkManager.chunkSize + 10;
+    Engine.sceneMain->camera->frustumOffset = chunkManager.chunkSize + 20;
     
     
     
@@ -393,9 +378,7 @@ void Run() {
     skyMaterial->ambient = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
     
     // World brightness
-    plainMaterial->diffuse = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
-    plainMaterial->ambient = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
-    chunkManager.world.staticTargetColor = plainMaterial->ambient;
+    chunkManager.world.staticTargetColor = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
     
     // Light brightness
     directionalLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);;
@@ -406,7 +389,11 @@ void Run() {
     
     
     
+    //
+    // Update weather system
+    //
     
+    Weather.Update();
     
     
     //
