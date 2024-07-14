@@ -154,7 +154,6 @@ private:
     // Buffer sizes
     unsigned int mVertexBufferSz;
     unsigned int mIndexBufferSz;
-    unsigned int mMaxSize;
     
     bool mAreBuffersAllocated;
     
@@ -172,11 +171,8 @@ private:
     void SetDefaultAttributes(void);
     
     // Allocate/deallocate 
-    void AllocateBuffers(unsigned int maxBufferSize);
+    void AllocateBuffers(void);
     void FreeBuffers(void);
-    
-    // Reallocate new GPU memory.
-    void Reallocate(unsigned int newBufferSize);
     
 };
 

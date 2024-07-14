@@ -24,6 +24,33 @@ class ENGINE_API WeatherSystem {
     
 public:
     
+    GameObject* sunObject;
+    Light* sun;
+    
+    
+    
+    
+    
+    
+    void Initiate(void) {
+        
+        sunObject = Engine.Create<GameObject>();
+        sunObject->AddComponent( Engine.CreateComponent<Light>() );
+        
+        Transform* transform = sunObject->GetComponent<Transform>();
+        transform->RotateEuler(0.0f, -1.0f, 2.0f);
+        
+        sun = sunObject->GetComponent<Light>();
+        
+        sun->type       = LIGHT_TYPE_DIRECTIONAL;
+        sun->intensity  = 0.7f;
+        sun->color      = Colors.white;
+        
+        Engine.sceneMain->AddLightToSceneRoot( sun );
+        
+    }
+    
+    
     void Update(void) {
         
         return;

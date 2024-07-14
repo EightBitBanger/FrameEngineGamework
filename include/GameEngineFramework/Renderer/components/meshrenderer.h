@@ -45,7 +45,7 @@ public:
     
 private:
     
-    // Should this renderer be culled
+    // Is this renderer being culled
     bool mDoCulling;
     
     friend class RenderSystem;

@@ -42,10 +42,16 @@ public:
         leafSpreadArea(5.0f),
         leafSpreadHeight(1.8f),
         leafHeightOffset(-0.8f),
-        numberOfLeaves(30)
+        numberOfLeaves(30),
         
+        staticColorMul(0.87f)
     {
-        staticTargetColor = Colors.black;
+        chunkColorHigh  = Colors.black;
+        chunkColorLow   = Colors.black;
+        staticColorLow  = Colors.black;
+        staticColorHigh = Colors.black;
+        actorColorLow   = Colors.black;
+        actorColorHigh  = Colors.black;
     }
     
     /// Range of actors to spawn.
@@ -97,8 +103,18 @@ public:
     /// Number of leaves to add to the trees.
     unsigned int numberOfLeaves;
     
-    /// Target color to add to static objects when updated
-    Color staticTargetColor;
+    /// Static object color multiplier to update static objects in chunks.
+    float staticColorMul;
+    
+    /// Chunk color range for world lighting.
+    Color chunkColorHigh, chunkColorLow;
+    
+    /// Static object color range for world lighting.
+    Color staticColorLow, staticColorHigh;
+    
+    /// Actor color range for world lighting.
+    Color actorColorLow, actorColorHigh;
+    
     
     /// Add a layer of perlin noise to the world generation
     void AddPerlinLayer(Perlin& perlinLayer) {
@@ -143,6 +159,18 @@ public:
     
     /// World generation parameters
     WorldGeneration world;
+    
+    /// World generation meshes
+    SubMesh subMeshWallHorz;
+    SubMesh subMeshWallVert;
+    
+    SubMesh subMeshGrassHorz;
+    SubMesh subMeshGrassVert;
+    
+    SubMesh subMeshStemHorz;
+    SubMesh subMeshStemVert;
+    
+    SubMesh subMeshTree;
     
     
     ChunkManager() : 
@@ -215,6 +243,34 @@ public:
         return baseChunk;
     }
     
+    void Initiate(void) {
+        
+        // Source meshes for world construction
+        
+        glm::vec3 normalUp(0, 1, 0);
+        
+        Engine.meshes.wallHorizontal->SetNormals(normalUp);
+        Engine.meshes.wallVertical->SetNormals(normalUp);
+        
+        Engine.meshes.grassHorz->SetNormals(normalUp);
+        Engine.meshes.grassVert->SetNormals(normalUp);
+        
+        Engine.meshes.stemHorz->SetNormals(normalUp);
+        Engine.meshes.stemVert->SetNormals(normalUp);
+        
+        Engine.meshes.log->GetSubMesh(2, subMeshTree);
+        
+        Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshWallHorz);
+        Engine.meshes.wallVertical  ->GetSubMesh(0, subMeshWallVert);
+        
+        Engine.meshes.grassHorz->GetSubMesh(0, subMeshGrassHorz);
+        Engine.meshes.grassVert->GetSubMesh(0, subMeshGrassVert);
+        
+        Engine.meshes.stemHorz->GetSubMesh(0, subMeshStemHorz);
+        Engine.meshes.stemVert->GetSubMesh(0, subMeshStemVert);
+        
+        return;
+    }
     
     void Update(void) {
         
@@ -222,7 +278,7 @@ public:
         // Update chunks
         //
         
-        for (unsigned int i=0; i < 13; i++) {
+        for (unsigned int i=0; i < 8; i++) {
             
             if (mChunkList.size() == 0) 
                 break;
@@ -249,21 +305,59 @@ public:
             if (index == -1) 
                 continue;
             
-            MeshRenderer* renderer = chunk.gameObject->GetComponent<MeshRenderer>();
-            
             // Update lighting
+            MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
+            
             if (Random.Range(0, 10) > 5) {
                 
-                renderer->material->ambient = world.staticTargetColor;
-                renderer->material->diffuse = world.staticTargetColor;
+                chunkRenderer->material->ambient = Colors.Lerp(world.chunkColorLow, world.chunkColorHigh, world.staticColorMul);
+                chunkRenderer->material->diffuse = Colors.Lerp(world.chunkColorLow, world.chunkColorHigh, world.staticColorMul);
                 
             }
             
+            
+            if (Random.Range(0, 10) > 5) {
+                
+                MeshRenderer* staticRenderer = chunk.staticObjects->GetComponent<MeshRenderer>();
+                staticRenderer->material->ambient = Colors.Lerp(world.staticColorLow, world.staticColorHigh, world.staticColorMul);
+                staticRenderer->material->diffuse = Colors.Lerp(world.staticColorLow, world.staticColorHigh, world.staticColorMul);
+                
+            }
+            
+            // Update actor lighting
+            unsigned int actorCount = chunk.actorList.size();
+            
+            if (Random.Range(0, 10) > 5) {
+            
+                for (unsigned int a=0; a < actorCount; a++) {
+                    
+                    GameObject* actorObject = chunk.actorList[a];
+                    
+                    Actor* actor = actorObject->GetComponent<Actor>();
+                    
+                    unsigned int numberOfRenderers = actor->GetNumberOfMeshRenderers();
+                    
+                    for (unsigned int z=0; z < numberOfRenderers; z++) {
+                        
+                        MeshRenderer* actorRenderer = actor->GetMeshRendererAtIndex(z);
+                        
+                        actorRenderer->material->ambient = Colors.Lerp(world.actorColorLow, world.actorColorHigh, world.staticColorMul);
+                        actorRenderer->material->diffuse = Colors.Lerp(world.actorColorLow, world.actorColorHigh, world.staticColorMul);
+                        
+                    }
+                    
+                }
+                
+            }
+            
+            
+            // Update level of detail
             if (glm::distance(chunkPosition, playerPosition) < levelOfDetailDistance) {
                 
                 // High level of detail
+                chunkRenderer->mesh = chunk.lodHigh;
                 
-                renderer->mesh = chunk.lodHigh;
+                chunk.staticObjects->Activate();
                 
                 transform->scale = glm::vec3(1, 1, 1);
                 transform->position.y = 0.0f;
@@ -271,8 +365,9 @@ public:
             } else {
                 
                 // Low level of detail
+                chunkRenderer->mesh = chunk.lodLow;
                 
-                renderer->mesh = chunk.lodLow;
+                chunk.staticObjects->Deactivate();
                 
                 transform->scale = glm::vec3(2.0f, 1.1f, 2.0f);
                 transform->position.y = -5.0f;
@@ -294,10 +389,10 @@ public:
             // Decrease purge rate
             mNumberOfChunksToPurge--;
             
-            if (mNumberOfChunksToPurge < 1) 
-                mNumberOfChunksToPurge = 1;
+            if (mNumberOfChunksToPurge < 3) 
+                mNumberOfChunksToPurge = 3;
             
-            for (unsigned int i=0; i < mNumberOfChunksToPurge; i++) {
+            for (unsigned int a=0; a < mNumberOfChunksToPurge; a++) {
                 
                 if (mChunkList.size() == 0) 
                     break;
@@ -330,9 +425,9 @@ public:
                     
                     if (numberOfActors > 0) {
                         
-                        for (unsigned int i=0; i < numberOfActors; i++) {
+                        for (unsigned int z=0; z < numberOfActors; z++) {
                             
-                            GameObject* actorObject = chunk.actorList[i];
+                            GameObject* actorObject = chunk.actorList[z];
                             
                             Engine.Destroy<GameObject>( actorObject );
                             
@@ -385,42 +480,6 @@ public:
         
         
         
-        
-        //
-        // Source meshes for world construction
-        
-        SubMesh subMeshWallHorz;
-        SubMesh subMeshWallVert;
-        
-        SubMesh subMeshGrassHorz;
-        SubMesh subMeshGrassVert;
-        
-        SubMesh subMeshStemHorz;
-        SubMesh subMeshStemVert;
-        
-        SubMesh subMeshTree;
-        
-        glm::vec3 normalUp(0, 1, 0);
-        
-        Engine.meshes.wallHorizontal->SetNormals(normalUp);
-        Engine.meshes.wallVertical->SetNormals(normalUp);
-        
-        Engine.meshes.grassHorz->SetNormals(normalUp);
-        Engine.meshes.grassVert->SetNormals(normalUp);
-        
-        Engine.meshes.stemHorz->SetNormals(normalUp);
-        Engine.meshes.stemVert->SetNormals(normalUp);
-        
-        Engine.meshes.log->GetSubMesh(2, subMeshTree);
-        
-        Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshWallHorz);
-        Engine.meshes.wallVertical  ->GetSubMesh(0, subMeshWallVert);
-        
-        Engine.meshes.grassHorz->GetSubMesh(0, subMeshGrassHorz);
-        Engine.meshes.grassVert->GetSubMesh(0, subMeshGrassVert);
-        
-        Engine.meshes.stemHorz->GetSubMesh(0, subMeshStemHorz);
-        Engine.meshes.stemVert->GetSubMesh(0, subMeshStemVert);
         
         
         
@@ -491,8 +550,20 @@ public:
             
             GameObject* baseObject = CreateBaseChunk(chunkX, chunkZ);
             
+            
+            Material* baseMaterial = Engine.Create<Material>();
+            
+            baseMaterial->shader = Engine.shaders.color;
+             
+            baseMaterial->ambient = Colors.Make(0.27f, 0.27f, 0.27f);
+            baseMaterial->diffuse = Colors.white;
+            baseMaterial->specular = Colors.white;
+            
+            
             // Chunk material
             MeshRenderer* baseRenderer = baseObject->GetComponent<MeshRenderer>();
+            baseRenderer->material = baseMaterial;
+            
             baseRenderer->EnableFrustumCulling();
             
             baseRenderer->isActive = false;
@@ -521,23 +592,17 @@ public:
             
             staticMesh->isShared = false;
             
+            
             // Static material
             
             Material* staticMaterial = Engine.Create<Material>();
-            
-            staticMaterial->shader = Engine.shaders.color;
             staticMaterial->DisableCulling();
             
-            staticMaterial->ambient = Colors.Make(0.27f, 0.27f, 0.27f);
+            staticMaterial->shader = Engine.shaders.color;
+            
+            staticMaterial->ambient = Colors.Make(0.1f, 0.1f, 0.1f);
             staticMaterial->diffuse = Colors.white;
             staticMaterial->specular = Colors.white;
-            
-            staticMaterial->isShared = false;
-            
-            baseRenderer->material = staticMaterial;
-            
-            
-            // Assemble the object container
             
             staticObjectContainer->AddComponent( Engine.CreateComponentMeshRenderer(staticMesh, staticMaterial) );
             
@@ -547,7 +612,6 @@ public:
             chunk.staticObjects = staticObjectContainer;
             
             Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer);
-            
             staticObjectContainer->Deactivate();
             
             
@@ -738,8 +802,8 @@ public:
                     Color lowTrunk;
                     Color highTrunk;
                     
-                    lowTrunk  = (Colors.brown * 0.01f)  + (Colors.green * 0.001);
-                    highTrunk = (Colors.brown * 0.008f) + (Colors.green * 0.01);
+                    lowTrunk  = (Colors.brown * 0.1f) + (Colors.green * 0.01);
+                    highTrunk = (Colors.brown * 0.8f) + (Colors.green * 0.01);
                     
                     finalColor = Colors.Lerp(lowTrunk, highTrunk, (s * 0.087f));
                     
@@ -752,6 +816,8 @@ public:
                 // Leaves
                 
                 float leafCount = Random.Range(((float)world.numberOfLeaves) / 2, (float)world.numberOfLeaves);
+                
+                unsigned int leafAccent = Random.Range(0, 100);
                 
                 for (unsigned int z=0; z < leafCount; z++) {
                     
@@ -766,13 +832,19 @@ public:
                     unsigned int index = numberOfSubMeshes - 1;
                     
                     Color finalColor;
-                    Color lowTrunk;
-                    Color highTrunk;
+                    Color lowLeaves;
+                    Color highLeaves;
                     
-                    lowTrunk  = (Colors.green * 0.01f)  + (Colors.green * 0.01);
-                    highTrunk = (Colors.green * 0.008f) + (Colors.green * 0.01);
+                    lowLeaves  = Colors.green * 0.08f;
+                    highLeaves = Colors.green * 0.01f;
                     
-                    finalColor = Colors.Lerp(lowTrunk, highTrunk, 0.087f);
+                    if ((leafAccent > 70) & (leafAccent < 80)) 
+                        lowLeaves = Colors.orange * 0.1f;
+                    
+                    if ((leafAccent > 20) & (leafAccent < 40)) 
+                        lowLeaves = Colors.yellow * 0.1f;
+                    
+                    finalColor = Colors.Lerp(lowLeaves, highLeaves, Random.Range(0, 100) * 0.01f);
                     
                     staticMesh->ChangeSubMeshColor(index, finalColor);
                     staticMesh->ChangeSubMeshColor(index-1, finalColor);
@@ -795,8 +867,8 @@ public:
             
             for (unsigned int a=0; a < world.staticDensity; a++) {
                 
-                float xx = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
-                float zz = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
+                float xx = Random.Range(0, chunkSize * 2) - Random.Range(0, chunkSize * 2) * 0.5f;
+                float zz = Random.Range(0, chunkSize * 2) - Random.Range(0, chunkSize * 2) * 0.5f;
                 
                 if ((xx > (chunkSize/2)) | (zz > (chunkSize/2)) | 
                     (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
@@ -820,22 +892,24 @@ public:
                 if (height == 0) 
                     continue;
                 
-                int spawnRange = Random.Range(0, 10);
+                int spawnRange = Random.Range(0, 7);
                 
-                if (spawnRange < 4) {
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshStemHorz, false);
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshStemVert, false);
-                }
+                staticMesh->AddSubMesh(0, 0, 0, subMeshStemHorz, false);
+                staticMesh->AddSubMesh(0, 0, 0, subMeshStemVert, false);
                 
+                /*
                 if ((spawnRange >= 4) & (spawnRange < 8)) {
                     staticMesh->AddSubMesh(0, 0, 0, subMeshGrassHorz, false);
                     staticMesh->AddSubMesh(0, 0, 0, subMeshGrassVert, false);
                 }
+                */
                 
+                /*
                 if (spawnRange >= 8) {
                     staticMesh->AddSubMesh(0, 0, 0, subMeshWallHorz, false);
                     staticMesh->AddSubMesh(0, 0, 0, subMeshWallVert, false);
                 }
+                */
                 
                 unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
                 
@@ -856,7 +930,7 @@ public:
                 }
                 
                 if (colorRange >= 7) {
-                    finalColor = (Colors.red + (Colors.MakeRandomGrayScale() * 0.087f)) * 0.02f;
+                    finalColor = (Colors.green + (Colors.MakeRandomGrayScale() * 0.087f)) * 0.02f;
                 }
                 
                 staticMesh->ChangeSubMeshColor(index, finalColor);
