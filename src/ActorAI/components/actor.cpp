@@ -142,6 +142,14 @@ glm::vec3 Actor::GetPosition(void) {
     return position;
 }
 
+unsigned int Actor::GetNumberOfMeshRenderers(void) {
+    return mGeneticRenderers.size();
+}
+
+MeshRenderer* Actor::GetMeshRendererAtIndex(unsigned int index) {
+    return mGeneticRenderers[index];
+}
+
 // Genetics
 
 
