@@ -32,12 +32,9 @@ void EngineSystemManager::UpdateComponentStream(void) {
             
             if (glm::distance(gameObject->mTransformCache->position, sceneMain->camera->transform.position) > gameObject->renderDistance) 
                 shouldRender = false;
-            
         }
         
-        
         // Check garbage collection
-        
         if (gameObject->mIsGarbage) {
             
             mGarbageGameObjects.push_back( gameObject );
@@ -49,7 +46,6 @@ void EngineSystemManager::UpdateComponentStream(void) {
         
         
         // Update the state of associated components
-        
         bool activeState = true;
         
         if ((!gameObject->isActive) | (!shouldRender))
@@ -66,6 +62,8 @@ void EngineSystemManager::UpdateComponentStream(void) {
         
         if (gameObject->mRigidBodyCache) 
             gameObject->mRigidBodyCache->setIsActive( activeState );
+        
+        gameObject->mMeshRendererCache->transform.position = gameObject->mTransformCache.position;
         
         
         // Check last object

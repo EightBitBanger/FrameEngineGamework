@@ -292,8 +292,8 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         newMaterial->diffuse.g = mStreamBuffer[index].actor->mGenes[a].color.y;
         newMaterial->diffuse.b = mStreamBuffer[index].actor->mGenes[a].color.z;
         
-        float ambient = 0.01f;
-        newMaterial->ambient = Colors.Make(ambient, ambient, ambient);
+        newMaterial->ambient = Colors.black;
+        newMaterial->diffuse = Colors.white;
         
         MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
         newRenderer->isActive = false;
@@ -390,9 +390,9 @@ void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
         
         
         // Scale by age
-        float ageScale = (mStreamBuffer[index].actor->mAge * 0.0001f);
+        float ageScale = (mStreamBuffer[index].actor->GetAge() * 0.0001f);
         
-        if (ageScale < 1) {
+        if (ageScale < 1.0f) {
             
             matrix = glm::scale( matrix, Math.Lerp(glm::vec3(mStreamBuffer[index].actor->mYouthScale), 
                                                    glm::vec3(mStreamBuffer[index].actor->mAdultScale), 
@@ -401,6 +401,8 @@ void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
         } else {
             
             matrix = glm::scale( matrix, glm::vec3(mStreamBuffer[index].actor->mAdultScale) );
+            
+            ageScale = 1.0f;
             
         }
         
