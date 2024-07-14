@@ -15,7 +15,7 @@ option(EVENT_LOG_DETAILED   "Log events out to the event log file." OFF)
 option(RUN_UNIT_TESTS       "Run unit tests at application start." OFF)
 
 
-#
+# ==========================================================
 # Build configuration
 #
 
@@ -29,7 +29,7 @@ endif()
 
 
 
-#
+# ==========================================================
 # Build executable file to launch the application
 #
 
@@ -175,7 +175,7 @@ endif()
 
 
 
-#
+# ==========================================================
 # Build application dll
 #
 
@@ -314,9 +314,9 @@ endif()
 
 
 
-#
+# ==========================================================
 # Build engine core dll
-#
+# 
 
 if(BUILD_CORE_ENGINE)
 
@@ -426,7 +426,7 @@ set (CORE_SOURCES
     "src/Engine/EngineGameObjects.cpp"
     "src/Engine/EngineComponents.cpp"
     "src/Engine/EngineDeferredDeletion.cpp"
-    "src/Engine/EngineUpdateComponentStream.cpp"
+    "src/Engine/EngineUpdateStream.cpp"
     
     "src/Engine/componentUpdate/EngineUpdateUI.cpp"
     "src/Engine/componentUpdate/EngineUpdateAI.cpp"
