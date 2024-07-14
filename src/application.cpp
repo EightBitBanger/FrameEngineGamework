@@ -21,9 +21,6 @@ GameObject*  cameraController;
 
 
 // Day night cycle
-GameObject* lightObject;
-Light* directionalLight;
-
 bool cycleDirection = false;
 
 float ambientLight = 0.9;
@@ -104,7 +101,8 @@ void Start() {
     
     Platform.HideMouseCursor();
     
-    
+    chunkManager.Initiate();
+    Weather.Initiate();
     
     
     
@@ -136,31 +134,6 @@ void Start() {
     
     
     
-    //
-    // Directional light
-    //
-    
-    // Create a new game object.
-    lightObject = Engine.Create<GameObject>();
-    
-    // Add a new light component to the game object.
-    lightObject->AddComponent( Engine.CreateComponent<Light>() );
-    
-    // Point the game object downward. This will cause 
-    // the light component to point toward the ground.
-    lightObject->GetComponent<Transform>()->RotateAxis(1, Vector3(0.8, -0.8, 0.0));
-    
-    // Get a pointer to the newly created light component.
-    directionalLight = lightObject->GetComponent<Light>();
-    
-    // Setup the parameters for a directional light
-    directionalLight->type       = LIGHT_TYPE_DIRECTIONAL;
-    directionalLight->intensity  = 0.7;
-    directionalLight->color      = Colors.white;
-    
-    // Add the light to the main scene.
-    Engine.sceneMain->AddLightToSceneRoot( directionalLight );
-    
     
     //
     // Create a sky
@@ -187,7 +160,7 @@ void Start() {
     // Sky rendering colors
     MeshRenderer* skyRenderer = skyObject->GetComponent<MeshRenderer>();
     skyMaterial = skyRenderer->material;
-    skyMaterial->diffuse = Colors.white;
+    skyMaterial->diffuse = Colors.dkgray;
     skyMaterial->ambient = Colors.white;
     
     
@@ -200,20 +173,37 @@ void Start() {
     chunkManager.chunkSize = 50;
     
     // World generation
-    chunkManager.renderDistance = 10;
+    chunkManager.renderDistance = 20;
     
     chunkManager.generationDistance  = chunkManager.renderDistance * chunkManager.chunkSize;
     chunkManager.destructionDistance = chunkManager.generationDistance * 1.5f;
     
-    chunkManager.renderDistance = 100;
+    chunkManager.renderDistance = 500;
     
     chunkManager.doUpdateWithPlayerPosition = false;
     
-    chunkManager.levelOfDetailDistance = 200;
+    chunkManager.levelOfDetailDistance = 500;
     
     // Start culling at the chunk size boundary
     Engine.sceneMain->camera->frustumOffset = chunkManager.chunkSize + 20;
     
+    float chunkHigh = 0.87f;
+    float chunkLow  = 0.1f;
+    
+    float staticHigh = 0.87f;
+    float staticLow  = 0.1f;
+    
+    float actorHigh = 0.87f;
+    float actorLow  = 0.1f;
+    
+    chunkManager.world.chunkColorHigh = Colors.Make(chunkHigh, chunkHigh, chunkHigh);
+    chunkManager.world.chunkColorLow  = Colors.Make(chunkLow, chunkLow, chunkLow);
+    
+    chunkManager.world.staticColorHigh = Colors.Make(staticHigh, staticHigh, staticHigh);
+    chunkManager.world.staticColorLow  = Colors.Make(staticLow, staticLow, staticLow);
+    
+    chunkManager.world.actorColorHigh = Colors.Make(actorHigh, actorHigh, actorHigh);
+    chunkManager.world.actorColorLow  = Colors.Make(actorLow, actorLow, actorLow);
     
     
     // Perlin layers
@@ -257,9 +247,9 @@ void Start() {
     
     
     // Actor generation
-    chunkManager.world.staticDensity = 1000;
+    chunkManager.world.staticDensity = 8000;
     
-    chunkManager.world.treeDensity = 10;
+    chunkManager.world.treeDensity = 30;
     
     chunkManager.world.actorDensity = 10;
     
@@ -344,19 +334,16 @@ void Run() {
     // Lighting day night cycle experimentation 
     //
     
-    float skyLightingMax    = 0.5;
-    float skyLightingMin    = 0.01;
+    float skyLightingMax    = 0.87f;
+    float skyLightingMin    = 0.0087f;
     
-    float worldLightingMax  = 0.7;
-    float worldLightingMin  = 0.1;
-    
-    float lightingMax       = 4.0;
-    float lightingMin       = 0.5;
+    float lightingMax       = 10.0f;
+    float lightingMin       = 0.0f;
     
     
     
     // Light direction
-    Transform* lightTransform = lightObject->GetComponent<Transform>();
+    Transform* lightTransform = Weather.sunObject->GetComponent<Transform>();
     
     
     if (!Platform.isPaused) {
@@ -364,8 +351,8 @@ void Run() {
         if (Input.CheckKeyCurrent(VK_I)) {ambientLight += 0.01f;}
         if (Input.CheckKeyCurrent(VK_K)) {ambientLight -= 0.01f;}
         
-        if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateAxis( 0.1, Vector3(1, 0, 0));}
-        if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateAxis(-0.1, Vector3(1, 0, 0));}
+        if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateEuler(0, 0,  0.1);}
+        if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateEuler(0, 0, -0.1);}
         
     }
     
@@ -374,14 +361,14 @@ void Run() {
     if (ambientLight > 0.87f) ambientLight = 0.87f;
     if (ambientLight < 0.0f)  ambientLight = 0.0f;
     
+    // World brightness
+    chunkManager.world.staticColorMul = ambientLight;
+    
     // Sky brightness
     skyMaterial->ambient = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
     
-    // World brightness
-    chunkManager.world.staticTargetColor = Math.Lerp(worldLightingMin, worldLightingMax, ambientLight);
-    
     // Light brightness
-    directionalLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);;
+    Weather.sun->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);
     
     
     
