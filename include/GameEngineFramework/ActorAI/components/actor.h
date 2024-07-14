@@ -55,6 +55,12 @@ public:
     /// Get the position of the actor.
     glm::vec3 GetPosition(void);
     
+    /// Get the number of mesh renderers associated with this actor.
+    unsigned int GetNumberOfMeshRenderers(void);
+    /// Return a mesh renderer at the given index.
+    MeshRenderer* GetMeshRendererAtIndex(unsigned int index);
+    
+    
     // Genetics
     
     /// Add a new gene to the actors genome. The index location will be returned.
