@@ -10,7 +10,7 @@ Transform::Transform() :
     localRotation(glm::identity<glm::quat>()),
     localScale(glm::vec3(1, 1, 1)),
     
-    matrix(glm::mat4(1)),
+    matrix(glm::mat4(0)),
     
     parent(nullptr),
     
