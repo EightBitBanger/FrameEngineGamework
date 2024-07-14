@@ -15,7 +15,6 @@ option(EVENT_LOG_DETAILED   "Log events out to the event log file." OFF)
 option(RUN_UNIT_TESTS       "Run unit tests at application start." OFF)
 
 
-
 #
 # Build configuration
 #
@@ -30,8 +29,9 @@ endif()
 
 
 
-
-
+#
+# Build executable file to launch the application
+#
 
 if(BUILD_RUNTIME_EXECUTABLE)
 
@@ -175,10 +175,9 @@ endif()
 
 
 
-
-
-
-
+#
+# Build application dll
+#
 
 if(BUILD_APPLICATION_LIBRARY)
 
@@ -315,13 +314,9 @@ endif()
 
 
 
-
-
-
-
-
-
-
+#
+# Build engine core dll
+#
 
 if(BUILD_CORE_ENGINE)
 
