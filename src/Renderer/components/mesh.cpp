@@ -18,11 +18,11 @@ Mesh::Mesh() :
     
     mVertexBufferSz(0),
     mIndexBufferSz(0),
-    mMaxSize(0),
     
-    mAreBuffersAllocated(false)
+    mAreBuffersAllocated(true)
 {
-    AllocateBuffers(1024);
+    
+    AllocateBuffers();
     
     SetDefaultAttributes();
     return;
@@ -31,6 +31,7 @@ Mesh::Mesh() :
 Mesh::~Mesh() {
     
     FreeBuffers();
+    
     return;
 }
 
@@ -308,9 +309,6 @@ bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) 
     
     mSubMesh[index].position = glm::vec3(x, y, z);
     
-    //glBindVertexArray(mVertexArray);
-    //glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
-    
     return true;
 }
 
@@ -326,9 +324,6 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
         vertex.b = newColor.b;
         destMesh.push_back(vertex);
     }
-    
-    //glBindVertexArray(mVertexArray);
-    //glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
     
     return true;
 }
@@ -351,9 +346,6 @@ bool Mesh::ChangeSubMeshPoints(unsigned int index, std::vector<glm::vec3> points
         
     }
     
-    //glBindVertexArray(mVertexArray);
-    //glBufferSubData(GL_ARRAY_BUFFER, sourceMesh.vertexBegin * sizeof(Vertex), sourceMesh.vertexCount * sizeof(Vertex), &destMesh[0]);
-    
     return true;
 }
 
@@ -366,26 +358,16 @@ void Mesh::ClearSubMeshes(void) {
 
 void Mesh::Load(void) {
     
-    /*
+    mVertexBufferSz = mVertexBuffer.size();
+    mIndexBufferSz  = mIndexBuffer.size();
     
     if (!mAreBuffersAllocated) {
         
-        mVertexBufferSz = mVertexBuffer.size();
-        mIndexBufferSz  = mIndexBuffer.size();
+        AllocateBuffers();
         
-        if (mVertexBufferSz > mIndexBufferSz) {
-            
-            AllocateBuffers( mVertexBufferSz );
-            
-        } else {
-            
-            AllocateBuffers( mIndexBufferSz );
-            
-        }
-        
+        mAreBuffersAllocated = true;
     }
     
-    */
     
     glBindVertexArray(mVertexArray);
     
@@ -395,17 +377,13 @@ void Mesh::Load(void) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0], GL_STATIC_DRAW);
     
-    mAreBuffersAllocated = true;
-    
     return;
 }
 
 void Mesh::Unload(void) {
-    /*
     
     if (!mAreBuffersAllocated) 
         return;
-    */
     
     FreeBuffers();
     
@@ -447,6 +425,9 @@ void Mesh::SetIndex(unsigned int index, Index position) {
 void Mesh::CalculateNormals(void) {
     
     for (unsigned int i=0; i < mVertexBufferSz; i += 3) {
+        
+        if (i > mVertexBuffer.size()) 
+            break;
         
         Vertex vertA = mVertexBuffer[i  ];
         Vertex vertB = mVertexBuffer[i+1];
@@ -499,14 +480,6 @@ void Mesh::SetNormals(glm::vec3 normals) {
     return;
 }
 
-void Mesh::Reallocate(unsigned int newBufferSize) {
-    FreeBuffers();
-    AllocateBuffers(newBufferSize);
-    
-    SetDefaultAttributes();
-    return;
-}
-
 void Mesh::SetPrimitive(int primitiveType) {
     mPrimitive = primitiveType;
     return;
@@ -529,14 +502,14 @@ void Mesh::DisableAttribute(int index) {
 void Mesh::LoadVertexBuffer(Vertex* bufferData, int vertexCount) {
     glBindVertexArray(mVertexArray);
     glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), &bufferData[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), &bufferData[0], GL_STATIC_DRAW);
     return;
 }
 
 void Mesh::LoadIndexBuffer(Index* bufferData, int indexCount) {
     glBindVertexArray(mVertexArray);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(Index), &bufferData[0], GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(Index), &bufferData[0], GL_STATIC_DRAW);
     return;
 }
 
@@ -545,19 +518,21 @@ void Mesh::Bind() {
     return;
 }
 
-void Mesh::AllocateBuffers(unsigned int maxBufferSize) {
-    mMaxSize = maxBufferSize;
+void Mesh::AllocateBuffers(void) {
+    
+    mVertexBufferSz = mVertexBuffer.size();
+    mIndexBufferSz  = mIndexBuffer.size();
     
     glGenVertexArrays(1, &mVertexArray);
     glBindVertexArray(mVertexArray);
     
     glGenBuffers(1, &mBufferVertex);
     glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
-    glBufferData(GL_ARRAY_BUFFER, mMaxSize * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mVertexBufferSz * sizeof(Vertex), NULL, GL_STATIC_DRAW);
     
     glGenBuffers(1, &mBufferIndex);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mMaxSize * sizeof(Index), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index), NULL, GL_STATIC_DRAW);
     
     return;
 }
