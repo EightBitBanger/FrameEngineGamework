@@ -226,6 +226,9 @@ public:
     /// The bias will determine how much snow will be added.
     void AddColorFieldSnowCap(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color capColor, float beginHeight, float bias);
     
+    /// Generate a water level effect.
+    void AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color waterColor, float beginHeight, float bias);
+    
     // Mapping to a mesh
     
     /// Apply the height field values to a mesh.
