@@ -24,15 +24,23 @@ class ENGINE_API WeatherSystem {
     
 public:
     
+    /// Sun
     GameObject* sunObject;
-    Light* sun;
+    Light* sunLight;
     
+    /// Sky
+    GameObject* skyObject;
+    Material* skyMaterial;
     
-    
+    /// Day/night cycle
     
     
     
     void Initiate(void) {
+        
+        //
+        // Sun
+        //
         
         sunObject = Engine.Create<GameObject>();
         sunObject->AddComponent( Engine.CreateComponent<Light>() );
@@ -40,14 +48,39 @@ public:
         Transform* transform = sunObject->GetComponent<Transform>();
         transform->RotateEuler(0.0f, -1.0f, 2.0f);
         
-        sun = sunObject->GetComponent<Light>();
+        sunLight = sunObject->GetComponent<Light>();
         
-        sun->type       = LIGHT_TYPE_DIRECTIONAL;
-        sun->intensity  = 0.7f;
-        sun->color      = Colors.white;
+        sunLight->type       = LIGHT_TYPE_DIRECTIONAL;
+        sunLight->intensity  = 0.7f;
+        sunLight->color      = Colors.white;
         
-        Engine.sceneMain->AddLightToSceneRoot( sun );
+        Engine.sceneMain->AddLightToSceneRoot( sunLight );
         
+        //
+        // Sky
+        //
+        
+        // Amount of fade bias from the color "skyHigh" to "skyLow".
+        float colorBias = 1.0f;
+        
+        // Sky mesh resource name.
+        // Note: this mesh is loaded by the resource manager.
+        std::string skyResourceName = "sky";
+        
+        // Generate the sky which will be returned as a game object.
+        // This game object will contain a mesh renderer to draw the sky.
+        skyObject = Engine.CreateSky(skyResourceName, Colors.blue, Colors.blue, colorBias);
+        
+        // Add the sky's mesh renderer to the main scene.
+        Engine.sceneMain->AddMeshRendererToSceneRoot( skyObject->GetComponent<MeshRenderer>(), RENDER_QUEUE_SKY );
+        
+        // Sky rendering colors
+        MeshRenderer* skyRenderer = skyObject->GetComponent<MeshRenderer>();
+        skyMaterial = skyRenderer->material;
+        skyMaterial->diffuse = Colors.dkgray;
+        skyMaterial->ambient = Colors.white;
+        
+        return;
     }
     
     

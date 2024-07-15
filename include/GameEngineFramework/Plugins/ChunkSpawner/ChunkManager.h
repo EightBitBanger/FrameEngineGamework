@@ -32,6 +32,8 @@ public:
         
         snowCapHeight(70),
         
+        waterLevel(0),
+        
         actorHeightCutoff(20),
         staticHeightCutoff(20),
         treeHeightCutoff(50),
@@ -39,13 +41,15 @@ public:
         treeHeightLow(5),
         treeHeightHigh(10),
         
-        leafSpreadArea(5.0f),
-        leafSpreadHeight(1.8f),
+        leafSpreadArea(5.7f),
+        leafSpreadHeight(1.4f),
         leafHeightOffset(-0.8f),
-        numberOfLeaves(30),
+        numberOfLeaves(45),
         
         staticColorMul(0.87f)
     {
+        waterColor = Colors.red;
+        
         chunkColorHigh  = Colors.black;
         chunkColorLow   = Colors.black;
         staticColorLow  = Colors.black;
@@ -65,6 +69,12 @@ public:
     
     /// Height at which the world will generate snow on mountain tops
     float snowCapHeight;
+    
+    /// Water table starting height.
+    float waterLevel;
+    
+    /// Color to use for water generation.
+    Color waterColor;
     
     /// Perlin layers to apply to the world
     std::vector<Perlin> perlinGraph;
@@ -580,7 +590,7 @@ public:
             // Generate the static object container
             
             GameObject* staticObjectContainer = Engine.Create<GameObject>();
-            staticObjectContainer->renderDistance = renderDistance * (chunkSize / 2) * 0.8f;
+            staticObjectContainer->renderDistance = (renderDistance * (chunkSize / 2)) * 0.2f;
             
             Transform* transform = staticObjectContainer->GetComponent<Transform>();
             
@@ -670,6 +680,9 @@ public:
             // Snow cap
             Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize, chunkSize, Colors.white, world.snowCapHeight, 7.0f);
             
+            // Water table
+            Engine.AddColorFieldWaterTable(colorField, heightField, chunkSize, chunkSize, world.waterColor, world.waterLevel, 0.1f);
+            
             
             // Generate rigid body
             
@@ -741,6 +754,9 @@ public:
                 if (height == 0) 
                     continue;
                 
+                if (height <= world.waterLevel) 
+                    continue;
+                
                 GameObject* actorObject = Engine.CreateAIActor( glm::vec3(from.x, 0, from.z) );
                 
                 chunk.actorList.push_back( actorObject );
@@ -783,6 +799,9 @@ public:
                     continue;
                 
                 if (height == 0) 
+                    continue;
+                
+                if (height <= world.waterLevel) 
                     continue;
                 
                 
@@ -892,52 +911,67 @@ public:
                 if (height == 0) 
                     continue;
                 
-                int spawnRange = Random.Range(0, 7);
+                unsigned int stackHeight = Random.Range(0, 3);
                 
-                staticMesh->AddSubMesh(0, 0, 0, subMeshStemHorz, false);
-                staticMesh->AddSubMesh(0, 0, 0, subMeshStemVert, false);
+                unsigned int stackType = Random.Range(0, 7);
                 
-                /*
-                if ((spawnRange >= 4) & (spawnRange < 8)) {
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshGrassHorz, false);
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshGrassVert, false);
+                for (unsigned int c=0; c < stackHeight; c++) {
+                    
+                    if (stackType > 2) {
+                        
+                        float heightOffset = height + c;
+                        
+                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshStemHorz, false);
+                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshStemVert, false);
+                        
+                        unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                        
+                        Color finalColor;
+                        finalColor = Colors.green * 0.03f;
+                        
+                        finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
+                                                  Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
+                                                  Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
+                        
+                        staticMesh->ChangeSubMeshColor(index, finalColor);
+                        staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                        
+                    }
+                    
+                    if (height <= world.waterLevel) 
+                        continue;
+                    
+                    if (stackType == 1) {
+                        float heightOffset = height + c;
+                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshGrassHorz, false);
+                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshGrassVert, false);
+                        
+                        unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                        
+                        Color finalColor;
+                        finalColor = Colors.green * 0.04f;
+                        
+                        staticMesh->ChangeSubMeshColor(index, finalColor);
+                        staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                        
+                    }
+                    
+                    if (stackType == 0) {
+                        float heightOffset = height + c;
+                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshWallHorz, false);
+                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshWallVert, false);
+                        
+                        unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                        
+                        Color finalColor;
+                        finalColor = Colors.green * 0.05f;
+                        
+                        staticMesh->ChangeSubMeshColor(index, finalColor);
+                        staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                        
+                    }
+                    
                 }
-                */
-                
-                /*
-                if (spawnRange >= 8) {
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshWallHorz, false);
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshWallVert, false);
-                }
-                */
-                
-                unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
-                
-                unsigned int index = numberOfSubMeshes - 1;
-                
-                unsigned int colorRange = Random.Range(0, 10);
-                
-                Color finalColor;
-                
-                finalColor = (Colors.dkgreen + (Colors.MakeRandomGrayScale() * 0.4f)) * 0.087f;
-                
-                if (colorRange < 4) {
-                    finalColor = (Colors.dkgreen + (Colors.MakeRandomGrayScale() * 0.087f)) * 0.087f;
-                }
-                
-                if ((colorRange >= 4) & (colorRange < 7)) {
-                    finalColor = (Colors.yellow - (Colors.MakeRandomGrayScale() * 0.3f)) * 0.01f;
-                }
-                
-                if (colorRange >= 7) {
-                    finalColor = (Colors.green + (Colors.MakeRandomGrayScale() * 0.087f)) * 0.02f;
-                }
-                
-                staticMesh->ChangeSubMeshColor(index, finalColor);
-                staticMesh->ChangeSubMeshColor(index-1, finalColor);
-                
-                staticMesh->ChangeSubMeshPosition(index, xx, height, zz);
-                staticMesh->ChangeSubMeshPosition(index-1, xx, height, zz);
                 
                 continue;
             }
