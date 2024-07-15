@@ -2,15 +2,15 @@
 
 
 Transform::Transform() : 
-    position(glm::vec3(0, 0, 0)),
+    position(glm::vec3(0.0f, 0.0f, 0.0f)),
     rotation(glm::identity<glm::quat>()),
-    scale(glm::vec3(1, 1, 1)),
+    scale(glm::vec3(1.0f, 1.0f, 1.0f)),
     
-    localPosition(glm::vec3(0, 0, 0)),
+    localPosition(glm::vec3(0.0f, 0.0f, 0.0f)),
     localRotation(glm::identity<glm::quat>()),
-    localScale(glm::vec3(1, 1, 1)),
+    localScale(glm::vec3(1.0f, 1.0f, 1.0f)),
     
-    matrix(glm::mat4(0)),
+    matrix(glm::mat4(0.0f)),
     
     parent(nullptr),
     

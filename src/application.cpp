@@ -25,8 +25,6 @@ bool cycleDirection = false;
 
 float ambientLight = 0.9;
 
-Material* skyMaterial;
-
 
 
 
@@ -102,8 +100,8 @@ void Start() {
     Platform.HideMouseCursor();
     
     chunkManager.Initiate();
-    Weather.Initiate();
     
+    Weather.Initiate();
     
     
     
@@ -132,37 +130,9 @@ void Start() {
     // Add the collider to the camera controller game object.
     Engine.cameraController->AddColliderBox(boxShape, 0, 0, 0);
     
-    
-    
-    
-    //
-    // Create a sky
-    //
-    
-    // Amount of fade bias from the color "skyHigh" to "skyLow".
-    float colorBias = 1.0f;
-    
-    // Sky mesh resource name.
-    // Note: this mesh is loaded by the resource manager.
-    std::string skyResourceName = "sky";
-    
-    // Generate the sky which will be returned as a game object.
-    // This game object will contain a mesh renderer to draw the sky.
-    GameObject* skyObject = Engine.CreateSky(skyResourceName, Colors.blue, Colors.blue, colorBias);
-    
-    // Add the sky's mesh renderer to the main scene.
-    Engine.sceneMain->AddMeshRendererToSceneRoot( skyObject->GetComponent<MeshRenderer>(), RENDER_QUEUE_SKY );
-    
     // Attach the sky object to the camera controller to prevent 
     // the player from moving outside of the sky.
-    skyObject->GetComponent<Transform>()->parent = Engine.cameraController->GetComponent<Transform>();
-    
-    // Sky rendering colors
-    MeshRenderer* skyRenderer = skyObject->GetComponent<MeshRenderer>();
-    skyMaterial = skyRenderer->material;
-    skyMaterial->diffuse = Colors.dkgray;
-    skyMaterial->ambient = Colors.white;
-    
+    Weather.skyObject->GetComponent<Transform>()->parent = Engine.cameraController->GetComponent<Transform>();
     
     
     
@@ -170,15 +140,15 @@ void Start() {
     // Chunk generation
     //
     
-    chunkManager.chunkSize = 50;
+    chunkManager.chunkSize = 100;
     
     // World generation
-    chunkManager.renderDistance = 20;
+    chunkManager.renderDistance = 40;
     
     chunkManager.generationDistance  = chunkManager.renderDistance * chunkManager.chunkSize;
     chunkManager.destructionDistance = chunkManager.generationDistance * 1.5f;
     
-    chunkManager.renderDistance = 500;
+    chunkManager.renderDistance = 30;
     
     chunkManager.doUpdateWithPlayerPosition = false;
     
@@ -228,13 +198,13 @@ void Start() {
     
     Perlin perlinMountainA;
     perlinMountainA.equation = 0;
-    perlinMountainA.heightMultuplier = 80;
+    perlinMountainA.heightMultuplier = 100;
     perlinMountainA.noiseWidth  = 0.009;
     perlinMountainA.noiseHeight = 0.009;
     
     Perlin perlinMountainB;
     perlinMountainB.equation = 0;
-    perlinMountainB.heightMultuplier = 200;
+    perlinMountainB.heightMultuplier = 300;
     perlinMountainB.noiseWidth  = 0.0007;
     perlinMountainB.noiseHeight = 0.0007;
     
@@ -244,15 +214,18 @@ void Start() {
     chunkManager.world.AddPerlinLayer(perlinMountainA);
     chunkManager.world.AddPerlinLayer(perlinMountainB);
     
+    // Added decoration
     
+    chunkManager.world.staticDensity = 4000;
     
-    // Actor generation
-    chunkManager.world.staticDensity = 8000;
+    chunkManager.world.treeDensity = 60;
     
-    chunkManager.world.treeDensity = 30;
+    chunkManager.world.actorDensity = 4;
     
-    chunkManager.world.actorDensity = 10;
+    chunkManager.world.waterLevel = -20;
+    chunkManager.world.waterColor = Colors.blue * 0.4f;
     
+    chunkManager.world.snowCapHeight = 80;
     
     return;
 }
@@ -343,16 +316,18 @@ void Run() {
     
     
     // Light direction
-    Transform* lightTransform = Weather.sunObject->GetComponent<Transform>();
-    
-    
-    if (!Platform.isPaused) {
+    if (Weather.sunLight != nullptr) {
+        Transform* lightTransform = Weather.sunObject->GetComponent<Transform>();
         
-        if (Input.CheckKeyCurrent(VK_I)) {ambientLight += 0.01f;}
-        if (Input.CheckKeyCurrent(VK_K)) {ambientLight -= 0.01f;}
-        
-        if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateEuler(0, 0,  0.1);}
-        if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateEuler(0, 0, -0.1);}
+        if (!Platform.isPaused) {
+            
+            if (Input.CheckKeyCurrent(VK_I)) {ambientLight += 0.01f;}
+            if (Input.CheckKeyCurrent(VK_K)) {ambientLight -= 0.01f;}
+            
+            if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateEuler(0, 0,  0.1);}
+            if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateEuler(0, 0, -0.1);}
+            
+        }
         
     }
     
@@ -365,10 +340,12 @@ void Run() {
     chunkManager.world.staticColorMul = ambientLight;
     
     // Sky brightness
-    skyMaterial->ambient = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
+    if (Weather.skyMaterial != nullptr) 
+        Weather.skyMaterial->ambient = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
     
     // Light brightness
-    Weather.sun->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);
+    if (Weather.sunLight != nullptr) 
+        Weather.sunLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);
     
     
     
