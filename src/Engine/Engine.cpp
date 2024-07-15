@@ -270,6 +270,54 @@ void EngineSystemManager::AddColorFieldSnowCap(glm::vec3* colorField, float* hei
     return;
 }
 
+void EngineSystemManager::AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, 
+                                                  unsigned int width, unsigned int height, 
+                                                  Color waterColor, float beginHeight, float bias) {
+    
+    for (unsigned int x=0; x < width; x ++) {
+        
+        for (unsigned int z=0; z < height; z ++) {
+            
+            unsigned int index = z * width + x;
+            
+            float heightBias = heightField[index] * 0.01;
+            
+            if (heightField[index] >= beginHeight) 
+                continue;
+            
+            Color color( colorField[index].x, colorField[index].y, colorField[index].z );
+            
+            float heightLerp = heightField[index] * 0.07;
+            
+            if (heightLerp > 1.0f) 
+                heightLerp = 1.0f;
+            
+            color = Colors.Lerp(color, waterColor, heightLerp);
+            
+            heightField[index] = beginHeight;
+            
+            /*
+            if (Random.Range(0, 100) > diff) 
+                color = Colors.Lerp(color, waterColor, heightField[index] * 0.07);
+            
+            int diff = ((beginHeight - (beginHeight - 20)) - (heightField[index] - beginHeight)) * bias;
+            
+            if (Random.Range(0, 100) > diff) 
+                color = Colors.Lerp(color, waterColor, heightField[index] * 0.07);
+            */
+            
+            // Apply the final color
+            colorField[index] = glm::vec3( color.r, color.g, color.b );
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    return;
+}
+
 Mesh* EngineSystemManager::CreateMeshFromHeightField(float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ) {
     
     Mesh* mesh = Create<Mesh>();

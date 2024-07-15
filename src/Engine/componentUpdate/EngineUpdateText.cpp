@@ -39,6 +39,7 @@ void EngineSystemManager::UpdateTextUI(unsigned int index) {
         
     }
     
+    
     //
     // Anchor RIGHT
     

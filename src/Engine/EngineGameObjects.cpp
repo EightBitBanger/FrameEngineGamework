@@ -165,6 +165,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     
     overlayObject->renderDistance = -1;
     
+    overlayObject->mTransformCache->matrix = glm::mat4(1);
     overlayObject->mTransformCache->RotateAxis(-180, Vector3(0, 1, 0));
     overlayObject->mTransformCache->RotateAxis( -90, Vector3(0, 0, 1));
     overlayObject->mTransformCache->inheritParentRotation = false;

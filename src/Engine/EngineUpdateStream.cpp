@@ -22,9 +22,6 @@ void EngineSystemManager::UpdateComponentStream(void) {
         
         GameObject* gameObject = mGameObjects[mObjectIndex];
         
-        if (gameObject->mTransformCache == nullptr) 
-            continue;
-        
         // Check game object render distance
         bool shouldRender = true;
         
@@ -45,7 +42,10 @@ void EngineSystemManager::UpdateComponentStream(void) {
         }
         
         
+        //
         // Update the state of associated components
+        //
+        
         bool activeState = true;
         
         if ((!gameObject->isActive) | (!shouldRender))
