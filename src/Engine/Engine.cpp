@@ -287,14 +287,14 @@ void EngineSystemManager::AddColorFieldWaterTable(glm::vec3* colorField, float* 
             
             Color color( colorField[index].x, colorField[index].y, colorField[index].z );
             
-            float heightLerp = heightField[index] * 0.07;
+            float heightLerp = heightField[index] * 0.001;
             
             if (heightLerp > 1.0f) 
                 heightLerp = 1.0f;
             
             color = Colors.Lerp(color, waterColor, heightLerp);
             
-            heightField[index] = beginHeight;
+            //heightField[index] = beginHeight;
             
             /*
             if (Random.Range(0, 100) > diff) 

@@ -33,9 +33,6 @@ float ambientLight = 0.9;
 
 
 
-// Application entry point
-//
-
 void FuncSummon(std::vector<std::string> args) {
     
     for (uint8_t i=0; i < 24; i++) {
@@ -66,8 +63,10 @@ void FuncSummon(std::vector<std::string> args) {
         }
         
         
+        // Add extra gene
+        
         Gene gene;
-        gene.attachmentIndex = 1;
+        gene.attachmentIndex = 3;
         
         gene.position.x = 0;
         gene.position.y = 0.9;
@@ -90,10 +89,11 @@ void FuncSummon(std::vector<std::string> args) {
 
 
 
+//
+// Application entry point
+//
 
 void Start() {
-    
-    
     
     Engine.ConsoleRegisterCommand("summon", FuncSummon);
     
@@ -103,6 +103,7 @@ void Start() {
     
     Weather.Initiate();
     
+    Engine.EnableProfiler();
     
     
     //
@@ -140,22 +141,21 @@ void Start() {
     // Chunk generation
     //
     
-    chunkManager.chunkSize = 100;
+    chunkManager.chunkSize = 50;
     
     // World generation
-    chunkManager.renderDistance = 40;
-    
     chunkManager.generationDistance  = chunkManager.renderDistance * chunkManager.chunkSize;
     chunkManager.destructionDistance = chunkManager.generationDistance * 1.5f;
     
-    chunkManager.renderDistance = 30;
+    chunkManager.renderDistance       = 80;
+    chunkManager.renderDistanceStatic = 20;
     
     chunkManager.doUpdateWithPlayerPosition = false;
     
-    chunkManager.levelOfDetailDistance = 500;
+    chunkManager.levelOfDetailDistance = 800;
     
     // Start culling at the chunk size boundary
-    Engine.sceneMain->camera->frustumOffset = chunkManager.chunkSize + 20;
+    Engine.sceneMain->camera->frustumOffset = chunkManager.chunkSize * 2;
     
     float chunkHigh = 0.87f;
     float chunkLow  = 0.1f;
@@ -163,8 +163,8 @@ void Start() {
     float staticHigh = 0.87f;
     float staticLow  = 0.1f;
     
-    float actorHigh = 0.87f;
-    float actorLow  = 0.1f;
+    float actorHigh = 0.4f;
+    float actorLow  = 0.0087f;
     
     chunkManager.world.chunkColorHigh = Colors.Make(chunkHigh, chunkHigh, chunkHigh);
     chunkManager.world.chunkColorLow  = Colors.Make(chunkLow, chunkLow, chunkLow);
@@ -223,7 +223,7 @@ void Start() {
     chunkManager.world.actorDensity = 4;
     
     chunkManager.world.waterLevel = -20;
-    chunkManager.world.waterColor = Colors.blue * 0.4f;
+    chunkManager.world.waterColor = Colors.blue * 0.087f;
     
     chunkManager.world.snowCapHeight = 80;
     
@@ -246,7 +246,6 @@ glm::vec3 force(0);
 float forceDblTime=0;
 
 void Run() {
-    
     
     Camera* mainCamera = Engine.sceneMain->camera;
     
@@ -284,6 +283,29 @@ void Run() {
         }
         
     }
+    
+    //
+    // Check current object in camera view
+    //
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     //
