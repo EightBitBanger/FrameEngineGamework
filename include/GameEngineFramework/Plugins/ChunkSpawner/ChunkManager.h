@@ -164,13 +164,16 @@ public:
     /// Chunk update cycle index.
     unsigned int chunkIndex;
     
-    /// Render distance multiplier
+    /// Render distance multiplier.
     float renderDistance;
     
-    /// World generation parameters
+    /// Render distance for static objects.
+    float renderDistanceStatic;
+    
+    /// World generation parameters.
     WorldGeneration world;
     
-    /// World generation meshes
+    /// World generation meshes.
     SubMesh subMeshWallHorz;
     SubMesh subMeshWallVert;
     
@@ -201,6 +204,7 @@ public:
         chunkIndex(0),
         
         renderDistance(18),
+        renderDistanceStatic(15),
         
         mNumberOfChunksToGenerate(1),
         mMaxChunksToGenerate(3),
@@ -316,17 +320,20 @@ public:
                 continue;
             
             // Update lighting
+            float chanceToUpdateLighting = 2.0f;
+            
             MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
             
-            if (Random.Range(0, 10) > 5) {
+            // Update chunk lighting
+            if (Random.Range(0.0f, 10.0f) > chanceToUpdateLighting) {
                 
                 chunkRenderer->material->ambient = Colors.Lerp(world.chunkColorLow, world.chunkColorHigh, world.staticColorMul);
                 chunkRenderer->material->diffuse = Colors.Lerp(world.chunkColorLow, world.chunkColorHigh, world.staticColorMul);
                 
             }
             
-            
-            if (Random.Range(0, 10) > 5) {
+            // Update static object lighting
+            if (Random.Range(0.0f, 10.0f) > chanceToUpdateLighting) {
                 
                 MeshRenderer* staticRenderer = chunk.staticObjects->GetComponent<MeshRenderer>();
                 staticRenderer->material->ambient = Colors.Lerp(world.staticColorLow, world.staticColorHigh, world.staticColorMul);
@@ -337,7 +344,7 @@ public:
             // Update actor lighting
             unsigned int actorCount = chunk.actorList.size();
             
-            if (Random.Range(0, 10) > 5) {
+            if (Random.Range(0.0f, 10.0f) > chanceToUpdateLighting) {
             
                 for (unsigned int a=0; a < actorCount; a++) {
                     
@@ -351,8 +358,8 @@ public:
                         
                         MeshRenderer* actorRenderer = actor->GetMeshRendererAtIndex(z);
                         
-                        actorRenderer->material->ambient = Colors.Lerp(world.actorColorLow, world.actorColorHigh, world.staticColorMul);
-                        actorRenderer->material->diffuse = Colors.Lerp(world.actorColorLow, world.actorColorHigh, world.staticColorMul);
+                        actorRenderer->material->ambient = Colors.Lerp(world.actorColorLow, world.actorColorHigh, (world.staticColorMul * 0.87f));
+                        actorRenderer->material->diffuse = Colors.Lerp(world.actorColorLow, world.actorColorHigh, (world.staticColorMul * 0.24f));
                         
                     }
                     
@@ -367,7 +374,7 @@ public:
                 // High level of detail
                 chunkRenderer->mesh = chunk.lodHigh;
                 
-                chunk.staticObjects->Activate();
+                chunkRenderer->material->EnableCulling();
                 
                 transform->scale = glm::vec3(1, 1, 1);
                 transform->position.y = 0.0f;
@@ -377,7 +384,7 @@ public:
                 // Low level of detail
                 chunkRenderer->mesh = chunk.lodLow;
                 
-                chunk.staticObjects->Deactivate();
+                chunkRenderer->material->DisableCulling();
                 
                 transform->scale = glm::vec3(2.0f, 1.1f, 2.0f);
                 transform->position.y = -5.0f;
@@ -448,6 +455,9 @@ public:
                     // Destroy chunk static objects
                     MeshRenderer* staticRenderer = chunk.staticObjects->GetComponent<MeshRenderer>();
                     staticRenderer->mesh = nullptr;
+                    
+                    // Destroy chunk water table
+                    Engine.Destroy<GameObject>(chunk.waterObject);
                     
                     // Destroy levels of detail
                     Engine.Destroy<Mesh>(chunk.lodLow);
@@ -590,7 +600,7 @@ public:
             // Generate the static object container
             
             GameObject* staticObjectContainer = Engine.Create<GameObject>();
-            staticObjectContainer->renderDistance = (renderDistance * (chunkSize / 2)) * 0.2f;
+            staticObjectContainer->renderDistance = (renderDistanceStatic * (chunkSize / 2)) * 0.7f;
             
             Transform* transform = staticObjectContainer->GetComponent<Transform>();
             
@@ -622,7 +632,6 @@ public:
             chunk.staticObjects = staticObjectContainer;
             
             Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer);
-            staticObjectContainer->Deactivate();
             
             
             //
@@ -683,6 +692,49 @@ public:
             // Water table
             Engine.AddColorFieldWaterTable(colorField, heightField, chunkSize, chunkSize, world.waterColor, world.waterLevel, 0.1f);
             
+            chunk.waterObject = Engine.Create<GameObject>();
+            chunk.waterObject->renderDistance = (renderDistanceStatic * (chunkSize / 2)) * 0.7f;
+            
+            chunk.waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+            MeshRenderer* waterRenderer = chunk.waterObject->GetComponent<MeshRenderer>();
+            waterRenderer->EnableFrustumCulling();
+            
+            
+            Transform* transformWater = chunk.waterObject->GetComponent<Transform>();
+            transformWater->position.x = chunkX;
+            transformWater->position.y = world.waterLevel;
+            transformWater->position.z = chunkZ;
+            
+            transformWater->scale = glm::vec3(24.5, 1.0f, 24.5);
+            
+            // Water mesh
+            waterRenderer->mesh = Engine.Create<Mesh>();
+            
+            float maxWaterLayers  = 4.0f;
+            float maxWaterSpacing = 0.3f;
+            
+            float layerThickness = 1.0f;
+            
+            for (float c=0.0f; c <= maxWaterLayers; c += maxWaterSpacing) 
+                waterRenderer->mesh->AddPlain(0, (c - maxWaterLayers) + maxWaterSpacing, 0, 1, 1, Colors.MakeGrayScale( -(c * layerThickness) ));
+            
+            waterRenderer->mesh->Load();
+            
+            // Water material
+            waterRenderer->material = Engine.Create<Material>();
+            waterRenderer->material->shader = Engine.shaders.colorUnlit;
+            
+            // Blending
+            waterRenderer->material->EnableBlending();
+            waterRenderer->material->DisableCulling();
+            waterRenderer->material->ambient = Color(0.01f, 0.01f, 0.01f, 0.01f);
+            waterRenderer->material->diffuse = world.waterColor * 0.87f;
+            waterRenderer->material->diffuse.a = 0.01f;
+            
+            waterRenderer->material->SetBlendingFunction(BLEND_EQUATION_SUB);
+            waterRenderer->material->SetBlendingAlpha(BLEND_SRC_COLOR, BLEND_ONE_MINUS_SRC_ALPHA);
+            
+            Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_FOREGROUND);
             
             // Generate rigid body
             
@@ -910,6 +962,14 @@ public:
                 
                 if (height == 0) 
                     continue;
+                
+                // Water level cut off
+                if (Random.Range(0, 10) > 1) 
+                    if (height <= world.waterLevel) 
+                        continue;
+                
+                if (height <= (world.waterLevel - 8)) 
+                        continue;
                 
                 unsigned int stackHeight = Random.Range(0, 3);
                 

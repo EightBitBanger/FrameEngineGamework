@@ -14,6 +14,9 @@ public:
     /// Associated game object.
     GameObject* gameObject;
     
+    /// Water layer renderer.
+    GameObject* waterObject;
+    
     /// Levels of detail
     Mesh* lodHigh;
     Mesh* lodLow;
