@@ -430,6 +430,9 @@ set (CORE_SOURCES
     
     "src/Engine/componentUpdate/EngineUpdateUI.cpp"
     "src/Engine/componentUpdate/EngineUpdateAI.cpp"
+    "src/Engine/componentUpdate/EngineUpdateAIGenetics.cpp"
+    "src/Engine/componentUpdate/EngineUpdateAITargeting.cpp"
+    "src/Engine/componentUpdate/EngineUpdateAIAnimations.cpp"
     "src/Engine/componentUpdate/EngineUpdateCamera.cpp"
     "src/Engine/componentUpdate/EngineUpdatePanel.cpp"
     "src/Engine/componentUpdate/EngineUpdateText.cpp"
