@@ -13,13 +13,6 @@ ChunkManager chunkManager;
 WeatherSystem Weather;
 
 
-
-// User globals
-GameObject*  cameraController;
-
-
-
-
 // Day night cycle
 bool cycleDirection = false;
 
@@ -29,21 +22,17 @@ float ambientLight = 0.9;
 
 
 
-
-
-
-
 void FuncSummon(std::vector<std::string> args) {
     
-    for (uint8_t i=0; i < 24; i++) {
+    for (uint8_t i=0; i < 100; i++) {
         
         unsigned int entityType = 0;
         
-        if (args[0] == "sheep") {entityType = 1;}
+        if (args[0] == "Sheep") {entityType = 1;}
         
         if (entityType == 0) {
             
-            Engine.ConsoleShiftUp("Unknown actor type");
+            Engine.Print("Unknown actor type");
             
             return;
         }
@@ -62,7 +51,7 @@ void FuncSummon(std::vector<std::string> args) {
             
         }
         
-        
+        /*
         // Add extra gene
         
         Gene gene;
@@ -77,16 +66,20 @@ void FuncSummon(std::vector<std::string> args) {
         gene.scale.z = 0.4;
         
         newActor->AddGene(gene);
+        */
         
         continue;
     }
     
-    Engine.ConsoleShiftUp("Actor summoned");
+    Engine.Print("Actor summoned");
     
     return;
 }
 
 
+
+
+std::vector<Chunk*> activeChunks;
 
 
 //
@@ -105,13 +98,12 @@ void Start() {
     
     Engine.EnableProfiler();
     
+    //Engine.EnablePhysicsDebugRenderer();
+    
     
     //
     // Create a camera controller
     //
-    
-    //Engine.EnablePhysicsDebugRenderer();
-    
     
     // The position of the player in the world.
     Vector3 playerPosition = Vector3(0, 30, 0);
@@ -129,7 +121,7 @@ void Start() {
     rp3d::BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);
     
     // Add the collider to the camera controller game object.
-    Engine.cameraController->AddColliderBox(boxShape, 0, 0, 0);
+    Engine.cameraController->AddColliderBox(boxShape, 0, 0, 0, LayerMask::Ground);
     
     // Attach the sky object to the camera controller to prevent 
     // the player from moving outside of the sky.
@@ -137,50 +129,12 @@ void Start() {
     
     
     
-    //
-    // Chunk generation
-    //
-    
-    chunkManager.chunkSize = 50;
-    
-    // World generation
-    chunkManager.generationDistance  = chunkManager.renderDistance * chunkManager.chunkSize;
-    chunkManager.destructionDistance = chunkManager.generationDistance * 1.5f;
-    
-    chunkManager.renderDistance       = 80;
-    chunkManager.renderDistanceStatic = 20;
-    
-    chunkManager.doUpdateWithPlayerPosition = false;
-    
-    chunkManager.levelOfDetailDistance = 800;
-    
-    // Start culling at the chunk size boundary
-    Engine.sceneMain->camera->frustumOffset = chunkManager.chunkSize * 2;
-    
-    float chunkHigh = 0.87f;
-    float chunkLow  = 0.1f;
-    
-    float staticHigh = 0.87f;
-    float staticLow  = 0.1f;
-    
-    float actorHigh = 0.4f;
-    float actorLow  = 0.0087f;
-    
-    chunkManager.world.chunkColorHigh = Colors.Make(chunkHigh, chunkHigh, chunkHigh);
-    chunkManager.world.chunkColorLow  = Colors.Make(chunkLow, chunkLow, chunkLow);
-    
-    chunkManager.world.staticColorHigh = Colors.Make(staticHigh, staticHigh, staticHigh);
-    chunkManager.world.staticColorLow  = Colors.Make(staticLow, staticLow, staticLow);
-    
-    chunkManager.world.actorColorHigh = Colors.Make(actorHigh, actorHigh, actorHigh);
-    chunkManager.world.actorColorLow  = Colors.Make(actorLow, actorLow, actorLow);
-    
     
     // Perlin layers
     
     Perlin perlinBase;
     perlinBase.equation = 0;
-    perlinBase.heightMultuplier = 3;
+    perlinBase.heightMultuplier = 8;
     perlinBase.noiseWidth  = 0.07;
     perlinBase.noiseHeight = 0.07;
     
@@ -208,24 +162,17 @@ void Start() {
     perlinMountainB.noiseWidth  = 0.0007;
     perlinMountainB.noiseHeight = 0.0007;
     
-    chunkManager.world.AddPerlinLayer(perlinBase);
-    chunkManager.world.AddPerlinLayer(perlinLayerA);
-    chunkManager.world.AddPerlinLayer(perlinLayerB);
-    chunkManager.world.AddPerlinLayer(perlinMountainA);
-    chunkManager.world.AddPerlinLayer(perlinMountainB);
+    chunkManager.AddPerlinNoiseLayer(perlinBase);
+    chunkManager.AddPerlinNoiseLayer(perlinLayerA);
+    chunkManager.AddPerlinNoiseLayer(perlinLayerB);
+    chunkManager.AddPerlinNoiseLayer(perlinMountainA);
+    chunkManager.AddPerlinNoiseLayer(perlinMountainB);
     
-    // Added decoration
+    chunkManager.renderDistance = 16;
+    chunkManager.renderDistanceStatic = 16;
     
-    chunkManager.world.staticDensity = 4000;
-    
-    chunkManager.world.treeDensity = 60;
-    
-    chunkManager.world.actorDensity = 4;
-    
-    chunkManager.world.waterLevel = -20;
-    chunkManager.world.waterColor = Colors.blue * 0.087f;
-    
-    chunkManager.world.snowCapHeight = 80;
+    chunkManager.world.waterLevel = -21;
+    chunkManager.world.waterColor = Colors.blue;
     
     return;
 }
@@ -284,29 +231,119 @@ void Run() {
         
     }
     
+    if (Engine.cameraController == nullptr) 
+        return;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     //
-    // Check current object in camera view
+    // Raycast from player
     //
     
+    //Engine.WriteDialog(1, Int.ToString( chunkManager.GetNumberOfChunks() ));
+    
+    
+    /*
+    
+    // Move the player out of the way as we cant cast a ray from inside the collider...
+    rp3d::RigidBody* rigidBody = Engine.cameraController->GetComponent<RigidBody>();
+    rp3d::Transform bodyTransform = rigidBody->getTransform();
+    rp3d::Vector3 bodyPosition = bodyTransform.getPosition();
+    bodyPosition.y += 1000;
+    
+    // Cast forward a ray
+    Hit hit;
+    float distance = 1000;
+    
+    glm::vec3 from      = Engine.cameraController->GetComponent<Transform>()->position;
+    glm::vec3 direction = glm::vec3(0, -1, 0);
     
     
     
+    //
+    // Print current chunk details
+    //
+    
+    glm::vec3 cameraPosition = Engine.cameraController->GetPosition();
+    Engine.WriteDialog(0, Int.ToString( cameraPosition.x ));
+    Engine.WriteDialog(1, Int.ToString( cameraPosition.z ));
+    
+    Engine.WriteDialog(2, Int.ToString( chunkManager.playerChunkX ));
+    Engine.WriteDialog(3, Int.ToString( chunkManager.playerChunkZ ));
+    
+    if (Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) {
+        
+        GameObject* hitObject = (GameObject*)hit.gameObject;
+        
+        Engine.WriteDialog(4, hitObject->name);
+        
+        Engine.WriteDialog(5, Int.ToString( hitObject->GetPosition().x ));
+        Engine.WriteDialog(6, Int.ToString( hitObject->GetPosition().z ));
+        
+    }
     
     
+    //int chunkIndex = chunkManager.FindChunk(chunkManager.playerChunkX * chunkManager.chunkSize, chunkManager.playerChunkZ * chunkManager.chunkSize);
+    //if (chunkIndex != -1) {
+    //    Chunk chunk = chunkManager.GetChunk(chunkIndex);
+    //    
+    //    Engine.WriteDialog(2, Int.ToString( chunk.actorList.size() ));
+    //    
+    //}
     
     
+    //
+    // Print aimed entity details
+    //
     
+    distance = 8;
     
+    from      = Engine.cameraController->GetComponent<Transform>()->position;
+    direction = Engine.cameraController->GetComponent<Camera>()->forward;
     
+    // Center the from angle
+    from.y -= 0.3f;
     
+    if (Physics.Raycast(from, direction, distance, hit, LayerMask::Actor)) {
+        
+        GameObject* hitObject = (GameObject*)hit.gameObject;
+        Actor* hitActor = hitObject->GetComponent<Actor>();
+        
+        Engine.WriteDialog(15, hitActor->GetName());
+        Engine.WriteDialog(16, Int.ToString(hitActor->GetAge()));
+        
+        Engine.WriteDialog(18, "Genome");
+        Engine.WriteDialog(19, AI.genomes.ExtractGenome(hitActor));
+        
+    } else {
+        
+        for (unsigned int i=0; i < 2; i++) 
+            Engine.WriteDialog(15 + i, "");
+        
+    }
     
+    // Move the actor back into position as we are now finished casting rays...
+    bodyPosition.y -= 1000;
+    bodyTransform.setPosition(bodyPosition);
     
-    
-    
-    
-    
-    
-    
+    */
     
     //
     // Profiling
@@ -359,7 +396,7 @@ void Run() {
     if (ambientLight < 0.0f)  ambientLight = 0.0f;
     
     // World brightness
-    chunkManager.world.staticColorMul = ambientLight;
+    //chunkManager.world.staticColorMul = ambientLight;
     
     // Sky brightness
     if (Weather.skyMaterial != nullptr) 
