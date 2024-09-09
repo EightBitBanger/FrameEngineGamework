@@ -104,7 +104,7 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             // Purge mesh
             if (meshRenderer->mesh != nullptr) 
                 if (!meshRenderer->mesh->isShared) 
-                    Renderer.DestroyMesh( meshRenderer->mesh );
+                    Destroy<Mesh>( meshRenderer->mesh );
             
             // Purge material
             if (meshRenderer->material != nullptr) 
@@ -121,14 +121,15 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
                     break;
             }
             
-            Renderer.DestroyMeshRenderer( meshRenderer );
+            Renderer.DestroyMeshRenderer(meshRenderer);
+            
             break;
         }
         
         // Rigid body garbage collection
         case COMPONENT_TYPE_RIGID_BODY: {
             
-            // Add the rigid body garbage list
+            // Add the rigid body to the garbage list
             mGarbageRigidBodies.push_back( (RigidBody*)componentPtr->GetComponent() );
             
             break;

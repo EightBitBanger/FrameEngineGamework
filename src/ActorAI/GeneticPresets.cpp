@@ -4,12 +4,56 @@
 
 #include <GameEngineFramework/Math/Random.h>
 #include <GameEngineFramework/Engine/types/color.h>
+#include <GameEngineFramework/Types/Types.h>
 
 extern NumberGeneration  Random;
 extern ColorPreset       Colors;
+extern FloatType         Float;
 
+
+std::string GeneticPresets::ExtractGenome(Actor* actorSource) {
+    
+    // Extract genetics
+    std::string genetics;
+    
+    unsigned int numberOfGenes = actorSource->GetNumberOfGenes();
+    for (unsigned int i=0; i < numberOfGenes; i++) {
+        
+        
+        Gene gene = actorSource->GetGeneFromGenome( i );
+        
+        genetics += Float.ToString( gene.position.x ) + ",";
+        genetics += Float.ToString( gene.position.y ) + ",";
+        genetics += Float.ToString( gene.position.z ) + "|";
+        
+        genetics += Float.ToString( gene.rotation.x ) + ",";
+        genetics += Float.ToString( gene.rotation.y ) + ",";
+        genetics += Float.ToString( gene.rotation.z ) + "|";
+        
+        genetics += Float.ToString( gene.scale.x ) + ",";
+        genetics += Float.ToString( gene.scale.y ) + ",";
+        genetics += Float.ToString( gene.scale.z ) + "|";
+        
+        genetics += Float.ToString( gene.offset.x ) + ",";
+        genetics += Float.ToString( gene.offset.y ) + ",";
+        genetics += Float.ToString( gene.offset.z ) + "|";
+        
+        genetics += Float.ToString( gene.color.x ) + ",";
+        genetics += Float.ToString( gene.color.y ) + ",";
+        genetics += Float.ToString( gene.color.z ) + "|";
+        
+        genetics += Float.ToString( gene.doInverseAnimation ) + "|";
+        genetics += Float.ToString( gene.doAnimationCycle ) + "|";
+        
+    }
+    
+    return genetics;
+}
 
 void GeneticPresets::SheepGene(Actor* targetActor) {
+    
+    // Identification
+    targetActor->SetName("Sheep");
     
     // Personality parameters
     targetActor->SetChanceToChangeDirection(80);

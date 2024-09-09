@@ -3,6 +3,7 @@
 
 GameObject* EngineSystemManager::CreateGameObject(void) {
     GameObject* newGameObject = mGameObjects.Create();
+    
     mGameObjectActive.push_back(newGameObject);
     
     newGameObject->AddComponent( CreateComponent<Transform>() );
@@ -142,8 +143,10 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     newGameObject->AddComponent( CreateComponent(Components.Actor) );
     newGameObject->AddComponent( CreateComponent(Components.RigidBody) );
     
-    newGameObject->GetComponent<Actor>()->mPosition    = position;
-    newGameObject->GetComponent<Actor>()->mTargetPoint = position;
+    Actor* actorPtr = newGameObject->GetComponent<Actor>();
+    
+    actorPtr->mPosition    = position;
+    actorPtr->mTargetPoint = position;
     
     newGameObject->SetPosition(position);
     

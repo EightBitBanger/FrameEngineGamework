@@ -54,6 +54,27 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
     mStreamBuffer[index].actor->mGeneticRenderers.clear();
     mStreamBuffer[index].actor->mAnimationStates.clear();
     
+    // Destroy colliders
+    if (mStreamBuffer[index].rigidBody != nullptr) {
+        
+        rp3d::RigidBody* rigidBody = mStreamBuffer[index].rigidBody;
+        unsigned int numberOfColliders = rigidBody->getNbColliders();
+        
+        for (unsigned int i=0; i < numberOfColliders; i++) 
+            rigidBody->removeCollider( rigidBody->getCollider(i) );
+        
+        // Create collider
+        rp3d::Transform colliderOffset(rp3d::Transform::identity());
+        rp3d::Collider* collider = rigidBody->addCollider(colliders.box, colliderOffset);
+        
+        collider->setCollideWithMaskBits( (unsigned short)sizeof(unsigned short) );
+        collider->setCollisionCategoryBits( (unsigned short)LayerMask::Actor );
+        
+        collider->setUserData( (void*)mStreamBuffer[index].gameObject );
+        rigidBody->setUserData( (void*)mStreamBuffer[index].gameObject );
+        
+    }
+    
     
     //
     // Create and express genetic elements

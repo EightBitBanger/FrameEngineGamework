@@ -23,11 +23,8 @@ void EngineSystemManager::ProcessDeferredDeletion(void) {
         
     }
     
-    mGarbageGameObjects.clear();
     
-    
-    
-    // Rigid bodies
+    // Purge rigid bodies
     if (mGarbageRigidBodies.size() > 0) {
         
         rp3d::RigidBody* rigidBody = mGarbageRigidBodies[ mGarbageRigidBodies.size() - 1 ];
@@ -78,11 +75,12 @@ void EngineSystemManager::ProcessDeferredDeletion(void) {
             
             mFreeRigidBodies.push_back( rigidBody );
             
-            return;
+        } else {
+            
+            // Purge extra rigid bodies
+            Physics.DestroyRigidBody( rigidBody );
+            
         }
-        
-        // Purge extra rigid bodies
-        Physics.DestroyRigidBody( rigidBody );
         
     }
     

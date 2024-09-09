@@ -150,12 +150,24 @@ void ActorSystem::Update(void) {
                 
                 actor->mTargetPoint.z = (Random.Range(0.0f, actor->mDistanceToWalk) - 
                                          Random.Range(0.0f, actor->mDistanceToWalk)) + actor->mPosition.z;
+                
             }
             
         } else {
             
             // Match the height to the target
             actor->mTargetPoint.y = actor->mPosition.y;
+            
+            
+            
+            // Check height preference
+            if ((actor->mTargetPoint.y >= actor->mHeightPreferenceMax) | 
+                (actor->mTargetPoint.y <= actor->mHeightPreferenceMin)) {
+                
+                // TODO: Actor must avoid specific height levels
+                
+            }
+            
             
             // Check reached destination
             float distance = glm::distance( actor->mTargetPoint, actor->mPosition );

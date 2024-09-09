@@ -38,6 +38,13 @@ void EngineSystemManager::EnableProfiler(void) {
     return;
 }
 
+void EngineSystemManager::WriteDialog(unsigned int index, std::string text) {
+    
+    mProfilerText[ index ]->text = text;
+    
+    return;
+}
+
 void EngineSystemManager::DisableProfiler(void) {
     
     mIsProfilerEnabled = false;
@@ -107,7 +114,7 @@ void EngineSystemManager::ConsoleClearLog(void) {
     return;
 }
 
-void EngineSystemManager::ConsoleShiftUp(std::string text) {
+void EngineSystemManager::Print(std::string text) {
     
     // Shift up the texts
     for (unsigned int i=CONSOLE_NUMBER_OF_ELEMENTS - 1; i > 0; i--) 
@@ -253,7 +260,7 @@ void EngineSystemManager::UpdateConsole(void) {
             // Check no function exists
             if (!doesFunctionExist) {
                 
-                ConsoleShiftUp("Function not found");
+                Print("Function not found");
                 
             }
             

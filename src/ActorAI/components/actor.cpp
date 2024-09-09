@@ -12,14 +12,17 @@ Actor::Actor() :
     mYouthScale(0.4),
     mAdultScale(1.0),
     
+    mColliderOffset(glm::vec3(0)),
+    mColliderScale(glm::vec3(1)),
+    
     mSpeed(1.5f),
     mSpeedMul(1.3),
     mSnapSpeed(0.24),
     
-    mVelocity(glm::vec3(0, 0, 0)),
-    mPosition(glm::vec3(0, 0, 0)),
-    mRotation(glm::vec3(0, 0, 0)),
-    mRotateTo(glm::vec3(0, 0, 0)),
+    mVelocity(glm::vec3(0)),
+    mPosition(glm::vec3(0)),
+    mRotation(glm::vec3(0)),
+    mRotateTo(glm::vec3(0)),
     mTargetPoint(glm::vec3(0, 0, 0)),
     mDistance(0),
     
@@ -278,6 +281,20 @@ void Actor::SetDistanceToFlee(float distance) {
 
 void Actor::AddMemory(std::string memory) {
     mMemories.push_back( memory );
+    return;
+}
+
+void Actor::SetHeightPreferenceMin(float height) {
+    mux.lock();
+    mHeightPreferenceMin = height;
+    mux.unlock();
+    return;
+}
+
+void Actor::SetHeightPreferenceMax(float height) {
+    mux.lock();
+    mHeightPreferenceMax = height;
+    mux.unlock();
     return;
 }
 

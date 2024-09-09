@@ -93,10 +93,6 @@ void EngineSystemManager::SetColorFieldValues(glm::vec3* colorField, unsigned in
             
             unsigned int index = z * width + x;
             
-            color.r = Random.Range(0, 100) * 0.0001f;
-            color.g = Random.Range(0, 100) * 0.0001f;
-            color.b = Random.Range(0, 100) * 0.0001f;
-            
             colorField[index] = glm::vec3(color.r, color.g, color.b);
             
             continue;
@@ -272,7 +268,7 @@ void EngineSystemManager::AddColorFieldSnowCap(glm::vec3* colorField, float* hei
 
 void EngineSystemManager::AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, 
                                                   unsigned int width, unsigned int height, 
-                                                  Color waterColor, float beginHeight, float bias) {
+                                                  Color waterColor, float beginHeight, float bias, float waterTableHeight) {
     
     for (unsigned int x=0; x < width; x ++) {
         
@@ -280,31 +276,43 @@ void EngineSystemManager::AddColorFieldWaterTable(glm::vec3* colorField, float* 
             
             unsigned int index = z * width + x;
             
-            float heightBias = heightField[index] * 0.01;
-            
-            if (heightField[index] >= beginHeight) 
+            if (heightField[index] > waterTableHeight) 
                 continue;
             
             Color color( colorField[index].x, colorField[index].y, colorField[index].z );
+            waterColor = 0.001f;
             
-            float heightLerp = heightField[index] * 0.001;
+            if (heightField[index]  < (waterTableHeight - 9.0f))   color = Colors.Lerp(color, waterColor, 1.0f);
             
-            if (heightLerp > 1.0f) 
-                heightLerp = 1.0f;
+            if ((heightField[index] < (waterTableHeight - 8.0f)) & 
+                (heightField[index] > (waterTableHeight - 9.0f)))  color = Colors.Lerp(color, waterColor, 0.9f);
             
-            color = Colors.Lerp(color, waterColor, heightLerp);
+            if ((heightField[index] < (waterTableHeight - 7.0f)) & 
+                (heightField[index] > (waterTableHeight - 8.0f)))  color = Colors.Lerp(color, waterColor, 0.8f);
             
-            //heightField[index] = beginHeight;
+            if ((heightField[index] < (waterTableHeight - 6.0f)) & 
+                (heightField[index] > (waterTableHeight - 7.0f)))  color = Colors.Lerp(color, waterColor, 0.7f);
             
-            /*
-            if (Random.Range(0, 100) > diff) 
-                color = Colors.Lerp(color, waterColor, heightField[index] * 0.07);
+            if ((heightField[index] < (waterTableHeight - 5.0f)) & 
+                (heightField[index] > (waterTableHeight - 6.0f)))  color = Colors.Lerp(color, waterColor, 0.6f);
             
-            int diff = ((beginHeight - (beginHeight - 20)) - (heightField[index] - beginHeight)) * bias;
+            if ((heightField[index] < (waterTableHeight - 4.0f)) & 
+                (heightField[index] > (waterTableHeight - 5.0f)))  color = Colors.Lerp(color, waterColor, 0.5f);
             
-            if (Random.Range(0, 100) > diff) 
-                color = Colors.Lerp(color, waterColor, heightField[index] * 0.07);
-            */
+            if ((heightField[index] < (waterTableHeight - 3.0f)) & 
+                (heightField[index] > (waterTableHeight - 4.0f)))  color = Colors.Lerp(color, waterColor, 0.4f);
+            
+            if ((heightField[index] < (waterTableHeight - 2.0f)) & 
+                (heightField[index] > (waterTableHeight - 3.0f)))  color = Colors.Lerp(color, waterColor, 0.3f);
+            
+            if ((heightField[index] < (waterTableHeight - 1.0f)) & 
+                (heightField[index] > (waterTableHeight - 2.0f)))  color = Colors.Lerp(color, waterColor, 0.2f);
+            
+            if ((heightField[index] < (waterTableHeight - 0.0f)) & 
+                (heightField[index] > (waterTableHeight - 1.0f)))  color = Colors.Lerp(color, waterColor, 0.1f);
+            
+            if (Random.Range(1, 10) > 8) 
+                color = Colors.MakeRandomGrayScale() * 0.3f;
             
             // Apply the final color
             colorField[index] = glm::vec3( color.r, color.g, color.b );
@@ -325,6 +333,21 @@ Mesh* EngineSystemManager::CreateMeshFromHeightField(float* heightField, glm::ve
     AddHeightFieldToMesh(mesh, heightField, colorField, width, height, offsetX, offsetZ);
     
     return mesh;
+}
+
+void EngineSystemManager::AddHeightStepToMesh(float* heightField, unsigned int width, unsigned int height) {
+    
+    for (unsigned int x=0; x < width; x ++) {
+        
+        for (unsigned int z=0; z < height; z ++) {
+            
+            heightField[x * z] = (Math.Round( (heightField[x * z] * 10) ) / 10);
+            
+        }
+        
+    }
+    
+    return;
 }
 
 void EngineSystemManager::AddHeightFieldToMesh(Mesh* mesh, 
@@ -576,6 +599,8 @@ void EngineSystemManager::Initiate() {
     meshes.wallHorizontal->isShared  = true;
     meshes.wallVertical->isShared    = true;
     
+    // Generate default colliders
+    colliders.box = Physics.common.createBoxShape( rp3d::Vector3(0.5f, 0.5f, 0.5f) );
     
     // Main world scene
     sceneMain = Create<Scene>();
