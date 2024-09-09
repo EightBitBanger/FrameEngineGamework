@@ -175,8 +175,10 @@ public:
     void ConsoleClearLog(void);
     
     /// Shift the console log text elements up and add the text string into the console log.
-    void ConsoleShiftUp(std::string text);
+    void Print(std::string text);
     
+    /// Write a string of text to the dialog text element referenced by index.
+    void WriteDialog(unsigned int index, std::string text);
     
     // Profiler
     
@@ -227,7 +229,7 @@ public:
     void AddColorFieldSnowCap(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color capColor, float beginHeight, float bias);
     
     /// Generate a water level effect.
-    void AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color waterColor, float beginHeight, float bias);
+    void AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color waterColor, float beginHeight, float bias, float waterTableHeight);
     
     // Mapping to a mesh
     
@@ -236,6 +238,9 @@ public:
     
     /// Generate a height field mesh from perlin noise.
     Mesh* CreateMeshFromHeightField(float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
+    
+    /// Apply a height stepping effect to the mesh.
+    void AddHeightStepToMesh(float* heightField, unsigned int width, unsigned int height);
     
     
     EngineSystemManager();
@@ -278,9 +283,7 @@ public:
         extern ActorSystem AI;
         
         // Engine
-        if (std::is_same<T, GameObject>::value)    {GameObject* ptr = (GameObject*)objectPtr;
-                                                    ptr->mIsGarbage = true;
-                                                    return true;}
+        if (std::is_same<T, GameObject>::value)    return DestroyGameObject( (GameObject*)objectPtr );
         if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
         
         // Renderer
@@ -417,6 +420,7 @@ private:
     void UpdateActorTargetRotation(unsigned int index);
     void UpdateActorGenetics(unsigned int index);
     void UpdateActorAnimation(unsigned int index);
+    void UpdateActorPhysics(unsigned int index);
     
     // List of active game objects
     std::vector<GameObject*>  mGameObjectActive;
@@ -474,6 +478,11 @@ private:
         
     };
     
+    struct DefaultColliders {
+        
+        rp3d::BoxShape*  box = nullptr;
+        
+    };
     
     //
     // Component stream
@@ -517,6 +526,9 @@ public:
     
     /// Default meshes provided by the engine.
     DefaultMeshes  meshes;
+    
+    /// Default collision shapes
+    DefaultColliders colliders;
     
 };
 

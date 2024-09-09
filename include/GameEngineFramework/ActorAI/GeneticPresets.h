@@ -7,6 +7,11 @@ class ENGINE_API GeneticPresets {
     
 public:
     
+    /// Extract the genome from the entity and return it as a string.
+    std::string ExtractGenome(Actor* actorSource);
+    
+    // Genomes
+    
     void SheepGene(Actor* targetActor);
     
 };

@@ -82,6 +82,9 @@ public:
     //
     // Physics
     
+    /// Get the position of the object.
+    glm::vec3 GetPosition(void);
+    
     /// Set the position of the object.
     void SetPosition(float x, float y, float z);
     

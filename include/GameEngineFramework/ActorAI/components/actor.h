@@ -115,6 +115,12 @@ public:
     /// Set the distance to begin running from a predator actor if any are nearby.
     void SetDistanceToFlee(float distance);
     
+    /// Set the minimum height preference when traveling.
+    void SetHeightPreferenceMin(float height);
+    
+    /// Set the maximum height preference when traveling.
+    void SetHeightPreferenceMax(float height);
+    
     // Memories
     
     /// Add a memory to this actor.
@@ -134,7 +140,7 @@ private:
     std::string mName;
     
     // Number of ticks this actor has accumulated in its lifetime
-    unsigned long int mAge;
+    unsigned long long int mAge;
     
     // Age when the actor will no longer grow
     float mAdultAge;
@@ -145,6 +151,11 @@ private:
     // Scale of the actor after it has stopped growing
     float mAdultScale;
     
+    // Collider position offset
+    glm::vec3 mColliderOffset;
+    
+    // Collider scale
+    glm::vec3 mColliderScale;
     
     // Maximum speed this actor can travel
     float mSpeed;
