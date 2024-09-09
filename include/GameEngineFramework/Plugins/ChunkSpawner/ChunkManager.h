@@ -25,111 +25,59 @@ class ENGINE_API WorldGeneration {
     
 public:
     
-    WorldGeneration() : 
-        actorDensity(0),
-        staticDensity(0),
-        treeDensity(0),
-        
-        snowCapHeight(70),
-        
-        waterLevel(0),
-        
-        actorHeightCutoff(20),
-        staticHeightCutoff(20),
-        treeHeightCutoff(50),
-        
-        treeHeightLow(5),
-        treeHeightHigh(10),
-        
-        leafSpreadArea(5.7f),
-        leafSpreadHeight(1.4f),
-        leafHeightOffset(-0.8f),
-        numberOfLeaves(45),
-        
-        staticColorMul(0.87f)
-    {
-        waterColor = Colors.red;
-        
-        chunkColorHigh  = Colors.black;
-        chunkColorLow   = Colors.black;
-        staticColorLow  = Colors.black;
-        staticColorHigh = Colors.black;
-        actorColorLow   = Colors.black;
-        actorColorHigh  = Colors.black;
-    }
-    
-    /// Range of actors to spawn.
-    unsigned int actorDensity;
-    
-    /// Range of static objects to spawn.
-    unsigned int staticDensity;
-    
-    /// Range of trees to spawn.
-    unsigned int treeDensity;
-    
-    /// Height at which the world will generate snow on mountain tops
     float snowCapHeight;
     
-    /// Water table starting height.
-    float waterLevel;
-    
-    /// Color to use for water generation.
     Color waterColor;
     
-    /// Perlin layers to apply to the world
-    std::vector<Perlin> perlinGraph;
+    float waterLevel;
     
-    // Height beyond which the objects will stop spawning
+    // Static plant generation
     
-    /// Maximum height to stop spawning actors.
-    unsigned int actorHeightCutoff;
-    
-    /// Maximum height to stop spawning static objects.
-    unsigned int staticHeightCutoff;
-    
-    /// Maximum height to stop spawning trees.
-    unsigned int treeHeightCutoff;
-    
-    // Tree trunk
-    
-    /// Tree trunk minimum height
-    unsigned int treeHeightLow;
-    
-    /// Tree trunk maximum height
-    unsigned int treeHeightHigh;
-    
+    unsigned int staticDensity;
+    float staticHeightCutoff;
     
     // Tree generation
     
-    /// Areal spread of the tree leaves.
+    unsigned int treeDensity;
+    float treeHeightCutoff;
+    float treeHeightLow;
+    float treeHeightHigh;
+    
+    unsigned int numberOfLeaves;
     float leafSpreadArea;
-    
-    /// Height spread of the tree leaves.
     float leafSpreadHeight;
-    
-    /// Height starting offset for leaf spread.
     float leafHeightOffset;
     
-    /// Number of leaves to add to the trees.
-    unsigned int numberOfLeaves;
+    // Actors
+    unsigned int actorDensity;
     
-    /// Static object color multiplier to update static objects in chunks.
-    float staticColorMul;
-    
-    /// Chunk color range for world lighting.
-    Color chunkColorHigh, chunkColorLow;
-    
-    /// Static object color range for world lighting.
-    Color staticColorLow, staticColorHigh;
-    
-    /// Actor color range for world lighting.
-    Color actorColorLow, actorColorHigh;
+    float actorHeightCutoff;
     
     
-    /// Add a layer of perlin noise to the world generation
-    void AddPerlinLayer(Perlin& perlinLayer) {
-        perlinGraph.push_back(perlinLayer);
-        return;
+    WorldGeneration() :
+        snowCapHeight(60.0f),
+        waterColor(Colors.blue),
+        waterLevel(-21.0f),
+        
+        staticDensity(200),
+        staticHeightCutoff(50),
+        
+        treeDensity(40),
+        treeHeightCutoff(50),
+        treeHeightLow(5),
+        treeHeightHigh(8),
+        
+        numberOfLeaves(15),
+        leafSpreadArea(3.0f),
+        leafSpreadHeight(1.4f),
+        leafHeightOffset(-0.4f),
+        
+        actorDensity(10),
+        
+        actorHeightCutoff(20.0f)
+        
+    {
+        
     }
     
 };
@@ -141,37 +89,49 @@ class ENGINE_API ChunkManager {
     
 public:
     
-    /// Should the chunks be loaded around the player or a fixed position.
-    bool doUpdateWithPlayerPosition;
-    
-    /// Distance to stop generating chunks.
-    int generationDistance;
-    int destructionDistance;
-    
-    /// Chunk level of detail distance.
-    int levelOfDetailDistance;
-    
-    /// Chunk size (must be a multiple of eight).
     int chunkSize;
     
-    /// Current chunk being generated.
-    int currentChunkX;
-    int currentChunkZ;
+    float currentChunkX;
+    float currentChunkZ;
     
-    /// Current actor being processed.
-    unsigned int currentActorIndex;
-    
-    /// Chunk update cycle index.
-    unsigned int chunkIndex;
-    
-    /// Render distance multiplier.
     float renderDistance;
-    
-    /// Render distance for static objects.
     float renderDistanceStatic;
     
-    /// World generation parameters.
+    unsigned int generateCounter;
+    unsigned int purgeCounter;
+    
+    unsigned int updateChunkCounter;
+    
     WorldGeneration world;
+    
+    
+    /// Create a new chunk at the given position.
+    Chunk* CreateChunk(float chunkX, float chunkZ);
+    
+    /// Destroy a chunk freeing any memory therein.
+    bool DestroyChunk(Chunk* chunkPtr);
+    
+    /// Check if the chunk exists at a given position.
+    Chunk* CheckChunk(glm::vec2 position);
+    
+    unsigned int GetNumberOfChunks(void);
+    
+    /// Prepare the chunk generator.
+    void Initiate(void);
+    
+    /// Check all the chunks in the world.
+    void Update(void);
+    
+    /// Generate new chunks around the player position.
+    void GenerateChunks(glm::vec2 position);
+    
+    /// Destroy old chunks beyond the player render distance.
+    void PurgeChunks(glm::vec2 position);
+    
+    
+    /// Add a perlin noise layer to the generator.
+    void AddPerlinNoiseLayer(Perlin& layer);
+    
     
     /// World generation meshes.
     SubMesh subMeshWallHorz;
@@ -185,107 +145,264 @@ public:
     
     SubMesh subMeshTree;
     
-    
     ChunkManager() : 
-        doUpdateWithPlayerPosition(true),
         
-        generationDistance(500),
-        destructionDistance(1400),
-        
-        levelOfDetailDistance(300),
-        
-        chunkSize(50),
+        chunkSize(32),
         
         currentChunkX(0),
         currentChunkZ(0),
         
-        currentActorIndex(0),
+        renderDistance(16),
+        renderDistanceStatic(13),
         
-        chunkIndex(0),
-        
-        renderDistance(18),
-        renderDistanceStatic(15),
-        
-        mNumberOfChunksToGenerate(1),
-        mMaxChunksToGenerate(3),
-        
-        mNumberOfChunksToPurge(1),
-        mMaxChunksToPurge(1),
-        
-        mNumberOfChunksToUpdate(1),
-        mMaxChunksToUpdate(10)
+        generateCounter(0),
+        purgeCounter(0),
+        updateChunkCounter(0)
         
     {}
-        void AddChunk(Chunk chunk) {
-        mChunkList.push_back( chunk );
-        return;
+    
+private:
+    
+    // Chunk allocator
+    PoolAllocator<Chunk> mChunkList;
+    
+    std::vector<Chunk*> mActiveChunks;
+    std::vector<Perlin> mPerlinLayers;
+    
+};
+
+Chunk* ChunkManager::CreateChunk(float chunkX, float chunkZ) {
+    
+    Chunk* newChunk = mChunkList.Create();
+    
+    newChunk->gameObject = Engine.Create<GameObject>();
+    
+    newChunk->gameObject->AddComponent( Engine.CreateComponentMeshRenderer( Engine.Create<Mesh>(), Engine.Create<Material>() ) );
+    
+    MeshRenderer* baseRenderer = newChunk->gameObject->GetComponent<MeshRenderer>();
+    
+    baseRenderer->mesh->isShared = false;
+    
+    baseRenderer->material->isShared = false;
+    baseRenderer->material->shader = Engine.shaders.color;
+    
+    baseRenderer->EnableFrustumCulling();
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot( baseRenderer, RENDER_QUEUE_DEFAULT );
+    
+    //
+    // Static object container
+    
+    GameObject* staticObjectContainer = Engine.Create<GameObject>();
+    staticObjectContainer->renderDistance = (renderDistanceStatic * (chunkSize / 2)) * 0.9f;
+    
+    Transform* transform = staticObjectContainer->GetComponent<Transform>();
+    
+    transform->position.x = chunkX;
+    transform->position.z = chunkZ;
+    
+    // Static mesh
+    Mesh* staticMesh = Engine.Create<Mesh>();
+    
+    staticMesh->isShared = false;
+    
+    // Static material
+    
+    Material* staticMaterial = Engine.Create<Material>();
+    staticMaterial->DisableCulling();
+    
+    staticMaterial->shader = Engine.shaders.color;
+    
+    staticMaterial->ambient = Colors.Make(0.1f, 0.1f, 0.1f);
+    staticMaterial->diffuse = Colors.white;
+    staticMaterial->specular = Colors.white;
+    
+    staticObjectContainer->AddComponent( Engine.CreateComponentMeshRenderer(staticMesh, staticMaterial) );
+    
+    MeshRenderer* staticRenderer = staticObjectContainer->GetComponent<MeshRenderer>();
+    staticRenderer->EnableFrustumCulling();
+    
+    newChunk->staticObjects = staticObjectContainer;
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer, RENDER_QUEUE_DEFAULT);
+    
+    //
+    // Water table generation
+    //
+    
+    newChunk->waterObject = Engine.Create<GameObject>();
+    newChunk->waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+    MeshRenderer* waterRenderer = newChunk->waterObject->GetComponent<MeshRenderer>();
+    waterRenderer->EnableFrustumCulling();
+    
+    Transform* transformWater = newChunk->waterObject->GetComponent<Transform>();
+    transformWater->position.y = world.waterLevel;
+    
+    transformWater->scale = glm::vec3(15.5, 1.0f, 15.5);
+    
+    float maxWaterLayers  = 16.0f;
+    float maxWaterSpacing = (1.0f / 3.0f);
+    
+    float layerThickness = 0.3f;
+    
+    // Water layers
+    
+    waterRenderer->mesh = Engine.Create<Mesh>();
+    int layerOffsetIndex = 0;
+    
+    for (float c=0.0f; c <= maxWaterLayers; c += maxWaterSpacing) {
+        
+        Color layerColor = Colors.MakeGrayScale( -(c * (layerThickness * 16.0f)) );
+        
+        if (c >= maxWaterLayers) 
+            layerColor = Colors.red;
+        
+        waterRenderer->mesh->AddPlain(0, 
+                                      (c - maxWaterLayers) + maxWaterSpacing, 
+                                      0, 
+                                      1, 1, 
+                                      layerColor);
+        
     }
     
-    void RemoveChunk(unsigned int index) {
-        mChunkList.erase( (mChunkList.begin() + index) );
-        return;
+    //waterRenderer->mesh->AddPlain(0, 0, 0, 1, 1, Colors.white);
+    waterRenderer->mesh->Load();
+    waterRenderer->mesh->isShared = false;
+    
+    // Water material
+    waterRenderer->material = Engine.Create<Material>();
+    waterRenderer->material->shader = Engine.shaders.colorUnlit;
+    waterRenderer->material->isShared = false;
+    
+    // Blending
+    waterRenderer->material->EnableBlending();
+    waterRenderer->material->DisableCulling();
+    
+    waterRenderer->material->diffuse = Color(0.000024f, 0.000024f, 0.000024f);
+    
+    waterRenderer->material->ambient = Colors.blue * 0.005f;
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_FOREGROUND);
+    
+    return newChunk;
+}
+
+bool ChunkManager::DestroyChunk(Chunk* chunkPtr) {
+    
+    Engine.Destroy( chunkPtr->gameObject );
+    
+    Engine.Destroy( chunkPtr->staticObjects );
+    
+    Physics.world->destroyRigidBody( chunkPtr->rigidBody );
+    
+    // Destroy physics collider
+    Physics.DestroyHeightFieldMap( chunkPtr->collider );
+    
+    return mChunkList.Destroy(chunkPtr);
+}
+
+Chunk* ChunkManager::CheckChunk(glm::vec2 position) {
+    
+    unsigned int numberOfChunks = mChunkList.Size();
+    
+    for (unsigned int i=0; i < numberOfChunks; i++) {
+        
+        Chunk* chunk = mChunkList[i];
+        
+        if (position == chunk->position) 
+            return chunk;
+        
     }
     
-    int FindChunk(glm::vec2 position) {
-        for (unsigned int i=0; i < mChunkList.size(); i++) {
-            if (mChunkList[i].position != position) 
+    return nullptr;
+}
+
+unsigned int ChunkManager::GetNumberOfChunks(void) {
+    
+    return mChunkList.Size();
+}
+
+
+void ChunkManager::AddPerlinNoiseLayer(Perlin& layer) {
+    
+    mPerlinLayers.push_back(layer);
+    
+    return;
+}
+
+
+
+void ChunkManager::Update(void) {
+    
+    glm::vec2 cameraPosition = glm::vec2(Engine.cameraController->GetPosition().x, Engine.cameraController->GetPosition().z);
+    
+    //
+    // Chunk generation
+    //
+    
+    GenerateChunks(cameraPosition);
+    
+    
+    
+    //
+    // Update world chunks
+    unsigned int numberOfChunks = mChunkList.Size();
+    updateChunkCounter++;
+    
+    if (numberOfChunks >= updateChunkCounter) 
+        updateChunkCounter=0;
+    
+    Chunk* chunk = mChunkList[updateChunkCounter];
+    
+    if (glm::distance(cameraPosition, chunk->position) > ((renderDistance * 1.15f) * chunkSize)) {
+        
+        DestroyChunk( chunk );
+        
+        for (std::vector<Chunk*>::iterator it = mActiveChunks.begin(); it != mActiveChunks.end(); ++it) {
+            
+            Chunk* chunkPtr = *it;
+            
+            if (chunk != chunkPtr) 
                 continue;
-            return i;
+            
+            mActiveChunks.erase( it );
+            
+            break;
         }
-        return -1;
+        
     }
     
     
     
-    GameObject* CreateBaseChunk(float x, float z) {
+    
+    
+    
+    /*
+    
+    purgeCounter++;
+    if (purgeCounter > 10) {
+        purgeCounter=0;
         
-        Mesh* chunkMesh = Engine.Create<Mesh>();
+        for (unsigned int p=0; p < 8; p++) 
+            PurgeChunks(cameraPosition);
         
-        GameObject* baseChunk = Engine.Create<GameObject>();
-        
-        baseChunk->AddComponent( Engine.CreateComponentMeshRenderer( chunkMesh, nullptr ) );
-        
-        MeshRenderer* plainRenderer = baseChunk->GetComponent<MeshRenderer>();
-        
-        Engine.sceneMain->AddMeshRendererToSceneRoot( plainRenderer, RENDER_QUEUE_BACKGROUND );
-        plainRenderer->mesh->SetPrimitive( MESH_TRIANGLES );
-        
-        baseChunk->renderDistance = renderDistance * (chunkSize / 2);
-        
-        baseChunk->SetPosition(x, 0, z);
-        
-        return baseChunk;
     }
     
-    void Initiate(void) {
-        
-        // Source meshes for world construction
-        
-        glm::vec3 normalUp(0, 1, 0);
-        
-        Engine.meshes.wallHorizontal->SetNormals(normalUp);
-        Engine.meshes.wallVertical->SetNormals(normalUp);
-        
-        Engine.meshes.grassHorz->SetNormals(normalUp);
-        Engine.meshes.grassVert->SetNormals(normalUp);
-        
-        Engine.meshes.stemHorz->SetNormals(normalUp);
-        Engine.meshes.stemVert->SetNormals(normalUp);
-        
-        Engine.meshes.log->GetSubMesh(2, subMeshTree);
-        
-        Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshWallHorz);
-        Engine.meshes.wallVertical  ->GetSubMesh(0, subMeshWallVert);
-        
-        Engine.meshes.grassHorz->GetSubMesh(0, subMeshGrassHorz);
-        Engine.meshes.grassVert->GetSubMesh(0, subMeshGrassVert);
-        
-        Engine.meshes.stemHorz->GetSubMesh(0, subMeshStemHorz);
-        Engine.meshes.stemVert->GetSubMesh(0, subMeshStemVert);
-        
-        return;
-    }
+    */
     
+    return;
+}
+
+
+
+
+
+
+
+
+
+/*
+
     void Update(void) {
         
         //
@@ -314,7 +431,7 @@ public:
             playerPosition.y = 0;
             
             // Check chunk exists
-            int index = FindChunk( glm::vec2((int)chunkPosition.x, (int)chunkPosition.z) );
+            int index = FindChunk( (int)chunkPosition.x, (int)chunkPosition.z );
             
             if (index == -1) 
                 continue;
@@ -396,681 +513,489 @@ public:
         
         
         
-        //
-        // Purge chunks
-        //
+
+
+*/
+
+void ChunkManager::GenerateChunks(glm::vec2 position) {
+    
+    float noiseWidth  = 0.01f;
+    float noiseHeight = 0.01f;
+    float heightMul   = 70;
+    
+    Color colorLow;
+    Color colorHigh;
+    
+    colorLow  = Colors.dkgreen * 0.07f;
+    colorHigh = Colors.brown   * 0.07f;
+    
+    float cameraX = Math.Round(position.x / chunkSize);
+    float cameraZ = Math.Round(position.y / chunkSize);
+    
+    float heightField [ chunkSize * chunkSize ];
+    glm::vec3 colorField  [ chunkSize * chunkSize ];
+    
+    unsigned int chunksPerFrame = 3;
+    unsigned int chunksFrameCounter = 0;
+    
+    bool breakout = false;
+    
+    while (1) {
         
-        
-        if (doUpdateWithPlayerPosition) {
+        chunksFrameCounter++;
+        if (chunksFrameCounter > chunksPerFrame) {
+            chunksFrameCounter = 0;
             
-            // Decrease purge rate
-            mNumberOfChunksToPurge--;
-            
-            if (mNumberOfChunksToPurge < 3) 
-                mNumberOfChunksToPurge = 3;
-            
-            for (unsigned int a=0; a < mNumberOfChunksToPurge; a++) {
-                
-                if (mChunkList.size() == 0) 
-                    break;
-                
-                Chunk chunk = mChunkList[chunkIndex];
-                
-                chunkIndex++;
-                
-                if (chunkIndex >= mChunkList.size()) 
-                    chunkIndex = 0;
-                
-                Transform* transform = chunk.gameObject->GetComponent<Transform>();
-                
-                glm::vec3 chunkPosition  = transform->position;
-                glm::vec3 playerPosition = Engine.sceneMain->camera->transform.position;
-                
-                // Ignore height
-                chunkPosition.y = 0;
-                playerPosition.y = 0;
-                
-                if (glm::distance(chunkPosition, playerPosition) > destructionDistance) {
-                    
-                    int index = FindChunk( glm::vec2((int)chunkPosition.x, (int)chunkPosition.z) );
-                    
-                    if (index == -1) 
-                        continue;
-                    
-                    // Destroy chunk actors
-                    unsigned int numberOfActors = chunk.actorList.size();
-                    
-                    if (numberOfActors > 0) {
-                        
-                        for (unsigned int z=0; z < numberOfActors; z++) {
-                            
-                            GameObject* actorObject = chunk.actorList[z];
-                            
-                            Engine.Destroy<GameObject>( actorObject );
-                            
-                        }
-                        
-                    }
-                    
-                    // Destroy chunk static objects
-                    MeshRenderer* staticRenderer = chunk.staticObjects->GetComponent<MeshRenderer>();
-                    staticRenderer->mesh = nullptr;
-                    
-                    // Destroy chunk water table
-                    Engine.Destroy<GameObject>(chunk.waterObject);
-                    
-                    // Destroy levels of detail
-                    Engine.Destroy<Mesh>(chunk.lodLow);
-                    Engine.Destroy<Mesh>(chunk.lodHigh);
-                    
-                    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_DEFAULT );
-                    
-                    Engine.Destroy<GameObject>( chunk.staticObjects );
-                    
-                    
-                    // Remove the chunk from the chunk index
-                    RemoveChunk( index );
-                    
-                    // Destroy physics objects
-                    chunk.rigidBody->removeCollider( chunk.bodyCollider );
-                    
-                    Physics.world->destroyRigidBody( chunk.rigidBody );
-                    
-                    Physics.common.destroyHeightFieldShape( chunk.collider->heightFieldShape );
-                    
-                    // Destroy height field collider and associated buffer
-                    MeshCollider* collider = chunk.collider;
-                    Physics.DestroyHeightFieldMap( collider );
-                    
-                    // Marked for destruction
-                    Engine.Destroy<GameObject>( chunk.gameObject );
-                    
-                    // Increase chunk purge rate
-                    mNumberOfChunksToPurge++;
-                    
-                    if (mNumberOfChunksToPurge > mMaxChunksToPurge) 
-                        mNumberOfChunksToPurge = mMaxChunksToPurge;
-                    
-                }
-                
-                continue;
-            }
-            
+            break;
         }
         
-        
-        
-        
-        
-        
-        
-        //
-        // Generate chunks
-        //
-        
-        float playerChunkX = 0;
-        float playerChunkZ = 0;
-        
-        if (doUpdateWithPlayerPosition) {
-            playerChunkX = glm::round( Engine.sceneMain->camera->transform.position.x / (chunkSize - 1));
-            playerChunkZ = glm::round( Engine.sceneMain->camera->transform.position.z / (chunkSize - 1));
-        }
-        
-        // Decrease generation rate
-        mNumberOfChunksToGenerate--;
-        
-        if (mNumberOfChunksToGenerate < 1) 
-            mNumberOfChunksToGenerate = 1;
-        
-        float     heightField [ chunkSize * chunkSize ];
-        glm::vec3 colorField  [ chunkSize * chunkSize ];
-        
-        
-        for (unsigned int i=0; i < mNumberOfChunksToGenerate; i++) {
+        if (currentChunkX >= renderDistance) {
             
-            float chunkX = ((currentChunkX + playerChunkX) * (chunkSize - 1)) - (generationDistance / 2);
-            float chunkZ = ((currentChunkZ + playerChunkZ) * (chunkSize - 1)) - (generationDistance / 2);
+            currentChunkX = 0;
             
-            glm::vec2 chunkPosition = glm::vec2((int)chunkX, (int)chunkZ);
-            
-            // Chunk counter
-            
-            currentChunkX++;
-            
-            if (currentChunkX > generationDistance / chunkSize) {
+            if (currentChunkZ >= renderDistance) {
                 
-                currentChunkX = 0;
+                currentChunkZ = 0;
+            } else {
                 
                 currentChunkZ++;
-                
-                if (currentChunkZ > generationDistance / chunkSize) 
-                    currentChunkZ = 0;
-                
             }
             
-            // Check chunk does not exist
-            if (FindChunk( chunkPosition ) > -1) 
+        } else {
+            
+            currentChunkX++;
+        }
+        
+        int x = currentChunkX;
+        int z = currentChunkZ;
+        
+        float chunkX = ((x + cameraX) * chunkSize) - ((renderDistance / 2) * chunkSize);
+        float chunkZ = ((z + cameraZ) * chunkSize) - ((renderDistance / 2) * chunkSize);
+        
+        int chunkAbsX = (chunkX / chunkSize) * (chunkSize);
+        int chunkAbsZ = (chunkZ / chunkSize) * (chunkSize);
+        
+        int chunkWorldX = (chunkX / chunkSize) * (chunkSize - 1);
+        int chunkWorldZ = (chunkZ / chunkSize) * (chunkSize - 1);
+        
+        Chunk* chunk = CheckChunk(glm::vec2(chunkX, chunkZ));
+        
+        if (chunk != nullptr) 
+            continue;
+        
+        chunk = CreateChunk(chunkWorldX, chunkWorldZ);
+        
+        chunk->position = glm::vec2(chunkX, chunkZ);
+        chunk->gameObject->SetPosition(chunkX, 0, chunkZ);
+        
+        Engine.SetHeightFieldValues(heightField, chunkSize, chunkSize, 0);
+        Engine.SetColorFieldValues(colorField, chunkSize, chunkSize, Colors.white);
+        
+        Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.024f);
+        
+        chunk->gameObject->Activate();
+        
+        //
+        // Perlin noise layers
+        
+        chunk->gameObject->SetPosition(chunkWorldX, 0, chunkWorldZ);
+        
+        MeshRenderer* chunkRenderer = chunk->gameObject->GetComponent<MeshRenderer>();
+        
+        // Chunk perlin
+        unsigned int numberOfLayers = mPerlinLayers.size();
+        for (unsigned int l=0; l < numberOfLayers; l++) {
+            
+            Perlin* perlinLayer = &mPerlinLayers[l];
+            
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 
+                                                 perlinLayer->noiseWidth, 
+                                                 perlinLayer->noiseHeight, 
+                                                 perlinLayer->heightMultuplier, 
+                                                 chunkWorldX, chunkWorldZ);
+            
+        }
+        
+        //
+        // Biome test
+        
+        //Engine.SetColorFieldFromPerlinNoise(colorField, chunkSize, chunkSize, 0.01, 0.01, 0.4, Colors.blue, Colors.red, chunkX, chunkZ);
+        
+        Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.024f);
+        
+        //
+        // Snow cap
+        
+        Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize, chunkSize, Colors.white, world.snowCapHeight, 7.0f);
+        
+        //
+        // Water table
+        
+        //Engine.AddColorFieldWaterTable(colorField, heightField, chunkSize, chunkSize, world.waterColor, world.waterLevel, 0.1f, world.waterLevel);
+        
+        chunk->waterObject->renderDistance = (renderDistance * (chunkSize / 2)) * 2.0f;
+        
+        Transform* transformWater = chunk->waterObject->GetComponent<Transform>();
+        transformWater->position.x = chunkWorldX;
+        transformWater->position.z = chunkWorldZ;
+        
+        
+        
+        
+        //
+        // Finalize chunk mesh
+        
+        Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSize, chunkSize, 0, 0, 1, 1);
+        chunkRenderer->mesh->Load();
+        
+        
+        
+        
+        // Generate rigid body
+        
+        RigidBody* chunkBody = Physics.world->createRigidBody( rp3d::Transform::identity() );
+        chunk->rigidBody = chunkBody;
+        
+        chunkBody->setAngularLockAxisFactor( rp3d::Vector3(0, 0, 0) );
+        chunkBody->setLinearLockAxisFactor( rp3d::Vector3(0, 0, 0) );
+        chunkBody->setType(rp3d::BodyType::STATIC);
+        
+        rp3d::Transform bodyTransform = rp3d::Transform::identity();
+        bodyTransform.setPosition( rp3d::Vector3(chunkWorldX, 0, chunkWorldZ) );
+        chunkBody->setTransform(bodyTransform);
+        
+        // Generate a height field collider
+        MeshCollider*  meshCollider = Physics.CreateHeightFieldMap(heightField, chunkSize, chunkSize);
+        chunk->collider = meshCollider;
+        
+        rp3d::Collider* bodyCollider = chunkBody->addCollider( meshCollider->heightFieldShape, rp3d::Transform::identity() );
+        bodyCollider->setUserData( (void*)chunk->gameObject );
+        //bodyCollider->setCollisionCategoryBits((unsigned short)LayerMask::Ground);
+        //bodyCollider->setCollideWithMaskBits(0);
+        
+        chunk->bodyCollider = bodyCollider;
+        
+        
+        //
+        // Generate actors
+        //
+        
+        for (unsigned int a=0; a < world.actorDensity; a++) {
+            
+            float xx = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
+            float zz = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
+            
+            if ((xx >  (chunkSize/2)) | (zz >  (chunkSize/2)) | 
+                (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
                 continue;
             
-            // Increase chunk update rate
-            mNumberOfChunksToGenerate++;
+            // Ray cast here to find the ground
+            glm::vec3 from(chunkWorldX + xx, 1000, chunkWorldZ + zz);
+            glm::vec3 direction(0, -1, 0);
             
-            if (mNumberOfChunksToGenerate > mMaxChunksToGenerate) 
-                mNumberOfChunksToGenerate = mMaxChunksToGenerate;
+            Hit hit;
             
+            float distance = 2000;
+            float height = 0;
             
-            //
-            // Generate chunk
-            //
+            if (Physics.Raycast(from, direction, distance, hit)) 
+                height = hit.point.y;
             
-            //
-            // Generate base chunk object
-            
-            Chunk chunk;
-            
-            GameObject* baseObject = CreateBaseChunk(chunkX, chunkZ);
-            
-            
-            Material* baseMaterial = Engine.Create<Material>();
-            
-            baseMaterial->shader = Engine.shaders.color;
-             
-            baseMaterial->ambient = Colors.Make(0.27f, 0.27f, 0.27f);
-            baseMaterial->diffuse = Colors.white;
-            baseMaterial->specular = Colors.white;
-            
-            
-            // Chunk material
-            MeshRenderer* baseRenderer = baseObject->GetComponent<MeshRenderer>();
-            baseRenderer->material = baseMaterial;
-            
-            baseRenderer->EnableFrustumCulling();
-            
-            baseRenderer->isActive = false;
-            
-            Engine.SetHeightFieldValues(heightField, chunkSize, chunkSize, 0);
-            Engine.SetColorFieldValues(colorField, chunkSize, chunkSize, Colors.black);
-            
-            Transform* baseTransform = baseObject->GetComponent<Transform>();
-            baseTransform->scale = glm::vec3(1, 1, 1);
-            
-            
-            
-            //
-            // Generate the static object container
-            
-            GameObject* staticObjectContainer = Engine.Create<GameObject>();
-            staticObjectContainer->renderDistance = (renderDistanceStatic * (chunkSize / 2)) * 0.7f;
-            
-            Transform* transform = staticObjectContainer->GetComponent<Transform>();
-            
-            transform->position.x = chunkX;
-            transform->position.z = chunkZ;
-            
-            // Static mesh
-            Mesh* staticMesh = Engine.Create<Mesh>();
-            
-            staticMesh->isShared = false;
-            
-            
-            // Static material
-            
-            Material* staticMaterial = Engine.Create<Material>();
-            staticMaterial->DisableCulling();
-            
-            staticMaterial->shader = Engine.shaders.color;
-            
-            staticMaterial->ambient = Colors.Make(0.1f, 0.1f, 0.1f);
-            staticMaterial->diffuse = Colors.white;
-            staticMaterial->specular = Colors.white;
-            
-            staticObjectContainer->AddComponent( Engine.CreateComponentMeshRenderer(staticMesh, staticMaterial) );
-            
-            MeshRenderer* staticRenderer = staticObjectContainer->GetComponent<MeshRenderer>();
-            staticRenderer->EnableFrustumCulling();
-            
-            chunk.staticObjects = staticObjectContainer;
-            
-            Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer);
-            
-            
-            //
-            // Main noise channels
-            
-            for (unsigned int n=0; n < world.perlinGraph.size(); n++) {
-                
-                float noiseWidth  = world.perlinGraph[n].noiseWidth;
-                float noiseHeight = world.perlinGraph[n].noiseHeight;
-                
-                float heightMul   = world.perlinGraph[n].heightMultuplier;
-                
-                if (world.perlinGraph[n].equation == 0) {
-                    
-                    Engine.AddHeightFieldFromPerlinNoise(heightField, 
-                                                        chunkSize, chunkSize, 
-                                                        noiseWidth, noiseHeight, heightMul, 
-                                                        chunkX, chunkZ);
-                    
-                } else {
-                    
-                    Engine.AverageHeightFieldFromPerlinNoise(heightField, 
-                                                             chunkSize, chunkSize, 
-                                                             noiseWidth, noiseHeight, heightMul, 
-                                                             chunkX, chunkZ);
-                    
-                }
-                
-            }
-            
-            
-            // Biome range
-            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize,  0.001,  0.001, 100, chunkX, chunkZ);
-            //Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 0.0001, 0.0001, 500, chunkX, chunkZ);
-            
-            
-            
-            //
-            // Biome effect on terrain color
-            //
-            
-            //Engine.SetColorFieldFromPerlinNoise(colorField, chunkSize, chunkSize, 0.01, 0.01, 0.4, Colors.blue, Colors.red, chunkX, chunkZ);
-            
-            
-            
-            // Apply terrain color by height value
-            Color colorLow;
-            Color colorHigh;
-            
-            colorLow  = Colors.dkgreen * 0.07f;
-            colorHigh = Colors.brown   * 0.07f;
-            
-            Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.024f);
-            
-            // Snow cap
-            Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize, chunkSize, Colors.white, world.snowCapHeight, 7.0f);
-            
-            // Water table
-            Engine.AddColorFieldWaterTable(colorField, heightField, chunkSize, chunkSize, world.waterColor, world.waterLevel, 0.1f);
-            
-            chunk.waterObject = Engine.Create<GameObject>();
-            chunk.waterObject->renderDistance = (renderDistanceStatic * (chunkSize / 2)) * 0.7f;
-            
-            chunk.waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-            MeshRenderer* waterRenderer = chunk.waterObject->GetComponent<MeshRenderer>();
-            waterRenderer->EnableFrustumCulling();
-            
-            
-            Transform* transformWater = chunk.waterObject->GetComponent<Transform>();
-            transformWater->position.x = chunkX;
-            transformWater->position.y = world.waterLevel;
-            transformWater->position.z = chunkZ;
-            
-            transformWater->scale = glm::vec3(24.5, 1.0f, 24.5);
-            
-            // Water mesh
-            waterRenderer->mesh = Engine.Create<Mesh>();
-            
-            float maxWaterLayers  = 4.0f;
-            float maxWaterSpacing = 0.3f;
-            
-            float layerThickness = 1.0f;
-            
-            for (float c=0.0f; c <= maxWaterLayers; c += maxWaterSpacing) 
-                waterRenderer->mesh->AddPlain(0, (c - maxWaterLayers) + maxWaterSpacing, 0, 1, 1, Colors.MakeGrayScale( -(c * layerThickness) ));
-            
-            waterRenderer->mesh->Load();
-            
-            // Water material
-            waterRenderer->material = Engine.Create<Material>();
-            waterRenderer->material->shader = Engine.shaders.colorUnlit;
-            
-            // Blending
-            waterRenderer->material->EnableBlending();
-            waterRenderer->material->DisableCulling();
-            waterRenderer->material->ambient = Color(0.01f, 0.01f, 0.01f, 0.01f);
-            waterRenderer->material->diffuse = world.waterColor * 0.87f;
-            waterRenderer->material->diffuse.a = 0.01f;
-            
-            waterRenderer->material->SetBlendingFunction(BLEND_EQUATION_SUB);
-            waterRenderer->material->SetBlendingAlpha(BLEND_SRC_COLOR, BLEND_ONE_MINUS_SRC_ALPHA);
-            
-            Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_FOREGROUND);
-            
-            // Generate rigid body
-            
-            RigidBody* chunkBody = Physics.world->createRigidBody( rp3d::Transform::identity() );
-            
-            chunkBody->setAngularLockAxisFactor( rp3d::Vector3(0, 0, 0) );
-            chunkBody->setLinearLockAxisFactor( rp3d::Vector3(0, 0, 0) );
-            chunkBody->setType(rp3d::BodyType::STATIC);
-            
-            rp3d::Transform bodyTransform = rp3d::Transform::identity();
-            bodyTransform.setPosition( rp3d::Vector3(chunkX, 0, chunkZ) );
-            chunkBody->setTransform(bodyTransform);
-            
-            
-            
-            // Generate a height field collider
-            MeshCollider*   meshCollider = Physics.CreateHeightFieldMap(heightField, chunkSize, chunkSize);
-            
-            rp3d::Collider* BodyCollider = chunkBody->addCollider( meshCollider->heightFieldShape, rp3d::Transform::identity() );
-            
-            
-            // Add the chunk to the mesh
-            
-            Engine.AddHeightFieldToMesh(baseRenderer->mesh, heightField, colorField, chunkSize, chunkSize, 0, 0, 1, 1);
-            
-            // Generate lower levels of detail for the terrain
-            
-            chunk.lodLow  = Engine.Create<Mesh>();
-            chunk.lodHigh = baseRenderer->mesh;
-            
-            chunk.lodLow->isShared = false;
-            chunk.lodHigh->isShared = false;
-            
-            Engine.AddHeightFieldToMesh(chunk.lodLow, heightField, colorField, chunkSize, chunkSize, chunkSize / 4, chunkSize / 4, 2, 2);
-            
-            baseRenderer->mesh->Load();
-            chunk.lodLow->Load();
-            
-            
-            
-            //
-            // Generate actors
-            //
-            
-            for (unsigned int a=0; a < world.actorDensity; a++) {
-                
-                float xx = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
-                float zz = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
-                
-                if ((xx >  (chunkSize/2)) | (zz >  (chunkSize/2)) | 
-                    (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
-                    continue;
-                
-                // Ray cast here to find the ground
-                glm::vec3 from(chunkX + xx, 1000, chunkZ + zz);
-                glm::vec3 direction(0, -1, 0);
-                
-                Hit hit;
-                
-                float distance = 2000;
-                float height = 0;
-                
-                if (Physics.Raycast(from, direction, distance, hit)) 
-                    height = hit.point.y;
-                
-                if (height > world.actorHeightCutoff) 
-                    continue;
-                
-                if (height == 0) 
-                    continue;
-                
-                if (height <= world.waterLevel) 
-                    continue;
-                
-                GameObject* actorObject = Engine.CreateAIActor( glm::vec3(from.x, 0, from.z) );
-                
-                chunk.actorList.push_back( actorObject );
-                
-                Actor* actor = actorObject->GetComponent<Actor>();
-                
-                // Use sheep actor preset
-                AI.genomes.SheepGene( actor );
-                
+            if (height > world.actorHeightCutoff) 
                 continue;
-            }
             
-            
-            //
-            // Trees
-            //
-            
-            for (unsigned int a=0; a < world.treeDensity; a++) {
-                
-                float xx = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
-                float zz = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
-                
-                if ((xx >  (chunkSize/2)) | (zz >  (chunkSize/2)) | 
-                    (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
-                    continue;
-                
-                // Ray cast here to find the ground
-                glm::vec3 from(chunkX + xx, 1000, chunkZ + zz);
-                glm::vec3 direction(0, -1, 0);
-                
-                Hit hit;
-                
-                float distance = 2000;
-                float height = 0;
-                
-                if (Physics.Raycast(from, direction, distance, hit)) 
-                    height = hit.point.y;
-                
-                if (height > world.treeHeightCutoff) 
-                    continue;
-                
-                if (height == 0) 
-                    continue;
-                
-                if (height <= world.waterLevel) 
-                    continue;
-                
-                
-                // Logs
-                
-                float logHeight = Random.Range((float)world.treeHeightLow, (float)world.treeHeightHigh);
-                
-                for (unsigned int s=0; s < logHeight; s++) {
-                    
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshTree, false);
-                    
-                    unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
-                    
-                    unsigned int index = numberOfSubMeshes - 1;
-                    
-                    Color finalColor;
-                    Color lowTrunk;
-                    Color highTrunk;
-                    
-                    lowTrunk  = (Colors.brown * 0.1f) + (Colors.green * 0.01);
-                    highTrunk = (Colors.brown * 0.8f) + (Colors.green * 0.01);
-                    
-                    finalColor = Colors.Lerp(lowTrunk, highTrunk, (s * 0.087f));
-                    
-                    staticMesh->ChangeSubMeshColor(index, finalColor);
-                    
-                    staticMesh->ChangeSubMeshPosition(index, xx, height + s - 1.0f, zz);
-                    
-                }
-                
-                // Leaves
-                
-                float leafCount = Random.Range(((float)world.numberOfLeaves) / 2, (float)world.numberOfLeaves);
-                
-                unsigned int leafAccent = Random.Range(0, 100);
-                
-                for (unsigned int z=0; z < leafCount; z++) {
-                    
-                    float offset_xx = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
-                    float offset_yy = Random.Range(0.0f, world.leafSpreadHeight) - Random.Range(0.0f, world.leafSpreadHeight);
-                    float offset_zz = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
-                    
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshWallHorz, false);
-                    staticMesh->AddSubMesh(0, 0, 0, subMeshWallVert, false);
-                    
-                    unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
-                    unsigned int index = numberOfSubMeshes - 1;
-                    
-                    Color finalColor;
-                    Color lowLeaves;
-                    Color highLeaves;
-                    
-                    lowLeaves  = Colors.green * 0.08f;
-                    highLeaves = Colors.green * 0.01f;
-                    
-                    if ((leafAccent > 70) & (leafAccent < 80)) 
-                        lowLeaves = Colors.orange * 0.1f;
-                    
-                    if ((leafAccent > 20) & (leafAccent < 40)) 
-                        lowLeaves = Colors.yellow * 0.1f;
-                    
-                    finalColor = Colors.Lerp(lowLeaves, highLeaves, Random.Range(0, 100) * 0.01f);
-                    
-                    staticMesh->ChangeSubMeshColor(index, finalColor);
-                    staticMesh->ChangeSubMeshColor(index-1, finalColor);
-                    
-                    staticMesh->ChangeSubMeshPosition(index,   xx + offset_xx, world.leafHeightOffset + height + logHeight + offset_yy, zz + offset_zz);
-                    staticMesh->ChangeSubMeshPosition(index-1, xx + offset_xx, world.leafHeightOffset + height + logHeight + offset_yy, zz + offset_zz);
-                    
-                }
-                
+            if (height == 0) 
                 continue;
-            }
             
-            
-            
-            
-            
-            //
-            // Grass
-            //
-            
-            for (unsigned int a=0; a < world.staticDensity; a++) {
-                
-                float xx = Random.Range(0, chunkSize * 2) - Random.Range(0, chunkSize * 2) * 0.5f;
-                float zz = Random.Range(0, chunkSize * 2) - Random.Range(0, chunkSize * 2) * 0.5f;
-                
-                if ((xx > (chunkSize/2)) | (zz > (chunkSize/2)) | 
-                    (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
-                    continue;
-                
-                // Ray cast here to find the ground
-                glm::vec3 from(chunkX + xx, 1000, chunkZ + zz);
-                glm::vec3 direction(0, -1, 0);
-                
-                Hit hit;
-                
-                float distance = 2000;
-                float height = 0;
-                
-                if (Physics.Raycast(from, direction, distance, hit)) 
-                    height = hit.point.y;
-                
-                if (height > world.staticHeightCutoff) 
-                    continue;
-                
-                if (height == 0) 
-                    continue;
-                
-                // Water level cut off
-                if (Random.Range(0, 10) > 1) 
-                    if (height <= world.waterLevel) 
-                        continue;
-                
-                if (height <= (world.waterLevel - 8)) 
-                        continue;
-                
-                unsigned int stackHeight = Random.Range(0, 3);
-                
-                unsigned int stackType = Random.Range(0, 7);
-                
-                for (unsigned int c=0; c < stackHeight; c++) {
-                    
-                    if (stackType > 2) {
-                        
-                        float heightOffset = height + c;
-                        
-                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshStemHorz, false);
-                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshStemVert, false);
-                        
-                        unsigned int index = staticMesh->GetSubMeshCount() - 1;
-                        
-                        Color finalColor;
-                        finalColor = Colors.green * 0.03f;
-                        
-                        finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
-                                                  Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
-                                                  Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
-                        
-                        staticMesh->ChangeSubMeshColor(index, finalColor);
-                        staticMesh->ChangeSubMeshColor(index-1, finalColor);
-                        
-                    }
-                    
-                    if (height <= world.waterLevel) 
-                        continue;
-                    
-                    if (stackType == 1) {
-                        float heightOffset = height + c;
-                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshGrassHorz, false);
-                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshGrassVert, false);
-                        
-                        unsigned int index = staticMesh->GetSubMeshCount() - 1;
-                        
-                        Color finalColor;
-                        finalColor = Colors.green * 0.04f;
-                        
-                        staticMesh->ChangeSubMeshColor(index, finalColor);
-                        staticMesh->ChangeSubMeshColor(index-1, finalColor);
-                        
-                    }
-                    
-                    if (stackType == 0) {
-                        float heightOffset = height + c;
-                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshWallHorz, false);
-                        staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshWallVert, false);
-                        
-                        unsigned int index = staticMesh->GetSubMeshCount() - 1;
-                        
-                        Color finalColor;
-                        finalColor = Colors.green * 0.05f;
-                        
-                        staticMesh->ChangeSubMeshColor(index, finalColor);
-                        staticMesh->ChangeSubMeshColor(index-1, finalColor);
-                        
-                    }
-                    
-                }
-                
+            if (height <= world.waterLevel) 
                 continue;
-            }
             
+            GameObject* actorObject = Engine.CreateAIActor( glm::vec3(from.x, 0, from.z) );
             
-            staticMesh->Load();
+            chunk->actorList.push_back( actorObject );
             
+            Actor* actor = actorObject->GetComponent<Actor>();
+            actor->SetHeightPreferenceMin(world.waterLevel);
+            actor->SetHeightPreferenceMax(40.0f);
             
-            // Add chunk to chunk list
-            chunk.position     = chunkPosition;
-            chunk.gameObject   = baseObject;
-            chunk.rigidBody    = chunkBody;
-            chunk.collider     = meshCollider;
-            chunk.bodyCollider = BodyCollider;
-            
-            AddChunk( chunk );
+            // Use sheep actor preset
+            AI.genomes.SheepGene( actor );
             
             continue;
         }
         
-        return;
+        
+        //
+        // Trees
+        //
+        
+        Mesh* staticMesh = chunk->staticObjects->GetComponent<MeshRenderer>()->mesh;
+        
+        for (unsigned int a=0; a < world.treeDensity; a++) {
+            
+            float xx = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
+            float zz = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
+            
+            if ((xx >  (chunkSize/2)) | (zz >  (chunkSize/2)) | 
+                (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
+                continue;
+            
+            // Ray cast here to find the ground
+            glm::vec3 from(chunkWorldX + xx, 1000, chunkWorldZ + zz);
+            glm::vec3 direction(0, -1, 0);
+            
+            Hit hit;
+            
+            float distance = 2000;
+            float height = 0;
+            
+            if (Physics.Raycast(from, direction, distance, hit)) 
+                height = hit.point.y;
+            
+            if (height > world.treeHeightCutoff) 
+                continue;
+            
+            if (height == 0) 
+                continue;
+            
+            if (height <= world.waterLevel) 
+                continue;
+            
+            
+            // Logs
+            
+            float logHeight = Random.Range((float)world.treeHeightLow, (float)world.treeHeightHigh);
+            
+            for (unsigned int s=0; s < logHeight; s++) {
+                
+                staticMesh->AddSubMesh(0, 0, 0, subMeshTree, false);
+                
+                unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
+                
+                unsigned int index = numberOfSubMeshes - 1;
+                
+                Color finalColor;
+                Color lowTrunk;
+                Color highTrunk;
+                
+                lowTrunk  = (Colors.brown * 0.1f) + (Colors.green * 0.01);
+                highTrunk = (Colors.brown * 0.8f) + (Colors.green * 0.01);
+                
+                finalColor = Colors.Lerp(lowTrunk, highTrunk, (s * 0.087f));
+                
+                staticMesh->ChangeSubMeshColor(index, finalColor);
+                
+                staticMesh->ChangeSubMeshPosition(index, xx, height + s - 1.0f, zz);
+                
+            }
+            
+            // Leaves
+            
+            float leafCount = Random.Range(((float)world.numberOfLeaves) / 2, (float)world.numberOfLeaves);
+            
+            unsigned int leafAccent = Random.Range(0, 100);
+            
+            for (unsigned int z=0; z < leafCount; z++) {
+                
+                float offset_xx = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
+                float offset_yy = Random.Range(0.0f, world.leafSpreadHeight) - Random.Range(0.0f, world.leafSpreadHeight);
+                float offset_zz = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
+                
+                staticMesh->AddSubMesh(0, 0, 0, subMeshWallHorz, false);
+                staticMesh->AddSubMesh(0, 0, 0, subMeshWallVert, false);
+                
+                unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
+                unsigned int index = numberOfSubMeshes - 1;
+                
+                Color finalColor;
+                Color lowLeaves;
+                Color highLeaves;
+                
+                lowLeaves  = Colors.green * 0.08f;
+                highLeaves = Colors.green * 0.01f;
+                
+                if ((leafAccent > 70) & (leafAccent < 80)) 
+                    lowLeaves = Colors.orange * 0.1f;
+                
+                if ((leafAccent > 20) & (leafAccent < 40)) 
+                    lowLeaves = Colors.yellow * 0.1f;
+                
+                finalColor = Colors.Lerp(lowLeaves, highLeaves, Random.Range(0, 100) * 0.01f);
+                
+                staticMesh->ChangeSubMeshColor(index, finalColor);
+                staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                
+                staticMesh->ChangeSubMeshPosition(index,   xx + offset_xx, world.leafHeightOffset + height + logHeight + offset_yy, zz + offset_zz);
+                staticMesh->ChangeSubMeshPosition(index-1, xx + offset_xx, world.leafHeightOffset + height + logHeight + offset_yy, zz + offset_zz);
+                
+            }
+            
+            continue;
+        }
+        
+        
+        
+        
+        //
+        // Grass
+        //
+        
+        for (unsigned int a=0; a < world.staticDensity; a++) {
+            
+            float xx = Random.Range(0, chunkSize * 2) - Random.Range(0, chunkSize * 2) * 0.5f + 1.0f;
+            float zz = Random.Range(0, chunkSize * 2) - Random.Range(0, chunkSize * 2) * 0.5f + 1.0f;
+            
+            if ((xx > (chunkSize/2)) | (zz > (chunkSize/2)) | 
+                (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
+                continue;
+            
+            // Ray cast here to find the ground
+            glm::vec3 from(chunkWorldX + xx, 1000, chunkWorldZ + zz);
+            glm::vec3 direction(0, -1, 0);
+            
+            Hit hit;
+            
+            float distance = 2000;
+            float height = 0;
+            
+            if (Physics.Raycast(from, direction, distance, hit)) 
+                height = hit.point.y;
+            
+            if (height > world.staticHeightCutoff) 
+                continue;
+            
+            if (height == 0) 
+                continue;
+            
+            // Water level cut off
+            if (Random.Range(0, 10) > 3) 
+                if (height <= world.waterLevel) 
+                    continue;
+            
+            if (height <= (world.waterLevel - 8)) 
+                continue;
+            
+            unsigned int stackHeight = Random.Range(0, 3);
+            
+            unsigned int stackType = Random.Range(0, 7);
+            
+            for (unsigned int c=0; c < stackHeight; c++) {
+                
+                if (stackType > 2) {
+                    
+                    float heightOffset = height + c;
+                    
+                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshStemHorz, false);
+                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshStemVert, false);
+                    
+                    unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                    
+                    Color finalColor;
+                    finalColor = Colors.green * 0.03f;
+                    
+                    finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
+                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
+                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
+                    
+                    staticMesh->ChangeSubMeshColor(index, finalColor);
+                    staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                    
+                }
+                
+                if (height <= world.waterLevel) 
+                    continue;
+                
+                if (stackType == 1) {
+                    float heightOffset = height + c;
+                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshGrassHorz, false);
+                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshGrassVert, false);
+                    
+                    unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                    
+                    Color finalColor;
+                    finalColor = Colors.green * 0.04f;
+                    
+                    staticMesh->ChangeSubMeshColor(index, finalColor);
+                    staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                    
+                }
+                
+                if (stackType == 0) {
+                    float heightOffset = height + c;
+                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshWallHorz, false);
+                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshWallVert, false);
+                    
+                    unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                    
+                    Color finalColor;
+                    finalColor = Colors.green * 0.05f;
+                    
+                    staticMesh->ChangeSubMeshColor(index, finalColor);
+                    staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                    
+                }
+                
+            }
+            
+            continue;
+        }
+        
+        staticMesh->Load();
+        
+        mActiveChunks.push_back(chunk);
+        
     }
     
+    return;
+}
+
+
+void ChunkManager::PurgeChunks(glm::vec2 position) {
     
-private:
+    for (std::vector<Chunk*>::iterator it = mActiveChunks.begin(); it != mActiveChunks.end(); ++it) {
+        
+        Chunk* chunkPtr = *it;
+        
+        if (glm::distance(position, chunkPtr->position) < ((renderDistance * 1.15f) * chunkSize)) 
+            continue;
+        
+        DestroyChunk( chunkPtr );
+        
+        mActiveChunks.erase( it );
+        
+        break;
+    }
     
-    /// List of chunks in the world.
-    std::vector<Chunk> mChunkList;
+    return;
+}
+
+
+void ChunkManager::Initiate(void) {
     
-    // Number of chunks being updated per frame
-    unsigned int mNumberOfChunksToGenerate;
-    unsigned int mMaxChunksToGenerate;
+    // Source meshes for world construction
     
-    // Number of chunks being destroyed per frame
-    unsigned int mNumberOfChunksToPurge;
-    unsigned int mMaxChunksToPurge;
+    glm::vec3 normalUp(0, 1, 0);
     
-    // Number of chunks to update per frame
-    unsigned int mNumberOfChunksToUpdate;
-    unsigned int mMaxChunksToUpdate;
+    Engine.meshes.wallHorizontal->SetNormals(normalUp);
+    Engine.meshes.wallVertical->SetNormals(normalUp);
     
-};
+    Engine.meshes.grassHorz->SetNormals(normalUp);
+    Engine.meshes.grassVert->SetNormals(normalUp);
+    
+    Engine.meshes.stemHorz->SetNormals(normalUp);
+    Engine.meshes.stemVert->SetNormals(normalUp);
+    
+    Engine.meshes.log->GetSubMesh(2, subMeshTree);
+    
+    Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshWallHorz);
+    Engine.meshes.wallVertical  ->GetSubMesh(0, subMeshWallVert);
+    
+    Engine.meshes.grassHorz->GetSubMesh(0, subMeshGrassHorz);
+    Engine.meshes.grassVert->GetSubMesh(0, subMeshGrassVert);
+    
+    Engine.meshes.stemHorz->GetSubMesh(0, subMeshStemHorz);
+    Engine.meshes.stemVert->GetSubMesh(0, subMeshStemVert);
+    
+    return;
+}
+

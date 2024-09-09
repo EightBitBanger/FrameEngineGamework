@@ -35,6 +35,12 @@ public:
     
     glm::vec3 normal;
     
+    rp3d::CollisionBody* body;
+    
+    rp3d::Collider* collider;
+    
+    void* userData;
+    
     RaybackCastCaller();
     
     virtual rp3d::decimal notifyRaycastHit( const rp3d::RaycastInfo& info ) {
@@ -49,6 +55,11 @@ public:
         normal.y = info.worldNormal.y;
         normal.z = info.worldNormal.z;
         
+        body = info.body;
+        collider = info.collider;
+        
+        userData = collider->getUserData();
+        
         // Return a fraction of 1.0 to gather all hits
         return rp3d::decimal (1.0) ;
     }
@@ -57,11 +68,15 @@ public:
 
 
 
-struct Hit {
+class ENGINE_API Hit {
+    
+public:
     
     glm::vec3 point;
     
     glm::vec3 normal;
+    
+    void* gameObject;
     
 };
 
@@ -103,6 +118,7 @@ public:
     
     /// Create a height field collider from a height field map and return its pointer.
     MeshCollider* CreateHeightFieldMap(float* heightField, unsigned int width, unsigned int height, float scaleX=1, float scaleY=1, float scaleZ=1);
+    
     /// Destroy a height field map collider.
     bool DestroyHeightFieldMap(MeshCollider* collider);
     
