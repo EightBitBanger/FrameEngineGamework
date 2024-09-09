@@ -36,10 +36,10 @@ bool RenderSystem::CullingPass(MeshRenderer* currentEntity, Camera* currentCamer
     if ((viewAngle > 360.0f - overlap) | (viewAngle < 0.0f + overlap)) {frontRight = true; frontLeft = true;}
     
     // Check angle is visible
-    if (frontRight) if ((currentEntity->transform.position.x > to.x) & (currentEntity->transform.position.z > to.y)) return false;
-    if (frontLeft)  if ((currentEntity->transform.position.x > to.x) & (currentEntity->transform.position.z < to.y)) return false;
-    if (rearRight)  if ((currentEntity->transform.position.x < to.x) & (currentEntity->transform.position.z > to.y)) return false;
-    if (rearLeft)   if ((currentEntity->transform.position.x < to.x) & (currentEntity->transform.position.z < to.y)) return false;
+    if (frontRight) if ((currentEntity->transform.position.x >= to.x) & (currentEntity->transform.position.z >= to.y)) return false;
+    if (frontLeft)  if ((currentEntity->transform.position.x >= to.x) & (currentEntity->transform.position.z <= to.y)) return false;
+    if (rearRight)  if ((currentEntity->transform.position.x <= to.x) & (currentEntity->transform.position.z >= to.y)) return false;
+    if (rearLeft)   if ((currentEntity->transform.position.x <= to.x) & (currentEntity->transform.position.z <= to.y)) return false;
     
     return true;
 }

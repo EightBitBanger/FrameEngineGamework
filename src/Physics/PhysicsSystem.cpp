@@ -119,14 +119,21 @@ MeshCollider* PhysicsSystem::CreateHeightFieldMap(float* heightField, unsigned i
 }
 
 bool PhysicsSystem::DestroyHeightFieldMap(MeshCollider* collider) {
-    delete(collider->heightMapBuffer);
+    
+    common.destroyHeightFieldShape( collider->heightFieldShape );
+    
+    delete( collider->heightMapBuffer );
+    
     return mMeshColliders.Destroy( collider );
 }
 
 
 void PhysicsSystem::AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr) {
+    
     mRigidBodyFreeList.push_back(rigidBodyPtr);
+    
     rigidBodyPtr->setIsActive(false);
+    
     return;
 }
 
@@ -161,6 +168,8 @@ bool PhysicsSystem::Raycast(glm::vec3 from, glm::vec3 direction, float distance,
     
     hit.point  = mRaybackCastCaller.point;
     hit.normal = mRaybackCastCaller.normal;
+    
+    hit.gameObject = mRaybackCastCaller.userData;
     
     return true;
 }
