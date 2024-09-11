@@ -96,7 +96,7 @@ void Start() {
     
     Weather.Initiate();
     
-    Engine.EnableProfiler();
+    //Engine.EnableProfiler();
     
     //Engine.EnablePhysicsDebugRenderer();
     
@@ -162,14 +162,18 @@ void Start() {
     perlinMountainB.noiseWidth  = 0.0007;
     perlinMountainB.noiseHeight = 0.0007;
     
+    chunkManager.AddPerlinNoiseLayer(perlinMountainB);
+    chunkManager.AddPerlinNoiseLayer(perlinMountainA);
     chunkManager.AddPerlinNoiseLayer(perlinBase);
     chunkManager.AddPerlinNoiseLayer(perlinLayerA);
     chunkManager.AddPerlinNoiseLayer(perlinLayerB);
-    chunkManager.AddPerlinNoiseLayer(perlinMountainA);
-    chunkManager.AddPerlinNoiseLayer(perlinMountainB);
     
-    chunkManager.renderDistance = 16;
-    chunkManager.renderDistanceStatic = 16;
+    chunkManager.world.actorDensity   = 0;
+    chunkManager.world.treeDensity    = 30;
+    chunkManager.world.staticDensity  = 0;
+    
+    chunkManager.renderDistance = 8;
+    chunkManager.renderDistanceStatic = 30;
     
     chunkManager.world.waterLevel = -21;
     chunkManager.world.waterColor = Colors.blue;
@@ -241,26 +245,12 @@ void Run() {
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     //
     // Raycast from player
     //
     
     //Engine.WriteDialog(1, Int.ToString( chunkManager.GetNumberOfChunks() ));
     
-    
-    /*
     
     // Move the player out of the way as we cant cast a ray from inside the collider...
     rp3d::RigidBody* rigidBody = Engine.cameraController->GetComponent<RigidBody>();
@@ -281,12 +271,14 @@ void Run() {
     // Print current chunk details
     //
     
+    /*
+    
     glm::vec3 cameraPosition = Engine.cameraController->GetPosition();
     Engine.WriteDialog(0, Int.ToString( cameraPosition.x ));
     Engine.WriteDialog(1, Int.ToString( cameraPosition.z ));
     
-    Engine.WriteDialog(2, Int.ToString( chunkManager.playerChunkX ));
-    Engine.WriteDialog(3, Int.ToString( chunkManager.playerChunkZ ));
+    //Engine.WriteDialog(2, Int.ToString( chunkManager.playerChunkX ));
+    //Engine.WriteDialog(3, Int.ToString( chunkManager.playerChunkZ ));
     
     if (Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) {
         
@@ -299,6 +291,7 @@ void Run() {
         
     }
     
+    */
     
     //int chunkIndex = chunkManager.FindChunk(chunkManager.playerChunkX * chunkManager.chunkSize, chunkManager.playerChunkZ * chunkManager.chunkSize);
     //if (chunkIndex != -1) {
@@ -326,16 +319,27 @@ void Run() {
         GameObject* hitObject = (GameObject*)hit.gameObject;
         Actor* hitActor = hitObject->GetComponent<Actor>();
         
-        Engine.WriteDialog(15, hitActor->GetName());
-        Engine.WriteDialog(16, Int.ToString(hitActor->GetAge()));
+        hitActor->SetUpdateGeneticsFlag();
         
-        Engine.WriteDialog(18, "Genome");
-        Engine.WriteDialog(19, AI.genomes.ExtractGenome(hitActor));
+        Engine.WriteDialog(1, hitActor->GetName());
+        Engine.WriteDialog(2, Int.ToString(hitActor->GetAge()));
+        
+        Engine.WriteDialog(3, "Genome");
+        
+        // Print out the genes from the actors genome
+        std::vector<std::string> genes = String.Explode(AI.genomes.ExtractGenome(hitActor), '#');
+        for (unsigned int i=0; i < genes.size(); i++) {
+            
+            std::string gene = genes[i];
+            
+            Engine.WriteDialog(5 + i, gene);
+            
+        }
         
     } else {
         
-        for (unsigned int i=0; i < 2; i++) 
-            Engine.WriteDialog(15 + i, "");
+        //for (unsigned int i=0; i < 10; i++) 
+        //    Engine.WriteDialog(1 + i, "");
         
     }
     
@@ -343,7 +347,8 @@ void Run() {
     bodyPosition.y -= 1000;
     bodyTransform.setPosition(bodyPosition);
     
-    */
+    
+    
     
     //
     // Profiling

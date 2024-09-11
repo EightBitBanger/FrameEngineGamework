@@ -282,37 +282,51 @@ void EngineSystemManager::AddColorFieldWaterTable(glm::vec3* colorField, float* 
             Color color( colorField[index].x, colorField[index].y, colorField[index].z );
             waterColor = 0.001f;
             
-            if (heightField[index]  < (waterTableHeight - 9.0f))   color = Colors.Lerp(color, waterColor, 1.0f);
+            if (heightField[index]  <= (waterTableHeight - 9.0f))   color = Colors.Lerp(color, waterColor, 1.0f);
             
-            if ((heightField[index] < (waterTableHeight - 8.0f)) & 
+            if ((heightField[index] <= (waterTableHeight - 8.0f)) & 
                 (heightField[index] > (waterTableHeight - 9.0f)))  color = Colors.Lerp(color, waterColor, 0.9f);
             
-            if ((heightField[index] < (waterTableHeight - 7.0f)) & 
-                (heightField[index] > (waterTableHeight - 8.0f)))  color = Colors.Lerp(color, waterColor, 0.8f);
+            if ((heightField[index] <= (waterTableHeight - 7.0f)) & 
+                (heightField[index] > (waterTableHeight - 8.0f)))  color = Colors.Lerp(color, waterColor, 0.85f);
             
-            if ((heightField[index] < (waterTableHeight - 6.0f)) & 
-                (heightField[index] > (waterTableHeight - 7.0f)))  color = Colors.Lerp(color, waterColor, 0.7f);
+            if ((heightField[index] <= (waterTableHeight - 6.0f)) & 
+                (heightField[index] > (waterTableHeight - 7.0f)))  color = Colors.Lerp(color, waterColor, 0.8f);
             
-            if ((heightField[index] < (waterTableHeight - 5.0f)) & 
-                (heightField[index] > (waterTableHeight - 6.0f)))  color = Colors.Lerp(color, waterColor, 0.6f);
+            if ((heightField[index] <= (waterTableHeight - 5.0f)) & 
+                (heightField[index] > (waterTableHeight - 6.0f)))  color = Colors.Lerp(color, waterColor, 0.75f);
             
-            if ((heightField[index] < (waterTableHeight - 4.0f)) & 
-                (heightField[index] > (waterTableHeight - 5.0f)))  color = Colors.Lerp(color, waterColor, 0.5f);
+            if ((heightField[index] <= (waterTableHeight - 4.0f)) & 
+                (heightField[index] > (waterTableHeight - 5.0f)))  color = Colors.Lerp(color, waterColor, 0.7f);
             
-            if ((heightField[index] < (waterTableHeight - 3.0f)) & 
-                (heightField[index] > (waterTableHeight - 4.0f)))  color = Colors.Lerp(color, waterColor, 0.4f);
+            if ((heightField[index] <= (waterTableHeight - 3.0f)) & 
+                (heightField[index] > (waterTableHeight - 4.0f)))  color = Colors.Lerp(color, waterColor, 0.65f);
             
-            if ((heightField[index] < (waterTableHeight - 2.0f)) & 
-                (heightField[index] > (waterTableHeight - 3.0f)))  color = Colors.Lerp(color, waterColor, 0.3f);
+            if ((heightField[index] <= (waterTableHeight - 2.0f)) & 
+                (heightField[index] > (waterTableHeight - 3.0f)))  color = Colors.Lerp(color, waterColor, 0.6f);
             
-            if ((heightField[index] < (waterTableHeight - 1.0f)) & 
-                (heightField[index] > (waterTableHeight - 2.0f)))  color = Colors.Lerp(color, waterColor, 0.2f);
+            if ((heightField[index] <= (waterTableHeight - 1.0f)) & 
+                (heightField[index] > (waterTableHeight - 2.0f)))  color = Colors.Lerp(color, waterColor, 0.55f);
             
-            if ((heightField[index] < (waterTableHeight - 0.0f)) & 
-                (heightField[index] > (waterTableHeight - 1.0f)))  color = Colors.Lerp(color, waterColor, 0.1f);
+            if ((heightField[index] <= (waterTableHeight - 0.0f)) & 
+                (heightField[index] > (waterTableHeight - 1.0f)))  color = Colors.Lerp(color, waterColor, 0.5f);
             
-            if (Random.Range(1, 10) > 8) 
-                color = Colors.MakeRandomGrayScale() * 0.3f;
+            // Deep
+            if (heightField[index] < (waterTableHeight - 7.0f)) 
+                if (Random.Range(1, 100) > 70) color = Colors.orange * 0.003f;
+            
+            if (heightField[index] < (waterTableHeight - 10.0f)) 
+                if (Random.Range(1, 100) > 90) color = Colors.green * 0.003f;
+            
+            if ((heightField[index] >= (waterTableHeight - 10.0f)) & (heightField[index] < (waterTableHeight - 4.0f))) 
+                if (Random.Range(1, 100) > 88) color = Colors.green * 0.002f;
+            
+            if ((heightField[index] >= (waterTableHeight - 10.0f)) & (heightField[index] < (waterTableHeight - 4.0f))) 
+                if (Random.Range(1, 100) > 80) color = Colors.green * 0.005f;
+            
+            // Shallow
+            if ((heightField[index] >= (waterTableHeight - 7.0f)) & (heightField[index] < (waterTableHeight))) 
+                if (Random.Range(1, 100) > 90) color = Colors.brown * 0.01f;
             
             // Apply the final color
             colorField[index] = glm::vec3( color.r, color.g, color.b );

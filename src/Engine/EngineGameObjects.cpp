@@ -36,6 +36,7 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
 }
 
 unsigned int EngineSystemManager::GetNumberOfGameObjects(void) {
+    
     return mGameObjects.Size();
 }
 

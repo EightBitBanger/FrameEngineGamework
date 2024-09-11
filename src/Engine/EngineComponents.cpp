@@ -101,26 +101,6 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             
             MeshRenderer* meshRenderer = (MeshRenderer*)componentPtr->GetComponent();
             
-            // Purge mesh
-            if (meshRenderer->mesh != nullptr) 
-                if (!meshRenderer->mesh->isShared) 
-                    Destroy<Mesh>( meshRenderer->mesh );
-            
-            // Purge material
-            if (meshRenderer->material != nullptr) 
-                if (!meshRenderer->material->isShared) 
-                    Destroy<Material>( meshRenderer->material );
-            
-            // Remove the renderer from the group its attached
-            for (unsigned int g=0; g < 5; g++) {
-                
-                int renderQueueIndex = RENDER_QUEUE_SKY + g;
-                
-                // Remove renderer from the render queue
-                if (sceneMain->RemoveMeshRendererFromSceneRoot( meshRenderer, renderQueueIndex )) 
-                    break;
-            }
-            
             Renderer.DestroyMeshRenderer(meshRenderer);
             
             break;
@@ -146,7 +126,7 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
                 MeshRenderer* renderer = actorPtr->mGeneticRenderers[i];
                 
                 // Remove renderer from the render queue
-                sceneMain->RemoveMeshRendererFromSceneRoot( renderer, RENDER_QUEUE_DEFAULT );
+                sceneMain->RemoveMeshRendererFromSceneRoot( renderer, RENDER_QUEUE_BACKGROUND );
                 
                 Destroy<MeshRenderer>( renderer );
             }
