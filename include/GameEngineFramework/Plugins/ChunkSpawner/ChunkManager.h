@@ -1,6 +1,7 @@
 #include <GameEngineFramework/Engine/Engine.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Perlin.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/Decor.h>
 
 extern EngineComponents     Components;
 extern ColorPreset          Colors;
@@ -31,6 +32,11 @@ public:
     
     float waterLevel;
     
+    std::vector<Decoration> mDecorations;
+    
+    
+    
+    
     // Static plant generation
     
     unsigned int staticDensity;
@@ -50,7 +56,6 @@ public:
     
     // Actors
     unsigned int actorDensity;
-    
     float actorHeightCutoff;
     
     
@@ -145,6 +150,11 @@ public:
     
     SubMesh subMeshTree;
     
+    /// Water mesh
+    Mesh* watermesh;
+    Material* watermaterial;
+    
+    
     ChunkManager() : 
         
         chunkSize(32),
@@ -207,7 +217,6 @@ Chunk* ChunkManager::CreateChunk(float chunkX, float chunkZ) {
     staticMesh->isShared = false;
     
     // Static material
-    
     Material* staticMaterial = Engine.Create<Material>();
     staticMaterial->DisableCulling();
     
@@ -225,6 +234,8 @@ Chunk* ChunkManager::CreateChunk(float chunkX, float chunkZ) {
     newChunk->staticObjects = staticObjectContainer;
     
     Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer, RENDER_QUEUE_DEFAULT);
+    
+    
     
     //
     // Water table generation
@@ -248,7 +259,6 @@ Chunk* ChunkManager::CreateChunk(float chunkX, float chunkZ) {
     // Water layers
     
     waterRenderer->mesh = Engine.Create<Mesh>();
-    int layerOffsetIndex = 0;
     
     for (float c=0.0f; c <= maxWaterLayers; c += maxWaterSpacing) {
         
@@ -289,14 +299,35 @@ Chunk* ChunkManager::CreateChunk(float chunkX, float chunkZ) {
 
 bool ChunkManager::DestroyChunk(Chunk* chunkPtr) {
     
+    MeshRenderer* chunkRenderer = chunkPtr->gameObject->GetComponent<MeshRenderer>();
+    MeshRenderer* waterRenderer = chunkPtr->waterObject->GetComponent<MeshRenderer>();
+    MeshRenderer* staticRenderer = chunkPtr->staticObjects->GetComponent<MeshRenderer>();
+    
+    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_DEFAULT );
     Engine.Destroy( chunkPtr->gameObject );
     
+    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_DEFAULT );
     Engine.Destroy( chunkPtr->staticObjects );
+    
+    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( waterRenderer, RENDER_QUEUE_FOREGROUND);
+    Engine.Destroy( chunkPtr->waterObject );
     
     Physics.world->destroyRigidBody( chunkPtr->rigidBody );
     
     // Destroy physics collider
     Physics.DestroyHeightFieldMap( chunkPtr->collider );
+    
+    // Destroy actors
+    
+    unsigned int numberOfActors = chunkPtr->actorList.size();
+    
+    for (unsigned int i=0; i < numberOfActors; i++) {
+        
+        Engine.Destroy( chunkPtr->actorList[i] );
+        
+    }
+    
+    chunkPtr->actorList.clear();
     
     return mChunkList.Destroy(chunkPtr);
 }
@@ -353,42 +384,6 @@ void ChunkManager::Update(void) {
         updateChunkCounter=0;
     
     Chunk* chunk = mChunkList[updateChunkCounter];
-    
-    if (glm::distance(cameraPosition, chunk->position) > ((renderDistance * 1.15f) * chunkSize)) {
-        
-        DestroyChunk( chunk );
-        
-        for (std::vector<Chunk*>::iterator it = mActiveChunks.begin(); it != mActiveChunks.end(); ++it) {
-            
-            Chunk* chunkPtr = *it;
-            
-            if (chunk != chunkPtr) 
-                continue;
-            
-            mActiveChunks.erase( it );
-            
-            break;
-        }
-        
-    }
-    
-    
-    
-    
-    
-    
-    /*
-    
-    purgeCounter++;
-    if (purgeCounter > 10) {
-        purgeCounter=0;
-        
-        for (unsigned int p=0; p < 8; p++) 
-            PurgeChunks(cameraPosition);
-        
-    }
-    
-    */
     
     return;
 }
@@ -544,6 +539,7 @@ void ChunkManager::GenerateChunks(glm::vec2 position) {
         
         chunksFrameCounter++;
         if (chunksFrameCounter > chunksPerFrame) {
+            
             chunksFrameCounter = 0;
             
             break;
@@ -556,6 +552,14 @@ void ChunkManager::GenerateChunks(glm::vec2 position) {
             if (currentChunkZ >= renderDistance) {
                 
                 currentChunkZ = 0;
+                
+                // Keep this here, chunks should only be destroyed
+                // after a full cycle of generation.. or else...
+                
+                PurgeChunks( glm::vec2(Engine.cameraController->GetPosition().x, Engine.cameraController->GetPosition().z) );
+                
+                break;
+                
             } else {
                 
                 currentChunkZ++;
@@ -593,7 +597,6 @@ void ChunkManager::GenerateChunks(glm::vec2 position) {
         
         Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.024f);
         
-        chunk->gameObject->Activate();
         
         //
         // Perlin noise layers
@@ -631,7 +634,7 @@ void ChunkManager::GenerateChunks(glm::vec2 position) {
         //
         // Water table
         
-        //Engine.AddColorFieldWaterTable(colorField, heightField, chunkSize, chunkSize, world.waterColor, world.waterLevel, 0.1f, world.waterLevel);
+        Engine.AddColorFieldWaterTable(colorField, heightField, chunkSize, chunkSize, world.waterColor, world.waterLevel, 0.1f, world.waterLevel);
         
         chunk->waterObject->renderDistance = (renderDistance * (chunkSize / 2)) * 2.0f;
         
@@ -676,268 +679,321 @@ void ChunkManager::GenerateChunks(glm::vec2 position) {
         chunk->bodyCollider = bodyCollider;
         
         
-        //
-        // Generate actors
-        //
-        
-        for (unsigned int a=0; a < world.actorDensity; a++) {
-            
-            float xx = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
-            float zz = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
-            
-            if ((xx >  (chunkSize/2)) | (zz >  (chunkSize/2)) | 
-                (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
-                continue;
-            
-            // Ray cast here to find the ground
-            glm::vec3 from(chunkWorldX + xx, 1000, chunkWorldZ + zz);
-            glm::vec3 direction(0, -1, 0);
-            
-            Hit hit;
-            
-            float distance = 2000;
-            float height = 0;
-            
-            if (Physics.Raycast(from, direction, distance, hit)) 
-                height = hit.point.y;
-            
-            if (height > world.actorHeightCutoff) 
-                continue;
-            
-            if (height == 0) 
-                continue;
-            
-            if (height <= world.waterLevel) 
-                continue;
-            
-            GameObject* actorObject = Engine.CreateAIActor( glm::vec3(from.x, 0, from.z) );
-            
-            chunk->actorList.push_back( actorObject );
-            
-            Actor* actor = actorObject->GetComponent<Actor>();
-            actor->SetHeightPreferenceMin(world.waterLevel);
-            actor->SetHeightPreferenceMax(40.0f);
-            
-            // Use sheep actor preset
-            AI.genomes.SheepGene( actor );
-            
-            continue;
-        }
-        
         
         //
-        // Trees
+        // Generate world decorations and actors
         //
         
         Mesh* staticMesh = chunk->staticObjects->GetComponent<MeshRenderer>()->mesh;
         
-        for (unsigned int a=0; a < world.treeDensity; a++) {
+        for (int xx=0; xx < chunkSize-1; xx++) {
             
-            float xx = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
-            float zz = Random.Range(0, chunkSize) - Random.Range(0, chunkSize);
-            
-            if ((xx >  (chunkSize/2)) | (zz >  (chunkSize/2)) | 
-                (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
-                continue;
-            
-            // Ray cast here to find the ground
-            glm::vec3 from(chunkWorldX + xx, 1000, chunkWorldZ + zz);
-            glm::vec3 direction(0, -1, 0);
-            
-            Hit hit;
-            
-            float distance = 2000;
-            float height = 0;
-            
-            if (Physics.Raycast(from, direction, distance, hit)) 
-                height = hit.point.y;
-            
-            if (height > world.treeHeightCutoff) 
-                continue;
-            
-            if (height == 0) 
-                continue;
-            
-            if (height <= world.waterLevel) 
-                continue;
-            
-            
-            // Logs
-            
-            float logHeight = Random.Range((float)world.treeHeightLow, (float)world.treeHeightHigh);
-            
-            for (unsigned int s=0; s < logHeight; s++) {
+            for (int zz=0; zz < chunkSize-1; zz++) {
                 
-                staticMesh->AddSubMesh(0, 0, 0, subMeshTree, false);
+                int xp = xx - (chunkSize / 2);
+                int zp = zz - (chunkSize / 2);
                 
-                unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
+                int staticX = (chunkWorldX - xp);
+                int staticZ = (chunkWorldZ - zp);
                 
-                unsigned int index = numberOfSubMeshes - 1;
+                glm::vec3 from(staticX, 0, staticZ);
+                glm::vec3 direction(0, -1, 0);
                 
-                Color finalColor;
-                Color lowTrunk;
-                Color highTrunk;
+                Hit hit;
                 
-                lowTrunk  = (Colors.brown * 0.1f) + (Colors.green * 0.01);
-                highTrunk = (Colors.brown * 0.8f) + (Colors.green * 0.01);
+                float distance = 2000;
+                float height = 0;
                 
-                finalColor = Colors.Lerp(lowTrunk, highTrunk, (s * 0.087f));
+                if (Physics.Raycast(from, direction, distance, hit)) 
+                    height = hit.point.y;
                 
-                staticMesh->ChangeSubMeshColor(index, finalColor);
-                
-                staticMesh->ChangeSubMeshPosition(index, xx, height + s - 1.0f, zz);
-                
-            }
-            
-            // Leaves
-            
-            float leafCount = Random.Range(((float)world.numberOfLeaves) / 2, (float)world.numberOfLeaves);
-            
-            unsigned int leafAccent = Random.Range(0, 100);
-            
-            for (unsigned int z=0; z < leafCount; z++) {
-                
-                float offset_xx = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
-                float offset_yy = Random.Range(0.0f, world.leafSpreadHeight) - Random.Range(0.0f, world.leafSpreadHeight);
-                float offset_zz = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
-                
-                staticMesh->AddSubMesh(0, 0, 0, subMeshWallHorz, false);
-                staticMesh->AddSubMesh(0, 0, 0, subMeshWallVert, false);
-                
-                unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
-                unsigned int index = numberOfSubMeshes - 1;
-                
-                Color finalColor;
-                Color lowLeaves;
-                Color highLeaves;
-                
-                lowLeaves  = Colors.green * 0.08f;
-                highLeaves = Colors.green * 0.01f;
-                
-                if ((leafAccent > 70) & (leafAccent < 80)) 
-                    lowLeaves = Colors.orange * 0.1f;
-                
-                if ((leafAccent > 20) & (leafAccent < 40)) 
-                    lowLeaves = Colors.yellow * 0.1f;
-                
-                finalColor = Colors.Lerp(lowLeaves, highLeaves, Random.Range(0, 100) * 0.01f);
-                
-                staticMesh->ChangeSubMeshColor(index, finalColor);
-                staticMesh->ChangeSubMeshColor(index-1, finalColor);
-                
-                staticMesh->ChangeSubMeshPosition(index,   xx + offset_xx, world.leafHeightOffset + height + logHeight + offset_yy, zz + offset_zz);
-                staticMesh->ChangeSubMeshPosition(index-1, xx + offset_xx, world.leafHeightOffset + height + logHeight + offset_yy, zz + offset_zz);
-                
-            }
-            
-            continue;
-        }
-        
-        
-        
-        
-        //
-        // Grass
-        //
-        
-        for (unsigned int a=0; a < world.staticDensity; a++) {
-            
-            float xx = Random.Range(0, chunkSize * 2) - Random.Range(0, chunkSize * 2) * 0.5f + 1.0f;
-            float zz = Random.Range(0, chunkSize * 2) - Random.Range(0, chunkSize * 2) * 0.5f + 1.0f;
-            
-            if ((xx > (chunkSize/2)) | (zz > (chunkSize/2)) | 
-                (xx < -(chunkSize/2)) | (zz < (-chunkSize/2))) 
-                continue;
-            
-            // Ray cast here to find the ground
-            glm::vec3 from(chunkWorldX + xx, 1000, chunkWorldZ + zz);
-            glm::vec3 direction(0, -1, 0);
-            
-            Hit hit;
-            
-            float distance = 2000;
-            float height = 0;
-            
-            if (Physics.Raycast(from, direction, distance, hit)) 
-                height = hit.point.y;
-            
-            if (height > world.staticHeightCutoff) 
-                continue;
-            
-            if (height == 0) 
-                continue;
-            
-            // Water level cut off
-            if (Random.Range(0, 10) > 3) 
-                if (height <= world.waterLevel) 
-                    continue;
-            
-            if (height <= (world.waterLevel - 8)) 
-                continue;
-            
-            unsigned int stackHeight = Random.Range(0, 3);
-            
-            unsigned int stackType = Random.Range(0, 7);
-            
-            for (unsigned int c=0; c < stackHeight; c++) {
-                
-                if (stackType > 2) {
-                    
-                    float heightOffset = height + c;
-                    
-                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshStemHorz, false);
-                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshStemVert, false);
-                    
-                    unsigned int index = staticMesh->GetSubMeshCount() - 1;
-                    
-                    Color finalColor;
-                    finalColor = Colors.green * 0.03f;
-                    
-                    finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
-                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
-                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
-                    
-                    staticMesh->ChangeSubMeshColor(index, finalColor);
-                    staticMesh->ChangeSubMeshColor(index-1, finalColor);
-                    
-                }
-                
-                if (height <= world.waterLevel) 
+                if (height > world.staticHeightCutoff) 
                     continue;
                 
-                if (stackType == 1) {
-                    float heightOffset = height + c;
-                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshGrassHorz, false);
-                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshGrassVert, false);
+                if (height == 0) 
+                    continue;
+                
+                unsigned int stackHeight = Random.Range(0, 5);
+                
+                unsigned int decorIndex = Random.Range(0, world.mDecorations.size());
+                
+                Decoration decor = world.mDecorations[ decorIndex ];
+                
+                if (Random.Range(0, 1000) > decor.density) 
+                    continue;
+                
+                if ((height > decor.spawnHeightMaximum) & 
+                    (height < decor.spawnHeightMinimum)) 
+                    continue;
+                
+                switch (decor.type) {
                     
-                    unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                    // Thin grass
+                    case 0: {
+                        
+                        for (unsigned int c=0; c < stackHeight; c++) {
+                            
+                            staticMesh->AddSubMesh(-xp, height + c, -zp, subMeshStemHorz, false);
+                            staticMesh->AddSubMesh(-xp, height + c, -zp, subMeshStemVert, false);
+                            
+                            unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                            
+                            Color finalColor;
+                            finalColor = Colors.green * 0.018f;
+                            
+                            finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
+                                                    Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
+                                                    Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
+                            
+                            staticMesh->ChangeSubMeshColor(index, finalColor);
+                            staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                            
+                        }
+                        
+                        break;
+                    }
                     
-                    Color finalColor;
-                    finalColor = Colors.green * 0.04f;
+                    // Grass
+                    case 1: {
+                        
+                        for (unsigned int c=0; c < stackHeight; c++) {
+                            
+                            staticMesh->AddSubMesh(-xp, height + c, -zp, subMeshGrassHorz, false);
+                            staticMesh->AddSubMesh(-xp, height + c, -zp, subMeshGrassVert, false);
+                            
+                            unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                            
+                            Color finalColor;
+                            finalColor = Colors.green * 0.04f;
+                            
+                            staticMesh->ChangeSubMeshColor(index, finalColor);
+                            staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                            
+                        }
+                        
+                        break;
+                    }
                     
-                    staticMesh->ChangeSubMeshColor(index, finalColor);
-                    staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                    // Thicker grass
+                    case 2: {
+                        
+                        staticMesh->AddSubMesh(-xp, height, -zp, subMeshWallHorz, false);
+                        staticMesh->AddSubMesh(-xp, height, -zp, subMeshWallVert, false);
+                        
+                        unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                        
+                        Color finalColor;
+                        finalColor = Colors.green * 0.05f;
+                        
+                        if (Random.Range(0, 100) < 20) finalColor = Colors.yellow * 0.05f;
+                        if (Random.Range(0, 100) < 20) finalColor = Colors.orange * 0.01f;
+                        
+                        staticMesh->ChangeSubMeshColor(index, finalColor);
+                        staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                        
+                        break;
+                    }
                     
+                    // Tree
+                    case 3: {
+                        
+                        // Tree logs
+                        
+                        float logHeight = Random.Range((float)world.treeHeightLow, (float)world.treeHeightHigh);
+                        
+                        for (unsigned int s=0; s < logHeight; s++) {
+                            
+                            staticMesh->AddSubMesh(-xp, height + s, -zp, subMeshTree, false);
+                            
+                            unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
+                            
+                            unsigned int index = numberOfSubMeshes - 1;
+                            
+                            Color finalColor;
+                            Color lowTrunk;
+                            Color highTrunk;
+                            
+                            lowTrunk  = (Colors.brown * 0.1f) + (Colors.green * 0.01);
+                            highTrunk = (Colors.brown * 0.8f) + (Colors.green * 0.01);
+                            
+                            finalColor = Colors.Lerp(lowTrunk, highTrunk, (s * 0.087f));
+                            
+                            staticMesh->ChangeSubMeshColor(index, finalColor);
+                            
+                            staticMesh->ChangeSubMeshPosition(index, -xp, height + s - 1.0f, -zp);
+                            
+                        }
+                        
+                        // Leaves
+                        
+                        float leafCount = Random.Range(((float)world.numberOfLeaves) / 2, (float)world.numberOfLeaves);
+                        
+                        unsigned int leafAccent = Random.Range(0, 100);
+                        
+                        for (unsigned int z=0; z < leafCount; z++) {
+                            
+                            float offset_xx = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
+                            float offset_yy = Random.Range(0.0f, world.leafSpreadHeight) - Random.Range(0.0f, world.leafSpreadHeight);
+                            float offset_zz = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
+                            
+                            staticMesh->AddSubMesh(0, 0, 0, subMeshWallHorz, false);
+                            staticMesh->AddSubMesh(0, 0, 0, subMeshWallVert, false);
+                            
+                            unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
+                            unsigned int index = numberOfSubMeshes - 1;
+                            
+                            Color finalColor;
+                            Color lowLeaves;
+                            Color highLeaves;
+                            
+                            lowLeaves  = Colors.green * 0.08f;
+                            highLeaves = Colors.green * 0.01f;
+                            
+                            if ((leafAccent > 70) & (leafAccent < 80)) 
+                                lowLeaves = Colors.orange * 0.1f;
+                            
+                            if ((leafAccent > 20) & (leafAccent < 40)) 
+                                lowLeaves = Colors.yellow * 0.1f;
+                            
+                            finalColor = Colors.Lerp(lowLeaves, highLeaves, Random.Range(0, 100) * 0.01f);
+                            
+                            staticMesh->ChangeSubMeshColor(index, finalColor);
+                            staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                            
+                            staticMesh->ChangeSubMeshPosition(index,   -xp + offset_xx, world.leafHeightOffset + height + logHeight + offset_yy, -zp + offset_zz);
+                            staticMesh->ChangeSubMeshPosition(index-1, -xp + offset_xx, world.leafHeightOffset + height + logHeight + offset_yy, -zp + offset_zz);
+                            
+                        }
+                        
+                        
+                        break;
+                    }
+                    
+                    // Tree
+                    case 4: {
+                        
+                        GameObject* actorObject = Engine.CreateAIActor( glm::vec3(from.x, 0, from.z) );
+                        
+                        chunk->actorList.push_back( actorObject );
+                        
+                        Actor* actor = actorObject->GetComponent<Actor>();
+                        actor->SetHeightPreferenceMin(world.waterLevel);
+                        actor->SetHeightPreferenceMax(40.0f);
+                        
+                        // Use sheep actor preset
+                        AI.genomes.SheepGene( actor );
+                        
+                        break;
+                    }
+                    
+                    
+                    default:
+                        break;
                 }
                 
-                if (stackType == 0) {
-                    float heightOffset = height + c;
-                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshWallHorz, false);
-                    staticMesh->AddSubMesh(xx, heightOffset, zz, subMeshWallVert, false);
+                
+                
+                
+                
+                
+                
+                
+                /*
+                // Actor generation dencity
+                if (Random.Range(0, 1000) < world.actorDensity) {
                     
-                    unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                    GameObject* actorObject = Engine.CreateAIActor( glm::vec3(from.x, 0, from.z) );
                     
-                    Color finalColor;
-                    finalColor = Colors.green * 0.05f;
+                    chunk->actorList.push_back( actorObject );
                     
-                    staticMesh->ChangeSubMeshColor(index, finalColor);
-                    staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                    Actor* actor = actorObject->GetComponent<Actor>();
+                    actor->SetHeightPreferenceMin(world.waterLevel);
+                    actor->SetHeightPreferenceMax(40.0f);
                     
+                    // Use sheep actor preset
+                    AI.genomes.SheepGene( actor );
+                    
+                    continue;
                 }
+                
+                // Static generation density
+                if (Random.Range(0, 1000) < world.treeDensity) {
+                    
+                    // Tree logs
+                    
+                    float logHeight = Random.Range((float)world.treeHeightLow, (float)world.treeHeightHigh);
+                    
+                    for (unsigned int s=0; s < logHeight; s++) {
+                        
+                        staticMesh->AddSubMesh(-xp, height + s, -zp, subMeshTree, false);
+                        
+                        unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
+                        
+                        unsigned int index = numberOfSubMeshes - 1;
+                        
+                        Color finalColor;
+                        Color lowTrunk;
+                        Color highTrunk;
+                        
+                        lowTrunk  = (Colors.brown * 0.1f) + (Colors.green * 0.01);
+                        highTrunk = (Colors.brown * 0.8f) + (Colors.green * 0.01);
+                        
+                        finalColor = Colors.Lerp(lowTrunk, highTrunk, (s * 0.087f));
+                        
+                        staticMesh->ChangeSubMeshColor(index, finalColor);
+                        
+                        staticMesh->ChangeSubMeshPosition(index, -xp, height + s - 1.0f, -zp);
+                        
+                    }
+                    
+                    // Leaves
+                    
+                    float leafCount = Random.Range(((float)world.numberOfLeaves) / 2, (float)world.numberOfLeaves);
+                    
+                    unsigned int leafAccent = Random.Range(0, 100);
+                    
+                    for (unsigned int z=0; z < leafCount; z++) {
+                        
+                        float offset_xx = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
+                        float offset_yy = Random.Range(0.0f, world.leafSpreadHeight) - Random.Range(0.0f, world.leafSpreadHeight);
+                        float offset_zz = Random.Range(0.0f, world.leafSpreadArea)   - Random.Range(0.0f, world.leafSpreadArea);
+                        
+                        staticMesh->AddSubMesh(0, 0, 0, subMeshWallHorz, false);
+                        staticMesh->AddSubMesh(0, 0, 0, subMeshWallVert, false);
+                        
+                        unsigned int numberOfSubMeshes = staticMesh->GetSubMeshCount();
+                        unsigned int index = numberOfSubMeshes - 1;
+                        
+                        Color finalColor;
+                        Color lowLeaves;
+                        Color highLeaves;
+                        
+                        lowLeaves  = Colors.green * 0.08f;
+                        highLeaves = Colors.green * 0.01f;
+                        
+                        if ((leafAccent > 70) & (leafAccent < 80)) 
+                            lowLeaves = Colors.orange * 0.1f;
+                        
+                        if ((leafAccent > 20) & (leafAccent < 40)) 
+                            lowLeaves = Colors.yellow * 0.1f;
+                        
+                        finalColor = Colors.Lerp(lowLeaves, highLeaves, Random.Range(0, 100) * 0.01f);
+                        
+                        staticMesh->ChangeSubMeshColor(index, finalColor);
+                        staticMesh->ChangeSubMeshColor(index-1, finalColor);
+                        
+                        staticMesh->ChangeSubMeshPosition(index,   -xp + offset_xx, world.leafHeightOffset + height + logHeight + offset_yy, -zp + offset_zz);
+                        staticMesh->ChangeSubMeshPosition(index-1, -xp + offset_xx, world.leafHeightOffset + height + logHeight + offset_yy, -zp + offset_zz);
+                        
+                    }
+                    
+                    continue;
+                }
+                */
+                
                 
             }
             
-            continue;
         }
         
         staticMesh->Load();
@@ -952,18 +1008,24 @@ void ChunkManager::GenerateChunks(glm::vec2 position) {
 
 void ChunkManager::PurgeChunks(glm::vec2 position) {
     
-    for (std::vector<Chunk*>::iterator it = mActiveChunks.begin(); it != mActiveChunks.end(); ++it) {
+    unsigned int numberOfChunks = mActiveChunks.size();
+    
+    for (unsigned int i=0; i < numberOfChunks; i++) {
         
-        Chunk* chunkPtr = *it;
+        for (std::vector<Chunk*>::iterator it = mActiveChunks.begin(); it != mActiveChunks.end(); ++it) {
+            
+            Chunk* chunkPtr = *it;
+            
+            if (glm::distance(position, chunkPtr->position) < ((renderDistance * 1.24f) * chunkSize)) 
+                continue;
+            
+            DestroyChunk( chunkPtr );
+            
+            mActiveChunks.erase( it );
+            
+            break;
+        }
         
-        if (glm::distance(position, chunkPtr->position) < ((renderDistance * 1.15f) * chunkSize)) 
-            continue;
-        
-        DestroyChunk( chunkPtr );
-        
-        mActiveChunks.erase( it );
-        
-        break;
     }
     
     return;
@@ -995,6 +1057,9 @@ void ChunkManager::Initiate(void) {
     
     Engine.meshes.stemHorz->GetSubMesh(0, subMeshStemHorz);
     Engine.meshes.stemVert->GetSubMesh(0, subMeshStemVert);
+    
+    watermesh     = Engine.Create<Mesh>();
+    watermaterial = Engine.Create<Material>();
     
     return;
 }
