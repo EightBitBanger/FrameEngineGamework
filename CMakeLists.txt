@@ -196,6 +196,7 @@ set (GAME_HEADERS
     "include/GameEngineFramework/plugins/ChunkSpawner/ChunkManager.h"
     "include/GameEngineFramework/plugins/ChunkSpawner/Chunk.h"
     "include/GameEngineFramework/plugins/ChunkSpawner/Perlin.h"
+    "include/GameEngineFramework/plugins/ChunkSpawner/Decor.h"
     
     "include/GameEngineFramework/Audio/AudioSystem.h"
     
