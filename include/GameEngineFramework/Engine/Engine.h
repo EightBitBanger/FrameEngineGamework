@@ -175,7 +175,7 @@ public:
     void ConsoleClearLog(void);
     
     /// Shift the console log text elements up and add the text string into the console log.
-    void Print(std::string text);
+    void Print(std::string text, unsigned int fadeTimer = 0);
     
     /// Write a string of text to the dialog text element referenced by index.
     void WriteDialog(unsigned int index, std::string text);
@@ -295,7 +295,23 @@ public:
         if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer( (MeshRenderer*)objectPtr );
         
         // AI
-        if (std::is_same<T, Actor>::value)         return AI.DestroyActor( (Actor*)objectPtr );
+        if (std::is_same<T, Actor>::value) {
+            
+            Actor* actorPtr = (Actor*)objectPtr;
+            
+            unsigned int numberOfRenderers = actorPtr->mGeneticRenderers.size();
+            for (unsigned int i=0; i < numberOfRenderers; i++) {
+                
+                sceneMain->RemoveMeshRendererFromSceneRoot( actorPtr->mGeneticRenderers[i], RENDER_QUEUE_DEFAULT );
+                
+                Renderer.DestroyMeshRenderer( actorPtr->mGeneticRenderers[i] );
+                
+            }
+            
+            actorPtr->mGeneticRenderers.clear();
+            
+            return AI.DestroyActor( actorPtr );
+        }
         
         return false;
     }
