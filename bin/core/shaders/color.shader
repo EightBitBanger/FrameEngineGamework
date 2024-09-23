@@ -110,9 +110,7 @@ void main() {
     
     float Gamma = 2.2;
     
-    vec4 vColor = vec4(v_color, 1);
-    
-    color = vec4( pow(vColor.rgb, vec3(1.0/Gamma)), 1);
+    color = vec4( pow(v_color.rgb, vec3(1.0/Gamma)), 1);
     
     return;
 }
