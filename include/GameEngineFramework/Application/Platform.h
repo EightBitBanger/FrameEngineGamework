@@ -80,6 +80,10 @@ public:
     /// Hide the mouse cursor.
     void HideMouseCursor(void);
     
+    /// Save a string of text to the clipboard.
+    void SetClipboardText(std::string text);
+    /// Get a string of text from the clipboard.
+    std::string GetClipboardText(void);
     
     /// Set the target render context.
     GLenum SetRenderTarget(void);

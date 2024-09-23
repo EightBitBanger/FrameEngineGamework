@@ -55,6 +55,9 @@ public:
     /// Get the position of the actor.
     glm::vec3 GetPosition(void);
     
+    /// Set the flag to update the actors genetics.
+    void SetUpdateGeneticsFlag(void);
+    
     /// Get the number of mesh renderers associated with this actor.
     unsigned int GetNumberOfMeshRenderers(void);
     /// Return a mesh renderer at the given index.
