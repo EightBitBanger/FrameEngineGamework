@@ -79,8 +79,6 @@ void FuncSummon(std::vector<std::string> args) {
 
 
 
-std::vector<Chunk*> activeChunks;
-
 
 //
 // Application entry point
@@ -129,6 +127,59 @@ void Start() {
     
     
     
+    //
+    // Chunk generation
+    //
+    
+    Decoration decorGrass;
+    decorGrass.type = DECORATION_GRASS;
+    decorGrass.density = 500;
+    decorGrass.spawnHeightMaximum = 35;
+    decorGrass.spawnHeightMinimum = chunkManager.world.waterLevel;
+    decorGrass.spawnStackHeightMin = 1;
+    decorGrass.spawnStackHeightMax = 2;
+    
+    Decoration decorTrees;
+    decorTrees.type = DECORATION_TREE;
+    decorTrees.density = 50;
+    decorTrees.spawnHeightMaximum = 40;
+    decorTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
+    decorTrees.spawnStackHeightMin = 4;
+    decorTrees.spawnStackHeightMax = 8;
+    
+    // Water adjacent plants
+    Decoration decorWaterTrees;
+    decorWaterTrees.type = DECORATION_TREE;
+    decorWaterTrees.density = 40;
+    decorWaterTrees.spawnHeightMaximum = chunkManager.world.waterLevel + 10;
+    decorWaterTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
+    decorWaterTrees.spawnStackHeightMin = 2;
+    decorWaterTrees.spawnStackHeightMax = 4;
+    
+    Decoration decorWaterPlants;
+    decorWaterPlants.type = DECORATION_GRASS_THIN;
+    decorWaterPlants.density = 200;
+    decorWaterPlants.spawnHeightMaximum = chunkManager.world.waterLevel + 3;
+    decorWaterPlants.spawnHeightMinimum = -40;
+    decorWaterPlants.spawnStackHeightMax = 4;
+    decorWaterPlants.spawnStackHeightMin = 2;
+    
+    
+    // Actors
+    Decoration decorSheep;
+    decorSheep.type = DECORATION_ACTOR_SHEEP;
+    decorSheep.density = 3;
+    decorSheep.spawnHeightMaximum = 10;
+    decorSheep.spawnHeightMinimum = chunkManager.world.waterLevel;
+    
+    
+    chunkManager.world.AddWorldDecoration(decorGrass);
+    chunkManager.world.AddWorldDecoration(decorTrees);
+    chunkManager.world.AddWorldDecoration(decorWaterTrees);
+    chunkManager.world.AddWorldDecoration(decorWaterPlants);
+    chunkManager.world.AddWorldDecoration(decorSheep);
+    
+    
     
     // Perlin layers
     
@@ -168,15 +219,32 @@ void Start() {
     chunkManager.AddPerlinNoiseLayer(perlinLayerA);
     chunkManager.AddPerlinNoiseLayer(perlinLayerB);
     
-    chunkManager.world.actorDensity   = 0;
-    chunkManager.world.treeDensity    = 30;
-    chunkManager.world.staticDensity  = 0;
+    
+    // Lighting levels
+    
+    chunkManager.world.chunkColorLow   = Colors.MakeGrayScale(0.3f);
+    chunkManager.world.staticColorLow  = Colors.MakeGrayScale(0.3f);
+    chunkManager.world.actorColorLow   = Colors.MakeGrayScale(0.3f);
+    
+    chunkManager.world.chunkColorHigh  = Colors.MakeGrayScale(0.87f);
+    chunkManager.world.staticColorHigh = Colors.MakeGrayScale(0.87f);
+    chunkManager.world.actorColorHigh  = Colors.MakeGrayScale(0.87f);
+    
+    chunkManager.world.ambientLight = 0.87f;
+    
+    
+    // World rendering
     
     chunkManager.renderDistance = 8;
-    chunkManager.renderDistanceStatic = 30;
+    
+    chunkManager.generationDistance   = chunkManager.renderDistance * 1.5f;
+    chunkManager.renderDistanceStatic = chunkManager.renderDistance;
     
     chunkManager.world.waterLevel = -21;
-    chunkManager.world.waterColor = Colors.blue;
+    chunkManager.world.waterColorLow  = Colors.MakeGrayScale(0.00003f);
+    chunkManager.world.waterColorHigh = Colors.blue * 0.3f;
+    
+    chunkManager.updateWorldChunks = true;
     
     return;
 }
@@ -195,6 +263,12 @@ void Start() {
 
 glm::vec3 force(0);
 float forceDblTime=0;
+
+bool isDebugReportActive = false;
+
+std::string targetName = "";
+std::string targetGene = "";
+
 
 void Run() {
     
@@ -268,41 +342,6 @@ void Run() {
     
     
     //
-    // Print current chunk details
-    //
-    
-    /*
-    
-    glm::vec3 cameraPosition = Engine.cameraController->GetPosition();
-    Engine.WriteDialog(0, Int.ToString( cameraPosition.x ));
-    Engine.WriteDialog(1, Int.ToString( cameraPosition.z ));
-    
-    //Engine.WriteDialog(2, Int.ToString( chunkManager.playerChunkX ));
-    //Engine.WriteDialog(3, Int.ToString( chunkManager.playerChunkZ ));
-    
-    if (Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) {
-        
-        GameObject* hitObject = (GameObject*)hit.gameObject;
-        
-        Engine.WriteDialog(4, hitObject->name);
-        
-        Engine.WriteDialog(5, Int.ToString( hitObject->GetPosition().x ));
-        Engine.WriteDialog(6, Int.ToString( hitObject->GetPosition().z ));
-        
-    }
-    
-    */
-    
-    //int chunkIndex = chunkManager.FindChunk(chunkManager.playerChunkX * chunkManager.chunkSize, chunkManager.playerChunkZ * chunkManager.chunkSize);
-    //if (chunkIndex != -1) {
-    //    Chunk chunk = chunkManager.GetChunk(chunkIndex);
-    //    
-    //    Engine.WriteDialog(2, Int.ToString( chunk.actorList.size() ));
-    //    
-    //}
-    
-    
-    //
     // Print aimed entity details
     //
     
@@ -314,34 +353,41 @@ void Run() {
     // Center the from angle
     from.y -= 0.3f;
     
-    if (Physics.Raycast(from, direction, distance, hit, LayerMask::Actor)) {
+    if (Input.CheckMouseMiddlePressed()) {
         
-        GameObject* hitObject = (GameObject*)hit.gameObject;
-        Actor* hitActor = hitObject->GetComponent<Actor>();
-        
-        hitActor->SetUpdateGeneticsFlag();
-        
-        Engine.WriteDialog(1, hitActor->GetName());
-        Engine.WriteDialog(2, Int.ToString(hitActor->GetAge()));
-        
-        Engine.WriteDialog(3, "Genome");
-        
-        // Print out the genes from the actors genome
-        std::vector<std::string> genes = String.Explode(AI.genomes.ExtractGenome(hitActor), '#');
-        for (unsigned int i=0; i < genes.size(); i++) {
+        if (Physics.Raycast(from, direction, distance, hit, LayerMask::Actor)) {
             
-            std::string gene = genes[i];
+            GameObject* hitObject = (GameObject*)hit.gameObject;
+            Actor* hitActor = hitObject->GetComponent<Actor>();
             
-            Engine.WriteDialog(5 + i, gene);
+            targetGene = AI.genomes.ExtractGenome(hitActor);
+            
+            Platform.SetClipboardText( targetGene );
+            
+            Engine.Print( "Genome extracted - " + hitActor->GetName(), 150 );
             
         }
         
-    } else {
+    }
+    
+    if ((Input.CheckMouseLeftPressed()) & (targetGene != "")) {
         
-        //for (unsigned int i=0; i < 10; i++) 
-        //    Engine.WriteDialog(1 + i, "");
+        if (Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) {
+            
+            GameObject* newActorObject = Engine.CreateAIActor( hit.point );
+            
+            Actor* newActor = newActorObject->GetComponent<Actor>();
+            
+            AI.genomes.PreyBase( newActor );
+            
+            AI.genomes.InjectGenome(newActor, targetGene);
+            newActor->SetUpdateGeneticsFlag();
+            
+        }
         
     }
+    
+    
     
     // Move the actor back into position as we are now finished casting rays...
     bodyPosition.y -= 1000;
@@ -355,16 +401,92 @@ void Run() {
     //
     if (Input.CheckKeyPressed(VK_F3)) {
         
+        isDebugReportActive = !isDebugReportActive;
+        
+        if (!isDebugReportActive) {
+            for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
+                Engine.WriteDialog(i, "");
+        }
+        
+        /*
         if (Engine.CheckIsProfilerActive()) {
-            
             Engine.DisableProfiler();
+            for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
+                Engine.WriteDialog(i, "");
             
         } else {
             
             Engine.EnableProfiler();
         }
+        */
         
     }
+    
+    
+    
+    // Debug report
+    
+    if (isDebugReportActive) {
+        
+        // Print current chunk details
+        
+        glm::vec3 cameraPosition = Engine.cameraController->GetPosition();
+        
+        std::string playerPosition = "x: ";
+        playerPosition += Int.ToString( cameraPosition.x );
+        playerPosition += " y: ";
+        playerPosition += Int.ToString( cameraPosition.y );
+        playerPosition += " z: ";
+        playerPosition += Int.ToString( cameraPosition.z );
+        
+        Engine.WriteDialog(1, playerPosition);
+        
+        if (Physics.Raycast(from, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Default)) {
+            
+            GameObject* hitObject = (GameObject*)hit.gameObject;
+            
+            if (hitObject != nullptr) {
+                
+                std::string chunkPosition = "Chunk ";
+                
+                chunkPosition += Int.ToString( cameraPosition.x / chunkManager.chunkSize );
+                chunkPosition += ", ";
+                chunkPosition += Int.ToString( cameraPosition.z / chunkManager.chunkSize );
+                
+                Engine.WriteDialog(0, chunkPosition);
+                
+            }
+            
+        }
+        
+        // Check current pointing object
+        
+        if (Physics.Raycast(from, direction, distance, hit, LayerMask::Actor)) {
+            
+            GameObject* hitObject = (GameObject*)hit.gameObject;
+            Actor* hitActor = hitObject->GetComponent<Actor>();
+            
+            Engine.WriteDialog(3, hitActor->GetName());
+            Engine.WriteDialog(4, "Age: " + Int.ToString(hitActor->GetAge()));
+            
+            Platform.SetClipboardText( targetGene );
+            
+        } else {
+            
+            Engine.WriteDialog(3, "");
+            Engine.WriteDialog(4, "");
+            Engine.WriteDialog(5, "");
+            
+        }
+        
+    }
+    
+    
+    
+    
+    
+    
+    
     
     
     //
@@ -401,7 +523,7 @@ void Run() {
     if (ambientLight < 0.0f)  ambientLight = 0.0f;
     
     // World brightness
-    //chunkManager.world.staticColorMul = ambientLight;
+    chunkManager.world.ambientLight = ambientLight;
     
     // Sky brightness
     if (Weather.skyMaterial != nullptr) 
