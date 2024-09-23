@@ -29,6 +29,8 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
     if (!mStreamBuffer[index].actor->mDoUpdateGenetics) 
         return;
     
+    //mStreamBuffer[index].actor->mux.lock();
+    
     int numberOfGenes = mStreamBuffer[index].actor->GetNumberOfGenes();
     
     //
@@ -67,8 +69,8 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         rp3d::Transform colliderOffset(rp3d::Transform::identity());
         rp3d::Collider* collider = rigidBody->addCollider(colliders.box, colliderOffset);
         
-        collider->setCollideWithMaskBits( (unsigned short)sizeof(unsigned short) );
         collider->setCollisionCategoryBits( (unsigned short)LayerMask::Actor );
+        collider->setCollideWithMaskBits( (unsigned short)CollisionMask::Entity );
         
         collider->setUserData( (void*)mStreamBuffer[index].gameObject );
         rigidBody->setUserData( (void*)mStreamBuffer[index].gameObject );
@@ -160,6 +162,8 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
     }
     
     mStreamBuffer[index].actor->mDoUpdateGenetics = false;
+    
+    //mStreamBuffer[index].actor->mux.unlock();
     
     return;
 }

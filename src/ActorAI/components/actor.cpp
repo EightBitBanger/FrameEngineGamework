@@ -81,6 +81,13 @@ void Actor::SetAge(unsigned long int newAge) {
     return;
 }
 
+void Actor::SetUpdateGeneticsFlag(void) {
+    
+    mDoUpdateGenetics = true;
+    
+    return;
+}
+
 std::string Actor::GetName(void) {
     mux.lock();
     std::string nameString = mName;

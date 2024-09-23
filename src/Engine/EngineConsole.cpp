@@ -28,19 +28,19 @@ bool EngineSystemManager::CheckIsConsoleActive(void) {
     return mIsConsoleEnabled;
 }
 
-void EngineSystemManager::EnableProfiler(void) {
+void EngineSystemManager::WriteDialog(unsigned int index, std::string text) {
     
-    mIsProfilerEnabled = true;
-    
-    for (uint8_t i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
-        mProfilerTextObjects[i]->isActive = true;
+    mProfilerText[ index ]->text = text;
     
     return;
 }
 
-void EngineSystemManager::WriteDialog(unsigned int index, std::string text) {
+void EngineSystemManager::EnableProfiler(void) {
     
-    mProfilerText[ index ]->text = text;
+    mIsProfilerEnabled = true;
+    
+    //for (uint8_t i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
+    //    mProfilerTextObjects[i]->isActive = true;
     
     return;
 }
@@ -49,8 +49,8 @@ void EngineSystemManager::DisableProfiler(void) {
     
     mIsProfilerEnabled = false;
     
-    for (uint8_t i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
-        mProfilerTextObjects[i]->isActive = false;
+    //for (uint8_t i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
+    //    mProfilerTextObjects[i]->isActive = false;
     
     return;
 }
@@ -114,7 +114,7 @@ void EngineSystemManager::ConsoleClearLog(void) {
     return;
 }
 
-void EngineSystemManager::Print(std::string text) {
+void EngineSystemManager::Print(std::string text, unsigned int fadeTimer) {
     
     // Shift up the texts
     for (unsigned int i=CONSOLE_NUMBER_OF_ELEMENTS - 1; i > 0; i--) 
@@ -141,7 +141,15 @@ void EngineSystemManager::Print(std::string text) {
     // Submit new line of text after the up shift
     mConsoleText[0]->text = text;
     mConsoleTextObjects[0]->isActive = true;
-    mConsoleTimers[0] = mConsoleFadeOutTimer;
+    
+    if (fadeTimer == 0) {
+        
+        mConsoleTimers[0] = mConsoleFadeOutTimer;
+        
+    } else {
+        
+        mConsoleTimers[0] = fadeTimer;
+    }
     
     MeshRenderer* meshRenderer = mConsoleTextObjects[0]->GetComponent<MeshRenderer>();
     meshRenderer->material->ambient.g = 1;

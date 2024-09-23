@@ -346,8 +346,7 @@ void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, floa
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
     
     rp3d::Collider* collider = mRigidBodyCache->addCollider(boxShape, offsetTransform);
-    //collider->setCollideWithMaskBits( (unsigned short)layer );
-    collider->setCollisionCategoryBits( (unsigned short)layer );
+    collider->setCollideWithMaskBits( (unsigned short)layer );
     
     return;
 }

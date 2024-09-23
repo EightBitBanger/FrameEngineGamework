@@ -9,6 +9,7 @@
 extern NumberGeneration  Random;
 extern ColorPreset       Colors;
 extern FloatType         Float;
+extern StringType        String;
 
 
 std::string GeneticPresets::ExtractGenome(Actor* actorSource) {
@@ -42,18 +43,70 @@ std::string GeneticPresets::ExtractGenome(Actor* actorSource) {
         genetics += Float.ToString( gene.color.y ) + ",";
         genetics += Float.ToString( gene.color.z ) + "|";
         
-        genetics += Float.ToString( gene.doInverseAnimation ) + "|";
-        genetics += Float.ToString( gene.doAnimationCycle ) + "|";
+        genetics += Float.ToString( gene.doInverseAnimation ) + ",";
+        genetics += Float.ToString( gene.doAnimationCycle ) + "|#";
         
     }
     
     return genetics;
 }
 
-void GeneticPresets::SheepGene(Actor* targetActor) {
+bool GeneticPresets::InjectGenome(Actor* actorSource, std::string genome) {
     
-    // Identification
-    targetActor->SetName("Sheep");
+    // Extract genes from the genome
+    std::vector<std::string> genes = String.Explode( genome, '#' );
+    
+    unsigned int numberOfGenes = genes.size();
+    for (unsigned int i=0; i < numberOfGenes; i++) {
+        
+        // Extract sub genes
+        std::vector<std::string> subGenes = String.Explode( (genes[i]), '|' );
+        std::vector<std::string> baseGene;
+        
+        Gene gene;
+        
+        baseGene = String.Explode( subGenes[0], ',' );
+        gene.position.x = String.ToFloat( baseGene[0] );
+        gene.position.y = String.ToFloat( baseGene[1] );
+        gene.position.z = String.ToFloat( baseGene[2] );
+        
+        baseGene = String.Explode( subGenes[1], ',' );
+        gene.rotation.x = String.ToFloat( baseGene[0] );
+        gene.rotation.y = String.ToFloat( baseGene[1] );
+        gene.rotation.z = String.ToFloat( baseGene[2] );
+        
+        baseGene = String.Explode( subGenes[2], ',' );
+        gene.scale.x = String.ToFloat( baseGene[0] );
+        gene.scale.y = String.ToFloat( baseGene[1] );
+        gene.scale.z = String.ToFloat( baseGene[2] );
+        
+        baseGene = String.Explode( subGenes[3], ',' );
+        gene.offset.x = String.ToFloat( baseGene[0] );
+        gene.offset.y = String.ToFloat( baseGene[1] );
+        gene.offset.z = String.ToFloat( baseGene[2] );
+        
+        baseGene = String.Explode( subGenes[4], ',' );
+        gene.color.x = String.ToFloat( baseGene[0] );
+        gene.color.y = String.ToFloat( baseGene[1] );
+        gene.color.z = String.ToFloat( baseGene[2] );
+        
+        baseGene = String.Explode( subGenes[5], ',' );
+        if (baseGene[0] == "1") {gene.doInverseAnimation = 1;}
+        if (baseGene[1] == "1") {gene.doAnimationCycle   = 1;}
+        
+        actorSource->AddGene( gene );
+        
+    }
+    
+    
+    return true;
+}
+
+
+// Mental models
+//
+
+void GeneticPresets::PreyBase(Actor* targetActor) {
     
     // Personality parameters
     targetActor->SetChanceToChangeDirection(80);
@@ -61,7 +114,23 @@ void GeneticPresets::SheepGene(Actor* targetActor) {
     targetActor->SetChanceToStopWalking(100);
     targetActor->SetChanceToWalk(100);
     
+    return;
+}
+
+
+
+// Genomes
+//
+
+void GeneticPresets::SheepGene(Actor* targetActor) {
+    
+    // Identification
+    targetActor->SetName("Sheep");
+    
     targetActor->SetSpeed(0.7);
+    
+    // Mental model
+    PreyBase(targetActor);
     
     // Color variant
     Color headColor;

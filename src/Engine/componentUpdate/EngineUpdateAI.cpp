@@ -26,6 +26,14 @@ ENGINE_API extern PlatformLayer     Platform;
 
 void EngineSystemManager::UpdateActor(unsigned int index) {
     
+    UpdateActorGenetics(index);
+    
+    UpdateActorTargetRotation(index);
+    
+    UpdateActorAnimation(index);
+    
+    UpdateActorPhysics(index);
+    
     //
     // Optimize out actor meshes at distance
     
@@ -80,7 +88,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         glm::vec3 forward;
         
         forward.x = cos( glm::radians( -(mStreamBuffer[index].actor->mRotation.y - 90.0f) ) );
-        // TODO: Actors should flying???
+        // TODO: Actors should fly???
         //forward.y = tan( glm::radians( -(mStreamBuffer[index].actor->mRotation.x - 90) ) );
         forward.z = sin( glm::radians( -(mStreamBuffer[index].actor->mRotation.y - 90) ) );
         
@@ -115,15 +123,6 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         mStreamBuffer[index].actor->mVelocity *= glm::vec3(0, 1, 0);
         
     }
-    
-    
-    UpdateActorTargetRotation(index);
-    
-    UpdateActorGenetics(index);
-    
-    UpdateActorAnimation(index);
-    
-    UpdateActorPhysics(index);
     
     return;
 }

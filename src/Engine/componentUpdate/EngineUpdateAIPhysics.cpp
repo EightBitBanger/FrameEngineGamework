@@ -55,7 +55,7 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     mStreamBuffer[index].rigidBody->setTransform(transform);
     
     // Check not on ground
-    if (!Physics.Raycast(from, direction, distance, hit)) {
+    if (!Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) {
         
         // Apply some falling action
         actorVelocity.y -= 0.01;

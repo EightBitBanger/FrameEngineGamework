@@ -162,6 +162,52 @@ void PlatformLayer::HideMouseCursor(void) {
     while (ShowCursor(false) >= 0);
 }
 
+void PlatformLayer::SetClipboardText(std::string text) {
+    
+    if (OpenClipboard(nullptr)) {
+        
+        EmptyClipboard();
+        
+        HGLOBAL block = GlobalAlloc(GMEM_MOVEABLE, text.size() + 1);
+        if (block) {
+            char* globalLock = static_cast<char*>(GlobalLock(block));
+            memcpy(globalLock, text.c_str(), text.size() + 1); // +1 for null terminator
+            GlobalUnlock(block);
+            
+            // Set the clipboard data
+            SetClipboardData(CF_TEXT, block);
+        }
+        
+        // Close the clipboard
+        CloseClipboard();
+    }
+    
+    return;
+}
+
+std::string PlatformLayer::GetClipboardText(void) {
+    
+    std::string text;
+    
+    if (OpenClipboard(nullptr)) {
+        
+        HGLOBAL block = GetClipboardData(CF_TEXT);
+        
+        if (block) {
+            
+            char* globalLock = static_cast<char*>(GlobalLock(block));
+            
+            if (globalLock) {
+                text = std::string(globalLock);
+                GlobalUnlock(block);
+            }
+        }
+        
+        CloseClipboard();
+    }
+    
+    return text;
+}
 
 GLenum PlatformLayer::SetRenderTarget(void) {
     
