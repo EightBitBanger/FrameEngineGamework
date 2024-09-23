@@ -32,7 +32,7 @@ void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQue
 
 bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup) {
     
-    std::vector<MeshRenderer*>* renderQueue = nullptr;
+    std::vector<MeshRenderer*>* renderQueue = &mRenderQueueDefault;
     
     switch (renderQueueGroup) {
         case RENDER_QUEUE_OVERLAY:    renderQueue = &mRenderQueueOverlay; break;
