@@ -5,7 +5,7 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 
 
-class Perlin {
+class ENGINE_API Perlin {
     
 public:
     
