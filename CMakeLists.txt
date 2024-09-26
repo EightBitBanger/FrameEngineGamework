@@ -48,6 +48,7 @@ set (RUNTIME_HEADERS
     "include/GameEngineFramework/Application/main.h"
     
     "include/GameEngineFramework/Audio/AudioSystem.h"
+    "include/GameEngineFramework/Audio/components/sound.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
@@ -124,6 +125,9 @@ set (RUNTIME_HEADERS
     
     "vendor/Bly7/OBJ_Loader.h"
     
+    "vendor/AL/al.h"
+    "vendor/AL/alc.h"
+    
 )
 
 set (RUNTIME_SOURCES
@@ -199,6 +203,7 @@ set (GAME_HEADERS
     "include/GameEngineFramework/plugins/ChunkSpawner/Decor.h"
     
     "include/GameEngineFramework/Audio/AudioSystem.h"
+    "include/GameEngineFramework/Audio/components/sound.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
@@ -273,6 +278,9 @@ set (GAME_HEADERS
     "include/GameEngineFramework/Scripting/components/script.h"
     
     "vendor/Bly7/OBJ_Loader.h"
+    
+    "vendor/AL/al.h"
+    "vendor/AL/alc.h"
     
 )
 
@@ -331,6 +339,7 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Application/winproc.h"
     
     "include/GameEngineFramework/Audio/AudioSystem.h"
+    "include/GameEngineFramework/Audio/components/sound.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
@@ -406,6 +415,9 @@ set (CORE_HEADERS
     
     "vendor/Bly7/OBJ_Loader.h"
     
+    "vendor/AL/al.h"
+    "vendor/AL/alc.h"
+    
     "vendor/stb/stb_image.h"
     "vendor/stb/stb_perlin.h"
     "vendor/stb/stb_truetype.h"
@@ -418,6 +430,7 @@ set (CORE_SOURCES
     "src/Application/winproc.cpp"
     
     "src/Audio/AudioSystem.cpp"
+    "src/Audio/components/sound.cpp"
     
     "src/Networking/NetworkSystem.cpp"
     
@@ -541,6 +554,7 @@ target_link_libraries(core opengl32.a)
 target_link_libraries(core Ws2_32.lib)
 
 target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
+target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/libOpenAL32.dll.a)
 
 endif()
 
