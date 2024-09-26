@@ -21,6 +21,22 @@ extern ResourceManager      Resources;
 extern PlatformLayer        Platform;
 
 
+#include "../../vendor/AL/al.h"
+#include "../../vendor/AL/alc.h"
+
+const int SAMPLE_RATE = 44100; // Sample rate
+const int DURATION = 5;          // Duration in seconds
+const int BUFFER_SIZE = SAMPLE_RATE * DURATION; // Total samples
+
+
+// Function to generate random noise
+void generateRandomNoise(std::vector<ALshort>& buffer) {
+    for (int i = 0; i < BUFFER_SIZE; ++i) {
+        buffer[i] = rand() % 32768 - 16384; // Random value between -16384 and 16383
+    }
+}
+
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     
     HWND wHndl = (HWND)Platform.CreateWindowHandle("windowFrame", "Render window", NULL, (void*)hInstance);
