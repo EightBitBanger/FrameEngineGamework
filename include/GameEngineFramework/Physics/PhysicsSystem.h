@@ -6,7 +6,7 @@
 #include <GameEngineFramework/Physics/components/meshcollider.h>
 #include <GameEngineFramework/Renderer/components/mesh.h>
 
-#include <ReactPhysics3d/ReactPhysics3d.h>
+#include "../../../vendor/ReactPhysics3d/ReactPhysics3d.h"
 
 #include <cstdlib>
 
