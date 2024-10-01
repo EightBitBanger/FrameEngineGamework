@@ -11,7 +11,13 @@ class ENGINE_API FileSystemDir {
     
 public:
     
-    std::vector<std::string> GetList(std::string path);
+    std::vector<std::string> List(std::string path);
+    
+    bool Create(std::string directoryName);
+    
+    bool Delete(std::string directoryName);
+    
+    bool CheckExists(std::string directoryName);
     
 };
 

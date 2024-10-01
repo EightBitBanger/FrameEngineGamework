@@ -18,6 +18,8 @@ public:
     /// Deserialize data in from a file.
     bool Deserialize(std::string filename, void* buffer, unsigned int size);
     
+    /// Get the size of a file.
+    int GetFileSize(std::string filename);
     
 private:
     
