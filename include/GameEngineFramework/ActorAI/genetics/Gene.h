@@ -11,20 +11,6 @@ class ENGINE_API Gene {
     
 public:
     
-    /// Should this gene be expressed.
-    bool doExpress;
-    
-    /// Should this gene be animated.
-    bool doAnimationCycle;
-    
-    /// Should the animation cycle be inverted.
-    bool doInverseAnimation;
-    
-    /// Offset gene index to which this gene will attach and generate.
-    unsigned int attachmentIndex;
-    
-    // Base genes in this gene.
-    
     /// Offset position from center.
     BaseGene offset;
     
@@ -45,6 +31,18 @@ public:
     
     /// Animation swing rate multiplier.
     BaseGene animationAxis;
+    
+    /// Offset gene index to which this gene will attach and generate.
+    unsigned int attachmentIndex;
+    
+    /// Should this gene be expressed.
+    bool doExpress;
+    
+    /// Should this gene be animated.
+    bool doAnimationCycle;
+    
+    /// Should the animation cycle be inverted.
+    bool doInverseAnimation;
     
     Gene();
     

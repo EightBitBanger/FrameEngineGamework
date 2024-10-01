@@ -27,31 +27,43 @@ public:
     
     /// Set the name of the actor.
     void SetName(std::string newName);
+    
     /// Get the name of the actor.
     std::string GetName(void);
     
     /// Set the active state of the actor.
     void SetActive(bool state);
+    
     /// Get the active state of the actor.
     bool GetActive(void);
     
     /// Set the age of the actor.
-    void SetAge(unsigned long int newAge);
+    void SetAge(long long int newAge);
+    
     /// Get the age of the actor.
-    unsigned long int GetAge(void);
+    long long int GetAge(void);
     
     /// Set the walking speed of the actor.
     void SetSpeed(float newSpeed);
+    
     /// Get the walking speed of the actor.
     float GetSpeed(void);
     
+    /// Set the speed the actor can run at as a youth.
+    void SetSpeedYouth(float speed);
+    
+    /// Get the speed the actor can run at as a youth.
+    float GetSpeedYouth(void);
+    
     /// Set the running speed multiplier of the actor.
     void SetSpeedMultiplier(float newSpeedMul);
+    
     /// Get the running speed multiplier of the actor.
     float GetSpeedMultiplier(void);
     
     /// Set the position of the actor.
     void SetPosition(glm::vec3 position);
+    
     /// Get the position of the actor.
     glm::vec3 GetPosition(void);
     
@@ -60,8 +72,21 @@ public:
     
     /// Get the number of mesh renderers associated with this actor.
     unsigned int GetNumberOfMeshRenderers(void);
+    
     /// Return a mesh renderer at the given index.
     MeshRenderer* GetMeshRendererAtIndex(unsigned int index);
+    
+    /// Set the user data pointer.
+    void SetUserDataA(void* ptr);
+    
+    /// Get the user data pointer.
+    void* GetUserDataA(void);
+    
+    /// Set the user data pointer.
+    void SetUserDataB(void* ptr);
+    
+    /// Get the user data pointer.
+    void* GetUserDataB(void);
     
     
     // Genetics
@@ -100,29 +125,56 @@ public:
     /// Set the chance for the actor to change direction.
     void SetChanceToChangeDirection(float chance);
     
+    /// Get the chance for the actor to change direction.
+    float GetChanceToChangeDirection(void);
+    
     /// Set the chance to focus on a nearby actor.
     void SetChanceToFocusOnActor(float chance);
+    
+    /// Get the chance to focus on a nearby actor.
+    float GetChanceToFocusOnActor(void);
     
     /// Set the chance to begin walking.
     void SetChanceToWalk(float chance);
     
+    /// Get the chance to begin walking.
+    float GetChanceToWalk(void);
+    
     /// Set the chance to stop walking.
     void SetChanceToStopWalking(float chance);
+    
+    /// Get the chance to stop walking.
+    float GetChanceToStopWalking(void);
     
     /// Set the distance to walk when selecting new random positions.
     void SetDistanceToWalk(float distance);
     
+    /// Get the distance to walk when selecting new random positions.
+    float GetDistanceToWalk(void);
+    
     /// Set the distance to begin attacking a pray actor if any are nearby.
     void SetDistanceToAttack(float distance);
+    
+    /// Get the distance to begin attacking a pray actor if any are nearby.
+    float GetDistanceToAttack(void);
     
     /// Set the distance to begin running from a predator actor if any are nearby.
     void SetDistanceToFlee(float distance);
     
+    /// Get the distance to begin running from a predator actor if any are nearby.
+    float GetDistanceToFlee(void);
+    
     /// Set the minimum height preference when traveling.
     void SetHeightPreferenceMin(float height);
     
+    /// Get the minimum height preference when traveling.
+    float GetHeightPreferenceMin(void);
+    
     /// Set the maximum height preference when traveling.
     void SetHeightPreferenceMax(float height);
+    
+    /// Get the maximum height preference when traveling.
+    float GetHeightPreferenceMax(void);
     
     // Memories
     
@@ -135,6 +187,18 @@ public:
     /// Check if a memory exists in this actor.
     bool CheckMemoryExists(std::string memory);
     
+    // Age scaling
+    
+    /// Set the initial scale for the actor.
+    void SetYouthScale(float scale);
+    /// Get the initial scale from the actor.
+    float GetYouthScale(void);
+    
+    /// Set the max adult scale for the actor.
+    void SetAdultScale(float scale);
+    /// Get the max adult scale from the actor.
+    float GetAdultScale(void);
+    
     Actor();
     
 private:
@@ -145,13 +209,10 @@ private:
     // Number of ticks this actor has accumulated in its lifetime
     unsigned long long int mAge;
     
-    // Age when the actor will no longer grow
-    float mAdultAge;
-    
-    // Scale of the actor before it begins growing
+    // Initial scale for this actor
     float mYouthScale;
     
-    // Scale of the actor after it has stopped growing
+    // Max scale for adult actor
     float mAdultScale;
     
     // Collider position offset
@@ -162,6 +223,9 @@ private:
     
     // Maximum speed this actor can travel
     float mSpeed;
+    
+    // Maximum speed this actor can travel as a youth
+    float mSpeedYouth;
     
     // Running speed multiplier
     float mSpeedMul;
@@ -257,6 +321,9 @@ private:
     // Is this actor loaded into the scene
     bool mIsActorActiveInScene;
     
+    // User data pointers
+    void* mUserDataA;
+    void* mUserDataB;
     
     // List of actor names considered to be pray actors
     std::vector<std::string> mAttackActors;

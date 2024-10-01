@@ -38,31 +38,7 @@
 
 
 #ifndef BUILD_CORE
-    extern EngineComponents     Components;
-    extern ColorPreset          Colors;
-    extern NumberGeneration     Random;
-    extern Logger               Log;
-    extern ProfilerTimer        Profiler;
-    extern Timer                PhysicsTime;
-    extern Timer                Time;
-    
-    extern PlatformLayer        Platform;
-    extern ResourceManager      Resources;
-    extern Serialization        Serializer;
-    extern ScriptSystem         Scripting;
-    extern RenderSystem         Renderer;
-    extern PhysicsSystem        Physics;
-    extern NetworkSystem        Network;
-    extern AudioSystem          Audio;
-    extern InputSystem          Input;
-    extern MathCore             Math;
-    extern ActorSystem          AI;
-    
-    extern StringType  String;
-    extern FloatType   Float;
-    extern DoubleType  Double;
-    extern IntType     Int;
-    extern UintType    Uint;
+    #include <GameEngineFramework/Engine/EngineSystems.h>
 #endif
 
 // UI callback type
@@ -207,10 +183,10 @@ public:
     void SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value);
     
     /// Add a layer of perlin noise into a height field.
-    void AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ);
+    void AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ, int seed);
     
     /// Average a layer of perlin noise into a height field.
-    void AverageHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ);
+    void AverageHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ, int seed);
     
     // Color field
     
@@ -283,7 +259,7 @@ public:
         extern ActorSystem AI;
         
         // Engine
-        if (std::is_same<T, GameObject>::value)    return DestroyGameObject( (GameObject*)objectPtr );
+        if (std::is_same<T, GameObject>::value)    {GameObject* gameObject = (GameObject*)objectPtr; gameObject->mIsGarbage = true; return true;}
         if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
         
         // Renderer
@@ -472,6 +448,7 @@ private:
         Shader*  UI = nullptr;
         Shader*  shadowCaster = nullptr;
         Shader*  sky = nullptr;
+        Shader*  water = nullptr;
     };
     
     struct DefaultMeshes {

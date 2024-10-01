@@ -19,7 +19,9 @@ public:
     
     // Genomes
     
-    void SheepGene(Actor* targetActor);
+    void Sheep(Actor* targetActor);
+    
+    void Bear(Actor* targetActor);
     
 };
 

@@ -3,6 +3,7 @@
 
 #include <GameEngineFramework/configuration.h>
 #include <GameEngineFramework/Audio/components/sound.h>
+#include <GameEngineFramework/Audio/components/samplebuffer.h>
 
 #include <GameEngineFramework/MemoryAllocation/poolallocator.h>
 #include <GameEngineFramework/Logging/Logging.h>
@@ -18,7 +19,6 @@
 
 #include <thread>
 #include <mutex>
-#include <chrono>
 
 class ENGINE_API AudioSystem {
     
@@ -39,6 +39,12 @@ public:
     /// Destroy an old sound object.
     bool DestroySound(Sound* soundPtr);
     
+    /// Create a new audio sample object and return its pointer.
+    AudioSample* CreateAudioSample(void);
+    
+    /// Destroy an old audio sample object.
+    bool DestroyAudioSample(AudioSample* samplePtr);
+    
     void Initiate(void);
     void Shutdown(void);
     
@@ -50,6 +56,7 @@ private:
     bool mIsDeviceActive;
     
     PoolAllocator<Sound> mSounds;
+    PoolAllocator<AudioSample> mSamples;
     
     std::thread* audioThread;
     

@@ -166,7 +166,18 @@ public:
     /// Make the rigid body kinematic.
     void SetKinematic(void);
     
+    
+    /// Set the game object user data.
+    void SetUserData(void* ptr);
+    
+    /// Get the game object user data.
+    void* GetUserData(void);
+    
+    
 private:
+    
+    // User data pointer
+    void* mUserData;
     
     // Is this object marked for destruction by garbage collection.
     bool mIsGarbage;
