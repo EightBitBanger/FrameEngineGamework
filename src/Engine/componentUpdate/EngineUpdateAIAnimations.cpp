@@ -26,10 +26,6 @@ ENGINE_API extern PlatformLayer     Platform;
 
 void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
     
-    //
-    // Update animations
-    //
-    
     for (unsigned int a=0; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
         
         MeshRenderer* geneRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
@@ -44,21 +40,16 @@ void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
         
         
         // Scale by age
-        float ageScale = (mStreamBuffer[index].actor->GetAge() * 0.0001f);
+        float ageScalerValue = ((float)mStreamBuffer[index].actor->mAge) * 0.001f;
         
-        if (ageScale < 1.0f) {
-            
-            matrix = glm::scale( matrix, Math.Lerp(glm::vec3(mStreamBuffer[index].actor->mYouthScale), 
-                                                   glm::vec3(mStreamBuffer[index].actor->mAdultScale), 
-                                                   ageScale) );
-            
-        } else {
-            
-            matrix = glm::scale( matrix, glm::vec3(mStreamBuffer[index].actor->mAdultScale) );
-            
-            ageScale = 1.0f;
-            
-        }
+        if (ageScalerValue > 1.0f) 
+            ageScalerValue = 1.0f;
+        
+        float ageScale = Math.Lerp(mStreamBuffer[index].actor->mYouthScale, 
+                                   mStreamBuffer[index].actor->mAdultScale, 
+                                   ageScalerValue);
+        
+        matrix = glm::scale( matrix, glm::vec3( ageScale ));
         
         // Rotate around center
         if (orientationCenterMass > 0) {
@@ -72,8 +63,8 @@ void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
         
         // Offset from center
         matrix = glm::translate( matrix, glm::vec3(mStreamBuffer[index].actor->mGenes[a].offset.x,
-                                                mStreamBuffer[index].actor->mGenes[a].offset.y,
-                                                mStreamBuffer[index].actor->mGenes[a].offset.z));
+                                                   mStreamBuffer[index].actor->mGenes[a].offset.y,
+                                                   mStreamBuffer[index].actor->mGenes[a].offset.z));
         
         //
         // Update animation
@@ -109,6 +100,7 @@ void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
             // Check inverted animation cycle
             if (mStreamBuffer[index].actor->mGenes[a].doInverseAnimation) {
                 
+                // Swing forward
                 mStreamBuffer[index].actor->mAnimationStates[a] += animationFactor;
                 
                 if ((mStreamBuffer[index].actor->mAnimationStates[a].x > animationMaxSwingRange) | 
@@ -127,6 +119,7 @@ void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
                 
             } else {
                 
+                // Swing backward
                 mStreamBuffer[index].actor->mAnimationStates[a] -= animationFactor;
                 
                 if ((mStreamBuffer[index].actor->mAnimationStates[a].x < -animationMaxSwingRange) | 
@@ -195,7 +188,6 @@ void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
         
         
         // Apply animation rotation state
-        float animationLength = glm::length( mStreamBuffer[index].actor->mAnimationStates[a] );
         
         // Cannot be zero when rotating
         if (mStreamBuffer[index].actor->mAnimationStates[a].x == 0) 
@@ -205,16 +197,29 @@ void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
         if (mStreamBuffer[index].actor->mAnimationStates[a].z == 0) 
             mStreamBuffer[index].actor->mAnimationStates[a].z += 0.0001f;
         
+        // Calculate base rotation
+        glm::vec3 baseRotation = glm::vec3(mStreamBuffer[index].actor->mGenes[a].rotation.x + 0.0001f, 
+                                           mStreamBuffer[index].actor->mGenes[a].rotation.y + 0.0001f, 
+                                           mStreamBuffer[index].actor->mGenes[a].rotation.z + 0.0001f);
+        
+        float rotationLength = glm::length( baseRotation );
+        
         matrix = glm::rotate(matrix, 
-                            glm::radians( animationLength ), 
-                            glm::normalize( glm::vec3(mStreamBuffer[index].actor->mAnimationStates[a].x, 
-                                                    mStreamBuffer[index].actor->mAnimationStates[a].y, 
-                                                    mStreamBuffer[index].actor->mAnimationStates[a].z) ));
+                            rotationLength, 
+                            glm::normalize( baseRotation ));
+        
+        // Calculate animation rotation
+        float animationLength = glm::length( mStreamBuffer[index].actor->mAnimationStates[a] );
+        matrix = glm::rotate(matrix, 
+                             glm::radians( animationLength ), 
+                             glm::normalize( glm::vec3(mStreamBuffer[index].actor->mAnimationStates[a].x, 
+                                                       mStreamBuffer[index].actor->mAnimationStates[a].y, 
+                                                       mStreamBuffer[index].actor->mAnimationStates[a].z) ));
         
         // Final position after animation rotation
         matrix = glm::translate( matrix, glm::vec3(mStreamBuffer[index].actor->mGenes[a].position.x,
-                                                mStreamBuffer[index].actor->mGenes[a].position.y,
-                                                mStreamBuffer[index].actor->mGenes[a].position.z));
+                                                   mStreamBuffer[index].actor->mGenes[a].position.y,
+                                                   mStreamBuffer[index].actor->mGenes[a].position.z));
         
         geneRenderer->transform.matrix = glm::scale(matrix, geneRenderer->transform.scale);
         

@@ -1,29 +1,30 @@
 #include <GameEngineFramework/Engine/Engine.h>
 
-ENGINE_API EngineComponents  Components;
-ENGINE_API ColorPreset       Colors;
-ENGINE_API NumberGeneration  Random;
-ENGINE_API Logger            Log;
-ENGINE_API Timer             PhysicsTime;
-ENGINE_API Timer             Time;
-ENGINE_API ProfilerTimer     Profiler;
+ENGINE_API EngineComponents     Components;
+ENGINE_API ColorPreset          Colors;
+ENGINE_API NumberGeneration     Random;
+ENGINE_API Logger               Log;
+ENGINE_API Timer                PhysicsTime;
+ENGINE_API Timer                Time;
+ENGINE_API ProfilerTimer        Profiler;
 
-ENGINE_API Serialization     Serializer;
-ENGINE_API ResourceManager   Resources;
-ENGINE_API ScriptSystem      Scripting;
-ENGINE_API RenderSystem      Renderer;
-ENGINE_API PhysicsSystem     Physics;
-ENGINE_API NetworkSystem     Network;
-ENGINE_API AudioSystem       Audio;
-ENGINE_API InputSystem       Input;
-ENGINE_API MathCore          Math;
-ENGINE_API ActorSystem       AI;
+ENGINE_API Serialization        Serializer;
+ENGINE_API ResourceManager      Resources;
+ENGINE_API ScriptSystem         Scripting;
+ENGINE_API RenderSystem         Renderer;
+ENGINE_API PhysicsSystem        Physics;
+ENGINE_API NetworkSystem        Network;
+ENGINE_API AudioSystem          Audio;
+ENGINE_API AudioPreset          Samples;
+ENGINE_API InputSystem          Input;
+ENGINE_API MathCore             Math;
+ENGINE_API ActorSystem          AI;
 
-ENGINE_API StringType        String;
-ENGINE_API FloatType         Float;
-ENGINE_API DoubleType        Double;
-ENGINE_API IntType           Int;
-ENGINE_API UintType          Uint;
+ENGINE_API StringType           String;
+ENGINE_API FloatType            Float;
+ENGINE_API DoubleType           Double;
+ENGINE_API IntType              Int;
+ENGINE_API UintType             Uint;
 
 ENGINE_API FileSystemDir        Directory;
 ENGINE_API PlatformLayer        Platform;
@@ -106,7 +107,7 @@ void EngineSystemManager::SetColorFieldValues(glm::vec3* colorField, unsigned in
 
 void EngineSystemManager::AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
                                                         float noiseWidth, float noiseHeight, 
-                                                        float noiseMul, int offsetX, int offsetZ) {
+                                                        float noiseMul, int offsetX, int offsetZ, int seed) {
     
     for (unsigned int x=0; x < width; x ++) {
         
@@ -115,7 +116,7 @@ void EngineSystemManager::AddHeightFieldFromPerlinNoise(float* heightField, unsi
             float xCoord = ((float)x + offsetX) * noiseWidth;
             float zCoord = ((float)z + offsetZ) * noiseHeight;
             
-            float noise = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
+            float noise = Random.Perlin(xCoord, 0, zCoord, seed) * noiseMul;
             
             unsigned int index = z * width + x;
             
@@ -132,7 +133,7 @@ void EngineSystemManager::AddHeightFieldFromPerlinNoise(float* heightField, unsi
 
 void EngineSystemManager::AverageHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
                                                             float noiseWidth, float noiseHeight, 
-                                                            float noiseMul, int offsetX, int offsetZ) {
+                                                            float noiseMul, int offsetX, int offsetZ, int seed) {
     
     for (unsigned int x=0; x < width; x ++) {
         
@@ -141,7 +142,7 @@ void EngineSystemManager::AverageHeightFieldFromPerlinNoise(float* heightField, 
             float xCoord = ((float)x + offsetX) * noiseWidth;
             float zCoord = ((float)z + offsetZ) * noiseHeight;
             
-            float noise = Random.Perlin(xCoord, 0, zCoord) * noiseMul;
+            float noise = Random.Perlin(xCoord, 0, zCoord, seed) * noiseMul;
             
             unsigned int index = z * width + x;
             
@@ -211,7 +212,7 @@ void EngineSystemManager::SetColorFieldFromPerlinNoise(glm::vec3* colorField, un
             float xCoord = ((float)x + offsetX) * noiseWidth;
             float zCoord = ((float)z + offsetZ) * noiseHeight;
             
-            float noise = Random.Perlin(xCoord, 0, zCoord) + noiseThreshold;
+            float noise = Random.Perlin(xCoord, 0, zCoord, 100) + noiseThreshold;
             
             if (noise > 1) noise = 1;
             if (noise < 0) noise = 0;
@@ -587,6 +588,7 @@ void EngineSystemManager::Initiate() {
     shaders.UI            = Resources.CreateShaderFromTag("UI");
     shaders.shadowCaster  = Resources.CreateShaderFromTag("shadowCaster");
     shaders.sky           = Resources.CreateShaderFromTag("sky");
+    shaders.water         = Resources.CreateShaderFromTag("water");
     
     // Load default meshes
     meshes.grassHorz       = Resources.CreateMeshFromTag("grassHorz");

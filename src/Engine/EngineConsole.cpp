@@ -251,6 +251,10 @@ void EngineSystemManager::UpdateConsole(void) {
                 args.push_back( command[i+1] );
             }
             
+            // Must send in at least one blank string
+            if (args.size() == 0) 
+                args.push_back("");
+            
             // Find the command function
             bool doesFunctionExist = false;
             for (unsigned int i=0; i < mConsoleCommands.size(); i++) {

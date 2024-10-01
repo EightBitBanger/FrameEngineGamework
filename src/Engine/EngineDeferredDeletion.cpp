@@ -18,6 +18,8 @@ void EngineSystemManager::ProcessDeferredDeletion(void) {
             
             DestroyGameObject( objectPtr );
             
+            mGameObjects.Destroy( objectPtr );
+            
             continue;
         }
         

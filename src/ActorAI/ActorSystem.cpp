@@ -18,7 +18,7 @@ int actorCounter=0;
 ActorSystem::ActorSystem() : 
     mPlayerPosition(0),
     mActorUpdateDistance(300),
-    mActorDetailDistance(60)
+    mActorDetailDistance(100)
 {
 }
 

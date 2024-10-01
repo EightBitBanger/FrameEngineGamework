@@ -30,7 +30,8 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     for (unsigned int i=0; i < gameObjectPtr->GetComponentCount(); i++) 
         DestroyComponent( gameObjectPtr->GetComponentIndex(i) );
     
-    mGameObjects.Destroy(gameObjectPtr);
+    // Defer the deletion
+    gameObjectPtr->mIsGarbage = true;
     
     return true;
 }

@@ -70,6 +70,11 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
         actorPosition.y   = hit.point.y;
         currentPosition.y = hit.point.y + 1000;
         
+        // Set current chunk
+        GameObject* gameObject = (GameObject*)hit.gameObject;
+        
+        mStreamBuffer[index].actor->mUserDataA = gameObject->GetUserData();
+        
         actorVelocity.y = 0;
         
     }
@@ -78,6 +83,11 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     currentPosition.y -= 1000;
     transform.setPosition(currentPosition);
     mStreamBuffer[index].rigidBody->setTransform(transform);
+    
+    // Factor in youth speed multiplier
+    if (mStreamBuffer[index].actor->mAge < 1000) 
+        actorVelocity *= mStreamBuffer[index].actor->mSpeedYouth;
+    
     
     // Apply force velocity
     mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, 

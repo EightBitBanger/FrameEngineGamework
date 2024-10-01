@@ -1,13 +1,13 @@
 #include <GameEngineFramework/Audio/components/sound.h>
 
+extern bool isAudioDeviceActive;
+
+
 Sound::Sound() : 
-    
     mBuffer(0),
     mSource(0),
     mIsBufferConstructed(false)
 {
-    
-    return;
 }
 
 Sound::~Sound() {
@@ -41,12 +41,23 @@ void Sound::Stop(void) {
     
     return;
 }
+
 void Sound::SetVolume(float volume) {
     
     if (!mIsBufferConstructed) 
         return;
     
     alSourcef(mSource, AL_GAIN, volume);
+    
+    return;
+}
+
+void Sound::SetPitch(float pitch) {
+    
+    if (!mIsBufferConstructed) 
+        return;
+    
+    alSourcef(mSource, AL_PITCH, pitch);
     
     return;
 }
@@ -63,7 +74,10 @@ bool Sound::IsSamplePlaying(void) {
     return state == AL_PLAYING;
 }
 
-bool Sound::Load(std::vector<ALshort>& samples, int sampleRate) {
+bool Sound::LoadSample(AudioSample* samplePtr) {
+    
+    if (!isAudioDeviceActive) 
+        return false;
     
     if (!mIsBufferConstructed) {
         
@@ -73,7 +87,9 @@ bool Sound::Load(std::vector<ALshort>& samples, int sampleRate) {
         mIsBufferConstructed = true;
     }
     
-    alBufferData(mBuffer, AL_FORMAT_MONO16, samples.data(), samples.size() * sizeof(ALshort), sampleRate);
+    unsigned int bufferSize = samplePtr->sampleBuffer.size() * sizeof(ALshort);
+    
+    alBufferData(mBuffer, AL_FORMAT_MONO16, samplePtr->sampleBuffer.data(), bufferSize, samplePtr->sample_rate);
     
     return true;
 }

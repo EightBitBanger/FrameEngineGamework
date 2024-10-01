@@ -38,38 +38,32 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     // Optimize out actor meshes at distance
     
     // Remove from scene
-    if (mStreamBuffer[index].actor->mDistance > AI.GetActorDetailDistance() - 10.0f) {
+    if (mStreamBuffer[index].actor->mDistance > AI.GetActorDetailDistance()) {
         
         if (mStreamBuffer[index].actor->mIsActorActiveInScene) {
             
             mStreamBuffer[index].actor->mIsActorActiveInScene = false;
             
-            for (unsigned int a=0; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
-                
-                if (a == 0) 
-                    continue;
+            for (unsigned int a=1; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
                 
                 MeshRenderer* meshRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
                 
                 sceneMain->RemoveMeshRendererFromSceneRoot( meshRenderer, RENDER_QUEUE_DEFAULT );
                 
             }
+            
         }
         
     }
     
-    
     // Add to scene
-    if (mStreamBuffer[index].actor->mDistance < AI.GetActorDetailDistance() + 10.0f) {
+    if (mStreamBuffer[index].actor->mDistance <= AI.GetActorDetailDistance()) {
         
         if (!mStreamBuffer[index].actor->mIsActorActiveInScene) {
             
             mStreamBuffer[index].actor->mIsActorActiveInScene = true;
             
-            for (unsigned int a=0; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
-                
-                if (a == 0) 
-                    continue;
+            for (unsigned int a=1; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
                 
                 MeshRenderer* meshRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
                 
@@ -80,6 +74,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         }
         
     }
+    
     
     // Check walking state
     if (mStreamBuffer[index].actor->mIsWalking) {
@@ -93,9 +88,6 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         forward.z = sin( glm::radians( -(mStreamBuffer[index].actor->mRotation.y - 90) ) );
         
         float actorSpeed = mStreamBuffer[index].actor->mSpeed;
-        
-        if (mStreamBuffer[index].actor->mAge < mStreamBuffer[index].actor->mAdultAge) 
-            actorSpeed *= 0.8f;
         
         glm::vec3 actorVelocity = forward * (actorSpeed * 0.1f) * 0.1f;
         
@@ -111,7 +103,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         
         // Get distance to target
         float targetDistance = glm::distance( mStreamBuffer[index].actor->mTargetPoint, 
-                                        mStreamBuffer[index].actor->mPosition );
+                                              mStreamBuffer[index].actor->mPosition );
         
         // Check arrived at target point
         if (targetDistance < 1.5) 

@@ -29,8 +29,6 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
     if (!mStreamBuffer[index].actor->mDoUpdateGenetics) 
         return;
     
-    //mStreamBuffer[index].actor->mux.lock();
-    
     int numberOfGenes = mStreamBuffer[index].actor->GetNumberOfGenes();
     
     //
@@ -95,8 +93,12 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         newMaterial->diffuse.g = mStreamBuffer[index].actor->mGenes[a].color.y;
         newMaterial->diffuse.b = mStreamBuffer[index].actor->mGenes[a].color.z;
         
-        newMaterial->ambient = Colors.black;
-        newMaterial->diffuse = Colors.white;
+        newMaterial->ambient = Colors.white;
+        
+        newMaterial->DisableBlending();
+        newMaterial->EnableCulling();
+        newMaterial->EnableDepthTest();
+        newMaterial->DisableShadowVolumePass();
         
         MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
         newRenderer->isActive = false;
@@ -158,12 +160,14 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         if (a == 0) 
             sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_DEFAULT );
         
+        // Add all renderers
+        //sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_DEFAULT );
+        //mStreamBuffer[index].actor->mIsActorActiveInScene = true;
+        
         continue;
     }
     
     mStreamBuffer[index].actor->mDoUpdateGenetics = false;
-    
-    //mStreamBuffer[index].actor->mux.unlock();
     
     return;
 }

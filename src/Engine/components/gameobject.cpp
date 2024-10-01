@@ -423,3 +423,12 @@ void GameObject::SetKinematic(void) {
     mRigidBodyCache->setType(rp3d::BodyType::KINEMATIC);
     return;
 }
+
+void GameObject::SetUserData(void* ptr){
+    mUserData = ptr;
+    return;
+}
+
+void* GameObject::GetUserData(void) {
+    return mUserData;
+}
