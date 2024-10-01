@@ -7,8 +7,6 @@ Serialization::Serialization(void) {
     return;
 }
 
-
-/// Serialize data out to a file.
 bool Serialization::Serialize(std::string filename, void* buffer, unsigned int size) {
     std::ofstream fStream(filename, std::fstream::out | std::fstream::binary);
     
@@ -22,7 +20,6 @@ bool Serialization::Serialize(std::string filename, void* buffer, unsigned int s
 }
 
 
-/// Deserialize data in from a file.
 bool Serialization::Deserialize(std::string filename, void* buffer, unsigned int size) {
     std::ifstream fStream(filename, std::fstream::in | std::fstream::binary);
     
@@ -33,5 +30,19 @@ bool Serialization::Deserialize(std::string filename, void* buffer, unsigned int
     
     fStream.close();
     return true;
+}
+
+
+int Serialization::GetFileSize(std::string filename) {
+    
+    std::ifstream fStream(filename, std::ios::binary);
+    if (!fStream) 
+        return -1;
+    
+    fStream.seekg( 0, std::ios::end );
+    std::streamsize size = fStream.tellg();
+    
+    fStream.close();
+    return size;
 }
 

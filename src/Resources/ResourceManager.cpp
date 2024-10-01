@@ -18,9 +18,9 @@ void ResourceManager::Initiate(void) {
     Log.WriteLn();
     
     // Load resource directories if they exist
-    std::vector<std::string> shaderDirectoryList   = Directory.GetList(".\\core\\shaders\\");
-    std::vector<std::string> modelDirectoryList    = Directory.GetList(".\\core\\models\\");
-    std::vector<std::string> materialDirectoryList = Directory.GetList(".\\core\\materials\\");
+    std::vector<std::string> shaderDirectoryList   = Directory.List(".\\core\\shaders\\");
+    std::vector<std::string> modelDirectoryList    = Directory.List(".\\core\\models\\");
+    std::vector<std::string> materialDirectoryList = Directory.List(".\\core\\materials\\");
     
     for (unsigned int i=0; i < shaderDirectoryList.size(); i++) 
         LoadShaderGLSL("core/shaders/" + shaderDirectoryList[i], String.GetNameFromFilenameNoExt( shaderDirectoryList[i] ));
