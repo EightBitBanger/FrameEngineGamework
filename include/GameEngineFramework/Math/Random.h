@@ -22,7 +22,7 @@ public:
     int Range(int min, int max);
     
     /// Return a perlin noise value based on the input coordinates.
-    float Perlin(float xcoord, float ycoord, float zcoord);
+    float Perlin(float xcoord, float ycoord, float zcoord, int seed);
     
 };
 
