@@ -20,15 +20,128 @@ float ambientLight = 0.9;
 
 
 
+// Set world name
+void FuncName(std::vector<std::string> args) {
+    
+    if (args[0] == "") {
+        
+        Engine.Print("World name: " + chunkManager.worldName);
+        
+        return;
+    }
+    
+    if ((args[0][0] > 0x20) & (args[0][0] < 0x7a)) {
+        
+        chunkManager.worldName = args[0];
+        
+        Engine.Print("World name: " + chunkManager.worldName);
+        
+    } else {
+        
+        Engine.Print("Invalid name");
+    }
+    
+    return;
+}
+
+// List worlds
+void FuncList(std::vector<std::string> args) {
+    
+    std::vector<std::string> dirList = Directory.List("worlds");
+    
+    if (dirList.size() == 0) {
+        
+        Engine.Print("No worlds");
+        
+        return;
+    }
+    
+    for (unsigned int i=0; i < dirList.size(); i++) 
+        Engine.Print( dirList[i] );
+    
+    return;
+}
+
+// Save world
+void FuncSave(std::vector<std::string> args) {
+    
+    if (chunkManager.worldName == "") {
+        
+        Engine.Print(chunkManager.worldName + "Incorrect world name");
+        
+        return;
+    }
+    
+    if (chunkManager.SaveWorld()) {
+        
+        Engine.Print("World saved");
+        
+        return;
+    }
+    
+    Engine.Print("Error saving world");
+    
+    return;
+}
+
+// Load world
+void FuncLoad(std::vector<std::string> args) {
+    
+    if (chunkManager.worldName == "") {
+        
+        Engine.Print(chunkManager.worldName + "Incorrect world name");
+        
+        return;
+    }
+    
+    chunkManager.LoadWorld();
+    
+    chunkManager.generateWorldChunks = true;
+    
+    return;
+}
+
+// Generate a world
+void FuncGen(std::vector<std::string> args) {
+    
+    chunkManager.generateWorldChunks = true;
+    
+    if (args[0] == "stop") {
+        chunkManager.generateWorldChunks = false;
+        
+        Engine.Print("Stopped generating");
+    }
+    
+    return;
+}
+
+// Set the world seed
+void FuncSeed(std::vector<std::string> args) {
+    
+    if (args[0] == "") {
+        
+        Engine.Print("World seed: " + Int.ToString(chunkManager.worldSeed));
+        
+        return;
+    }
+    
+    chunkManager.worldSeed = String.ToInt(args[0]);
+    
+    Engine.Print("World seed: " + Int.ToString(chunkManager.worldSeed));
+    
+    return;
+}
 
 
+// Summon an actor
 void FuncSummon(std::vector<std::string> args) {
     
     for (uint8_t i=0; i < 100; i++) {
         
         unsigned int entityType = 0;
         
-        if (args[0] == "Sheep") {entityType = 1;}
+        if (args[0] == "Sheep")   {entityType = 1;}
+        if (args[0] == "Bear")    {entityType = 2;}
         
         if (entityType == 0) {
             
@@ -47,26 +160,10 @@ void FuncSummon(std::vector<std::string> args) {
         switch (entityType) {
             
             default:
-            case 1: AI.genomes.SheepGene( newActor ); break;
+            case 1: AI.genomes.Sheep( newActor ); break;
+            case 2: AI.genomes.Bear( newActor ); break;
             
         }
-        
-        /*
-        // Add extra gene
-        
-        Gene gene;
-        gene.attachmentIndex = 3;
-        
-        gene.position.x = 0;
-        gene.position.y = 0.9;
-        gene.position.z = 0;
-        
-        gene.scale.x = 0.35;
-        gene.scale.y = 0.5;
-        gene.scale.z = 0.4;
-        
-        newActor->AddGene(gene);
-        */
         
         continue;
     }
@@ -80,13 +177,22 @@ void FuncSummon(std::vector<std::string> args) {
 
 
 
+
 //
 // Application entry point
 //
 
 void Start() {
     
-    Engine.ConsoleRegisterCommand("summon", FuncSummon);
+    // Load console functions
+    Engine.ConsoleRegisterCommand("summon",  FuncSummon);
+    Engine.ConsoleRegisterCommand("name",    FuncName);
+    Engine.ConsoleRegisterCommand("list",    FuncList);
+    Engine.ConsoleRegisterCommand("save",    FuncSave);
+    Engine.ConsoleRegisterCommand("load",    FuncLoad);
+    Engine.ConsoleRegisterCommand("gen",     FuncGen);
+    Engine.ConsoleRegisterCommand("seed",    FuncSeed);
+    
     
     Platform.HideMouseCursor();
     
@@ -94,9 +200,38 @@ void Start() {
     
     Weather.Initiate();
     
+    Engine.DisableConsoleCloseOnReturn();
+    
     //Engine.EnableProfiler();
     
     //Engine.EnablePhysicsDebugRenderer();
+    
+    
+    //
+    // Audio test sample
+    
+    Sound* soundA = Audio.CreateSound();
+    AudioSample* sampleA = Audio.CreateAudioSample();
+    
+    sampleA->sample_rate = 44100;
+    
+    Samples.renderBlankSpace(sampleA, 0.4f);
+    Samples.renderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
+    Samples.renderBlankSpace(sampleA, 0.7f);
+    Samples.renderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
+    Samples.renderBlankSpace(sampleA, 1.0f);
+    Samples.renderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
+    Samples.renderBlankSpace(sampleA, 0.1f);
+    Samples.renderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
+    
+    
+    soundA->LoadSample(sampleA);
+    
+    soundA->SetVolume(0.4f);
+    
+    //soundA->Play();
+    //while (soundA->IsSamplePlaying());
+    
     
     
     //
@@ -133,7 +268,7 @@ void Start() {
     
     Decoration decorGrass;
     decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 500;
+    decorGrass.density = 200;
     decorGrass.spawnHeightMaximum = 35;
     decorGrass.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
@@ -141,16 +276,24 @@ void Start() {
     
     Decoration decorTrees;
     decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 50;
-    decorTrees.spawnHeightMaximum = 40;
+    decorTrees.density = 500;
+    decorTrees.spawnHeightMaximum = 20;
     decorTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
     decorTrees.spawnStackHeightMax = 8;
     
+    Decoration decorTreeHights;
+    decorTreeHights.type = DECORATION_TREE;
+    decorTreeHights.density = 800;
+    decorTreeHights.spawnHeightMaximum = 40;
+    decorTreeHights.spawnHeightMinimum = 20;
+    decorTreeHights.spawnStackHeightMin = 4;
+    decorTreeHights.spawnStackHeightMax = 8;
+    
     // Water adjacent plants
     Decoration decorWaterTrees;
     decorWaterTrees.type = DECORATION_TREE;
-    decorWaterTrees.density = 40;
+    decorWaterTrees.density = 100;
     decorWaterTrees.spawnHeightMaximum = chunkManager.world.waterLevel + 10;
     decorWaterTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorWaterTrees.spawnStackHeightMin = 2;
@@ -167,17 +310,28 @@ void Start() {
     
     // Actors
     Decoration decorSheep;
-    decorSheep.type = DECORATION_ACTOR_SHEEP;
-    decorSheep.density = 3;
+    decorSheep.type = DECORATION_ACTOR;
+    decorSheep.name = "Sheep";
+    decorSheep.density = 2;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = chunkManager.world.waterLevel;
+    
+    Decoration decorBear;
+    decorBear.type = DECORATION_ACTOR;
+    decorBear.name = "Bear";
+    decorBear.density = 4;
+    decorBear.spawnHeightMaximum = 40;
+    decorBear.spawnHeightMinimum = 5;
     
     
     chunkManager.world.AddWorldDecoration(decorGrass);
     chunkManager.world.AddWorldDecoration(decorTrees);
+    chunkManager.world.AddWorldDecoration(decorTreeHights);
+    
     chunkManager.world.AddWorldDecoration(decorWaterTrees);
     chunkManager.world.AddWorldDecoration(decorWaterPlants);
     chunkManager.world.AddWorldDecoration(decorSheep);
+    chunkManager.world.AddWorldDecoration(decorBear);
     
     
     
@@ -213,18 +367,28 @@ void Start() {
     perlinMountainB.noiseWidth  = 0.0007;
     perlinMountainB.noiseHeight = 0.0007;
     
+    Perlin perlinFlatland;
+    perlinFlatland.equation = 0;
+    perlinFlatland.heightMultuplier = 0;
+    perlinFlatland.noiseWidth  = 0.0007;
+    perlinFlatland.noiseHeight = 0.0007;
+    
+    
+    
     chunkManager.AddPerlinNoiseLayer(perlinMountainB);
     chunkManager.AddPerlinNoiseLayer(perlinMountainA);
     chunkManager.AddPerlinNoiseLayer(perlinBase);
     chunkManager.AddPerlinNoiseLayer(perlinLayerA);
     chunkManager.AddPerlinNoiseLayer(perlinLayerB);
+    //chunkManager.AddPerlinNoiseLayer(perlinFlatland);
+    
     
     
     // Lighting levels
     
     chunkManager.world.chunkColorLow   = Colors.MakeGrayScale(0.3f);
     chunkManager.world.staticColorLow  = Colors.MakeGrayScale(0.3f);
-    chunkManager.world.actorColorLow   = Colors.MakeGrayScale(0.3f);
+    chunkManager.world.actorColorLow   = Colors.MakeGrayScale(0.02f);
     
     chunkManager.world.chunkColorHigh  = Colors.MakeGrayScale(0.87f);
     chunkManager.world.staticColorHigh = Colors.MakeGrayScale(0.87f);
@@ -235,7 +399,7 @@ void Start() {
     
     // World rendering
     
-    chunkManager.renderDistance = 8;
+    chunkManager.renderDistance = 13;
     
     chunkManager.generationDistance   = chunkManager.renderDistance * 1.5f;
     chunkManager.renderDistanceStatic = chunkManager.renderDistance;
@@ -245,6 +409,7 @@ void Start() {
     chunkManager.world.waterColorHigh = Colors.blue * 0.3f;
     
     chunkManager.updateWorldChunks = true;
+    chunkManager.generateWorldChunks = true;
     
     return;
 }
@@ -364,7 +529,7 @@ void Run() {
             
             Platform.SetClipboardText( targetGene );
             
-            Engine.Print( "Genome extracted - " + hitActor->GetName(), 150 );
+            Engine.Print( "Genome extracted - " + hitActor->GetName());
             
         }
         
@@ -375,13 +540,18 @@ void Run() {
         if (Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) {
             
             GameObject* newActorObject = Engine.CreateAIActor( hit.point );
+            GameObject* hitObject = (GameObject*)hit.gameObject;
+            Chunk* chunkPtr = (Chunk*)hitObject->GetUserData();
             
             Actor* newActor = newActorObject->GetComponent<Actor>();
+            chunkPtr->actorList.push_back(newActorObject);
             
             AI.genomes.PreyBase( newActor );
             
             AI.genomes.InjectGenome(newActor, targetGene);
             newActor->SetUpdateGeneticsFlag();
+            
+            newActor->SetAge( Random.Range(800, 2000) );
             
         }
         
@@ -441,25 +611,30 @@ void Run() {
         
         Engine.WriteDialog(1, playerPosition);
         
-        if (Physics.Raycast(from, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Default)) {
+        if (Physics.Raycast(from, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Ground)) {
             
             GameObject* hitObject = (GameObject*)hit.gameObject;
+            MeshRenderer* chunkRenderer = hitObject->GetComponent<MeshRenderer>();
+            
+            Chunk* hitChunk = (Chunk*)hitObject->GetUserData();
             
             if (hitObject != nullptr) {
                 
                 std::string chunkPosition = "Chunk ";
                 
-                chunkPosition += Int.ToString( cameraPosition.x / chunkManager.chunkSize );
+                chunkPosition += Float.ToString( hitObject->GetPosition().x );
                 chunkPosition += ", ";
-                chunkPosition += Int.ToString( cameraPosition.z / chunkManager.chunkSize );
+                chunkPosition += Float.ToString( hitObject->GetPosition().z );
                 
                 Engine.WriteDialog(0, chunkPosition);
+                
+                Engine.WriteDialog(1, "Actors " + Int.ToString(hitChunk->actorList.size()));
                 
             }
             
         }
         
-        // Check current pointing object
+        // Check object in front of camera
         
         if (Physics.Raycast(from, direction, distance, hit, LayerMask::Actor)) {
             
@@ -469,13 +644,26 @@ void Run() {
             Engine.WriteDialog(3, hitActor->GetName());
             Engine.WriteDialog(4, "Age: " + Int.ToString(hitActor->GetAge()));
             
-            Platform.SetClipboardText( targetGene );
+            float actorChunkX = Math.Round( hitObject->GetPosition().x / chunkManager.chunkSize ) * chunkManager.chunkSize;
+            float actorChunkZ = Math.Round( hitObject->GetPosition().z / chunkManager.chunkSize ) * chunkManager.chunkSize;
+            
+            // Set actor chunk to the current chunk
+            Chunk* chunkPtr = chunkManager.CheckChunk( glm::vec2(actorChunkX, actorChunkZ) );
+            if (chunkPtr != nullptr) {
+                
+                Engine.WriteDialog(5, Float.ToString(chunkPtr->position.x) + ", " + Float.ToString(chunkPtr->position.y));
+                
+            }
+            
+            Engine.WriteDialog(6, Float.ToString(actorChunkX) + ", " + Float.ToString(actorChunkZ));
+            
+            Engine.WriteDialog(7, "MeshRenderers " + Int.ToString( hitActor->GetNumberOfMeshRenderers() ));
+            Engine.WriteDialog(8, "Genomes       " + Int.ToString( hitActor->GetNumberOfGenes() ));
             
         } else {
             
-            Engine.WriteDialog(3, "");
-            Engine.WriteDialog(4, "");
-            Engine.WriteDialog(5, "");
+            for (unsigned int i=0; i < 10; i++) 
+                Engine.WriteDialog(3 + i, "");
             
         }
         
