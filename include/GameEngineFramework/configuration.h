@@ -56,6 +56,8 @@
 
 #define  LOG_RENDER_DETAILS
 
+#define  RENDER_NUMBER_OF_QUEUE_GROUPS   7
+
 
 
 //
