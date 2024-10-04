@@ -173,39 +173,46 @@ void GeneticPresets::PreyBase(Actor* targetActor) {
 
 void GeneticPresets::Sheep(Actor* targetActor) {
     
-    // Identification
     targetActor->SetName("Sheep");
     
     targetActor->SetSpeed(0.7);
     
-    targetActor->SetYouthScale(0.1f);
+    targetActor->SetYouthScale(0.2f);
     targetActor->SetAdultScale(0.8f);
     
     
-    // Mental model
     PreyBase(targetActor);
     
-    // Color variant
-    Color headColor;
-    Color bodyColor;
-    Color limbColor;
+    // Color variants
+    Color headColor = Colors.dkgray;
+    Color bodyColor = Colors.dkgray;
+    Color limbColor = Colors.dkgray;
     
-    headColor = Colors.MakeRandomGrayScale() * Colors.ltgray;
-    bodyColor = Colors.MakeRandomGrayScale() * Colors.dkgray;
-    limbColor = Colors.MakeRandomGrayScale() * Colors.gray;
+    headColor = Colors.Range(Colors.gray, Colors.dkgray) * (Random.Range(1, 100) * 0.008f);
+    bodyColor = Colors.Range(Colors.gray, Colors.black)  * (Random.Range(1, 100) * 0.008f);
+    limbColor = Colors.Range(Colors.gray, Colors.dkgray) * (Random.Range(1, 100) * 0.008f);
     
-    // Random off colors
+    bool selected = false;
     
     // Brown
-    if (Random.Range(0, 100) > 90) 
-        bodyColor *= Colors.brown;
+    if ((!selected) & (Random.Range(0, 100) > 80)) {
+        bodyColor = Colors.brown * 0.04f;
+        selected = true;
+    }
     
-    // Grays
-    if (Random.Range(0, 100) > 90) bodyColor *= Colors.dkgray;
-    if (Random.Range(0, 100) > 90) bodyColor *= Colors.ltgray;
+    // Black
+    if ((!selected) & (Random.Range(0, 100) > 90)) {
+        headColor = Colors.Range(Colors.gray, Colors.dkgray) * 0.08;
+        bodyColor = Colors.black;
+        limbColor = Colors.Range(Colors.gray, Colors.dkgray) * 0.05;
+        selected = true;
+    }
     
-    if (Random.Range(0, 1000) > 990) bodyColor = Colors.purple;
-    
+    // Rare - pink
+    if ((!selected) & (Random.Range(0, 1000000) > 999990)) {
+        bodyColor = Colors.purple * 0.7f;
+        selected = true;
+    }
     
     // Body gene
     Gene geneBody;
@@ -301,7 +308,6 @@ void GeneticPresets::Sheep(Actor* targetActor) {
 
 void GeneticPresets::Bear(Actor* targetActor) {
     
-    // Identification
     targetActor->SetName("Bear");
     
     targetActor->SetSpeed(1.1);
@@ -309,43 +315,39 @@ void GeneticPresets::Bear(Actor* targetActor) {
     targetActor->SetYouthScale(0.4f);
     targetActor->SetAdultScale(1.3f);
     
-    // Color variant
-    Color headColor;
-    Color bodyColor;
-    Color limbColor;
+    // Color variants
+    bool selected = false;
     
-    // Random off colors
+    // Default brown bear
+    Color headColor = Colors.brown;
+    Color bodyColor = Colors.brown;
+    Color limbColor = Colors.brown;
     
-    // Brown bears
-    if (Random.Range(0, 100) > 40) {
-        
-        headColor *= Colors.dkgray;
-        bodyColor *= Colors.dkgray;
-        limbColor *= Colors.brown * Colors.dkgray;
-        
-        PreyBase(targetActor);
-        
-    }
+    headColor *= Colors.MakeGrayScale(0.02);
+    bodyColor *= Colors.MakeGrayScale(0.018);
+    limbColor *= Colors.MakeGrayScale(0.03);
     
-    // Grizzle grizzle
-    if (Random.Range(0, 100) > 70) {
+    // Grizzly bear
+    if ((!selected) & (Random.Range(0, 100) > 70)) {
         
         headColor = Colors.brown * Colors.MakeGrayScale(0.02);
-        bodyColor = Colors.brown * Colors.MakeGrayScale(0.018);
+        bodyColor = Colors.brown * Colors.MakeGrayScale(0.02);
         limbColor = Colors.brown * Colors.MakeGrayScale(0.03);
         
         PreyBase(targetActor);
         
+        selected = true;
     }
     
     // Black bear
-    if (Random.Range(0, 100) > 80) {
+    if ((!selected) & (Random.Range(0, 100) > 80)) {
         
         headColor = Colors.dkgray * Colors.dkgray * Colors.MakeGrayScale(0.01);
-        bodyColor = Colors.dkgray * Colors.dkgray * Colors.MakeGrayScale(0.018);
+        bodyColor = Colors.dkgray * Colors.dkgray * Colors.MakeGrayScale(0.001);
         
         PreyBase(targetActor);
         
+        selected = true;
     }
     
     // Body gene

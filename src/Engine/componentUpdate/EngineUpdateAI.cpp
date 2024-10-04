@@ -48,7 +48,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
                 
                 MeshRenderer* meshRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
                 
-                sceneMain->RemoveMeshRendererFromSceneRoot( meshRenderer, RENDER_QUEUE_DEFAULT );
+                sceneMain->RemoveMeshRendererFromSceneRoot( meshRenderer, RENDER_QUEUE_GEOMETRY );
                 
             }
             
@@ -67,7 +67,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
                 
                 MeshRenderer* meshRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
                 
-                sceneMain->AddMeshRendererToSceneRoot( meshRenderer, RENDER_QUEUE_DEFAULT );
+                sceneMain->AddMeshRendererToSceneRoot( meshRenderer, RENDER_QUEUE_GEOMETRY );
                 
             }
             

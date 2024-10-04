@@ -145,8 +145,6 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
         default: break;
     }
     
-    mComponents.Destroy(componentPtr);
-    
     return true;
 }
 

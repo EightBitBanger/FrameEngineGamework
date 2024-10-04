@@ -226,13 +226,23 @@ Color& ColorPreset::Make(float r, float g, float b) {
     mCustom.r = r;
     mCustom.g = g;
     mCustom.b = b;
+    mCustom.a = 1;
     return mCustom;
+}
+
+Color& ColorPreset::Range(Color begin, Color end) {
+    float randomScale = Random.Range(0, 100) * 0.01f;
+    mRandom = Color( glm::lerp(begin.r, end.r, randomScale), 
+                     glm::lerp(begin.g, end.g, randomScale), 
+                     glm::lerp(begin.b, end.b, randomScale), 1);
+    return mRandom;
 }
 
 Color& ColorPreset::MakeRandom(void) {
     mRandom.r = Random.Range(0, 100) * 0.01f;
     mRandom.g = Random.Range(0, 100) * 0.01f;
     mRandom.b = Random.Range(0, 100) * 0.01f;
+    mRandom.a = 1;
     return mRandom;
 }
 
@@ -240,6 +250,7 @@ Color& ColorPreset::MakeGrayScale(float grayScale) {
     mCustom.r = grayScale;
     mCustom.g = grayScale;
     mCustom.b = grayScale;
+    mCustom.a = 1;
     return mCustom;
 }
 
@@ -248,12 +259,13 @@ Color& ColorPreset::MakeRandomGrayScale(void) {
     mRandom.r = randomScale;
     mRandom.g = randomScale;
     mRandom.b = randomScale;
+    mRandom.a = 1;
     return mRandom;
 }
 
 Color& ColorPreset::Lerp(Color min, Color max, float bias) {
     mCustom = Color( glm::lerp(min.r, max.r, bias), 
                      glm::lerp(min.g, max.g, bias), 
-                     glm::lerp(min.b, max.b, bias) );
+                     glm::lerp(min.b, max.b, bias), 1);
     return mCustom;
 }

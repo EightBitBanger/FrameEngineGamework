@@ -44,7 +44,7 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         if (geneRenderer->material != nullptr) 
             Renderer.DestroyMaterial(geneRenderer->material);
         
-        sceneMain->RemoveMeshRendererFromSceneRoot( geneRenderer, RENDER_QUEUE_DEFAULT );
+        sceneMain->RemoveMeshRendererFromSceneRoot( geneRenderer, RENDER_QUEUE_GEOMETRY );
         
         Renderer.DestroyMeshRenderer( geneRenderer );
         
@@ -158,10 +158,10 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         mStreamBuffer[index].actor->mAnimationStates .push_back( orientation );
         
         if (a == 0) 
-            sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_DEFAULT );
+            sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_GEOMETRY );
         
         // Add all renderers
-        //sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_DEFAULT );
+        //sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_GEOMETRY );
         //mStreamBuffer[index].actor->mIsActorActiveInScene = true;
         
         continue;
