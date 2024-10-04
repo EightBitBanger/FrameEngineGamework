@@ -10,37 +10,33 @@ Scene::Scene() :
 
 void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup) {
     switch (renderQueueGroup) {
-        case RENDER_QUEUE_OVERLAY:
-            mRenderQueueOverlay.emplace( mRenderQueueOverlay.begin(), meshRenderer );
-            break;
-        case RENDER_QUEUE_FOREGROUND:
-            mRenderQueueForeground.emplace( mRenderQueueForeground.begin(), meshRenderer );
-            break;
-        default:
-        case RENDER_QUEUE_DEFAULT:
-            mRenderQueueDefault.emplace( mRenderQueueDefault.begin(), meshRenderer );
-            break;
-        case RENDER_QUEUE_BACKGROUND:
-            mRenderQueueBackground.emplace( mRenderQueueBackground.begin(), meshRenderer );
-            break;
-        case RENDER_QUEUE_SKY:
-            mRenderQueueSky.emplace( mRenderQueueSky.begin(), meshRenderer );
-            break;
+        
+        case RENDER_QUEUE_OVERLAY:      mRenderQueueOverlay.emplace( mRenderQueueOverlay.begin(), meshRenderer ); break;
+        case RENDER_QUEUE_FOREGROUND:   mRenderQueueForeground.emplace( mRenderQueueForeground.begin(), meshRenderer ); break;
+        case RENDER_QUEUE_POSTGEOMETRY: mRenderQueuePostGeometry.emplace( mRenderQueuePostGeometry.begin(), meshRenderer ); break;
+        default: 
+        case RENDER_QUEUE_GEOMETRY:     mRenderQueueGeometry.emplace( mRenderQueueGeometry.begin(), meshRenderer ); break;
+        case RENDER_QUEUE_PREGEOMETRY:  mRenderQueuePreGrometry.emplace( mRenderQueuePreGrometry.begin(), meshRenderer ); break;
+        case RENDER_QUEUE_BACKGROUND:   mRenderQueueBackground.emplace( mRenderQueueBackground.begin(), meshRenderer ); break;
+        case RENDER_QUEUE_SKY:          mRenderQueueSky.emplace( mRenderQueueSky.begin(), meshRenderer ); break;
+        
     }
     return;
 }
 
 bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup) {
     
-    std::vector<MeshRenderer*>* renderQueue = &mRenderQueueDefault;
+    std::vector<MeshRenderer*>* renderQueue;
     
     switch (renderQueueGroup) {
-        case RENDER_QUEUE_OVERLAY:    renderQueue = &mRenderQueueOverlay; break;
-        case RENDER_QUEUE_FOREGROUND: renderQueue = &mRenderQueueForeground; break;
+        case RENDER_QUEUE_OVERLAY:      renderQueue = &mRenderQueueOverlay; break;
+        case RENDER_QUEUE_FOREGROUND:   renderQueue = &mRenderQueueForeground; break;
+        case RENDER_QUEUE_POSTGEOMETRY: renderQueue = &mRenderQueuePostGeometry; break;
         default: 
-        case RENDER_QUEUE_DEFAULT:    renderQueue = &mRenderQueueDefault; break;
-        case RENDER_QUEUE_BACKGROUND: renderQueue = &mRenderQueueBackground; break;
-        case RENDER_QUEUE_SKY:        renderQueue = &mRenderQueueSky; break;
+        case RENDER_QUEUE_GEOMETRY:     renderQueue = &mRenderQueueGeometry; break;
+        case RENDER_QUEUE_PREGEOMETRY:  renderQueue = &mRenderQueuePreGrometry; break;
+        case RENDER_QUEUE_BACKGROUND:   renderQueue = &mRenderQueueBackground; break;
+        case RENDER_QUEUE_SKY:          renderQueue = &mRenderQueueSky; break;
     }
     
     for (std::vector<MeshRenderer*>::iterator it = renderQueue->begin(); it != renderQueue->end(); ++it) {

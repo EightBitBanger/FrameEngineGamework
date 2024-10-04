@@ -25,6 +25,8 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
     currentCamera->forward.y = tan( (currentCamera->transform.rotation.y * 180) / glm::pi<float>() );
     currentCamera->forward.z = sin( (currentCamera->transform.rotation.x * 180) / glm::pi<float>() );
     
+    currentCamera->forward = glm::normalize( currentCamera->forward );
+    
     glm::vec3 lookingAngle;
     lookingAngle.x = eye.x + currentCamera->forward.x;
     lookingAngle.y = eye.y + currentCamera->forward.y;

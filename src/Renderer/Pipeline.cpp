@@ -58,16 +58,20 @@ void RenderSystem::RenderFrame(void) {
         //
         // Draw the render queues
         
-        for (unsigned int group=0; group < 5; group++) {
+        for (unsigned int group=0; group < RENDER_NUMBER_OF_QUEUE_GROUPS; group++) {
             
             std::vector<MeshRenderer*>* renderQueueGroup;
             
             switch (group) {
-                case 0: renderQueueGroup = &scenePtr->mRenderQueueSky; break;
-                case 1: renderQueueGroup = &scenePtr->mRenderQueueBackground; break;
-                case 2: renderQueueGroup = &scenePtr->mRenderQueueDefault; break;
-                case 3: renderQueueGroup = &scenePtr->mRenderQueueForeground; break;
-                case 4: renderQueueGroup = &scenePtr->mRenderQueueOverlay; break;
+                
+                case 0: {renderQueueGroup = &scenePtr->mRenderQueueSky; break;}
+                case 1: {renderQueueGroup = &scenePtr->mRenderQueueBackground; break;}
+                case 2: {renderQueueGroup = &scenePtr->mRenderQueuePreGrometry; break;}
+                case 3: {renderQueueGroup = &scenePtr->mRenderQueueGeometry; break;}
+                case 4: {renderQueueGroup = &scenePtr->mRenderQueuePostGeometry; break;}
+                case 5: {renderQueueGroup = &scenePtr->mRenderQueueForeground; break;}
+                case 6: {renderQueueGroup = &scenePtr->mRenderQueueOverlay; break;}
+                
             }
             
             
