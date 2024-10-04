@@ -19,9 +19,8 @@ public:
     /// The camera associated with this scene.
     Camera* camera;
     
-    
     /// Add a mesh renderer to this scene.
-    void AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup = RENDER_QUEUE_DEFAULT);
+    void AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup = RENDER_QUEUE_GEOMETRY);
     
     /// Remove a mesh renderer from this scene.
     bool RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup);
@@ -41,9 +40,12 @@ public:
 private:
     
     /// List of mesh renderer queue groups in this scene.
+    
     std::vector<MeshRenderer*>  mRenderQueueOverlay;
     std::vector<MeshRenderer*>  mRenderQueueForeground;
-    std::vector<MeshRenderer*>  mRenderQueueDefault;
+    std::vector<MeshRenderer*>  mRenderQueuePostGeometry;
+    std::vector<MeshRenderer*>  mRenderQueueGeometry;
+    std::vector<MeshRenderer*>  mRenderQueuePreGrometry;
     std::vector<MeshRenderer*>  mRenderQueueBackground;
     std::vector<MeshRenderer*>  mRenderQueueSky;
     

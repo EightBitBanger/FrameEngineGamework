@@ -234,7 +234,7 @@ Chunk* ChunkManager::CreateChunk(float chunkX, float chunkZ) {
     
     newChunk->gameObject = Engine.Create<GameObject>();
     
-    newChunk->gameObject->renderDistance = renderDistanceStatic * (chunkSize / 2) * 2.0f;
+    newChunk->gameObject->renderDistance = 10000;//renderDistanceStatic * (chunkSize / 2) * 2.0f;
     
     newChunk->gameObject->AddComponent( Engine.CreateComponentMeshRenderer( Engine.Create<Mesh>(), Engine.Create<Material>() ) );
     
@@ -250,13 +250,13 @@ Chunk* ChunkManager::CreateChunk(float chunkX, float chunkZ) {
     
     baseRenderer->EnableFrustumCulling();
     
-    Engine.sceneMain->AddMeshRendererToSceneRoot( baseRenderer, RENDER_QUEUE_DEFAULT );
+    Engine.sceneMain->AddMeshRendererToSceneRoot( baseRenderer, RENDER_QUEUE_GEOMETRY );
     
     //
     // Static object container
     
     GameObject* staticObjectContainer = Engine.Create<GameObject>();
-    staticObjectContainer->renderDistance = renderDistanceStatic * (chunkSize / 2) * 2.0f;
+    staticObjectContainer->renderDistance = 10000;//renderDistanceStatic * (chunkSize / 2) * 2.0f;
     
     Transform* transform = staticObjectContainer->GetComponent<Transform>();
     
@@ -284,7 +284,7 @@ Chunk* ChunkManager::CreateChunk(float chunkX, float chunkZ) {
     
     newChunk->staticObjects = staticObjectContainer;
     
-    Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer, RENDER_QUEUE_DEFAULT);
+    Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer, RENDER_QUEUE_GEOMETRY);
     
     
     
@@ -293,7 +293,7 @@ Chunk* ChunkManager::CreateChunk(float chunkX, float chunkZ) {
     //
     
     newChunk->waterObject = Engine.Create<GameObject>();
-    newChunk->waterObject->renderDistance = (renderDistance * (chunkSize / 2)) * 2.0f;
+    newChunk->waterObject->renderDistance = 10000;//(renderDistance * (chunkSize / 2)) * 2.0f;
     
     newChunk->waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     MeshRenderer* waterRenderer = newChunk->waterObject->GetComponent<MeshRenderer>();
@@ -338,9 +338,12 @@ Chunk* ChunkManager::CreateChunk(float chunkX, float chunkZ) {
     waterRenderer->material->DisableCulling();
     
     waterRenderer->material->diffuse = Colors.Lerp(world.waterColorLow, world.waterColorHigh, world.ambientLight);
-    waterRenderer->material->ambient = Colors.black;
+    waterRenderer->material->ambient = Colors.gray;
     
-    Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_FOREGROUND);
+    waterRenderer->material->diffuse.a = 0.2;
+    waterRenderer->material->ambient.a = 0.2;
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY);
     
     return newChunk;
 }
@@ -351,13 +354,12 @@ bool ChunkManager::DestroyChunk(Chunk* chunkPtr) {
     MeshRenderer* waterRenderer = chunkPtr->waterObject->GetComponent<MeshRenderer>();
     MeshRenderer* staticRenderer = chunkPtr->staticObjects->GetComponent<MeshRenderer>();
     
-    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_DEFAULT );
+    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
+    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
+    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
+    
     Engine.Destroy( chunkPtr->gameObject );
-    
-    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_DEFAULT );
     Engine.Destroy( chunkPtr->staticObjects );
-    
-    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( waterRenderer, RENDER_QUEUE_FOREGROUND);
     Engine.Destroy( chunkPtr->waterObject );
     
     Physics.world->destroyRigidBody( chunkPtr->rigidBody );
@@ -381,7 +383,7 @@ bool ChunkManager::DestroyChunk(Chunk* chunkPtr) {
             
             MeshRenderer* actorRenderer = actorPtr->GetMeshRendererAtIndex(r);
             
-            Engine.sceneMain->RemoveMeshRendererFromSceneRoot( actorRenderer, RENDER_QUEUE_DEFAULT);
+            Engine.sceneMain->RemoveMeshRendererFromSceneRoot( actorRenderer, RENDER_QUEUE_GEOMETRY);
             
             Renderer.DestroyMeshRenderer(actorRenderer);
             
@@ -490,9 +492,6 @@ bool ChunkManager::LoadWorld(void) {
     if (worldName == "") 
         return false;
     
-    //PurgeWorld();
-    //return true;
-    
     std::string worldPath = worldsDirectory + worldName;
     
     if (!Directory.CheckExists( worldPath )) {
@@ -537,15 +536,16 @@ bool ChunkManager::LoadWorld(void) {
 // Chunk update loop
 //
 
+glm::vec2 cameraPosition;
+
+
+
 void ChunkManager::Update(void) {
     
-    glm::vec2 cameraPosition = glm::vec2(Engine.cameraController->GetPosition().x, Engine.cameraController->GetPosition().z);
-    
-    // Chunk generation
     if (generateWorldChunks) 
         GenerateChunks(cameraPosition);
     
-    
+    PurgeChunks( cameraPosition );
     
     // Update world chunks
     
@@ -554,128 +554,126 @@ void ChunkManager::Update(void) {
     if (numberOfChunks == 0) 
         return;
     
-    for (unsigned int rp=0; rp < 3; rp++) {
+    updateChunkCounter++;
+    if (updateChunkCounter >= numberOfChunks) {
+        updateChunkCounter=0;
         
-        updateChunkCounter++;
-        if (updateChunkCounter >= numberOfChunks) 
-            updateChunkCounter=0;
+        cameraPosition = glm::vec2(Engine.cameraController->GetPosition().x, Engine.cameraController->GetPosition().z);
+    }
+    
+    Chunk* chunk = mActiveChunks[updateChunkCounter];
+    
+    MeshRenderer* chunkRenderer  = chunk->gameObject->GetComponent<MeshRenderer>();
+    MeshRenderer* staticRenderer = chunk->staticObjects->GetComponent<MeshRenderer>();
+    MeshRenderer* waterRenderer  = chunk->waterObject->GetComponent<MeshRenderer>();
+    
+    // Update chunk lighting
+    chunkRenderer->material->ambient = Colors.Lerp(world.chunkColorLow, world.chunkColorHigh, world.ambientLight);
+    chunkRenderer->material->diffuse = Colors.Lerp(world.chunkColorLow, world.chunkColorHigh, world.ambientLight);
+    
+    // Update static object lighting
+    staticRenderer->material->ambient = Colors.Lerp(world.staticColorLow, world.staticColorHigh, world.ambientLight);
+    staticRenderer->material->diffuse = Colors.Lerp(world.staticColorLow, world.staticColorHigh, world.ambientLight);
+    
+    
+    // Update chunk actors
+    unsigned int actorCount = chunk->actorList.size();
+    
+    for (unsigned int a=0; a < actorCount; a++) {
         
-        Chunk* chunk = mActiveChunks[updateChunkCounter];
+        GameObject* actorObject = chunk->actorList[a];
         
-        MeshRenderer* chunkRenderer  = chunk->gameObject->GetComponent<MeshRenderer>();
-        MeshRenderer* staticRenderer = chunk->staticObjects->GetComponent<MeshRenderer>();
-        MeshRenderer* waterRenderer  = chunk->waterObject->GetComponent<MeshRenderer>();
+        Actor* actorPtr = actorObject->GetComponent<Actor>();
         
-        // Update chunk lighting
-        chunkRenderer->material->ambient = Colors.Lerp(world.chunkColorLow, world.chunkColorHigh, world.ambientLight);
-        chunkRenderer->material->diffuse = Colors.Lerp(world.chunkColorLow, world.chunkColorHigh, world.ambientLight);
+        //
+        // Keep actor in its current chunk
         
-        // Update static object lighting
-        staticRenderer->material->ambient = Colors.Lerp(world.staticColorLow, world.staticColorHigh, world.ambientLight);
-        staticRenderer->material->diffuse = Colors.Lerp(world.staticColorLow, world.staticColorHigh, world.ambientLight);
-        
-        
-        // Update chunk actors
-        unsigned int actorCount = chunk->actorList.size();
-        
-        for (unsigned int a=0; a < actorCount; a++) {
+        if (actorPtr->GetUserDataA() != actorPtr->GetUserDataB()) {
             
-            GameObject* actorObject = chunk->actorList[a];
+            Chunk* chunkPtr = (Chunk*)actorPtr->GetUserDataA();
             
-            Actor* actorPtr = actorObject->GetComponent<Actor>();
+            if (chunkPtr == nullptr) 
+                continue;
             
-            //
-            // Keep actor in its current chunk
+            actorPtr->SetUserDataB( actorPtr->GetUserDataA() );
             
-            if (actorPtr->GetUserDataA() != actorPtr->GetUserDataB()) {
+            for (unsigned int c=0; c < numberOfChunks; c++) {
                 
-                Chunk* chunkPtr = (Chunk*)actorPtr->GetUserDataA();
+                Chunk* worldChunk = mChunkList[c];
                 
-                if (chunkPtr == nullptr) 
-                    continue;
+                unsigned int actorListSz = worldChunk->actorList.size();
                 
-                actorPtr->SetUserDataB( actorPtr->GetUserDataA() );
-                
-                for (unsigned int c=0; c < numberOfChunks; c++) {
+                for (unsigned int i=0; i < actorListSz; i++) {
                     
-                    Chunk* worldChunk = mChunkList[c];
-                    
-                    unsigned int actorListSz = worldChunk->actorList.size();
-                    
-                    for (unsigned int i=0; i < actorListSz; i++) {
+                    if (actorObject == worldChunk->actorList[i]) {
                         
-                        if (actorObject == worldChunk->actorList[i]) {
-                            
-                            worldChunk->actorList.erase( worldChunk->actorList.begin() + i );
-                            
-                            break;
-                        }
+                        worldChunk->actorList.erase( worldChunk->actorList.begin() + i );
                         
+                        break;
                     }
                     
                 }
                 
-                chunkPtr->actorList.push_back( actorObject );
-                
             }
             
-            
-            //
-            // Lighting
-            
-            unsigned int numberOfRenderers = actorPtr->GetNumberOfMeshRenderers();
-            
-            for (unsigned int z=0; z < numberOfRenderers; z++) {
-                
-                MeshRenderer* actorRenderer = actorPtr->GetMeshRendererAtIndex(z);
-                
-                //actorRenderer->material->ambient = Colors.Lerp(world.actorColorLow, world.actorColorHigh, world.ambientLight);
-                //actorRenderer->material->diffuse = Colors.Lerp(world.actorColorLow, world.actorColorHigh, world.ambientLight);
-                
-            }
+            chunkPtr->actorList.push_back( actorObject );
             
         }
-        
-        // Water lighting
-        
-        waterRenderer->material->diffuse = Colors.Lerp(world.waterColorLow, world.waterColorHigh, (world.ambientLight * 0.01f) + 0.0004f);
-        waterRenderer->material->ambient = Colors.Lerp(world.waterColorLow, world.waterColorHigh, world.ambientLight * 0.001f);
         
         
         //
-        // Update level of detail
+        // Lighting
         
-        /*
+        unsigned int numberOfRenderers = actorPtr->GetNumberOfMeshRenderers();
         
-        if ((chunk->lodHigh != nullptr) & (chunk->lodLow != nullptr)) {
+        for (unsigned int z=0; z < numberOfRenderers; z++) {
             
-            if (glm::distance(chunkPosition, playerPosition) < levelOfDetailDistance) {
-                
-                // High level of detail
-                chunkRenderer->mesh = chunk.lodHigh;
-                
-                chunkRenderer->material->EnableCulling();
-                
-                transform->scale = glm::vec3(1, 1, 1);
-                transform->position.y = 0.0f;
-                
-            } else {
-                
-                // Low level of detail
-                chunkRenderer->mesh = chunk.lodLow;
-                
-                chunkRenderer->material->DisableCulling();
-                
-                transform->scale = glm::vec3(2.0f, 1.1f, 2.0f);
-                transform->position.y = -5.0f;
-                
-            }
+            MeshRenderer* actorRenderer = actorPtr->GetMeshRendererAtIndex(z);
+            
+            //actorRenderer->material->ambient = Colors.Lerp(world.actorColorLow, world.actorColorHigh, world.ambientLight);
+            //actorRenderer->material->diffuse = Colors.Lerp(world.actorColorLow, world.actorColorHigh, world.ambientLight);
             
         }
         
-        */
+    }
+    
+    // Water lighting
+    
+    //waterRenderer->material->diffuse = Colors.Lerp(world.waterColorLow, world.waterColorHigh, (world.ambientLight * 0.01f) + 0.0004f);
+    //waterRenderer->material->ambient = Colors.Lerp(world.waterColorLow, world.waterColorHigh, world.ambientLight * 0.001f);
+    
+    waterRenderer->material->diffuse.a = 0.01f;
+    
+    
+    //
+    // Update level of detail
+    /*
+    if ((chunk->lodHigh != nullptr) & (chunk->lodLow != nullptr)) {
+        
+        if (glm::distance(chunkPosition, playerPosition) < levelOfDetailDistance) {
+            
+            // High level of detail
+            chunkRenderer->mesh = chunk.lodHigh;
+            
+            chunkRenderer->material->EnableCulling();
+            
+            transform->scale = glm::vec3(1, 1, 1);
+            transform->position.y = 0.0f;
+            
+        } else {
+            
+            // Low level of detail
+            chunkRenderer->mesh = chunk.lodLow;
+            
+            chunkRenderer->material->DisableCulling();
+            
+            transform->scale = glm::vec3(2.0f, 1.1f, 2.0f);
+            transform->position.y = -5.0f;
+            
+        }
         
     }
+    */
     
     return;
 }
@@ -709,20 +707,8 @@ void ChunkManager::GenerateChunks(glm::vec2 position) {
     float heightField [ chunkSize * chunkSize ];
     glm::vec3 colorField  [ chunkSize * chunkSize ];
     
-    unsigned int chunksPerFrame = 3;
-    unsigned int chunksFrameCounter = 0;
-    
-    bool breakout = false;
-    
-    while (1) {
-        
-        chunksFrameCounter++;
-        if (chunksFrameCounter > chunksPerFrame) {
-            
-            chunksFrameCounter = 0;
-            
-            break;
-        }
+    // Repeat chunk generation
+    for (unsigned int i=0; i < 8; i++) {
         
         if (currentChunkX >= generationDistance) {
             
@@ -731,13 +717,6 @@ void ChunkManager::GenerateChunks(glm::vec2 position) {
             if (currentChunkZ >= generationDistance) {
                 
                 currentChunkZ = 0;
-                
-                // Keep this here, chunks should only be destroyed
-                // after a full cycle of generation.. or else...
-                
-                //PurgeChunks( glm::vec2(Engine.cameraController->GetPosition().x, Engine.cameraController->GetPosition().z) );
-                
-                break;
                 
             } else {
                 
@@ -749,133 +728,128 @@ void ChunkManager::GenerateChunks(glm::vec2 position) {
             currentChunkX++;
         }
         
-        // Repeat chunk generation
-        for (unsigned int i=0; i < 32; i++) {
+        int x = currentChunkX;
+        int z = currentChunkZ;
+        
+        int chunkAbsX = (x + cameraX) * chunkSize;
+        int chunkAbsZ = (z + cameraZ) * chunkSize;
+        
+        float chunkX = chunkAbsX - (((generationDistance / 2) * chunkSize) + chunkSize / 2);
+        float chunkZ = chunkAbsZ - (((generationDistance / 2) * chunkSize) + chunkSize / 2);
+        
+        int chunkWorldX = (chunkX / chunkSize) * (chunkSize - 1);
+        int chunkWorldZ = (chunkZ / chunkSize) * (chunkSize - 1);
+        
+        Chunk* chunk = CheckChunk(glm::vec2(chunkAbsX, chunkAbsZ));
+        
+        if (chunk != nullptr) 
+            continue;
+        
+        chunk = CreateChunk(chunkWorldX, chunkWorldZ);
+        
+        chunk->position = glm::vec2(chunkAbsX, chunkAbsZ);
+        
+        chunk->gameObject->SetPosition(chunkX, 0, chunkZ);
+        
+        chunk->gameObject->SetUserData( (void*)chunk );
+        
+        Engine.SetHeightFieldValues(heightField, chunkSize, chunkSize, 0);
+        Engine.SetColorFieldValues(colorField, chunkSize, chunkSize, Colors.white);
+        
+        Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.024f);
+        
+        
+        //
+        // Perlin noise layers
+        
+        chunk->gameObject->SetPosition(chunkWorldX, 0, chunkWorldZ);
+        
+        MeshRenderer* chunkRenderer = chunk->gameObject->GetComponent<MeshRenderer>();
+        
+        // Chunk perlin
+        unsigned int numberOfLayers = mPerlinLayers.size();
+        for (unsigned int l=0; l < numberOfLayers; l++) {
             
-            int x = currentChunkX;
-            int z = currentChunkZ;
+            Perlin* perlinLayer = &mPerlinLayers[l];
             
-            int chunkAbsX = (x + cameraX) * chunkSize;
-            int chunkAbsZ = (z + cameraZ) * chunkSize;
-            
-            float chunkX = chunkAbsX - (((generationDistance / 2) * chunkSize) + chunkSize / 2);
-            float chunkZ = chunkAbsZ - (((generationDistance / 2) * chunkSize) + chunkSize / 2);
-            
-            int chunkWorldX = (chunkX / chunkSize) * (chunkSize - 1);
-            int chunkWorldZ = (chunkZ / chunkSize) * (chunkSize - 1);
-            
-            Chunk* chunk = CheckChunk(glm::vec2(chunkAbsX, chunkAbsZ));
-            
-            if (chunk != nullptr) 
-                continue;
-            
-            chunk = CreateChunk(chunkWorldX, chunkWorldZ);
-            
-            chunk->position = glm::vec2(chunkAbsX, chunkAbsZ);
-            
-            chunk->gameObject->SetPosition(chunkX, 0, chunkZ);
-            
-            chunk->gameObject->SetUserData( (void*)chunk );
-            
-            Engine.SetHeightFieldValues(heightField, chunkSize, chunkSize, 0);
-            Engine.SetColorFieldValues(colorField, chunkSize, chunkSize, Colors.white);
-            
-            Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.024f);
-            
-            
-            //
-            // Perlin noise layers
-            
-            chunk->gameObject->SetPosition(chunkWorldX, 0, chunkWorldZ);
-            
-            MeshRenderer* chunkRenderer = chunk->gameObject->GetComponent<MeshRenderer>();
-            
-            // Chunk perlin
-            unsigned int numberOfLayers = mPerlinLayers.size();
-            for (unsigned int l=0; l < numberOfLayers; l++) {
-                
-                Perlin* perlinLayer = &mPerlinLayers[l];
-                
-                Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 
-                                                    perlinLayer->noiseWidth, 
-                                                    perlinLayer->noiseHeight, 
-                                                    perlinLayer->heightMultuplier, 
-                                                    chunkWorldX, chunkWorldZ, worldSeed);
-                
-            }
-            
-            //
-            // Biome test
-            
-            //Engine.SetColorFieldFromPerlinNoise(colorField, chunkSize, chunkSize, 0.01, 0.01, 0.4, Colors.blue, Colors.red, chunkX, chunkZ);
-            
-            Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.024f);
-            
-            //
-            // Snow cap
-            
-            Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize, chunkSize, Colors.white, world.snowCapHeight, 7.0f);
-            
-            //
-            // Water table
-            
-            Engine.AddColorFieldWaterTable(colorField, heightField, chunkSize, chunkSize, world.waterColorHigh, world.waterLevel, 0.1f, world.waterLevel);
-            
-            Transform* transformWater = chunk->waterObject->GetComponent<Transform>();
-            transformWater->position.x = chunkWorldX;
-            transformWater->position.z = chunkWorldZ;
-            
-            
-            
-            
-            //
-            // Finalize chunk mesh
-            
-            Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSize, chunkSize, 0, 0, 1, 1);
-            chunkRenderer->mesh->Load();
-            
-            
-            
-            
-            // Generate rigid body
-            
-            RigidBody* chunkBody = Physics.world->createRigidBody( rp3d::Transform::identity() );
-            chunk->rigidBody = chunkBody;
-            
-            chunkBody->setAngularLockAxisFactor( rp3d::Vector3(0, 0, 0) );
-            chunkBody->setLinearLockAxisFactor( rp3d::Vector3(0, 0, 0) );
-            chunkBody->setType(rp3d::BodyType::STATIC);
-            
-            rp3d::Transform bodyTransform = rp3d::Transform::identity();
-            bodyTransform.setPosition( rp3d::Vector3(chunkWorldX, 0, chunkWorldZ) );
-            chunkBody->setTransform(bodyTransform);
-            
-            // Generate a height field collider
-            MeshCollider*  meshCollider = Physics.CreateHeightFieldMap(heightField, chunkSize, chunkSize);
-            chunk->collider = meshCollider;
-            
-            rp3d::Collider* bodyCollider = chunkBody->addCollider( meshCollider->heightFieldShape, rp3d::Transform::identity() );
-            bodyCollider->setUserData( (void*)chunk->gameObject );
-            bodyCollider->setCollisionCategoryBits((unsigned short)LayerMask::Ground);
-            bodyCollider->setCollideWithMaskBits((unsigned short)CollisionMask::Entity);
-            
-            chunk->bodyCollider = bodyCollider;
-            
-            
-            
-            //
-            // Generate world decorations and actors
-            //
-            
-            Mesh* staticMesh = chunk->staticObjects->GetComponent<MeshRenderer>()->mesh;
-            
-            Decorate(chunk, chunkWorldX, chunkWorldZ, staticMesh);
-            
-            staticMesh->Load();
-            
-            mActiveChunks.push_back(chunk);
+            Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize, chunkSize, 
+                                                perlinLayer->noiseWidth, 
+                                                perlinLayer->noiseHeight, 
+                                                perlinLayer->heightMultuplier, 
+                                                chunkWorldX, chunkWorldZ, worldSeed);
             
         }
+        
+        //
+        // Biome test
+        
+        //Engine.SetColorFieldFromPerlinNoise(colorField, chunkSize, chunkSize, 0.01, 0.01, 0.4, Colors.blue, Colors.red, chunkX, chunkZ);
+        
+        Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize, chunkSize, colorLow, colorHigh, 0.024f);
+        
+        //
+        // Snow cap
+        
+        Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize, chunkSize, Colors.white, world.snowCapHeight, 7.0f);
+        
+        //
+        // Water table
+        
+        Engine.AddColorFieldWaterTable(colorField, heightField, chunkSize, chunkSize, world.waterColorHigh, world.waterLevel, 0.1f, world.waterLevel);
+        
+        Transform* transformWater = chunk->waterObject->GetComponent<Transform>();
+        transformWater->position.x = chunkWorldX;
+        transformWater->position.z = chunkWorldZ;
+        
+        
+        
+        
+        //
+        // Finalize chunk mesh
+        
+        Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSize, chunkSize, 0, 0, 1, 1);
+        chunkRenderer->mesh->Load();
+        
+        
+        
+        
+        // Generate rigid body
+        
+        RigidBody* chunkBody = Physics.world->createRigidBody( rp3d::Transform::identity() );
+        chunk->rigidBody = chunkBody;
+        
+        chunkBody->setAngularLockAxisFactor( rp3d::Vector3(0, 0, 0) );
+        chunkBody->setLinearLockAxisFactor( rp3d::Vector3(0, 0, 0) );
+        chunkBody->setType(rp3d::BodyType::STATIC);
+        
+        rp3d::Transform bodyTransform = rp3d::Transform::identity();
+        bodyTransform.setPosition( rp3d::Vector3(chunkWorldX, 0, chunkWorldZ) );
+        chunkBody->setTransform(bodyTransform);
+        
+        // Generate a height field collider
+        MeshCollider*  meshCollider = Physics.CreateHeightFieldMap(heightField, chunkSize, chunkSize);
+        chunk->collider = meshCollider;
+        
+        rp3d::Collider* bodyCollider = chunkBody->addCollider( meshCollider->heightFieldShape, rp3d::Transform::identity() );
+        bodyCollider->setUserData( (void*)chunk->gameObject );
+        bodyCollider->setCollisionCategoryBits((unsigned short)LayerMask::Ground);
+        bodyCollider->setCollideWithMaskBits((unsigned short)CollisionMask::Entity);
+        
+        chunk->bodyCollider = bodyCollider;
+        
+        
+        
+        //
+        // Generate world decorations and actors
+        //
+        
+        Mesh* staticMesh = chunk->staticObjects->GetComponent<MeshRenderer>()->mesh;
+        
+        Decorate(chunk, chunkWorldX, chunkWorldZ, staticMesh);
+        
+        staticMesh->Load();
+        
+        mActiveChunks.push_back(chunk);
         
     }
     
@@ -1154,7 +1128,7 @@ void ChunkManager::PurgeChunks(glm::vec2 position) {
             
             Chunk* chunkPtr = *it;
             
-            if (glm::distance(position, chunkPtr->position) < ((generationDistance * 1.24f) * chunkSize)) 
+            if (glm::distance(position, chunkPtr->position) < ((generationDistance * 2.0f) * chunkSize)) 
                 continue;
             
             DestroyChunk( chunkPtr );
