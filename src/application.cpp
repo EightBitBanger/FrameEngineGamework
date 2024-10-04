@@ -260,6 +260,11 @@ void Start() {
     // the player from moving outside of the sky.
     Weather.skyObject->GetComponent<Transform>()->parent = Engine.cameraController->GetComponent<Transform>();
     
+    //rp3d::RigidBody* cameraBody = Engine.cameraController->GetComponent<RigidBody>();
+    
+    
+    
+    
     
     
     //
@@ -312,14 +317,14 @@ void Start() {
     Decoration decorSheep;
     decorSheep.type = DECORATION_ACTOR;
     decorSheep.name = "Sheep";
-    decorSheep.density = 2;
+    decorSheep.density = 4;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = chunkManager.world.waterLevel;
     
     Decoration decorBear;
     decorBear.type = DECORATION_ACTOR;
     decorBear.name = "Bear";
-    decorBear.density = 4;
+    decorBear.density = 10;
     decorBear.spawnHeightMaximum = 40;
     decorBear.spawnHeightMinimum = 5;
     
@@ -380,7 +385,7 @@ void Start() {
     chunkManager.AddPerlinNoiseLayer(perlinBase);
     chunkManager.AddPerlinNoiseLayer(perlinLayerA);
     chunkManager.AddPerlinNoiseLayer(perlinLayerB);
-    //chunkManager.AddPerlinNoiseLayer(perlinFlatland);
+    chunkManager.AddPerlinNoiseLayer(perlinFlatland);
     
     
     
@@ -399,7 +404,7 @@ void Start() {
     
     // World rendering
     
-    chunkManager.renderDistance = 13;
+    chunkManager.renderDistance = 16;
     
     chunkManager.generationDistance   = chunkManager.renderDistance * 1.5f;
     chunkManager.renderDistanceStatic = chunkManager.renderDistance;
@@ -410,6 +415,7 @@ void Start() {
     
     chunkManager.updateWorldChunks = true;
     chunkManager.generateWorldChunks = true;
+    
     
     return;
 }
@@ -435,47 +441,122 @@ std::string targetName = "";
 std::string targetGene = "";
 
 
+
+
+
+
+
+
+
+
+
+class ChunkObject {
+    
+public:
+    
+    int x;
+    int y;
+    
+    GameObject* gameObject;
+    
+};
+
+std::vector<ChunkObject> chunkList;
+
 void Run() {
     
-    Camera* mainCamera = Engine.sceneMain->camera;
-    
-    //
-    // Pausing
-    if (Input.CheckKeyPressed(VK_ESCAPE)) {
-        
-        Platform.Pause();
-        
-        if (Platform.isPaused) {
-            
-            Engine.EnableConsole();
-            
-            mainCamera->DisableMouseLook();
-            
-            Input.ClearKeys();
-            
-            Platform.ShowMouseCursor();
-            
-        } else {
-            
-            Engine.DisableConsole();
-            Engine.ConsoleClearInputString();
-            
-            mainCamera->EnableMouseLook();
-            
-            // Reset mouse position
-            Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
-            
-            Platform.HideMouseCursor();
-            
-            // Reset timers
-            Time.Update();
-            PhysicsTime.Update();
-        }
-        
-    }
     
     if (Engine.cameraController == nullptr) 
         return;
+    
+    glm::vec3 playerPosition = Engine.cameraController->GetPosition();
+    playerPosition.y = 0;
+    
+    for (unsigned int c=0; c < chunkList.size(); c++) {
+        
+        ChunkObject chunkPtr = chunkList[c];
+        
+        glm::vec3 chunkPos = glm::vec3(chunkPtr.x, 0, chunkPtr.y);
+        
+        if (glm::distance(chunkPos, playerPosition) < 100.0f ) 
+            continue;
+        
+        
+        MeshRenderer* chunkRenderer = chunkPtr.gameObject->GetComponent<MeshRenderer>();
+        
+        Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
+        
+        Engine.Destroy<GameObject>( chunkPtr.gameObject );
+        
+        chunkList.erase( chunkList.begin() + c );
+        
+        break;
+    }
+    
+    
+    
+    /*
+    
+    glm::vec2 chunkPosition;
+    
+    float chunkSize = 32;
+    
+    chunkPosition.x = Math.Round(playerPosition.x / chunkSize) * chunkSize;
+    chunkPosition.y = Math.Round(playerPosition.z / chunkSize) * chunkSize;
+    
+    bool chunkFound = false;
+    
+    for (unsigned int c=0; c < chunkList.size(); c++) {
+        
+        ChunkObject chunkPtr = chunkList[c];
+        
+        if (glm::vec3(chunkPtr.x, 0, chunkPtr.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y)) {
+            
+            chunkFound = true;
+            
+            break;
+        }
+        
+        
+    }
+    
+    if (!chunkFound) {
+        
+        ChunkObject chunk;
+        
+        chunk.gameObject = Engine.Create<GameObject>();
+        chunk.gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+        MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
+        Transform* chunkTransform = chunk.gameObject->GetComponent<Transform>();
+        
+        chunkTransform->position = glm::vec3( chunkPosition.x, 0, chunkPosition.y);
+        chunkTransform->scale = glm::vec3( 32, 1, 32);
+        
+        chunk.x = chunkPosition.x;
+        chunk.y = chunkPosition.y;
+        
+        chunkRenderer->mesh = Engine.meshes.chunk;
+        chunkRenderer->material = Engine.Create<Material>();
+        
+        chunkRenderer->material->shader = Engine.shaders.color;
+        
+        Engine.sceneMain->AddMeshRendererToSceneRoot( chunkRenderer );
+        
+        chunkList.push_back( chunk );
+        
+    }
+    */
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -578,7 +659,6 @@ void Run() {
                 Engine.WriteDialog(i, "");
         }
         
-        /*
         if (Engine.CheckIsProfilerActive()) {
             Engine.DisableProfiler();
             for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
@@ -588,7 +668,7 @@ void Run() {
             
             Engine.EnableProfiler();
         }
-        */
+        
         
     }
     
@@ -723,10 +803,6 @@ void Run() {
     
     
     
-    
-    
-    
-    
     //
     // Update weather system
     //
@@ -743,6 +819,8 @@ void Run() {
     
     
     
+    
+    
     //
     // Camera controller movement
     //
@@ -755,6 +833,8 @@ void Run() {
     
     float forceMax = 0.08f;
     
+    
+    Camera* mainCamera = Engine.sceneMain->camera;
     
     if (mainCamera != nullptr) {
         
@@ -790,6 +870,7 @@ void Run() {
         
         Engine.cameraController->AddForce(forceTotal.x, forceTotal.y, forceTotal.z);
         
+        
         // Field of view effect
         float fovPullback = glm::length(forceTotal) * 80.0f;
         
@@ -800,6 +881,41 @@ void Run() {
         
     }
     
+    
+    //
+    // Pausing
+    if (Input.CheckKeyPressed(VK_ESCAPE)) {
+        
+        Platform.Pause();
+        
+        if (Platform.isPaused) {
+            
+            Engine.EnableConsole();
+            
+            mainCamera->DisableMouseLook();
+            
+            Input.ClearKeys();
+            
+            Platform.ShowMouseCursor();
+            
+        } else {
+            
+            Engine.DisableConsole();
+            Engine.ConsoleClearInputString();
+            
+            mainCamera->EnableMouseLook();
+            
+            // Reset mouse position
+            Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            
+            Platform.HideMouseCursor();
+            
+            // Reset timers
+            Time.Update();
+            PhysicsTime.Update();
+        }
+        
+    }
     
     return;
 }
