@@ -259,16 +259,20 @@ public:
         extern ActorSystem AI;
         
         // Engine
-        if (std::is_same<T, GameObject>::value)    {GameObject* gameObject = (GameObject*)objectPtr; gameObject->mIsGarbage = true; return true;}
-        if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
+        //if (std::is_same<T, GameObject>::value)    {GameObject* gameObject = (GameObject*)objectPtr; gameObject->mIsGarbage = true; return true;}
+        
+        if (std::is_same<T, GameObject>::value)    return DestroyGameObject( (GameObject*)objectPtr );
+        //if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
         
         // Renderer
-        if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh( (Mesh*)objectPtr );
-        if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial( (Material*)objectPtr );
-        if (std::is_same<T, Shader>::value)        return Renderer.DestroyShader( (Shader*)objectPtr );
-        if (std::is_same<T, Scene>::value)         return Renderer.DestroyScene( (Scene*)objectPtr );
-        if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera( (Camera*)objectPtr );
-        if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer( (MeshRenderer*)objectPtr );
+        //if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh( (Mesh*)objectPtr );
+        //if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial( (Material*)objectPtr );
+        //if (std::is_same<T, Shader>::value)        return Renderer.DestroyShader( (Shader*)objectPtr );
+        //if (std::is_same<T, Scene>::value)         return Renderer.DestroyScene( (Scene*)objectPtr );
+        //if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera( (Camera*)objectPtr );
+        //if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer( (MeshRenderer*)objectPtr );
+        
+        /*
         
         // AI
         if (std::is_same<T, Actor>::value) {
@@ -278,7 +282,7 @@ public:
             unsigned int numberOfRenderers = actorPtr->mGeneticRenderers.size();
             for (unsigned int i=0; i < numberOfRenderers; i++) {
                 
-                sceneMain->RemoveMeshRendererFromSceneRoot( actorPtr->mGeneticRenderers[i], RENDER_QUEUE_DEFAULT );
+                sceneMain->RemoveMeshRendererFromSceneRoot( actorPtr->mGeneticRenderers[i], RENDER_QUEUE_GEOMETRY );
                 
                 Renderer.DestroyMeshRenderer( actorPtr->mGeneticRenderers[i] );
                 
@@ -288,6 +292,7 @@ public:
             
             return AI.DestroyActor( actorPtr );
         }
+        */
         
         return false;
     }

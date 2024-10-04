@@ -77,6 +77,9 @@ public:
     
     Color brown    = {0.266, 0.18, 0.07};
     
+    /// Return a random color interpolated between the given color values.
+    Color& Range(Color begin, Color end);
+    
     /// Return a color from given red, green and blue values.
     Color& Make(float r, float g, float b);
     
