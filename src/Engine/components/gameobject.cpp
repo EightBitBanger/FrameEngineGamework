@@ -7,8 +7,6 @@ GameObject::GameObject() :
     isActive(true),
     renderDistance(-1),
     
-    mIsGarbage(false),
-    
     mTransformCache(nullptr),
     mCameraCache(nullptr),
     mRigidBodyCache(nullptr),

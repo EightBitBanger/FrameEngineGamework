@@ -194,7 +194,6 @@ void AudioSystem::Initiate(void) {
 
 void AudioSystem::Shutdown(void) {
     
-    /*
     alcMakeContextCurrent(nullptr);
     
     if (mContext != 0) 
@@ -202,8 +201,6 @@ void AudioSystem::Shutdown(void) {
     
     if (mDevice != 0) 
         alcCloseDevice(mDevice);
-    
-    */
     
     isAudioThreadActive = false;
     

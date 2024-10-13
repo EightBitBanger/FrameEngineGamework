@@ -39,8 +39,8 @@ void EngineSystemManager::EnableProfiler(void) {
     
     mIsProfilerEnabled = true;
     
-    //for (uint8_t i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
-    //    mProfilerTextObjects[i]->isActive = true;
+    for (uint8_t i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
+        mProfilerTextObjects[i]->isActive = true;
     
     return;
 }
@@ -49,8 +49,8 @@ void EngineSystemManager::DisableProfiler(void) {
     
     mIsProfilerEnabled = false;
     
-    //for (uint8_t i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
-    //    mProfilerTextObjects[i]->isActive = false;
+    for (uint8_t i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
+        mProfilerTextObjects[i]->isActive = false;
     
     return;
 }

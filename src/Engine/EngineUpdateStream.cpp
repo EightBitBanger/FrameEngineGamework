@@ -31,10 +31,6 @@ void EngineSystemManager::UpdateComponentStream(void) {
                 shouldRender = false;
         }
         
-        // Check garbage collection
-        if (gameObject->mIsGarbage) 
-            mGarbageGameObjects.push_back( gameObject );
-        
         
         //
         // Update the state of associated components

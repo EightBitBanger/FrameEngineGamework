@@ -26,18 +26,17 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
         break;
     }
     
-    // Destroy the object of the component
-    for (unsigned int i=0; i < gameObjectPtr->GetComponentCount(); i++) 
-        DestroyComponent( gameObjectPtr->GetComponentIndex(i) );
+    // Destroy the components
+    unsigned int numberOfComponents = gameObjectPtr->GetComponentCount();
     
-    // Destroy the object container
-    for (unsigned int i=0; i < gameObjectPtr->GetComponentCount(); i++) 
+    for (unsigned int i=0; i < numberOfComponents; i++) {
+        
+        DestroyComponent( gameObjectPtr->GetComponentIndex(i) );
+        
         mComponents.Destroy( gameObjectPtr->GetComponentIndex(i) );
+    }
     
     mGameObjects.Destroy( gameObjectPtr );
-    
-    // Defer the deletion
-    gameObjectPtr->mIsGarbage = true;
     
     return true;
 }

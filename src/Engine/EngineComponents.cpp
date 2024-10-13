@@ -49,21 +49,6 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
             break;
         }
         case COMPONENT_TYPE_RIGID_BODY: {
-            
-            // Check the rigid body free list for an old rigid body
-            if (mFreeRigidBodies.size() > 0) {
-                
-                RigidBody* rigidBody = mFreeRigidBodies[ 0 ];
-                
-                mFreeRigidBodies.erase( mFreeRigidBodies.begin() );
-                
-                Component* component = mComponents.Create();
-                
-                component->SetComponent( Components.RigidBody, (void*)rigidBody );
-                
-                return component;
-            }
-            
             component_object = (void*)Physics.CreateRigidBody();
             break;
         }
@@ -109,8 +94,9 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
         // Rigid body garbage collection
         case COMPONENT_TYPE_RIGID_BODY: {
             
-            // Add the rigid body to the garbage list
-            mGarbageRigidBodies.push_back( (RigidBody*)componentPtr->GetComponent() );
+            rp3d::RigidBody* bodyPtr = (RigidBody*)componentPtr->GetComponent();
+            
+            Physics.DestroyRigidBody( bodyPtr );
             
             break;
         }
@@ -126,10 +112,12 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
                 MeshRenderer* renderer = actorPtr->mGeneticRenderers[i];
                 
                 // Remove renderer from the render queue
-                sceneMain->RemoveMeshRendererFromSceneRoot( renderer, RENDER_QUEUE_BACKGROUND );
+                sceneMain->RemoveMeshRendererFromSceneRoot( renderer, RENDER_QUEUE_GEOMETRY );
                 
                 Destroy<MeshRenderer>( renderer );
             }
+            
+            actorPtr->mGeneticRenderers.clear();
             
             AI.DestroyActor( actorPtr );
             break;

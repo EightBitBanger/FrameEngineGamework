@@ -78,7 +78,7 @@ void Actor::SetActive(bool state) {
     return;
 }
 
-void Actor::SetAge(long long int newAge) {
+void Actor::SetAge(unsigned long long int newAge) {
     mux.lock();
     mAge = newAge;
     mux.unlock();
@@ -106,9 +106,9 @@ bool Actor::GetActive(void) {
     return activeState;
 }
 
-long long int Actor::GetAge(void) {
+unsigned long long int Actor::GetAge(void) {
     mux.lock();
-    long int ageValue = mAge;
+    unsigned long long int ageValue = mAge;
     mux.unlock();
     return ageValue;
 }

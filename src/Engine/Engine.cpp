@@ -782,10 +782,8 @@ void EngineSystemManager::EnablePhysicsDebugRenderer(void) {
     triangleRenderer->mesh     = debugMesh;
     triangleRenderer->material = debugMaterialMesh;
     
-    
-    sceneMain->AddMeshRendererToSceneRoot( lineRenderer );
-    
-    sceneMain->AddMeshRendererToSceneRoot( triangleRenderer );
+    sceneMain->AddMeshRendererToSceneRoot( lineRenderer, RENDER_QUEUE_FOREGROUND );
+    sceneMain->AddMeshRendererToSceneRoot( triangleRenderer, RENDER_QUEUE_FOREGROUND );
     
     return;
 }
