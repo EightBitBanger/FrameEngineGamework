@@ -19,8 +19,14 @@ public:
     /// Return an integer containing the numbers from text.
     int      ToInt(std::string value);
     
+    /// Return a long integer containing the numbers from text.
+    long int ToLongInt(std::string value);
+    
     /// Return an unsigned integer containing the numbers from text.
     unsigned int ToUint(std::string value);
+    
+    /// Return a long unsigned integer containing the numbers from text.
+    unsigned long int ToLongUint(std::string value);
     
     /// Explode the string by the given delimiter into an array of strings.
     std::vector<std::string> Explode(std::string value, const char character);
