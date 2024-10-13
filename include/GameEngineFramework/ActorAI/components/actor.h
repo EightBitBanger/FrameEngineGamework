@@ -38,10 +38,10 @@ public:
     bool GetActive(void);
     
     /// Set the age of the actor.
-    void SetAge(long long int newAge);
+    void SetAge(unsigned long long int newAge);
     
     /// Get the age of the actor.
-    long long int GetAge(void);
+    unsigned long long int GetAge(void);
     
     /// Set the walking speed of the actor.
     void SetSpeed(float newSpeed);

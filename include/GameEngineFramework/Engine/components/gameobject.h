@@ -179,9 +179,6 @@ private:
     // User data pointer
     void* mUserData;
     
-    // Is this object marked for destruction by garbage collection.
-    bool mIsGarbage;
-    
     // List of attached components
     std::vector<Component*> mComponentList;
     
