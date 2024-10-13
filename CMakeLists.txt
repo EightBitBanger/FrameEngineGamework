@@ -49,6 +49,7 @@ set (RUNTIME_HEADERS
     
     "include/GameEngineFramework/Audio/AudioSystem.h"
     "include/GameEngineFramework/Audio/components/sound.h"
+    "include/GameEngineFramework/Audio/components/samplebuffer.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
@@ -204,6 +205,7 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/Audio/AudioSystem.h"
     "include/GameEngineFramework/Audio/components/sound.h"
+    "include/GameEngineFramework/Audio/components/samplebuffer.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
@@ -286,6 +288,10 @@ set (GAME_HEADERS
 
 set (GAME_SOURCES
     
+    "src/plugins/ChunkSpawner/ChunkManager.cpp"
+    "src/plugins/ChunkSpawner/ChunkManagerUpdate.cpp"
+    "src/plugins/ChunkSpawner/Chunk.cpp"
+    
     "src/application.cpp"
     
 )
@@ -340,6 +346,7 @@ set (CORE_HEADERS
     
     "include/GameEngineFramework/Audio/AudioSystem.h"
     "include/GameEngineFramework/Audio/components/sound.h"
+    "include/GameEngineFramework/Audio/components/samplebuffer.h"
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
@@ -431,6 +438,7 @@ set (CORE_SOURCES
     
     "src/Audio/AudioSystem.cpp"
     "src/Audio/components/sound.cpp"
+    "src/Audio/components/samplebuffer.cpp"
     
     "src/Networking/NetworkSystem.cpp"
     
@@ -439,7 +447,6 @@ set (CORE_SOURCES
     "src/Engine/EngineConsole.cpp"
     "src/Engine/EngineGameObjects.cpp"
     "src/Engine/EngineComponents.cpp"
-    "src/Engine/EngineDeferredDeletion.cpp"
     "src/Engine/EngineUpdateStream.cpp"
     
     "src/Engine/componentUpdate/EngineUpdateUI.cpp"
