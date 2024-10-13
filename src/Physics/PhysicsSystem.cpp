@@ -38,8 +38,8 @@ void PhysicsSystem::Initiate(void) {
 
 void PhysicsSystem::Shutdown(void) {
     
-    while (mRigidBodyFreeList.size() > 0) 
-        DestroyRigidBody( RemoveRigidBodyFromFreeList() );
+    for (unsigned int i=0; i < mRigidBodyFreeList.size(); i++) 
+        world->destroyRigidBody( mRigidBodyFreeList[i] );
     
     common.destroyPhysicsWorld(world);
     
@@ -60,6 +60,7 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
     rp3d::Transform physicsTransform = rp3d::Transform(position, orientation);
     
     /*
+    // Pull from a free list
     rp3d::RigidBody* body = RemoveRigidBodyFromFreeList();
     if (body != nullptr) {
         body->setTransform(physicsTransform);
@@ -73,11 +74,11 @@ rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
 bool PhysicsSystem::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
     assert(rigidBodyPtr != nullptr);
     
-    // !! Warning: leak on rigid body destroy !!
+    // Push into a free list...
+    //AddRigidBodyToFreeList(rigidBodyPtr);
+    
     world->destroyRigidBody(rigidBodyPtr);
     
-    // Use a free list instead...
-    //AddRigidBodyToFreeList(rigidBodyPtr);
     return true;
 }
 
