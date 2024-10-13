@@ -8,33 +8,20 @@ class ENGINE_API Chunk {
     
 public:
     
-    /// Position of the chunk in the world.
-    glm::vec2 position;
+    int x;
+    int y;
     
-    /// Associated game object.
     GameObject* gameObject;
-    
-    /// Water layer renderer.
     GameObject* waterObject;
+    GameObject* staticObject;
     
-    /// Levels of detail
-    Mesh* lodHigh;
-    Mesh* lodLow;
-    
-    /// Associated rigid body.
     rp3d::RigidBody* rigidBody;
     
-    /// Associated collider.
     rp3d::Collider* bodyCollider;
     
-    /// Height field collision buffer.
-    MeshCollider* collider;
+    MeshCollider* meshCollider;
     
-    /// List of actor objects in this chunk.
     std::vector<GameObject*> actorList;
-    
-    /// Batched static object container
-    GameObject* staticObjects;
     
 };
 
