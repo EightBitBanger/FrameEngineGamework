@@ -10,7 +10,7 @@
 ChunkManager chunkManager;
 
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
-WeatherSystem Weather;
+WeatherSystem weather;
 
 
 // Day night cycle
@@ -19,30 +19,6 @@ bool cycleDirection = false;
 float ambientLight = 0.9;
 
 
-
-// Set world name
-void FuncName(std::vector<std::string> args) {
-    
-    if (args[0] == "") {
-        
-        Engine.Print("World name: " + chunkManager.worldName);
-        
-        return;
-    }
-    
-    if ((args[0][0] > 0x20) & (args[0][0] < 0x7a)) {
-        
-        chunkManager.worldName = args[0];
-        
-        Engine.Print("World name: " + chunkManager.worldName);
-        
-    } else {
-        
-        Engine.Print("Invalid name");
-    }
-    
-    return;
-}
 
 // List worlds
 void FuncList(std::vector<std::string> args) {
@@ -65,21 +41,18 @@ void FuncList(std::vector<std::string> args) {
 // Save world
 void FuncSave(std::vector<std::string> args) {
     
-    if (chunkManager.worldName == "") {
-        
-        Engine.Print(chunkManager.worldName + "Incorrect world name");
-        
-        return;
-    }
-    
-    if (chunkManager.SaveWorld()) {
+    /*
+    if (chunkManager.SaveWorld( args[0] )) {
         
         Engine.Print("World saved");
+        
+        chunkManager.worldName = args[0];
         
         return;
     }
     
     Engine.Print("Error saving world");
+    */
     
     return;
 }
@@ -87,16 +60,26 @@ void FuncSave(std::vector<std::string> args) {
 // Load world
 void FuncLoad(std::vector<std::string> args) {
     
-    if (chunkManager.worldName == "") {
+    /*
+    if (chunkManager.LoadWorld( args[0] )) {
         
-        Engine.Print(chunkManager.worldName + "Incorrect world name");
+        Engine.Print("World loaded");
         
         return;
     }
     
-    chunkManager.LoadWorld();
+    Engine.Print("Error loading world");
+    */
     
-    chunkManager.generateWorldChunks = true;
+    return;
+}
+
+// Clear world
+void FuncClear(std::vector<std::string> args) {
+    
+    chunkManager.ClearWorld();
+    
+    Engine.Print("World cleared");
     
     return;
 }
@@ -104,13 +87,18 @@ void FuncLoad(std::vector<std::string> args) {
 // Generate a world
 void FuncGen(std::vector<std::string> args) {
     
+    /*
     chunkManager.generateWorldChunks = true;
+    chunkManager.updateWorldChunks   = true;
     
     if (args[0] == "stop") {
+        
         chunkManager.generateWorldChunks = false;
+        chunkManager.updateWorldChunks   = false;
         
         Engine.Print("Stopped generating");
     }
+    */
     
     return;
 }
@@ -118,6 +106,7 @@ void FuncGen(std::vector<std::string> args) {
 // Set the world seed
 void FuncSeed(std::vector<std::string> args) {
     
+    /*
     if (args[0] == "") {
         
         Engine.Print("World seed: " + Int.ToString(chunkManager.worldSeed));
@@ -128,6 +117,7 @@ void FuncSeed(std::vector<std::string> args) {
     chunkManager.worldSeed = String.ToInt(args[0]);
     
     Engine.Print("World seed: " + Int.ToString(chunkManager.worldSeed));
+    */
     
     return;
 }
@@ -157,6 +147,8 @@ void FuncSummon(std::vector<std::string> args) {
         GameObject* newActorObject = Engine.CreateAIActor( Engine.sceneMain->camera->transform.GetPosition() - randomOffset );
         Actor* newActor = newActorObject->GetComponent<Actor>();
         
+        newActor->SetAge( 1000 );
+        
         switch (entityType) {
             
             default:
@@ -164,6 +156,8 @@ void FuncSummon(std::vector<std::string> args) {
             case 2: AI.genomes.Bear( newActor ); break;
             
         }
+        
+        chunkManager.actorList.push_back( newActorObject );
         
         continue;
     }
@@ -186,10 +180,10 @@ void Start() {
     
     // Load console functions
     Engine.ConsoleRegisterCommand("summon",  FuncSummon);
-    Engine.ConsoleRegisterCommand("name",    FuncName);
     Engine.ConsoleRegisterCommand("list",    FuncList);
     Engine.ConsoleRegisterCommand("save",    FuncSave);
     Engine.ConsoleRegisterCommand("load",    FuncLoad);
+    Engine.ConsoleRegisterCommand("clear",   FuncClear);
     Engine.ConsoleRegisterCommand("gen",     FuncGen);
     Engine.ConsoleRegisterCommand("seed",    FuncSeed);
     
@@ -198,9 +192,10 @@ void Start() {
     
     chunkManager.Initiate();
     
-    Weather.Initiate();
+    weather.Initiate();
     
     Engine.DisableConsoleCloseOnReturn();
+    
     
     //Engine.EnableProfiler();
     
@@ -258,9 +253,7 @@ void Start() {
     
     // Attach the sky object to the camera controller to prevent 
     // the player from moving outside of the sky.
-    Weather.skyObject->GetComponent<Transform>()->parent = Engine.cameraController->GetComponent<Transform>();
-    
-    //rp3d::RigidBody* cameraBody = Engine.cameraController->GetComponent<RigidBody>();
+    weather.skyObject->GetComponent<Transform>()->parent = Engine.cameraController->GetComponent<Transform>();
     
     
     
@@ -273,7 +266,7 @@ void Start() {
     
     Decoration decorGrass;
     decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 200;
+    decorGrass.density = 1500;
     decorGrass.spawnHeightMaximum = 35;
     decorGrass.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
@@ -289,7 +282,7 @@ void Start() {
     
     Decoration decorTreeHights;
     decorTreeHights.type = DECORATION_TREE;
-    decorTreeHights.density = 800;
+    decorTreeHights.density = 1200;
     decorTreeHights.spawnHeightMaximum = 40;
     decorTreeHights.spawnHeightMinimum = 20;
     decorTreeHights.spawnStackHeightMin = 4;
@@ -307,8 +300,8 @@ void Start() {
     Decoration decorWaterPlants;
     decorWaterPlants.type = DECORATION_GRASS_THIN;
     decorWaterPlants.density = 200;
-    decorWaterPlants.spawnHeightMaximum = chunkManager.world.waterLevel + 3;
-    decorWaterPlants.spawnHeightMinimum = -40;
+    decorWaterPlants.spawnHeightMaximum = chunkManager.world.waterLevel;
+    decorWaterPlants.spawnHeightMinimum = -100;
     decorWaterPlants.spawnStackHeightMax = 4;
     decorWaterPlants.spawnStackHeightMin = 2;
     
@@ -329,14 +322,14 @@ void Start() {
     decorBear.spawnHeightMinimum = 5;
     
     
-    chunkManager.world.AddWorldDecoration(decorGrass);
-    chunkManager.world.AddWorldDecoration(decorTrees);
-    chunkManager.world.AddWorldDecoration(decorTreeHights);
+    chunkManager.world.mDecorations.push_back(decorGrass);
+    chunkManager.world.mDecorations.push_back(decorTrees);
+    chunkManager.world.mDecorations.push_back(decorTreeHights);
     
-    chunkManager.world.AddWorldDecoration(decorWaterTrees);
-    chunkManager.world.AddWorldDecoration(decorWaterPlants);
-    chunkManager.world.AddWorldDecoration(decorSheep);
-    chunkManager.world.AddWorldDecoration(decorBear);
+    chunkManager.world.mDecorations.push_back(decorWaterTrees);
+    chunkManager.world.mDecorations.push_back(decorWaterPlants);
+    chunkManager.world.mDecorations.push_back(decorSheep);
+    chunkManager.world.mDecorations.push_back(decorBear);
     
     
     
@@ -380,12 +373,12 @@ void Start() {
     
     
     
-    chunkManager.AddPerlinNoiseLayer(perlinMountainB);
-    chunkManager.AddPerlinNoiseLayer(perlinMountainA);
-    chunkManager.AddPerlinNoiseLayer(perlinBase);
-    chunkManager.AddPerlinNoiseLayer(perlinLayerA);
-    chunkManager.AddPerlinNoiseLayer(perlinLayerB);
-    chunkManager.AddPerlinNoiseLayer(perlinFlatland);
+    chunkManager.perlin.push_back(perlinMountainB);
+    chunkManager.perlin.push_back(perlinMountainA);
+    chunkManager.perlin.push_back(perlinBase);
+    chunkManager.perlin.push_back(perlinLayerA);
+    chunkManager.perlin.push_back(perlinLayerB);
+    chunkManager.perlin.push_back( perlinFlatland );
     
     
     
@@ -406,19 +399,33 @@ void Start() {
     
     chunkManager.renderDistance = 16;
     
-    chunkManager.generationDistance   = chunkManager.renderDistance * 1.5f;
+    /*
+    
+    chunkManager.renderDistance = 16;
     chunkManager.renderDistanceStatic = chunkManager.renderDistance;
     
-    chunkManager.world.waterLevel = -21;
+    chunkManager.generationDistance = 8;
+    
+    chunkManager.world.waterLevel = -24;
     chunkManager.world.waterColorLow  = Colors.MakeGrayScale(0.00003f);
     chunkManager.world.waterColorHigh = Colors.blue * 0.3f;
     
-    chunkManager.updateWorldChunks = true;
+    chunkManager.updateWorldChunks   = true;
+    chunkManager.destroyWorldChunks  = false;
     chunkManager.generateWorldChunks = true;
     
+    chunkManager.generateWorldActors     = false;
+    chunkManager.generateWorldDecoration = false;
+    
+    */
     
     return;
 }
+
+
+
+
+
 
 
 
@@ -446,122 +453,21 @@ std::string targetGene = "";
 
 
 
-
-
-
-
-class ChunkObject {
-    
-public:
-    
-    int x;
-    int y;
-    
-    GameObject* gameObject;
-    
-};
-
-std::vector<ChunkObject> chunkList;
-
 void Run() {
     
+    chunkManager.Update();
     
-    if (Engine.cameraController == nullptr) 
-        return;
     
-    glm::vec3 playerPosition = Engine.cameraController->GetPosition();
-    playerPosition.y = 0;
     
-    for (unsigned int c=0; c < chunkList.size(); c++) {
-        
-        ChunkObject chunkPtr = chunkList[c];
-        
-        glm::vec3 chunkPos = glm::vec3(chunkPtr.x, 0, chunkPtr.y);
-        
-        if (glm::distance(chunkPos, playerPosition) < 100.0f ) 
-            continue;
-        
-        
-        MeshRenderer* chunkRenderer = chunkPtr.gameObject->GetComponent<MeshRenderer>();
-        
-        Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
-        
-        Engine.Destroy<GameObject>( chunkPtr.gameObject );
-        
-        chunkList.erase( chunkList.begin() + c );
-        
-        break;
-    }
+    
+    
+    
+    
+    
     
     
     
     /*
-    
-    glm::vec2 chunkPosition;
-    
-    float chunkSize = 32;
-    
-    chunkPosition.x = Math.Round(playerPosition.x / chunkSize) * chunkSize;
-    chunkPosition.y = Math.Round(playerPosition.z / chunkSize) * chunkSize;
-    
-    bool chunkFound = false;
-    
-    for (unsigned int c=0; c < chunkList.size(); c++) {
-        
-        ChunkObject chunkPtr = chunkList[c];
-        
-        if (glm::vec3(chunkPtr.x, 0, chunkPtr.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y)) {
-            
-            chunkFound = true;
-            
-            break;
-        }
-        
-        
-    }
-    
-    if (!chunkFound) {
-        
-        ChunkObject chunk;
-        
-        chunk.gameObject = Engine.Create<GameObject>();
-        chunk.gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-        MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
-        Transform* chunkTransform = chunk.gameObject->GetComponent<Transform>();
-        
-        chunkTransform->position = glm::vec3( chunkPosition.x, 0, chunkPosition.y);
-        chunkTransform->scale = glm::vec3( 32, 1, 32);
-        
-        chunk.x = chunkPosition.x;
-        chunk.y = chunkPosition.y;
-        
-        chunkRenderer->mesh = Engine.meshes.chunk;
-        chunkRenderer->material = Engine.Create<Material>();
-        
-        chunkRenderer->material->shader = Engine.shaders.color;
-        
-        Engine.sceneMain->AddMeshRendererToSceneRoot( chunkRenderer );
-        
-        chunkList.push_back( chunk );
-        
-    }
-    */
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     
@@ -597,7 +503,7 @@ void Run() {
     direction = Engine.cameraController->GetComponent<Camera>()->forward;
     
     // Center the from angle
-    from.y -= 0.3f;
+    from.y += 0.24f;
     
     if (Input.CheckMouseMiddlePressed()) {
         
@@ -639,10 +545,27 @@ void Run() {
     }
     
     
+    if (Input.CheckMouseRightPressed()) {
+        
+        if (Physics.Raycast(from, direction, distance, hit, LayerMask::Actor)) {
+            
+            GameObject* hitObject = (GameObject*)hit.gameObject;
+            
+            chunkManager.RemoveActorFromWorld( hitObject );
+            
+            Engine.Destroy(hitObject);
+            
+        }
+        
+    }
+    
+    
     
     // Move the actor back into position as we are now finished casting rays...
     bodyPosition.y -= 1000;
     bodyTransform.setPosition(bodyPosition);
+    
+    */
     
     
     
@@ -650,14 +573,7 @@ void Run() {
     //
     // Profiling
     //
-    if (Input.CheckKeyPressed(VK_F3)) {
-        
-        isDebugReportActive = !isDebugReportActive;
-        
-        if (!isDebugReportActive) {
-            for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
-                Engine.WriteDialog(i, "");
-        }
+    if (Input.CheckKeyPressed(VK_F4)) {
         
         if (Engine.CheckIsProfilerActive()) {
             Engine.DisableProfiler();
@@ -669,6 +585,16 @@ void Run() {
             Engine.EnableProfiler();
         }
         
+    }
+    
+    if (Input.CheckKeyPressed(VK_F3)) {
+        
+        isDebugReportActive = !isDebugReportActive;
+        
+        if (!isDebugReportActive) {
+            for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
+                Engine.WriteDialog(i, "");
+        }
         
     }
     
@@ -676,20 +602,11 @@ void Run() {
     
     // Debug report
     
+    /*
+    
     if (isDebugReportActive) {
         
         // Print current chunk details
-        
-        glm::vec3 cameraPosition = Engine.cameraController->GetPosition();
-        
-        std::string playerPosition = "x: ";
-        playerPosition += Int.ToString( cameraPosition.x );
-        playerPosition += " y: ";
-        playerPosition += Int.ToString( cameraPosition.y );
-        playerPosition += " z: ";
-        playerPosition += Int.ToString( cameraPosition.z );
-        
-        Engine.WriteDialog(1, playerPosition);
         
         if (Physics.Raycast(from, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Ground)) {
             
@@ -708,11 +625,24 @@ void Run() {
                 
                 Engine.WriteDialog(0, chunkPosition);
                 
-                Engine.WriteDialog(1, "Actors " + Int.ToString(hitChunk->actorList.size()));
+                if (hitChunk->actorList.size() > 0) 
+                    Engine.WriteDialog(1, "Actors " + Int.ToString(hitChunk->actorList.size()));
                 
             }
             
         }
+        
+        // Print player position
+        glm::vec3 cameraPosition = Engine.cameraController->GetPosition();
+        
+        std::string playerPosition = "x: ";
+        playerPosition += Int.ToString( cameraPosition.x );
+        playerPosition += " y: ";
+        playerPosition += Int.ToString( cameraPosition.y );
+        playerPosition += " z: ";
+        playerPosition += Int.ToString( cameraPosition.z );
+        
+        Engine.WriteDialog(3, playerPosition);
         
         // Check object in front of camera
         
@@ -721,8 +651,8 @@ void Run() {
             GameObject* hitObject = (GameObject*)hit.gameObject;
             Actor* hitActor = hitObject->GetComponent<Actor>();
             
-            Engine.WriteDialog(3, hitActor->GetName());
-            Engine.WriteDialog(4, "Age: " + Int.ToString(hitActor->GetAge()));
+            Engine.WriteDialog(4, hitActor->GetName());
+            Engine.WriteDialog(5, "Age: " + Int.ToString(hitActor->GetAge()));
             
             float actorChunkX = Math.Round( hitObject->GetPosition().x / chunkManager.chunkSize ) * chunkManager.chunkSize;
             float actorChunkZ = Math.Round( hitObject->GetPosition().z / chunkManager.chunkSize ) * chunkManager.chunkSize;
@@ -731,27 +661,24 @@ void Run() {
             Chunk* chunkPtr = chunkManager.CheckChunk( glm::vec2(actorChunkX, actorChunkZ) );
             if (chunkPtr != nullptr) {
                 
-                Engine.WriteDialog(5, Float.ToString(chunkPtr->position.x) + ", " + Float.ToString(chunkPtr->position.y));
+                Engine.WriteDialog(6, Float.ToString(chunkPtr->position.x / chunkManager.chunkSize) + 
+                                      ", " + 
+                                      Float.ToString(chunkPtr->position.y / chunkManager.chunkSize));
                 
             }
             
-            Engine.WriteDialog(6, Float.ToString(actorChunkX) + ", " + Float.ToString(actorChunkZ));
+            Engine.WriteDialog(7, Float.ToString(actorChunkX) + ", " + Float.ToString(actorChunkZ));
             
-            Engine.WriteDialog(7, "MeshRenderers " + Int.ToString( hitActor->GetNumberOfMeshRenderers() ));
-            Engine.WriteDialog(8, "Genomes       " + Int.ToString( hitActor->GetNumberOfGenes() ));
+            Engine.WriteDialog(8, "Genes         " + Int.ToString( hitActor->GetNumberOfGenes() ));
             
         } else {
             
-            for (unsigned int i=0; i < 10; i++) 
-                Engine.WriteDialog(3 + i, "");
+            for (unsigned int i=0; i < 10-4; i++) 
+                Engine.WriteDialog(4 + i, "");
             
         }
         
     }
-    
-    
-    
-    
     
     
     
@@ -816,7 +743,7 @@ void Run() {
     
     chunkManager.Update();
     
-    
+    */
     
     
     

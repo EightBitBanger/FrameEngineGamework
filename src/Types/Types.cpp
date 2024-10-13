@@ -20,8 +20,20 @@ int StringType::ToInt(std::string value) {
     return output;
 }
 
+long int StringType::ToLongInt(std::string value) {
+    long int output;
+    std::stringstream(value) >> output;
+    return output;
+}
+
 unsigned int StringType::ToUint(std::string value) {
     unsigned int output;
+    std::stringstream(value) >> output;
+    return output;
+}
+
+unsigned long int StringType::ToLongUint(std::string value) {
+    unsigned long int output;
     std::stringstream(value) >> output;
     return output;
 }
