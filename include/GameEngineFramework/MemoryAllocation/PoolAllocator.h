@@ -1,7 +1,7 @@
 //
 // Custom allocator pool class
 //
-// Author: SniperChicken
+// Author: David Penning
 
 #ifndef _POOL_ALLOCATOR_SUPPORT__
 #define _POOL_ALLOCATOR_SUPPORT__
@@ -80,6 +80,7 @@ template<typename T> class ENGINE_API PoolAllocator {
         
         return poolPair;
     }
+    
     void deallocate(void) {
         
         // Deallocate the last pool pair
@@ -126,38 +127,7 @@ public:
     }
     ~PoolAllocator() {
         
-        // Iterate the pool list
-        int poolListSz = m_pool.size();
-        for (int i=0; i < poolListSz; i++) {
-            
-            // Get the next pair
-            std::pair<T*, std::vector<bool>>* poolPair = &m_pool[i];
-            T*    poolPtr = poolPair ->first;
-            std::vector<bool> boolPtr = poolPair ->second;
-            
-#ifdef ENABLE_LEAK_DETECTION__
-    #ifdef ENABLE_CONSOLE_DEBUG__
-            
-            // Iterate the pool
-            int poolSz = this ->m_poolSz;
-            for (int f=0; f < poolSz; f++) {
-                
-                if (boolPtr[f]) {
-                    T& poolRef = *poolPair ->first;
-                    
-                    std::cout << " [Leak detected]  < " << &poolPtr[f] << " >  pool #" << i << "  pool *";
-                    std::cout << &poolRef << "\n";
-                }
-                
-            }
-            
-    #endif
-#endif
-            
-            // Deallocate the pool pair
-            std::free(poolPtr);
-            
-        }
+        Clear();
         
         return;
     }
@@ -292,6 +262,47 @@ public:
         }
         
         return false;
+    }
+    
+    /** Clears the entire pool of all its objects.*/
+    void Clear(void) {
+        
+        // Iterate the pool list
+        int poolListSz = m_pool.size();
+        for (int i=0; i < poolListSz; i++) {
+            
+            // Get the next pair
+            std::pair<T*, std::vector<bool>>* poolPair = &m_pool[i];
+            T*    poolPtr = poolPair ->first;
+            std::vector<bool> boolPtr = poolPair ->second;
+            
+#ifdef ENABLE_LEAK_DETECTION__
+    #ifdef ENABLE_CONSOLE_DEBUG__
+            
+            // Iterate the pool
+            int poolSz = this ->m_poolSz;
+            for (int f=0; f < poolSz; f++) {
+                
+                if (boolPtr[f]) {
+                    T& poolRef = *poolPair ->first;
+                    
+                    std::cout << " [Leak detected]  < " << &poolPtr[f] << " >  pool #" << i << "  pool *";
+                    std::cout << &poolRef << "\n";
+                }
+                
+            }
+            
+    #endif
+#endif
+            
+            // Deallocate the pool pair
+            std::free(poolPtr);
+            
+        }
+        
+        m_pool.clear();
+        
+        return;
     }
     
     /** Returns the number of active objects.*/
