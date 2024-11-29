@@ -1,13 +1,15 @@
 #include <GameEngineFramework/Timer/timer.h>
 
-#ifndef _WIN32_WINNT
-  #define _WIN32_WINNT 0x500
+#ifdef PLATFORM_WINDOWS
+ #ifndef _WIN32_WINNT
+ #define _WIN32_WINNT 0x500
+ #endif
+ 
+ #define WIN32_LEAN_AND_MEAN
+ 
+ #include <sdkddkver.h>
+ #include <windows.h>
 #endif
-
-#define WIN32_LEAN_AND_MEAN
-
-#include <sdkddkver.h>
-#include <windows.h>
 
 
 Timer::Timer() {

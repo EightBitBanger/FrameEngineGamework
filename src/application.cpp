@@ -126,7 +126,7 @@ void FuncSeed(std::vector<std::string> args) {
 // Summon an actor
 void FuncSummon(std::vector<std::string> args) {
     
-    for (uint8_t i=0; i < 100; i++) {
+    for (uint8_t i=0; i < 1; i++) {
         
         unsigned int entityType = 0;
         
@@ -157,7 +157,7 @@ void FuncSummon(std::vector<std::string> args) {
             
         }
         
-        chunkManager.actorList.push_back( newActorObject );
+        chunkManager.chunkList[0].actorList.push_back( newActorObject );
         
         continue;
     }
@@ -210,19 +210,19 @@ void Start() {
     
     sampleA->sample_rate = 44100;
     
-    Samples.renderBlankSpace(sampleA, 0.4f);
-    Samples.renderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
-    Samples.renderBlankSpace(sampleA, 0.7f);
-    Samples.renderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
-    Samples.renderBlankSpace(sampleA, 1.0f);
-    Samples.renderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
-    Samples.renderBlankSpace(sampleA, 0.1f);
-    Samples.renderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
+    //Samples.RenderBlankSpace(sampleA, 0.4f);
+    //Samples.RenderSweepingSineWave(sampleA, 17000, 11000, 0.1f);
+    //Samples.RenderBlankSpace(sampleA, 0.7f);
+    //Samples.RenderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
+    //Samples.RenderBlankSpace(sampleA, 1.0f);
+    //Samples.RenderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
+    //Samples.RenderBlankSpace(sampleA, 0.1f);
+    //Samples.RenderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
     
     
     soundA->LoadSample(sampleA);
     
-    soundA->SetVolume(0.4f);
+    //soundA->SetVolume(0.4f);
     
     //soundA->Play();
     //while (soundA->IsSamplePlaying());
@@ -310,14 +310,14 @@ void Start() {
     Decoration decorSheep;
     decorSheep.type = DECORATION_ACTOR;
     decorSheep.name = "Sheep";
-    decorSheep.density = 4;
+    decorSheep.density = 40;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = chunkManager.world.waterLevel;
     
     Decoration decorBear;
     decorBear.type = DECORATION_ACTOR;
     decorBear.name = "Bear";
-    decorBear.density = 10;
+    decorBear.density = 100;
     decorBear.spawnHeightMaximum = 40;
     decorBear.spawnHeightMinimum = 5;
     
@@ -328,6 +328,7 @@ void Start() {
     
     chunkManager.world.mDecorations.push_back(decorWaterTrees);
     chunkManager.world.mDecorations.push_back(decorWaterPlants);
+    
     chunkManager.world.mDecorations.push_back(decorSheep);
     chunkManager.world.mDecorations.push_back(decorBear);
     
@@ -373,13 +374,13 @@ void Start() {
     
     
     
+    
     chunkManager.perlin.push_back(perlinMountainB);
     chunkManager.perlin.push_back(perlinMountainA);
     chunkManager.perlin.push_back(perlinBase);
     chunkManager.perlin.push_back(perlinLayerA);
     chunkManager.perlin.push_back(perlinLayerB);
-    chunkManager.perlin.push_back( perlinFlatland );
-    
+    chunkManager.perlin.push_back(perlinFlatland);
     
     
     // Lighting levels
@@ -399,25 +400,7 @@ void Start() {
     
     chunkManager.renderDistance = 16;
     
-    /*
     
-    chunkManager.renderDistance = 16;
-    chunkManager.renderDistanceStatic = chunkManager.renderDistance;
-    
-    chunkManager.generationDistance = 8;
-    
-    chunkManager.world.waterLevel = -24;
-    chunkManager.world.waterColorLow  = Colors.MakeGrayScale(0.00003f);
-    chunkManager.world.waterColorHigh = Colors.blue * 0.3f;
-    
-    chunkManager.updateWorldChunks   = true;
-    chunkManager.destroyWorldChunks  = false;
-    chunkManager.generateWorldChunks = true;
-    
-    chunkManager.generateWorldActors     = false;
-    chunkManager.generateWorldDecoration = false;
-    
-    */
     
     return;
 }
@@ -455,19 +438,8 @@ std::string targetGene = "";
 
 void Run() {
     
+    
     chunkManager.Update();
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /*
     
     
     
@@ -514,7 +486,9 @@ void Run() {
             
             targetGene = AI.genomes.ExtractGenome(hitActor);
             
-            Platform.SetClipboardText( targetGene );
+            std::string destGene = "gen<" + targetGene;
+            
+            Platform.SetClipboardText( destGene );
             
             Engine.Print( "Genome extracted - " + hitActor->GetName());
             
@@ -522,23 +496,33 @@ void Run() {
         
     }
     
-    if ((Input.CheckMouseLeftPressed()) & (targetGene != "")) {
+    if (Input.CheckMouseLeftPressed()) {
         
         if (Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) {
             
-            GameObject* newActorObject = Engine.CreateAIActor( hit.point );
-            GameObject* hitObject = (GameObject*)hit.gameObject;
-            Chunk* chunkPtr = (Chunk*)hitObject->GetUserData();
+            std::string sourceGene = Platform.GetClipboardText();
             
-            Actor* newActor = newActorObject->GetComponent<Actor>();
-            chunkPtr->actorList.push_back(newActorObject);
+            std::vector<std::string> sourceArray = String.Explode(sourceGene, '<');
             
-            AI.genomes.PreyBase( newActor );
-            
-            AI.genomes.InjectGenome(newActor, targetGene);
-            newActor->SetUpdateGeneticsFlag();
-            
-            newActor->SetAge( Random.Range(800, 2000) );
+            if ((sourceArray[0][0] == 'g') & 
+                (sourceArray[0][1] == 'e') & 
+                (sourceArray[0][2] == 'n')) {
+                
+                GameObject* newActorObject = Engine.CreateAIActor( hit.point );
+                GameObject* hitObject = (GameObject*)hit.gameObject;
+                Chunk chunkPtr = chunkManager.chunkList[0];
+                
+                Actor* newActor = newActorObject->GetComponent<Actor>();
+                chunkPtr.actorList.push_back(newActorObject);
+                
+                AI.genomes.PreyBase( newActor );
+                
+                AI.genomes.InjectGenome(newActor, sourceArray[1]);
+                newActor->SetUpdateGeneticsFlag();
+                
+                newActor->SetAge( Random.Range(800, 4000) );
+                
+            }
             
         }
         
@@ -551,7 +535,7 @@ void Run() {
             
             GameObject* hitObject = (GameObject*)hit.gameObject;
             
-            chunkManager.RemoveActorFromWorld( hitObject );
+            //chunkManager.RemoveActorFromWorld( hitObject );
             
             Engine.Destroy(hitObject);
             
@@ -565,7 +549,7 @@ void Run() {
     bodyPosition.y -= 1000;
     bodyTransform.setPosition(bodyPosition);
     
-    */
+    
     
     
     
@@ -577,6 +561,7 @@ void Run() {
         
         if (Engine.CheckIsProfilerActive()) {
             Engine.DisableProfiler();
+            
             for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
                 Engine.WriteDialog(i, "");
             
