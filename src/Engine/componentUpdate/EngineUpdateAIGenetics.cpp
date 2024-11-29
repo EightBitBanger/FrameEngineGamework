@@ -160,10 +160,6 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         if (a == 0) 
             sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_GEOMETRY );
         
-        // Add all renderers
-        //sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_GEOMETRY );
-        //mStreamBuffer[index].actor->mIsActorActiveInScene = true;
-        
         continue;
     }
     

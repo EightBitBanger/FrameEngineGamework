@@ -4,6 +4,7 @@
 GameObject::GameObject() : 
     
     name(""),
+    isGarbage(false),
     isActive(true),
     renderDistance(-1),
     

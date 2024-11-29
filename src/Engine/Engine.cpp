@@ -57,8 +57,8 @@ EngineSystemManager::EngineSystemManager(void) :
     mStreamSize(0),
     
     usePhysicsDebugRenderer(false),
-    debugMesh(nullptr),
-    debugLines(nullptr)
+    debugMeshGameObject(nullptr),
+    debugLinesGameObject(nullptr)
 {
 }
 
@@ -159,6 +159,25 @@ void EngineSystemManager::AverageHeightFieldFromPerlinNoise(float* heightField, 
     return;
 }
 
+void EngineSystemManager::GenerateWaterTableFromHeightField(float* heightField, unsigned int width, unsigned int height, float tableHeight) {
+    
+    for (unsigned int x=0; x < width; x ++) {
+        
+        for (unsigned int z=0; z < height; z ++) {
+            
+            unsigned int index = z * width + x;
+            
+            if (heightField[index] < tableHeight) heightField[index] *= 0.3;
+            
+            continue;
+        }
+        
+        continue;
+    }
+    
+    return;
+}
+
 void EngineSystemManager::GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, 
                                                             unsigned int width, unsigned int height, 
                                                             Color low, Color high, float bias) {
@@ -168,8 +187,6 @@ void EngineSystemManager::GenerateColorFieldFromHeightField(glm::vec3* colorFiel
         for (unsigned int z=0; z < height; z ++) {
             
             unsigned int index = z * width + x;
-            
-            if (heightField[index] < 0) heightField[index] *= 0.3;
             
             float heightBias = heightField[index] * bias;
             
@@ -756,8 +773,8 @@ void EngineSystemManager::EnablePhysicsDebugRenderer(void) {
     //debugRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_AABB, true);
     //debugRenderer.setIsDebugItemDisplayed(rp3d::DebugRenderer::DebugItem::COLLIDER_BROADPHASE_AABB, true);
     
-    debugMesh  = Create<Mesh>();
-    debugLines = Create<Mesh>();
+    Mesh* debugLines = Create<Mesh>();
+    Mesh* debugMesh  = Create<Mesh>();
     
     Material* debugMaterialLines = Create<Material>();
     Material* debugMaterialMesh  = Create<Material>();
@@ -774,17 +791,26 @@ void EngineSystemManager::EnablePhysicsDebugRenderer(void) {
     debugMesh->SetPrimitive( MESH_LINES );
     
     
-    MeshRenderer* lineRenderer = Renderer.CreateMeshRenderer();
-    lineRenderer->mesh     = debugLines;
-    lineRenderer->material = debugMaterialLines;
+    debugLinesGameObject = Create<GameObject>();
+    debugMeshGameObject = Create<GameObject>();
     
-    MeshRenderer* triangleRenderer = Renderer.CreateMeshRenderer();
-    triangleRenderer->mesh     = debugMesh;
-    triangleRenderer->material = debugMaterialMesh;
+    debugLinesGameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+    debugMeshGameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     
-    sceneMain->AddMeshRendererToSceneRoot( lineRenderer, RENDER_QUEUE_FOREGROUND );
-    sceneMain->AddMeshRendererToSceneRoot( triangleRenderer, RENDER_QUEUE_FOREGROUND );
+    MeshRenderer* meshRendererLines = debugLinesGameObject->GetComponent<MeshRenderer>();
+    MeshRenderer* meshRendererMeshes = debugMeshGameObject->GetComponent<MeshRenderer>();
     
+    meshRendererLines->mesh     = debugLines;
+    meshRendererLines->material = debugMaterialLines;
+    meshRendererLines->DisableFrustumCulling();
+    
+    meshRendererMeshes->mesh     = debugMesh;
+    meshRendererMeshes->material = debugMaterialMesh;
+    meshRendererMeshes->DisableFrustumCulling();
+    
+    sceneMain->AddMeshRendererToSceneRoot( meshRendererLines, RENDER_QUEUE_FOREGROUND );
+    sceneMain->AddMeshRendererToSceneRoot( meshRendererMeshes, RENDER_QUEUE_FOREGROUND );
+        
     return;
 }
 
@@ -841,9 +867,15 @@ void EngineSystemManager::UpdatePhysicsDebugRenderer(void) {
     subMeshLines.indexCount  = numberOfLines * 2;
     subMeshLines.vertexCount = numberOfLines * 2;
     
-    debugLines->RemoveSubMesh(0);
+    MeshRenderer* debugLinesRenderer = debugMeshGameObject->GetComponent<MeshRenderer>();
     
-    debugLines->AddSubMesh(0, 0, 0, subMeshLines, true);
+    Mesh* debugLines = debugLinesRenderer->mesh;
+    
+    debugLines->ClearSubMeshes();
+    
+    debugLines->AddSubMesh(0, 0, 0, subMeshLines);
+    
+    debugLines->Load();
     
     
     //
@@ -910,9 +942,15 @@ void EngineSystemManager::UpdatePhysicsDebugRenderer(void) {
     subMeshTriangles.indexCount  = numberOfTriangles * 3;
     subMeshTriangles.vertexCount = numberOfTriangles * 3;
     
-    debugMesh->RemoveSubMesh(0);
+    MeshRenderer* debugMeshRenderer = debugMeshGameObject->GetComponent<MeshRenderer>();
     
-    debugMesh->AddSubMesh(0, 0, 0, subMeshTriangles, true);
+    Mesh* debugMesh = debugMeshRenderer->mesh;
+    
+    debugMesh->ClearSubMeshes();
+    
+    debugMesh->AddSubMesh(0, 0, 0, subMeshTriangles);
+    
+    debugMesh->Load();
     
     return;
 }

@@ -33,7 +33,6 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     if (mStreamBuffer[index].rigidBody == nullptr) 
         return;
     
-    
     glm::vec3 actorPosition = mStreamBuffer[index].transform->position;
     glm::vec3 actorRotation = mStreamBuffer[index].actor->mRotation;
     glm::vec3 actorVelocity = mStreamBuffer[index].actor->mVelocity;

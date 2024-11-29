@@ -2,7 +2,7 @@
 
 
 /// Generate a square wave
-void AudioPreset::renderBlankSpace(AudioSample* sample, float duration) {
+void AudioPreset::RenderBlankSpace(AudioSample* sample, float duration) {
     int samples = (int)(sample->sample_rate * duration);
     
     for (int i = 0; i < samples; i++) 
@@ -12,7 +12,7 @@ void AudioPreset::renderBlankSpace(AudioSample* sample, float duration) {
 }
 
 /// Generate white noise
-void AudioPreset::renderWhiteNoise(AudioSample* sample, float duration) {
+void AudioPreset::RenderWhiteNoise(AudioSample* sample, float duration) {
     int samples = (int)(sample->sample_rate * duration);
     
     for (int i = 0; i < samples; i++) 
@@ -22,7 +22,7 @@ void AudioPreset::renderWhiteNoise(AudioSample* sample, float duration) {
 }
 
 /// Generate square waves
-void AudioPreset::renderSquareWave(AudioSample* sample, float frequency, float duration) {
+void AudioPreset::RenderSquareWave(AudioSample* sample, float frequency, float duration) {
     int samples = (int)(sample->sample_rate * duration);
     int period = (int)(sample->sample_rate / frequency);
     
@@ -32,7 +32,7 @@ void AudioPreset::renderSquareWave(AudioSample* sample, float frequency, float d
     return;
 }
 
-void AudioPreset::renderSweepingSineWave(AudioSample* sample, double startFreq, double endFreq, double duration) {
+void AudioPreset::RenderSweepingSineWave(AudioSample* sample, double startFreq, double endFreq, double duration) {
     
     int totalSamples = (int)(duration * sample->sample_rate);
     

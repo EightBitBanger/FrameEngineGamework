@@ -13,30 +13,7 @@ GameObject* EngineSystemManager::CreateGameObject(void) {
 
 bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     
-    // Remove the game object from the active list
-    for (std::vector<GameObject*>::iterator it = mGameObjectActive.begin(); it != mGameObjectActive.end(); ++it) {
-        
-        GameObject* thisGameObjectPtr = *it;
-        
-        if (gameObjectPtr != thisGameObjectPtr) 
-            continue;
-        
-        mGameObjectActive.erase(it);
-        
-        break;
-    }
-    
-    // Destroy the components
-    unsigned int numberOfComponents = gameObjectPtr->GetComponentCount();
-    
-    for (unsigned int i=0; i < numberOfComponents; i++) {
-        
-        DestroyComponent( gameObjectPtr->GetComponentIndex(i) );
-        
-        mComponents.Destroy( gameObjectPtr->GetComponentIndex(i) );
-    }
-    
-    mGameObjects.Destroy( gameObjectPtr );
+    gameObjectPtr->isGarbage = true;
     
     return true;
 }

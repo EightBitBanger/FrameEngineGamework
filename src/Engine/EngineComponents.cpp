@@ -81,7 +81,6 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
     
     switch (componentType) {
         
-        // Mesh renderer garbage collection
         case COMPONENT_TYPE_MESH_RENDERER: {
             
             MeshRenderer* meshRenderer = (MeshRenderer*)componentPtr->GetComponent();
@@ -91,35 +90,31 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             break;
         }
         
-        // Rigid body garbage collection
         case COMPONENT_TYPE_RIGID_BODY: {
             
             rp3d::RigidBody* bodyPtr = (RigidBody*)componentPtr->GetComponent();
+            
+            bodyPtr->setIsActive( false );
             
             Physics.DestroyRigidBody( bodyPtr );
             
             break;
         }
         
-        // Actor garbage collection
         case COMPONENT_TYPE_ACTOR: {
             
             Actor* actorPtr = (Actor*)componentPtr->GetComponent();
             
-            // Destroy actor genetic renderers
-            for (unsigned int i=0; i < actorPtr->mGeneticRenderers.size(); i++) {
-                
-                MeshRenderer* renderer = actorPtr->mGeneticRenderers[i];
-                
-                // Remove renderer from the render queue
-                sceneMain->RemoveMeshRendererFromSceneRoot( renderer, RENDER_QUEUE_GEOMETRY );
-                
-                Destroy<MeshRenderer>( renderer );
-            }
+            for (unsigned int i=0; i < actorPtr->mGeneticRenderers.size(); i++) 
+                sceneMain->RemoveMeshRendererFromSceneRoot( actorPtr->mGeneticRenderers[i], RENDER_QUEUE_GEOMETRY );
+            
+            for (unsigned int i=0; i < actorPtr->mGeneticRenderers.size(); i++) 
+                Destroy<MeshRenderer>( actorPtr->mGeneticRenderers[i] );
             
             actorPtr->mGeneticRenderers.clear();
             
             AI.DestroyActor( actorPtr );
+            
             break;
         }
         
