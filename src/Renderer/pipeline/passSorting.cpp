@@ -6,7 +6,7 @@
 
 bool RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup, unsigned int queueGroupIndex) {
     
-    std::vector<std::pair<float, MeshRenderer*>> sortList(1024);
+    std::vector< std::pair<float, MeshRenderer*> > sortList;
     
     std::vector<MeshRenderer*> renderQueue = *renderQueueGroup;
     
@@ -25,9 +25,10 @@ bool RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* rende
         return a.first < b.first;
     });
     
-    for (unsigned int i=0; i < renderQueue.size(); i++) {
-        renderQueue[i] = sortList[i].second;
-    }
+    renderQueue.clear();
+    
+    for (unsigned int i=0; i < sortList.size(); i++) 
+        renderQueue.push_back( sortList[i].second );
     
     return true;
 }

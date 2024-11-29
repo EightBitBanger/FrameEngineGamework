@@ -43,8 +43,9 @@ MeshRenderer* RenderSystem::CreateMeshRenderer(void) {
 }
 bool RenderSystem::DestroyMeshRenderer(MeshRenderer* meshRendererPtr) {
     if (meshRendererPtr->mesh != nullptr) 
-        if (meshRendererPtr->mesh->isShared == false) 
+        if (meshRendererPtr->mesh->isShared == false) {
             mMesh.Destroy(meshRendererPtr->mesh);
+        }
     if (meshRendererPtr->material != nullptr) 
         if (meshRendererPtr->material->isShared == false) 
             mMaterial.Destroy(meshRendererPtr->material);
