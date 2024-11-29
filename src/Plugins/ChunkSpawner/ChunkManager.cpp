@@ -9,9 +9,6 @@ ChunkManager::ChunkManager() :
     
     worldSeed(100),
     
-    chunkConstructCounter(0),
-    chunkDestructCounter(0),
-    
     ChunkCounterX(0),
     ChunkCounterZ(0)
 {
@@ -66,32 +63,28 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     return newChunk;
 }
 
-bool ChunkManager::DestroyChunk(Chunk chunkPtr) {
+bool ChunkManager::DestroyChunk(Chunk& chunkPtr) {
     
     MeshRenderer* chunkRenderer = chunkPtr.gameObject->GetComponent<MeshRenderer>();
-    MeshRenderer* waterRenderer = chunkPtr.waterObject->GetComponent<MeshRenderer>();
     MeshRenderer* staticRenderer = chunkPtr.staticObject->GetComponent<MeshRenderer>();
     
     Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
-    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
     Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
     
+    for (unsigned int a=0; a < chunkPtr.actorList.size(); a++) {
+        
+        GameObject* actorObject = chunkPtr.actorList[a];
+        
+        Engine.Destroy<GameObject>( actorObject );
+    }
+    
     Engine.Destroy<GameObject>( chunkPtr.gameObject );
-    Engine.Destroy<GameObject>( chunkPtr.waterObject );
     Engine.Destroy<GameObject>( chunkPtr.staticObject );
     
     Physics.DestroyRigidBody( chunkPtr.rigidBody );
     Physics.DestroyHeightFieldMap(chunkPtr.meshCollider);
     
-    unsigned int numberOfActors = chunkPtr.actorList.size();
-    for (unsigned int a=0; a < numberOfActors; a++) {
-        
-        Engine.Destroy<GameObject>( chunkPtr.actorList[a] );
-        
-    }
     chunkPtr.actorList.clear();
-    
-    chunkList.erase( chunkList.begin() + chunkDestructCounter );
     
     return false;
 }
@@ -125,26 +118,20 @@ void ChunkManager::ClearWorld(void) {
         Chunk chunkPtr = chunkList[i];
         
         MeshRenderer* chunkRenderer = chunkPtr.gameObject->GetComponent<MeshRenderer>();
-        MeshRenderer* waterRenderer = chunkPtr.waterObject->GetComponent<MeshRenderer>();
         MeshRenderer* staticRenderer = chunkPtr.staticObject->GetComponent<MeshRenderer>();
         
         Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
-        Engine.sceneMain->RemoveMeshRendererFromSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
         Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
         
         Engine.Destroy<GameObject>( chunkPtr.gameObject );
-        Engine.Destroy<GameObject>( chunkPtr.waterObject );
         Engine.Destroy<GameObject>( chunkPtr.staticObject );
         
         Physics.DestroyRigidBody( chunkPtr.rigidBody );
         Physics.DestroyHeightFieldMap(chunkPtr.meshCollider);
         
-        for (unsigned int a=0; a < chunkPtr.actorList.size(); a++) {
-            
-            Engine.Destroy<GameObject>( chunkPtr.actorList[a] );
-            
-        }
-        chunkPtr.actorList.clear();
+        if (chunkPtr.actorList.size() > 0) 
+            for (unsigned int a=0; a < chunkPtr.actorList.size(); a++) 
+                Engine.Destroy<GameObject>( chunkPtr.actorList[a] );
         
     }
     
@@ -152,8 +139,6 @@ void ChunkManager::ClearWorld(void) {
     
     ChunkCounterX = 0;
     ChunkCounterZ = 0;
-    chunkConstructCounter = 0;
-    chunkDestructCounter = 0;
     
     return;
 }

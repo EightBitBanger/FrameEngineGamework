@@ -11,11 +11,9 @@ void ChunkManager::Update(void) {
     //
     // Destroy chunks
     
-    unsigned int destroyPerCycle = 8;
-    
     for (unsigned int c=0; c < chunkList.size(); c++) {
         
-        Chunk chunkPtr = chunkList[ chunkDestructCounter ];
+        Chunk& chunkPtr = chunkList[ c ];
         
         glm::vec3 chunkPos = glm::vec3(chunkPtr.x, 0, chunkPtr.y);
         
@@ -24,6 +22,8 @@ void ChunkManager::Update(void) {
         
         DestroyChunk( chunkPtr );
         
+        chunkList.erase( chunkList.begin() + c );
+        
         continue;
     }
     
@@ -31,36 +31,23 @@ void ChunkManager::Update(void) {
     //
     // Generate chunks
     
-    unsigned int chunksPerCycle = 16;
-    
-    for (; ChunkCounterX <= renderDistance; ) {
+    for (ChunkCounterX=0; ChunkCounterX <= renderDistance; ChunkCounterX++) {
         
-        if (chunkConstructCounter > chunksPerCycle) {
-            
-            chunkConstructCounter=0;
-            break;
-        }
-        chunkConstructCounter++;
-        
-        ChunkCounterX++;
         if (ChunkCounterX >= renderDistance) {
             
             ChunkCounterX = 0;
             break;
         }
+        
         int xx = ChunkCounterX;
         
-        for (; ChunkCounterZ <= renderDistance; ) {
+        for (ChunkCounterZ=0; ChunkCounterZ <= renderDistance; ChunkCounterZ++) {
             
-            if (chunkConstructCounter > chunksPerCycle) 
-                break;
-            
-            ChunkCounterZ++;
             if (ChunkCounterZ >= renderDistance) {
-                
                 ChunkCounterZ = 0;
                 break;
             }
+            
             int zz = ChunkCounterZ;
             
             float chunkX = Math.Round( playerPosition.x / chunkSize + xx);
@@ -86,35 +73,29 @@ void ChunkManager::Update(void) {
                 
             }
             
+            if (chunkFound) 
+                continue;
+            
             if (glm::distance(glm::vec3(chunkPosition.x, 0, chunkPosition.y), playerPosition) > (renderDistance * (chunkSize / 2))) 
                 continue;
             
-            if (chunkFound) 
-                continue;
             
             Chunk chunk;
             
             chunk.gameObject = Engine.Create<GameObject>();
-            chunk.waterObject = Engine.Create<GameObject>();
             chunk.staticObject = Engine.Create<GameObject>();
             
             chunk.gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-            chunk.waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
             chunk.staticObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
             
             MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
-            MeshRenderer* waterRenderer = chunk.waterObject->GetComponent<MeshRenderer>();
             MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
             
             Transform* chunkTransform = chunk.gameObject->GetComponent<Transform>();
-            Transform* waterTransform = chunk.waterObject->GetComponent<Transform>();
             Transform* staticTransform = chunk.staticObject->GetComponent<Transform>();
             
             chunkTransform->position = glm::vec3( chunkPosition.x, 0, chunkPosition.y);
             chunkTransform->scale = glm::vec3( 1, 1, 1 );
-            
-            waterTransform->position = glm::vec3( chunkPosition.x, world.waterLevel, chunkPosition.y);
-            waterTransform->scale = glm::vec3( 16, 1, 16 );
             
             staticTransform->position = glm::vec3( chunkPosition.x, 0, chunkPosition.y);
             staticTransform->scale = glm::vec3( 1, 1, 1 );
@@ -126,10 +107,6 @@ void ChunkManager::Update(void) {
             chunkRenderer->mesh = Engine.Create<Mesh>();
             chunkRenderer->mesh->isShared = false;
             chunkRenderer->EnableFrustumCulling();
-            
-            waterRenderer->mesh = Engine.Create<Mesh>();
-            waterRenderer->mesh->isShared = false;
-            waterRenderer->EnableFrustumCulling();
             
             staticRenderer->mesh = Engine.Create<Mesh>();
             staticRenderer->mesh->isShared = false;
@@ -156,7 +133,22 @@ void ChunkManager::Update(void) {
                                                     perlinLayer->heightMultuplier, 
                                                     chunkPosition.x, chunkPosition.y, worldSeed);
                 
+                continue;
             }
+            
+            
+            // Material
+            
+            chunkRenderer->material = Engine.Create<Material>();
+            chunkRenderer->material->isShared = false;
+            
+            chunkRenderer->material->diffuse = Colors.gray;
+            chunkRenderer->material->ambient = Colors.MakeGrayScale(0.2f);
+            
+            chunkRenderer->material->shader = Engine.shaders.color;
+            
+            Engine.sceneMain->AddMeshRendererToSceneRoot( chunkRenderer );
+            
             
             // Chunk color
             Color colorLow;
@@ -167,24 +159,35 @@ void ChunkManager::Update(void) {
             
             Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize+1, chunkSize+1, colorLow, colorHigh, 0.024f);
             
-            
-            Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSize+1, chunkSize+1, 0, 0, 1, 1);
-            chunkRenderer->mesh->Load();
-            
+            Engine.GenerateWaterTableFromHeightField(heightField, chunkSize+1, chunkSize+1, 0);
             
             // Water table
             
-            float maxWaterLayers  = 16.0f;
+            /*
+            
+            chunk.waterObject = Engine.Create<GameObject>();
+            chunk.waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+            MeshRenderer* waterRenderer = chunk.waterObject->GetComponent<MeshRenderer>();
+            Transform* waterTransform = chunk.waterObject->GetComponent<Transform>();
+            
+            waterTransform->position = glm::vec3( chunkPosition.x, world.waterLevel, chunkPosition.y);
+            waterTransform->scale = glm::vec3( 16, 1, 16 );
+            
+            waterRenderer->mesh = Engine.Create<Mesh>();
+            waterRenderer->mesh->isShared = false;
+            waterRenderer->EnableFrustumCulling();
+            
+            float maxWaterLayers  = 40.0f;
             float maxWaterSpacing = (1.0f / 3.0f);
             
-            float layerThickness = 0.4f;
+            float layerThickness = 0.1f;
             
             for (float c=0.0f; c <= maxWaterLayers; c += maxWaterSpacing) {
                 
                 Color layerColor = world.waterColorHigh;
                 layerColor *= Colors.MakeGrayScale( -(c * (layerThickness * 32)) );
                 
-                layerColor *= 0.4;
+                layerColor *= 0.1;
                 
                 waterRenderer->mesh->AddPlain(0, 
                                             (c - maxWaterLayers) + maxWaterSpacing, 
@@ -195,6 +198,28 @@ void ChunkManager::Update(void) {
             }
             
             waterRenderer->mesh->Load();
+            
+            
+            // Water material
+            waterRenderer->material = Engine.Create<Material>();
+            waterRenderer->material->isShared = false;
+            
+            waterRenderer->material->diffuse = Colors.MakeGrayScale(0.01f);
+            waterRenderer->material->ambient = Colors.MakeGrayScale(0.01f);
+            
+            waterRenderer->material->shader = Engine.shaders.water;
+            
+            Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
+            
+            // Water blending
+            waterRenderer->material->EnableBlending();
+            waterRenderer->material->DisableCulling();
+            
+            
+            */
+            
+            
+            
             
             
             // Physics
@@ -222,32 +247,17 @@ void ChunkManager::Update(void) {
             chunk.meshCollider = meshCollider;
             
             
-            // Material
+            // Chunk material
             
             chunkRenderer->material = Engine.Create<Material>();
             chunkRenderer->material->isShared = false;
             
             chunkRenderer->material->diffuse = Colors.gray;
-            chunkRenderer->material->ambient = Colors.MakeGrayScale(0.2f);
+            chunkRenderer->material->ambient = Colors.MakeGrayScale(0.1f);
             
             chunkRenderer->material->shader = Engine.shaders.color;
             
-            Engine.sceneMain->AddMeshRendererToSceneRoot( chunkRenderer );
-            
-            // Water material
-            waterRenderer->material = Engine.Create<Material>();
-            waterRenderer->material->isShared = false;
-            
-            waterRenderer->material->diffuse = Colors.MakeGrayScale(0.01f);
-            waterRenderer->material->ambient = Colors.MakeGrayScale(0.01f);
-            
-            waterRenderer->material->shader = Engine.shaders.water;
-            
-            Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
-            
-            // Water blending
-            waterRenderer->material->EnableBlending();
-            waterRenderer->material->DisableCulling();
+            Engine.sceneMain->AddMeshRendererToSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
             
             
             // Static material
@@ -260,7 +270,7 @@ void ChunkManager::Update(void) {
             
             staticRenderer->material->shader = Engine.shaders.color;
             
-            Engine.sceneMain->AddMeshRendererToSceneRoot( staticRenderer );
+            Engine.sceneMain->AddMeshRendererToSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
             
             
             // Decorate chunk
@@ -270,10 +280,18 @@ void ChunkManager::Update(void) {
             staticRenderer->mesh->Load();
             
             
+            
+            
+            Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSize+1, chunkSize+1, 0, 0, 1, 1);
+            
+            chunkRenderer->mesh->Load();
+            
             chunkList.push_back( chunk );
             
+            continue;
         }
         
+        continue;
     }
     
     return;
@@ -289,9 +307,9 @@ void DecodeGenome(Decoration& decor, Actor* actorPtr) {
 
 
 
-void ChunkManager::Decorate(Chunk chunk, int chunkX, int chunkZ, Mesh* staticMesh) {
+void ChunkManager::Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMesh) {
     
-    if (world.mDecorations.size() < 0) 
+    if (world.mDecorations.size() == 0) 
         return;
     
     for (int xx=0; xx < chunkSize-1; xx++) {
