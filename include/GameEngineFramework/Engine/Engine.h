@@ -197,6 +197,9 @@ public:
     /// from the low color to the high color based on the height field values.
     void GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color low, Color high, float bias);
     
+    /// Smooth the terrain height starting at a given height level and moving downward.
+    void GenerateWaterTableFromHeightField(float* heightField, unsigned int width, unsigned int height, float tableHeight);
+    
     /// Set a layer of perlin noise into a color field. The perlin noise is used to fade from the first color to the second.
     void SetColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseThreshold, Color first, Color second, int offsetX, int offsetZ);
     
@@ -275,18 +278,8 @@ public:
             
             Actor* actorPtr = (Actor*)objectPtr;
             
-            unsigned int numberOfRenderers = actorPtr->mGeneticRenderers.size();
-            for (unsigned int i=0; i < numberOfRenderers; i++) {
-                
-                sceneMain->RemoveMeshRendererFromSceneRoot( actorPtr->mGeneticRenderers[i], RENDER_QUEUE_GEOMETRY );
-                
-                Renderer.DestroyMeshRenderer( actorPtr->mGeneticRenderers[i] );
-                
-            }
+            AI.DestroyActor( actorPtr );
             
-            actorPtr->mGeneticRenderers.clear();
-            
-            return AI.DestroyActor( actorPtr );
         }
         
         return false;
@@ -494,11 +487,11 @@ private:
     // Debug rendering
     bool usePhysicsDebugRenderer;
     
-    Mesh* debugMesh;
-    Mesh* debugLines;
-    
     
 public:
+    
+    GameObject* debugMeshGameObject;
+    GameObject* debugLinesGameObject;
     
     /// Default shaders provided by the engine.
     DefaultShaders shaders;

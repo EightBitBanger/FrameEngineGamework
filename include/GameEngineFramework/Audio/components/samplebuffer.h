@@ -31,13 +31,13 @@ class ENGINE_API AudioPreset {
     
 public:
     
-    void renderBlankSpace(AudioSample* sample, float duration);
+    void RenderBlankSpace(AudioSample* sample, float duration);
     
-    void renderWhiteNoise(AudioSample* sample, float duration);
+    void RenderWhiteNoise(AudioSample* sample, float duration);
     
-    void renderSquareWave(AudioSample* sample, float frequency, float duration);
+    void RenderSquareWave(AudioSample* sample, float frequency, float duration);
     
-    void renderSweepingSineWave(AudioSample* sample, double startFreq, double endFreq, double duration);
+    void RenderSweepingSineWave(AudioSample* sample, double startFreq, double endFreq, double duration);
     
 };
 
