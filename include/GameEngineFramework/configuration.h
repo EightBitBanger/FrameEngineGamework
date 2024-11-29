@@ -2,10 +2,21 @@
 #define APPLICATION_CONFIGURATION
 
 //
-// Application layout
+// Platform
+
+#define  PLATFORM_WINDOWS
+//#define  PLATFORM_LINUX
+
+
+
 //
+// Application layout
 
 #define  WINDOW_NAME  "Render window"
+
+//#define  APPLICATION_CURSOR_HIDDEN_ON_START
+//#define  APPLICATION_ESCAPE_KEY_PAUSE
+
 
 // Starting window dimensions relative to display size
 #define  WINDOW_WIDTH       0.7
@@ -14,9 +25,6 @@
 // Minimum window size (In pixels)
 #define  WINDOW_WIDTH_MIN   300
 #define  WINDOW_HEIGHT_MIN  200
-
-//#define  APPLICATION_CURSOR_HIDDEN_ON_START
-//#define  APPLICATION_ESCAPE_KEY_PAUSE
 
 // Console window area
 #define     WINDOW_CONSOLE_LEFT    5
