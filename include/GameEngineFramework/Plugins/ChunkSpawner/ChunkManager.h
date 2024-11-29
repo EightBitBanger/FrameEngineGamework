@@ -105,10 +105,6 @@ public:
     
     int worldSeed;
     
-    
-    int chunkConstructCounter;
-    int chunkDestructCounter;
-    
     int ChunkCounterX;
     int ChunkCounterZ;
     
@@ -123,7 +119,7 @@ public:
     
     Chunk CreateChunk(float x, float y);
     
-    bool DestroyChunk(Chunk chunkPtr);
+    bool DestroyChunk(Chunk& chunkPtr);
     
     
     void Initiate(void);
@@ -131,14 +127,13 @@ public:
     void Update(void);
     
     
-    void Decorate(Chunk chunk, int chunkX, int chunkZ, Mesh* staticMesh);
+    void Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMesh);
     
     
     std::vector<Decoration> decoration;
     std::vector<Perlin> perlin;
     
     std::vector<Chunk> chunkList;
-    std::vector<GameObject*> actorList;
     
 private:
     

@@ -12,8 +12,8 @@ public:
     int y;
     
     GameObject* gameObject;
-    GameObject* waterObject;
     GameObject* staticObject;
+    GameObject* waterObject;
     
     rp3d::RigidBody* rigidBody;
     
