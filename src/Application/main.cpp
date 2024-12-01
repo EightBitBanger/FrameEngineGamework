@@ -10,8 +10,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     HWND cHnd = GetConsoleWindow();
     
+#ifndef  WINDOW_CONSOLE_HIDE_ON_STARTUP
+    
     ShowWindow(cHnd, SW_SHOW);
     SetWindowPos(cHnd, NULL, WINDOW_CONSOLE_LEFT, WINDOW_CONSOLE_TOP, WINDOW_CONSOLE_WIDTH, WINDOW_CONSOLE_HEIGHT, SWP_SHOWWINDOW);
+    
+#else
+    
+    ShowWindow(cHnd, SW_HIDE);
+    
+#endif
     
     Log.Clear();
     
@@ -238,7 +246,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             // --- Profiling ---
             if (Engine.CheckIsProfilerActive()) 
                 Profiler.Begin();
-            
             
             // Draw the current frame state
             Renderer.RenderFrame();

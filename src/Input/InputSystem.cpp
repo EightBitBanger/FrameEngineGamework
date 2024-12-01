@@ -11,6 +11,14 @@
  #include <windows.h>
 #endif
 
+
+#ifdef PLATFORM_LINUX
+ 
+ #include <X11/Xlib.h>
+ 
+#endif
+
+
 extern InputSystem::InputSystem(void) : 
     
     lastKeyPressed(-1),
@@ -30,9 +38,32 @@ extern InputSystem::InputSystem(void) :
 }
 
 void InputSystem::SetMousePosition(unsigned int x, unsigned int y) {
+    
+#ifdef PLATFORM_WINDOWS
+    
     SetCursorPos( (int)x, (int)y );
     mouseX = x;
     mouseY = y;
+    
+#endif
+    
+#ifdef PLATFORM_LINUX
+    
+    Display* disp = XOpenDisplay(nullptr);
+    
+    if (disp == nullptr) 
+        return;
+    
+    Window root = DefaultRootWindow(disp);
+    
+    XWarpPointer(disp, 0, root, 0, 0, 0, 0, x, y);
+    
+    XFlush(disp);
+    
+    XCloseDisplay(disp);
+    
+#endif
+    
     return;
 }
 

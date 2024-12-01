@@ -67,16 +67,12 @@ void EngineSystemManager::UpdateComponentStream(void) {
         if (gameObject->mTextCache != nullptr)  isUIElement = true;
         if (gameObject->mPanelCache != nullptr) isUIElement = true;
         
-        
         //
-        // Final check before added to list
+        // Set buffer stream objects and components
         
         if (((!gameObject->isActive) | (!shouldRender)) & (!isUIElement)) 
             continue;
         
-        //
-        // Set buffer stream objects and components
-        //
         if (!gameObject->isGarbage) {
             
             mStreamBuffer[mDataStreamIndex].gameObject    = gameObject;

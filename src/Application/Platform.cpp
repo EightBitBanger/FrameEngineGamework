@@ -9,6 +9,7 @@
 
 #include <sdkddkver.h>
 #include <windows.h>
+#include <shellapi.h>
 
 #define IDI_ICON  101
 
@@ -75,7 +76,7 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     ShowWindow( (HWND)windowHandle, true );
     SetCursor(hCursor);
     
-#ifdef APPLICATION_CURSOR_HIDDEN_ON_START
+#ifdef APPLICATION_CURSOR_HIDE_ON_STARTUP
     while (ShowCursor(false) >= 0);
 #endif
     
@@ -111,6 +112,12 @@ void PlatformLayer::SetWindowCenter(void) {
     WindowSz.y = (displayHeight / 2) - (WindowSz.h / 2);
     
     SetWindowPos((HWND)windowHandle, NULL, WindowSz.x, WindowSz.y, WindowSz.w, WindowSz.h, SWP_SHOWWINDOW);
+    
+    windowArea.x = WindowSz.x;
+    windowArea.y = WindowSz.y;
+    windowArea.w = WindowSz.w;
+    windowArea.h = WindowSz.h;
+    
     return;
 }
 
@@ -121,13 +128,21 @@ void PlatformLayer::SetWindowCenterScale(float width, float height) {
     newWindowSz.w = displayWidth  * width;
     newWindowSz.h = displayHeight * height;
     
+    windowArea.w = newWindowSz.w;
+    windowArea.h = newWindowSz.h;
+    
     SetWindowPosition(newWindowSz);
     SetWindowCenter();
     return;
 }
 
 void PlatformLayer::SetWindowPosition(Viewport windowSize) {
+    
     SetWindowPos((HWND)windowHandle, NULL, windowSize.x, windowSize.y, windowSize.w, windowSize.h, SWP_SHOWWINDOW);
+    
+    windowArea.w = windowSize.w;
+    windowArea.h = windowSize.h;
+    
     return;
 }
 
@@ -142,6 +157,24 @@ Viewport PlatformLayer::GetWindowArea(void) {
     area.h = (windowSz.bottom - windowSz.top);
     
     return area;
+}
+
+void PlatformLayer::WindowEnableFullscreen(void) {
+    
+    SetWindowLongPtr((HWND)windowHandle, GWL_STYLE, WS_POPUP);
+    SetWindowPos((HWND)windowHandle, HWND_TOPMOST, 0, 0, displayWidth, displayHeight, SWP_FRAMECHANGED);
+    ShowWindow((HWND)windowHandle, SW_MAXIMIZE);
+    
+    return;
+}
+
+void PlatformLayer::WindowDisableFullscreen(void) {
+    
+    SetWindowLongPtr((HWND)windowHandle, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+    SetWindowPos((HWND)windowHandle, HWND_NOTOPMOST, windowArea.x, windowArea.y, windowArea.w, windowArea.h, SWP_FRAMECHANGED);
+    ShowWindow((HWND)windowHandle, SW_RESTORE);
+    
+    return;
 }
 
 void PlatformLayer::HideWindowHandle(void) {
@@ -160,6 +193,21 @@ void PlatformLayer::ShowMouseCursor(void) {
 
 void PlatformLayer::HideMouseCursor(void) {
     while (ShowCursor(false) >= 0);
+}
+
+int PlatformLayer::GetTaskbarHeight(void) {
+    APPBARDATA abd;
+    abd.cbSize = sizeof(APPBARDATA);
+    
+    SHAppBarMessage(ABM_GETTASKBARPOS, &abd);
+    
+    return abd.rc.bottom - abd.rc.top;
+}
+
+int PlatformLayer::GetTitlebarHeight(void) {
+    int titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
+    
+    return titleBarHeight;
 }
 
 void PlatformLayer::SetClipboardText(std::string text) {

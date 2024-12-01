@@ -27,43 +27,15 @@ Component* EngineSystemManager::CreateComponent(ComponentType type) {
     
     switch (type) {
         
-        case COMPONENT_TYPE_TRANSFORM: {
-            component_object = (void*)mTransforms.Create();
-            break;
-        }
-        case COMPONENT_TYPE_MESH_RENDERER: {
-            component_object = (void*)Renderer.CreateMeshRenderer();
-            break;
-        }
-        case COMPONENT_TYPE_CAMERA: {
-            component_object = (void*)Renderer.CreateCamera();
-            break;
-        }
-        case COMPONENT_TYPE_LIGHT: {
-            component_object = (void*)Renderer.CreateLight();
-            break;
-        }
-        
-        case COMPONENT_TYPE_SCRIPT: {
-            component_object = (void*)Scripting.CreateScript();
-            break;
-        }
-        case COMPONENT_TYPE_RIGID_BODY: {
-            component_object = (void*)Physics.CreateRigidBody();
-            break;
-        }
-        case COMPONENT_TYPE_ACTOR: {
-            component_object = (void*)AI.CreateActor();
-            break;
-        }
-        case COMPONENT_TYPE_TEXT: {
-            component_object = (void*)mTextObjects.Create();
-            break;
-        }
-        case COMPONENT_TYPE_PANEL: {
-            component_object = (void*)mPanelObjects.Create();
-            break;
-        }
+        case Components.Transform:       component_object = (void*)mTransforms.Create(); break;
+        case Components.MeshRenderer:    component_object = (void*)Renderer.CreateMeshRenderer(); break;
+        case Components.Camera:          component_object = (void*)Renderer.CreateCamera(); break;
+        case Components.Light:           component_object = (void*)Renderer.CreateLight(); break;
+        case Components.Script:          component_object = (void*)Scripting.CreateScript(); break;
+        case Components.RigidBody:       component_object = (void*)Physics.CreateRigidBody(); break;
+        case Components.Actor:           component_object = (void*)AI.CreateActor(); break;
+        case Components.Text:            component_object = (void*)mTextObjects.Create(); break;
+        case Components.Panel:           component_object = (void*)mPanelObjects.Create(); break;
         
         default:
             return nullptr;
@@ -81,7 +53,7 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
     
     switch (componentType) {
         
-        case COMPONENT_TYPE_MESH_RENDERER: {
+        case Components.MeshRenderer: {
             
             MeshRenderer* meshRenderer = (MeshRenderer*)componentPtr->GetComponent();
             
@@ -90,7 +62,7 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             break;
         }
         
-        case COMPONENT_TYPE_RIGID_BODY: {
+        case Components.RigidBody: {
             
             rp3d::RigidBody* bodyPtr = (RigidBody*)componentPtr->GetComponent();
             
@@ -101,7 +73,7 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             break;
         }
         
-        case COMPONENT_TYPE_ACTOR: {
+        case Components.Actor: {
             
             Actor* actorPtr = (Actor*)componentPtr->GetComponent();
             
@@ -118,12 +90,12 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             break;
         }
         
-        case COMPONENT_TYPE_TRANSFORM: {mTransforms.Destroy( (Transform*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_CAMERA:    {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_LIGHT:     {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_SCRIPT:    {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_TEXT:      {mTextObjects.Destroy( (Text*)componentPtr->GetComponent() ); break;}
-        case COMPONENT_TYPE_PANEL:     {mPanelObjects.Destroy( (Panel*)componentPtr->GetComponent() ); break;}
+        case Components.Transform: {mTransforms.Destroy( (Transform*)componentPtr->GetComponent() ); break;}
+        case Components.Camera:    {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
+        case Components.Light:     {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
+        case Components.Script:    {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
+        case Components.Text:      {mTextObjects.Destroy( (Text*)componentPtr->GetComponent() ); break;}
+        case Components.Panel:     {mPanelObjects.Destroy( (Panel*)componentPtr->GetComponent() ); break;}
         
         default: break;
     }

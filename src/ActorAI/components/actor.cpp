@@ -58,7 +58,6 @@ Actor::Actor() :
     mUserDataA(nullptr),
     mUserDataB(nullptr)
 {
-    return;
 }
 
 void Actor::SetName(std::string newName) {
