@@ -110,9 +110,9 @@ public:
     
     ChunkManager();
     
-    void SaveWorld(void);
+    bool SaveWorld(std::string worldname);
     
-    void LoadWorld(void);
+    bool LoadWorld(std::string worldname);
     
     void ClearWorld(void);
     
@@ -121,6 +121,7 @@ public:
     
     bool DestroyChunk(Chunk& chunkPtr);
     
+    bool RemoveActorFromWorld(GameObject* actorObject);
     
     void Initiate(void);
     
