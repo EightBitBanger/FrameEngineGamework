@@ -240,7 +240,7 @@ public:
         
         // Engine
         if (std::is_same<T, GameObject>::value)    return (T*)CreateGameObject();
-        if (std::is_same<T, Component>::value)     return (T*)CreateComponent( COMPONENT_TYPE_UNDEFINED );
+        if (std::is_same<T, Component>::value)     return (T*)CreateComponent( Components.Undefined );
         
         // Renderer
         if (std::is_same<T, Mesh>::value)          return (T*)Renderer.CreateMesh();

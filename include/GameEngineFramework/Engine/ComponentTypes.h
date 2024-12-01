@@ -3,58 +3,39 @@
 
 #include <GameEngineFramework/configuration.h>
 
-
-#define  COMPONENT_TYPE_UNDEFINED       0
-// Engine
-#define  COMPONENT_TYPE_TRANSFORM       1
-//Rendering
-#define  COMPONENT_TYPE_MESH_RENDERER   2
-#define  COMPONENT_TYPE_CAMERA          3
-#define  COMPONENT_TYPE_LIGHT           4
-#define  COMPONENT_TYPE_SCRIPT          5
-// Physics
-#define  COMPONENT_TYPE_RIGID_BODY      6
-// AI
-#define  COMPONENT_TYPE_ACTOR           7
-// UI
-#define  COMPONENT_TYPE_TEXT            8
-#define  COMPONENT_TYPE_PANEL           9
-
-
-
 typedef unsigned short int ComponentType;
 
 
 struct ENGINE_API EngineComponents {
     /// Undefined component.
-    constexpr static short int Undefined = COMPONENT_TYPE_UNDEFINED;
+    constexpr static short int Undefined = 0;
     
     /// Transform component.
-    constexpr static short int Transform = COMPONENT_TYPE_TRANSFORM;
+    constexpr static short int Transform = 1;
     
     /// Mesh renderer component.
-    constexpr static short int MeshRenderer = COMPONENT_TYPE_MESH_RENDERER;
+    constexpr static short int MeshRenderer = 2;
     
     /// Camera component.
-    constexpr static short int Camera = COMPONENT_TYPE_CAMERA;
+    constexpr static short int Camera = 3;
     
     /// Light component.
-    constexpr static short int Light = COMPONENT_TYPE_LIGHT;
+    constexpr static short int Light = 4;
     
     /// Scripting component.
-    constexpr static short int Script = COMPONENT_TYPE_SCRIPT;
+    constexpr static short int Script = 5;
     
     /// Physics rigid body component.
-    constexpr static short int RigidBody = COMPONENT_TYPE_RIGID_BODY;
+    constexpr static short int RigidBody = 6;
     
     /// AI actor component.
-    constexpr static short int Actor = COMPONENT_TYPE_ACTOR;
+    constexpr static short int Actor = 7;
     
     /// Text UI component.
-    constexpr static short int Text = COMPONENT_TYPE_TEXT;
+    constexpr static short int Text = 8;
     
     /// Panel UI component.
-    constexpr static short int Panel = COMPONENT_TYPE_PANEL;
+    constexpr static short int Panel = 9;
 };
 
 

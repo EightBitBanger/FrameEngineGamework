@@ -42,6 +42,8 @@ public:
     int windowRight;
     int windowBottom;
     
+    Viewport windowArea;
+    
     /// Game paused state.
     bool isPaused;
     /// Game loop running state. Setting this to false will exit the loop.
@@ -70,6 +72,11 @@ public:
     /// Get the area of the window in pixels.
     Viewport GetWindowArea(void);
     
+    /// Keep the window always on top of other windows.
+    void WindowEnableFullscreen(void);
+    /// Allow the window to be layered with other windows.
+    void WindowDisableFullscreen(void);
+    
     /// Show the window on the screen.
     void ShowWindowHandle(void);
     /// Hide the window.
@@ -79,6 +86,12 @@ public:
     void ShowMouseCursor(void);
     /// Hide the mouse cursor.
     void HideMouseCursor(void);
+    
+    /// Get the height of the task bar.
+    int GetTaskbarHeight(void);
+    
+    /// Get the height of the title bar.
+    int GetTitlebarHeight(void);
     
     /// Save a string of text to the clipboard.
     void SetClipboardText(std::string text);
