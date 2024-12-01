@@ -9,6 +9,9 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
     if (!currentEntity->isActive) 
         return false;
     
+    if (currentEntity->material == nullptr) 
+        return false;
+    
     if (!currentEntity->material->mDoShadowPass)
         return false;
     
