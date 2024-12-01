@@ -9,6 +9,7 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 ChunkManager chunkManager;
 
+
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
 WeatherSystem weather;
 
@@ -41,18 +42,16 @@ void FuncList(std::vector<std::string> args) {
 // Save world
 void FuncSave(std::vector<std::string> args) {
     
-    /*
     if (chunkManager.SaveWorld( args[0] )) {
         
         Engine.Print("World saved");
         
-        chunkManager.worldName = args[0];
+        //chunkManager.worldName = args[0];
         
         return;
     }
     
     Engine.Print("Error saving world");
-    */
     
     return;
 }
@@ -60,7 +59,6 @@ void FuncSave(std::vector<std::string> args) {
 // Load world
 void FuncLoad(std::vector<std::string> args) {
     
-    /*
     if (chunkManager.LoadWorld( args[0] )) {
         
         Engine.Print("World loaded");
@@ -69,7 +67,6 @@ void FuncLoad(std::vector<std::string> args) {
     }
     
     Engine.Print("Error loading world");
-    */
     
     return;
 }
@@ -80,25 +77,6 @@ void FuncClear(std::vector<std::string> args) {
     chunkManager.ClearWorld();
     
     Engine.Print("World cleared");
-    
-    return;
-}
-
-// Generate a world
-void FuncGen(std::vector<std::string> args) {
-    
-    /*
-    chunkManager.generateWorldChunks = true;
-    chunkManager.updateWorldChunks   = true;
-    
-    if (args[0] == "stop") {
-        
-        chunkManager.generateWorldChunks = false;
-        chunkManager.updateWorldChunks   = false;
-        
-        Engine.Print("Stopped generating");
-    }
-    */
     
     return;
 }
@@ -184,7 +162,6 @@ void Start() {
     Engine.ConsoleRegisterCommand("save",    FuncSave);
     Engine.ConsoleRegisterCommand("load",    FuncLoad);
     Engine.ConsoleRegisterCommand("clear",   FuncClear);
-    Engine.ConsoleRegisterCommand("gen",     FuncGen);
     Engine.ConsoleRegisterCommand("seed",    FuncSeed);
     
     
@@ -274,7 +251,7 @@ void Start() {
     
     Decoration decorTrees;
     decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 500;
+    decorTrees.density = 100;
     decorTrees.spawnHeightMaximum = 20;
     decorTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
@@ -282,7 +259,7 @@ void Start() {
     
     Decoration decorTreeHights;
     decorTreeHights.type = DECORATION_TREE;
-    decorTreeHights.density = 1200;
+    decorTreeHights.density = 300;
     decorTreeHights.spawnHeightMaximum = 40;
     decorTreeHights.spawnHeightMinimum = 20;
     decorTreeHights.spawnStackHeightMin = 4;
@@ -291,7 +268,7 @@ void Start() {
     // Water adjacent plants
     Decoration decorWaterTrees;
     decorWaterTrees.type = DECORATION_TREE;
-    decorWaterTrees.density = 100;
+    decorWaterTrees.density = 70;
     decorWaterTrees.spawnHeightMaximum = chunkManager.world.waterLevel + 10;
     decorWaterTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorWaterTrees.spawnStackHeightMin = 2;
@@ -299,7 +276,7 @@ void Start() {
     
     Decoration decorWaterPlants;
     decorWaterPlants.type = DECORATION_GRASS_THIN;
-    decorWaterPlants.density = 200;
+    decorWaterPlants.density = 100;
     decorWaterPlants.spawnHeightMaximum = chunkManager.world.waterLevel;
     decorWaterPlants.spawnHeightMinimum = -100;
     decorWaterPlants.spawnStackHeightMax = 4;
@@ -310,14 +287,14 @@ void Start() {
     Decoration decorSheep;
     decorSheep.type = DECORATION_ACTOR;
     decorSheep.name = "Sheep";
-    decorSheep.density = 40;
+    decorSheep.density = 100;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = chunkManager.world.waterLevel;
     
     Decoration decorBear;
     decorBear.type = DECORATION_ACTOR;
     decorBear.name = "Bear";
-    decorBear.density = 100;
+    decorBear.density = 60;
     decorBear.spawnHeightMaximum = 40;
     decorBear.spawnHeightMinimum = 5;
     
@@ -330,7 +307,7 @@ void Start() {
     chunkManager.world.mDecorations.push_back(decorWaterPlants);
     
     chunkManager.world.mDecorations.push_back(decorSheep);
-    chunkManager.world.mDecorations.push_back(decorBear);
+    //chunkManager.world.mDecorations.push_back(decorBear);
     
     
     
@@ -368,18 +345,18 @@ void Start() {
     
     Perlin perlinFlatland;
     perlinFlatland.equation = 0;
-    perlinFlatland.heightMultuplier = 0;
-    perlinFlatland.noiseWidth  = 0.0007;
-    perlinFlatland.noiseHeight = 0.0007;
+    perlinFlatland.heightMultuplier = 40;
+    perlinFlatland.noiseWidth  = 0.007;
+    perlinFlatland.noiseHeight = 0.007;
     
     
     
     
-    chunkManager.perlin.push_back(perlinMountainB);
-    chunkManager.perlin.push_back(perlinMountainA);
-    chunkManager.perlin.push_back(perlinBase);
-    chunkManager.perlin.push_back(perlinLayerA);
-    chunkManager.perlin.push_back(perlinLayerB);
+    //chunkManager.perlin.push_back(perlinMountainB);
+    //chunkManager.perlin.push_back(perlinMountainA);
+    //chunkManager.perlin.push_back(perlinBase);
+    //chunkManager.perlin.push_back(perlinLayerA);
+    //chunkManager.perlin.push_back(perlinLayerB);
     chunkManager.perlin.push_back(perlinFlatland);
     
     
@@ -398,7 +375,7 @@ void Start() {
     
     // World rendering
     
-    chunkManager.renderDistance = 16;
+    chunkManager.renderDistance = 13;
     
     
     
@@ -426,6 +403,7 @@ glm::vec3 force(0);
 float forceDblTime=0;
 
 bool isDebugReportActive = false;
+bool isFullScreen = false;
 
 std::string targetName = "";
 std::string targetGene = "";
@@ -464,10 +442,6 @@ void Run() {
     glm::vec3 direction = glm::vec3(0, -1, 0);
     
     
-    
-    //
-    // Print aimed entity details
-    //
     
     distance = 8;
     
@@ -535,9 +509,8 @@ void Run() {
             
             GameObject* hitObject = (GameObject*)hit.gameObject;
             
-            //chunkManager.RemoveActorFromWorld( hitObject );
-            
-            Engine.Destroy(hitObject);
+            if (chunkManager.RemoveActorFromWorld( hitObject )) 
+                Engine.Destroy(hitObject);
             
         }
         
@@ -583,7 +556,21 @@ void Run() {
         
     }
     
-    
+    if (Input.CheckKeyPressed(VK_F11)) {
+        
+        isFullScreen = !isFullScreen;
+        
+        if (isFullScreen) {
+            
+            Platform.WindowEnableFullscreen();
+            
+        } else {
+            
+            Platform.WindowDisableFullscreen();
+            
+        }
+        
+    }
     
     // Debug report
     
@@ -740,10 +727,10 @@ void Run() {
     if (Engine.cameraController == nullptr) 
         return;
     
-    float forceAccelerate = 0.002f;
+    float forceAccelerate = 0.012f;
     float forceDecelerate = 0.015f;
     
-    float forceMax = 0.08f;
+    float forceMax = 30.86f;
     
     
     Camera* mainCamera = Engine.sceneMain->camera;

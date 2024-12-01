@@ -1,42 +1,45 @@
 #include <GameEngineFramework/Timer/timer.h>
 
+Timer::Timer() : 
+    delta(0),
+    units(0),
+    accumulator(0),
+    updateRateMs(1000.0 / 30.0),
+    updateRateMax(updateRateMs + (updateRateMs / 4.0)),
+    
 #ifdef PLATFORM_WINDOWS
- #ifndef _WIN32_WINNT
- #define _WIN32_WINNT 0x500
- #endif
- 
- #define WIN32_LEAN_AND_MEAN
- 
- #include <sdkddkver.h>
- #include <windows.h>
+    
+    interpolationFactor(0),
+    timeFrequency(),
+    tLast(0)
+    
 #endif
-
-
-Timer::Timer() {
     
-    delta=0;
-    units=0;
-    accumulator=0;
+#ifdef PLATFORM_LINUX
     
-    updateRateMs  = 1000.0 / 30.0;
-    updateRateMax = updateRateMs + (updateRateMs / 4.0);
+    interpolationFactor(0)
+    //startTime( std::chrono::high_resolution_clock::now() )
     
-    interpolationFactor = 0;
+#endif
+    
+{
+    
+#ifdef PLATFORM_WINDOWS
     
     LARGE_INTEGER tFrequency;
     
     QueryPerformanceFrequency(&tFrequency);
     timeFrequency = tFrequency.QuadPart / 1000.0;
     
-    LARGE_INTEGER integerLarge;
-    integerLarge.QuadPart = tLast;
+#endif
     
-    QueryPerformanceCounter(&integerLarge);
     return;
 }
 
 
 double Timer::GetCurrentDelta(void) {
+    
+#ifdef PLATFORM_WINDOWS
     
     LARGE_INTEGER tCurrent;
     QueryPerformanceCounter(&tCurrent);
@@ -45,10 +48,25 @@ double Timer::GetCurrentDelta(void) {
     integerLarge.QuadPart = tLast;
     
     return (tCurrent.QuadPart - integerLarge.QuadPart) / timeFrequency;
+    
+#endif
+    
+#ifdef PLATFORM_LINUX
+    
+    std::chrono::time_point<std::chrono::high_resolution_clock> current = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = current - startTime;
+    
+    return duration.count();
+    
+#endif
+    
+    
 }
 
 
 bool Timer::Update(void) {
+    
+#ifdef PLATFORM_WINDOWS
     
     LARGE_INTEGER tCurrent;
     QueryPerformanceCounter(&tCurrent);
@@ -58,6 +76,19 @@ bool Timer::Update(void) {
     
     delta = (tCurrent.QuadPart - integerLarge.QuadPart) / timeFrequency;
     tLast = tCurrent.QuadPart;
+    
+#endif
+    
+#ifdef PLATFORM_LINUX
+    
+    std::chrono::time_point<std::chrono::high_resolution_clock> current = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = current - startTime;
+    
+    delta = duration.count();
+    
+    //startTime = std::chrono::high_resolution_clock::now();
+    
+#endif
     
     accumulator += delta;
     
@@ -79,9 +110,25 @@ bool Timer::Update(void) {
 }
 
 double Timer::Current(void) {
+    
+#ifdef PLATFORM_WINDOWS
+    
     LARGE_INTEGER tCurrent;
     QueryPerformanceCounter(&tCurrent);
+    
     return tCurrent.QuadPart;
+    
+#endif
+    
+#ifdef PLATFORM_LINUX
+    
+    std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = now - startTime;
+    
+    return duration.count();
+    
+#endif
+    
 }
 
 void Timer::SetRefreshRate(int rate) {
