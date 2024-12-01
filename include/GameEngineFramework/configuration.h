@@ -14,7 +14,7 @@
 
 #define  WINDOW_NAME  "Render window"
 
-//#define  APPLICATION_CURSOR_HIDDEN_ON_START
+//#define  APPLICATION_CURSOR_HIDE_ON_STARTUP
 //#define  APPLICATION_ESCAPE_KEY_PAUSE
 
 
@@ -27,19 +27,12 @@
 #define  WINDOW_HEIGHT_MIN  200
 
 // Console window area
-#define     WINDOW_CONSOLE_LEFT    5
-#define     WINDOW_CONSOLE_TOP     50
-#define     WINDOW_CONSOLE_WIDTH   700
-#define     WINDOW_CONSOLE_HEIGHT  800
+//#define  WINDOW_CONSOLE_HIDE_ON_STARTUP
 
-
-
-//
-// Profiling
-//
-
-//#define PROFILE_ENGINE_CORE
-
+#define  WINDOW_CONSOLE_LEFT    5
+#define  WINDOW_CONSOLE_TOP     50
+#define  WINDOW_CONSOLE_WIDTH   700
+#define  WINDOW_CONSOLE_HEIGHT  800
 
 
 //

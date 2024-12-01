@@ -3,6 +3,25 @@
 
 #include <GameEngineFramework/configuration.h>
 
+#ifdef PLATFORM_WINDOWS
+ 
+ #ifndef _WIN32_WINNT
+ #define _WIN32_WINNT 0x500
+ #endif
+ 
+ #define WIN32_LEAN_AND_MEAN
+ 
+ #include <sdkddkver.h>
+ #include <windows.h>
+ 
+#endif
+
+#ifdef PLATFORM_LINUX
+ 
+ #include <chrono>
+ #include <unistd.h>
+ 
+#endif
 
 
 class ENGINE_API Timer {
@@ -44,11 +63,18 @@ public:
     
 private:
     
-    // Precision frequency adjustment
-    double timeFrequency;
+#ifdef PLATFORM_WINDOWS
     
-    // Previous frame time
+    double timeFrequency;
     long long int tLast;
+    
+#endif
+    
+#ifdef PLATFORM_LINUX
+    
+    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+    
+#endif
     
 };
 
