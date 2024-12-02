@@ -82,8 +82,6 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     chunkRenderer->mesh->isShared = false;
     chunkRenderer->EnableFrustumCulling();
     
-    // Chunk material
-    
     chunkRenderer->material = Engine.Create<Material>();
     chunkRenderer->material->isShared = false;
     
@@ -103,8 +101,6 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     staticRenderer->mesh->isShared = false;
     staticRenderer->EnableFrustumCulling();
     
-    // Static material
-    
     staticRenderer->material = Engine.Create<Material>();
     staticRenderer->material->isShared = false;
     staticRenderer->material->DisableCulling();
@@ -113,6 +109,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     staticRenderer->material->ambient = Colors.MakeGrayScale(0.2f);
     
     staticRenderer->material->shader = Engine.shaders.color;
+    
     
     // Generate perlin
     
@@ -124,10 +121,13 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     unsigned int numberOfLayers = perlin.size();
     
+    float min=0.0;
+    
     for (unsigned int l=0; l < numberOfLayers; l++) {
         
         Perlin* perlinLayer = &perlin[l];
         
+        min = 
         Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize+1, chunkSize+1, 
                                             perlinLayer->noiseWidth, 
                                             perlinLayer->noiseHeight, 
@@ -136,6 +136,50 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
         
         continue;
     }
+    
+    // Generate water below water level
+    if (min < (world.waterLevel - 32)) {
+        
+        chunk.waterObject = Engine.Create<GameObject>();
+        
+        chunk.waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+        MeshRenderer* waterRenderer = chunk.waterObject->GetComponent<MeshRenderer>();
+        
+        Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
+        
+        // Water renderer
+        Transform* waterTransform = chunk.waterObject->GetComponent<Transform>();
+        
+        waterTransform->position = glm::vec3( x, world.waterLevel, y);
+        waterTransform->scale = glm::vec3( 32, 1, 32 );
+        
+        waterRenderer->mesh = Engine.meshes.plain;
+        waterRenderer->EnableFrustumCulling();
+        
+        waterRenderer->material = Engine.Create<Material>();
+        waterRenderer->material->isShared = false;
+        waterRenderer->material->DisableCulling();
+        waterRenderer->material->EnableBlending();
+        
+        waterRenderer->material->diffuse = Colors.blue * Colors.MakeGrayScale(0.4f);
+        
+        waterRenderer->material->shader = Engine.shaders.water;
+        
+    }
+    
+    // Generate terrain color
+    
+    Color colorLow;
+    Color colorHigh;
+    
+    colorLow  = Colors.brown * Colors.green * Colors.MakeGrayScale(0.4f);
+    colorHigh = Colors.brown * Colors.MakeGrayScale(0.2f);
+    
+    Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize+1, chunkSize+1, colorLow, colorHigh, 0.024f);
+    
+    Engine.GenerateWaterTableFromHeightField(heightField, chunkSize+1, chunkSize+1, 0);
+    
+    // Finalize chunk
     
     Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSize+1, chunkSize+1, 0, 0, 1, 1);
     
@@ -174,62 +218,49 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     return chunk;
 }
 
-bool ChunkManager::DestroyChunk(Chunk& chunkPtr) {
+bool ChunkManager::DestroyChunk(Chunk& chunk) {
     
-    Engine.Destroy<GameObject>( chunkPtr.gameObject );
-    Engine.Destroy<GameObject>( chunkPtr.staticObject );
+    Engine.Destroy<GameObject>( chunk.gameObject );
+    Engine.Destroy<GameObject>( chunk.staticObject );
     
-    MeshRenderer* chunkRenderer = chunkPtr.gameObject->GetComponent<MeshRenderer>();
-    MeshRenderer* staticRenderer = chunkPtr.staticObject->GetComponent<MeshRenderer>();
+    MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
+    MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
     
     Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
     Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
     
-    for (unsigned int a=0; a < chunkPtr.actorList.size(); a++) {
+    // Destroy water if it was generated
+    if (chunk.waterObject != nullptr) {
         
-        GameObject* actorObject = chunkPtr.actorList[a];
+        Engine.Destroy<GameObject>( chunk.waterObject );
         
-        Engine.Destroy<GameObject>( actorObject );
+        MeshRenderer* waterRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
+        
+        Engine.sceneMain->RemoveMeshRendererFromSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
     }
     
-    chunkPtr.actorList.clear();
+    Physics.DestroyRigidBody( chunk.rigidBody );
+    Physics.DestroyHeightFieldMap(chunk.meshCollider);
     
-    Physics.DestroyRigidBody( chunkPtr.rigidBody );
-    Physics.DestroyHeightFieldMap(chunkPtr.meshCollider);
+    // Wrangle any associated actors for saving
+    for (unsigned int i=0; i < actors.size(); i++) {
+        
+        GameObject* actorObject = actors[i];
+        glm::vec3 actorPos = actorObject->GetPosition();
+        glm::vec3 chunkPos = glm::vec3(chunk.x, 0, chunk.y);
+        
+        if (glm::distance(actorPos, chunkPos) < chunkSize ) 
+            KillActor(actorObject);
+        
+        continue;
+    }
+    
+    
+    // TODO: Send the save data into a threaded saving/loading system
+    
     
     return true;
 }
-
-
-bool ChunkManager::RemoveActorFromWorld(GameObject* actorObject) {
-    
-    unsigned int numberOfChunks = chunkList.size();
-    
-    for (unsigned int i=0; i < numberOfChunks; i++) {
-        
-        Chunk chunk = chunkList[i];
-        
-        unsigned int numberOfActors = chunk.actorList.size();
-        
-        for (unsigned int a=0; a < numberOfActors; a++) {
-            
-            GameObject* actorListObject = chunk.actorList[a];
-            
-            if (actorListObject == actorObject) {
-                
-                chunk.actorList.erase( chunk.actorList.begin() + a );
-                
-                return 1;
-            }
-            
-            continue;
-        }
-        
-    }
-    
-    return 0;
-}
-
 
 
 bool ChunkManager::SaveWorld(std::string worldname) {
@@ -252,31 +283,13 @@ bool ChunkManager::LoadWorld(std::string worldname) {
 
 void ChunkManager::ClearWorld(void) {
     
-    unsigned int numberOfChunks = chunkList.size();
+    for (unsigned int i=0; i < chunks.size(); i++) 
+        DestroyChunk( chunks[i] );
     
-    for (unsigned int i=0; i < numberOfChunks; i++) {
-        
-        Chunk chunkPtr = chunkList[i];
-        
-        MeshRenderer* chunkRenderer = chunkPtr.gameObject->GetComponent<MeshRenderer>();
-        MeshRenderer* staticRenderer = chunkPtr.staticObject->GetComponent<MeshRenderer>();
-        
-        Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
-        Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
-        
-        Engine.Destroy<GameObject>( chunkPtr.gameObject );
-        Engine.Destroy<GameObject>( chunkPtr.staticObject );
-        
-        Physics.DestroyRigidBody( chunkPtr.rigidBody );
-        Physics.DestroyHeightFieldMap(chunkPtr.meshCollider);
-        
-        if (chunkPtr.actorList.size() > 0) 
-            for (unsigned int a=0; a < chunkPtr.actorList.size(); a++) 
-                Engine.Destroy<GameObject>( chunkPtr.actorList[a] );
-        
-    }
+    for (unsigned int a=0; a < actors.size(); a++) 
+        actors[a]->Deactivate();
     
-    chunkList.clear();
+    chunks.clear();
     
     ChunkCounterX = 0;
     ChunkCounterZ = 0;
@@ -285,7 +298,74 @@ void ChunkManager::ClearWorld(void) {
 }
 
 
+GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
+    
+    GameObject* actorObject = nullptr;
+    
+    for (unsigned int a=0; a < actors.size(); a++) {
+        
+        if (actors[a]->isActive) 
+            continue;
+        
+        actorObject = actors[a];
+        actorObject->SetPosition(x, y, z);
+        actorObject->Activate();
+        
+        break;
+    }
+    
+    if (actorObject == nullptr) {
+        
+        actorObject = Engine.CreateAIActor( glm::vec3(x, y, z) );
+        
+        actors.push_back( actorObject );
+        
+    }
+    
+    return actorObject;
+}
 
-
-
-
+bool ChunkManager::KillActor(GameObject* actorObject) {
+    
+    Actor* ActorPtr = actorObject->GetComponent<Actor>();
+    
+    ActorPtr->SetName("");
+    ActorPtr->SetChanceToChangeDirection(0);
+    ActorPtr->SetChanceToFocusOnActor(0);
+    ActorPtr->SetChanceToStopWalking(0);
+    ActorPtr->SetChanceToWalk(0);
+    ActorPtr->SetTargetPoint(glm::vec3(0, 0, 0));
+    
+    ActorPtr->SetSpeed(0);
+    ActorPtr->SetSpeedMultiplier(0);
+    
+    ActorPtr->SetYouthScale(0);
+    ActorPtr->SetAdultScale(0);
+    
+    actorObject->Deactivate();
+    
+    return true;
+    
+    /*
+    
+    for (unsigned int i=0; i < actors.size(); i++) {
+        
+        GameObject* worldActorObject = actors[i];
+        
+        if (worldActorObject != actorObject) 
+            continue;
+        
+        mFreeActors.push_back( actorObject );
+        
+        actorObject->Deactivate();
+        
+        actors.erase( actors.begin() + i );
+        
+        return true;
+    }
+    
+    */
+    
+    return false;
+}
+    

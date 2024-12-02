@@ -8,12 +8,13 @@ void ChunkManager::Update(void) {
     glm::vec3 playerPosition = Engine.cameraController->GetPosition();
     playerPosition.y = 0;
     
+    
     //
     // Destroy chunks
     
-    for (unsigned int c=0; c < chunkList.size(); c++) {
+    for (unsigned int c=0; c < chunks.size(); c++) {
         
-        Chunk& chunkPtr = chunkList[ c ];
+        Chunk& chunkPtr = chunks[ c ];
         
         glm::vec3 chunkPos = glm::vec3(chunkPtr.x, 0, chunkPtr.y);
         
@@ -22,7 +23,7 @@ void ChunkManager::Update(void) {
         
         DestroyChunk( chunkPtr );
         
-        chunkList.erase( chunkList.begin() + c );
+        chunks.erase( chunks.begin() + c );
         
         continue;
     }
@@ -59,9 +60,9 @@ void ChunkManager::Update(void) {
             
             bool chunkFound = false;
             
-            for (unsigned int c=0; c < chunkList.size(); c++) {
+            for (unsigned int c=0; c < chunks.size(); c++) {
                 
-                Chunk chunkPtr = chunkList[c];
+                Chunk chunkPtr = chunks[c];
                 
                 if (glm::vec3(chunkPtr.x, 0, chunkPtr.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y)) {
                     
@@ -79,93 +80,9 @@ void ChunkManager::Update(void) {
             if (glm::distance(glm::vec3(chunkPosition.x, 0, chunkPosition.y), playerPosition) > (renderDistance * (chunkSize / 2))) 
                 continue;
             
-            
             Chunk chunk = CreateChunk(chunkPosition.x, chunkPosition.y);
             
-            chunkList.push_back( chunk );
-            
-            
-            
-            
-            // Generate chunk from perlin
-            
-            
-            
-            // Chunk color
-            
-            /*
-            
-            Color colorLow;
-            Color colorHigh;
-            
-            colorLow  = Colors.brown * Colors.green * Colors.MakeGrayScale(0.4f);
-            colorHigh = Colors.brown * Colors.MakeGrayScale(0.2f);
-            
-            Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize+1, chunkSize+1, colorLow, colorHigh, 0.024f);
-            
-            Engine.GenerateWaterTableFromHeightField(heightField, chunkSize+1, chunkSize+1, 0);
-            */
-            
-            
-            
-            // Water table
-            
-            /*
-            
-            chunk.waterObject = Engine.Create<GameObject>();
-            chunk.waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-            MeshRenderer* waterRenderer = chunk.waterObject->GetComponent<MeshRenderer>();
-            Transform* waterTransform = chunk.waterObject->GetComponent<Transform>();
-            
-            waterTransform->position = glm::vec3( chunkPosition.x, world.waterLevel, chunkPosition.y);
-            waterTransform->scale = glm::vec3( 16, 1, 16 );
-            
-            waterRenderer->mesh = Engine.Create<Mesh>();
-            waterRenderer->mesh->isShared = false;
-            waterRenderer->EnableFrustumCulling();
-            
-            float maxWaterLayers  = 40.0f;
-            float maxWaterSpacing = (1.0f / 3.0f);
-            
-            float layerThickness = 0.1f;
-            
-            for (float c=0.0f; c <= maxWaterLayers; c += maxWaterSpacing) {
-                
-                Color layerColor = world.waterColorHigh;
-                layerColor *= Colors.MakeGrayScale( -(c * (layerThickness * 32)) );
-                
-                layerColor *= 0.1;
-                
-                waterRenderer->mesh->AddPlain(0, 
-                                            (c - maxWaterLayers) + maxWaterSpacing, 
-                                            0, 
-                                            1, 1, 
-                                            layerColor);
-                
-            }
-            
-            waterRenderer->mesh->Load();
-            
-            
-            // Water material
-            waterRenderer->material = Engine.Create<Material>();
-            waterRenderer->material->isShared = false;
-            
-            waterRenderer->material->diffuse = Colors.MakeGrayScale(0.01f);
-            waterRenderer->material->ambient = Colors.MakeGrayScale(0.01f);
-            
-            waterRenderer->material->shader = Engine.shaders.water;
-            
-            Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
-            
-            // Water blending
-            waterRenderer->material->EnableBlending();
-            waterRenderer->material->DisableCulling();
-            
-            
-            */
-            
-            
+            chunks.push_back( chunk );
             
             continue;
         }
@@ -179,8 +96,10 @@ void ChunkManager::Update(void) {
 
 
 void DecodeGenome(Decoration& decor, Actor* actorPtr) {
+    
     if (decor.name == "Sheep")  {AI.genomes.Sheep( actorPtr );}
     if (decor.name == "Bear")   {AI.genomes.Bear( actorPtr );}
+    
     return;
 }
 
@@ -380,54 +299,13 @@ void ChunkManager::Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMe
                 // Actor generation
                 case 4: {
                     
-                    GameObject* actorObject = Engine.CreateAIActor( glm::vec3(from.x, 0, from.z) );
-                    
-                    chunk.actorList.push_back( actorObject );
+                    GameObject* actorObject = SpawnActor(from.x, 0, from.z);
                     
                     Actor* actor = actorObject->GetComponent<Actor>();
-                    
-                    if (actor == nullptr) 
-                        continue;
-                    
-                    actor->SetHeightPreferenceMin(world.waterLevel);
-                    actor->SetHeightPreferenceMax(40.0f);
                     
                     DecodeGenome(decor, actor);
                     
                     actor->SetAge( 1000 );
-                    
-                    // Generate youth
-                    if (Random.Range(0, 100) > 90) {
-                        
-                        unsigned int numberOfChildren = Random.Range(1, 3);
-                        
-                        for (unsigned int c=0; c < numberOfChildren; c++) {
-                            
-                            float offsetX = (Random.Range(0, 1) - Random.Range(0, 1));
-                            float offsetZ = (Random.Range(0, 1) - Random.Range(0, 1));
-                            
-                            GameObject* youthActorObject = Engine.CreateAIActor( glm::vec3(from.x + offsetX, 
-                                                                                           0, 
-                                                                                           from.z + offsetZ) );
-                            
-                            chunk.actorList.push_back( youthActorObject );
-                            
-                            Actor* youthActor = youthActorObject->GetComponent<Actor>();
-                            
-                            if (youthActor == nullptr) 
-                                continue;
-                            
-                            youthActor->SetHeightPreferenceMin(world.waterLevel);
-                            youthActor->SetHeightPreferenceMax(40.0f);
-                            
-                            DecodeGenome(decor, youthActor);
-                            
-                            youthActor->SetAge(0);
-                            
-                        }
-                        
-                        continue;
-                    }
                     
                     continue;
                 }
