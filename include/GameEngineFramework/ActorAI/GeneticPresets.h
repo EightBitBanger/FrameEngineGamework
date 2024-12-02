@@ -13,6 +13,9 @@ public:
     /// Inject a genome string into an actor.
     bool InjectGenome(Actor* actorSource, std::string genome);
     
+    /// Clear all the genes from an actor genome.
+    void ClearGenes(Actor* actorPtr);
+    
     // Mental models
     
     void PreyBase(Actor* targetActor);

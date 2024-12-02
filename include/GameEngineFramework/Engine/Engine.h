@@ -182,11 +182,9 @@ public:
     /// Initiates a height field grid array of points and set them to zero.
     void SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value);
     
-    /// Add a layer of perlin noise into a height field.
-    void AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ, int seed);
-    
-    /// Average a layer of perlin noise into a height field.
-    void AverageHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ, int seed);
+    /// Add a layer of perlin noise into a height field. The minimum 
+    /// height value will be returned.
+    float AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ, int seed);
     
     // Color field
     

@@ -24,6 +24,7 @@ public:
     
     friend class ActorSystem;
     friend class EngineSystemManager;
+    friend class GeneticPresets;
     
     /// Set the name of the actor.
     void SetName(std::string newName);
@@ -66,6 +67,9 @@ public:
     
     /// Get the position of the actor.
     glm::vec3 GetPosition(void);
+    
+    /// Set the position toward which the actor should point.
+    void SetTargetPoint(glm::vec3 position);
     
     /// Set the flag to update the actors genetics.
     void SetUpdateGeneticsFlag(void);
