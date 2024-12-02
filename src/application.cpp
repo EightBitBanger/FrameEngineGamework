@@ -135,7 +135,7 @@ void FuncSummon(std::vector<std::string> args) {
             
         }
         
-        chunkManager.chunkList[0].actorList.push_back( newActorObject );
+        //chunkManager.actors.push_back( newActorObject );
         
         continue;
     }
@@ -243,7 +243,7 @@ void Start() {
     
     Decoration decorGrass;
     decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 1500;
+    decorGrass.density = 4000;
     decorGrass.spawnHeightMaximum = 35;
     decorGrass.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
@@ -251,7 +251,7 @@ void Start() {
     
     Decoration decorTrees;
     decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 100;
+    decorTrees.density = 400;
     decorTrees.spawnHeightMaximum = 20;
     decorTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
@@ -259,7 +259,7 @@ void Start() {
     
     Decoration decorTreeHights;
     decorTreeHights.type = DECORATION_TREE;
-    decorTreeHights.density = 300;
+    decorTreeHights.density = 900;
     decorTreeHights.spawnHeightMaximum = 40;
     decorTreeHights.spawnHeightMinimum = 20;
     decorTreeHights.spawnStackHeightMin = 4;
@@ -287,24 +287,24 @@ void Start() {
     Decoration decorSheep;
     decorSheep.type = DECORATION_ACTOR;
     decorSheep.name = "Sheep";
-    decorSheep.density = 100;
+    decorSheep.density = 30;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = chunkManager.world.waterLevel;
     
     Decoration decorBear;
     decorBear.type = DECORATION_ACTOR;
     decorBear.name = "Bear";
-    decorBear.density = 60;
+    decorBear.density = 50;
     decorBear.spawnHeightMaximum = 40;
     decorBear.spawnHeightMinimum = 5;
     
     
     chunkManager.world.mDecorations.push_back(decorGrass);
-    chunkManager.world.mDecorations.push_back(decorTrees);
-    chunkManager.world.mDecorations.push_back(decorTreeHights);
+    //chunkManager.world.mDecorations.push_back(decorTrees);
+    //chunkManager.world.mDecorations.push_back(decorTreeHights);
     
-    chunkManager.world.mDecorations.push_back(decorWaterTrees);
-    chunkManager.world.mDecorations.push_back(decorWaterPlants);
+    //chunkManager.world.mDecorations.push_back(decorWaterTrees);
+    //chunkManager.world.mDecorations.push_back(decorWaterPlants);
     
     chunkManager.world.mDecorations.push_back(decorSheep);
     //chunkManager.world.mDecorations.push_back(decorBear);
@@ -345,7 +345,7 @@ void Start() {
     
     Perlin perlinFlatland;
     perlinFlatland.equation = 0;
-    perlinFlatland.heightMultuplier = 40;
+    perlinFlatland.heightMultuplier = 10;
     perlinFlatland.noiseWidth  = 0.007;
     perlinFlatland.noiseHeight = 0.007;
     
@@ -375,7 +375,7 @@ void Start() {
     
     // World rendering
     
-    chunkManager.renderDistance = 13;
+    chunkManager.renderDistance = 18;
     
     
     
@@ -425,9 +425,6 @@ void Run() {
     // Raycast from player
     //
     
-    //Engine.WriteDialog(1, Int.ToString( chunkManager.GetNumberOfChunks() ));
-    
-    
     // Move the player out of the way as we cant cast a ray from inside the collider...
     rp3d::RigidBody* rigidBody = Engine.cameraController->GetComponent<RigidBody>();
     rp3d::Transform bodyTransform = rigidBody->getTransform();
@@ -460,7 +457,7 @@ void Run() {
             
             targetGene = AI.genomes.ExtractGenome(hitActor);
             
-            std::string destGene = "gen<" + targetGene;
+            std::string destGene = "gene<" + targetGene + ">";
             
             Platform.SetClipboardText( destGene );
             
@@ -476,18 +473,28 @@ void Run() {
             
             std::string sourceGene = Platform.GetClipboardText();
             
+            if (sourceGene.size() == 0) 
+                return;
+            
+            // Remove end character
+            size_t pos = sourceGene.find(">");
+            if (pos != std::string::npos) 
+                sourceGene.erase(pos, 1);
+            
             std::vector<std::string> sourceArray = String.Explode(sourceGene, '<');
             
             if ((sourceArray[0][0] == 'g') & 
                 (sourceArray[0][1] == 'e') & 
-                (sourceArray[0][2] == 'n')) {
+                (sourceArray[0][2] == 'n') & 
+                (sourceArray[0][3] == 'e')) {
                 
-                GameObject* newActorObject = Engine.CreateAIActor( hit.point );
+                GameObject* newActorObject = chunkManager.SpawnActor( hit.point.x, hit.point.y, hit.point.z );
+                
                 GameObject* hitObject = (GameObject*)hit.gameObject;
-                Chunk chunkPtr = chunkManager.chunkList[0];
+                Chunk chunkPtr = chunkManager.chunks[0];
                 
                 Actor* newActor = newActorObject->GetComponent<Actor>();
-                chunkPtr.actorList.push_back(newActorObject);
+                chunkManager.actors.push_back(newActorObject);
                 
                 AI.genomes.PreyBase( newActor );
                 
@@ -509,13 +516,26 @@ void Run() {
             
             GameObject* hitObject = (GameObject*)hit.gameObject;
             
-            if (chunkManager.RemoveActorFromWorld( hitObject )) 
-                Engine.Destroy(hitObject);
+            chunkManager.KillActor( hitObject );
             
         }
         
     }
     
+    if (Input.CheckKeyPressed(VK_R)) {
+        
+        //chunkManager.ClearWorld();
+        //return;
+        
+        for (unsigned int i=0; i < chunkManager.actors.size(); i++) {
+            
+            //chunkManager.actors[i]->Deactivate();
+            
+            AI.genomes.Bear(chunkManager.actors[i]->GetComponent<Actor>());
+            
+        }
+        
+    }
     
     
     // Move the actor back into position as we are now finished casting rays...
@@ -729,9 +749,6 @@ void Run() {
     
     float forceAccelerate = 0.012f;
     float forceDecelerate = 0.015f;
-    
-    float forceMax = 30.86f;
-    
     
     Camera* mainCamera = Engine.sceneMain->camera;
     
