@@ -13,6 +13,9 @@
 
 #define IDI_ICON  101
 
+typedef BOOL (APIENTRY * PFNWGLSWAPINTERVALEXTPROC)(int interval);
+PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
+
 
 PlatformLayer::PlatformLayer() : 
     
@@ -287,6 +290,13 @@ GLenum PlatformLayer::SetRenderTarget(void) {
     
     wglMakeCurrent((HDC)deviceContext, (HGLRC)renderContext);
     
+    // Initiate glew after setting the render target
+    GLenum passed = glewInit();
+    
+    // Enable VSYNC
+    //wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+    //wglSwapIntervalEXT(1);
+    
     //
     // Log hardware details
     
@@ -321,6 +331,5 @@ GLenum PlatformLayer::SetRenderTarget(void) {
     Log.WriteLn();
 #endif
     
-    // Initiate glew after setting the render target
-    return glewInit();
+    return passed;
 }

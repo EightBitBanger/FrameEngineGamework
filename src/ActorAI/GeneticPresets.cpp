@@ -10,7 +10,7 @@ extern NumberGeneration  Random;
 extern ColorPreset       Colors;
 extern FloatType         Float;
 extern StringType        String;
-
+extern RenderSystem      Renderer;
 
 std::string GeneticPresets::ExtractGenome(Actor* actorSource) {
     
@@ -151,6 +151,13 @@ bool GeneticPresets::InjectGenome(Actor* actorSource, std::string genome) {
     return true;
 }
 
+void GeneticPresets::ClearGenes(Actor* actorPtr) {
+    
+    actorPtr->mGenes.clear();
+    
+    return;
+}
+
 
 // Mental models
 //
@@ -172,6 +179,8 @@ void GeneticPresets::PreyBase(Actor* targetActor) {
 //
 
 void GeneticPresets::Sheep(Actor* targetActor) {
+    
+    ClearGenes(targetActor);
     
     targetActor->SetName("Sheep");
     
@@ -307,6 +316,8 @@ void GeneticPresets::Sheep(Actor* targetActor) {
 
 
 void GeneticPresets::Bear(Actor* targetActor) {
+    
+    ClearGenes(targetActor);
     
     targetActor->SetName("Bear");
     

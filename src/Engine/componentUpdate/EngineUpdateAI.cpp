@@ -34,50 +34,6 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
     
     UpdateActorPhysics(index);
     
-    //
-    // Optimize out actor meshes at distance
-    
-    // Remove from scene
-    if (mStreamBuffer[index].actor->mDistance > AI.GetActorDetailDistance() * 1.4f) {
-        
-        if (mStreamBuffer[index].actor->mIsActorActiveInScene) {
-            
-            mStreamBuffer[index].actor->mIsActorActiveInScene = false;
-            
-            mStreamBuffer[index].actor->SetUpdateGeneticsFlag();
-            
-            for (unsigned int a=1; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
-                
-                MeshRenderer* meshRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
-                
-                sceneMain->RemoveMeshRendererFromSceneRoot( meshRenderer, RENDER_QUEUE_GEOMETRY );
-                
-            }
-            
-        }
-        
-    }
-    
-    // Add to scene
-    if (mStreamBuffer[index].actor->mDistance < AI.GetActorDetailDistance()) {
-        
-        if (!mStreamBuffer[index].actor->mIsActorActiveInScene) {
-            
-            mStreamBuffer[index].actor->mIsActorActiveInScene = true;
-            
-            for (unsigned int a=1; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
-                
-                MeshRenderer* meshRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
-                
-                sceneMain->AddMeshRendererToSceneRoot( meshRenderer, RENDER_QUEUE_GEOMETRY );
-                
-            }
-            
-        }
-        
-    }
-    
-    
     
     // Check walking state
     if (mStreamBuffer[index].actor->mIsWalking) {

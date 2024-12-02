@@ -43,7 +43,6 @@ void EngineSystemManager::UpdateActorTargetRotation(unsigned int index) {
             mStreamBuffer[index].actor->mRotateTo.y -= 360;
     }
     
-    //
     // Check actor target direction
     
     // Wrap euler rotations

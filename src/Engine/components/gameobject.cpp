@@ -189,7 +189,6 @@ void GameObject::SetPosition(glm::vec3 newPosition) {
 
 void GameObject::Activate(void) {
     
-    renderDistance = -1;
     isActive = true;
     
     for (unsigned int i=0; i < mComponentList.size(); i++) {
@@ -227,7 +226,6 @@ void GameObject::Activate(void) {
 
 void GameObject::Deactivate(void) {
     
-    renderDistance = -1;
     isActive = false;
     
     for (unsigned int i=0; i < mComponentList.size(); i++) {

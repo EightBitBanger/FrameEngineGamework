@@ -27,9 +27,6 @@ ENGINE_API extern PlatformLayer     Platform;
 
 void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     
-    //
-    // Update actor physics
-    
     if (mStreamBuffer[index].rigidBody == nullptr) 
         return;
     
@@ -57,13 +54,36 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     if (!Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) {
         
         // Apply some falling action
-        actorVelocity.y -= 0.01;
+        //actorVelocity.y -= 0.01;
         
         // Terminal velocity
-        if (actorVelocity.y < -1) 
-            actorVelocity.y = -1;
+        //if (actorVelocity.y < -1) 
+        //    actorVelocity.y = -1;
+        
+        actorVelocity = glm::vec3(0, 0, 0);
+        
+        /*
+        
+        unsigned int numberOfRenderers = mStreamBuffer[index].actor->GetNumberOfMeshRenderers();
+        for (unsigned int i=0; i < numberOfRenderers; i++) {
+            
+            Material* actorMaterial = mStreamBuffer[index].actor->GetMeshRendererAtIndex(i)->material;
+            
+            actorMaterial->ambient = Colors.black;
+            
+        }
+        
+        */
         
     } else {
+        
+        unsigned int numberOfRenderers = mStreamBuffer[index].actor->GetNumberOfMeshRenderers();
+        for (unsigned int i=0; i < numberOfRenderers; i++) {
+            
+            Material* actorMaterial = mStreamBuffer[index].actor->GetMeshRendererAtIndex(i)->material;
+            
+            actorMaterial->ambient = Colors.white;
+        }
         
         // Standing on ground
         actorPosition.y   = hit.point.y;

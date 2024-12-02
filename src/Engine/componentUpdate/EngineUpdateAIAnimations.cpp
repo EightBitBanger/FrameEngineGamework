@@ -81,9 +81,6 @@ void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
             continue;
         }
         
-        if (!mStreamBuffer[index].actor->mIsActorActiveInScene) 
-            continue;
-        
         // Rotate current animation state
         glm::vec4 animationFactor(mStreamBuffer[index].actor->mGenes[a].animationAxis.x, 
                                   mStreamBuffer[index].actor->mGenes[a].animationAxis.y, 

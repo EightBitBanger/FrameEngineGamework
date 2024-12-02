@@ -81,13 +81,14 @@ void EngineSystemManager::Update(void) {
         mProfilerText[9]->text = "Mesh ------------ " + Int.ToString( Renderer.GetNumberOfMeshes() );
         mProfilerText[10]->text = "Material ------- " + Int.ToString( Renderer.GetNumberOfMaterials() );
         mProfilerText[11]->text = "RigidBody ------ " + Int.ToString( Physics.world->getNbRigidBodies() );
+        mProfilerText[12]->text = "Actors --------- " + Int.ToString( AI.GetNumberOfActors() );
         
-        mProfilerText[13]->text = "x - " + Int.ToString( cameraController->GetComponent<Transform>()->position.x );
-        mProfilerText[14]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );
-        mProfilerText[15]->text = "z - " + Int.ToString( cameraController->GetComponent<Transform>()->position.z );
+        mProfilerText[14]->text = "x - " + Int.ToString( cameraController->GetComponent<Transform>()->position.x );
+        mProfilerText[15]->text = "y - " + Int.ToString( cameraController->GetComponent<Transform>()->position.y );
+        mProfilerText[16]->text = "z - " + Int.ToString( cameraController->GetComponent<Transform>()->position.z );
         
-        mProfilerText[17]->text = "Camera Yaw ---- " + Float.ToString( sceneMain->camera->lookAngle.x );
-        mProfilerText[18]->text = "Camera Pitch -- " + Float.ToString( sceneMain->camera->lookAngle.y );
+        mProfilerText[18]->text = "Camera Yaw ---- " + Float.ToString( sceneMain->camera->lookAngle.x );
+        mProfilerText[19]->text = "Camera Pitch -- " + Float.ToString( sceneMain->camera->lookAngle.y );
         
     }
     

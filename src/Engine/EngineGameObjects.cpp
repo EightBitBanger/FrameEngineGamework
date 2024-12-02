@@ -125,12 +125,7 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     newGameObject->AddComponent( CreateComponent( Components.Actor ) );
     newGameObject->AddComponent( CreateComponent( Components.RigidBody ) );
     
-    newGameObject->renderDistance = 300;
-    
-    Actor* actorPtr = newGameObject->GetComponent<Actor>();
-    
-    actorPtr->mPosition    = position;
-    actorPtr->mTargetPoint = position;
+    newGameObject->renderDistance = -1;
     
     newGameObject->SetPosition(position);
     

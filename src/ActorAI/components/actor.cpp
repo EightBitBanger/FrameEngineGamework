@@ -169,6 +169,11 @@ glm::vec3 Actor::GetPosition(void) {
     return position;
 }
 
+void Actor::SetTargetPoint(glm::vec3 position) {
+    mTargetPoint = position;
+    return;
+}
+
 unsigned int Actor::GetNumberOfMeshRenderers(void) {
     return mGeneticRenderers.size();
 }

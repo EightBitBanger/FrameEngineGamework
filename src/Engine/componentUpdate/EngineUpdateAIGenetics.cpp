@@ -29,20 +29,11 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
     if (!mStreamBuffer[index].actor->mDoUpdateGenetics) 
         return;
     
-    int numberOfGenes = mStreamBuffer[index].actor->GetNumberOfGenes();
-    
-    //
     // Destroy and clear old genetic renderers
-    
-    mStreamBuffer[index].actor->mIsActorActiveInScene = false;
     
     for (unsigned int a=0; a < mStreamBuffer[index].actor->mGeneticRenderers.size(); a++) {
         
         MeshRenderer* geneRenderer = mStreamBuffer[index].actor->mGeneticRenderers[a];
-        
-        // Destroy old material
-        if (geneRenderer->material != nullptr) 
-            Renderer.DestroyMaterial(geneRenderer->material);
         
         sceneMain->RemoveMeshRendererFromSceneRoot( geneRenderer, RENDER_QUEUE_GEOMETRY );
         
@@ -55,6 +46,7 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
     mStreamBuffer[index].actor->mAnimationStates.clear();
     
     // Destroy colliders
+    
     if (mStreamBuffer[index].rigidBody != nullptr) {
         
         rp3d::RigidBody* rigidBody = mStreamBuffer[index].rigidBody;
@@ -76,9 +68,9 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
     }
     
     
-    //
     // Create and express genetic elements
-    //
+    
+    int numberOfGenes = mStreamBuffer[index].actor->GetNumberOfGenes();
     
     for (int a=0; a < numberOfGenes; a++) {
         
@@ -88,12 +80,14 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         // Generate a new mesh renderer for the gene
         
         Material* newMaterial = Renderer.CreateMaterial();
-        newMaterial->shader = shaders.color;
+        newMaterial->isShared = false;
+        
         newMaterial->diffuse.r = mStreamBuffer[index].actor->mGenes[a].color.x;
         newMaterial->diffuse.g = mStreamBuffer[index].actor->mGenes[a].color.y;
         newMaterial->diffuse.b = mStreamBuffer[index].actor->mGenes[a].color.z;
-        
         newMaterial->ambient = Colors.white;
+        
+        newMaterial->shader = shaders.color;
         
         newMaterial->DisableBlending();
         newMaterial->EnableCulling();
@@ -103,6 +97,7 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
         newRenderer->isActive = false;
         
+        // TODO: Allow different mesh types
         newRenderer->mesh     = meshes.cube;
         newRenderer->material = newMaterial;
         
@@ -157,8 +152,7 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         mStreamBuffer[index].actor->mGeneticRenderers.push_back( newRenderer );
         mStreamBuffer[index].actor->mAnimationStates .push_back( orientation );
         
-        if (a == 0) 
-            sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_GEOMETRY );
+        sceneMain->AddMeshRendererToSceneRoot( newRenderer, RENDER_QUEUE_GEOMETRY );
         
         continue;
     }

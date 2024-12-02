@@ -105,9 +105,10 @@ void EngineSystemManager::SetColorFieldValues(glm::vec3* colorField, unsigned in
     return;
 }
 
-void EngineSystemManager::AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
+float EngineSystemManager::AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
                                                         float noiseWidth, float noiseHeight, 
                                                         float noiseMul, int offsetX, int offsetZ, int seed) {
+    float minimumHeight = 1000.0f;
     
     for (unsigned int x=0; x < width; x ++) {
         
@@ -122,33 +123,8 @@ void EngineSystemManager::AddHeightFieldFromPerlinNoise(float* heightField, unsi
             
             heightField[index] += Math.Round( (noise * 10.0) ) * 0.1;
             
-            continue;
-        }
-        
-        continue;
-    }
-    
-    return;
-}
-
-void EngineSystemManager::AverageHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
-                                                            float noiseWidth, float noiseHeight, 
-                                                            float noiseMul, int offsetX, int offsetZ, int seed) {
-    
-    for (unsigned int x=0; x < width; x ++) {
-        
-        for (unsigned int z=0; z < height; z ++) {
-            
-            float xCoord = ((float)x + offsetX) * noiseWidth;
-            float zCoord = ((float)z + offsetZ) * noiseHeight;
-            
-            float noise = Random.Perlin(xCoord, 0, zCoord, seed) * noiseMul;
-            
-            unsigned int index = z * width + x;
-            
-            float currentHeight = (heightField[index] + noise) / 2;
-            
-            heightField[index] = Math.Round( (currentHeight * 10.0) ) * 0.1;
+            if (heightField[index] < minimumHeight)
+                minimumHeight = heightField[index];
             
             continue;
         }
@@ -156,7 +132,7 @@ void EngineSystemManager::AverageHeightFieldFromPerlinNoise(float* heightField, 
         continue;
     }
     
-    return;
+    return minimumHeight;
 }
 
 void EngineSystemManager::GenerateWaterTableFromHeightField(float* heightField, unsigned int width, unsigned int height, float tableHeight) {
