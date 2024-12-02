@@ -119,9 +119,12 @@ public:
     
     Chunk CreateChunk(float x, float y);
     
-    bool DestroyChunk(Chunk& chunkPtr);
+    bool DestroyChunk(Chunk& chunk);
     
-    bool RemoveActorFromWorld(GameObject* actorObject);
+    GameObject* SpawnActor(float x, float y, float z);
+    
+    bool KillActor(GameObject* actorObject);
+    
     
     void Initiate(void);
     
@@ -134,7 +137,10 @@ public:
     std::vector<Decoration> decoration;
     std::vector<Perlin> perlin;
     
-    std::vector<Chunk> chunkList;
+    std::vector<Chunk> chunks;
+    
+    std::vector<GameObject*> actors;
+
     
 private:
     

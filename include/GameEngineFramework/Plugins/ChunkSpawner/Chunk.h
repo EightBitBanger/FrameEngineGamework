@@ -8,8 +8,10 @@ class ENGINE_API Chunk {
     
 public:
     
-    int x;
-    int y;
+    Chunk();
+    
+    int32_t x;
+    int32_t y;
     
     GameObject* gameObject;
     GameObject* staticObject;
@@ -20,8 +22,6 @@ public:
     rp3d::Collider* bodyCollider;
     
     MeshCollider* meshCollider;
-    
-    std::vector<GameObject*> actorList;
     
 };
 
