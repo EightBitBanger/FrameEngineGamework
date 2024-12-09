@@ -44,6 +44,7 @@ public:
     bool inheritParentScale;
     
     Transform();
+    Transform(glm::vec3 init_position);
     
     /// Assignment
     void operator= (const Transform& transform);
