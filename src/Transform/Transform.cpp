@@ -19,6 +19,24 @@ Transform::Transform() :
 {
 }
 
+Transform::Transform(glm::vec3 init_position) : 
+    position( init_position ),
+    rotation(glm::identity<glm::quat>()),
+    scale(glm::vec3(1.0f, 1.0f, 1.0f)),
+    
+    localPosition(glm::vec3(0.0f, 0.0f, 0.0f)),
+    localRotation(glm::identity<glm::quat>()),
+    localScale(glm::vec3(1.0f, 1.0f, 1.0f)),
+    
+    matrix(glm::mat4(0.0f)),
+    
+    parent(nullptr),
+    
+    inheritParentRotation(true),
+    inheritParentScale(true)
+{
+}
+
 void Transform::operator= (const Transform& transform) {
     this->position  = transform.position;
     this->rotation  = transform.rotation;
