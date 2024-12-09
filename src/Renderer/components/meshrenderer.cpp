@@ -5,6 +5,7 @@ MeshRenderer::MeshRenderer() :
     isActive(true),
     mesh(nullptr),
     material(nullptr),
+    transform(Transform()),
     mDoCulling(false)
 {
 }
