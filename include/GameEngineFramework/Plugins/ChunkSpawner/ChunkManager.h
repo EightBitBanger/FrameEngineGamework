@@ -9,6 +9,8 @@ class ENGINE_API WorldGeneration {
     
 public:
     
+    std::string name;
+    
     float snowCapHeight;
     
     Color waterColorLow;
@@ -52,6 +54,8 @@ public:
     
     
     WorldGeneration() :
+        name("Default world"),
+        
         snowCapHeight(60.0f),
         
         waterColorLow(Colors.black),
@@ -110,9 +114,13 @@ public:
     
     ChunkManager();
     
-    bool SaveWorld(std::string worldname);
+    bool SaveChunk(Chunk& chunk);
     
-    bool LoadWorld(std::string worldname);
+    bool LoadChunk(Chunk& chunk);
+    
+    bool SaveWorld(void);
+    
+    bool LoadWorld(void);
     
     void ClearWorld(void);
     
