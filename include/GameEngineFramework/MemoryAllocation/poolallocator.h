@@ -419,14 +419,12 @@ public:
         
 #endif
         
+        return;
     }
     
     /** Forces a memory dump. Must #define ENABLE_CRASH_DUMP__. */
     void ForceCrashDump(const char* FileName) {
         
-#ifdef  ENABLE_CRASH_DUMP__
-        
-        std::string crashDumpFile = "crashdump.txt";
         std::fstream fDump;
         fDump.open(FileName, std::fstream::trunc | std::fstream::out);
         
@@ -458,6 +456,11 @@ public:
                     T* poolRef = &poolPtr[f];
                     fDump << " " << f << " " << poolRef << "\n";
                     
+                    char* charPtr = (char*)poolPtr;
+                    
+                    for (unsigned int z=0; z < sizeof(T); z++) 
+                        fDump << &charPtr[z];
+                    
                 }
                 
             }
@@ -466,8 +469,7 @@ public:
         
         fDump.close();
         
-#endif
-        
+        return;
     }
     
 };
