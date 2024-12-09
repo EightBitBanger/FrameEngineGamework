@@ -401,6 +401,8 @@ private:
     void UpdateActorGenetics(unsigned int index);
     void UpdateActorAnimation(unsigned int index);
     void UpdateActorPhysics(unsigned int index);
+    void ExpressActorGenetics(unsigned int index);
+    
     
     // List of active game objects
     std::vector<GameObject*>  mGameObjectActive;

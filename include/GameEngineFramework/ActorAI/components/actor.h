@@ -72,7 +72,10 @@ public:
     void SetTargetPoint(glm::vec3 position);
     
     /// Set the flag to update the actors genetics.
-    void SetUpdateGeneticsFlag(void);
+    void SetGeneticUpdateFlag(void);
+    
+    /// Set the flag to re-express the genome.
+    void SetGeneticExpressionFlag(void);
     
     /// Get the number of mesh renderers associated with this actor.
     unsigned int GetNumberOfMeshRenderers(void);
@@ -92,7 +95,6 @@ public:
     /// Get the user data pointer.
     void* GetUserDataB(void);
     
-    
     // Genetics
     
     /// Add a new gene to the actors genome. The index location will be returned.
@@ -100,6 +102,9 @@ public:
     
     /// Remove a gene from the actors genome.
     void RemoveGene(unsigned int index);
+    
+    /// Clear all the genes in this actors genome.
+    void ClearGenome(void);
     
     /// Get the number of genes in the genome.
     unsigned int GetNumberOfGenes(void);
@@ -114,6 +119,9 @@ public:
     
     /// Remove a weighted layer from the neural network by the given index location.
     void RemoveWeightedLayer(unsigned int index);
+    
+    /// Clear neural layers.
+    void ClearWeightedLayers(void);
     
     /// Get the number of weighted layers in the neural network.
     unsigned int GetNumberOfWeightedLayers(void);
@@ -187,6 +195,9 @@ public:
     
     /// Remove a memory from this actor.
     bool RemoveMemory(std::string memory);
+    
+    /// Clear all the actor memories.
+    void ClearMemories(void);
     
     /// Check if a memory exists in this actor.
     bool CheckMemoryExists(std::string memory);
@@ -262,8 +273,11 @@ private:
     // Is this actor active in the simulation
     bool mIsActive;
     
-    // Should the genetic data be re-expressed
+    // Should the genetics be re constructed
     bool mDoUpdateGenetics;
+    
+    // Should the genetics be re-expressed
+    bool mDoReexpressGenetics;
     
     
     // Is the actor walking
