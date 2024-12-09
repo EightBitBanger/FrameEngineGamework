@@ -1,5 +1,8 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
+unsigned int actorIndex = 0;
+unsigned int chunkIndex = 0;
+
 void ChunkManager::Update(void) {
     
     if (Engine.cameraController == nullptr) 
@@ -8,24 +11,60 @@ void ChunkManager::Update(void) {
     glm::vec3 playerPosition = Engine.cameraController->GetPosition();
     playerPosition.y = 0;
     
+    //
+    // Update actors
+    
+    unsigned int numberOfActors = actors.size();
+    
+    if (numberOfActors > 0) {
+        
+        GameObject* actorObject = actors[actorIndex];
+        
+        Actor* actorPtr = actorObject->GetComponent<Actor>();
+        
+        glm::vec3 actorPos = actorPtr->GetPosition();
+        
+        if (glm::distance(actorPos, playerPosition) < (renderDistance * chunkSize) * 0.9f ) 
+            actorPtr->SetGeneticExpressionFlag();
+        
+        actorIndex++;
+        
+        if (actorIndex >= numberOfActors) 
+            actorIndex = 0;
+        
+    }
     
     //
     // Destroy chunks
     
-    for (unsigned int c=0; c < chunks.size(); c++) {
+    unsigned int numberOfChunks = chunks.size();
+    
+    if (numberOfChunks > 0) {
         
-        Chunk& chunkPtr = chunks[ c ];
-        
-        glm::vec3 chunkPos = glm::vec3(chunkPtr.x, 0, chunkPtr.y);
-        
-        if (glm::distance(chunkPos, playerPosition) < (renderDistance * chunkSize) * 1.024f ) 
+        for (unsigned int c=0; c < 8; c++) {
+            
+            Chunk& chunkPtr = chunks[chunkIndex];
+            
+            glm::vec3 chunkPos = glm::vec3(chunkPtr.x, 0, chunkPtr.y);
+            
+            if (glm::distance(chunkPos, playerPosition) > (renderDistance * chunkSize) * 1.024f ) {
+                
+                SaveChunk( chunkPtr );
+                
+                DestroyChunk( chunkPtr );
+                
+                chunks.erase( chunks.begin() + chunkIndex );
+                
+            }
+            
+            chunkIndex++;
+            
+            if (chunkIndex >= numberOfActors) 
+                chunkIndex = 0;
+            
             continue;
+        }
         
-        DestroyChunk( chunkPtr );
-        
-        chunks.erase( chunks.begin() + c );
-        
-        continue;
     }
     
     

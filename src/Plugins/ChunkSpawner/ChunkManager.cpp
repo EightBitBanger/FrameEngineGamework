@@ -1,6 +1,5 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
-
 ChunkManager::ChunkManager() : 
     
     renderDistance(8),
@@ -60,6 +59,9 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     chunk.gameObject = Engine.Create<GameObject>();
     chunk.staticObject = Engine.Create<GameObject>();
+    
+    chunk.gameObject->renderDistance   = renderDistance * chunkSize * 1.2f;
+    chunk.staticObject->renderDistance = renderDistance * chunkSize * 0.8f;
     
     // Add renderers
     chunk.gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
@@ -141,6 +143,8 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     if (min < (world.waterLevel - 32)) {
         
         chunk.waterObject = Engine.Create<GameObject>();
+        
+        chunk.waterObject->renderDistance = renderDistance * chunkSize * 0.9;
         
         chunk.waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
         MeshRenderer* waterRenderer = chunk.waterObject->GetComponent<MeshRenderer>();
@@ -243,27 +247,77 @@ bool ChunkManager::DestroyChunk(Chunk& chunk) {
     Physics.DestroyHeightFieldMap(chunk.meshCollider);
     
     // Wrangle any associated actors for saving
+    
     for (unsigned int i=0; i < actors.size(); i++) {
         
         GameObject* actorObject = actors[i];
         glm::vec3 actorPos = actorObject->GetPosition();
         glm::vec3 chunkPos = glm::vec3(chunk.x, 0, chunk.y);
         
-        if (glm::distance(actorPos, chunkPos) < chunkSize ) 
+        actorPos.y = 0;
+        
+        if (glm::distance(actorPos, chunkPos) <= chunkSize * 3.0f) 
             KillActor(actorObject);
+        
+        // TODO: Send the save data into a threaded saving/loading system
         
         continue;
     }
-    
-    
-    // TODO: Send the save data into a threaded saving/loading system
-    
     
     return true;
 }
 
 
-bool ChunkManager::SaveWorld(std::string worldname) {
+
+
+bool ChunkManager::SaveChunk(Chunk& chunk) {
+    
+    std::string chunkPos = Int.ToString( chunk.x ) + "_" + Int.ToString( chunk.y );
+    std::string worldChunks = "worlds/" + world.name + "/chunks";
+    
+    std::string chunkName = worldChunks + "/" + chunkPos;
+    
+    std::string buffer = "";
+    
+    unsigned int numberOfActors = actors.size();
+    
+    for (unsigned int a=0; a < numberOfActors; a++) {
+        
+        GameObject* actorObject = actors[a];
+        
+        glm::vec3 actorPos = actorObject->GetPosition();
+        
+        // Check actor within chunk bounds
+        int chunkArea = chunkSize * 2;
+        
+        if ( ((actorPos.x > (chunk.x + chunkArea)) | (actorPos.x < (chunk.x - chunkArea))) | 
+             ((actorPos.z > (chunk.y + chunkArea)) | (actorPos.z < (chunk.y - chunkArea))) ) {
+            continue;
+        }
+        
+        Actor* actorPtr = actorObject->GetComponent<Actor>();
+        
+        std::string actorPosStr = Float.ToString(actorPos.x) + "~" + 
+                                  Float.ToString(actorPos.y) + "~" + 
+                                  Float.ToString(actorPos.z) + "~";
+        
+        std::string actorGenome = AI.genomes.ExtractGenome(actorPtr);
+        
+        buffer += actorPosStr + actorGenome + '\n';
+        
+        KillActor( actorObject );
+        
+        continue;
+    }
+    
+    unsigned int bufferSz = buffer.size();
+    
+    Serializer.Serialize(chunkName, (void*)buffer.data(), bufferSz);
+    
+    return 0;
+}
+
+bool ChunkManager::LoadChunk(Chunk& chunk) {
     
     
     
@@ -272,7 +326,36 @@ bool ChunkManager::SaveWorld(std::string worldname) {
     return 0;
 }
 
-bool ChunkManager::LoadWorld(std::string worldname) {
+
+
+bool ChunkManager::SaveWorld(void) {
+    
+    std::string worldName   = "worlds/" + world.name;
+    std::string worldChunks = "worlds/" + world.name + "/chunks";
+    
+    // Check world directory structure exists
+    if (!Directory.CheckExists(worldName)) 
+        Directory.Create(worldName);
+    if (!Directory.CheckExists(worldChunks)) 
+        Directory.Create(worldChunks);
+    
+    // Save world chunks
+    
+    unsigned int numberOfChunks = chunks.size();
+    
+    for (unsigned int c=0; c < numberOfChunks; c++) {
+        
+        Chunk chunkPtr = chunks[c];
+        
+        SaveChunk( chunkPtr );
+        
+        continue;
+    }
+    
+    return 1;
+}
+
+bool ChunkManager::LoadWorld(void) {
     
     
     
@@ -309,7 +392,11 @@ GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
         
         actorObject = actors[a];
         actorObject->SetPosition(x, y, z);
+        
         actorObject->Activate();
+        
+        Actor* actorPtr = actorObject->GetComponent<Actor>();
+        actorPtr->SetTargetPoint(glm::vec3(x, y, z));
         
         break;
     }
@@ -320,6 +407,9 @@ GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
         
         actors.push_back( actorObject );
         
+        Actor* actorPtr = actorObject->GetComponent<Actor>();
+        actorPtr->SetTargetPoint(glm::vec3(x, y, z));
+        
     }
     
     return actorObject;
@@ -327,45 +417,43 @@ GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
 
 bool ChunkManager::KillActor(GameObject* actorObject) {
     
-    Actor* ActorPtr = actorObject->GetComponent<Actor>();
-    
-    ActorPtr->SetName("");
-    ActorPtr->SetChanceToChangeDirection(0);
-    ActorPtr->SetChanceToFocusOnActor(0);
-    ActorPtr->SetChanceToStopWalking(0);
-    ActorPtr->SetChanceToWalk(0);
-    ActorPtr->SetTargetPoint(glm::vec3(0, 0, 0));
-    
-    ActorPtr->SetSpeed(0);
-    ActorPtr->SetSpeedMultiplier(0);
-    
-    ActorPtr->SetYouthScale(0);
-    ActorPtr->SetAdultScale(0);
+    Actor* actorPtr = actorObject->GetComponent<Actor>();
     
     actorObject->Deactivate();
     
-    return true;
+    actorPtr->ClearGenome();
     
-    /*
+    if (actorPtr == nullptr) 
+        return false;
     
-    for (unsigned int i=0; i < actors.size(); i++) {
+    actorPtr->SetName("");
+    actorPtr->SetChanceToChangeDirection(0);
+    actorPtr->SetChanceToFocusOnActor(0);
+    actorPtr->SetChanceToStopWalking(0);
+    actorPtr->SetChanceToWalk(0);
+    actorPtr->SetTargetPoint(glm::vec3(0, 0, 0));
+    
+    actorPtr->SetSpeed(0);
+    actorPtr->SetSpeedMultiplier(0);
+    
+    actorPtr->SetYouthScale(0);
+    actorPtr->SetAdultScale(0);
+    
+    actorPtr->ClearGenome();
+    actorPtr->ClearMemories();
+    actorPtr->ClearWeightedLayers();
+    
+    for (unsigned int a=0; a < actors.size(); a++) {
         
-        GameObject* worldActorObject = actors[i];
+        if (actors[a] == actorObject) {
+            
+            actors.erase( actors.begin() + a );
+            
+            break;
+        }
         
-        if (worldActorObject != actorObject) 
-            continue;
-        
-        mFreeActors.push_back( actorObject );
-        
-        actorObject->Deactivate();
-        
-        actors.erase( actors.begin() + i );
-        
-        return true;
     }
     
-    */
-    
-    return false;
+    return true;
 }
     
