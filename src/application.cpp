@@ -42,16 +42,14 @@ void FuncList(std::vector<std::string> args) {
 // Save world
 void FuncSave(std::vector<std::string> args) {
     
-    if (chunkManager.SaveWorld( args[0] )) {
+    if (chunkManager.SaveWorld()) {
         
         Engine.Print("World saved");
-        
-        //chunkManager.worldName = args[0];
         
         return;
     }
     
-    Engine.Print("Error saving world");
+    Engine.Print("World save error: " + chunkManager.world.name);
     
     return;
 }
@@ -59,14 +57,27 @@ void FuncSave(std::vector<std::string> args) {
 // Load world
 void FuncLoad(std::vector<std::string> args) {
     
-    if (chunkManager.LoadWorld( args[0] )) {
+    if (chunkManager.LoadWorld()) {
         
         Engine.Print("World loaded");
         
         return;
     }
     
-    Engine.Print("Error loading world");
+    Engine.Print("World not found: " + chunkManager.world.name);
+    
+    return;
+}
+
+// Set world name
+void FuncName(std::vector<std::string> args) {
+    
+    if (args[0][0] > 0x20) 
+        chunkManager.world.name = args[0];
+    
+    std::string worldName = "Name: " + chunkManager.world.name;
+    
+    Engine.Print(worldName);
     
     return;
 }
@@ -159,6 +170,7 @@ void Start() {
     // Load console functions
     Engine.ConsoleRegisterCommand("summon",  FuncSummon);
     Engine.ConsoleRegisterCommand("list",    FuncList);
+    Engine.ConsoleRegisterCommand("name",    FuncName);
     Engine.ConsoleRegisterCommand("save",    FuncSave);
     Engine.ConsoleRegisterCommand("load",    FuncLoad);
     Engine.ConsoleRegisterCommand("clear",   FuncClear);
@@ -243,7 +255,7 @@ void Start() {
     
     Decoration decorGrass;
     decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 4000;
+    decorGrass.density = 8000;
     decorGrass.spawnHeightMaximum = 35;
     decorGrass.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
@@ -251,7 +263,7 @@ void Start() {
     
     Decoration decorTrees;
     decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 400;
+    decorTrees.density = 800;
     decorTrees.spawnHeightMaximum = 20;
     decorTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
@@ -259,24 +271,17 @@ void Start() {
     
     Decoration decorTreeHights;
     decorTreeHights.type = DECORATION_TREE;
-    decorTreeHights.density = 900;
+    decorTreeHights.density = 1700;
     decorTreeHights.spawnHeightMaximum = 40;
     decorTreeHights.spawnHeightMinimum = 20;
     decorTreeHights.spawnStackHeightMin = 4;
     decorTreeHights.spawnStackHeightMax = 8;
     
     // Water adjacent plants
-    Decoration decorWaterTrees;
-    decorWaterTrees.type = DECORATION_TREE;
-    decorWaterTrees.density = 70;
-    decorWaterTrees.spawnHeightMaximum = chunkManager.world.waterLevel + 10;
-    decorWaterTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
-    decorWaterTrees.spawnStackHeightMin = 2;
-    decorWaterTrees.spawnStackHeightMax = 4;
     
     Decoration decorWaterPlants;
     decorWaterPlants.type = DECORATION_GRASS_THIN;
-    decorWaterPlants.density = 100;
+    decorWaterPlants.density = 3000;
     decorWaterPlants.spawnHeightMaximum = chunkManager.world.waterLevel;
     decorWaterPlants.spawnHeightMinimum = -100;
     decorWaterPlants.spawnStackHeightMax = 4;
@@ -287,27 +292,26 @@ void Start() {
     Decoration decorSheep;
     decorSheep.type = DECORATION_ACTOR;
     decorSheep.name = "Sheep";
-    decorSheep.density = 30;
+    decorSheep.density = 24;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = chunkManager.world.waterLevel;
     
     Decoration decorBear;
     decorBear.type = DECORATION_ACTOR;
     decorBear.name = "Bear";
-    decorBear.density = 50;
+    decorBear.density = 2;
     decorBear.spawnHeightMaximum = 40;
     decorBear.spawnHeightMinimum = 5;
     
     
     chunkManager.world.mDecorations.push_back(decorGrass);
-    //chunkManager.world.mDecorations.push_back(decorTrees);
-    //chunkManager.world.mDecorations.push_back(decorTreeHights);
+    chunkManager.world.mDecorations.push_back(decorTrees);
+    chunkManager.world.mDecorations.push_back(decorTreeHights);
     
-    //chunkManager.world.mDecorations.push_back(decorWaterTrees);
-    //chunkManager.world.mDecorations.push_back(decorWaterPlants);
+    chunkManager.world.mDecorations.push_back(decorWaterPlants);
     
     chunkManager.world.mDecorations.push_back(decorSheep);
-    //chunkManager.world.mDecorations.push_back(decorBear);
+    chunkManager.world.mDecorations.push_back(decorBear);
     
     
     
@@ -352,11 +356,11 @@ void Start() {
     
     
     
-    //chunkManager.perlin.push_back(perlinMountainB);
-    //chunkManager.perlin.push_back(perlinMountainA);
-    //chunkManager.perlin.push_back(perlinBase);
-    //chunkManager.perlin.push_back(perlinLayerA);
-    //chunkManager.perlin.push_back(perlinLayerB);
+    chunkManager.perlin.push_back(perlinMountainB);
+    chunkManager.perlin.push_back(perlinMountainA);
+    chunkManager.perlin.push_back(perlinBase);
+    chunkManager.perlin.push_back(perlinLayerA);
+    chunkManager.perlin.push_back(perlinLayerB);
     chunkManager.perlin.push_back(perlinFlatland);
     
     
@@ -375,7 +379,7 @@ void Start() {
     
     // World rendering
     
-    chunkManager.renderDistance = 18;
+    chunkManager.renderDistance = 24;
     
     
     
@@ -416,7 +420,6 @@ std::string targetGene = "";
 
 void Run() {
     
-    
     chunkManager.Update();
     
     
@@ -440,13 +443,14 @@ void Run() {
     
     
     
-    distance = 8;
+    distance = 13;
     
     from      = Engine.cameraController->GetComponent<Transform>()->position;
     direction = Engine.cameraController->GetComponent<Camera>()->forward;
     
     // Center the from angle
     from.y += 0.24f;
+    
     
     if (Input.CheckMouseMiddlePressed()) {
         
@@ -461,7 +465,28 @@ void Run() {
             
             Platform.SetClipboardText( destGene );
             
-            Engine.Print( "Genome extracted - " + hitActor->GetName());
+            unsigned int numberOfGenes = hitActor->GetNumberOfGenes();
+            
+            for (unsigned int i=0 ; i < numberOfGenes; i++) {
+                
+                MeshRenderer* geneRenderer = hitActor->GetMeshRendererAtIndex(i);
+                
+                std::string geneDataString = "";
+                
+                float xPos = geneRenderer->transform.position.x;
+                float yPos = geneRenderer->transform.position.y;
+                float zPos = geneRenderer->transform.position.z;
+                
+                float xScale = geneRenderer->transform.scale.x;
+                float yScale = geneRenderer->transform.scale.y;
+                float zScale = geneRenderer->transform.scale.z;
+                
+                geneDataString += Float.ToString(xPos) + ", " + Float.ToString(yPos) + ", " + Float.ToString(zPos) + "    ";
+                geneDataString += Float.ToString(xScale) + ", " + Float.ToString(yScale) + ", " + Float.ToString(zScale);
+                
+                Engine.Print( geneDataString );
+                
+            }
             
         }
         
@@ -499,9 +524,9 @@ void Run() {
                 AI.genomes.PreyBase( newActor );
                 
                 AI.genomes.InjectGenome(newActor, sourceArray[1]);
-                newActor->SetUpdateGeneticsFlag();
+                newActor->SetGeneticUpdateFlag();
                 
-                newActor->SetAge( Random.Range(800, 4000) );
+                newActor->SetAge( Random.Range(200, 4000) );
                 
             }
             
@@ -517,21 +542,6 @@ void Run() {
             GameObject* hitObject = (GameObject*)hit.gameObject;
             
             chunkManager.KillActor( hitObject );
-            
-        }
-        
-    }
-    
-    if (Input.CheckKeyPressed(VK_R)) {
-        
-        //chunkManager.ClearWorld();
-        //return;
-        
-        for (unsigned int i=0; i < chunkManager.actors.size(); i++) {
-            
-            //chunkManager.actors[i]->Deactivate();
-            
-            AI.genomes.Bear(chunkManager.actors[i]->GetComponent<Actor>());
             
         }
         
