@@ -1,6 +1,7 @@
 #include <GameEngineFramework/ActorAI/components/actor.h>
 
 extern PhysicsSystem  Physics;
+extern RenderSystem   Renderer;
 
 
 Actor::Actor() : 
@@ -30,6 +31,7 @@ Actor::Actor() :
     mIsActive(true),
     
     mDoUpdateGenetics(false),
+    mDoReexpressGenetics(false),
     
     mIsWalking(false),
     mIsRunning(false),
@@ -84,9 +86,16 @@ void Actor::SetAge(unsigned long long int newAge) {
     return;
 }
 
-void Actor::SetUpdateGeneticsFlag(void) {
+void Actor::SetGeneticUpdateFlag(void) {
     
     mDoUpdateGenetics = true;
+    
+    return;
+}
+
+void Actor::SetGeneticExpressionFlag(void) {
+    
+    mDoReexpressGenetics = true;
     
     return;
 }
@@ -209,32 +218,29 @@ void* Actor::GetUserDataB(void) {
 
 
 unsigned int Actor::AddGene(Gene& newGene) {
-    mux.lock();
     mGenes.push_back( newGene );
     mDoUpdateGenetics = true;
-    mux.unlock();
     return mGenes.size();
 }
 
 void Actor::RemoveGene(unsigned int index) {
-    mux.lock();
     mGenes.erase( mGenes.begin() + index );
     mDoUpdateGenetics = true;
-    mux.unlock();
+    return;
+}
+
+void Actor::ClearGenome(void) {
+    mGenes.clear();
     return;
 }
 
 unsigned int Actor::GetNumberOfGenes(void) {
-    mux.lock();
     unsigned int sizeValue = mGenes.size();
-    mux.unlock();
     return sizeValue;
 }
 
 Gene Actor::GetGeneFromGenome(unsigned int index) {
-    mux.lock();
     Gene geneValue = mGenes[index];
-    mux.unlock();
     return geneValue;
 }
 
@@ -252,6 +258,13 @@ void Actor::AddWeightedLayer(WeightedLayer& newNeuralLayer) {
 void Actor::RemoveWeightedLayer(unsigned int index) {
     mux.lock();
     mWeightedLayers.erase( mWeightedLayers.begin() + index );
+    mux.unlock();
+    return;
+}
+
+void Actor::ClearWeightedLayers(void) {
+    mux.lock();
+    mWeightedLayers.clear();
     mux.unlock();
     return;
 }
@@ -421,6 +434,11 @@ bool Actor::RemoveMemory(std::string memory) {
         }
     }
     return false;
+}
+
+void Actor::ClearMemories(void) {
+    mMemories.clear();
+    return;
 }
 
 bool Actor::CheckMemoryExists(std::string memory) {

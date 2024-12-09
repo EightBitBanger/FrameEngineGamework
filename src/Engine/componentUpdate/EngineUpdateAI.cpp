@@ -1,32 +1,10 @@
-//
-// Update actor components
-
-#include <GameEngineFramework/Engine/Engine.h>
-
-ENGINE_API extern EngineComponents  Components;
-ENGINE_API extern ColorPreset       Colors;
-ENGINE_API extern NumberGeneration  Random;
-ENGINE_API extern StringType        String;
-ENGINE_API extern Logger            Log;
-ENGINE_API extern Timer             PhysicsTime;
-ENGINE_API extern Timer             Time;
-
-ENGINE_API extern Serialization     Serializer;
-ENGINE_API extern ResourceManager   Resources;
-ENGINE_API extern ScriptSystem      Scripting;
-ENGINE_API extern RenderSystem      Renderer;
-ENGINE_API extern PhysicsSystem     Physics;
-ENGINE_API extern AudioSystem       Audio;
-ENGINE_API extern InputSystem       Input;
-ENGINE_API extern MathCore          Math;
-ENGINE_API extern ActorSystem       AI;
-
-ENGINE_API extern PlatformLayer     Platform;
-
+#include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateActor(unsigned int index) {
     
     UpdateActorGenetics(index);
+    
+    ExpressActorGenetics(index);
     
     UpdateActorTargetRotation(index);
     
@@ -53,6 +31,8 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
         mStreamBuffer[index].actor->mVelocity.x = actorVelocity.x;
         mStreamBuffer[index].actor->mVelocity.z = actorVelocity.z;
         
+        
+        // TODO This should really be in the actorAI update code
         
         // Check running speed multiplier
         if (mStreamBuffer[index].actor->mIsRunning) {
