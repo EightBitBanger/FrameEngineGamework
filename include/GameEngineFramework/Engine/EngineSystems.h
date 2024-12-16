@@ -1,11 +1,11 @@
 #include <GameEngineFramework/Engine/Engine.h>
 
 ENGINE_API extern IntType           Int;
+ENGINE_API extern IntLongType       IntLong;
 ENGINE_API extern FloatType         Float;
 ENGINE_API extern StringType        String;
 
 ENGINE_API extern EngineComponents  Components;
-ENGINE_API extern FileSystemDir     Directory;
 ENGINE_API extern ColorPreset       Colors;
 ENGINE_API extern NumberGeneration  Random;
 ENGINE_API extern Logger            Log;
@@ -26,3 +26,4 @@ ENGINE_API extern ActorSystem       AI;
 
 ENGINE_API extern ProfilerTimer     Profiler;
 ENGINE_API extern PlatformLayer     Platform;
+ENGINE_API extern FileSystem        fs;

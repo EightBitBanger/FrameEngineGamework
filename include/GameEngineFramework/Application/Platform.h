@@ -101,6 +101,9 @@ public:
     /// Set the target render context.
     GLenum SetRenderTarget(void);
     
+    /// Event callback for window losing focus.
+    void(*EventCallbackLoseFocus)(void);
+    
     
 private:
     
