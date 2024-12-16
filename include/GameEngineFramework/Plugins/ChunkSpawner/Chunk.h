@@ -3,6 +3,21 @@
 
 #include <GameEngineFramework/Engine/Engine.h>
 
+class ENGINE_API StaticObject {
+    
+public:
+    
+    float x;
+    float y;
+    float z;
+    
+    float r;
+    float g;
+    float b;
+    
+    uint8_t type;
+};
+
 
 class ENGINE_API Chunk {
     
@@ -10,8 +25,11 @@ public:
     
     Chunk();
     
-    int32_t x;
-    int32_t y;
+    /// Is the chunk active in the scene
+    bool isActive;
+    
+    float x;
+    float y;
     
     GameObject* gameObject;
     GameObject* staticObject;
@@ -22,6 +40,8 @@ public:
     rp3d::Collider* bodyCollider;
     
     MeshCollider* meshCollider;
+    
+    std::vector<StaticObject> statics;
     
 };
 

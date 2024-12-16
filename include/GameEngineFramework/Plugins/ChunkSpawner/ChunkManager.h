@@ -1,3 +1,6 @@
+#ifndef __CHUNK_MANAGER_
+#define __CHUNK_MANAGER_
+
 #include <GameEngineFramework/Engine/Engine.h>
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
@@ -10,6 +13,8 @@ class ENGINE_API WorldGeneration {
 public:
     
     std::string name;
+    
+    bool doGenerateChunks;
     
     float snowCapHeight;
     
@@ -54,7 +59,9 @@ public:
     
     
     WorldGeneration() :
-        name("Default world"),
+        name("default"),
+        
+        doGenerateChunks(false),
         
         snowCapHeight(60.0f),
         
@@ -104,6 +111,7 @@ public:
     WorldGeneration world;
     
     float renderDistance;
+    float staticDistance;
     
     int chunkSize;
     
@@ -114,7 +122,7 @@ public:
     
     ChunkManager();
     
-    bool SaveChunk(Chunk& chunk);
+    bool SaveChunk(Chunk& chunk, bool doClearActors);
     
     bool LoadChunk(Chunk& chunk);
     
@@ -123,6 +131,8 @@ public:
     bool LoadWorld(void);
     
     void ClearWorld(void);
+    
+    bool DestroyWorld(std::string worldname);
     
     
     Chunk CreateChunk(float x, float y);
@@ -148,7 +158,6 @@ public:
     std::vector<Chunk> chunks;
     
     std::vector<GameObject*> actors;
-
     
 private:
     
@@ -169,3 +178,5 @@ private:
     Material* watermaterial;
     
 };
+
+#endif

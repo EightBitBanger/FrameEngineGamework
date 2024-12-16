@@ -9,7 +9,8 @@
 #define DECORATION_GRASS        1
 #define DECORATION_GRASS_THICK  2
 #define DECORATION_TREE         3
-#define DECORATION_ACTOR        4
+#define DECORATION_LEAVES       4
+#define DECORATION_ACTOR        5
 
 class ENGINE_API Decoration {
     
