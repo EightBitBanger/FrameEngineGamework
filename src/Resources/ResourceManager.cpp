@@ -2,11 +2,8 @@
 #include <GameEngineFramework/Resources/ResourceManager.h>
 #include <GameEngineFramework/Types/Types.h>
 
-extern RenderSystem   Renderer;
-extern PhysicsSystem  Physics;
-extern FileSystemDir  Directory;
-extern StringType     String;
-extern Logger         Log;
+#include <GameEngineFramework/Engine/EngineSystems.h>
+
 
 ResourceManager::ResourceManager() {
     return;
@@ -18,9 +15,9 @@ void ResourceManager::Initiate(void) {
     Log.WriteLn();
     
     // Load resource directories if they exist
-    std::vector<std::string> shaderDirectoryList   = Directory.List(".\\core\\shaders\\");
-    std::vector<std::string> modelDirectoryList    = Directory.List(".\\core\\models\\");
-    std::vector<std::string> materialDirectoryList = Directory.List(".\\core\\materials\\");
+    std::vector<std::string> shaderDirectoryList   = fs.DirectoryGetList(".\\core\\shaders\\");
+    std::vector<std::string> modelDirectoryList    = fs.DirectoryGetList(".\\core\\models\\");
+    std::vector<std::string> materialDirectoryList = fs.DirectoryGetList(".\\core\\materials\\");
     
     for (unsigned int i=0; i < shaderDirectoryList.size(); i++) 
         LoadShaderGLSL("core/shaders/" + shaderDirectoryList[i], String.GetNameFromFilenameNoExt( shaderDirectoryList[i] ));

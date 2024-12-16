@@ -2,7 +2,8 @@
 
 ChunkManager::ChunkManager() : 
     
-    renderDistance(8),
+    renderDistance(16),
+    staticDistance(10),
     
     chunkSize(32),
     
@@ -51,333 +52,39 @@ void ChunkManager::Initiate(void) {
 }
 
 
-Chunk ChunkManager::CreateChunk(float x, float y) {
-    Chunk chunk;
-    
-    chunk.x = x;
-    chunk.y = y;
-    
-    chunk.gameObject = Engine.Create<GameObject>();
-    chunk.staticObject = Engine.Create<GameObject>();
-    
-    chunk.gameObject->renderDistance   = renderDistance * chunkSize * 1.2f;
-    chunk.staticObject->renderDistance = renderDistance * chunkSize * 0.8f;
-    
-    // Add renderers
-    chunk.gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-    chunk.staticObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-    
-    MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
-    MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
-    
-    Engine.sceneMain->AddMeshRendererToSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
-    Engine.sceneMain->AddMeshRendererToSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
-    
-    // Chunk renderer
-    
-    Transform* chunkTransform = chunk.gameObject->GetComponent<Transform>();
-    
-    chunkTransform->position = glm::vec3( x, 0, y);
-    chunkTransform->scale = glm::vec3( 1, 1, 1 );
-    
-    chunkRenderer->mesh = Engine.Create<Mesh>();
-    chunkRenderer->mesh->isShared = false;
-    chunkRenderer->EnableFrustumCulling();
-    
-    chunkRenderer->material = Engine.Create<Material>();
-    chunkRenderer->material->isShared = false;
-    
-    chunkRenderer->material->diffuse = Colors.gray;
-    chunkRenderer->material->ambient = Colors.MakeGrayScale(0.2f);
-    
-    chunkRenderer->material->shader = Engine.shaders.color;
-    
-    // Static renderer
-    
-    Transform* staticTransform = chunk.staticObject->GetComponent<Transform>();
-    
-    staticTransform->position = glm::vec3( x, 0, y);
-    staticTransform->scale = glm::vec3( 1, 1, 1 );
-    
-    staticRenderer->mesh = Engine.Create<Mesh>();
-    staticRenderer->mesh->isShared = false;
-    staticRenderer->EnableFrustumCulling();
-    
-    staticRenderer->material = Engine.Create<Material>();
-    staticRenderer->material->isShared = false;
-    staticRenderer->material->DisableCulling();
-    
-    staticRenderer->material->diffuse = Colors.gray;
-    staticRenderer->material->ambient = Colors.MakeGrayScale(0.2f);
-    
-    staticRenderer->material->shader = Engine.shaders.color;
-    
-    
-    // Generate perlin
-    
-    float heightField [ (chunkSize+1) * (chunkSize+1) ];
-    glm::vec3 colorField  [ (chunkSize+1) * (chunkSize+1) ];
-    
-    Engine.SetHeightFieldValues(heightField, chunkSize+1, chunkSize+1, 0);
-    Engine.SetColorFieldValues(colorField, chunkSize+1, chunkSize+1, Colors.white);
-    
-    unsigned int numberOfLayers = perlin.size();
-    
-    float min=0.0;
-    
-    for (unsigned int l=0; l < numberOfLayers; l++) {
-        
-        Perlin* perlinLayer = &perlin[l];
-        
-        min = 
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize+1, chunkSize+1, 
-                                            perlinLayer->noiseWidth, 
-                                            perlinLayer->noiseHeight, 
-                                            perlinLayer->heightMultuplier, 
-                                            x, y, worldSeed);
-        
-        continue;
-    }
-    
-    // Generate water below water level
-    if (min < (world.waterLevel - 32)) {
-        
-        chunk.waterObject = Engine.Create<GameObject>();
-        
-        chunk.waterObject->renderDistance = renderDistance * chunkSize * 0.9;
-        
-        chunk.waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-        MeshRenderer* waterRenderer = chunk.waterObject->GetComponent<MeshRenderer>();
-        
-        Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
-        
-        // Water renderer
-        Transform* waterTransform = chunk.waterObject->GetComponent<Transform>();
-        
-        waterTransform->position = glm::vec3( x, world.waterLevel, y);
-        waterTransform->scale = glm::vec3( 32, 1, 32 );
-        
-        waterRenderer->mesh = Engine.meshes.plain;
-        waterRenderer->EnableFrustumCulling();
-        
-        waterRenderer->material = Engine.Create<Material>();
-        waterRenderer->material->isShared = false;
-        waterRenderer->material->DisableCulling();
-        waterRenderer->material->EnableBlending();
-        
-        waterRenderer->material->diffuse = Colors.blue * Colors.MakeGrayScale(0.4f);
-        
-        waterRenderer->material->shader = Engine.shaders.water;
-        
-    }
-    
-    // Generate terrain color
-    
-    Color colorLow;
-    Color colorHigh;
-    
-    colorLow  = Colors.brown * Colors.green * Colors.MakeGrayScale(0.4f);
-    colorHigh = Colors.brown * Colors.MakeGrayScale(0.2f);
-    
-    Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize+1, chunkSize+1, colorLow, colorHigh, 0.024f);
-    
-    Engine.GenerateWaterTableFromHeightField(heightField, chunkSize+1, chunkSize+1, 0);
-    
-    // Finalize chunk
-    
-    Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSize+1, chunkSize+1, 0, 0, 1, 1);
-    
-    chunkRenderer->mesh->Load();
-    
-    // Physics
-    
-    chunk.rigidBody = Physics.world->createRigidBody( rp3d::Transform::identity() );
-    
-    chunk.rigidBody->setAngularLockAxisFactor( rp3d::Vector3(0, 0, 0) );
-    chunk.rigidBody->setLinearLockAxisFactor( rp3d::Vector3(0, 0, 0) );
-    chunk.rigidBody->setType(rp3d::BodyType::STATIC);
-    
-    rp3d::Transform bodyTransform = rp3d::Transform::identity();
-    bodyTransform.setPosition( rp3d::Vector3(x, 0, y) );
-    chunk.rigidBody->setTransform(bodyTransform);
-    
-    // Generate a height field collider
-    
-    MeshCollider*  meshCollider = Physics.CreateHeightFieldMap(heightField, chunkSize+1, chunkSize+1);
-    
-    rp3d::Collider* bodyCollider = chunk.rigidBody->addCollider( meshCollider->heightFieldShape, rp3d::Transform::identity() );
-    bodyCollider->setUserData( (void*)chunk.gameObject );
-    bodyCollider->setCollisionCategoryBits((unsigned short)LayerMask::Ground);
-    bodyCollider->setCollideWithMaskBits((unsigned short)CollisionMask::Entity);
-    
-    chunk.bodyCollider = bodyCollider;
-    chunk.meshCollider = meshCollider;
-    
-    // Decorate chunk
-    
-    Decorate(chunk, x, y, staticRenderer->mesh);
-    
-    staticRenderer->mesh->Load();
-    
-    return chunk;
-}
-
-bool ChunkManager::DestroyChunk(Chunk& chunk) {
-    
-    Engine.Destroy<GameObject>( chunk.gameObject );
-    Engine.Destroy<GameObject>( chunk.staticObject );
-    
-    MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
-    MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
-    
-    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
-    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
-    
-    // Destroy water if it was generated
-    if (chunk.waterObject != nullptr) {
-        
-        Engine.Destroy<GameObject>( chunk.waterObject );
-        
-        MeshRenderer* waterRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
-        
-        Engine.sceneMain->RemoveMeshRendererFromSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
-    }
-    
-    Physics.DestroyRigidBody( chunk.rigidBody );
-    Physics.DestroyHeightFieldMap(chunk.meshCollider);
-    
-    // Wrangle any associated actors for saving
-    
-    for (unsigned int i=0; i < actors.size(); i++) {
-        
-        GameObject* actorObject = actors[i];
-        glm::vec3 actorPos = actorObject->GetPosition();
-        glm::vec3 chunkPos = glm::vec3(chunk.x, 0, chunk.y);
-        
-        actorPos.y = 0;
-        
-        if (glm::distance(actorPos, chunkPos) <= chunkSize * 3.0f) 
-            KillActor(actorObject);
-        
-        // TODO: Send the save data into a threaded saving/loading system
-        
-        continue;
-    }
-    
-    return true;
-}
-
-
-
-
-bool ChunkManager::SaveChunk(Chunk& chunk) {
-    
-    std::string chunkPos = Int.ToString( chunk.x ) + "_" + Int.ToString( chunk.y );
-    std::string worldChunks = "worlds/" + world.name + "/chunks";
-    
-    std::string chunkName = worldChunks + "/" + chunkPos;
-    
-    std::string buffer = "";
-    
-    unsigned int numberOfActors = actors.size();
-    
-    for (unsigned int a=0; a < numberOfActors; a++) {
-        
-        GameObject* actorObject = actors[a];
-        
-        glm::vec3 actorPos = actorObject->GetPosition();
-        
-        // Check actor within chunk bounds
-        int chunkArea = chunkSize * 2;
-        
-        if ( ((actorPos.x > (chunk.x + chunkArea)) | (actorPos.x < (chunk.x - chunkArea))) | 
-             ((actorPos.z > (chunk.y + chunkArea)) | (actorPos.z < (chunk.y - chunkArea))) ) {
-            continue;
-        }
-        
-        Actor* actorPtr = actorObject->GetComponent<Actor>();
-        
-        std::string actorPosStr = Float.ToString(actorPos.x) + "~" + 
-                                  Float.ToString(actorPos.y) + "~" + 
-                                  Float.ToString(actorPos.z) + "~";
-        
-        std::string actorGenome = AI.genomes.ExtractGenome(actorPtr);
-        
-        buffer += actorPosStr + actorGenome + '\n';
-        
-        KillActor( actorObject );
-        
-        continue;
-    }
-    
-    unsigned int bufferSz = buffer.size();
-    
-    Serializer.Serialize(chunkName, (void*)buffer.data(), bufferSz);
-    
-    return 0;
-}
-
-bool ChunkManager::LoadChunk(Chunk& chunk) {
-    
-    
-    
-    
-    
-    return 0;
-}
-
-
-
-bool ChunkManager::SaveWorld(void) {
-    
-    std::string worldName   = "worlds/" + world.name;
-    std::string worldChunks = "worlds/" + world.name + "/chunks";
-    
-    // Check world directory structure exists
-    if (!Directory.CheckExists(worldName)) 
-        Directory.Create(worldName);
-    if (!Directory.CheckExists(worldChunks)) 
-        Directory.Create(worldChunks);
-    
-    // Save world chunks
-    
-    unsigned int numberOfChunks = chunks.size();
-    
-    for (unsigned int c=0; c < numberOfChunks; c++) {
-        
-        Chunk chunkPtr = chunks[c];
-        
-        SaveChunk( chunkPtr );
-        
-        continue;
-    }
-    
-    return 1;
-}
-
-bool ChunkManager::LoadWorld(void) {
-    
-    
-    
-    
-    
-    return 0;
-}
-
 void ChunkManager::ClearWorld(void) {
+    
+    world.doGenerateChunks = false;
+    
+    SaveWorld();
     
     for (unsigned int i=0; i < chunks.size(); i++) 
         DestroyChunk( chunks[i] );
     
     for (unsigned int a=0; a < actors.size(); a++) 
-        actors[a]->Deactivate();
-    
-    chunks.clear();
+        KillActor(actors[a]);
     
     ChunkCounterX = 0;
     ChunkCounterZ = 0;
     
     return;
+}
+
+bool ChunkManager::DestroyWorld(std::string worldname) {
+    
+    if (worldname == "") 
+        return false;
+    
+    std::string worldPath = "worlds/" + worldname;
+    
+    if (!fs.DirectoryExists(worldPath)) 
+        return false;
+    
+    fs.DirectoryDelete( worldPath + "/chunks" );
+    
+    fs.DirectoryDelete( worldPath );
+    
+    return true;
 }
 
 
@@ -442,17 +149,6 @@ bool ChunkManager::KillActor(GameObject* actorObject) {
     actorPtr->ClearGenome();
     actorPtr->ClearMemories();
     actorPtr->ClearWeightedLayers();
-    
-    for (unsigned int a=0; a < actors.size(); a++) {
-        
-        if (actors[a] == actorObject) {
-            
-            actors.erase( actors.begin() + a );
-            
-            break;
-        }
-        
-    }
     
     return true;
 }

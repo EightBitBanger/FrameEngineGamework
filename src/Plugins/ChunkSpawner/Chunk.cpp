@@ -1,6 +1,7 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
 Chunk::Chunk() : 
+    isActive(false),
     x(0),
     y(0),
     gameObject(nullptr),
