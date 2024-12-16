@@ -95,6 +95,12 @@ std::string IntType::ToString(int value) {
     return sstream.str();
 }
 
+std::string IntLongType::ToString(long int value) {
+    std::stringstream sstream;
+    sstream << value;
+    return sstream.str();
+}
+
 std::string UintType::ToString(unsigned int value) {
     std::stringstream sstream;
     sstream << value;
