@@ -1,5 +1,5 @@
-#ifndef _DIRECTORY_SEARCH__
-#define _DIRECTORY_SEARCH__
+#ifndef _FILESYSTEM_FUNCTIONS__
+#define _FILESYSTEM_FUNCTIONS__
 
 #include <GameEngineFramework/configuration.h>
 
@@ -7,17 +7,28 @@
 #include <string>
 
 
-class ENGINE_API FileSystemDir {
+class ENGINE_API FileSystem {
     
 public:
     
-    std::vector<std::string> List(std::string path);
+    /// Return a vector array of filename strings.
+    std::vector<std::string> DirectoryGetList(std::string directoryName);
     
-    bool Create(std::string directoryName);
+    /// Create a directory.
+    bool DirectoryCreate(std::string directoryName);
     
-    bool Delete(std::string directoryName);
+    /// Delete a directory.
+    bool DirectoryDelete(std::string directoryName);
     
-    bool CheckExists(std::string directoryName);
+    /// Check if a directory exists.
+    bool DirectoryExists(std::string directoryName);
+    
+    
+    /// Create a new file with a given size.
+    bool FileCreate(std::string filename, unsigned int size);
+    
+    /// Delete a file.
+    bool FileDelete(std::string filename);
     
 };
 

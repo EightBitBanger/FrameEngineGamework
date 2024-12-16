@@ -70,6 +70,14 @@ public:
     
 };
 
+class ENGINE_API IntLongType {
+    
+public:
+    
+    static std::string ToString(long int value);
+    
+};
+
 class ENGINE_API UintType {
     
 public:

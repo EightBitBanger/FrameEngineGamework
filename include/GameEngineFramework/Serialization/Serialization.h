@@ -19,7 +19,10 @@ public:
     bool Deserialize(std::string filename, void* buffer, unsigned int size);
     
     /// Get the size of a file.
-    int GetFileSize(std::string filename);
+    unsigned int GetFileSize(std::string filename);
+    
+    /// Check if a file exists.
+    bool CheckExists(std::string filename);
     
 private:
     
