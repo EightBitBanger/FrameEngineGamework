@@ -30,7 +30,7 @@ endif()
 
 
 # ==========================================================
-# Build executable file to launch the application
+# Build executable
 #
 
 if(BUILD_RUNTIME_EXECUTABLE)
@@ -193,6 +193,8 @@ endif()
 set (GAME_HEADERS
     
     "include/GameEngineFramework/configuration.h"
+    "include/GameEngineFramework/functions.h"
+    "include/GameEngineFramework/plugins.h"
     
     "include/GameEngineFramework/Application/Platform.h"
     "include/GameEngineFramework/Application/winproc.h"
@@ -288,11 +290,21 @@ set (GAME_HEADERS
 
 set (GAME_SOURCES
     
+    "src/plugins/ChunkSpawner/WorldLoad.cpp"
+    "src/plugins/ChunkSpawner/WorldSave.cpp"
+    "src/plugins/ChunkSpawner/ChunkLoad.cpp"
+    "src/plugins/ChunkSpawner/ChunkSave.cpp"
+    "src/plugins/ChunkSpawner/ChunkCreate.cpp"
+    "src/plugins/ChunkSpawner/ChunkDestroy.cpp"
     "src/plugins/ChunkSpawner/ChunkManager.cpp"
     "src/plugins/ChunkSpawner/ChunkManagerUpdate.cpp"
     "src/plugins/ChunkSpawner/Chunk.cpp"
     
-    "src/application.cpp"
+    "src/start.cpp"
+    "src/run.cpp"
+    "src/shutdown.cpp"
+    "src/functions.cpp"
+    "src/plugins.cpp"
     
 )
 
@@ -376,6 +388,7 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Engine/types/bufferlayout.h"
     "include/GameEngineFramework/Engine/types/color.h"
     "include/GameEngineFramework/Engine/types/viewport.h"
+    "include/GameEngineFramework/Engine/types/nulltype.h"
     
     "include/GameEngineFramework/Engine/UI/text.h"
     "include/GameEngineFramework/Engine/UI/sprite.h"
@@ -435,6 +448,7 @@ set (CORE_SOURCES
     
     "src/Application/Platform.cpp"
     "src/Application/winproc.cpp"
+    "src/Application/nulltype.cpp"
     
     "src/Audio/AudioSystem.cpp"
     "src/Audio/components/sound.cpp"
