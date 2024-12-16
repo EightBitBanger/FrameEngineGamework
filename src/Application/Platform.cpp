@@ -1,5 +1,6 @@
 #include <GameEngineFramework/Application/Platform.h>
 #include <GameEngineFramework/Application/winproc.h>
+#include <GameEngineFramework/Engine/types/nulltype.h>
 
 #ifndef _WIN32_WINNT
   #define _WIN32_WINNT 0x500
@@ -34,7 +35,8 @@ PlatformLayer::PlatformLayer() :
     isPaused(false),
     isActive(true),
     
-    mIsWindowRunning(false)
+    mIsWindowRunning(false),
+    EventCallbackLoseFocus(nullfunc)
 {
 }
 

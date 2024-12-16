@@ -107,13 +107,25 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
             
         }
         
+        
+        // TODO Genetic mutation detection
+        // Mutation being a gene glitch resulting in a miss shaped gene
+        
+        // Clamp gene scale
+        //float clamp = 2.0f;
+        //if (mStreamBuffer[index].actor->mGenes[a].scale.x > clamp) mStreamBuffer[index].actor->mGenes[a].scale.x = clamp;
+        //if (mStreamBuffer[index].actor->mGenes[a].scale.y > clamp) mStreamBuffer[index].actor->mGenes[a].scale.y = clamp;
+        //if (mStreamBuffer[index].actor->mGenes[a].scale.z > clamp) mStreamBuffer[index].actor->mGenes[a].scale.z = clamp;
+        
+        //if (mStreamBuffer[index].actor->mGenes[a].scale.x < -clamp) mStreamBuffer[index].actor->mGenes[a].scale.x = -clamp;
+        //if (mStreamBuffer[index].actor->mGenes[a].scale.y < -clamp) mStreamBuffer[index].actor->mGenes[a].scale.y = -clamp;
+        //if (mStreamBuffer[index].actor->mGenes[a].scale.z < -clamp) mStreamBuffer[index].actor->mGenes[a].scale.z = -clamp;
+        
+        
         // Scale
         newRenderer->transform.scale.x = mStreamBuffer[index].actor->mGenes[a].scale.x;
         newRenderer->transform.scale.y = mStreamBuffer[index].actor->mGenes[a].scale.y;
         newRenderer->transform.scale.z = mStreamBuffer[index].actor->mGenes[a].scale.z;
-        
-        // Clamp scale
-        newRenderer->transform.scale = glm::clamp(newRenderer->transform.scale, 0.0f, 2.0f);
         
         // Rotation
         newRenderer->transform.RotateAxis( mStreamBuffer[index].actor->mGenes[a].rotation.x, glm::vec3(1, 0, 0) );

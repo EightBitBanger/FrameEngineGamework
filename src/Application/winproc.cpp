@@ -108,6 +108,12 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             break;
         }
         
+        case WM_KILLFOCUS: 
+            
+            Platform.EventCallbackLoseFocus();
+            
+            break;
+        
         case WM_CLOSE: // Window (X) close button
             
             Platform.isActive = false;

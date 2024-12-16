@@ -26,7 +26,7 @@ ENGINE_API DoubleType           Double;
 ENGINE_API IntType              Int;
 ENGINE_API UintType             Uint;
 
-ENGINE_API FileSystemDir        Directory;
+ENGINE_API FileSystem           fs;
 ENGINE_API PlatformLayer        Platform;
 ENGINE_API EngineSystemManager  Engine;
 

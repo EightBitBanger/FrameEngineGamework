@@ -4,8 +4,8 @@
 GameObject::GameObject() : 
     
     name(""),
-    isGarbage(false),
     isActive(true),
+    isGarbage(false),
     renderDistance(-1),
     
     mTransformCache(nullptr),

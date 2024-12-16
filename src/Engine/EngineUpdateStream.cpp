@@ -67,41 +67,9 @@ void EngineSystemManager::UpdateComponentStream(void) {
         if (gameObject->mTextCache != nullptr)  isUIElement = true;
         if (gameObject->mPanelCache != nullptr) isUIElement = true;
         
-        //
-        // Set buffer stream objects and components
+        // Check garbage objects
         
-        if (((!gameObject->isActive) | (!shouldRender)) & (!isUIElement)) 
-            continue;
-        
-        if (!gameObject->isGarbage) {
-            
-            mStreamBuffer[mDataStreamIndex].gameObject    = gameObject;
-            mStreamBuffer[mDataStreamIndex].transform     = gameObject->mTransformCache;
-            
-            mStreamBuffer[mDataStreamIndex].light         = gameObject->mLightCache;
-            mStreamBuffer[mDataStreamIndex].actor         = gameObject->mActorCache;
-            mStreamBuffer[mDataStreamIndex].camera        = gameObject->mCameraCache;
-            mStreamBuffer[mDataStreamIndex].rigidBody     = gameObject->mRigidBodyCache;
-            mStreamBuffer[mDataStreamIndex].meshRenderer  = gameObject->mMeshRendererCache;
-            
-            mStreamBuffer[mDataStreamIndex].text          = gameObject->mTextCache;
-            mStreamBuffer[mDataStreamIndex].panel         = gameObject->mPanelCache;
-            
-        } else {
-            
-            gameObject->Deactivate();
-            
-            // Destroy the components
-            unsigned int numberOfComponents = gameObject->GetComponentCount();
-            
-            for (unsigned int i=0; i < numberOfComponents; i++) {
-                
-                DestroyComponent( gameObject->GetComponentIndex(i) );
-                
-                mComponents.Destroy( gameObject->GetComponentIndex(i) );
-            }
-            
-            mGameObjects.Destroy( gameObject );
+        if (gameObject->isGarbage) {
             
             // Remove the game object from the active list
             
@@ -117,8 +85,40 @@ void EngineSystemManager::UpdateComponentStream(void) {
                 break;
             }
             
+            gameObject->Deactivate();
+            
+            // Destroy the components
+            unsigned int numberOfComponents = gameObject->GetComponentCount();
+            
+            for (unsigned int i=0; i < numberOfComponents; i++) {
+                
+                DestroyComponent( gameObject->GetComponentIndex(i) );
+                
+                mComponents.Destroy( gameObject->GetComponentIndex(i) );
+            }
+            
+            mGameObjects.Destroy( gameObject );
+            
             continue;
         }
+        
+        
+        // Set buffer stream objects and components
+        
+        if (((!gameObject->isActive) | (!shouldRender)) & (!isUIElement)) 
+            continue;
+        
+        mStreamBuffer[mDataStreamIndex].gameObject    = gameObject;
+        mStreamBuffer[mDataStreamIndex].transform     = gameObject->mTransformCache;
+        
+        mStreamBuffer[mDataStreamIndex].light         = gameObject->mLightCache;
+        mStreamBuffer[mDataStreamIndex].actor         = gameObject->mActorCache;
+        mStreamBuffer[mDataStreamIndex].camera        = gameObject->mCameraCache;
+        mStreamBuffer[mDataStreamIndex].rigidBody     = gameObject->mRigidBodyCache;
+        mStreamBuffer[mDataStreamIndex].meshRenderer  = gameObject->mMeshRendererCache;
+        
+        mStreamBuffer[mDataStreamIndex].text          = gameObject->mTextCache;
+        mStreamBuffer[mDataStreamIndex].panel         = gameObject->mPanelCache;
         
         mDataStreamIndex++;
         

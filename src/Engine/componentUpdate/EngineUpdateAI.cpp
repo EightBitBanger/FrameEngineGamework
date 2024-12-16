@@ -45,7 +45,7 @@ void EngineSystemManager::UpdateActor(unsigned int index) {
                                               mStreamBuffer[index].actor->mPosition );
         
         // Check arrived at target point
-        if (targetDistance < 1.5) 
+        if (targetDistance < 1.5f) 
             mStreamBuffer[index].actor->mIsWalking = false;
         
     } else {

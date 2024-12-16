@@ -40,11 +40,11 @@ std::string GeneticPresets::ExtractGenome(Actor* actorSource) {
     genetics += Float.ToString( actorSource->GetHeightPreferenceMin() ) + ":";
     genetics += Float.ToString( actorSource->GetHeightPreferenceMax() ) + ":";
     
-    genetics += "#";
-    
     for (unsigned int i=0; i < numberOfGenes; i++) {
         
         Gene gene = actorSource->GetGeneFromGenome( i );
+        
+        genetics += "#";
         
         genetics += Float.ToString( gene.position.x ) + ",";
         genetics += Float.ToString( gene.position.y ) + ",";
@@ -69,8 +69,7 @@ std::string GeneticPresets::ExtractGenome(Actor* actorSource) {
         genetics += Float.ToString( gene.doInverseAnimation ) + ",";
         genetics += Float.ToString( gene.doAnimationCycle ) + "|";
         
-        genetics += "#";
-        
+        continue;
     }
     
     return genetics;
