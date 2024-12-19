@@ -10,7 +10,10 @@ public:
     NumberGeneration();
     
     /// Set the seed for the random number generator.
-    void Seed(int value);
+    void SetSeed(int value);
+    
+    /// Get the seed from the random number generator.
+    int GetSeed(void);
     
     /// Return a float between the min and max values.
     float Range(float min, float max);
@@ -24,6 +27,9 @@ public:
     /// Return a perlin noise value based on the input coordinates.
     float Perlin(float xcoord, float ycoord, float zcoord, int seed);
     
+private:
+    
+    int mSeed;
 };
 
 #endif

@@ -44,6 +44,12 @@ public:
     /// Get the age of the actor.
     unsigned long long int GetAge(void);
     
+    /// Set the generation of the actor.
+    void SetGeneration(unsigned int newAge);
+    
+    /// Set the generation of the actor.
+    unsigned int GetGeneration(void);
+    
     /// Set the walking speed of the actor.
     void SetSpeed(float newSpeed);
     
@@ -82,6 +88,12 @@ public:
     
     /// Return a mesh renderer at the given index.
     MeshRenderer* GetMeshRendererAtIndex(unsigned int index);
+    
+    /// Set the user bit mask byte.
+    void SetUserBitmask(uint8_t bitmask);
+    
+    /// Get the user bit mask byte.
+    uint8_t GetUserBitmask(void);
     
     /// Set the user data pointer.
     void SetUserDataA(void* ptr);
@@ -224,6 +236,9 @@ private:
     // Number of ticks this actor has accumulated in its lifetime
     unsigned long long int mAge;
     
+    // Current position in the generational sequence over time
+    unsigned int mGeneration;
+    
     // Initial scale for this actor
     float mYouthScale;
     
@@ -338,6 +353,9 @@ private:
     
     // Is this actor loaded into the scene
     bool mIsActorActiveInScene;
+    
+    // User bit mask byte
+    uint8_t mBitmask;
     
     // User data pointers
     void* mUserDataA;

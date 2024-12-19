@@ -16,6 +16,9 @@ public:
     /// Clear all the genes from an actor genome.
     void ClearGenes(Actor* actorPtr);
     
+    /// Expose the genome to random changes.
+    void ExposeToRadiation(Actor* actorPtr, float radiationMultiplier);
+    
     // Mental models
     
     void PreyBase(Actor* targetActor);
