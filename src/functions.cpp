@@ -78,6 +78,7 @@ void FuncLoad(std::vector<std::string> args) {
     return;
 }
 
+// Delete world
 void FuncRemove(std::vector<std::string> args) {
     
     if (args[0] == "") 
@@ -108,7 +109,6 @@ void FuncClear(std::vector<std::string> args) {
 // Set the world seed
 void FuncSeed(std::vector<std::string> args) {
     
-    /*
     if (args[0] == "") {
         
         Engine.Print("World seed: " + Int.ToString(chunkManager.worldSeed));
@@ -119,7 +119,6 @@ void FuncSeed(std::vector<std::string> args) {
     chunkManager.worldSeed = String.ToInt(args[0]);
     
     Engine.Print("World seed: " + Int.ToString(chunkManager.worldSeed));
-    */
     
     return;
 }
@@ -128,7 +127,7 @@ void FuncSeed(std::vector<std::string> args) {
 // Summon an actor
 void FuncSummon(std::vector<std::string> args) {
     
-    for (uint8_t i=0; i < 1; i++) {
+    for (uint8_t i=0; i < 24; i++) {
         
         unsigned int entityType = 0;
         
@@ -144,9 +143,8 @@ void FuncSummon(std::vector<std::string> args) {
         
         glm::vec3 randomOffset = Engine.sceneMain->camera->transform.GetPosition();
         
-        randomOffset.x += Random.Range(0, 50) - Random.Range(0, 50);
-        randomOffset.y += 0;
-        randomOffset.z += Random.Range(0, 50) - Random.Range(0, 50);
+        randomOffset.x += Random.Range(0, 20) - Random.Range(0, 20);
+        randomOffset.z += Random.Range(0, 20) - Random.Range(0, 20);
         
         GameObject* newActorObject = chunkManager.SpawnActor( randomOffset.x, randomOffset.y, randomOffset.z );
         

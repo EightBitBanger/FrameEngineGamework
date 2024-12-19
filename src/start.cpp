@@ -109,7 +109,7 @@ void Start() {
     
     Decoration decorTrees;
     decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 800;
+    decorTrees.density = 50;
     decorTrees.spawnHeightMaximum = 20;
     decorTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
@@ -123,8 +123,6 @@ void Start() {
     decorTreeHights.spawnStackHeightMin = 4;
     decorTreeHights.spawnStackHeightMax = 8;
     
-    // Water adjacent plants
-    
     Decoration decorWaterPlants;
     decorWaterPlants.type = DECORATION_GRASS_THIN;
     decorWaterPlants.density = 800;
@@ -133,12 +131,12 @@ void Start() {
     decorWaterPlants.spawnStackHeightMax = 4;
     decorWaterPlants.spawnStackHeightMin = 2;
     
-    
     // Actors
+    
     Decoration decorSheep;
     decorSheep.type = DECORATION_ACTOR;
     decorSheep.name = "Sheep";
-    decorSheep.density = 8;
+    decorSheep.density = 10;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = chunkManager.world.waterLevel;
     
@@ -158,7 +156,6 @@ void Start() {
     
     chunkManager.world.mDecorations.push_back(decorSheep);
     chunkManager.world.mDecorations.push_back(decorBear);
-    
     
     
     // Perlin layers
@@ -223,8 +220,8 @@ void Start() {
     
     // World rendering
     
-    chunkManager.renderDistance = 8;
-    chunkManager.staticDistance = 6;
+    chunkManager.renderDistance = 10;
+    chunkManager.staticDistance = 10;
     
     return;
 }
