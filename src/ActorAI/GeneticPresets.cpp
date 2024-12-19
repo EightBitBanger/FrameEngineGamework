@@ -157,6 +157,23 @@ void GeneticPresets::ClearGenes(Actor* actorPtr) {
     return;
 }
 
+void GeneticPresets::ExposeToRadiation(Actor* actorPtr, float radiationMultiplier) {
+    
+    unsigned int numberOfGenes = actorPtr->mGenes.size();
+    
+    for (unsigned int i=0; i < numberOfGenes; i++) {
+        
+        Gene& gene = actorPtr->mGenes[i];
+        
+        gene.color.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiationMultiplier;
+        gene.color.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiationMultiplier;
+        gene.color.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiationMultiplier;
+        
+    }
+    
+    return;
+}
+
 
 // Mental models
 //

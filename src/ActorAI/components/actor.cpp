@@ -9,6 +9,7 @@ Actor::Actor() :
     mName(""),
     
     mAge(0),
+    mGeneration(0),
     mYouthScale(0.3),
     mAdultScale(1.3),
     
@@ -57,6 +58,8 @@ Actor::Actor() :
     
     mIsActorActiveInScene(false),
     
+    mBitmask(0),
+    
     mUserDataA(nullptr),
     mUserDataB(nullptr)
 {
@@ -76,13 +79,6 @@ void Actor::SetActive(bool state) {
     
     for (unsigned int i=0; i < mGeneticRenderers.size(); i++) 
         mGeneticRenderers[i]->isActive = state;
-    return;
-}
-
-void Actor::SetAge(unsigned long long int newAge) {
-    mux.lock();
-    mAge = newAge;
-    mux.unlock();
     return;
 }
 
@@ -114,11 +110,32 @@ bool Actor::GetActive(void) {
     return activeState;
 }
 
+void Actor::SetAge(unsigned long long int newAge) {
+    mux.lock();
+    mAge = newAge;
+    mux.unlock();
+    return;
+}
+
 unsigned long long int Actor::GetAge(void) {
     mux.lock();
     unsigned long long int ageValue = mAge;
     mux.unlock();
     return ageValue;
+}
+
+void Actor::SetGeneration(unsigned int newGeneration) {
+    mux.lock();
+    mGeneration = newGeneration;
+    mux.unlock();
+    return;
+}
+
+unsigned int Actor::GetGeneration(void) {
+    mux.lock();
+    unsigned int generation = mGeneration;
+    mux.unlock();
+    return generation;
 }
 
 void Actor::SetSpeed(float newSpeed) {
@@ -189,6 +206,15 @@ unsigned int Actor::GetNumberOfMeshRenderers(void) {
 
 MeshRenderer* Actor::GetMeshRendererAtIndex(unsigned int index) {
     return mGeneticRenderers[index];
+}
+
+void Actor::SetUserBitmask(uint8_t bitmask) {
+    mBitmask = bitmask;
+    return;
+}
+
+uint8_t Actor::GetUserBitmask(void) {
+    return mBitmask;
 }
 
 void Actor::SetUserDataA(void* ptr) {

@@ -28,7 +28,7 @@ void EngineSystemManager::UpdateActorAnimation(unsigned int index) {
         matrix = glm::scale( matrix, glm::vec3( ageScale ));
         
         // Clamp gene scale
-        geneRenderer->transform.scale = glm::clamp(geneRenderer->transform.scale, 0.0f, 2.0f);
+        geneRenderer->transform.scale = glm::clamp(geneRenderer->transform.scale, 0.0f, 8.0f);
         
         
         // Rotate around center

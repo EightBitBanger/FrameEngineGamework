@@ -38,7 +38,6 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
         actorVelocity = glm::vec3(0, 0, 0);
         
         /*
-        
         unsigned int numberOfRenderers = mStreamBuffer[index].actor->GetNumberOfMeshRenderers();
         for (unsigned int i=0; i < numberOfRenderers; i++) {
             
@@ -47,11 +46,11 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
             actorMaterial->ambient = Colors.black;
             
         }
-        
         */
         
     } else {
         
+        /*
         unsigned int numberOfRenderers = mStreamBuffer[index].actor->GetNumberOfMeshRenderers();
         for (unsigned int i=0; i < numberOfRenderers; i++) {
             
@@ -59,6 +58,7 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
             
             actorMaterial->ambient = Colors.white;
         }
+        */
         
         // Standing on ground
         actorPosition.y   = hit.point.y;
