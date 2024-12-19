@@ -4,17 +4,27 @@
 #include "../../vendor/stb/stb_perlin.h"
 
 
-NumberGeneration::NumberGeneration() {
+NumberGeneration::NumberGeneration() :
+    mSeed(100)
+{
     
     srand(100);
+    
     return;
 }
 
-void NumberGeneration::Seed(int value) {
+void NumberGeneration::SetSeed(int seed) {
     
-    srand(value);
+    srand( seed );
+    
+    mSeed = seed;
     
     return;
+}
+
+int NumberGeneration::GetSeed(void) {
+    
+    return mSeed;
 }
 
 int NumberGeneration::Range(int min, int max) {
