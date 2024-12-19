@@ -2,10 +2,10 @@
 
 ChunkManager::ChunkManager() : 
     
-    renderDistance(16),
+    renderDistance(10),
     staticDistance(10),
     
-    chunkSize(32),
+    chunkSize(50),
     
     worldSeed(100),
     
@@ -56,16 +56,16 @@ void ChunkManager::ClearWorld(void) {
     
     world.doGenerateChunks = false;
     
-    SaveWorld();
-    
-    for (unsigned int i=0; i < chunks.size(); i++) 
-        DestroyChunk( chunks[i] );
+    for (unsigned int c=0; c < chunks.size(); c++) 
+        DestroyChunk( chunks[c] );
     
     for (unsigned int a=0; a < actors.size(); a++) 
         KillActor(actors[a]);
     
     ChunkCounterX = 0;
     ChunkCounterZ = 0;
+    
+    chunks.clear();
     
     return;
 }
@@ -81,6 +81,7 @@ bool ChunkManager::DestroyWorld(std::string worldname) {
         return false;
     
     fs.DirectoryDelete( worldPath + "/chunks" );
+    fs.DirectoryDelete( worldPath + "/static" );
     
     fs.DirectoryDelete( worldPath );
     
@@ -105,6 +106,8 @@ GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
         Actor* actorPtr = actorObject->GetComponent<Actor>();
         actorPtr->SetTargetPoint(glm::vec3(x, y, z));
         
+        actorPtr->SetUserBitmask(0);
+        
         break;
     }
     
@@ -112,10 +115,14 @@ GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
         
         actorObject = Engine.CreateAIActor( glm::vec3(x, y, z) );
         
+        actorObject->renderDistance = renderDistance * chunkSize * 2.4f;
+        
         actors.push_back( actorObject );
         
         Actor* actorPtr = actorObject->GetComponent<Actor>();
         actorPtr->SetTargetPoint(glm::vec3(x, y, z));
+        
+        actorPtr->SetUserBitmask(0);
         
     }
     
@@ -127,8 +134,6 @@ bool ChunkManager::KillActor(GameObject* actorObject) {
     Actor* actorPtr = actorObject->GetComponent<Actor>();
     
     actorObject->Deactivate();
-    
-    actorPtr->ClearGenome();
     
     if (actorPtr == nullptr) 
         return false;

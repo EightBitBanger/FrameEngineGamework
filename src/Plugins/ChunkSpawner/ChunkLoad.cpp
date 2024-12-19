@@ -36,6 +36,8 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 float posY = String.ToFloat( lineArray[1] );
                 float posZ = String.ToFloat( lineArray[2] );
                 
+                glm::vec3 pos(posX, posY, posZ);
+                
                 unsigned long long int age = String.ToLongUint( lineArray[3] );
                 
                 GameObject* actorObject = SpawnActor(posX, posY, posZ);

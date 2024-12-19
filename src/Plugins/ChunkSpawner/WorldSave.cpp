@@ -2,6 +2,9 @@
 
 bool ChunkManager::SaveWorld(void) {
     
+    if (!world.doGenerateChunks) 
+        return false;
+    
     std::string worldName   = "worlds/" + world.name;
     std::string worldChunks = "worlds/" + world.name + "/chunks";
     std::string worldStatic = "worlds/" + world.name + "/static";
@@ -17,10 +20,21 @@ bool ChunkManager::SaveWorld(void) {
     // Save world chunks
     
     unsigned int numberOfChunks = chunks.size();
+    unsigned int numberOfActors = actors.size();
     
     for (unsigned int c=0; c < numberOfChunks; c++) 
         SaveChunk( chunks[c], false );
     
+    // Reset actor save marker
+    for (unsigned int a=0; a < numberOfActors; a++) {
+        
+        GameObject* actorObject = actors[a];
+        
+        Actor* actorPtr = actorObject->GetComponent<Actor>();
+        actorPtr->SetUserBitmask(0);
+        
+        continue;
+    }
     
     // Save world data file
     

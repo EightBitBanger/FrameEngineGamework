@@ -4,22 +4,6 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     Chunk chunk;
     
-    /*
-    unsigned int numberOfChunks = chunks.size();
-    
-    for (unsigned int i=0; i < numberOfChunks; i++) {
-        
-        Chunk& chunkPtr = chunks[i];
-        
-        if (chunkPtr.isActive) 
-            continue;
-         
-        chunk = chunkPtr;
-        
-        break;
-    }
-    */
-    
     chunk.isActive = true;
     
     chunk.x = x;
@@ -126,7 +110,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
         Transform* waterTransform = chunk.waterObject->GetComponent<Transform>();
         
         waterTransform->position = glm::vec3( x, world.waterLevel, y);
-        waterTransform->scale = glm::vec3( 32, 1, 32 );
+        waterTransform->scale = glm::vec3( chunkSize, 1, chunkSize );
         
         waterRenderer->mesh = Engine.meshes.plain;
         waterRenderer->EnableFrustumCulling();
@@ -151,6 +135,8 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     colorHigh = Colors.brown * Colors.MakeGrayScale(0.2f);
     
     Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize+1, chunkSize+1, colorLow, colorHigh, 0.024f);
+    
+    Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize+1, chunkSize+1, Colors.white, 80.0f, 2.0f);
     
     Engine.GenerateWaterTableFromHeightField(heightField, chunkSize+1, chunkSize+1, 0);
     

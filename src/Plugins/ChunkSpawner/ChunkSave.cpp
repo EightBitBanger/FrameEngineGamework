@@ -11,9 +11,6 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
     
     std::string buffer = "";
     
-    // Boundary offset
-    float boundsOffset = 3.0f;
-    
     
     // Save actors within chunk range
     
@@ -26,16 +23,25 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
         glm::vec3 actorPos = actorObject->GetPosition();
         glm::vec3 chunkPos(chunk.x, 0, chunk.y);
         
-        float chunkSz = chunkSize / 1.3f;
+        float chunkSz = chunkSize * 0.5f;
+        
+        Actor* actorPtr = actorObject->GetComponent<Actor>();
         
         // Check actor within chunk bounds
         if (((actorPos.x < (chunkPos.x - chunkSz)) | actorPos.x > (chunkPos.x + chunkSz)) | 
             ((actorPos.z < (chunkPos.z - chunkSz)) | actorPos.z > (chunkPos.z + chunkSz)))
             continue;
         
-        Actor* actorPtr = actorObject->GetComponent<Actor>();
+        // Check mark as saved
+        if (actorPtr->GetUserBitmask() == 'S') 
+            continue;
+        
+        actorPtr->SetUserBitmask('S');
         
         if (actorPtr->GetName() == "") 
+            continue;
+        
+        if (!actorPtr->GetActive()) 
             continue;
         
         std::string actorPosStr = Float.ToString(actorPos.x) + "~" + 
@@ -58,8 +64,19 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
     
     unsigned int bufferSz = buffer.size();
     
-    Serializer.Serialize(chunkName, (void*)buffer.data(), bufferSz);
+    if (bufferSz != 0) 
+        Serializer.Serialize(chunkName, (void*)buffer.data(), bufferSz);
     
+    for (unsigned int a=0; a < numberOfActors; a++) {
+        
+        GameObject* actorObject = actors[a];
+        
+        Actor* actorPtr = actorObject->GetComponent<Actor>();
+        
+        actorPtr->SetUserBitmask(0);
+        
+        continue;
+    }
     
     // Save static objects
     
@@ -98,7 +115,8 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
     
     bufferSz = buffer.size();
     
-    Serializer.Serialize(staticName, (void*)buffer.data(), bufferSz);
+    if (bufferSz != 0) 
+        Serializer.Serialize(staticName, (void*)buffer.data(), bufferSz);
     
     return 0;
 }

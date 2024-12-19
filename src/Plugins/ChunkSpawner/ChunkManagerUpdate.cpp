@@ -1,6 +1,8 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
 unsigned int actorIndex = 0;
+unsigned int actorCheckCounter = 0;
+
 unsigned int chunkIndex = 0;
 
 void ChunkManager::Update(void) {
@@ -27,7 +29,9 @@ void ChunkManager::Update(void) {
         
         glm::vec3 actorPos = actorPtr->GetPosition();
         
-        if (glm::distance(actorPos, playerPosition) < (renderDistance * chunkSize) * 0.9f ) 
+        // TODO Find out why the actors generate with misshapen genetic expressions
+        // This effectively hides this issue but does not fix the source
+        if (glm::distance(actorPos, playerPosition) < (renderDistance * chunkSize)) 
             actorPtr->SetGeneticExpressionFlag();
         
         actorIndex++;
@@ -44,7 +48,9 @@ void ChunkManager::Update(void) {
     
     if (numberOfChunks > 0) {
         
-        for (unsigned int c=0; c < 16; c++) {
+        unsigned int numberOfCycles = numberOfChunks / 3;
+        
+        for (unsigned int c=0; c < numberOfCycles; c++) {
             
             Chunk& chunk = chunks[chunkIndex];
             
@@ -123,28 +129,27 @@ void ChunkManager::Update(void) {
             
             // Check if the chunk exists on disk
             
-            std::string filename = Float.ToString(chunkPosition.x) + "_" + Float.ToString(chunkPosition.y);
+            std::string filename = Int.ToString(chunkPosition.x) + "_" + Int.ToString(chunkPosition.y);
             
-            std::string worldFilename = "worlds/" + world.name + "/chunks/" + filename;
+            std::string chunkFilename  = "worlds/" + world.name + "/chunks/" + filename;
+            std::string staticFilename = "worlds/" + world.name + "/static/" + filename;
             
-            if (Serializer.CheckExists( worldFilename )) {
-                
-                Chunk chunk = CreateChunk(chunkPosition.x, chunkPosition.y);
+            Chunk chunk = CreateChunk(chunkPosition.x, chunkPosition.y);
+            
+            MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
+            
+            if (Serializer.CheckExists( chunkFilename ) | 
+                Serializer.CheckExists( staticFilename )) {
                 
                 LoadChunk( chunk );
                 
-                chunks.push_back( chunk );
+            } else {
                 
-                continue;
+                Random.SetSeed( worldSeed + chunkPosition.x + chunkPosition.y );
+                
+                Decorate(chunk, chunkPosition.x, chunkPosition.y, staticRenderer->mesh);
+                
             }
-            
-            // Generate a new chunk
-            Chunk chunk = CreateChunk(chunkPosition.x, chunkPosition.y);
-            
-            // Decorate chunk
-            MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
-            
-            Decorate(chunk, chunkPosition.x, chunkPosition.y, staticRenderer->mesh);
             
             staticRenderer->mesh->Load();
             
