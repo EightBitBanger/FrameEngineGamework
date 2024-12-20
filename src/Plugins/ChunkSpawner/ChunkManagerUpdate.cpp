@@ -145,7 +145,9 @@ void ChunkManager::Update(void) {
                 
             } else {
                 
-                Random.SetSeed( worldSeed + chunkPosition.x + chunkPosition.y );
+                chunk.seed = worldSeed + ((chunkPosition.x * 2) + (chunkPosition.y * 4) / 2);
+                
+                Random.SetSeed( chunk.seed );
                 
                 Decorate(chunk, chunkPosition.x, chunkPosition.y, staticRenderer->mesh);
                 
@@ -175,11 +177,92 @@ void DecodeGenome(Decoration& decor, Actor* actorPtr) {
 }
 
 
+void ChunkManager::AddDecorGrass(StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz) {
+    
+    staticObject.type = DECORATION_GRASS;
+    
+    staticMesh->AddSubMesh(xx, yy, zz, subMeshGrassHorz, false);
+    staticMesh->AddSubMesh(xx, yy, zz, subMeshGrassVert, false);
+    
+    unsigned int index = staticMesh->GetSubMeshCount() - 1;
+    
+    Color finalColor;
+    finalColor = Colors.green * 0.04f;
+    
+    staticMesh->ChangeSubMeshColor(index, finalColor);
+    staticMesh->ChangeSubMeshColor(index-1, finalColor);
+    
+    staticObject.r = finalColor.r;
+    staticObject.g = finalColor.g;
+    staticObject.b = finalColor.b;
+    
+    return;
+}
+
+
+
+void ChunkManager::AddDecorGrassThin(StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz) {
+    
+    staticObject.type = DECORATION_GRASS_THIN;
+    
+    staticMesh->AddSubMesh(xx, yy, zz, subMeshStemHorz, false);
+    staticMesh->AddSubMesh(xx, yy, zz, subMeshStemVert, false);
+    
+    unsigned int index = staticMesh->GetSubMeshCount() - 1;
+    
+    Color finalColor;
+    finalColor = Colors.green * 0.018f;
+    
+    finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
+                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
+                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
+    
+    staticMesh->ChangeSubMeshColor(index, finalColor);
+    staticMesh->ChangeSubMeshColor(index-1, finalColor);
+    
+    staticObject.r = finalColor.r;
+    staticObject.g = finalColor.g;
+    staticObject.b = finalColor.b;
+    
+    return;
+}
+
+void ChunkManager::AddDecorGrassThick(StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz) {
+    
+    staticObject.type = DECORATION_GRASS_THICK;
+    
+    staticMesh->AddSubMesh(xx, yy, zz, subMeshWallHorz, false);
+    staticMesh->AddSubMesh(xx, yy, zz, subMeshWallVert, false);
+    
+    unsigned int index = staticMesh->GetSubMeshCount() - 1;
+    
+    Color finalColor;
+    finalColor = Colors.green * 0.05f;
+    
+    if (Random.Range(0, 100) < 20) finalColor = Colors.yellow * 0.05f;
+    if (Random.Range(0, 100) < 20) finalColor = Colors.orange * 0.01f;
+    
+    staticMesh->ChangeSubMeshColor(index, finalColor);
+    staticMesh->ChangeSubMeshColor(index-1, finalColor);
+    
+    staticObject.r = finalColor.r;
+    staticObject.g = finalColor.g;
+    staticObject.b = finalColor.b;
+    
+    return;
+}
+
+
+
+
 
 void ChunkManager::Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMesh) {
     
     if (world.mDecorations.size() == 0) 
         return;
+    
+    float threshold = 0.1f;
+    float noise = 0.03f;
     
     chunk.statics.clear();
     
@@ -198,6 +281,21 @@ void ChunkManager::Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMe
             glm::vec3 from(staticX, 0, staticZ);
             glm::vec3 direction(0, -1, 0);
             
+            // Pick a random decoration for this world
+            unsigned int decorIndex = Random.Range(0, world.mDecorations.size());
+            
+            Decoration decor = world.mDecorations[ decorIndex ];
+            
+            // Perlin generation
+            if (decor.threshold < 1.0f) {
+                
+                float xCoord = (float)xx * decor.noise;
+                float zCoord = (float)zz * decor.noise;
+                
+                if (Random.Perlin(xCoord, 0, zCoord, chunk.seed) < decor.threshold) 
+                    continue;
+            }
+            
             Hit hit;
             
             float distance = 2000.0f;
@@ -210,14 +308,6 @@ void ChunkManager::Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMe
                 continue;
             
             if (height == 0.0f) 
-                continue;
-            
-            unsigned int decorIndex = Random.Range(0, world.mDecorations.size());
-            
-            Decoration decor = world.mDecorations[ decorIndex ];
-            
-            // Spawn density
-            if ((unsigned int)Random.Range(0, 10000) > decor.density) 
                 continue;
             
             // World spawn height range
@@ -233,26 +323,39 @@ void ChunkManager::Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMe
             // Stack height
             unsigned int stackHeight = Random.Range((float)decor.spawnStackHeightMin, (float)decor.spawnStackHeightMax);
             
+            // Structures
+            
+            for (unsigned int s=0; s < world.mStructures.size(); s++) {
+                
+                if ((unsigned int)Random.Range(0, 100) > 97) 
+                    break;
+                
+                unsigned int numberOfElements = world.mStructures[s].elements.size();
+                
+                for (unsigned int e=0; e < numberOfElements; e++) {
+                    
+                    glm::vec3 pos(world.mStructures[s].elements[e].position.x - xp, 
+                                  world.mStructures[s].elements[e].position.y + height, 
+                                  world.mStructures[s].elements[e].position.z - zp);
+                    
+                    if (world.mStructures[s].elements[e].type == DECORATION_GRASS) 
+                        AddDecorGrass(staticObj, staticMesh, pos.x, pos.y, pos.z);
+                    
+                    chunk.statics.push_back(staticObj);
+                    
+                }
+                
+                
+            }
+            
             
             // Grass
             if (decor.type == DECORATION_GRASS) {
                 
-                staticObj.type = DECORATION_GRASS;
+                if ((unsigned int)Random.Range(0, 8000) > decor.density) 
+                    continue;
                 
-                staticMesh->AddSubMesh(-xp, height, -zp, subMeshGrassHorz, false);
-                staticMesh->AddSubMesh(-xp, height, -zp, subMeshGrassVert, false);
-                
-                unsigned int index = staticMesh->GetSubMeshCount() - 1;
-                
-                Color finalColor;
-                finalColor = Colors.green * 0.04f;
-                
-                staticMesh->ChangeSubMeshColor(index, finalColor);
-                staticMesh->ChangeSubMeshColor(index-1, finalColor);
-                
-                staticObj.r = finalColor.r;
-                staticObj.g = finalColor.g;
-                staticObj.b = finalColor.b;
+                AddDecorGrass( staticObj, staticMesh, -xp, height, -zp );
                 
                 chunk.statics.push_back(staticObj);
             }
@@ -260,29 +363,14 @@ void ChunkManager::Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMe
             // Thin grass
             if (decor.type == DECORATION_GRASS_THIN) {
                 
+                if ((unsigned int)Random.Range(0, 10000) > decor.density) 
+                    continue;
+                
                 for (unsigned int c=0; c < stackHeight; c++) {
                     
-                    staticObj.type = DECORATION_GRASS_THIN;
+                    AddDecorGrassThin(staticObj, staticMesh, -xp, height + c, -zp);
+                    
                     staticObj.y = height + c;
-                    
-                    staticMesh->AddSubMesh(-xp, height + c, -zp, subMeshStemHorz, false);
-                    staticMesh->AddSubMesh(-xp, height + c, -zp, subMeshStemVert, false);
-                    
-                    unsigned int index = staticMesh->GetSubMeshCount() - 1;
-                    
-                    Color finalColor;
-                    finalColor = Colors.green * 0.018f;
-                    
-                    finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
-                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f,
-                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
-                    
-                    staticMesh->ChangeSubMeshColor(index, finalColor);
-                    staticMesh->ChangeSubMeshColor(index-1, finalColor);
-                    
-                    staticObj.r = finalColor.r;
-                    staticObj.g = finalColor.g;
-                    staticObj.b = finalColor.b;
                     
                     chunk.statics.push_back(staticObj);
                     
@@ -291,28 +379,13 @@ void ChunkManager::Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMe
                 continue;
             }
             
-            // Thicker grass
+            // Thick grass
             if (decor.type == DECORATION_GRASS_THICK) {
                 
-                staticObj.type = DECORATION_GRASS_THICK;
+                if ((unsigned int)Random.Range(0, 10000) > decor.density) 
+                    continue;
                 
-                staticMesh->AddSubMesh(-xp, height, -zp, subMeshWallHorz, false);
-                staticMesh->AddSubMesh(-xp, height, -zp, subMeshWallVert, false);
-                
-                unsigned int index = staticMesh->GetSubMeshCount() - 1;
-                
-                Color finalColor;
-                finalColor = Colors.green * 0.05f;
-                
-                if (Random.Range(0, 100) < 20) finalColor = Colors.yellow * 0.05f;
-                if (Random.Range(0, 100) < 20) finalColor = Colors.orange * 0.01f;
-                
-                staticMesh->ChangeSubMeshColor(index, finalColor);
-                staticMesh->ChangeSubMeshColor(index-1, finalColor);
-                
-                staticObj.r = finalColor.r;
-                staticObj.g = finalColor.g;
-                staticObj.b = finalColor.b;
+                AddDecorGrassThick(staticObj, staticMesh, -xp, height, -zp);
                 
                 chunk.statics.push_back(staticObj);
                 
@@ -321,6 +394,9 @@ void ChunkManager::Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMe
             
             // Trees
             if (decor.type == DECORATION_TREE) {
+                
+                if ((unsigned int)Random.Range(0, 10000) > decor.density) 
+                    continue;
                 
                 // Tree logs
                 
@@ -414,6 +490,9 @@ void ChunkManager::Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMe
             
             // Actor generation
             if (decor.type == DECORATION_ACTOR) {
+                
+                if ((unsigned int)Random.Range(0, 300000) > decor.density) 
+                    continue;
                 
                 GameObject* actorObject = SpawnActor(from.x, 0, from.z);
                 

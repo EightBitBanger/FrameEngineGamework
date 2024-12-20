@@ -2,6 +2,7 @@
 
 Chunk::Chunk() : 
     isActive(false),
+    seed(0),
     x(0),
     y(0),
     gameObject(nullptr),
