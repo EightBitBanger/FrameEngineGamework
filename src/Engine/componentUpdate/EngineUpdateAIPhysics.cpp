@@ -9,35 +9,55 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     glm::vec3 actorRotation = mStreamBuffer[index].actor->mRotation;
     glm::vec3 actorVelocity = mStreamBuffer[index].actor->mVelocity;
     
-    // Ray cast here
-    glm::vec3 from      = actorPosition;
-    glm::vec3 direction = glm::vec3(0, -1, 0);
-    from.y = 900;
     
-    Hit hit;
-    
-    float distance = 1000;
-    
-    // Move the actor out of the way since we cant cast a ray from inside the collider...
     rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
     rp3d::Vector3 currentPosition = transform.getPosition();
-    currentPosition.y += 1000;
-    transform.setPosition(currentPosition);
     mStreamBuffer[index].rigidBody->setTransform(transform);
     
     // Check not on ground
-    if (!Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) {
+    Hit hit;
+    
+    if (Physics.Raycast(actorPosition, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Ground)) {
         
-        // Apply some falling action
-        //actorVelocity.y -= 0.01;
+        // Standing on ground
+        if (actorPosition.y > hit.point.y) {
+            
+            // Apply some falling action
+            actorVelocity.y -= 1.3f;
+            
+            // Terminal velocity
+            float terminalVelocity = -9.81f * 2.0f;
+            
+            if (actorVelocity.y < terminalVelocity) 
+                actorVelocity.y = terminalVelocity;
+            
+        } else {
+            
+            actorPosition.y   = hit.point.y;
+            currentPosition.y = hit.point.y;
+            
+        }
         
-        // Terminal velocity
-        //if (actorVelocity.y < -1) 
-        //    actorVelocity.y = -1;
+        
+        unsigned int numberOfRenderers = mStreamBuffer[index].actor->GetNumberOfMeshRenderers();
+        for (unsigned int i=0; i < numberOfRenderers; i++) {
+            
+            Material* actorMaterial = mStreamBuffer[index].actor->GetMeshRendererAtIndex(i)->material;
+            
+            actorMaterial->ambient = Colors.white;
+        }
+        
+        
+        // Set current chunk
+        GameObject* gameObject = (GameObject*)hit.gameObject;
+        
+        mStreamBuffer[index].actor->mUserDataA = gameObject->GetUserData();
+        
+    } else {
         
         actorVelocity = glm::vec3(0, 0, 0);
         
-        /*
+        
         unsigned int numberOfRenderers = mStreamBuffer[index].actor->GetNumberOfMeshRenderers();
         for (unsigned int i=0; i < numberOfRenderers; i++) {
             
@@ -46,42 +66,17 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
             actorMaterial->ambient = Colors.black;
             
         }
-        */
         
-    } else {
-        
-        /*
-        unsigned int numberOfRenderers = mStreamBuffer[index].actor->GetNumberOfMeshRenderers();
-        for (unsigned int i=0; i < numberOfRenderers; i++) {
-            
-            Material* actorMaterial = mStreamBuffer[index].actor->GetMeshRendererAtIndex(i)->material;
-            
-            actorMaterial->ambient = Colors.white;
-        }
-        */
-        
-        // Standing on ground
-        actorPosition.y   = hit.point.y;
-        currentPosition.y = hit.point.y + 1000;
-        
-        // Set current chunk
-        GameObject* gameObject = (GameObject*)hit.gameObject;
-        
-        mStreamBuffer[index].actor->mUserDataA = gameObject->GetUserData();
-        
-        actorVelocity.y = 0;
         
     }
     
-    // Move the actor back into position since we are finished casting rays...
-    currentPosition.y -= 1000;
+    // Move the actor into position
     transform.setPosition(currentPosition);
     mStreamBuffer[index].rigidBody->setTransform(transform);
     
     // Factor in youth speed multiplier
     if (mStreamBuffer[index].actor->mAge < 1000) 
         actorVelocity *= mStreamBuffer[index].actor->mSpeedYouth;
-    
     
     // Apply force velocity
     mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, 

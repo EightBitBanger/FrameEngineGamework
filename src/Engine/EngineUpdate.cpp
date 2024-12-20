@@ -31,7 +31,6 @@ void EngineSystemManager::Update(void) {
     // Process console input
     UpdateConsole();
     
-    
     //
     // Update attached components
     //
