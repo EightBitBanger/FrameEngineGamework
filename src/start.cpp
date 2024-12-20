@@ -19,12 +19,14 @@ void Start() {
     
     
     Platform.HideMouseCursor();
+    Engine.DisableConsoleCloseOnReturn();
     
+    
+    // User plug-in initiation
     chunkManager.Initiate();
     
     weather.Initiate();
     
-    Engine.DisableConsoleCloseOnReturn();
     
     
     // Event callbacks
@@ -101,11 +103,13 @@ void Start() {
     
     Decoration decorGrass;
     decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 8000;
+    decorGrass.density = 1000000;
     decorGrass.spawnHeightMaximum = 35;
     decorGrass.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
     decorGrass.spawnStackHeightMax = 2;
+    decorGrass.threshold = 0.001f;
+    decorGrass.noise = 0.2f;
     
     Decoration decorTrees;
     decorTrees.type = DECORATION_TREE;
@@ -114,6 +118,8 @@ void Start() {
     decorTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
     decorTrees.spawnStackHeightMax = 8;
+    decorTrees.threshold = 0.2f;
+    decorTrees.noise = 0.007f;
     
     Decoration decorTreeHights;
     decorTreeHights.type = DECORATION_TREE;
@@ -203,6 +209,16 @@ void Start() {
     chunkManager.perlin.push_back(perlinLayerA);
     chunkManager.perlin.push_back(perlinLayerB);
     chunkManager.perlin.push_back(perlinFlatland);
+    
+    // Structure test
+    Structure structure;
+    
+    DecorationElement element;
+    element.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    structure.elements.push_back(element);
+    
+    chunkManager.world.mStructures.push_back(structure);
+    
     
     
     // Lighting levels

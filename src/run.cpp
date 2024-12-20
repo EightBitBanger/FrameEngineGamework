@@ -21,28 +21,43 @@ void Run() {
     // Raycast from player
     //
     
-    // Move the player out of the way as we cant cast a ray from inside the collider...
-    rp3d::RigidBody* rigidBody = Engine.cameraController->GetComponent<RigidBody>();
-    rp3d::Transform bodyTransform = rigidBody->getTransform();
-    rp3d::Vector3 bodyPosition = bodyTransform.getPosition();
-    bodyPosition.y += 1000;
-    
-    // Cast forward a ray
     Hit hit;
-    float distance = 15;
     
-    glm::vec3 from      = Engine.cameraController->GetComponent<Transform>()->position;
-    glm::vec3 direction = Engine.cameraController->GetComponent<Camera>()->forward;
+    glm::vec3 from    = Engine.cameraController->GetComponent<Transform>()->position;
+    glm::vec3 forward = Engine.cameraController->GetComponent<Camera>()->forward;
     
-    // Center the from angle
-    from.y += 0.24f;
+    // Prevent player controller from under ground
+    if (Physics.Raycast(from, glm::vec3(0.0f, -1.0f, 0.0f), 1000, hit, LayerMask::Ground)) {
+        
+        RigidBody* bodyPtr = Engine.cameraController->GetComponent<RigidBody>();
+        
+        rp3d::Transform transform = bodyPtr->getTransform();
+        
+        rp3d::Vector3 position = transform.getPosition();
+        
+        if (position.y < hit.point.y) {
+            
+            position.y = hit.point.y;
+            
+            transform.setPosition( position );
+            
+            bodyPtr->setTransform( transform );
+            
+        }
+        
+    }
+    
     
     
     // Pick an actors genome
     
     if (Input.CheckMouseMiddlePressed()) {
         
-        if (Physics.Raycast(from, direction, distance, hit, LayerMask::Actor)) {
+        from.y -= 2.4f;
+        
+        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
+            
+            Engine.Print("Fuck");
             
             GameObject* hitObject = (GameObject*)hit.gameObject;
             Actor* hitActor = hitObject->GetComponent<Actor>();
@@ -85,7 +100,7 @@ void Run() {
     
     if (Input.CheckMouseLeftPressed()) {
         
-        if (Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) {
+        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             
             std::string sourceGene = Platform.GetClipboardText();
             
@@ -131,7 +146,7 @@ void Run() {
     
     if (Input.CheckMouseRightPressed()) {
         
-        if (Physics.Raycast(from, direction, distance, hit, LayerMask::Actor)) {
+        if (Physics.Raycast(from, forward, 20, hit, LayerMask::Actor)) {
             
             GameObject* hitObject = (GameObject*)hit.gameObject;
             
@@ -140,13 +155,6 @@ void Run() {
         }
         
     }
-    
-    
-    // Move the actor back into position as we are now finished casting rays...
-    bodyPosition.y -= 1000;
-    bodyTransform.setPosition(bodyPosition);
-    
-    
     
     
     //
@@ -194,6 +202,7 @@ void Run() {
         }
         
     }
+    
     
     // Debug report
     
