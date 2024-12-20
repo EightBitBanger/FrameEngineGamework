@@ -34,7 +34,7 @@ void main() {
     
     vec3 norm = normalize(l_normal);
     
-    v_color = (m_ambient + m_diffuse) * l_color;
+    v_color = m_ambient * m_diffuse * l_color;
     v_coord = l_uv;
     
     gl_Position = u_proj * vertPos;
