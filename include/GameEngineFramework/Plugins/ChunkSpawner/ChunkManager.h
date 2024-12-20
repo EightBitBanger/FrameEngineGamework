@@ -7,6 +7,7 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Perlin.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Decor.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/Structure.h>
 
 class ENGINE_API WorldGeneration {
     
@@ -34,6 +35,8 @@ public:
     Color actorColorHigh;
     
     std::vector<Decoration> mDecorations;
+    
+    std::vector<Structure> mStructures;
     
     
     // Static plant generation
@@ -148,6 +151,10 @@ public:
     
     void Update(void);
     
+    
+    void AddDecorGrass(StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
+    void AddDecorGrassThin(StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
+    void AddDecorGrassThick(StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
     
     void Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMesh);
     

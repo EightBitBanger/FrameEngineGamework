@@ -28,6 +28,9 @@ public:
     /// Is the chunk active in the scene
     bool isActive;
     
+    /// Current seed used to generate this chunk
+    int seed;
+    
     float x;
     float y;
     

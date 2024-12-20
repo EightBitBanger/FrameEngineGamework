@@ -48,6 +48,11 @@ public:
     /// Maximum plant generation stack height.
     unsigned int spawnStackHeightMax;
     
+    /// Threshold to generate decoration from perlin noise.
+    float threshold;
+    
+    /// Perlin noise multiplier.
+    float noise;
     
     Decoration() : 
         type(0),
@@ -58,7 +63,9 @@ public:
         spawnHeightMaximum(100),
         
         spawnStackHeightMin(1),
-        spawnStackHeightMax(1)
+        spawnStackHeightMax(1),
+        threshold(0.1f),
+        noise(0.1f)
         
     {
         
