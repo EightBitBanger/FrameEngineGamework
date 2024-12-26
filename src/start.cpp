@@ -41,29 +41,22 @@ void Start() {
     
     //
     // Audio test sample
-    
+    /*
     Sound* soundA = Audio.CreateSound();
     AudioSample* sampleA = Audio.CreateAudioSample();
     
     sampleA->sample_rate = 44100;
     
-    //Samples.RenderBlankSpace(sampleA, 0.4f);
-    //Samples.RenderSweepingSineWave(sampleA, 17000, 11000, 0.1f);
-    //Samples.RenderBlankSpace(sampleA, 0.7f);
-    //Samples.RenderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
-    //Samples.RenderBlankSpace(sampleA, 1.0f);
-    //Samples.RenderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
-    //Samples.RenderBlankSpace(sampleA, 0.1f);
-    //Samples.RenderSweepingSineWave(sampleA, 17000, 15000, 0.1f);
-    
+    Samples.RenderBlankSpace(sampleA, 0.4f);
+    Samples.RenderSweepingSineWave(sampleA, 17000, 1000, 0.3f);
     
     soundA->LoadSample(sampleA);
     
-    //soundA->SetVolume(0.4f);
+    soundA->SetVolume(0.9f);
     
-    //soundA->Play();
-    //while (soundA->IsSamplePlaying());
-    
+    soundA->Play();
+    while (soundA->IsSamplePlaying());
+    */
     
     
     //
@@ -71,12 +64,12 @@ void Start() {
     //
     
     // The position of the player in the world.
-    Vector3 playerPosition = Vector3(0, 30, 0);
+    Vector3 playerPosition = Vector3(0, 0, 0);
     
     // Create a new camera controller object
     Engine.cameraController = Engine.CreateCameraController(playerPosition);
     
-    // Assign the camera controller's camera for rendering scene main.
+    // Assign the camera controller's camera for rendering the main scene.
     Engine.sceneMain->camera = Engine.cameraController->GetComponent<Camera>();
     
     // Use the mouse to look around.
@@ -90,7 +83,8 @@ void Start() {
     
     // Attach the sky object to the camera controller to prevent 
     // the player from moving outside of the sky.
-    weather.skyObject->GetComponent<Transform>()->parent = Engine.cameraController->GetComponent<Transform>();
+    
+    weather.SetPlayerObject(Engine.cameraController);
     
     
     
@@ -101,57 +95,65 @@ void Start() {
     // Chunk generation
     //
     
-    Decoration decorGrass;
+    DecorationSpecifier decorGrass;
     decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 1000000;
+    decorGrass.density = 100;
     decorGrass.spawnHeightMaximum = 35;
     decorGrass.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
     decorGrass.spawnStackHeightMax = 2;
-    decorGrass.threshold = 0.001f;
-    decorGrass.noise = 0.2f;
+    decorGrass.threshold = 0.1f;
+    decorGrass.noise = 0.4f;
     
-    Decoration decorTrees;
+    DecorationSpecifier decorTrees;
     decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 50;
+    decorTrees.density = 10;
     decorTrees.spawnHeightMaximum = 20;
     decorTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
     decorTrees.spawnStackHeightMax = 8;
     decorTrees.threshold = 0.2f;
-    decorTrees.noise = 0.007f;
+    decorTrees.noise = 0.07f;
     
-    Decoration decorTreeHights;
+    DecorationSpecifier decorTreeHights;
     decorTreeHights.type = DECORATION_TREE;
-    decorTreeHights.density = 1300;
+    decorTreeHights.density = 150;
     decorTreeHights.spawnHeightMaximum = 40;
     decorTreeHights.spawnHeightMinimum = 10;
     decorTreeHights.spawnStackHeightMin = 4;
     decorTreeHights.spawnStackHeightMax = 8;
+    decorTreeHights.threshold = 0.8f;
+    decorTreeHights.noise = 0.3f;
     
-    Decoration decorWaterPlants;
+    DecorationSpecifier decorWaterPlants;
     decorWaterPlants.type = DECORATION_GRASS_THIN;
-    decorWaterPlants.density = 800;
+    decorWaterPlants.density = 80;
     decorWaterPlants.spawnHeightMaximum = chunkManager.world.waterLevel;
     decorWaterPlants.spawnHeightMinimum = -100;
     decorWaterPlants.spawnStackHeightMax = 4;
     decorWaterPlants.spawnStackHeightMin = 2;
+    decorWaterPlants.threshold = 0.1f;
+    decorWaterPlants.noise = 0.4f;
     
     // Actors
     
-    Decoration decorSheep;
+    DecorationSpecifier decorSheep;
     decorSheep.type = DECORATION_ACTOR;
     decorSheep.name = "Sheep";
-    decorSheep.density = 10;
+    decorSheep.density = 30;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = chunkManager.world.waterLevel;
+    decorSheep.threshold = 0.1f;
+    decorSheep.noise = 0.4f;
     
-    Decoration decorBear;
+    DecorationSpecifier decorBear;
     decorBear.type = DECORATION_ACTOR;
     decorBear.name = "Bear";
-    decorBear.density = 8;
+    decorBear.density = 20;
     decorBear.spawnHeightMaximum = 40;
     decorBear.spawnHeightMinimum = 5;
+    decorBear.threshold = 0.1f;
+    decorBear.noise = 0.4f;
     
     
     chunkManager.world.mDecorations.push_back(decorGrass);
@@ -212,10 +214,19 @@ void Start() {
     
     // Structure test
     Structure structure;
+    structure.name = "";
+    structure.rarity = 10000;
     
-    DecorationElement element;
-    element.position = glm::vec3(0.0f, 0.0f, 0.0f);
-    structure.elements.push_back(element);
+    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 0, 0)) );
+    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 1, 0)) );
+    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 2, 0)) );
+    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 3, 0)) );
+    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 4, 0)) );
+    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 5, 0)) );
+    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 6, 0)) );
+    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 7, 0)) );
+    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 8, 0)) );
+    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 9, 0)) );
     
     chunkManager.world.mStructures.push_back(structure);
     
@@ -236,8 +247,8 @@ void Start() {
     
     // World rendering
     
-    chunkManager.renderDistance = 10;
-    chunkManager.staticDistance = 10;
+    chunkManager.renderDistance = 14;
+    chunkManager.staticDistance = chunkManager.renderDistance * 0.7f;
     
     return;
 }

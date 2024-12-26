@@ -1,4 +1,5 @@
 #include <GameEngineFramework/Types/types.h>
+#include <GameEngineFramework/Math/Math.h>
 
 #include <sstream>
 
@@ -105,5 +106,30 @@ std::string UintType::ToString(unsigned int value) {
     std::stringstream sstream;
     sstream << value;
     return sstream.str();
+}
+
+float FloatType::Lerp(float min, float max, float bias) {
+    
+    return glm::lerp(min, max, bias);
+}
+
+double DoubleType::Lerp(double min, double max, float bias) {
+    
+    return glm::lerp(min, max, (double)bias);
+}
+
+int IntType::Lerp(int min, int max, float bias) {
+    
+    return glm::lerp((float)min, (float)max, bias);
+}
+
+long int IntLongType::Lerp(long int min, long int max, float bias) {
+    
+    return glm::lerp((float)min, (float)max, bias);
+}
+
+unsigned int UintType::Lerp(unsigned int min, unsigned int max, float bias) {
+    
+    return glm::lerp((float)min, (float)max, bias);
 }
 

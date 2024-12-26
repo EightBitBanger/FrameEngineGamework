@@ -12,21 +12,25 @@ bool isFullScreen = false;
 
 std::string targetGene = "";
 
+Actor* actorSelected = nullptr;
+
+
+float ambientLight = 0.0f;
+
+
 
 void Run() {
     
-    chunkManager.Update();
-    
-    //
-    // Raycast from player
-    //
+    // Cast a ray from the player
     
     Hit hit;
     
-    glm::vec3 from    = Engine.cameraController->GetComponent<Transform>()->position;
-    glm::vec3 forward = Engine.cameraController->GetComponent<Camera>()->forward;
+    Camera* cameraPtr = Engine.cameraController->GetComponent<Camera>();
     
-    // Prevent player controller from under ground
+    glm::vec3 from    = cameraPtr->transform.position;
+    glm::vec3 forward = cameraPtr->forward;
+    
+    // Prevent player controller from going under ground
     if (Physics.Raycast(from, glm::vec3(0.0f, -1.0f, 0.0f), 1000, hit, LayerMask::Ground)) {
         
         RigidBody* bodyPtr = Engine.cameraController->GetComponent<RigidBody>();
@@ -49,18 +53,52 @@ void Run() {
     
     
     
+    // DEBUG - Show data on the aimed actor
+    glm::vec3 fromHigh = from;
+    
+    if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
+        
+        GameObject* hitObject = (GameObject*)hit.gameObject;
+        Actor* hitActor = hitObject->GetComponent<Actor>();
+        
+        Engine.WriteDialog( 2, hitActor->GetName() );
+        Engine.WriteDialog( 3, Int.ToString( hitActor->GetAge() ) );
+        
+        unsigned int numberOfGenes = hitActor->GetNumberOfGenes();
+        
+    } else {
+        
+        for (unsigned int i=0; i < 2; i++) 
+            Engine.WriteDialog(i + 2, "");
+        
+    }
+    
+    /*
+    if (Physics.Raycast(from, forward, 100, hit, LayerMask::Object)) {
+        
+        GameObject* hitObject = (GameObject*)hit.gameObject;
+        
+        Engine.WriteDialog( 2, "OBJECT DETECTED" );
+        
+    } else {
+        
+        for (unsigned int i=0; i < 1; i++) 
+            Engine.WriteDialog(i + 2, "");
+        
+    }
+    */
+    
+    
     // Pick an actors genome
     
     if (Input.CheckMouseMiddlePressed()) {
         
-        from.y -= 2.4f;
-        
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
-            
-            Engine.Print("Fuck");
             
             GameObject* hitObject = (GameObject*)hit.gameObject;
             Actor* hitActor = hitObject->GetComponent<Actor>();
+            
+            actorSelected = hitActor;
             
             targetGene = AI.genomes.ExtractGenome(hitActor);
             
@@ -125,11 +163,9 @@ void Run() {
                 GameObject* hitObject = (GameObject*)hit.gameObject;
                 Actor* newActor = newActorObject->GetComponent<Actor>();
                 
-                AI.genomes.PreyBase( newActor );
+                AI.genomes.mental.PreyBase( newActor );
                 
                 AI.genomes.InjectGenome(newActor, sourceArray[1]);
-                
-                AI.genomes.ExposeToRadiation(newActor, 0.001f);
                 
                 newActor->SetAge( 900 + Random.Range(100, 800) );
                 
@@ -142,15 +178,50 @@ void Run() {
     }
     
     
-    // Destroy an actor
+    // Plant tree (testing)
+    if (Input.CheckKeyPressed(VK_P)) {
+        
+        if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Ground)) {
+            
+            GameObject* gameObject = (GameObject*)hit.gameObject;
+            
+            std::vector<std::string> name_pos = String.Explode(gameObject->name, '_');
+            float posX = String.ToInt( name_pos[0] );
+            float posZ = String.ToInt( name_pos[1] );
+            
+            Chunk* chunk = chunkManager.FindChunk(posX, posZ);
+            
+            if (chunk->gameObject != nullptr) {
+                
+                float chunkPosX = posX - hit.point.x;
+                float chunkPosY = hit.point.y;
+                float chunkPosZ = posZ - hit.point.z;
+                
+                GameObject* hitObject = chunk->staticObject;
+                
+                MeshRenderer* chunkRenderer = hitObject->GetComponent<MeshRenderer>();
+                
+                StaticObject staticObj;
+                staticObj.x = chunkPosX;
+                staticObj.y = chunkPosY;
+                staticObj.z = chunkPosZ;
+                
+                chunkManager.AddDecorTree(*chunk, staticObj, chunkRenderer->mesh, -chunkPosX, chunkPosY, -chunkPosZ, Decoration::TreeOak);
+                chunkRenderer->mesh->Load();
+                
+            }
+            
+        }
+        
+    }
     
+    
+    // Kill actor test
     if (Input.CheckMouseRightPressed()) {
         
-        if (Physics.Raycast(from, forward, 20, hit, LayerMask::Actor)) {
+        if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
             
-            GameObject* hitObject = (GameObject*)hit.gameObject;
-            
-            chunkManager.KillActor( hitObject );
+            chunkManager.KillActor( (GameObject*)hit.gameObject );
             
         }
         
@@ -202,6 +273,75 @@ void Run() {
         }
         
     }
+    
+    
+    
+    
+    
+    //
+    // Lighting day night cycle experimentation 
+    //
+    
+    float skyLightingMax    = 0.87f;
+    float skyLightingMin    = 0.0087f;
+    
+    float lightingMax       = 10.0f;
+    float lightingMin       = 0.0f;
+    
+    if (!Platform.isPaused) {
+        
+        if (Input.CheckKeyCurrent(VK_I)) {ambientLight += 0.01f;}
+        if (Input.CheckKeyCurrent(VK_K)) {ambientLight -= 0.01f;}
+        
+        if (ambientLight < 0) 
+            ambientLight = 0;
+        
+        //if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateEuler(0, 0,  0.1);}
+        //if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateEuler(0, 0, -0.1);}
+        
+    }
+    
+    
+    // Light direction
+    /*
+    if (weather.sunLight != nullptr) {
+        Transform* lightTransform = weather.sunObject->GetComponent<Transform>();
+        
+        if (!Platform.isPaused) {
+            
+            if (Input.CheckKeyCurrent(VK_I)) {ambientLight += 0.01f;}
+            if (Input.CheckKeyCurrent(VK_K)) {ambientLight -= 0.01f;}
+            
+            if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateEuler(0, 0,  0.1);}
+            if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateEuler(0, 0, -0.1);}
+            
+        }
+        
+    }
+    
+    // Ambient limits
+    if (ambientLight > 0.87f) ambientLight = 0.87f;
+    if (ambientLight < 0.0f)  ambientLight = 0.0f;
+    
+    // World brightness
+    chunkManager.world.ambientLight = ambientLight;
+    */
+    
+    // Sky brightness
+    float skyColor = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
+    weather.SetSkyAmbientColor( Colors.MakeGrayScale(skyColor) );
+    
+    // Light brightness
+    //if (weather.sunLight != nullptr) 
+    //    weather.sunLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);
+    
+    
+    
+    weather.Update();
+    
+    chunkManager.Update();
+    
+    
     
     
     // Debug report
@@ -285,68 +425,6 @@ void Run() {
     }
     
     
-    
-    
-    
-    //
-    // Lighting day night cycle experimentation 
-    //
-    
-    float skyLightingMax    = 0.87f;
-    float skyLightingMin    = 0.0087f;
-    
-    float lightingMax       = 10.0f;
-    float lightingMin       = 0.0f;
-    
-    
-    
-    // Light direction
-    if (Weather.sunLight != nullptr) {
-        Transform* lightTransform = Weather.sunObject->GetComponent<Transform>();
-        
-        if (!Platform.isPaused) {
-            
-            if (Input.CheckKeyCurrent(VK_I)) {ambientLight += 0.01f;}
-            if (Input.CheckKeyCurrent(VK_K)) {ambientLight -= 0.01f;}
-            
-            if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateEuler(0, 0,  0.1);}
-            if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateEuler(0, 0, -0.1);}
-            
-        }
-        
-    }
-    
-    
-    // Ambient limits
-    if (ambientLight > 0.87f) ambientLight = 0.87f;
-    if (ambientLight < 0.0f)  ambientLight = 0.0f;
-    
-    // World brightness
-    chunkManager.world.ambientLight = ambientLight;
-    
-    // Sky brightness
-    if (Weather.skyMaterial != nullptr) 
-        Weather.skyMaterial->ambient = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
-    
-    // Light brightness
-    if (Weather.sunLight != nullptr) 
-        Weather.sunLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);
-    
-    
-    
-    //
-    // Update weather system
-    //
-    
-    Weather.Update();
-    
-    
-    //
-    // Map generation
-    //
-    
-    chunkManager.Update();
-    
     */
     
     
@@ -359,7 +437,7 @@ void Run() {
     if (Engine.cameraController == nullptr) 
         return;
     
-    float forceAccelerate = 0.012f;
+    float forceAccelerate = 0.0034f;
     float forceDecelerate = 0.015f;
     
     Camera* mainCamera = Engine.sceneMain->camera;
@@ -381,7 +459,8 @@ void Run() {
         }
         
         // Double speed
-        if (Input.CheckKeyCurrent(VK_CONTROL)) forceDblTime += 0.24f;
+        if (Input.CheckKeyCurrent(VK_CONTROL)) 
+            forceDblTime += 0.24f;
         
         if (forceDblTime > 1.0f) {forceDblTime -= (forceDecelerate * 8.0f);} else {forceDblTime = 1.0f;}
         
@@ -399,10 +478,10 @@ void Run() {
         
         
         // Field of view effect
-        float fovPullback = glm::length(forceTotal) * 80.0f;
+        float fovPullback = glm::length(forceTotal) * 40.0f;
         
-        if (fovPullback > 10.0f) 
-            fovPullback = 10.0f;
+        if (fovPullback > 4.0f) 
+            fovPullback = 4.0f;
         
         Engine.sceneMain->camera->fov = 60 + fovPullback;
         

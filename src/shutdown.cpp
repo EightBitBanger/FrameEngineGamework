@@ -6,8 +6,6 @@
 
 void Shutdown(void) {
     
-    return;
-    
     if (chunkManager.world.doGenerateChunks) 
         chunkManager.SaveWorld();
     

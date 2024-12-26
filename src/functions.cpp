@@ -75,6 +75,10 @@ void FuncLoad(std::vector<std::string> args) {
     
     Engine.Print("Generating: " + chunkManager.world.name);
     
+    chunkManager.worldSeed = Random.Range(100, 10000000) - Random.Range(100, 10000000);
+    
+    chunkManager.SaveWorld();
+    
     return;
 }
 
@@ -100,6 +104,11 @@ void FuncRemove(std::vector<std::string> args) {
 void FuncClear(std::vector<std::string> args) {
     
     chunkManager.ClearWorld();
+    
+    Engine.cameraController->SetPosition(0, 0, 0);
+    Camera* camera = Engine.cameraController->GetComponent<Camera>();
+    
+    camera->mouseLookAngle = glm::vec2(0, 0);
     
     Engine.Print("World cleared");
     
@@ -157,8 +166,8 @@ void FuncSummon(std::vector<std::string> args) {
         switch (entityType) {
             
             default:
-            case 1: AI.genomes.Sheep( newActor ); break;
-            case 2: AI.genomes.Bear( newActor ); break;
+            case 1: AI.genomes.presets.Sheep( newActor ); break;
+            case 2: AI.genomes.presets.Bear( newActor ); break;
             
         }
         
