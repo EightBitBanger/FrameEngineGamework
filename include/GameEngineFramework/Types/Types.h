@@ -11,13 +11,13 @@ class ENGINE_API StringType {
 public:
     
     /// Return a float containing the numbers from text.
-    float    ToFloat(std::string value);
+    float ToFloat(std::string value);
     
     /// Return a double containing the numbers from text.
-    double   ToDouble(std::string value);
+    double ToDouble(std::string value);
     
     /// Return an integer containing the numbers from text.
-    int      ToInt(std::string value);
+    int ToInt(std::string value);
     
     /// Return a long integer containing the numbers from text.
     long int ToLongInt(std::string value);
@@ -50,7 +50,11 @@ class ENGINE_API FloatType {
     
 public:
     
-    static std::string ToString(float value);
+    /// Convert a float to a string.
+    std::string ToString(float value);
+    
+    /// Linearly interpolate between min and max via the bias factor.
+    float Lerp(float min, float max, float bias);
     
 };
 
@@ -58,7 +62,11 @@ class ENGINE_API DoubleType {
     
 public:
     
-    static std::string ToString(double value);
+    /// Convert a double to a string.
+    std::string ToString(double value);
+    
+    /// Linearly interpolate between min and max via the bias factor.
+    double Lerp(double min, double max, float bias);
     
 };
 
@@ -66,7 +74,11 @@ class ENGINE_API IntType {
     
 public:
     
-    static std::string ToString(int value);
+    /// Convert an integer to a string.
+    std::string ToString(int value);
+    
+    /// Linearly interpolate between min and max via the bias factor.
+    int Lerp(int min, int max, float bias);
     
 };
 
@@ -74,7 +86,11 @@ class ENGINE_API IntLongType {
     
 public:
     
-    static std::string ToString(long int value);
+    /// Convert a long integer to a string.
+    std::string ToString(long int value);
+    
+    /// Linearly interpolate between min and max via the bias factor.
+    long int Lerp(long int min, long int max, float bias);
     
 };
 
@@ -82,7 +98,11 @@ class ENGINE_API UintType {
     
 public:
     
-    static std::string ToString(unsigned int value);
+    /// Convert an unsigned integer to a string.
+    std::string ToString(unsigned int value);
+    
+    /// Linearly interpolate between min and max via the bias factor.
+    unsigned int Lerp(unsigned int min, unsigned int max, float bias);
     
 };
 
