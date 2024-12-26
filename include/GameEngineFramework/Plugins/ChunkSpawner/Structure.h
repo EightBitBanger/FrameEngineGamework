@@ -21,18 +21,32 @@ public:
         position(glm::vec3(0))
     {
     }
+    
+    DecorationElement(int newType, glm::vec3 newPosition) : 
+        type(newType),
+        position(newPosition)
+    {
+    }
+    
 };
 
 class ENGINE_API Structure {
     
 public:
     
+    // Structure name
     std::string name;
     
+    /// How rare the structure is in the world
+    /// Higher number will increase rarity
+    unsigned int rarity;
+    
+    // Decorations included in this structure
     std::vector<DecorationElement> elements;
     
     Structure() : 
-        name("")
+        name(""),
+        rarity(10)
     {
     }
     

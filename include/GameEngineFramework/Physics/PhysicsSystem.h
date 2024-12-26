@@ -2,93 +2,22 @@
 #define _PHYSICS_WRAP_
 
 #include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
-
-#include <GameEngineFramework/Physics/components/meshcollider.h>
-#include <GameEngineFramework/Renderer/components/mesh.h>
+#include <GameEngineFramework/Math/Math.h>
 
 #include "../../../vendor/ReactPhysics3d/ReactPhysics3d.h"
+#include <GameEngineFramework/Physics/components/meshcollider.h>
+
+#include <GameEngineFramework/Physics/Raycast.h>
+#include <GameEngineFramework/Physics/Masks.h>
 
 #include <cstdlib>
 
-typedef rp3d::RigidBody    RigidBody;
-typedef rp3d::BoxShape     BoxShape;
-typedef rp3d::SphereShape  SphereShape;
-typedef rp3d::CapsuleShape CapsuleShape;
+typedef rp3d::RigidBody      RigidBody;
+typedef rp3d::CollisionBody  CollisionBody;
 
-// Collision type layer mask
-enum class LayerMask {
-    Default = 0x0001,
-    Ground  = 0x0002,
-    Object  = 0x0003,
-    Actor   = 0x0004,
-    Player  = 0x0005
-};
-
-
-// Solid collision mask
-enum class CollisionMask {
-    Default = 0x0001,
-    Ground  = 0x0002,
-    Entity  = 0x0003,
-};
-
-
-class RaybackCastCaller : public rp3d::RaycastCallback {
-    
-public:
-    
-    bool isHit;
-    
-    glm::vec3 point;
-    
-    glm::vec3 normal;
-    
-    rp3d::CollisionBody* body;
-    
-    rp3d::Collider* collider;
-    
-    void* userData;
-    
-    RaybackCastCaller();
-    
-    virtual rp3d::decimal notifyRaycastHit( const rp3d::RaycastInfo& info ) {
-        
-        isHit = true;
-        
-        point.x = info.worldPoint.x;
-        point.y = info.worldPoint.y;
-        point.z = info.worldPoint.z;
-        
-        normal.x = info.worldNormal.x;
-        normal.y = info.worldNormal.y;
-        normal.z = info.worldNormal.z;
-        
-        body = info.body;
-        collider = info.collider;
-        
-        userData = collider->getUserData();
-        
-        // Return a fraction of 1.0 to gather all hits
-        return rp3d::decimal (1.0) ;
-    }
-    
-};
-
-
-
-class ENGINE_API Hit {
-    
-public:
-    
-    glm::vec3 point;
-    
-    glm::vec3 normal;
-    
-    void* gameObject;
-    
-};
-
-
+typedef rp3d::BoxShape       BoxShape;
+typedef rp3d::SphereShape    SphereShape;
+typedef rp3d::CapsuleShape   CapsuleShape;
 
 
 class ENGINE_API PhysicsSystem {
@@ -113,6 +42,11 @@ public:
     rp3d::RigidBody* CreateRigidBody(float x=0.0, float y=0.0, float z=0.0);
     /// Destroy a rigid body object.
     bool DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr);
+    
+    /// Create a collision body object and return its pointer.
+    rp3d::CollisionBody* CreateCollisionBody(float x=0.0, float y=0.0, float z=0.0);
+    /// Destroy a collision body object.
+    bool DestroyCollisionBody(rp3d::CollisionBody* collisionBodyPtr);
     
     /// Set the gravity for the world simulation.
     void SetWorldGravity(float x, float y, float z);

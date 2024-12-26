@@ -16,6 +16,7 @@ public:
     std::string name;
     
     bool doGenerateChunks;
+    bool doAutoBreeding;
     
     float snowCapHeight;
     
@@ -34,7 +35,7 @@ public:
     Color staticColorHigh;
     Color actorColorHigh;
     
-    std::vector<Decoration> mDecorations;
+    std::vector<DecorationSpecifier> mDecorations;
     
     std::vector<Structure> mStructures;
     
@@ -65,6 +66,7 @@ public:
         name("default"),
         
         doGenerateChunks(false),
+        doAutoBreeding(true),
         
         snowCapHeight(60.0f),
         
@@ -113,6 +115,8 @@ public:
     
     WorldGeneration world;
     
+    bool isInitiated;
+    
     float renderDistance;
     float staticDistance;
     
@@ -120,14 +124,15 @@ public:
     
     int worldSeed;
     
-    int ChunkCounterX;
-    int ChunkCounterZ;
-    
     ChunkManager();
     
     bool SaveChunk(Chunk& chunk, bool doClearActors);
     
     bool LoadChunk(Chunk& chunk);
+    
+    Chunk* FindChunk(int x, int z);
+    
+    void InitiateWorld(void);
     
     bool SaveWorld(void);
     
@@ -152,12 +157,18 @@ public:
     void Update(void);
     
     
-    void AddDecorGrass(StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
-    void AddDecorGrassThin(StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
-    void AddDecorGrassThick(StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
+    void AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
+    void AddDecorGrassThin(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
+    void AddDecorGrassThick(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
     
-    void Decorate(Chunk& chunk, int chunkX, int chunkZ, Mesh* staticMesh);
+    void AddDecorTreeLogs(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
+    void AddDecorTreeLeaves(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
+    void AddDecorTree(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz, Decoration treeType);
     
+    void Decorate(Chunk& chunk);
+    
+    
+    unsigned int numberOfActiveActors;
     
     std::vector<Decoration> decoration;
     std::vector<Perlin> perlin;
@@ -168,7 +179,22 @@ public:
     
 private:
     
-    /// World generation meshes.
+    // Update index counters
+    
+    unsigned int mActorIndex;
+    unsigned int mChunkIndex;
+    
+    int mChunkCounterX;
+    int mChunkCounterZ;
+    
+    // Cool down counters
+    
+    unsigned int mBreedingCoolDown;
+    unsigned int mDeathCoolDown;
+    
+    // Mesh generation
+    
+    /// World generation meshes
     SubMesh subMeshWallHorz;
     SubMesh subMeshWallVert;
     
@@ -180,9 +206,13 @@ private:
     
     SubMesh subMeshTree;
     
-    /// Water mesh
-    Mesh* watermesh;
-    Material* watermaterial;
+    /// Water
+    Mesh* waterMesh;
+    Material* waterMaterial;
+    
+    /// World chunk and static material
+    Material* worldMaterial;
+    Material* staticMaterial;
     
 };
 

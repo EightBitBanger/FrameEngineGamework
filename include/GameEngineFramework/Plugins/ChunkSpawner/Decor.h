@@ -5,6 +5,13 @@
 #include <GameEngineFramework/Engine/types/color.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 
+enum class Decoration {
+    
+    TreeOak,
+    TreePine
+    
+};
+
 #define DECORATION_GRASS_THIN   0
 #define DECORATION_GRASS        1
 #define DECORATION_GRASS_THICK  2
@@ -12,7 +19,8 @@
 #define DECORATION_LEAVES       4
 #define DECORATION_ACTOR        5
 
-class ENGINE_API Decoration {
+
+class ENGINE_API DecorationSpecifier {
     
 public:
     
@@ -54,7 +62,7 @@ public:
     /// Perlin noise multiplier.
     float noise;
     
-    Decoration() : 
+    DecorationSpecifier() : 
         type(0),
         name(""),
         density(10),

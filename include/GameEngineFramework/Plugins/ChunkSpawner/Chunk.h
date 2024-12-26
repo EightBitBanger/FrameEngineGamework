@@ -7,15 +7,24 @@ class ENGINE_API StaticObject {
     
 public:
     
+    /// Position
     float x;
     float y;
     float z;
     
+    /// Color
     float r;
     float g;
     float b;
     
+    /// Type of decoration
     uint8_t type;
+    
+    /// Rigid body representing the object in the world
+    rp3d::RigidBody* rigidBody;
+    
+    StaticObject();
+    
 };
 
 
