@@ -451,7 +451,6 @@ set (CORE_SOURCES
     
     "src/Application/Platform.cpp"
     "src/Application/winproc.cpp"
-    "src/Application/nulltype.cpp"
     
     "src/Audio/AudioSystem.cpp"
     "src/Audio/components/sound.cpp"
@@ -485,6 +484,7 @@ set (CORE_SOURCES
     
     "src/Engine/types/bufferlayout.cpp"
     "src/Engine/types/color.cpp"
+    "src/Engine/types/nulltype.cpp"
     "src/Engine/types/viewport.cpp"
     
     "src/ActorAI/ActorSystem.cpp"
