@@ -3,6 +3,7 @@
 
 #include <GameEngineFramework/ActorAI/components/actor.h>
 
+
 class ENGINE_API GeneticPresets {
     
 public:
@@ -13,21 +14,44 @@ public:
     /// Inject a genome string into an actor.
     bool InjectGenome(Actor* actorSource, std::string genome);
     
+    
+    /// Blend two genomes together creating a sub variant of the original pair.
+    bool ConjugateGenome(Actor* actorA, Actor* actorB, Actor* targetActor);
+    
     /// Clear all the genes from an actor genome.
     void ClearGenes(Actor* actorPtr);
     
+    
     /// Expose the genome to random changes.
-    void ExposeToRadiation(Actor* actorPtr, float radiationMultiplier);
+    void ExposeToRadiation(Actor* actorPtr, float radiationAmount);
     
-    // Mental models
+    /// Linearly interpolate between two genes via the bias value.
+    Gene Lerp(Gene geneA, Gene geneB, float bias);
     
-    void PreyBase(Actor* targetActor);
     
-    // Genomes
+    /// Preset mental states.
+    class ENGINE_API PsychologicalPresets {
+        
+    public:
+        
+        void PreyBase(Actor* targetActor);
+        
+        void PredatorBase(Actor* targetActor);
+        
+    } mental;
     
-    void Sheep(Actor* targetActor);
     
-    void Bear(Actor* targetActor);
+    /// Preset actor definitions.
+    class ENGINE_API ActorPresets {
+        
+    public:
+        
+        void Sheep(Actor* targetActor);
+        
+        void Bear(Actor* targetActor);
+        
+    } presets;
+    
     
 };
 

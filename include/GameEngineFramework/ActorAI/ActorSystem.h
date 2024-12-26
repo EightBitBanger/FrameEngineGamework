@@ -29,17 +29,20 @@ public:
     /// Destroy an actor.
     bool DestroyActor(Actor* actorPtr);
     
+    
     /// Set the player position in the simulation.
     void SetPlayerWorldPosition(glm::vec3 position);
     
     /// Get the player position in the simulation.
     glm::vec3 GetPlayerWorldPosition(void);
     
+    
     /// Get the number of actors in the AI simulation.
     unsigned int GetNumberOfActors(void);
     
     /// Get an actor from the simulation by its index.
     Actor* GetActor(unsigned int index);
+    
     
     /// Signal to the AI thread to update the simulation.
     void UpdateSendSignal(void);
@@ -50,19 +53,21 @@ public:
     
     
     /// Set the distance where actor detail will not be drawn
-    void SetActorDetailDistance(float position);
+    void SetWaterLevel(float waterLevel);
     
     /// Get the distance where actor detail will not be drawn
-    float GetActorDetailDistance(void);
+    float GetWaterLevel(void);
     
     
-    /// Initiate the actor AI system. (called internally)
+    // Called internally
+    
+    /// Initiate the actor AI system.
     void Initiate(void);
     
-    /// Shutdown the actor AI system. (called internally)
+    /// Shutdown the actor AI system.
     void Shutdown(void);
     
-    /// Update the actors in the simulation. (called internally from another thread)
+    /// Update the actors in the simulation.
     void Update();
     
     /// Genetic entity definitions.
@@ -76,8 +81,9 @@ private:
     // Distance beyond which the actors will no longer update
     float mActorUpdateDistance;
     
-    // Distance beyond which the actors limbs wont be drawn
-    float mActorDetailDistance;
+    // Maximum world water level
+    float mWorldWaterLevel;
+    
     
     // Threading
     std::thread* mActorSystemThread;

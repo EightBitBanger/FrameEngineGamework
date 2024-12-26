@@ -39,10 +39,10 @@ public:
     bool GetActive(void);
     
     /// Set the age of the actor.
-    void SetAge(unsigned long long int newAge);
+    void SetAge(unsigned long int newAge);
     
     /// Get the age of the actor.
-    unsigned long long int GetAge(void);
+    unsigned long int GetAge(void);
     
     /// Set the generation of the actor.
     void SetGeneration(unsigned int newAge);
@@ -76,6 +76,9 @@ public:
     
     /// Set the position toward which the actor should point.
     void SetTargetPoint(glm::vec3 position);
+    
+    /// Get the position toward which the actor is pointing.
+    glm::vec3 GetTargetPoint(void);
     
     /// Set the flag to update the actors genetics.
     void SetGeneticUpdateFlag(void);
@@ -123,6 +126,12 @@ public:
     
     /// Get a gene from the genome.
     Gene GetGeneFromGenome(unsigned int index);
+    
+    /// Set the actor with which this actor should breed.
+    Actor* GetBreedWithActor(void);
+    
+    /// Get the actor with which this actor should breed.
+    void SetBreedWithActor(Actor* actorPtr);
     
     // Neural networking
     
@@ -234,7 +243,7 @@ private:
     std::string mName;
     
     // Number of ticks this actor has accumulated in its lifetime
-    unsigned long long int mAge;
+    unsigned long int mAge;
     
     // Current position in the generational sequence over time
     unsigned int mGeneration;
@@ -282,8 +291,10 @@ private:
     // Distance to the player
     float mDistance;
     
+    
     //
     // States
+    //
     
     // Is this actor active in the simulation
     bool mIsActive;
@@ -347,12 +358,12 @@ private:
 	float mHeightPreferenceMax;
     
     
-    // Cool down period before focusing on another actor
+    // Prevents actor from hyper focusing on its surroundings
+    // This will stop the actor from acting spastic
     unsigned int mObservationCoolDownCounter;
     
-    
-    // Is this actor loaded into the scene
-    bool mIsActorActiveInScene;
+    // Prevents actor movement lock when outside the prefered height range
+    unsigned int mMovementCoolDownCounter;
     
     // User bit mask byte
     uint8_t mBitmask;
@@ -360,6 +371,9 @@ private:
     // User data pointers
     void* mUserDataA;
     void* mUserDataB;
+    
+    // Used for reproduction targeting
+    Actor* mBreedWithActor;
     
     // List of actor names considered to be pray actors
     std::vector<std::string> mAttackActors;
