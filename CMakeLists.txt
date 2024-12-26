@@ -400,6 +400,8 @@ set (CORE_HEADERS
     "include/GameEngineFramework/Input/InputSystem.h"
     "include/GameEngineFramework/Input/keys.h"
     
+    "include/GameEngineFramework/Physics/Masks.h"
+    "include/GameEngineFramework/Physics/Raycast.h"
     "include/GameEngineFramework/Physics/PhysicsSystem.h"
     "include/GameEngineFramework/Physics/components/meshcollider.h"
     
