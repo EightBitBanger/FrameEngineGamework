@@ -8,7 +8,7 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     glm::vec3 actorPosition = mStreamBuffer[index].transform->position;
     glm::vec3 actorRotation = mStreamBuffer[index].actor->mRotation;
     glm::vec3 actorVelocity = mStreamBuffer[index].actor->mVelocity;
-    
+    glm::vec3 actorTarget = mStreamBuffer[index].actor->mTargetPoint;
     
     rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
     rp3d::Vector3 currentPosition = transform.getPosition();
@@ -33,7 +33,7 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
             
         } else {
             
-            actorPosition.y   = hit.point.y;
+            actorPosition.y = hit.point.y;
             currentPosition.y = hit.point.y;
             
         }
@@ -57,7 +57,6 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
         
         actorVelocity = glm::vec3(0, 0, 0);
         
-        
         unsigned int numberOfRenderers = mStreamBuffer[index].actor->GetNumberOfMeshRenderers();
         for (unsigned int i=0; i < numberOfRenderers; i++) {
             
@@ -68,6 +67,18 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
         }
         
         
+    }
+    
+    // Get actor target height
+    actorTarget.y = 1000;
+    
+    if (Physics.Raycast(actorTarget, glm::vec3(0, -1, 0), 2000, hit, LayerMask::Ground)) {
+        
+        actorTarget.y = hit.point.y;
+        
+    } else {
+        
+        actorTarget.y = 0.0f;
     }
     
     // Move the actor into position
@@ -87,6 +98,7 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     mStreamBuffer[index].actor->mPosition = actorPosition;
     mStreamBuffer[index].actor->mRotation = actorRotation;
     mStreamBuffer[index].actor->mVelocity = actorVelocity;
+    mStreamBuffer[index].actor->mTargetPoint = actorTarget;
     
     return;
 }

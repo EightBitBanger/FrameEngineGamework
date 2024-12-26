@@ -16,7 +16,7 @@ RaybackCastCaller::RaybackCastCaller() :
 }
 
 void PhysicsSystem::Initiate(void) {
-    assert(world == nullptr);
+    
     rp3d::PhysicsWorld::WorldSettings worldSettings;
     //worldSettings.defaultBounciness            = 0.5;
     //worldSettings.defaultFrictionCoefficient   = 0.7;
@@ -47,37 +47,40 @@ void PhysicsSystem::Shutdown(void) {
 }
 
 void PhysicsSystem::SetWorldGravity(float x, float y, float z) {
-    assert(world != nullptr);
+    
     world->setGravity(rp3d::Vector3(x, y, z));
+    
     return;
 }
 
 rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
-    assert(world != nullptr);
     
     rp3d::Vector3 position = rp3d::Vector3(x, y, z);
     rp3d::Quaternion orientation = rp3d::Quaternion::identity();
     rp3d::Transform physicsTransform = rp3d::Transform(position, orientation);
     
-    /*
-    // Pull from a free list
-    rp3d::RigidBody* body = RemoveRigidBodyFromFreeList();
-    if (body != nullptr) {
-        body->setTransform(physicsTransform);
-        return body;
-    }
-    */
-    
     return world->createRigidBody(physicsTransform);
 }
 
 bool PhysicsSystem::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
-    assert(rigidBodyPtr != nullptr);
-    
-    // Push into a free list...
-    //AddRigidBodyToFreeList(rigidBodyPtr);
     
     world->destroyRigidBody(rigidBodyPtr);
+    
+    return true;
+}
+
+rp3d::CollisionBody* PhysicsSystem::CreateCollisionBody(float x, float y, float z) {
+    
+    rp3d::Vector3 position = rp3d::Vector3(x, y, z);
+    rp3d::Quaternion orientation = rp3d::Quaternion::identity();
+    rp3d::Transform physicsTransform = rp3d::Transform(position, orientation);
+    
+    return world->createCollisionBody(physicsTransform);
+}
+
+bool PhysicsSystem::DestroyCollisionBody(rp3d::CollisionBody* collisionBodyPtr) {
+    
+    world->destroyCollisionBody(collisionBodyPtr);
     
     return true;
 }
@@ -139,10 +142,16 @@ void PhysicsSystem::AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr) {
 }
 
 rp3d::RigidBody* PhysicsSystem::RemoveRigidBodyFromFreeList(void) {
-    if (mRigidBodyFreeList.size() == 0) return nullptr;
+    
+    if (mRigidBodyFreeList.size() == 0) 
+        return nullptr;
+    
     rp3d::RigidBody* bodyPtr = mRigidBodyFreeList[mRigidBodyFreeList.size()-1];
+    
     bodyPtr->setIsActive(true);
+    
     mRigidBodyFreeList.erase( mRigidBodyFreeList.end()-1 );
+    
     return bodyPtr;
 }
 
@@ -171,6 +180,7 @@ bool PhysicsSystem::Raycast(glm::vec3 from, glm::vec3 direction, float distance,
     hit.normal = mRaybackCastCaller.normal;
     
     hit.gameObject = mRaybackCastCaller.userData;
+    hit.collider   = mRaybackCastCaller.collider;
     
     return true;
 }

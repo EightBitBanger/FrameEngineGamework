@@ -10,8 +10,8 @@ Actor::Actor() :
     
     mAge(0),
     mGeneration(0),
-    mYouthScale(0.3),
-    mAdultScale(1.3),
+    mYouthScale(0.3f),
+    mAdultScale(1.3f),
     
     mColliderOffset(glm::vec3(0)),
     mColliderScale(glm::vec3(1)),
@@ -19,8 +19,8 @@ Actor::Actor() :
     mSpeed(1.5f),
     mSpeedYouth(0.3f),
     
-    mSpeedMul(1.3),
-    mSnapSpeed(0.24),
+    mSpeedMul(1.3f),
+    mSnapSpeed(0.24f),
     
     mVelocity(glm::vec3(0)),
     mPosition(glm::vec3(0)),
@@ -51,17 +51,18 @@ Actor::Actor() :
     mDistanceToAttack       (30),
 	mDistanceToFlee         (20),
     
-    mHeightPreferenceMin    (0),
-	mHeightPreferenceMax    (0),
+    mHeightPreferenceMin    (0.0f),
+	mHeightPreferenceMax    (1000),
     
     mObservationCoolDownCounter(0),
-    
-    mIsActorActiveInScene(false),
+    mMovementCoolDownCounter(0),
     
     mBitmask(0),
     
     mUserDataA(nullptr),
-    mUserDataB(nullptr)
+    mUserDataB(nullptr),
+    
+    mBreedWithActor(nullptr)
 {
 }
 
@@ -110,16 +111,16 @@ bool Actor::GetActive(void) {
     return activeState;
 }
 
-void Actor::SetAge(unsigned long long int newAge) {
+void Actor::SetAge(unsigned long int newAge) {
     mux.lock();
     mAge = newAge;
     mux.unlock();
     return;
 }
 
-unsigned long long int Actor::GetAge(void) {
+unsigned long int Actor::GetAge(void) {
     mux.lock();
-    unsigned long long int ageValue = mAge;
+    unsigned long int ageValue = mAge;
     mux.unlock();
     return ageValue;
 }
@@ -188,16 +189,24 @@ void Actor::SetPosition(glm::vec3 position) {
 }
 
 glm::vec3 Actor::GetPosition(void) {
-    glm::vec3 position;
     mux.lock();
-    position = mPosition;
+    glm::vec3 position = mPosition;
     mux.unlock();
     return position;
 }
 
 void Actor::SetTargetPoint(glm::vec3 position) {
+    mux.lock();
     mTargetPoint = position;
+    mux.unlock();
     return;
+}
+
+glm::vec3 Actor::GetTargetPoint(void) {
+    mux.lock();
+    glm::vec3 position = mTargetPoint;
+    mux.unlock();
+    return position;
 }
 
 unsigned int Actor::GetNumberOfMeshRenderers(void) {
@@ -218,9 +227,7 @@ uint8_t Actor::GetUserBitmask(void) {
 }
 
 void Actor::SetUserDataA(void* ptr) {
-    
     mUserDataA = ptr;
-    
     return;
 }
 
@@ -229,9 +236,7 @@ void* Actor::GetUserDataA(void) {
 }
 
 void Actor::SetUserDataB(void* ptr) {
-    
     mUserDataB = ptr;
-    
     return;
 }
 
@@ -268,6 +273,15 @@ unsigned int Actor::GetNumberOfGenes(void) {
 Gene Actor::GetGeneFromGenome(unsigned int index) {
     Gene geneValue = mGenes[index];
     return geneValue;
+}
+
+Actor* Actor::GetBreedWithActor(void) {
+    return mBreedWithActor;
+}
+
+void Actor::SetBreedWithActor(Actor* actorPtr) {
+    mBreedWithActor = actorPtr;
+    return;
 }
 
 

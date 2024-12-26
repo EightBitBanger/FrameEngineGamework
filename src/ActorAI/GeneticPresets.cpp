@@ -11,6 +11,8 @@ extern ColorPreset       Colors;
 extern FloatType         Float;
 extern StringType        String;
 extern RenderSystem      Renderer;
+extern ActorSystem       AI;
+
 
 std::string GeneticPresets::ExtractGenome(Actor* actorSource) {
     
@@ -150,6 +152,83 @@ bool GeneticPresets::InjectGenome(Actor* actorSource, std::string genome) {
     return true;
 }
 
+bool GeneticPresets::ConjugateGenome(Actor* actorA, Actor* actorB, Actor* targetActor) {
+    
+    unsigned int numberOfGenesA = actorA->mGenes.size();
+    unsigned int numberOfGenesB = actorB->mGenes.size();
+    
+    // Check genetic incompatibility
+    if (numberOfGenesA != numberOfGenesB) 
+        return false;
+    
+    targetActor->mGenes.clear();
+    
+    for (unsigned int i=0; i < numberOfGenesA; i++) {
+        
+        Gene variant;
+        
+        if (Random.Range(0, 100) >= 50) {
+            
+            variant = Lerp(actorA->mGenes[i], actorB->mGenes[i], 0.9999f);
+            
+        } else {
+            
+            variant = Lerp(actorA->mGenes[i], actorB->mGenes[i], 0.0001f);
+        }
+        
+        targetActor->mGenes.push_back(variant);
+        
+        // Targeting and motion parameters
+        
+        float chanceToChangeDirectionA = actorA->GetChanceToChangeDirection();
+        float chanceToFocusOnActorA    = actorA->GetChanceToFocusOnActor();
+        float chanceToStopWalkingA     = actorA->GetChanceToStopWalking();
+        float chanceToWalkA            = actorA->GetChanceToWalk();
+        
+        float chanceToChangeDirectionB = actorB->GetChanceToChangeDirection();
+        float chanceToFocusOnActorB    = actorB->GetChanceToFocusOnActor();
+        float chanceToStopWalkingB     = actorB->GetChanceToStopWalking();
+        float chanceToWalkB            = actorB->GetChanceToWalk();
+        
+        float chanceToChangeDirection = Float.Lerp(chanceToChangeDirectionA, chanceToChangeDirectionB, 0.5f);
+        float chanceToFocusOnActor    = Float.Lerp(chanceToFocusOnActorA, chanceToFocusOnActorB, 0.5f);
+        float chanceToStopWalking     = Float.Lerp(chanceToStopWalkingA, chanceToStopWalkingB, 0.5f);
+        float chanceToWalk            = Float.Lerp(chanceToWalkA, chanceToWalkB, 0.5f);
+        
+        targetActor->SetChanceToChangeDirection(chanceToChangeDirection);
+        targetActor->SetChanceToFocusOnActor(chanceToFocusOnActor);
+        targetActor->SetChanceToStopWalking(chanceToStopWalking);
+        targetActor->SetChanceToWalk(chanceToWalk);
+        
+        // Distance parameters
+        
+        float DistanceToAttackA = actorA->GetDistanceToAttack();
+        float DistanceToFleeA   = actorA->GetDistanceToFlee();
+        float DistanceToWalkA   = actorA->GetDistanceToWalk();
+        
+        float DistanceToAttackB = actorB->GetDistanceToAttack();
+        float DistanceToFleeB   = actorB->GetDistanceToFlee();
+        float DistanceToWalkB   = actorB->GetDistanceToWalk();
+        
+        float DistanceToAttack  = Float.Lerp(DistanceToAttackA, DistanceToAttackB, 0.5f);
+        float DistanceToFlee    = Float.Lerp(DistanceToFleeA, DistanceToFleeB, 0.5f);
+        float DistanceToWalk    = Float.Lerp(DistanceToWalkA, DistanceToWalkB, 0.5f);
+        
+        targetActor->SetDistanceToAttack(DistanceToAttack);
+        targetActor->SetDistanceToFlee(DistanceToFlee);
+        targetActor->SetDistanceToWalk(DistanceToWalk);
+        
+        // Increment generation
+        unsigned int generation = actorA->GetGeneration();
+        
+        targetActor->SetGeneration( generation );
+        
+        continue;
+    }
+    
+    return true;
+}
+
 void GeneticPresets::ClearGenes(Actor* actorPtr) {
     
     actorPtr->mGenes.clear();
@@ -157,7 +236,9 @@ void GeneticPresets::ClearGenes(Actor* actorPtr) {
     return;
 }
 
-void GeneticPresets::ExposeToRadiation(Actor* actorPtr, float radiationMultiplier) {
+void GeneticPresets::ExposeToRadiation(Actor* actorPtr, float radiationAmount) {
+    
+    float radiation = Random.Range(0.0f, radiationAmount) - Random.Range(0.0f, radiationAmount);
     
     unsigned int numberOfGenes = actorPtr->mGenes.size();
     
@@ -165,20 +246,103 @@ void GeneticPresets::ExposeToRadiation(Actor* actorPtr, float radiationMultiplie
         
         Gene& gene = actorPtr->mGenes[i];
         
-        gene.color.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiationMultiplier;
-        gene.color.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiationMultiplier;
-        gene.color.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiationMultiplier;
+        gene.offset.x += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
+        gene.offset.y += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
+        gene.offset.z += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
+        
+        gene.position.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        gene.position.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        gene.position.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        
+        gene.rotation.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        gene.rotation.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        gene.rotation.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        
+        gene.scale.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        gene.scale.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        gene.scale.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        
+        gene.color.x += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
+        gene.color.y += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
+        gene.color.z += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
         
     }
     
     return;
 }
 
+Gene GeneticPresets::Lerp(Gene geneA, Gene geneB, float bias) {
+    
+    Gene gene;
+    
+    gene.offset.x   = Float.Lerp(geneA.offset.x, geneB.offset.x, bias);
+    gene.offset.y   = Float.Lerp(geneA.offset.y, geneB.offset.y, bias);
+    gene.offset.z   = Float.Lerp(geneA.offset.z, geneB.offset.z, bias);
+    
+    gene.position.x = Float.Lerp(geneA.position.x, geneB.position.x, bias);
+    gene.position.y = Float.Lerp(geneA.position.y, geneB.position.y, bias);
+    gene.position.z = Float.Lerp(geneA.position.z, geneB.position.z, bias);
+    
+    gene.rotation.x = Float.Lerp(geneA.rotation.x, geneB.rotation.x, bias);
+    gene.rotation.y = Float.Lerp(geneA.rotation.y, geneB.rotation.y, bias);
+    gene.rotation.z = Float.Lerp(geneA.rotation.z, geneB.rotation.z, bias);
+    
+    gene.scale.x    = Float.Lerp(geneA.scale.x, geneB.scale.x, bias);
+    gene.scale.y    = Float.Lerp(geneA.scale.y, geneB.scale.y, bias);
+    gene.scale.z    = Float.Lerp(geneA.scale.z, geneB.scale.z, bias);
+    
+    gene.color.x    = Float.Lerp(geneA.color.x, geneB.color.x, bias);
+    gene.color.y    = Float.Lerp(geneA.color.y, geneB.color.y, bias);
+    gene.color.z    = Float.Lerp(geneA.color.z, geneB.color.z, bias);
+    
+    if ((geneA.doInverseAnimation) | (geneB.doInverseAnimation)) {
+        gene.doInverseAnimation = true;
+    } else {gene.doInverseAnimation = false;}
+    
+    if ((geneA.doAnimationCycle) | (geneB.doAnimationCycle)) {
+        gene.doAnimationCycle = true;
+    } else {gene.doAnimationCycle = false;}
+    
+    if (geneA.attachmentIndex != geneB.attachmentIndex) {
+        
+        if (Random.Range(0, 100) > 50) {
+            gene.attachmentIndex = geneA.attachmentIndex;
+        } else {
+            gene.attachmentIndex = geneB.attachmentIndex;
+        }
+        
+    }
+    
+    gene.animationRange = Float.Lerp(geneA.animationRange, geneB.animationRange, bias);
+    
+    gene.animationAxis.x = Float.Lerp(geneA.animationAxis.x, geneB.animationAxis.x, bias);
+    gene.animationAxis.y = Float.Lerp(geneA.animationAxis.y, geneB.animationAxis.y, bias);
+    gene.animationAxis.z = Float.Lerp(geneA.animationAxis.z, geneB.animationAxis.z, bias);
+    
+    if ((geneA.doExpress) & (geneB.doExpress)) {
+        gene.doExpress = true;
+    } else {
+        gene.doExpress = false;
+    }
+    
+    return gene;
+}
 
 // Mental models
 //
 
-void GeneticPresets::PreyBase(Actor* targetActor) {
+void GeneticPresets::PsychologicalPresets::PreyBase(Actor* targetActor) {
+    
+    // Personality parameters
+    targetActor->SetChanceToChangeDirection(80);
+    targetActor->SetChanceToFocusOnActor(200);
+    targetActor->SetChanceToStopWalking(100);
+    targetActor->SetChanceToWalk(100);
+    
+    return;
+}
+
+void GeneticPresets::PsychologicalPresets::PredatorBase(Actor* targetActor) {
     
     // Personality parameters
     targetActor->SetChanceToChangeDirection(80);
@@ -190,23 +354,24 @@ void GeneticPresets::PreyBase(Actor* targetActor) {
 }
 
 
-
 // Genomes
 //
 
-void GeneticPresets::Sheep(Actor* targetActor) {
+void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     
-    ClearGenes(targetActor);
+    AI.genomes.ClearGenes(targetActor);
     
     targetActor->SetName("Sheep");
     
     targetActor->SetSpeed(0.7);
+    targetActor->SetSpeedYouth(0.6);
     
     targetActor->SetYouthScale(0.2f);
     targetActor->SetAdultScale(0.8f);
     
+    targetActor->SetHeightPreferenceMax(20.0f);
     
-    PreyBase(targetActor);
+    AI.genomes.mental.PreyBase(targetActor);
     
     // Color variants
     Color headColor = Colors.dkgray;
@@ -331,16 +496,23 @@ void GeneticPresets::Sheep(Actor* targetActor) {
 
 
 
-void GeneticPresets::Bear(Actor* targetActor) {
+void GeneticPresets::ActorPresets::Bear(Actor* targetActor) {
     
-    ClearGenes(targetActor);
+    AI.genomes.ClearGenes(targetActor);
     
     targetActor->SetName("Bear");
     
-    targetActor->SetSpeed(1.1);
+    targetActor->SetSpeed(1.1f);
+    targetActor->SetSpeedYouth(0.9f);
     
     targetActor->SetYouthScale(0.4f);
     targetActor->SetAdultScale(1.3f);
+    
+    targetActor->SetHeightPreferenceMax(50.0f);
+    targetActor->SetHeightPreferenceMin(20.0f);
+    
+    AI.genomes.mental.PredatorBase(targetActor);
+    
     
     // Color variants
     bool selected = false;
@@ -361,7 +533,7 @@ void GeneticPresets::Bear(Actor* targetActor) {
         bodyColor = Colors.brown * Colors.MakeGrayScale(0.02);
         limbColor = Colors.brown * Colors.MakeGrayScale(0.03);
         
-        PreyBase(targetActor);
+        AI.genomes.mental.PredatorBase(targetActor);
         
         selected = true;
     }
@@ -372,7 +544,7 @@ void GeneticPresets::Bear(Actor* targetActor) {
         headColor = Colors.dkgray * Colors.dkgray * Colors.MakeGrayScale(0.01);
         bodyColor = Colors.dkgray * Colors.dkgray * Colors.MakeGrayScale(0.001);
         
-        PreyBase(targetActor);
+        AI.genomes.mental.PredatorBase(targetActor);
         
         selected = true;
     }

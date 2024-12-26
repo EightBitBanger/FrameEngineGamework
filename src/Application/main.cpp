@@ -164,8 +164,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             
             tickAccumulator -= tickUpdateTimeout;
             
-            AI.UpdateSendSignal();
-            
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
                 
@@ -193,6 +191,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         if (fixedAccumulator >= fixedUpdateTimeout) {
             
             fixedTimer.Update();
+            
+            AI.UpdateSendSignal();
             
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {

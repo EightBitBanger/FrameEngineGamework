@@ -1,6 +1,5 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
-
 void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
     
     if (!mStreamBuffer[index].actor->mDoUpdateGenetics) 
@@ -32,6 +31,9 @@ void EngineSystemManager::UpdateActorGenetics(unsigned int index) {
         if (numberOfColliders == 0) {
             
             rp3d::Transform colliderOffset(rp3d::Transform::identity());
+            
+            colliderOffset.setPosition( rp3d::Vector3(0.0f, 0.5f, 0.0f) );
+            
             rp3d::Collider* collider = rigidBody->addCollider(colliders.box, colliderOffset);
             
             collider->setCollisionCategoryBits( (unsigned short)LayerMask::Actor );

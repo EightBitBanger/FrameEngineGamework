@@ -4,29 +4,18 @@ bool ChunkManager::LoadWorld(void) {
     
     world.doGenerateChunks = true;
     
-    std::string worldName   = "worlds/" + world.name;
-    std::string worldChunks = "worlds/" + world.name + "/chunks";
-    std::string worldStatic = "worlds/" + world.name + "/static";
-    
-    // Check world directory structure exists
-    if (!fs.DirectoryExists(worldName)) {
-        
-        fs.DirectoryCreate(worldName);
-        
-        if (!fs.DirectoryExists(worldChunks)) 
-            fs.DirectoryCreate(worldChunks);
-        
-        if (!fs.DirectoryExists(worldStatic)) 
-            fs.DirectoryCreate(worldStatic);
-        
-    }
+    // Setup world directory structure
+    InitiateWorld();
     
     // Load world data file
+    std::string worldName   = "worlds/" + world.name;
     
     unsigned int fileSize = Serializer.GetFileSize(worldName + "/world.dat");
     
     if (fileSize == 0) 
         return false;
+    
+    isInitiated = true;
     
     std::string dataBuffer;
     dataBuffer.resize(fileSize + 1);
@@ -44,6 +33,9 @@ bool ChunkManager::LoadWorld(void) {
     
     float yaw   = String.ToFloat(lookingAngle[0]);
     float pitch = String.ToFloat(lookingAngle[1]);
+    worldSeed = String.ToInt(bufferArray[2]);
+    
+    if (bufferArray[3] == "true") {world.doAutoBreeding = true;} else {world.doAutoBreeding = false;}
     
     Camera* cameraPtr = Engine.cameraController->GetComponent<Camera>();
     

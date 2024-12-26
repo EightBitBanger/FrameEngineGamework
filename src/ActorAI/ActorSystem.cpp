@@ -13,12 +13,13 @@ bool doUpdate = false;
 void actorThreadMain(void);
 
 int actorCounter=0;
+int tickCounter=0;
 
 
 ActorSystem::ActorSystem() : 
     mPlayerPosition(0),
     mActorUpdateDistance(300),
-    mActorDetailDistance(100)
+    mWorldWaterLevel(0.0f)
 {
 }
 
@@ -42,13 +43,18 @@ void ActorSystem::Shutdown(void) {
     return;
 }
 
-void ActorSystem::SetActorDetailDistance(float position) {
-    mActorDetailDistance = position;
+void ActorSystem::SetWaterLevel(float waterLevel) {
+    mux.lock();
+    mWorldWaterLevel = waterLevel;
+    mux.unlock();
     return;
 }
 
-float ActorSystem::GetActorDetailDistance(void) {
-    return mActorDetailDistance;
+float ActorSystem::GetWaterLevel(void) {
+    mux.lock();
+    float waterLevel = mWorldWaterLevel;
+    mux.unlock();
+    return waterLevel;
 }
 
 void ActorSystem::SetPlayerWorldPosition(glm::vec3 position) {
@@ -120,7 +126,7 @@ void actorThreadMain() {
     while (isActorThreadActive) {
         
         if (!doUpdate) {
-            std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
+            std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
             continue;
         }
         
@@ -129,7 +135,8 @@ void actorThreadMain() {
         continue;
     }
     
-    std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
+    std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(100) );
+    
     Log.Write( " >> Shutting down on thread AI" );
     
     return;

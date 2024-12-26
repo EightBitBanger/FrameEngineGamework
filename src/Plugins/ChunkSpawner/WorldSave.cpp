@@ -5,17 +5,10 @@ bool ChunkManager::SaveWorld(void) {
     if (!world.doGenerateChunks) 
         return false;
     
-    std::string worldName   = "worlds/" + world.name;
-    std::string worldChunks = "worlds/" + world.name + "/chunks";
-    std::string worldStatic = "worlds/" + world.name + "/static";
+    // Setup world directory structure
+    InitiateWorld();
     
-    // Check world directory structure exists
-    if (!fs.DirectoryExists(worldName)) 
-        fs.DirectoryCreate(worldName);
-    if (!fs.DirectoryExists(worldChunks)) 
-        fs.DirectoryCreate(worldChunks);
-    if (!fs.DirectoryExists(worldStatic)) 
-        fs.DirectoryCreate(worldStatic);
+    std::string worldName   = "worlds/" + world.name;
     
     // Save world chunks
     
@@ -47,8 +40,11 @@ bool ChunkManager::SaveWorld(void) {
     float playerYaw   = cameraPtr->mouseLookAngle.x;
     float playerPitch = cameraPtr->mouseLookAngle.y;
     
-    dataBuffer += Float.ToString(playerPosition.x) +","+ Float.ToString(playerPosition.y) +","+ Float.ToString(playerPosition.z) +"\n";
-    dataBuffer += Float.ToString(playerYaw) +","+ Float.ToString(playerPitch) +"\n";
+    dataBuffer += Float.ToString(playerPosition.x) + "," + Float.ToString(playerPosition.y) + "," + Float.ToString(playerPosition.z) + "\n";
+    dataBuffer += Float.ToString(playerYaw) + "," + Float.ToString(playerPitch) + "\n";
+    dataBuffer += Int.ToString(worldSeed) + "\n";
+    
+    if (world.doAutoBreeding) {dataBuffer += "true\n";} else {dataBuffer += "false\n";}
     
     Serializer.Serialize(worldName + "/world.dat", (void*)dataBuffer.data(), dataBuffer.size());
     

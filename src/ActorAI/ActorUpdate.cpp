@@ -13,10 +13,8 @@ extern bool doUpdate;
 
 extern int actorCounter;
 
+extern int tickCounter;
 
-//
-// AI actor processing
-//
 
 void ActorSystem::Update(void) {
     
@@ -24,9 +22,23 @@ void ActorSystem::Update(void) {
     
     int numberOfActors = mActors.Size();
     
+    // Update cycle counter
+    int numberOfActorsPerCycle = 1;
+    
+    if (numberOfActors > 10) 
+        numberOfActorsPerCycle = numberOfActors / 10;
+    
+    // Tick counter
+    tickCounter++;
+    if (tickCounter < 10000000) 
+        return;
+    
+    tickCounter=0;
+    
+    
     mux.lock();
     
-    for (int i = 0; i < 80; i++) {
+    for (int i = 0; i < numberOfActorsPerCycle; i++) {
         
         if (actorCounter >= numberOfActors) {
             
@@ -46,49 +58,6 @@ void ActorSystem::Update(void) {
         
         actor->mux.lock();
         
-        
-        //
-        // TESTING random movement
-        //
-        
-        /*
-        
-        mIsWalking
-        mIsRunning
-        
-        mIsAttacking
-        
-        mIsFleeing
-        mIsConsuming
-        
-        mChanceToChangeDirection
-        mChanceToFocusOnActor
-        mChanceToWalk
-        
-        mDistanceToFocusOnActor
-        mDistanceToWalk
-        
-        mHeightPreferenceMin
-        mHeightPreferenceMax
-        
-        mDistanceToAttack
-        mDistanceToFlee
-        
-        mDirectionChangeCoolDownCounter
-        mObservationCoolDownCounter
-        
-        if (Random.Range(0, 100) > 98) 
-            actor->mIsWalking = false;
-        
-        if (Random.Range(0, 100) > 98) 
-            actor->mIsWalking = true;
-        
-        if (Random.Range(0, 100) > 97) 
-            actor->mRotateTo.y = Random.Range(0, 360);
-        
-        */
-        
-        
         // Check actor update distance
         actor->mDistance = glm::distance( mPlayerPosition, actor->mPosition );
         
@@ -100,18 +69,36 @@ void ActorSystem::Update(void) {
         // Advance actor age
         actor->mAge++;
         
+        // Check actor breeding state
+        if (actor->mBreedWithActor != nullptr) {
+            
+            actor->mTargetPoint = actor->mBreedWithActor->mPosition;
+            
+            if (glm::distance(actor->mPosition, actor->mBreedWithActor->mPosition) > 1.0f) {
+                
+                actor->mIsWalking = true;
+                
+            } else {
+                
+                actor->mIsWalking = false;
+            }
+            
+            actor->mux.unlock();
+            continue;
+        }
+        
         
         // Chance to start walking
-        if ((Random.Range(0, 1000) < actor->mChanceToWalk)) 
-            actor->mIsWalking = true;
-        
-        // Cool down after a change in direction
-        if (actor->mObservationCoolDownCounter < 100) {
+        if (actor->mTargetPoint.y != 0) {
             
-            actor->mObservationCoolDownCounter++;
+            if ((Random.Range(0, 1000) < actor->mChanceToWalk)) 
+                actor->mIsWalking = true;
             
         }
         
+        // Cool down after a change in direction
+        if (actor->mObservationCoolDownCounter < 100) 
+            actor->mObservationCoolDownCounter++;
         
         // Chance to focus on a near by actor or player
         if ((Random.Range(0, 10000) < actor->mChanceToFocusOnActor)) {
@@ -130,7 +117,7 @@ void ActorSystem::Update(void) {
                 
             } else {
                 
-                // TODO: Focus on nearby actor. Probably islanding into regions.
+                // TODO: Focus on nearby actor.
                 
                 
                 
@@ -138,6 +125,7 @@ void ActorSystem::Update(void) {
             
         }
         
+        // Not walking and cooling down
         if ((!actor->mIsWalking) & (actor->mObservationCoolDownCounter != 0)) {
             
             actor->mObservationCoolDownCounter = 0;
@@ -145,37 +133,50 @@ void ActorSystem::Update(void) {
             // Chance to pick new target destination
             if ((Random.Range(0, 1000) < actor->mChanceToChangeDirection)) {
                 
-                actor->mTargetPoint.x = (Random.Range(0.0f, actor->mDistanceToWalk) - 
-                                         Random.Range(0.0f, actor->mDistanceToWalk)) + actor->mPosition.x;
+                float randA = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
+                float randB = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
+                float randC = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
+                float randD = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
                 
-                actor->mTargetPoint.z = (Random.Range(0.0f, actor->mDistanceToWalk) - 
-                                         Random.Range(0.0f, actor->mDistanceToWalk)) + actor->mPosition.z;
+                actor->mTargetPoint.x = (randA - randB) + actor->mPosition.x;
+                actor->mTargetPoint.z = (randC - randD) + actor->mPosition.z;
+                
                 
             }
             
         } else {
             
-            // Match the height to the target
-            actor->mTargetPoint.y = actor->mPosition.y;
-            
-            
-            
-            // Check height preference
-            if ((actor->mTargetPoint.y >= actor->mHeightPreferenceMax) | 
-                (actor->mTargetPoint.y <= actor->mHeightPreferenceMin)) {
+            // Check height preference is out of range
+            if ((actor->mTargetPoint.y > actor->mHeightPreferenceMax) | 
+                (actor->mTargetPoint.y < actor->mHeightPreferenceMin)) {
                 
-                // TODO: Actor must avoid specific height levels
+                // Expand search range for prefered height range
+                actor->mMovementCoolDownCounter += 1;
+                
+                if (actor->mMovementCoolDownCounter > 100) 
+                    actor->mMovementCoolDownCounter = 100;
+                
+                // Avoid moving deeper out of range
+                if (actor->mPosition.y < mWorldWaterLevel) {
+                    
+                    if (actor->mTargetPoint.y < actor->mPosition.y) 
+                        actor->mIsWalking = false;
+                    
+                }
                 
             }
             
-            
             // Check reached destination
-            float distance = glm::distance( actor->mTargetPoint, actor->mPosition );
-            
-            if (distance < 1.5) 
+            if (glm::distance( actor->mTargetPoint, actor->mPosition ) < 1.5f) {
+                
+                actor->mMovementCoolDownCounter = 0;
+                
                 actor->mIsWalking = false;
+            }
             
         }
+        
+        
         
         
         

@@ -25,6 +25,7 @@ ENGINE_API FloatType            Float;
 ENGINE_API DoubleType           Double;
 ENGINE_API IntType              Int;
 ENGINE_API UintType             Uint;
+ENGINE_API IntLongType          IntLong;
 
 ENGINE_API FileSystem           fs;
 ENGINE_API PlatformLayer        Platform;

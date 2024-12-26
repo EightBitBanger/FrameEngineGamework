@@ -9,11 +9,10 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     chunk.x = x;
     chunk.y = y;
     
-    if (chunk.gameObject == nullptr) 
-        chunk.gameObject = Engine.Create<GameObject>();
+    chunk.gameObject = Engine.Create<GameObject>();
+    chunk.staticObject = Engine.Create<GameObject>();
     
-    if (chunk.staticObject == nullptr) 
-        chunk.staticObject = Engine.Create<GameObject>();
+    chunk.gameObject->name = Float.ToString(x) + "_" + Float.ToString(y);
     
     chunk.gameObject->renderDistance   = renderDistance * chunkSize;
     chunk.staticObject->renderDistance = staticDistance * chunkSize;
@@ -39,13 +38,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     chunkRenderer->mesh->isShared = false;
     chunkRenderer->EnableFrustumCulling();
     
-    chunkRenderer->material = Engine.Create<Material>();
-    chunkRenderer->material->isShared = false;
-    
-    chunkRenderer->material->diffuse = Colors.gray;
-    chunkRenderer->material->ambient = Colors.MakeGrayScale(0.2f);
-    
-    chunkRenderer->material->shader = Engine.shaders.color;
+    chunkRenderer->material = worldMaterial;
     
     // Static renderer
     
@@ -58,14 +51,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     staticRenderer->mesh->isShared = false;
     staticRenderer->EnableFrustumCulling();
     
-    staticRenderer->material = Engine.Create<Material>();
-    staticRenderer->material->isShared = false;
-    staticRenderer->material->DisableCulling();
-    
-    staticRenderer->material->diffuse = Colors.gray;
-    staticRenderer->material->ambient = Colors.MakeGrayScale(0.2f);
-    
-    staticRenderer->material->shader = Engine.shaders.color;
+    staticRenderer->material = staticMaterial;
     
     
     // Generate perlin
@@ -115,14 +101,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
         waterRenderer->mesh = Engine.meshes.plain;
         waterRenderer->EnableFrustumCulling();
         
-        waterRenderer->material = Engine.Create<Material>();
-        waterRenderer->material->isShared = false;
-        waterRenderer->material->DisableCulling();
-        waterRenderer->material->EnableBlending();
-        
-        waterRenderer->material->diffuse = Colors.blue * Colors.MakeGrayScale(0.4f);
-        
-        waterRenderer->material->shader = Engine.shaders.water;
+        waterRenderer->material = waterMaterial;
         
     }
     
