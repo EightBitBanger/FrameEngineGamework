@@ -206,6 +206,8 @@ set (GAME_HEADERS
     "include/GameEngineFramework/plugins/ChunkSpawner/Decor.h"
     "include/GameEngineFramework/plugins/ChunkSpawner/Structure.h"
     
+    "include/GameEngineFramework/plugins/WeatherSystem/WeatherSystem.h"
+    
     "include/GameEngineFramework/Audio/AudioSystem.h"
     "include/GameEngineFramework/Audio/components/sound.h"
     "include/GameEngineFramework/Audio/components/samplebuffer.h"
@@ -300,6 +302,8 @@ set (GAME_SOURCES
     "src/plugins/ChunkSpawner/ChunkManager.cpp"
     "src/plugins/ChunkSpawner/ChunkManagerUpdate.cpp"
     "src/plugins/ChunkSpawner/Chunk.cpp"
+    
+    "src/plugins/WeatherSystem/WeatherSystem.cpp"
     
     "src/start.cpp"
     "src/run.cpp"
