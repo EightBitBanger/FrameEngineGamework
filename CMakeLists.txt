@@ -53,12 +53,11 @@ set (RUNTIME_HEADERS
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
+    "include/GameEngineFramework/ActorAI/NeuralNetwork.h"
     "include/GameEngineFramework/ActorAI/GeneticPresets.h"
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
-    "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
-    "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
     
     "include/GameEngineFramework/Serialization/Serialization.h"
     
@@ -214,12 +213,11 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
+    "include/GameEngineFramework/ActorAI/NeuralNetwork.h"
     "include/GameEngineFramework/ActorAI/GeneticPresets.h"
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
-    "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
-    "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
     
     "include/GameEngineFramework/Serialization/Serialization.h"
     
@@ -305,6 +303,8 @@ set (GAME_SOURCES
     
     "src/plugins/WeatherSystem/WeatherSystem.cpp"
     
+    "src/plugins/ParticleSystem/ParticleSystem.cpp"
+    
     "src/start.cpp"
     "src/run.cpp"
     "src/shutdown.cpp"
@@ -367,12 +367,11 @@ set (CORE_HEADERS
     
     "include/GameEngineFramework/ActorAI/ActorSystem.h"
     "include/GameEngineFramework/ActorAI/ActorStates.h"
+    "include/GameEngineFramework/ActorAI/NeuralNetwork.h"
     "include/GameEngineFramework/ActorAI/GeneticPresets.h"
     "include/GameEngineFramework/ActorAI/genetics/gene.h"
     "include/GameEngineFramework/ActorAI/genetics/base.h"
     "include/GameEngineFramework/ActorAI/components/actor.h"
-    "include/GameEngineFramework/ActorAI/neurons/NeuralLayer.h"
-    "include/GameEngineFramework/ActorAI/neurons/WeightedLayer.h"
     
     "include/GameEngineFramework/Serialization/Serialization.h"
     
@@ -493,12 +492,11 @@ set (CORE_SOURCES
     
     "src/ActorAI/ActorSystem.cpp"
     "src/ActorAI/ActorUpdate.cpp"
+    "src/ActorAI/NeuralNetwork.cpp"
     "src/ActorAI/GeneticPresets.cpp"
     "src/ActorAI/genetics/gene.cpp"
     "src/ActorAI/genetics/base.cpp"
     "src/ActorAI/components/actor.cpp"
-    "src/ActorAI/neurons/NeuralLayer.cpp"
-    "src/ActorAI/neurons/WeightedLayer.cpp"
     
     "src/Serialization/Serialization.cpp"
     
