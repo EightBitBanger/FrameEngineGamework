@@ -4,8 +4,7 @@
 #include <GameEngineFramework/ActorAI/ActorStates.h>
 
 #include <GameEngineFramework/ActorAI/Genetics/Gene.h>
-#include <GameEngineFramework/ActorAI/neurons/NeuralLayer.h>
-#include <GameEngineFramework/ActorAI/neurons/WeightedLayer.h>
+#include <GameEngineFramework/ActorAI/NeuralNetwork.h>
 
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
 #include <GameEngineFramework/Renderer/RenderSystem.h>
@@ -133,26 +132,6 @@ public:
     /// Get the actor with which this actor should breed.
     void SetBreedWithActor(Actor* actorPtr);
     
-    // Neural networking
-    
-    /// Add a weighted layer to the neural network.
-    void AddWeightedLayer(WeightedLayer& newNeuralLayer);
-    
-    /// Remove a weighted layer from the neural network by the given index location.
-    void RemoveWeightedLayer(unsigned int index);
-    
-    /// Clear neural layers.
-    void ClearWeightedLayers(void);
-    
-    /// Get the number of weighted layers in the neural network.
-    unsigned int GetNumberOfWeightedLayers(void);
-    
-    /// Get a weighted layer from the neural network.
-    WeightedLayer GetWeightedLayerFromNetwork(unsigned int index);
-    
-    /// Set the input data to be fed through the neural network.
-    void SetNeuralInputLayer(NeuralLayer inputLayer);
-    
     // AI state behavioral hardwiring
     
     /// Set the chance for the actor to change direction.
@@ -234,6 +213,14 @@ public:
     void SetAdultScale(float scale);
     /// Get the max adult scale from the actor.
     float GetAdultScale(void);
+    
+    // Cool down counters
+    
+    /// Set the current cool down counter for actor breeding.
+    void SetCoolDownBreeding(unsigned int counter);
+    
+    /// Get the current cool down counter for actor breeding.
+    unsigned int GetCoolDownBreeding(void);
     
     Actor();
     
@@ -365,6 +352,10 @@ private:
     // Prevents actor movement lock when outside the prefered height range
     unsigned int mMovementCoolDownCounter;
     
+    // Prevents over breeding
+    unsigned int mBreedingCoolDownCounter;
+    
+    
     // User bit mask byte
     uint8_t mBitmask;
     
@@ -392,9 +383,6 @@ private:
     
     // List of animation states for each genetic component
     std::vector<glm::vec4> mAnimationStates;
-    
-    // Layers of weighted neurological expression
-    std::vector<WeightedLayer> mWeightedLayers;
     
     std::mutex mux;
     

@@ -1,13 +1,13 @@
 #ifndef _ACTOR_AI_SYSTEM__
 #define _ACTOR_AI_SYSTEM__
 
+#include <GameEngineFramework/ActorAI/NeuralNetwork.h>
+
 #include <GameEngineFramework/ActorAI/ActorStates.h>
 #include <GameEngineFramework/ActorAI/GeneticPresets.h>
 
 #include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
-#include <GameEngineFramework/ActorAI/neurons/NeuralLayer.h>
-#include <GameEngineFramework/ActorAI/neurons/WeightedLayer.h>
 #include <GameEngineFramework/ActorAI/Genetics/Gene.h>
 
 #include <GameEngineFramework/ActorAI/components/actor.h>
