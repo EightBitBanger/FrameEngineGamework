@@ -17,6 +17,9 @@ void Start() {
     Engine.ConsoleRegisterCommand("clear",   FuncClear);
     Engine.ConsoleRegisterCommand("seed",    FuncSeed);
     
+    Engine.ConsoleRegisterCommand("time",    FuncTime);
+    Engine.ConsoleRegisterCommand("weather", FuncWeather);
+    
     
     Platform.HideMouseCursor();
     Engine.DisableConsoleCloseOnReturn();
@@ -24,8 +27,8 @@ void Start() {
     
     // User plug-in initiation
     chunkManager.Initiate();
-    
     weather.Initiate();
+    particle.Initiate();
     
     
     
@@ -81,13 +84,23 @@ void Start() {
     // Add the collider to the camera controller game object.
     Engine.cameraController->AddColliderBox(boxShape, 0, 0, 0, LayerMask::Ground);
     
-    // Attach the sky object to the camera controller to prevent 
-    // the player from moving outside of the sky.
+    // Weather system
     
     weather.SetPlayerObject(Engine.cameraController);
+    weather.SetWorldMaterial(chunkManager.worldMaterial);
+    weather.SetStaticMaterial(chunkManager.staticMaterial);
+    weather.SetWaterMaterial(chunkManager.waterMaterial);
     
     
+    //chunkManager.staticMaterial->EnableShadowVolumePass();
+    //chunkManager.staticMaterial->SetShadowVolumeIntensityHigh(1.0f);
+    //chunkManager.staticMaterial->SetShadowVolumeIntensityLow(1.0f);
     
+    //chunkManager.staticMaterial->SetShadowVolumeColor(Colors.red);
+    //chunkManager.staticMaterial->SetShadowVolumeColorIntensity(10.0f);
+    
+    //chunkManager.staticMaterial->SetShadowVolumeLength();
+    //chunkManager.staticMaterial->SetShadowVolumeAngleOfView();
     
     
     
@@ -249,6 +262,46 @@ void Start() {
     
     chunkManager.renderDistance = 14;
     chunkManager.staticDistance = chunkManager.renderDistance * 0.7f;
+    
+    
+    
+    
+    // Smoke test
+    
+    /*
+    
+    Emitter* testEmitter = particle.CreateEmitter();
+    
+    testEmitter->type = EmitterType::Point;
+    testEmitter->position = playerPosition;
+    testEmitter->direction = glm::vec3(0.0f, 0.07f, 0.0f);
+    testEmitter->scale = glm::vec3(0.1f, 0.1f, 0.1f);
+    
+    testEmitter->velocity = glm::vec3(0.0f, 0.4f, 0.0f);
+    
+    testEmitter->velocityBias = 0.0004f;
+    
+    testEmitter->width = 80;
+    testEmitter->height = 100;
+    
+    testEmitter->angle = 8;
+    testEmitter->spread = 1;
+    
+    testEmitter->colorBegin = Colors.red;
+    testEmitter->colorEnd = Colors.blue;
+    
+    testEmitter->maxParticles = 8000;
+    testEmitter->spawnRate = 0;
+    
+    testEmitter->heightMinimum = chunkManager.world.waterLevel;
+    
+    Material* emitterMaterial = testEmitter->GetMaterial();
+    
+    //emitterMaterial->EnableBlending();
+    //emitterMaterial->shader = Engine.shaders.water;
+    
+    */
+    
     
     return;
 }

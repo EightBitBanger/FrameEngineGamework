@@ -21,6 +21,15 @@ float ambientLight = 0.0f;
 
 void Run() {
     
+    // Update plug-in systems
+    
+    weather.Update();
+    
+    particle.Update();
+    
+    chunkManager.Update();
+    
+    
     // Cast a ray from the player
     
     Hit hit;
@@ -273,76 +282,6 @@ void Run() {
         }
         
     }
-    
-    
-    
-    
-    
-    //
-    // Lighting day night cycle experimentation 
-    //
-    
-    float skyLightingMax    = 0.87f;
-    float skyLightingMin    = 0.0087f;
-    
-    float lightingMax       = 10.0f;
-    float lightingMin       = 0.0f;
-    
-    if (!Platform.isPaused) {
-        
-        if (Input.CheckKeyCurrent(VK_I)) {ambientLight += 0.01f;}
-        if (Input.CheckKeyCurrent(VK_K)) {ambientLight -= 0.01f;}
-        
-        if (ambientLight < 0) 
-            ambientLight = 0;
-        
-        //if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateEuler(0, 0,  0.1);}
-        //if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateEuler(0, 0, -0.1);}
-        
-    }
-    
-    
-    // Light direction
-    /*
-    if (weather.sunLight != nullptr) {
-        Transform* lightTransform = weather.sunObject->GetComponent<Transform>();
-        
-        if (!Platform.isPaused) {
-            
-            if (Input.CheckKeyCurrent(VK_I)) {ambientLight += 0.01f;}
-            if (Input.CheckKeyCurrent(VK_K)) {ambientLight -= 0.01f;}
-            
-            if (Input.CheckKeyCurrent(VK_T)) {lightTransform->RotateEuler(0, 0,  0.1);}
-            if (Input.CheckKeyCurrent(VK_G)) {lightTransform->RotateEuler(0, 0, -0.1);}
-            
-        }
-        
-    }
-    
-    // Ambient limits
-    if (ambientLight > 0.87f) ambientLight = 0.87f;
-    if (ambientLight < 0.0f)  ambientLight = 0.0f;
-    
-    // World brightness
-    chunkManager.world.ambientLight = ambientLight;
-    */
-    
-    // Sky brightness
-    float skyColor = Math.Lerp(skyLightingMin, skyLightingMax, ambientLight);
-    weather.SetSkyAmbientColor( Colors.MakeGrayScale(skyColor) );
-    
-    // Light brightness
-    //if (weather.sunLight != nullptr) 
-    //    weather.sunLight->intensity = Math.Lerp(lightingMin, lightingMax, ambientLight);
-    
-    
-    
-    weather.Update();
-    
-    chunkManager.Update();
-    
-    
-    
     
     // Debug report
     

@@ -1,6 +1,7 @@
 #include <GameEngineFramework/Types/types.h>
 #include <GameEngineFramework/Math/Math.h>
 
+#include <algorithm>
 #include <sstream>
 
 float StringType::ToFloat(std::string value) {
@@ -77,6 +78,26 @@ std::string StringType::GetPathFromFilename(std::string filename) {
         path += pathParts[i];
     return path;
 }
+
+bool StringType::IsNumeric(std::string& str) {
+    
+    return std::all_of(str.begin(), str.end(), [](char c) { return std::isdigit(c); });
+}
+
+bool StringType::Lowercase(std::string& str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        str[i] = tolower(str[i]);
+    }
+    return true;
+}
+
+bool StringType::Uppercase(std::string& str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        str[i] = toupper(str[i]);
+    }
+    return true;
+}
+
 
 std::string FloatType::ToString(float value) {
     std::stringstream sstream;

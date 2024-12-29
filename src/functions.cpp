@@ -3,8 +3,6 @@
 #include <GameEngineFramework/plugins.h>
 
 
-// Events
-
 void EventLostFocus(void) {
     
     Engine.EnableConsole();
@@ -24,7 +22,6 @@ void EventLostFocus(void) {
 }
 
 
-// List worlds
 void FuncList(std::vector<std::string> args) {
     
     std::vector<std::string> dirList = fs.DirectoryGetList("worlds");
@@ -42,7 +39,7 @@ void FuncList(std::vector<std::string> args) {
     return;
 }
 
-// Save world
+
 void FuncSave(std::vector<std::string> args) {
     
     if (args[0] != "") 
@@ -60,7 +57,7 @@ void FuncSave(std::vector<std::string> args) {
     return;
 }
 
-// Load world
+
 void FuncLoad(std::vector<std::string> args) {
     
     if (args[0] != "") 
@@ -82,7 +79,7 @@ void FuncLoad(std::vector<std::string> args) {
     return;
 }
 
-// Delete world
+
 void FuncRemove(std::vector<std::string> args) {
     
     if (args[0] == "") 
@@ -100,7 +97,7 @@ void FuncRemove(std::vector<std::string> args) {
     return;
 }
 
-// Clear world
+
 void FuncClear(std::vector<std::string> args) {
     
     chunkManager.ClearWorld();
@@ -115,7 +112,7 @@ void FuncClear(std::vector<std::string> args) {
     return;
 }
 
-// Set the world seed
+
 void FuncSeed(std::vector<std::string> args) {
     
     if (args[0] == "") {
@@ -133,7 +130,6 @@ void FuncSeed(std::vector<std::string> args) {
 }
 
 
-// Summon an actor
 void FuncSummon(std::vector<std::string> args) {
     
     for (uint8_t i=0; i < 24; i++) {
@@ -179,4 +175,96 @@ void FuncSummon(std::vector<std::string> args) {
     return;
 }
 
+
+void FuncTime(std::vector<std::string> args) {
+    
+    if (args[0] == "set") {
+        
+        std::string msgTimeSetTo = "Time set to ";
+        
+        if (args[1] == "day") {
+            
+            weather.SetTime(7000);
+            
+            Engine.Print(msgTimeSetTo + "day");
+            
+            return;
+        }
+        
+        if (args[1] == "noon") {
+            
+            weather.SetTime(12000);
+            
+            Engine.Print(msgTimeSetTo + "noon");
+            
+            return;
+        }
+        
+        if (args[1] == "night") {
+            
+            weather.SetTime(17000);
+            
+            Engine.Print(msgTimeSetTo + "night");
+            
+            return;
+        }
+        
+        if (args[1] == "midnight") {
+            
+            weather.SetTime(0);
+            
+            Engine.Print(msgTimeSetTo + "midnight");
+            
+            return;
+        }
+        
+        if (!String.IsNumeric(args[1])) {
+            
+            Engine.Print("Invalid time " + args[1]);
+            
+            return;
+        }
+        
+        int time = String.ToInt(args[1]);
+        
+        weather.SetTime((float)time);
+        
+        Engine.Print(msgTimeSetTo + args[1]);
+        
+        return;
+    }
+        
+    
+    return;
+}
+
+void FuncWeather(std::vector<std::string> args) {
+    
+    std::string msgWeatherSet = "Weather ";
+    
+    if (args[0] == "clear") {
+        weather.SetWeatherNextCycle(WeatherType::Clear);
+        Engine.Print(msgWeatherSet + "clear");
+        return;
+    }
+    if (args[0] == "cloudy") {
+        weather.SetWeatherNextCycle(WeatherType::Cloudy);
+        Engine.Print(msgWeatherSet + "cloudy");
+        return;
+    }
+    if (args[0] == "rain") {
+        weather.SetWeatherNextCycle(WeatherType::Rain);
+        Engine.Print(msgWeatherSet + "rain");
+        return;
+    }
+    if (args[0] == "snow") {
+        weather.SetWeatherNextCycle(WeatherType::Snow);
+        Engine.Print(msgWeatherSet + "snow");
+        return;
+    }
+    
+    Engine.Print(msgWeatherSet + " invalid");
+    
+    return;
+}
 
