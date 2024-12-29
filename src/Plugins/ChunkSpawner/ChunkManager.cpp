@@ -12,14 +12,21 @@ ChunkManager::ChunkManager() :
     
     numberOfActiveActors(0),
     
+    waterMaterial(nullptr),
+    
+    worldMaterial(nullptr),
+    staticMaterial(nullptr),
+    
     mActorIndex(0),
     mChunkIndex(0),
     
     mChunkCounterX(0),
     mChunkCounterZ(0),
     
-    mBreedingCoolDown(8000),
-    mDeathCoolDown(4000)
+    mBreedingCoolDown(10),
+    mDeathCoolDown(10),
+    
+    waterMesh(nullptr)
 {
     
     return;
@@ -97,6 +104,10 @@ void ChunkManager::InitiateWorld(void) {
         if (!fs.DirectoryExists(worldStatic)) 
             fs.DirectoryCreate(worldStatic);
         
+        // Default world rules
+        
+        AddWorldRule("doAutoBreeding", "true");
+        
     }
     
     return;
@@ -118,6 +129,7 @@ void ChunkManager::ClearWorld(void) {
     mChunkCounterZ = 0;
     
     chunks.clear();
+    mWorldRules.clear();
     
     return;
 }
@@ -207,11 +219,98 @@ bool ChunkManager::KillActor(GameObject* actorObject) {
     
     actorPtr->ClearGenome();
     actorPtr->ClearMemories();
-    actorPtr->ClearWeightedLayers();
     
     numberOfActiveActors--;
     
     return true;
+}
+
+void ChunkManager::AddWorldRule(std::string key, std::string value) {
+    
+    unsigned int numberOfRules = mWorldRules.size();
+    
+    for (unsigned int i=0; i < numberOfRules; i++) {
+        
+        if (mWorldRules[i].first != key) 
+            continue;
+        
+        mWorldRules[i].second = value;
+        
+        ApplyWorldRule(key, value);
+        
+        return;
+    }
+    
+    std::pair<std::string, std::string> keyPair(key, value);
+    
+    mWorldRules.push_back( keyPair );
+    
+    ApplyWorldRule(key, value);
+    
+    return;
+}
+
+bool ChunkManager::RemoveWorldRule(std::string key) {
+    
+    unsigned int numberOfRules = mWorldRules.size();
+    
+    for (unsigned int i=0; i < numberOfRules; i++) {
+        
+        if (mWorldRules[i].first != key) 
+            continue;
+        
+        mWorldRules.erase(mWorldRules.begin() + i);
+        
+        return true;
+    }
+    
+    return false;
+}
+
+std::string ChunkManager::GetWorldRule(std::string key) {
+    
+    unsigned int numberOfRules = mWorldRules.size();
+    
+    for (unsigned int i=0; i < numberOfRules; i++) {
+        
+        if (mWorldRules[i].first != key) 
+            continue;
+        
+        return mWorldRules[i].second;
+    }
+    
+    return "";
+}
+
+bool ChunkManager::SetWorldRule(std::string key, std::string value) {
+    
+    unsigned int numberOfRules = mWorldRules.size();
+    
+    for (unsigned int i=0; i < numberOfRules; i++) {
+        
+        if (mWorldRules[i].first != key) 
+            continue;
+        
+        mWorldRules[i].second = value;
+        
+        ApplyWorldRule(key, value);
+        
+        return true;
+    }
+    
+    return false;
+}
+
+bool ChunkManager::ApplyWorldRule(std::string key, std::string value) {
+    
+    if (key == "doAutoBreeding") {
+        
+        if (value == "true") {world.doAutoBreeding = true;} else {world.doAutoBreeding = false;}
+        
+        return true;
+    }
+    
+    return false;
 }
 
 Chunk* ChunkManager::FindChunk(int x, int y) {

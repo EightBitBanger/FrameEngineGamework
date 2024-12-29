@@ -1,4 +1,8 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
+#include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
+
+extern WeatherSystem  weather;
+
 
 bool ChunkManager::LoadWorld(void) {
     
@@ -10,19 +14,23 @@ bool ChunkManager::LoadWorld(void) {
     // Load world data file
     std::string worldName   = "worlds/" + world.name;
     
-    unsigned int fileSize = Serializer.GetFileSize(worldName + "/world.dat");
+    unsigned int worldFileSize = Serializer.GetFileSize(worldName + "/world.dat");
+    unsigned int rulesFileSize = Serializer.GetFileSize(worldName + "/rules.dat");
     
-    if (fileSize == 0) 
+    if (worldFileSize == 0) 
+        return false;
+    
+    if (rulesFileSize == 0) 
         return false;
     
     isInitiated = true;
     
-    std::string dataBuffer;
-    dataBuffer.resize(fileSize + 1);
+    std::string worldDataBuffer;
+    worldDataBuffer.resize(worldFileSize + 1);
     
-    Serializer.Deserialize(worldName + "/world.dat", (void*)dataBuffer.data(), fileSize);
+    Serializer.Deserialize(worldName + "/world.dat", (void*)worldDataBuffer.data(), worldFileSize);
     
-    std::vector<std::string> bufferArray = String.Explode(dataBuffer, '\n');
+    std::vector<std::string> bufferArray = String.Explode(worldDataBuffer, '\n');
     
     std::vector<std::string> position = String.Explode(bufferArray[0], ',');
     std::vector<std::string> lookingAngle = String.Explode(bufferArray[1], ',');
@@ -34,14 +42,40 @@ bool ChunkManager::LoadWorld(void) {
     float yaw   = String.ToFloat(lookingAngle[0]);
     float pitch = String.ToFloat(lookingAngle[1]);
     worldSeed = String.ToInt(bufferArray[2]);
-    
-    if (bufferArray[3] == "true") {world.doAutoBreeding = true;} else {world.doAutoBreeding = false;}
+    float worldTime = String.ToInt(bufferArray[3]);
     
     Camera* cameraPtr = Engine.cameraController->GetComponent<Camera>();
     
     cameraPtr->mouseLookAngle = glm::vec2(yaw, pitch);
     
     Engine.cameraController->SetPosition( glm::vec3(posX, posY, posZ) );
+    
+    weather.SetTime( worldTime );
+    
+    // Load world rules
+    
+    std::string rulesDataBuffer;
+    rulesDataBuffer.resize(rulesFileSize + 1);
+    
+    Serializer.Deserialize(worldName + "/rules.dat", (void*)rulesDataBuffer.data(), rulesFileSize);
+    
+    std::vector<std::string> ruleList = String.Explode(rulesDataBuffer, '\n');
+    
+    unsigned int numberOfRules = ruleList.size();
+    
+    for (unsigned int i=0; i < numberOfRules; i++) {
+        
+        std::vector<std::string> rule = String.Explode(ruleList[i], '=');
+        
+        if (rule.size() < 2) 
+            continue;
+        
+        std::pair<std::string, std::string> rulePair( rule[0], rule[1] );
+        
+        mWorldRules.push_back(rulePair);
+        
+        continue;
+    }
     
     return true;
 }

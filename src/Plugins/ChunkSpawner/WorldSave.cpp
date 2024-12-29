@@ -1,4 +1,8 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
+#include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
+
+extern WeatherSystem  weather;
+
 
 bool ChunkManager::SaveWorld(void) {
     
@@ -31,7 +35,6 @@ bool ChunkManager::SaveWorld(void) {
     
     // Save world data file
     
-    std::string dataBuffer = "";
     
     glm::vec3 playerPosition = Engine.cameraController->GetPosition();
     
@@ -40,14 +43,32 @@ bool ChunkManager::SaveWorld(void) {
     float playerYaw   = cameraPtr->mouseLookAngle.x;
     float playerPitch = cameraPtr->mouseLookAngle.y;
     
-    dataBuffer += Float.ToString(playerPosition.x) + "," + Float.ToString(playerPosition.y) + "," + Float.ToString(playerPosition.z) + "\n";
-    dataBuffer += Float.ToString(playerYaw) + "," + Float.ToString(playerPitch) + "\n";
-    dataBuffer += Int.ToString(worldSeed) + "\n";
+    std::string worldDataBuffer = "";
+    worldDataBuffer += Float.ToString(playerPosition.x) + "," + Float.ToString(playerPosition.y) + "," + Float.ToString(playerPosition.z) + "\n";
+    worldDataBuffer += Float.ToString(playerYaw) + "," + Float.ToString(playerPitch) + "\n";
+    worldDataBuffer += Int.ToString(worldSeed) + "\n";
+    worldDataBuffer += Float.ToString(weather.GetTime()) + "\n";
     
-    if (world.doAutoBreeding) {dataBuffer += "true\n";} else {dataBuffer += "false\n";}
+    Serializer.Serialize(worldName + "/world.dat", (void*)worldDataBuffer.data(), worldDataBuffer.size());
     
-    Serializer.Serialize(worldName + "/world.dat", (void*)dataBuffer.data(), dataBuffer.size());
+    // Save world rules
+    
+    std::string rulesDataBuffer = "";
+    
+    unsigned int sizeofRulesList = mWorldRules.size();
+    
+    for (unsigned int i=0; i < sizeofRulesList; i++) {
+        
+        std::pair<std::string, std::string> rulePair = mWorldRules[i];
+        
+        rulesDataBuffer += rulePair.first + "=" + rulePair.second + "\n";
+        
+        continue;
+    }
+    
+    Serializer.Serialize(worldName + "/rules.dat", (void*)rulesDataBuffer.data(), rulesDataBuffer.size());
     
     return 1;
 }
+
 

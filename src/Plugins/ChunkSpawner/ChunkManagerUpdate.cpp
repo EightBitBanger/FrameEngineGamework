@@ -42,8 +42,6 @@ void ChunkManager::Update(void) {
         
         if (actorObject->isActive) {
             
-            // Testing actor expiration
-            
             if (numberOfActiveActors > 1000) {
                 
                 if (mDeathCoolDown > 0) 
@@ -51,13 +49,11 @@ void ChunkManager::Update(void) {
                 
                 if (mDeathCoolDown == 0) {
                     
-                    mDeathCoolDown = 80;
+                    mDeathCoolDown = 300;
                     
-                    if (actorPtr->GetAge() > 100000) {
+                    if (actorPtr->GetAge() > 10000) {
                         
                         KillActor(actorObject);
-                        
-                        //Engine.Print("Actor death", 1000);
                         
                         return;
                     }
@@ -73,18 +69,32 @@ void ChunkManager::Update(void) {
             if (glm::distance(actorPos, playerPosition) < (renderDistance * chunkSize)) 
                 actorPtr->SetGeneticExpressionFlag();
             
+            unsigned int breedingCoolDown = actorPtr->GetCoolDownBreeding();
+            
+            if (breedingCoolDown != 0) {
+                
+                breedingCoolDown--;
+                
+                actorPtr->SetCoolDownBreeding(breedingCoolDown);
+            }
+            
+            
             // Auto breeding
             if (world.doAutoBreeding) {
                 
-                if ((numberOfActiveActors < 1200) & 
+                if ((numberOfActiveActors < 1400) & 
                     (numberOfActiveActors > 1)) {
                     
-                    if (mBreedingCoolDown > 0) 
+                    // System breeding cool down
+                    
+                    if (mBreedingCoolDown != 0) 
                         mBreedingCoolDown--;
                     
                     if (mBreedingCoolDown == 0) {
                         
-                        mBreedingCoolDown = 2400;
+                        mBreedingCoolDown = 400;
+                        
+                        // Test for a few different suitable pairs
                         
                         for (unsigned int i=0; i < 8; i++) {
                             
@@ -97,20 +107,34 @@ void ChunkManager::Update(void) {
                             if (actorObjectA == actorObjectB) 
                                 continue;
                             
+                            Actor* actorA = actorObjectA->GetComponent<Actor>();
+                            Actor* actorB = actorObjectB->GetComponent<Actor>();
+                            
+                            // Per actor breeding cool down counter
+                            unsigned int breedingCoolDownA = actorA->GetCoolDownBreeding();
+                            unsigned int breedingCoolDownB = actorB->GetCoolDownBreeding();
+                            
+                            if ((breedingCoolDownA != 0) | (breedingCoolDownB != 0)) 
+                                continue;
+                            
+                            // Check actor distance
                             glm::vec3 posA = actorObjectA->GetPosition();
                             glm::vec3 posB = actorObjectB->GetPosition();
                             
                             if (glm::distance(posA, posB) > 50.0f) 
                                 continue;
                             
-                            Actor* actorA = actorObjectA->GetComponent<Actor>();
-                            Actor* actorB = actorObjectB->GetComponent<Actor>();
-                            
+                            // Check minimum age requirement
                             if ((actorA->GetAge() < 1000) | (actorB->GetAge() < 1000)) 
                                 continue;
                             
+                            // Attract actors to one another
                             actorA->SetBreedWithActor( actorB );
                             actorB->SetBreedWithActor( actorA );
+                            
+                            // Set actor breeding cool down
+                            actorA->SetCoolDownBreeding(200);
+                            actorB->SetCoolDownBreeding(200);
                             
                             break;
                         }
