@@ -56,6 +56,7 @@ Actor::Actor() :
     
     mObservationCoolDownCounter(0),
     mMovementCoolDownCounter(0),
+    mBreedingCoolDownCounter(0),
     
     mBitmask(0),
     
@@ -285,53 +286,6 @@ void Actor::SetBreedWithActor(Actor* actorPtr) {
 }
 
 
-// Neural networking
-
-
-void Actor::AddWeightedLayer(WeightedLayer& newNeuralLayer) {
-    mux.lock();
-    mWeightedLayers.push_back( newNeuralLayer );
-    mux.unlock();
-    return;
-}
-
-void Actor::RemoveWeightedLayer(unsigned int index) {
-    mux.lock();
-    mWeightedLayers.erase( mWeightedLayers.begin() + index );
-    mux.unlock();
-    return;
-}
-
-void Actor::ClearWeightedLayers(void) {
-    mux.lock();
-    mWeightedLayers.clear();
-    mux.unlock();
-    return;
-}
-
-unsigned int Actor::GetNumberOfWeightedLayers(void) {
-    mux.lock();
-    unsigned int sizeValue = mWeightedLayers.size();
-    mux.unlock();
-    return sizeValue;
-}
-
-WeightedLayer Actor::GetWeightedLayerFromNetwork(unsigned int index) {
-    mux.lock();
-    WeightedLayer layer = mWeightedLayers[index];
-    mux.unlock();
-    return layer;
-}
-
-void Actor::SetNeuralInputLayer(NeuralLayer inputLayer) {
-    mux.lock();
-    for (int i=0; i < NEURAL_LAYER_WIDTH; i++) 
-        mWeightedLayers[0].node[i] = inputLayer.node[i];
-    mux.unlock();
-    return;
-}
-
-
 // AI state behavioral hardwiring
 
 
@@ -513,3 +467,14 @@ float Actor::GetAdultScale(void) {
     
     return mAdultScale;
 }
+
+void Actor::SetCoolDownBreeding(unsigned int counter) {
+    mBreedingCoolDownCounter = counter;
+    return;
+}
+
+unsigned int Actor::GetCoolDownBreeding(void) {
+    
+    return mBreedingCoolDownCounter;
+}
+

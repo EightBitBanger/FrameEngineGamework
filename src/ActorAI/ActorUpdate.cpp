@@ -15,10 +15,27 @@ extern int actorCounter;
 
 extern int tickCounter;
 
+#define NUMBER_OF_TICKS  10000000
+
+#define DECISION_CHANCE_TO_WALK                  1000
+#define DECISION_CHANCE_TO_CHANGE_DIRECTION      1000
+#define DECISION_CHANCE_TO_FOCUS_NEARBY          10000
+#define DECISION_CHANCE_TO_STOP_MOVING           10000
+#define COOLDOWN_OBSERVATION_MAX                 100
+#define COOLDOWN_MOVEMENT_MAX                    100
+
+#define DISTANCE_MINIMUM_TARGET_REACHED          1.5f
+#define DISTANCE_MINIMUM_TARGET_BREEDING         1.0f
+
 
 void ActorSystem::Update(void) {
     
-    glm::vec3 forward(0);
+    // Tick counter
+    tickCounter++;
+    if (tickCounter < NUMBER_OF_TICKS) 
+        return;
+    
+    tickCounter=0;
     
     int numberOfActors = mActors.Size();
     
@@ -27,14 +44,6 @@ void ActorSystem::Update(void) {
     
     if (numberOfActors > 10) 
         numberOfActorsPerCycle = numberOfActors / 10;
-    
-    // Tick counter
-    tickCounter++;
-    if (tickCounter < 10000000) 
-        return;
-    
-    tickCounter=0;
-    
     
     mux.lock();
     
@@ -69,39 +78,56 @@ void ActorSystem::Update(void) {
         // Advance actor age
         actor->mAge++;
         
+        // Check if the actor is aquatic
+        bool isAquatic = false;
+        
+        if (actor->mHeightPreferenceMax < mWorldWaterLevel) 
+            isAquatic = true;
+        
         // Check actor breeding state
-        if (actor->mBreedWithActor != nullptr) {
+        if ((actor->mTargetPoint.y < actor->mHeightPreferenceMax) | 
+            (actor->mTargetPoint.y > actor->mHeightPreferenceMin)) {
             
-            actor->mTargetPoint = actor->mBreedWithActor->mPosition;
-            
-            if (glm::distance(actor->mPosition, actor->mBreedWithActor->mPosition) > 1.0f) {
+            if (actor->mBreedWithActor != nullptr) {
                 
-                actor->mIsWalking = true;
+                // Walk towards the other actor
+                actor->mTargetPoint = actor->mBreedWithActor->mPosition;
                 
-            } else {
+                if (glm::distance(actor->mPosition, actor->mBreedWithActor->mPosition) > DISTANCE_MINIMUM_TARGET_BREEDING) {
+                    
+                    actor->mIsWalking = true;
+                    
+                } else {
+                    
+                    actor->mIsWalking = false;
+                }
                 
-                actor->mIsWalking = false;
+                actor->mux.unlock();
+                continue;
             }
             
-            actor->mux.unlock();
-            continue;
         }
         
         
-        // Chance to start walking
-        if (actor->mTargetPoint.y != 0) {
+        if (!isAquatic) {
             
-            if ((Random.Range(0, 1000) < actor->mChanceToWalk)) 
-                actor->mIsWalking = true;
+            // Chance to start walking
+            
+            if (actor->mTargetPoint.y > mWorldWaterLevel) {
+                
+                if ((Random.Range(0, DECISION_CHANCE_TO_WALK) < actor->mChanceToWalk)) 
+                    actor->mIsWalking = true;
+                
+            }
             
         }
         
         // Cool down after a change in direction
-        if (actor->mObservationCoolDownCounter < 100) 
+        if (actor->mObservationCoolDownCounter < COOLDOWN_OBSERVATION_MAX) 
             actor->mObservationCoolDownCounter++;
         
         // Chance to focus on a near by actor or player
-        if ((Random.Range(0, 10000) < actor->mChanceToFocusOnActor)) {
+        if ((Random.Range(0, DECISION_CHANCE_TO_FOCUS_NEARBY) < actor->mChanceToFocusOnActor)) {
             
             // Distance to focus on player
             if (actor->mDistance < actor->mDistanceToFocusOnActor) {
@@ -131,10 +157,13 @@ void ActorSystem::Update(void) {
             actor->mObservationCoolDownCounter = 0;
             
             // Chance to pick new target destination
-            if ((Random.Range(0, 1000) < actor->mChanceToChangeDirection)) {
+            if ((Random.Range(0, DECISION_CHANCE_TO_CHANGE_DIRECTION) < actor->mChanceToChangeDirection)) {
                 
+                // Get random X position
                 float randA = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
                 float randB = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
+                
+                // Get random Z position
                 float randC = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
                 float randD = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
                 
@@ -153,21 +182,37 @@ void ActorSystem::Update(void) {
                 // Expand search range for prefered height range
                 actor->mMovementCoolDownCounter += 1;
                 
-                if (actor->mMovementCoolDownCounter > 100) 
-                    actor->mMovementCoolDownCounter = 100;
+                if (actor->mMovementCoolDownCounter > COOLDOWN_MOVEMENT_MAX) 
+                    actor->mMovementCoolDownCounter = COOLDOWN_MOVEMENT_MAX;
                 
-                // Avoid moving deeper out of range
-                if (actor->mPosition.y < mWorldWaterLevel) {
+                if (!isAquatic) {
                     
-                    if (actor->mTargetPoint.y < actor->mPosition.y) 
-                        actor->mIsWalking = false;
+                    // Avoid moving deeper out of range
+                    
+                    if (actor->mPosition.y < mWorldWaterLevel) {
+                        
+                        if (actor->mTargetPoint.y < actor->mPosition.y) 
+                            actor->mIsWalking = false;
+                        
+                    }
+                    
+                } else {
+                    
+                    // Avoid moving shallower out of range
+                    
+                    if (actor->mPosition.y > mWorldWaterLevel) {
+                        
+                        if (actor->mTargetPoint.y > actor->mPosition.y) 
+                            actor->mIsWalking = false;
+                        
+                    }
                     
                 }
                 
             }
             
             // Check reached destination
-            if (glm::distance( actor->mTargetPoint, actor->mPosition ) < 1.5f) {
+            if (glm::distance( actor->mTargetPoint, actor->mPosition ) < DISTANCE_MINIMUM_TARGET_REACHED) {
                 
                 actor->mMovementCoolDownCounter = 0;
                 
@@ -177,83 +222,11 @@ void ActorSystem::Update(void) {
         }
         
         
-        
-        
-        
-        // TODO: Fix neural networking.
-        
-        
-        //if ((Random.Range(0, 10000) < actor->mChanceToStopWalking)) {
-        //    actor->mIsWalking = false;
-        //}
-        
-        
-        
-        
-        /*
-        // Check neural network control
-        int numberOfLayers = actor->mWeightedLayers.size();
-        
-        if (numberOfLayers < 1) {
-            actor->mux.unlock();
-            continue;
-        }
-        
-        //
-        // Send in the input data
-        //
-        
-        for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
-            actor->mWeightedLayers[0].node[w] = (Random.Range(0, 10) * 0.001) - (Random.Range(0, 10) * 0.001);
-        
-        //
-        // Feed data through the network
-        //
-        
-        for (int a=1; a < numberOfLayers; a++) {
-            
-            for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
-                actor->mWeightedLayers[a].node[w] = actor->mWeightedLayers[a-1].node[w] * 
-                                                    actor->mWeightedLayers[a-1].weight[w];
-            
-            continue;
-        }
-        
-        // Apply neural plasticity
-        // Plasticity is the amount to which the weights will conform to the data coming though
-        
-        for (int a=0; a < numberOfLayers; a++) {
-            
-            for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
-                actor->mWeightedLayers[a].weight[w] = Math.Lerp(actor->mWeightedLayers[a].weight[w], 
-                                                                actor->mWeightedLayers[a].node[w], 
-                                                                actor->mWeightedLayers[a].plasticity);
-            
-            continue;
-        }
-        
-        // Get the outputs from the last layer
-        NeuralLayer outputLayer;
-        for (int w=0; w < NEURAL_LAYER_WIDTH; w++) 
-            outputLayer.node[w] = actor->mWeightedLayers[ numberOfLayers-1 ].node[w];
-        
-        // Apply outputs to action
-        
-        // Move forward
-        
-        if (outputLayer.node[0] > 0) {
-            actor->mIsWalking = true;
-        } else {
+        // Chance to stop walking
+        if ((Random.Range(0, DECISION_CHANCE_TO_STOP_MOVING) < actor->mChanceToStopWalking)) {
             actor->mIsWalking = false;
         }
         
-        if (outputLayer.node[1] < 0) {
-            actor->mRotateTo.y = Random.Range(0, 360);
-        }
-        
-        //actor->mRotateTo.y
-        
-        */
         
         actor->mux.unlock();
         
