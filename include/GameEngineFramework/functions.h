@@ -25,7 +25,11 @@ void FuncSeed(std::vector<std::string> args);
 // Summon an actor
 void FuncSummon(std::vector<std::string> args);
 
+// Time control
+void FuncTime(std::vector<std::string> args);
 
+// Weather control
+void FuncWeather(std::vector<std::string> args);
 
 // Event callbacks
 void EventLostFocus(void);

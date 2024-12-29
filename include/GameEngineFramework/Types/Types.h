@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <ctype.h>
 
 class ENGINE_API StringType {
     
@@ -42,6 +43,15 @@ public:
     
     /// Return the path part of a file name.
     std::string GetPathFromFilename(std::string filename);
+    
+    /// Check if a string contains only numbers.
+    bool IsNumeric(std::string& str);
+    
+    /// Convert a string to lower case letters
+    bool Lowercase(std::string& str);
+    
+    /// Convert a string to upper case letters
+    bool Uppercase(std::string& str);
     
 };
 
