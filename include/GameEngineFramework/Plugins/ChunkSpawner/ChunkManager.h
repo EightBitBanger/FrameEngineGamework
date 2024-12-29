@@ -2,7 +2,6 @@
 #define __CHUNK_MANAGER_
 
 #include <GameEngineFramework/Engine/Engine.h>
-#include <GameEngineFramework/Engine/EngineSystems.h>
 
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Perlin.h>
@@ -16,6 +15,7 @@ public:
     std::string name;
     
     bool doGenerateChunks;
+    
     bool doAutoBreeding;
     
     float snowCapHeight;
@@ -126,30 +126,49 @@ public:
     
     ChunkManager();
     
-    bool SaveChunk(Chunk& chunk, bool doClearActors);
-    
-    bool LoadChunk(Chunk& chunk);
-    
     Chunk* FindChunk(int x, int z);
     
     void InitiateWorld(void);
+    
+    // Save / load
+    
+    bool SaveChunk(Chunk& chunk, bool doClearActors);
+    
+    bool LoadChunk(Chunk& chunk);
     
     bool SaveWorld(void);
     
     bool LoadWorld(void);
     
+    // Purge
+    
     void ClearWorld(void);
     
     bool DestroyWorld(std::string worldname);
     
+    // Chunks
     
     Chunk CreateChunk(float x, float y);
     
     bool DestroyChunk(Chunk& chunk);
     
+    // Actors
+    
     GameObject* SpawnActor(float x, float y, float z);
     
     bool KillActor(GameObject* actorObject);
+    
+    // World rules
+    
+    void AddWorldRule(std::string key, std::string value);
+    
+    bool RemoveWorldRule(std::string key);
+    
+    std::string GetWorldRule(std::string key);
+    
+    bool SetWorldRule(std::string key, std::string value);
+    
+    bool ApplyWorldRule(std::string key, std::string value);
     
     
     void Initiate(void);
@@ -177,7 +196,17 @@ public:
     
     std::vector<GameObject*> actors;
     
+    // World material batches
+    
+    Material* waterMaterial;
+    Material* worldMaterial;
+    Material* staticMaterial;
+    
 private:
+    
+    // List of world rules
+    
+    std::vector<std::pair<std::string, std::string>> mWorldRules;
     
     // Update index counters
     
@@ -206,13 +235,7 @@ private:
     
     SubMesh subMeshTree;
     
-    /// Water
     Mesh* waterMesh;
-    Material* waterMaterial;
-    
-    /// World chunk and static material
-    Material* worldMaterial;
-    Material* staticMaterial;
     
 };
 

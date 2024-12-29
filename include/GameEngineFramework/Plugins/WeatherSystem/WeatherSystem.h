@@ -1,32 +1,97 @@
 #ifndef __WEATHER_SYSTEM_
 #define __WEATHER_SYSTEM_
 
-#include <GameEngineFramework/Engine/EngineSystems.h>
 #include <GameEngineFramework/Engine/Engine.h>
+#include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
+
+enum class WeatherType {
+    Clear,
+    Cloudy,
+    Rain,
+    Snow
+};
 
 
 class ENGINE_API WeatherSystem {
     
 public:
     
-    void SetPlayerObject(GameObject* player);
+    float weatherStateCounter;
+    
+    WeatherSystem();
     
     void Initiate(void);
     
     void Update(void);
     
+    void SetPlayerObject(GameObject* player);
+    
     void SetSkyAmbientColor(Color skyColor);
     
+    void SetWorldMaterial(Material* materialPtr);
+    void SetStaticMaterial(Material* materialPtr);
+    void SetWaterMaterial(Material* materialPtr);
+    
+    void SetTime(float newTime);
+    float GetTime(void);
+    
+    /// Set a weather cycle.
+    void SetWeather(WeatherType type);
+    
+    /// Set the weather cycle to shift to after the current.
+    void SetWeatherNextCycle(WeatherType type);
+    
+    /// Add a weather cycle to any active cycles.
+    void AddWeather(WeatherType type);
+    
+    /// Return the current weather cycle.
+    WeatherType GetWeather(void);
+    
+    /// Return the next weather cycle.
+    WeatherType GetWeatherNext(void);
+    
+    /// Get the state of the master weather counter.
+    float GetWeatherCycleCounter(void);
+    
+    /// Set the state of the master weather counter.
+    void SetWeatherCycleCounter(float counter);
     
 private:
     
-    /// Sun
-    GameObject* sunObject;
-    Light* sunLight;
+    float mWorldTime;
     
-    /// Sky
-    GameObject* skyObject;
-    Material* skyMaterial;
+    float mLightIntensity;
+    glm::vec3 mLightAngle;
+    
+    // Sun
+    GameObject* mSunObject;
+    Light* mSunLight;
+    Transform* mLightTransform;
+    
+    // Sky
+    GameObject* mSkyObject;
+    Material* mSkyMaterial;
+    
+    // World materials used for lighting
+    Material* mWorldMaterial;
+    Material* mStaticMaterial;
+    Material* mWaterMaterial;
+    
+    // Which weather type should be shifted into next after the mCurrentWeather weather cycle
+    WeatherType mNextWeather;
+    // Current weather cycle taking place in the world
+    WeatherType mCurrentWeather;
+    
+    // Weather cycle master timer
+    float mWeatherMasterCounter;
+    
+    // Weather state shift counter 
+    float mWeatherShiftCounter;
+    
+    // Effect emitters
+    Emitter* mRainEmitter;
+    Emitter* mSnowEmitter;
     
 };
 

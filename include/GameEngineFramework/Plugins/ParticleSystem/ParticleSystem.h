@@ -1,31 +1,33 @@
-// Particle system management class
+#ifndef __PARTICLE_SYSTEM_
+#define __PARTICLE_SYSTEM_
+
+#include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
+#include <GameEngineFramework/Plugins/ParticleSystem/Emitter.h>
 
 #include <GameEngineFramework/Engine/Engine.h>
-
-extern EngineComponents     Components;
-extern ColorPreset          Colors;
-extern NumberGeneration     Random;
-extern Logger               Log;
-extern Timer                PhysicsTime;
-extern Timer                Time;
-
-extern EngineSystemManager  Engine;
-extern PlatformLayer        Platform;
-extern ResourceManager      Resources;
-extern Serialization        Serializer;
-extern ScriptSystem         Scripting;
-extern RenderSystem         Renderer;
-extern PhysicsSystem        Physics;
-extern InputSystem          Input;
-extern MathCore             Math;
-extern ActorSystem          AI;
 
 
 class ENGINE_API ParticleSystem {
     
 public:
     
+    ParticleSystem();
+    
+    void Initiate(void);
+    
+    void Update(void);
+    
+    
+    Emitter* CreateEmitter(void);
+    
+    void DestroyEmitter(Emitter* emitterPtr);
+    
     
 private:
     
+    PoolAllocator<Emitter> mEmitters;
+    
 };
+
+
+#endif
