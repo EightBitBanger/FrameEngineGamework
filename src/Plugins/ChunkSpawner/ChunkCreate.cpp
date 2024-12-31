@@ -14,8 +14,8 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     chunk.gameObject->name = Float.ToString(x) + "_" + Float.ToString(y);
     
-    chunk.gameObject->renderDistance   = renderDistance * chunkSize;
-    chunk.staticObject->renderDistance = staticDistance * chunkSize;
+    chunk.gameObject->renderDistance   = renderDistance * chunkSize * 0.5f;
+    chunk.staticObject->renderDistance = staticDistance * chunkSize * 0.5f;
     
     // Add renderers
     chunk.gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
@@ -83,6 +83,8 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     // Generate water below water level
     if (min < (world.waterLevel - 32)) {
         
+        /*
+        
         chunk.waterObject = Engine.Create<GameObject>();
         
         chunk.waterObject->renderDistance = renderDistance * chunkSize * 0.99;
@@ -90,7 +92,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
         chunk.waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
         MeshRenderer* waterRenderer = chunk.waterObject->GetComponent<MeshRenderer>();
         
-        Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
+        //Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
         
         // Water renderer
         Transform* waterTransform = chunk.waterObject->GetComponent<Transform>();
@@ -103,6 +105,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
         
         waterRenderer->material = waterMaterial;
         
+        */
     }
     
     // Generate terrain color

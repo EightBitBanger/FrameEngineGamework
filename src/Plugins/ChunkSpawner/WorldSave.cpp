@@ -48,6 +48,10 @@ bool ChunkManager::SaveWorld(void) {
     worldDataBuffer += Float.ToString(playerYaw) + "," + Float.ToString(playerPitch) + "\n";
     worldDataBuffer += Int.ToString(worldSeed) + "\n";
     worldDataBuffer += Float.ToString(weather.GetTime()) + "\n";
+    // Weather
+    worldDataBuffer += Int.ToString((int)weather.GetWeatherCurrent()) + "\n";
+    worldDataBuffer += Int.ToString((int)weather.GetWeatherNext()) + "\n";
+    worldDataBuffer += Float.ToString(weather.GetWeatherCycleCounter()) + "\n";
     
     Serializer.Serialize(worldName + "/world.dat", (void*)worldDataBuffer.data(), worldDataBuffer.size());
     

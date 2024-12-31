@@ -148,6 +148,50 @@ int Mesh::AddQuad(float x, float y, float z, float width, float height, Color co
     return AddSubMesh(x, y, z, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
 }
 
+void Mesh::AddSphere(float x, float y, float z, float radius, unsigned int rings, unsigned int sectors, Color color) {
+    std::vector<Vertex> vertices;
+    std::vector<Index> indices;
+    
+    float const R = 1.0f / (float)(rings - 1);
+    float const S = 1.0f / (float)(sectors - 1);
+    int r, s;
+    
+    for (r = 0; r < rings; r++) {
+        
+        for (s = 0; s < sectors; s++) {
+            
+            float const y = sin(-(glm::pi<float>() / 2.0f) + glm::pi<float>() * r * R);
+            float const x = cos(2 * glm::pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
+            float const z = sin(2 * glm::pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
+            
+            vertices.push_back(Vertex(
+                x * radius, y * radius, z * radius,
+                color.r, color.g, color.b,
+                x, y, z,
+                (float)s * S, (float)r * R
+            ));
+            
+        }
+    }
+    
+    for (r = 0; r < rings - 1; r++) {
+        
+        for (s = 0; s < sectors - 1; s++) {
+            
+            indices.push_back(r * sectors + s);
+            indices.push_back(r * sectors + (s + 1));
+            indices.push_back((r + 1) * sectors + (s + 1));
+            indices.push_back(r * sectors + s);
+            indices.push_back((r + 1) * sectors + (s + 1));
+            indices.push_back((r + 1) * sectors + s);
+            
+        }
+        
+    }
+    
+    AddSubMesh(x, y, z, vertices, indices, false);
+}
+
 int Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu) {
     return AddSubMesh(x, y, z, mesh.vertexBuffer, mesh.indexBuffer, doUploadToGpu);
 }
@@ -158,7 +202,7 @@ int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer,
         
         // Find an open slot in the buffer for the mesh
         for (std::vector<SubMesh>::iterator it = mFreeMesh.begin(); it != mFreeMesh.end(); ++it) {
-            SubMesh freeMeshPtr = *it;
+            SubMesh& freeMeshPtr = *it;
             
             if (vrtxBuffer.size() != freeMeshPtr.vertexCount) 
                 continue;
@@ -231,12 +275,29 @@ int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer,
     return startVertex;
 }
 
+bool Mesh::ReplaceSubMesh(unsigned int index, SubMesh& subMesh) {
+    if (index >= mSubMesh.size()) 
+        return false;
+    
+    // Remove the existing sub mesh at the index
+    RemoveSubMesh(index);
+    
+    // Add the new sub mesh at the same position
+    float x = mSubMesh[index].position.x;
+    float y = mSubMesh[index].position.y;
+    float z = mSubMesh[index].position.z;
+    
+    AddSubMesh(x, y, z, subMesh, true);
+    
+    return true;
+}
+
 bool Mesh::RemoveSubMesh(unsigned int index) {
     if (index >= mSubMesh.size()) 
         return false;
     
     std::vector<Vertex> destMesh;
-    SubMesh sourceMesh = mSubMesh[index];
+    SubMesh& sourceMesh = mSubMesh[index];
     
     for (std::vector<Vertex>::iterator it = mVertexBuffer.begin() + sourceMesh.vertexBegin; it != mVertexBuffer.begin() + sourceMesh.vertexBegin + sourceMesh.vertexCount; ++it) {
         Vertex vertex;
@@ -259,7 +320,7 @@ bool Mesh::GetSubMesh(unsigned int index, SubMesh& mesh) {
     if (index >= mSubMesh.size()) 
         return false;
     
-    SubMesh sourceMesh = mSubMesh[index];
+    SubMesh& sourceMesh = mSubMesh[index];
     
     for (std::vector<Vertex>::iterator it = mVertexBuffer.begin() + sourceMesh.vertexBegin; it != mVertexBuffer.begin() + sourceMesh.vertexBegin + sourceMesh.vertexCount; ++it) 
         mesh.vertexBuffer.push_back(*it);
@@ -278,7 +339,7 @@ bool Mesh::GetSubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::
     if (index >= mSubMesh.size()) 
         return false;
     
-    SubMesh sourceMesh = mSubMesh[index];
+    SubMesh& sourceMesh = mSubMesh[index];
     
     for (std::vector<Vertex>::iterator it = mVertexBuffer.begin() + sourceMesh.vertexBegin; it != mVertexBuffer.begin() + sourceMesh.vertexBegin + sourceMesh.vertexCount; ++it) 
         vrtxBuffer.push_back(*it);
@@ -291,20 +352,21 @@ bool Mesh::GetSubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::
 
 bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) {
     
-    std::vector<Vertex> destMesh;
-    SubMesh sourceMesh = mSubMesh[index];
+    if (index >= mSubMesh.size()) 
+        return false;
+    
+    SubMesh& sourceMesh = mSubMesh[index];
     
     for (std::vector<Vertex>::iterator it = mVertexBuffer.begin() + sourceMesh.vertexBegin; it != mVertexBuffer.begin() + sourceMesh.vertexBegin + sourceMesh.vertexCount; ++it) {
         Vertex& vertex = *it;
-        // Zero the sub-mesh position
+        
         vertex.x -= sourceMesh.position.x;
         vertex.y -= sourceMesh.position.y;
         vertex.z -= sourceMesh.position.z;
-        // Move sub-mesh to new offset
+        
         vertex.x += x;
         vertex.y += y;
         vertex.z += z;
-        destMesh.push_back(vertex);
     }
     
     mSubMesh[index].position = glm::vec3(x, y, z);
@@ -312,17 +374,73 @@ bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) 
     return true;
 }
 
+bool Mesh::ChangeSubMeshRotation(unsigned int index, float angle, glm::vec3 axis) {
+    
+    if (index >= mSubMesh.size()) 
+        return false;
+    
+    SubMesh& sourceMesh = mSubMesh[index];
+    
+    // Calculate the rotation matrix
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis);
+    
+    for (unsigned int i = 0; i < sourceMesh.vertexCount; ++i) {
+        Vertex& vertex = mVertexBuffer[sourceMesh.vertexBegin + i];
+        
+        // Translate vertex to origin
+        glm::vec4 position(vertex.x - sourceMesh.position.x, vertex.y - sourceMesh.position.y, vertex.z - sourceMesh.position.z, 1.0f);
+        
+        // Apply rotation
+        position = rotationMatrix * position;
+        
+        // Translate vertex back
+        vertex.x = position.x + sourceMesh.position.x;
+        vertex.y = position.y + sourceMesh.position.y;
+        vertex.z = position.z + sourceMesh.position.z;
+    }
+    
+    return true;
+}
+
+bool Mesh::ChangeSubMeshScale(unsigned int index, float scaleX, float scaleY, float scaleZ) {
+    
+    if (index >= mSubMesh.size()) 
+        return false;
+    
+    SubMesh& sourceMesh = mSubMesh[index];
+    
+    for (unsigned int i = 0; i < sourceMesh.vertexCount; ++i) {
+        Vertex& vertex = mVertexBuffer[sourceMesh.vertexBegin + i];
+        
+        vertex.x -= sourceMesh.position.x;
+        vertex.y -= sourceMesh.position.y;
+        vertex.z -= sourceMesh.position.z;
+        
+        vertex.x *= scaleX;
+        vertex.y *= scaleY;
+        vertex.z *= scaleZ;
+        
+        vertex.x += sourceMesh.position.x;
+        vertex.y += sourceMesh.position.y;
+        vertex.z += sourceMesh.position.z;
+    }
+    
+    return true;
+}
+
 bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
     
-    std::vector<Vertex> destMesh;
-    SubMesh sourceMesh = mSubMesh[index];
+    if (index >= mSubMesh.size()) 
+        return false;
+    
+    SubMesh& sourceMesh = mSubMesh[index];
     
     for (std::vector<Vertex>::iterator it = mVertexBuffer.begin() + sourceMesh.vertexBegin; it != mVertexBuffer.begin() + sourceMesh.vertexBegin + sourceMesh.vertexCount; ++it) {
         Vertex& vertex = *it;
+        
         vertex.r = newColor.r;
         vertex.g = newColor.g;
         vertex.b = newColor.b;
-        destMesh.push_back(vertex);
     }
     
     return true;
@@ -330,19 +448,18 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
 
 bool Mesh::ChangeSubMeshPoints(unsigned int index, std::vector<glm::vec3> points) {
     
-    std::vector<Vertex> destMesh;
-    SubMesh sourceMesh = mSubMesh[index];
+    if (index >= mSubMesh.size()) 
+        return false;
+    
+    SubMesh& sourceMesh = mSubMesh[index];
     
     for (unsigned int i=0; i < sourceMesh.vertexCount; i++) {
-        
         mVertexBuffer[i].x = points[i].x;
         mVertexBuffer[i].y = points[i].y;
         mVertexBuffer[i].z = points[i].z;
         
-        destMesh.push_back(mVertexBuffer[i]);
-        
         if (points.size() >= i) 
-            return true;
+            break;
         
     }
     
@@ -378,6 +495,32 @@ void Mesh::Load(void) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index), &mIndexBuffer[0], GL_STATIC_DRAW);
     
     return;
+}
+
+bool Mesh::LoadRange(unsigned int start, unsigned int count) {
+    // Boundary checking
+    if (start >= mVertexBuffer.size() || 
+        (start + count) > mVertexBuffer.size() || 
+        start >= mIndexBuffer.size() || 
+        (start + count) > mIndexBuffer.size()) {
+        
+        return false;
+    }
+    
+    if (!mAreBuffersAllocated) {
+        AllocateBuffers();
+        mAreBuffersAllocated = true;
+    }
+    
+    glBindVertexArray(mVertexArray);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
+    glBufferSubData(GL_ARRAY_BUFFER, start * sizeof(Vertex), count * sizeof(Vertex), &mVertexBuffer[start]);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, start * sizeof(Index), count * sizeof(Index), &mIndexBuffer[start]);
+    
+    return true;
 }
 
 void Mesh::Unload(void) {

@@ -54,6 +54,40 @@ bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     mCurrentShader->SetMaterialDiffuse(mCurrentMaterial->diffuse);
     mCurrentShader->SetMaterialSpecular(mCurrentMaterial->specular);
     
+    // Fog layers
+    for (unsigned int i=0; i < 4; i++) {
+        
+        if (!fogActive[i]) {
+            
+            // Blank the fog values
+            
+            mCurrentShader->SetFogDensity(i, 0.0f);
+            
+            mCurrentShader->SetFogHeightCutoff(i, 1000000.0f);
+            
+            Color blank(0, 0, 0);
+            mCurrentShader->SetFogColorBegin(i, blank);
+            mCurrentShader->SetFogColorEnd(i, blank);
+            
+            mCurrentShader->SetFogBegin(i, 0.0f);
+            mCurrentShader->SetFogEnd(i, 0.0f);
+            
+            continue;
+        }
+        
+        mCurrentShader->SetFogDensity(i, fogDensity[i]);
+        
+        mCurrentShader->SetFogHeightCutoff(i, fogHeightCutoff[i]);
+        
+        mCurrentShader->SetFogColorBegin(i, fogColorBegin[i]);
+        mCurrentShader->SetFogColorEnd(i, fogColorEnd[i]);
+        
+        mCurrentShader->SetFogBegin(i, fogBegin[i]);
+        mCurrentShader->SetFogEnd(i, fogEnd[i]);
+        
+    }
+    
+    
     // Render the geometry
     currentEntity->mesh->DrawIndexArray();
     mNumberOfDrawCalls++;

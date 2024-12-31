@@ -132,6 +132,10 @@ void ParticleSystem::Update(void) {
                                                             emitterPtr->mParticlePositions[p].y, 
                                                             emitterPtr->mParticlePositions[p].z);
                 
+                emitterPtr->mMesh->ChangeSubMeshScale(p, emitterPtr->scaleTo.x,
+                                                         emitterPtr->scaleTo.y,
+                                                         emitterPtr->scaleTo.z);
+                
                 emitterPtr->mMesh->ChangeSubMeshColor(p, blendedColor);
                 
             }
@@ -152,6 +156,11 @@ void ParticleSystem::Update(void) {
                 emitterPtr->mParticlePositions[p].x += emitterPtr->mParticleVelocities[p].x;
                 emitterPtr->mParticlePositions[p].y += emitterPtr->mParticleVelocities[p].y;
                 emitterPtr->mParticlePositions[p].z += emitterPtr->mParticleVelocities[p].z;
+                
+                // Add target scale
+                emitterPtr->scale.x *= emitterPtr->scaleTo.x;
+                emitterPtr->scale.y *= emitterPtr->scaleTo.y;
+                emitterPtr->scale.z *= emitterPtr->scaleTo.z;
                 
                 // Integrate velocities
                 

@@ -43,6 +43,14 @@ bool ChunkManager::LoadWorld(void) {
     float pitch = String.ToFloat(lookingAngle[1]);
     worldSeed = String.ToInt(bufferArray[2]);
     float worldTime = String.ToInt(bufferArray[3]);
+    // Weather
+    int weatherCurrent = String.ToInt(bufferArray[4]);
+    int weatherNext = String.ToInt(bufferArray[5]);
+    float weatherCycleCounter = String.ToFloat(bufferArray[6]);
+    
+    weather.SetWeather( (WeatherType)weatherCurrent );
+    weather.SetWeatherNext( (WeatherType)weatherNext );
+    weather.SetWeatherCycleCounter(weatherCycleCounter);
     
     Camera* cameraPtr = Engine.cameraController->GetComponent<Camera>();
     

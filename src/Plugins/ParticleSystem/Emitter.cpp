@@ -10,6 +10,7 @@ Emitter::Emitter() :
     position(glm::vec3(0)),
     direction(glm::vec3(0)),
     scale(glm::vec3(1)),
+    scaleTo(glm::vec3(1)),
     
     colorBegin(Colors.black),
     colorEnd(Colors.white),

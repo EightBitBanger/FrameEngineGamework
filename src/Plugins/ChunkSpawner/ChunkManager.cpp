@@ -5,6 +5,7 @@ ChunkManager::ChunkManager() :
     
     renderDistance(10),
     staticDistance(10),
+    actorDistance(10),
     
     chunkSize(50),
     
@@ -83,6 +84,16 @@ void ChunkManager::Initiate(void) {
     waterMaterial->EnableBlending();
     waterMaterial->diffuse = Colors.blue * Colors.MakeGrayScale(0.4f);
     waterMaterial->shader = Engine.shaders.water;
+    
+    // Underwater blue fog
+    
+    Renderer.fogActive[RENDER_FOG_LAYER_3]        = true;
+    
+    Renderer.fogDensity[RENDER_FOG_LAYER_3]       = 0.8f;
+    Renderer.fogBegin[RENDER_FOG_LAYER_3]         = 0.0f;
+    Renderer.fogEnd[RENDER_FOG_LAYER_3]           = 1.0f;
+    Renderer.fogColorBegin[RENDER_FOG_LAYER_3]    = Colors.blue;
+    Renderer.fogColorEnd[RENDER_FOG_LAYER_3]      = Colors.blue;
     
     return;
 }
@@ -176,7 +187,7 @@ GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
         
         actorObject = Engine.CreateAIActor( glm::vec3(x, y, z) );
         
-        actorObject->renderDistance = renderDistance * chunkSize * 2.4f;
+        actorObject->renderDistance = staticDistance * chunkSize * 0.5f;
         
         actors.push_back( actorObject );
         

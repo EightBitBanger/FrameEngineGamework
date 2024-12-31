@@ -29,6 +29,34 @@ void ChunkManager::Update(void) {
         
     }
     
+    
+    // Check player underwater
+    
+    if (playerPosition.y < world.waterLevel) {
+        
+        // Underwater
+        Renderer.fogHeightCutoff[RENDER_FOG_LAYER_3] = 1000.0f;
+        
+        Renderer.fogDensity[RENDER_FOG_LAYER_3]       = 0.8f;
+        Renderer.fogBegin[RENDER_FOG_LAYER_3]         = 0.0f;
+        Renderer.fogEnd[RENDER_FOG_LAYER_3]           = 24.0f;
+        Renderer.fogColorBegin[RENDER_FOG_LAYER_3]    = Colors.blue;
+        Renderer.fogColorEnd[RENDER_FOG_LAYER_3]      = Colors.blue;
+        
+    } else {
+        
+        // Above water
+        Renderer.fogHeightCutoff[RENDER_FOG_LAYER_3] = world.waterLevel;
+        
+        Renderer.fogDensity[RENDER_FOG_LAYER_3]       = 0.8f;
+        Renderer.fogBegin[RENDER_FOG_LAYER_3]         = 0.0f;
+        Renderer.fogEnd[RENDER_FOG_LAYER_3]           = 1.0f;
+        Renderer.fogColorBegin[RENDER_FOG_LAYER_3]    = Colors.blue;
+        Renderer.fogColorEnd[RENDER_FOG_LAYER_3]      = Colors.blue;
+        
+    }
+    
+    
     //
     // Update actors
     

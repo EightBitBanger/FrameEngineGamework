@@ -2,12 +2,15 @@
 #include <GameEngineFramework/Logging/Logging.h>
 
 #include <GameEngineFramework/Types/types.h>
+#include <GameEngineFramework/Engine/types/color.h>
 
 #include <iostream>
 
 extern Logger Log;
 
 extern IntType Int;
+
+extern ColorPreset  Colors;
 
 
 // Render thread
@@ -22,6 +25,18 @@ RenderSystem::RenderSystem() :
     displayCenter(glm::vec2(0, 0)),
     
     doUpdateLightsEveryFrame(true),
+    
+    fogActive{false, false, false, false},
+    
+    fogDensity{0.8f,0.8f,0.8f,0.8f},
+    
+    fogHeightCutoff{1000000.0f, 1000000.0f, 1000000.0f, 1000000.0f},
+    
+    fogBegin{40.0f,40.0f,40.0f,40.0f},
+    fogEnd{180.0f,180.0f,180.0f,180.0f},
+    
+    fogColorBegin{Colors.white, Colors.white, Colors.white, Colors.white},
+    fogColorEnd{Colors.dkgray, Colors.dkgray, Colors.dkgray, Colors.dkgray},
     
     mNumberOfDrawCalls(0),
     mNumberOfFrames(0),
@@ -41,6 +56,7 @@ MeshRenderer* RenderSystem::CreateMeshRenderer(void) {
     MeshRenderer* meshRendererPtr = mEntity.Create();
     return meshRendererPtr;
 }
+
 bool RenderSystem::DestroyMeshRenderer(MeshRenderer* meshRendererPtr) {
     
     if (meshRendererPtr->mesh != nullptr) 
