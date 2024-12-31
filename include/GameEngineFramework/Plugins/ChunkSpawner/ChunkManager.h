@@ -119,6 +119,7 @@ public:
     
     float renderDistance;
     float staticDistance;
+    float actorDistance;
     
     int chunkSize;
     

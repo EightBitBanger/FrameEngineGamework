@@ -48,6 +48,23 @@ public:
     /// Recalculate lights every frame.
     bool doUpdateLightsEveryFrame;
     
+    /// Fog active state.
+    bool fogActive[4];
+    
+    /// Thickness of the fog between begin and end.
+    float fogDensity[4];
+    
+    /// Height cutoff of the fog.
+    float fogHeightCutoff[4];
+    
+    /// Distance range to render the fog.
+    float fogBegin[4];
+    float fogEnd[4];
+    
+    /// Color fade of the fog in the world.
+    Color fogColorBegin[4];
+    Color fogColorEnd[4];
+    
     
     RenderSystem();
     

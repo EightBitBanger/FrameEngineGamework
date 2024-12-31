@@ -44,6 +44,25 @@ public:
     void SetTextureSampler(unsigned int index);
     
     
+    /// Set the density for the fog effect.
+    void SetFogDensity(unsigned int index, float density);
+    
+    /// Set the height cutoff for the fog effect.
+    void SetFogHeightCutoff(unsigned int index, float height);
+    
+    /// Set the distance to begin rendering fog.
+    void SetFogBegin(unsigned int index, float begin);
+    
+    /// Set the distance to stop rendering fog.
+    void SetFogEnd(unsigned int index, float end);
+    
+    /// Set the color at the start of the fog.
+    void SetFogColorBegin(unsigned int index, Color color);
+    
+    /// Set the fog at the end of the fog.
+    void SetFogColorEnd(unsigned int index, Color color);
+    
+    
     /// Set the number of uniform lights.
     void SetLightCount(unsigned int numberOfLights);
     
@@ -98,6 +117,13 @@ private:
     int mMaterialSpecularLocation;
     
     int mSamplerLocation;
+    
+    int mFogDensityLocation[4];
+    int mFogHeightCutoffLocation[4];
+    int mFogBeginColorLocation[4];
+    int mFogEndColorLocation[4];
+    int mFogBeginLocation[4];
+    int mFogEndLocation[4];
     
     int mLightCount;
     int mLightPosition;

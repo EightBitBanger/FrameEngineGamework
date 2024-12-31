@@ -36,9 +36,14 @@ public:
     /// Add a quad sub mesh to the vertex buffer.
     int AddQuad(float x, float y, float z, float width, float height, Color color);
     
+    /// Add a sphere sub mesh to the vertex buffer.
+    void AddSphere(float x, float y, float z, float radius, unsigned int rings, unsigned int sectors, Color color);
     
     /// Add a sub mesh into this vertex buffer. The index of the sub mesh in the mesh will be returned. A return value of negative one indicated an error.
     int AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu=true);
+    
+    /// Replace a sub mesh at an index.
+    bool ReplaceSubMesh(unsigned int index, SubMesh& subMesh);
     
     /// Add a vertex buffer directly into this vertex buffer. The index of the sub mesh in the mesh will be returned. A return value of negative one indicated an error.
     int AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu=true);
@@ -59,7 +64,13 @@ public:
     /// Update the position of a sub mesh.
     bool ChangeSubMeshPosition(unsigned int index, float x, float y, float z);
     
+    /// Update the orientation of a sub mesh.
+    bool ChangeSubMeshRotation(unsigned int index, float angle, glm::vec3 axis);
+    
     /// Update the scale of a sub mesh.
+    bool ChangeSubMeshScale(unsigned int index, float x, float y, float z);
+    
+    /// Update the points of a sub mesh.
     bool ChangeSubMeshPoints(unsigned int index, std::vector<glm::vec3> points);
     
     /// Clear all sub meshes in the mesh.
@@ -68,6 +79,10 @@ public:
     
     /// Fully re-upload the vertex buffer onto the GPU.
     void Load(void);
+    
+    /// Re-upload a range of the buffer onto the GPU.
+    bool LoadRange(unsigned int start, unsigned int count);
+    
     
     /// Purge the vertex buffer from the GPU.
     void Unload(void);
@@ -112,16 +127,6 @@ public:
     void LoadIndexBuffer(Index* bufferData, int indexCount);
     
     
-    /// Bind the mesh buffer for rendering.
-    void Bind(void);
-    
-    /// Run a draw call on this vertex buffer.
-    void DrawVertexArray(void);
-    
-    /// Run a draw call on this index buffer.
-    void DrawIndexArray(void);
-    
-    
     /// Return the number of sub meshes in this vertex buffer.
     unsigned int GetSubMeshCount(void);
     
@@ -142,6 +147,16 @@ public:
     
     
 private:
+    
+    // Bind the mesh buffer for rendering.
+    void Bind(void);
+    
+    // Run a draw call on this vertex buffer.
+    void DrawVertexArray(void);
+    
+    // Run a draw call on this index buffer.
+    void DrawIndexArray(void);
+    
     
     // OpenGL buffers
     unsigned int mVertexArray;

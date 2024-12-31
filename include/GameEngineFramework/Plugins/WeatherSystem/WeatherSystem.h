@@ -7,7 +7,6 @@
 
 enum class WeatherType {
     Clear,
-    Cloudy,
     Rain,
     Snow
 };
@@ -36,17 +35,17 @@ public:
     void SetTime(float newTime);
     float GetTime(void);
     
-    /// Set a weather cycle.
+    /// Set the current weather cycle.
     void SetWeather(WeatherType type);
     
-    /// Set the weather cycle to shift to after the current.
-    void SetWeatherNextCycle(WeatherType type);
+    /// Set the next weather cycle to shift to after the current one has finished.
+    void SetWeatherNext(WeatherType type);
     
-    /// Add a weather cycle to any active cycles.
+    /// Add a weather cycle to any currently active weather cycles.
     void AddWeather(WeatherType type);
     
     /// Return the current weather cycle.
-    WeatherType GetWeather(void);
+    WeatherType GetWeatherCurrent(void);
     
     /// Return the next weather cycle.
     WeatherType GetWeatherNext(void);
@@ -56,6 +55,9 @@ public:
     
     /// Set the state of the master weather counter.
     void SetWeatherCycleCounter(float counter);
+    
+    /// Reset the world fog.
+    void FogClear(void);
     
 private:
     
@@ -83,11 +85,19 @@ private:
     // Current weather cycle taking place in the world
     WeatherType mCurrentWeather;
     
-    // Weather cycle master timer
+    // Weather cycle counters
     float mWeatherMasterCounter;
-    
-    // Weather state shift counter 
     float mWeatherShiftCounter;
+    float mWeatherFogCounter;
+    
+    // World fog
+    float mWorldFogDensity;
+    float mWorldFogNear;
+    float mWorldFogFar;
+    Color mWorldFogColorNear;
+    Color mWorldFogColorFar;
+    
+    float mFogLightBias;
     
     // Effect emitters
     Emitter* mRainEmitter;

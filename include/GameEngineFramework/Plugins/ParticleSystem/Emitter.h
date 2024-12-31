@@ -30,10 +30,13 @@ public:
     /// Size of the particles.
     glm::vec3 scale;
     
+    /// Scale to which the particle should add per frame.
+    glm::vec3 scaleTo;
     
     /// Color range between which the particles will fade.
     Color colorBegin;
     Color colorEnd;
+    
     /// Rate to which the particles should fade from color "begin" to "end".
     float colorBias;
     

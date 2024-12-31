@@ -1,8 +1,7 @@
 //
 // Render system enumerators
 
-//
-//
+// Render queues
 
 #define RENDER_QUEUE_OVERLAY      8
 #define RENDER_QUEUE_FOREGROUND   7
@@ -12,9 +11,13 @@
 #define RENDER_QUEUE_BACKGROUND   3
 #define RENDER_QUEUE_SKY          2
 
+// Fog layers
 
+#define RENDER_FOG_LAYER_0        0
+#define RENDER_FOG_LAYER_1        1
+#define RENDER_FOG_LAYER_2        2
+#define RENDER_FOG_LAYER_3        3
 
-// ============================================
 // Mesh primitive drawing types
 
 #define  MESH_POINTS          GL_POINTS
