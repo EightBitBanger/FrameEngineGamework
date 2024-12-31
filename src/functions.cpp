@@ -243,22 +243,17 @@ void FuncWeather(std::vector<std::string> args) {
     std::string msgWeatherSet = "Weather ";
     
     if (args[0] == "clear") {
-        weather.SetWeatherNextCycle(WeatherType::Clear);
+        weather.SetWeatherNext(WeatherType::Clear);
         Engine.Print(msgWeatherSet + "clear");
         return;
     }
-    if (args[0] == "cloudy") {
-        weather.SetWeatherNextCycle(WeatherType::Cloudy);
-        Engine.Print(msgWeatherSet + "cloudy");
-        return;
-    }
     if (args[0] == "rain") {
-        weather.SetWeatherNextCycle(WeatherType::Rain);
+        weather.SetWeatherNext(WeatherType::Rain);
         Engine.Print(msgWeatherSet + "rain");
         return;
     }
     if (args[0] == "snow") {
-        weather.SetWeatherNextCycle(WeatherType::Snow);
+        weather.SetWeatherNext(WeatherType::Snow);
         Engine.Print(msgWeatherSet + "snow");
         return;
     }

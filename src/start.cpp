@@ -259,49 +259,84 @@ void Start() {
     
     
     // World rendering
+    chunkManager.chunkSize = 64;
     
-    chunkManager.renderDistance = 14;
+    chunkManager.renderDistance = 18;
     chunkManager.staticDistance = chunkManager.renderDistance * 0.7f;
+    chunkManager.actorDistance  = chunkManager.renderDistance * 0.5f;
     
     
     
     
-    // Smoke test
+    // Fire emitter test
     
-    /*
+    Emitter* fireEmitter = particle.CreateEmitter();
     
-    Emitter* testEmitter = particle.CreateEmitter();
+    fireEmitter->type = EmitterType::Point;
+    fireEmitter->position = playerPosition;
+    fireEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
+    fireEmitter->scale = glm::vec3(0.1f, 0.01f, 0.1f);
+    fireEmitter->scaleTo = glm::vec3(1.01f, 1.01f, 1.01f);
     
-    testEmitter->type = EmitterType::Point;
-    testEmitter->position = playerPosition;
-    testEmitter->direction = glm::vec3(0.0f, 0.07f, 0.0f);
-    testEmitter->scale = glm::vec3(0.1f, 0.1f, 0.1f);
+    fireEmitter->velocity = glm::vec3(0.0f, 0.01f, 0.0f);
     
-    testEmitter->velocity = glm::vec3(0.0f, 0.4f, 0.0f);
+    fireEmitter->velocityBias = 0.008f;
     
-    testEmitter->velocityBias = 0.0004f;
+    fireEmitter->width = 0.1f;
+    fireEmitter->height = 0.1f;
     
-    testEmitter->width = 80;
-    testEmitter->height = 100;
+    fireEmitter->angle = 0.18f;
+    fireEmitter->spread = 0.4f;
     
-    testEmitter->angle = 8;
-    testEmitter->spread = 1;
+    fireEmitter->colorBegin = Colors.red;
+    fireEmitter->colorEnd = Colors.yellow;
     
-    testEmitter->colorBegin = Colors.red;
-    testEmitter->colorEnd = Colors.blue;
+    fireEmitter->maxParticles = 20;
+    fireEmitter->spawnRate = 20;
     
-    testEmitter->maxParticles = 8000;
-    testEmitter->spawnRate = 0;
+    fireEmitter->heightMinimum = chunkManager.world.waterLevel;
     
-    testEmitter->heightMinimum = chunkManager.world.waterLevel;
+    Material* fireEmitterMaterial = fireEmitter->GetMaterial();
     
-    Material* emitterMaterial = testEmitter->GetMaterial();
+    //fireEmitterMaterial->EnableBlending();
+    //fireEmitterMaterial->shader = Engine.shaders.water;
     
-    //emitterMaterial->EnableBlending();
-    //emitterMaterial->shader = Engine.shaders.water;
     
-    */
     
+    
+    
+    
+    // Smoke emitter test
+    
+    Emitter* smokeEmitter = particle.CreateEmitter();
+    
+    smokeEmitter->type = EmitterType::Point;
+    smokeEmitter->position = playerPosition;
+    smokeEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
+    smokeEmitter->scale = glm::vec3(0.08f, 0.01f, 0.08f);
+    
+    smokeEmitter->velocity = glm::vec3(0.0f, 0.01f, 0.0f);
+    
+    smokeEmitter->velocityBias = 0.02f;
+    
+    smokeEmitter->width = 4;
+    smokeEmitter->height = 8;
+    
+    smokeEmitter->angle = 0.3f;
+    smokeEmitter->spread = 0.5f;
+    
+    smokeEmitter->colorBegin = Colors.dkgray;
+    smokeEmitter->colorEnd = Colors.gray;
+    
+    smokeEmitter->maxParticles = 2000;
+    smokeEmitter->spawnRate = 1;
+    
+    smokeEmitter->heightMinimum = chunkManager.world.waterLevel;
+    
+    Material* smokeEmitterMaterial = smokeEmitter->GetMaterial();
+    
+    //smokeEmitterMaterial->EnableBlending();
+    //smokeEmitterMaterial->shader = Engine.shaders.water;
     
     return;
 }
