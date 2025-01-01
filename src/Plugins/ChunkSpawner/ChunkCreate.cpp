@@ -24,6 +24,17 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
     MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
     
+    // Bounding box area
+    glm::vec3 boundMin(-chunkSize, -100, -chunkSize);
+    glm::vec3 boundMax(chunkSize, 100, chunkSize);
+    
+    chunkRenderer->SetBoundingBoxMin(boundMin);
+    chunkRenderer->SetBoundingBoxMax(boundMax);
+    
+    staticRenderer->SetBoundingBoxMin(boundMin);
+    staticRenderer->SetBoundingBoxMax(boundMax);
+    
+    
     Engine.sceneMain->AddMeshRendererToSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
     Engine.sceneMain->AddMeshRendererToSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
     

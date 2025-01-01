@@ -7,28 +7,24 @@
 bool RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup, unsigned int queueGroupIndex) {
     
     std::vector< std::pair<float, MeshRenderer*> > sortList;
+    sortList.reserve(renderQueueGroup->size());
     
-    std::vector<MeshRenderer*> renderQueue = *renderQueueGroup;
+    std::transform(renderQueueGroup->begin(), renderQueueGroup->end(), std::back_inserter(sortList),
+                   [&eye](MeshRenderer* renderer) {
+                       return std::make_pair(glm::distance(eye, renderer->transform.position), renderer);
+                   });
     
-    for (unsigned int i=0; i < renderQueue.size(); i++) {
-        
-        std::pair<float, MeshRenderer*> renderPair;
-        
-        renderPair.first = glm::distance( eye, renderQueue[i]->transform.position );
-        renderPair.second = renderQueue[i];
-        
-        sortList.push_back( renderPair );
-        
-    }
-    
-    std::sort(sortList.begin(), sortList.end(), [](std::pair<float, MeshRenderer*> a, std::pair<float, MeshRenderer*> b) {
+    std::sort(sortList.begin(), sortList.end(), [](const std::pair<float, MeshRenderer*>& a, const std::pair<float, MeshRenderer*>& b) {
         return a.first < b.first;
     });
     
-    renderQueue.clear();
+    renderQueueGroup->clear();
+    renderQueueGroup->reserve(sortList.size());
     
-    for (unsigned int i=0; i < sortList.size(); i++) 
-        renderQueue.push_back( sortList[i].second );
+    std::transform(sortList.begin(), sortList.end(), std::back_inserter(*renderQueueGroup),
+                   [](const std::pair<float, MeshRenderer*>& pair) {
+                       return pair.second;
+                   });
     
     return true;
 }

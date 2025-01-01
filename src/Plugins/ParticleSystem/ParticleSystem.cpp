@@ -1,19 +1,11 @@
-// Particle system management class
-
 #include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
-
 #include <GameEngineFramework/Engine/Engine.h>
-
 
 ParticleSystem::ParticleSystem() 
 {
 }
 
-
 void ParticleSystem::Initiate(void) {
-    
-    
-    
     return;
 }
 
@@ -22,10 +14,9 @@ void ParticleSystem::Update(void) {
     glm::vec3 playerPosition = AI.GetPlayerWorldPosition();
     
     unsigned int numberOfEmitters = mEmitters.Size();
-    
+
     // Update emitters
-    
-    for (unsigned int e=0; e < numberOfEmitters; e++) {
+    for (unsigned int e = 0; e < numberOfEmitters; e++) {
         
         Emitter* emitterPtr = mEmitters[e];
         
@@ -33,11 +24,9 @@ void ParticleSystem::Update(void) {
             continue;
         
         // Check to spawn in more particles
-        
         if (emitterPtr->mNumberOfParticles < emitterPtr->maxParticles) {
             
             // Spawn from a point
-            
             if (emitterPtr->type == EmitterType::Point) {
                 
                 emitterPtr->mSpawnRate++;
@@ -51,11 +40,9 @@ void ParticleSystem::Update(void) {
                     glm::vec3 spawnVelocity = emitterPtr->direction;
                     
                     emitterPtr->AddParticle(spawnPosition, spawnScale, spawnVelocity, emitterPtr->colorBegin, emitterPtr->colorEnd);
-                    
                 }
-                
             }
-            
+
             // Spawn within an area
             if (emitterPtr->type == EmitterType::AreaEffector) {
                 
@@ -74,140 +61,95 @@ void ParticleSystem::Update(void) {
                     spawnPosition.z += randomZ;
                     
                     emitterPtr->AddParticle(spawnPosition, spawnScale, spawnVelocity, emitterPtr->colorBegin, emitterPtr->colorEnd);
-                    
                 }
-                
             }
-            
-            
         }
-        
+
         // Point emitter
-        
         if (emitterPtr->type == EmitterType::Point) {
-            
             // Update emitter particles
-            for (unsigned int p=0; p < emitterPtr->mNumberOfParticles; p++) {
+            for (unsigned int p = 0; p < emitterPtr->mNumberOfParticles; p++) {
                 
                 // Solve velocity
-                
-                emitterPtr->mParticlePositions[p].x += emitterPtr->mParticleVelocities[p].x;
-                emitterPtr->mParticlePositions[p].y += emitterPtr->mParticleVelocities[p].y;
-                emitterPtr->mParticlePositions[p].z += emitterPtr->mParticleVelocities[p].z;
+                emitterPtr->mParticlePositions[p] += emitterPtr->mParticleVelocities[p];
                 
                 // Integrate velocities
-                
-                emitterPtr->mParticleVelocities[p].x = Float.Lerp(emitterPtr->mParticleVelocities[p].x, emitterPtr->velocity.x, emitterPtr->velocityBias);
-                emitterPtr->mParticleVelocities[p].y = Float.Lerp(emitterPtr->mParticleVelocities[p].y, emitterPtr->velocity.y, emitterPtr->velocityBias);
-                emitterPtr->mParticleVelocities[p].z = Float.Lerp(emitterPtr->mParticleVelocities[p].z, emitterPtr->velocity.z, emitterPtr->velocityBias);
+                emitterPtr->mParticleVelocities[p] = glm::mix(emitterPtr->mParticleVelocities[p], emitterPtr->velocity, emitterPtr->velocityBias);
                 
                 // Constraints
-                
-                if ((emitterPtr->mParticlePositions[p].x < emitterPtr->position.x - emitterPtr->width) | 
-                    (emitterPtr->mParticlePositions[p].x > emitterPtr->position.x + emitterPtr->width) | 
-                    (emitterPtr->mParticlePositions[p].y < emitterPtr->position.y - emitterPtr->height) | 
-                    (emitterPtr->mParticlePositions[p].y > emitterPtr->position.y + emitterPtr->height) | 
-                    (emitterPtr->mParticlePositions[p].z < emitterPtr->position.z - emitterPtr->width) | 
+                if ((emitterPtr->mParticlePositions[p].x < emitterPtr->position.x - emitterPtr->width) || 
+                    (emitterPtr->mParticlePositions[p].x > emitterPtr->position.x + emitterPtr->width) || 
+                    (emitterPtr->mParticlePositions[p].y < emitterPtr->position.y - emitterPtr->height) || 
+                    (emitterPtr->mParticlePositions[p].y > emitterPtr->position.y + emitterPtr->height) || 
+                    (emitterPtr->mParticlePositions[p].z < emitterPtr->position.z - emitterPtr->width) || 
                     (emitterPtr->mParticlePositions[p].z > emitterPtr->position.z + emitterPtr->width)) {
                     
                     emitterPtr->ResetParticle(p);
-                    
                 }
                 
                 // Interpolate color
-                
-                Color sourceColor;
-                
-                sourceColor.r = emitterPtr->mParticleColors[p].x;
-                sourceColor.g = emitterPtr->mParticleColors[p].y;
-                sourceColor.b = emitterPtr->mParticleColors[p].z;
-                
+                Color sourceColor(emitterPtr->mParticleColors[p].x, emitterPtr->mParticleColors[p].y, emitterPtr->mParticleColors[p].z);
                 Color blendedColor = Colors.Lerp(sourceColor, emitterPtr->colorEnd, emitterPtr->colorBias);
                 
-                emitterPtr->mParticleColors[p].x = blendedColor.r;
-                emitterPtr->mParticleColors[p].y = blendedColor.g;
-                emitterPtr->mParticleColors[p].z = blendedColor.b;
+                emitterPtr->mParticleColors[p] = glm::vec3(blendedColor.r, blendedColor.g, blendedColor.b);
                 
-                emitterPtr->mMesh->ChangeSubMeshPosition(p, emitterPtr->mParticlePositions[p].x, 
-                                                            emitterPtr->mParticlePositions[p].y, 
-                                                            emitterPtr->mParticlePositions[p].z);
-                
-                emitterPtr->mMesh->ChangeSubMeshScale(p, emitterPtr->scaleTo.x,
-                                                         emitterPtr->scaleTo.y,
-                                                         emitterPtr->scaleTo.z);
-                
+                emitterPtr->mMesh->ChangeSubMeshPosition(p, emitterPtr->mParticlePositions[p].x, emitterPtr->mParticlePositions[p].y, emitterPtr->mParticlePositions[p].z);
+                emitterPtr->mMesh->ChangeSubMeshScale(p, emitterPtr->scaleTo.x, emitterPtr->scaleTo.y, emitterPtr->scaleTo.z);
                 emitterPtr->mMesh->ChangeSubMeshColor(p, blendedColor);
-                
             }
             
             emitterPtr->mMesh->Load();
             
             continue;
         }
-        
+
         // Area effector emitter
-        
         if (emitterPtr->type == EmitterType::AreaEffector) {
             
             // Update emitter particles
-            for (unsigned int p=0; p < emitterPtr->mNumberOfParticles; p++) {
+            
+            for (unsigned int p = 0; p < emitterPtr->mNumberOfParticles; p++) {
                 
                 // Solve velocity
-                emitterPtr->mParticlePositions[p].x += emitterPtr->mParticleVelocities[p].x;
-                emitterPtr->mParticlePositions[p].y += emitterPtr->mParticleVelocities[p].y;
-                emitterPtr->mParticlePositions[p].z += emitterPtr->mParticleVelocities[p].z;
+                emitterPtr->mParticlePositions[p] += emitterPtr->mParticleVelocities[p];
                 
                 // Add target scale
-                emitterPtr->scale.x *= emitterPtr->scaleTo.x;
-                emitterPtr->scale.y *= emitterPtr->scaleTo.y;
-                emitterPtr->scale.z *= emitterPtr->scaleTo.z;
+                emitterPtr->scale *= emitterPtr->scaleTo;
                 
                 // Integrate velocities
-                
-                emitterPtr->mParticleVelocities[p].x = Float.Lerp(emitterPtr->mParticleVelocities[p].x, emitterPtr->velocity.x, emitterPtr->velocityBias);
-                emitterPtr->mParticleVelocities[p].y = Float.Lerp(emitterPtr->mParticleVelocities[p].y, emitterPtr->velocity.y, emitterPtr->velocityBias);
-                emitterPtr->mParticleVelocities[p].z = Float.Lerp(emitterPtr->mParticleVelocities[p].z, emitterPtr->velocity.z, emitterPtr->velocityBias);
+                emitterPtr->mParticleVelocities[p] = glm::mix(emitterPtr->mParticleVelocities[p], emitterPtr->velocity, emitterPtr->velocityBias);
                 
                 // Constraints
-                if ((emitterPtr->mParticlePositions[p].x < playerPosition.x - emitterPtr->width) | 
-                    (emitterPtr->mParticlePositions[p].x > playerPosition.x + emitterPtr->width)  | 
-                    (emitterPtr->mParticlePositions[p].y < playerPosition.y - emitterPtr->height) | 
-                    (emitterPtr->mParticlePositions[p].y > playerPosition.y + emitterPtr->height) | 
-                    (emitterPtr->mParticlePositions[p].z < playerPosition.z - emitterPtr->width) | 
-                    (emitterPtr->mParticlePositions[p].z > playerPosition.z + emitterPtr->width) | 
-                    (emitterPtr->mParticlePositions[p].y > emitterPtr->heightMaximum) | 
+                if ((emitterPtr->mParticlePositions[p].x < playerPosition.x - emitterPtr->width) || 
+                    (emitterPtr->mParticlePositions[p].x > playerPosition.x + emitterPtr->width) || 
+                    (emitterPtr->mParticlePositions[p].y < playerPosition.y - emitterPtr->height) || 
+                    (emitterPtr->mParticlePositions[p].y > playerPosition.y + emitterPtr->height) || 
+                    (emitterPtr->mParticlePositions[p].z < playerPosition.z - emitterPtr->width) || 
+                    (emitterPtr->mParticlePositions[p].z > playerPosition.z + emitterPtr->width) || 
+                    (emitterPtr->mParticlePositions[p].y > emitterPtr->heightMaximum) || 
                     (emitterPtr->mParticlePositions[p].y < emitterPtr->heightMinimum)) {
                     
                     float randomX = Random.Range(0.0f, emitterPtr->width) - Random.Range(0.0f, emitterPtr->width);
                     float randomY = Random.Range(0.0f, emitterPtr->height) - Random.Range(0.0f, emitterPtr->height);
                     float randomZ = Random.Range(0.0f, emitterPtr->width) - Random.Range(0.0f, emitterPtr->width);
                     
-                    emitterPtr->mParticlePositions[p].x = playerPosition.x + randomX;
-                    emitterPtr->mParticlePositions[p].y = playerPosition.y + randomY;
-                    emitterPtr->mParticlePositions[p].z = playerPosition.z + randomZ;
+                    emitterPtr->mParticlePositions[p] = playerPosition + glm::vec3(randomX, randomY, randomZ);
                     
                     if (emitterPtr->mParticlePositions[p].y < emitterPtr->heightMinimum) 
                         emitterPtr->mParticlePositions[p].y = emitterPtr->heightMinimum + 200;
                     
                 }
                 
-                emitterPtr->mMesh->ChangeSubMeshPosition(p, emitterPtr->mParticlePositions[p].x, 
-                                                            emitterPtr->mParticlePositions[p].y, 
-                                                            emitterPtr->mParticlePositions[p].z);
-                
+                emitterPtr->mMesh->ChangeSubMeshPosition(p, emitterPtr->mParticlePositions[p].x, emitterPtr->mParticlePositions[p].y, emitterPtr->mParticlePositions[p].z);
             }
             
             emitterPtr->mMesh->Load();
             
             continue;
         }
-        
-        continue;
     }
-    
     return;
 }
-
 
 Emitter* ParticleSystem::CreateEmitter(void) {
     
@@ -216,25 +158,25 @@ Emitter* ParticleSystem::CreateEmitter(void) {
     newEmitter->mParticleObject = Engine.Create<GameObject>();
     
     // Material
-    
     Material* particleMaterial = Engine.Create<Material>();
     newEmitter->mMaterial = particleMaterial;
+    
     particleMaterial->shader = Engine.shaders.colorUnlit;
     particleMaterial->isShared = false;
-    
     particleMaterial->ambient = Colors.white;
     particleMaterial->diffuse = Colors.white;
     particleMaterial->DisableCulling();
     
     // Mesh
-    
     Mesh* particleMesh = Engine.Create<Mesh>();
+    
     newEmitter->mMesh = particleMesh;
+    
     particleMesh->isShared = false;
     
-    newEmitter->mParticleObject->AddComponent( Engine.CreateComponentMeshRenderer( particleMesh, particleMaterial ) );
+    newEmitter->mParticleObject->AddComponent(Engine.CreateComponentMeshRenderer(particleMesh, particleMaterial));
     
-    Engine.sceneMain->AddMeshRendererToSceneRoot( newEmitter->mParticleObject->GetComponent<MeshRenderer>(), RENDER_QUEUE_GEOMETRY );
+    Engine.sceneMain->AddMeshRendererToSceneRoot(newEmitter->mParticleObject->GetComponent<MeshRenderer>(), RENDER_QUEUE_GEOMETRY);
     
     return newEmitter;
 }
@@ -243,9 +185,8 @@ void ParticleSystem::DestroyEmitter(Emitter* emitterPtr) {
     
     MeshRenderer* particleRenderer = emitterPtr->mParticleObject->GetComponent<MeshRenderer>();
     
-    Engine.sceneMain->RemoveMeshRendererFromSceneRoot( particleRenderer, RENDER_QUEUE_GEOMETRY );
-    
-    Engine.Destroy<GameObject>( emitterPtr->mParticleObject );
+    Engine.sceneMain->RemoveMeshRendererFromSceneRoot(particleRenderer, RENDER_QUEUE_GEOMETRY);
+    Engine.Destroy<GameObject>(emitterPtr->mParticleObject);
     
     return;
 }

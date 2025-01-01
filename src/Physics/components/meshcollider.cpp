@@ -3,8 +3,11 @@
 MeshCollider::MeshCollider() : 
     
     heightFieldShape(nullptr),
+    heightMapBuffer(nullptr),
     
-    heightMapBuffer(nullptr)
+    triangleMesh(nullptr),
+    vertexBuffer(nullptr),
+    indexBuffer(nullptr)
 {
 }
 

@@ -9,7 +9,7 @@ StaticObject::StaticObject() :
     b(0),
     
     type(0),
-    rigidBody(nullptr)
+    collisionBody(nullptr)
 {
 }
 

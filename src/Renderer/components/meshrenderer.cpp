@@ -6,7 +6,9 @@ MeshRenderer::MeshRenderer() :
     mesh(nullptr),
     material(nullptr),
     transform(Transform()),
-    mDoCulling(false)
+    mDoCulling(false),
+    mBoundingBoxMin(glm::vec3(-1.0f, -1.0f, -1.0f)),
+    mBoundingBoxMax(glm::vec3(1.0f, 1.0f, 1.0f))
 {
 }
 
@@ -19,3 +21,24 @@ void MeshRenderer::DisableFrustumCulling(void) {
     mDoCulling = false;
     return;
 }
+
+void MeshRenderer::SetBoundingBoxMin(glm::vec3 min) {
+    mBoundingBoxMin = min;
+    return;
+}
+
+void MeshRenderer::SetBoundingBoxMax(glm::vec3 max) {
+    mBoundingBoxMax = max;
+    return;
+}
+
+glm::vec3 MeshRenderer::GetBoundingBoxMin(void) {
+    
+    return mBoundingBoxMin;
+}
+
+glm::vec3 MeshRenderer::GetBoundingBoxMax(void) {
+    
+    return mBoundingBoxMax;
+}
+

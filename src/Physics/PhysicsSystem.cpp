@@ -131,6 +131,36 @@ bool PhysicsSystem::DestroyHeightFieldMap(MeshCollider* collider) {
     return mMeshColliders.Destroy( collider );
 }
 
+MeshCollider* PhysicsSystem::CreateTriangleMesh(float* vertices, unsigned int vertexCount, unsigned int* indices, unsigned int indexCount) {
+    
+    // TODO Physics triangle mesh collider
+    
+    MeshCollider* collider = mMeshColliders.Create();
+    
+    collider->vertexBuffer = new float[vertexCount * 3];
+    collider->indexBuffer = new unsigned int[indexCount];
+    
+    for (unsigned int i = 0; i < vertexCount * 3; i++) {
+        collider->vertexBuffer[i] = vertices[i];
+    }
+    
+    for (unsigned int i = 0; i < indexCount; i++) {
+        collider->indexBuffer[i] = indices[i];
+    }
+    
+    collider->triangleMesh = common.createTriangleMesh();
+    
+    return collider;
+}
+
+bool PhysicsSystem::DestroyTriangleMesh(MeshCollider* collider) {
+    
+    common.destroyTriangleMesh( collider->triangleMesh );
+    
+    delete( collider->heightMapBuffer );
+    
+    return mMeshColliders.Destroy( collider );
+}
 
 void PhysicsSystem::AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr) {
     
