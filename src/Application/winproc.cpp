@@ -91,8 +91,10 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
                 // Update camera aspect
                 Renderer[i]->camera->aspect = Renderer.viewport.w / Renderer.viewport.h;
                 
-                if (Renderer[i]->camera->aspect < 1.3) 
-                    Renderer[i]->camera->aspect = 1.3;
+                //Renderer[i]->camera->aspect = Renderer.viewport.w / Renderer.viewport.h;
+                
+                //if (Renderer[i]->camera->aspect < 1.3) 
+                //    Renderer[i]->camera->aspect = 1.3;
                 
                 continue;
             }

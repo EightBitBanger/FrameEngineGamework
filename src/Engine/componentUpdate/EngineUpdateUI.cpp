@@ -9,7 +9,7 @@ void EngineSystemManager::UpdateUI(void) {
     unsigned int windowMouseX = Input.mouseX - Platform.windowLeft;
     unsigned int windowMouseY = Input.mouseY - Platform.windowTop;
     
-    for (unsigned int i=0; i < mButtons.Size(); i++) {
+    for (unsigned int i = 0; i < mButtons.Size(); i++) {
         
         Button* button = mButtons[i];
         
@@ -36,17 +36,17 @@ void EngineSystemManager::UpdateUI(void) {
         unsigned int hh = button->h;
         
         // Check hovered
-        if ((windowMouseX > xx) & (windowMouseX < (xx + ww)) & 
-            (windowMouseY > yy) & (windowMouseY < (yy + hh))) {
+        if ((windowMouseX > xx) && (windowMouseX < (xx + ww)) && 
+            (windowMouseY > yy) && (windowMouseY < (yy + hh))) {
             
             button->isHovering = true;
             
             bool isClicked = false;
             
             // Check clicked type and button
-            if ((button->triggerOnLeftButton)   & (leftActive))   isClicked = true;
-            if ((button->triggerOnMiddleButton) & (middleActive)) isClicked = true;
-            if ((button->triggerOnRightButton)  & (rightActive))  isClicked = true;
+            if ((button->triggerOnLeftButton)   && (leftActive))   isClicked = true;
+            if ((button->triggerOnMiddleButton) && (middleActive)) isClicked = true;
+            if ((button->triggerOnRightButton)  && (rightActive))  isClicked = true;
             
             if (isClicked) {
                 
