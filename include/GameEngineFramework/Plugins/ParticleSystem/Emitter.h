@@ -88,7 +88,7 @@ private:
     // Is this emitter currently active
     bool mIsActive;
     
-    // Internal spawn rate conter
+    // Internal spawn rate counter
     float mSpawnRate;
     
     //  Current number of particles in the particle emitter

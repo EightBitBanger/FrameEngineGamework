@@ -11,11 +11,14 @@ class ENGINE_API MeshCollider {
     
 public:
     
-    /// Pointer to the physics height field map.
+    /// Height field collider.
     rp3d::HeightFieldShape* heightFieldShape;
-    
-    /// Height field grid array.
     float* heightMapBuffer;
+    
+    /// Triangle collider.
+    rp3d::TriangleMesh* triangleMesh;
+    float* vertexBuffer;
+    unsigned int* indexBuffer;
     
     MeshCollider();
     ~MeshCollider();

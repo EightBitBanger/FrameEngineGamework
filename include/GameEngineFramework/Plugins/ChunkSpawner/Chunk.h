@@ -20,8 +20,8 @@ public:
     /// Type of decoration
     uint8_t type;
     
-    /// Rigid body representing the object in the world
-    rp3d::RigidBody* rigidBody;
+    /// Collision body representing the object in the world
+    rp3d::CollisionBody* collisionBody;
     
     StaticObject();
     

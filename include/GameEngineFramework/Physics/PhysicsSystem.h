@@ -60,9 +60,13 @@ public:
     
     /// Create a height field collider from a height field map and return its pointer.
     MeshCollider* CreateHeightFieldMap(float* heightField, unsigned int width, unsigned int height, float scaleX=1, float scaleY=1, float scaleZ=1);
-    
     /// Destroy a height field map collider.
     bool DestroyHeightFieldMap(MeshCollider* collider);
+    
+    /// Create a physics triangle mesh collider.
+    MeshCollider* CreateTriangleMesh(float* vertices, unsigned int vertexCount, unsigned int* indices, unsigned int indexCount);
+    /// Destroy a physics triangle mesh collider.
+    bool DestroyTriangleMesh(MeshCollider* collider);
     
     /// Cast a ray and return the hit data of any objects that intersected the ray.
     bool Raycast(glm::vec3 from, glm::vec3 direction, float distance, Hit& hit, LayerMask layer=LayerMask::Default);

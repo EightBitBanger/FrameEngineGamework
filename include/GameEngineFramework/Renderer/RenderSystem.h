@@ -280,7 +280,7 @@ private:
     
     void LevelOfDetailPass(MeshRenderer* currentEntity, glm::vec3& eye);
     
-    bool CullingPass(MeshRenderer* currentEntity, Camera* currentCamera);
+    bool CullingPass(MeshRenderer* currentEntity, Camera* currentCamera, glm::mat4& viewProjection);
     
     
     // Default assets

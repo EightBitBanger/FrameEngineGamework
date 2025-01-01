@@ -41,12 +41,28 @@ public:
     /// Disable culling for this entity
     void DisableFrustumCulling(void);
     
+    /// Set the frustum culling bounding box min corner.
+    void SetBoundingBoxMin(glm::vec3 min);
+    
+    /// Set the frustum culling bounding box max corner.
+    void SetBoundingBoxMax(glm::vec3 max);
+    
+    /// Get the frustum culling bounding box min corner.
+    glm::vec3 GetBoundingBoxMin(void);
+    
+    /// Get the frustum culling bounding box max corner.
+    glm::vec3 GetBoundingBoxMax(void);
+    
     MeshRenderer();
     
 private:
     
     // Is this renderer being culled
     bool mDoCulling;
+    
+    // Bounding box area
+    glm::vec3 mBoundingBoxMin;
+    glm::vec3 mBoundingBoxMax;
     
     friend class RenderSystem;
     
