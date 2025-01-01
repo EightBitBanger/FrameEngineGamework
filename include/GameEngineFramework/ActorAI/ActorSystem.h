@@ -75,6 +75,16 @@ public:
     
 private:
     
+    // Behavioral state update
+    void UpdateActorState(Actor* actor);
+    
+    bool HandleWalkingChance(Actor* actor);
+    void HandleStopWalkingChance(Actor* actor);
+    void HandleMovementCooldown(Actor* actor, bool isAquatic);
+    void HandleObservationCooldown(Actor* actor);
+    void HandleFocusOnNearbyActor(Actor* actor);
+    bool HandleBreedingState(Actor* actor);
+    
     // Current position of the player in the world
     glm::vec3 mPlayerPosition;
     

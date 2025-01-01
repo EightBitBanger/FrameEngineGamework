@@ -403,6 +403,18 @@ private:
     void UpdateActorPhysics(unsigned int index);
     void ExpressActorGenetics(unsigned int index);
     
+    // Actor animation
+    /*
+    void EnsureNonZeroAnimationState(unsigned int index, unsigned int a);
+    void ApplyAnimationRotation(glm::mat4& matrix, unsigned int index, unsigned int a);
+    void HandleAnimationSwingBackward(unsigned int index, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange);
+    void HandleAnimationSwingForward(unsigned int index, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange);
+    void UpdateAnimation(glm::mat4& matrix, unsigned int index, unsigned int a);
+    void ApplyOffsetFromCenter(glm::mat4& matrix, unsigned int index, unsigned int a);
+    void ApplyRotation(glm::mat4& matrix, unsigned int index, unsigned int a);
+    void ApplyScaleByAge(glm::mat4& matrix, unsigned int index, unsigned int a);
+    */
+    
     
     // List of active game objects
     std::vector<GameObject*>  mGameObjectActive;
