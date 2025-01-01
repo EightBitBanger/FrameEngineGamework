@@ -137,3 +137,57 @@ void Timer::SetRefreshRate(int rate) {
     return;
 }
 
+/*
+
+#include <GameEngineFramework/Timer/timer.h>
+#include <chrono>
+
+Timer::Timer() : 
+    delta(0),
+    units(0),
+    accumulator(0),
+    updateRateMs(1000.0 / 30.0),
+    updateRateMax(updateRateMs + (updateRateMs / 4.0)),
+    interpolationFactor(0),
+    startTime(std::chrono::high_resolution_clock::now())
+{
+}
+
+double Timer::GetCurrentDelta(void) {
+    std::chrono::time_point<std::chrono::high_resolution_clock> current = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = current - startTime;
+    return duration.count();
+}
+
+bool Timer::Update(void) {
+    std::chrono::time_point<std::chrono::high_resolution_clock> current = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = current - startTime;
+    delta = duration.count();
+    startTime = current;
+
+    accumulator += delta;
+
+    if (accumulator >= updateRateMs) {
+        if (accumulator > updateRateMax) 
+            accumulator = updateRateMax;
+        accumulator -= updateRateMs;
+        units = accumulator * 1000;
+        interpolationFactor = accumulator / updateRateMs;
+        return true;
+    }
+    return false;
+}
+
+double Timer::Current(void) {
+    std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = now - startTime;
+    return duration.count();
+}
+
+void Timer::SetRefreshRate(int rate) {
+    updateRateMs = 1000.0 / static_cast<double>(rate);
+    updateRateMax = updateRateMs + (updateRateMs / 4.0);
+}
+
+
+*/

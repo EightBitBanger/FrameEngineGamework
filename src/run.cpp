@@ -82,8 +82,8 @@ void Run() {
         
     }
     
-    /*
-    if (Physics.Raycast(from, forward, 100, hit, LayerMask::Object)) {
+    
+    if (Physics.Raycast(from, forward, 100, hit, LayerMask::Static)) {
         
         GameObject* hitObject = (GameObject*)hit.gameObject;
         
@@ -95,7 +95,7 @@ void Run() {
             Engine.WriteDialog(i + 2, "");
         
     }
-    */
+    
     
     
     // Pick an actors genome

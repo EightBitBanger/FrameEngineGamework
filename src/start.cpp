@@ -4,6 +4,11 @@
 #include <GameEngineFramework/plugins.h>
 
 
+void ButtonPressed(void) {
+    Engine.Print("CLICKED TEST");
+    return;
+}
+
 void Start() {
     
     // Load console functions
@@ -268,6 +273,25 @@ void Start() {
     
     
     
+    
+    
+    
+    Button* buttonUI = Engine.CreateOverlayButtonCallback(120, 120, 32, 32, ButtonPressed);
+    buttonUI->triggerOnLeftButton = true;
+    
+    
+    GameObject* buttonOverlay = Engine.CreateOverlayPanelRenderer(120, 120, 32, 32, "panel_blue");
+    
+    MeshRenderer* buttonRenderer = buttonOverlay->GetComponent<MeshRenderer>();
+    Engine.sceneOverlay->AddMeshRendererToSceneRoot(buttonRenderer, RENDER_QUEUE_GEOMETRY);
+    
+    //buttonRenderer->material->
+    
+    
+    
+    return;
+    
+    
     // Fire emitter test
     
     Emitter* fireEmitter = particle.CreateEmitter();
@@ -275,8 +299,8 @@ void Start() {
     fireEmitter->type = EmitterType::Point;
     fireEmitter->position = playerPosition;
     fireEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
-    fireEmitter->scale = glm::vec3(0.1f, 0.01f, 0.1f);
-    fireEmitter->scaleTo = glm::vec3(1.01f, 1.01f, 1.01f);
+    fireEmitter->scale = glm::vec3(0.08f, 0.01f, 0.08f);
+    fireEmitter->scaleTo = glm::vec3(1.0008f, 1.0008f, 1.0008f);
     
     fireEmitter->velocity = glm::vec3(0.0f, 0.01f, 0.0f);
     
@@ -311,9 +335,13 @@ void Start() {
     Emitter* smokeEmitter = particle.CreateEmitter();
     
     smokeEmitter->type = EmitterType::Point;
+    
     smokeEmitter->position = playerPosition;
+    playerPosition.y += 1.3f;
+    
     smokeEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
-    smokeEmitter->scale = glm::vec3(0.08f, 0.01f, 0.08f);
+    smokeEmitter->scale = glm::vec3(0.08f, 0.03f, 0.08f);
+    smokeEmitter->scaleTo = glm::vec3(1.000f, 1.000f, 1.000f);
     
     smokeEmitter->velocity = glm::vec3(0.0f, 0.01f, 0.0f);
     
