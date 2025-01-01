@@ -12,46 +12,46 @@ class ENGINE_API StringType {
 public:
     
     /// Return a float containing the numbers from text.
-    float ToFloat(std::string value);
+    float ToFloat(const std::string& value);
     
     /// Return a double containing the numbers from text.
-    double ToDouble(std::string value);
+    double ToDouble(const std::string& value);
     
     /// Return an integer containing the numbers from text.
-    int ToInt(std::string value);
+    int ToInt(const std::string& value);
     
     /// Return a long integer containing the numbers from text.
-    long int ToLongInt(std::string value);
+    long int ToLongInt(const std::string& value);
     
     /// Return an unsigned integer containing the numbers from text.
-    unsigned int ToUint(std::string value);
+    unsigned int ToUint(const std::string& value);
     
     /// Return a long unsigned integer containing the numbers from text.
-    unsigned long int ToLongUint(std::string value);
+    unsigned long int ToLongUint(const std::string& value);
     
     /// Explode the string by the given delimiter into an array of strings.
-    std::vector<std::string> Explode(std::string value, const char character);
+    std::vector<std::string> Explode(const std::string& value, const char character);
     
     /// Return the filename from a file name.
-    std::string GetNameFromFilename(std::string filename);
+    std::string GetNameFromFilename(const std::string& filename);
     
     /// Return the filename without an extension from a file name.
-    std::string GetNameFromFilenameNoExt(std::string filename);
+    std::string GetNameFromFilenameNoExt(const std::string& filename);
     
     /// Return the extension of the file name.
-    std::string GetExtFromFilename(std::string filename);
+    std::string GetExtFromFilename(const std::string& filename);
     
     /// Return the path part of a file name.
-    std::string GetPathFromFilename(std::string filename);
+    std::string GetPathFromFilename(const std::string& filename);
     
     /// Check if a string contains only numbers.
-    bool IsNumeric(std::string& str);
+    bool IsNumeric(const std::string& str);
     
     /// Convert a string to lower case letters
-    bool Lowercase(std::string& str);
+    void Lowercase(std::string& str);
     
     /// Convert a string to upper case letters
-    bool Uppercase(std::string& str);
+    void Uppercase(std::string& str);
     
 };
 
