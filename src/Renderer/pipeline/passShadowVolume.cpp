@@ -47,9 +47,9 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
         // Rotate by the inverse light angle
         glm::vec3 angles = currentEntity->transform.EulerAngles();
         
-        mShadowTransform.RotateWorldAxis( angles.x, glm::vec3(1, 0, 0), Vector3(0, 0, 0) );
-        mShadowTransform.RotateWorldAxis( angles.y, glm::vec3(0, 1, 0), Vector3(0, 0, 0) );
-        mShadowTransform.RotateWorldAxis( angles.z, glm::vec3(0, 0, 1), Vector3(0, 0, 0) );
+        //mShadowTransform.RotateWorldAxis( angles.x, glm::vec3(1, 0, 0), Vector3(0, 0, 0) );
+        //mShadowTransform.RotateWorldAxis( angles.y, glm::vec3(0, 1, 0), Vector3(0, 0, 0) );
+        //mShadowTransform.RotateWorldAxis( angles.z, glm::vec3(0, 0, 1), Vector3(0, 0, 0) );
         
         // Offset by half the distance
         glm::vec3 shadowTranslation = (glm::vec3(0, -1, 0) * shadowLength);
@@ -74,8 +74,8 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
         // Shadow intensity
         shadowAttenuation[0].r = currentEntity->material->mShadowVolumeAngleOfView;
         shadowAttenuation[0].g = currentEntity->material->mShadowVolumeColorIntensity;
-        shadowAttenuation[0].b = currentEntity->material->mShadowVolumeIntensityHigh  * 0.1;
-        shadowAttenuation[0].a = currentEntity->material->mShadowVolumeIntensityLow   * 0.1;
+        shadowAttenuation[0].b = currentEntity->material->mShadowVolumeIntensityHigh  * 0.1f;
+        shadowAttenuation[0].a = currentEntity->material->mShadowVolumeIntensityLow   * 0.1f;
         
         // Send in the shadow data through the lighting parameters for this pass
         shaders.shadowCaster->SetLightCount(1);
