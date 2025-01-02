@@ -401,10 +401,15 @@ private:
     void UpdateActorGenetics(unsigned int index);
     void UpdateActorAnimation(unsigned int index);
     void UpdateActorPhysics(unsigned int index);
+    
+    // Actor genetics update
+    void ClearOldGeneticRenderers(unsigned int index);
+    void GenerateCollider(unsigned int index);
+    MeshRenderer* CreateMeshRendererForGene(unsigned int index, unsigned int geneIndex, Mesh* sourceMesh);
+    void UpdateGeneticAttributes(unsigned int index, unsigned int geneIndex, unsigned int attachmentIndex);
     void ExpressActorGenetics(unsigned int index);
     
-    // Actor animation
-    /*
+    // Actor animation update
     void EnsureNonZeroAnimationState(unsigned int index, unsigned int a);
     void ApplyAnimationRotation(glm::mat4& matrix, unsigned int index, unsigned int a);
     void HandleAnimationSwingBackward(unsigned int index, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange);
@@ -413,7 +418,6 @@ private:
     void ApplyOffsetFromCenter(glm::mat4& matrix, unsigned int index, unsigned int a);
     void ApplyRotation(glm::mat4& matrix, unsigned int index, unsigned int a);
     void ApplyScaleByAge(glm::mat4& matrix, unsigned int index, unsigned int a);
-    */
     
     
     // List of active game objects

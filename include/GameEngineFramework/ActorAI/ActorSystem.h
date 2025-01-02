@@ -84,6 +84,7 @@ private:
     void HandleObservationCooldown(Actor* actor);
     void HandleFocusOnNearbyActor(Actor* actor);
     bool HandleBreedingState(Actor* actor);
+    void HandleNeuralNetwork(Actor* actor);
     
     // Current position of the player in the world
     glm::vec3 mPlayerPosition;

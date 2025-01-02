@@ -50,6 +50,8 @@ public:
         
         void Bear(Actor* targetActor);
         
+        void Dog(Actor* targetActor);
+        
     } presets;
     
     

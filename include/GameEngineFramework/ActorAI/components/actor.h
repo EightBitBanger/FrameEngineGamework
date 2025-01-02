@@ -188,6 +188,11 @@ public:
     /// Get the maximum height preference when traveling.
     float GetHeightPreferenceMax(void);
     
+    // Neural network
+    
+    /// Assign a set of neural layers to the neural network.
+    void SetNeuralTopology(const std::vector<NeuralLayer>& layers);
+    
     // Memories
     
     /// Add a memory to this actor.
@@ -278,7 +283,6 @@ private:
     // Distance to the player
     float mDistance;
     
-    
     //
     // States
     //
@@ -355,6 +359,8 @@ private:
     // Prevents over breeding
     unsigned int mBreedingCoolDownCounter;
     
+    // Local actor neural network
+    NeuralNetwork mNeuralNetwork;
     
     // User bit mask byte
     uint8_t mBitmask;
