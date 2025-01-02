@@ -299,6 +299,7 @@ set (GAME_SOURCES
     "src/plugins/ChunkSpawner/ChunkDestroy.cpp"
     "src/plugins/ChunkSpawner/ChunkManager.cpp"
     "src/plugins/ChunkSpawner/ChunkManagerUpdate.cpp"
+    "src/plugins/ChunkSpawner/ChunkManagerDecorate.cpp"
     "src/plugins/ChunkSpawner/Chunk.cpp"
     
     "src/plugins/WeatherSystem/WeatherSystem.cpp"
