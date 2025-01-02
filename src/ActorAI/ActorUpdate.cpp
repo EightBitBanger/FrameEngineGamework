@@ -34,7 +34,7 @@ void ActorSystem::Update(void) {
     tickCounter = 0;
     int numberOfActors = mActors.Size();
     int numberOfActorsPerCycle = (numberOfActors > 10) ? (numberOfActors / 10) : 1;
-
+    
     mux.lock();
     for (int i = 0; i < numberOfActorsPerCycle; i++) {
         if (actorCounter >= numberOfActors) {
@@ -42,11 +42,11 @@ void ActorSystem::Update(void) {
             doUpdate = false;
             break;
         }
-
+        
         Actor* actor = mActors[actorCounter++];
         if (!actor->mIsActive) 
             continue;
-
+        
         actor->mux.lock();
         
         actor->mDistance = glm::distance(mPlayerPosition, actor->mPosition);
@@ -55,7 +55,7 @@ void ActorSystem::Update(void) {
             actor->mux.unlock();
             continue;
         }
-
+        
         UpdateActorState(actor);
         actor->mux.unlock();
     }
@@ -78,9 +78,38 @@ void ActorSystem::UpdateActorState(Actor* actor) {
     HandleFocusOnNearbyActor(actor);
     HandleMovementCooldown(actor, isAquatic);
     HandleStopWalkingChance(actor);
+    HandleNeuralNetwork(actor);
     
     return;
 }
+
+void ActorSystem::HandleNeuralNetwork(Actor* actor) {
+    
+    /*
+    
+    // Define the topology of the neural network
+    std::vector<int> topology = { 3, 2, 1 };
+    NeuralNetwork myNet(topology);
+    
+    // Define input values
+    std::vector<double> inputVals = { 1.0, 0.5, -1.5 };
+    myNet.feedForward(inputVals);
+    
+    // Define target values
+    std::vector<double> targetVals = { 0.8 };
+    myNet.backProp(targetVals);
+    
+    // Get the results
+    std::vector<double> resultVals;
+    myNet.getResults(resultVals);
+    
+    */
+    
+    return;
+}
+
+
+
 
 bool ActorSystem::HandleBreedingState(Actor* actor) {
     
