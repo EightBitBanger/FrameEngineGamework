@@ -3,39 +3,53 @@
 
 #include <algorithm>
 #include <sstream>
-#include <filesystem>
 
 float StringType::ToFloat(const std::string& value) {
-    return std::stof(value);
+    float output;
+    std::stringstream(value) >> output;
+    return output;
 }
 
 double StringType::ToDouble(const std::string& value) {
-    return std::stod(value);
+    double output;
+    std::stringstream(value) >> output;
+    return output;
 }
 
 int StringType::ToInt(const std::string& value) {
-    return std::stoi(value);
+    int output;
+    std::stringstream(value) >> output;
+    return output;
 }
 
 long int StringType::ToLongInt(const std::string& value) {
-    return std::stol(value);
+    long int output;
+    std::stringstream(value) >> output;
+    return output;
 }
 
 unsigned int StringType::ToUint(const std::string& value) {
-    return std::stoul(value);
+    unsigned int output;
+    std::stringstream(value) >> output;
+    return output;
 }
 
 unsigned long int StringType::ToLongUint(const std::string& value) {
-    return std::stoull(value);
+    unsigned long int output;
+    std::stringstream(value) >> output;
+    return output;
 }
 
-std::vector<std::string> StringType::Explode(const std::string& value, char character) {
-    std::vector<std::string> result;
+std::vector<std::string> StringType::Explode(const std::string& value, const char character) {
+	std::vector<std::string> result;
     std::istringstream iss(value);
+    
     for (std::string token; std::getline(iss, token, character); ) {
-        if (!token.empty()) {
-            result.push_back(token);
-        }
+        
+        if (std::move(token) == "") 
+            continue;
+        
+        result.push_back(std::move(token));
     }
     return result;
 }
@@ -66,35 +80,52 @@ std::string StringType::GetPathFromFilename(const std::string& filename) {
 }
 
 bool StringType::IsNumeric(const std::string& str) {
-    return std::all_of(str.begin(), str.end(), ::isdigit);
+    return std::all_of(str.begin(), str.end(), [](char c) { return std::isdigit(c); });
 }
 
 void StringType::Lowercase(std::string& str) {
-    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    for (int i = 0; str[i] != '\0'; i++) {
+        str[i] = tolower(str[i]);
+    }
+    return;
 }
 
 void StringType::Uppercase(std::string& str) {
-    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+    for (int i = 0; str[i] != '\0'; i++) {
+        str[i] = toupper(str[i]);
+    }
+    return;
 }
 
+
 std::string FloatType::ToString(float value) {
-    return std::to_string(value);
+    std::stringstream sstream;
+    sstream << value;
+    return sstream.str();
 }
 
 std::string DoubleType::ToString(double value) {
-    return std::to_string(value);
+    std::stringstream sstream;
+    sstream << value;
+    return sstream.str();
 }
 
 std::string IntType::ToString(int value) {
-    return std::to_string(value);
+    std::stringstream sstream;
+    sstream << value;
+    return sstream.str();
 }
 
 std::string IntLongType::ToString(long int value) {
-    return std::to_string(value);
+    std::stringstream sstream;
+    sstream << value;
+    return sstream.str();
 }
 
 std::string UintType::ToString(unsigned int value) {
-    return std::to_string(value);
+    std::stringstream sstream;
+    sstream << value;
+    return sstream.str();
 }
 
 float FloatType::Lerp(float min, float max, float bias) {
@@ -102,18 +133,17 @@ float FloatType::Lerp(float min, float max, float bias) {
 }
 
 double DoubleType::Lerp(double min, double max, float bias) {
-    return glm::lerp(min, max, static_cast<double>(bias));
+    return glm::lerp(min, max, (double)bias);
 }
 
 int IntType::Lerp(int min, int max, float bias) {
-    return static_cast<int>(glm::lerp(static_cast<float>(min), static_cast<float>(max), bias));
+    return glm::lerp((float)min, (float)max, bias);
 }
 
 long int IntLongType::Lerp(long int min, long int max, float bias) {
-    return static_cast<long int>(glm::lerp(static_cast<float>(min), static_cast<float>(max), bias));
+    return glm::lerp((float)min, (float)max, bias);
 }
 
 unsigned int UintType::Lerp(unsigned int min, unsigned int max, float bias) {
-    return static_cast<unsigned int>(glm::lerp(static_cast<float>(min), static_cast<float>(max), bias));
+    return glm::lerp((float)min, (float)max, bias);
 }
-

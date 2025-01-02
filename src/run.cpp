@@ -111,7 +111,7 @@ void Run() {
             
             targetGene = AI.genomes.ExtractGenome(hitActor);
             
-            std::string destGene = "gene<" + targetGene + ">";
+            std::string destGene = "gene<" + targetGene;
             
             Platform.SetClipboardText( destGene );
             
@@ -155,10 +155,10 @@ void Run() {
                 return;
             
             // Remove end character
-            size_t pos = sourceGene.find(">");
+            //size_t pos = sourceGene.find(">");
             
-            if (pos != std::string::npos) 
-                sourceGene.erase(pos, 1);
+            //if (pos != std::string::npos) 
+            //    sourceGene.erase(pos, 1);
             
             std::vector<std::string> sourceArray = String.Explode(sourceGene, '<');
             

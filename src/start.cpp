@@ -274,7 +274,53 @@ void Start() {
     
     
     
+    /*
     
+    
+    // Shadow test
+    
+    
+    for (unsigned int i=0; i < 1000; i++) {
+        
+        GameObject* gameObject = Engine.Create<GameObject>();
+        
+        float randX = Random.Range(0, 100) - Random.Range(0, 100);
+        float randY = Random.Range(0, 100) - Random.Range(0, 100);
+        float randZ = Random.Range(0, 100) - Random.Range(0, 100);
+        
+        gameObject->SetPosition( randX, randY, randZ );
+        
+        
+        gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+        
+        MeshRenderer* objectRenderer = gameObject->GetComponent<MeshRenderer>();
+        
+        objectRenderer->mesh = Engine.meshes.cube;
+        objectRenderer->material = Engine.Create<Material>();
+        objectRenderer->material->shader = Engine.shaders.color;
+        objectRenderer->material->diffuse = Colors.green;
+        objectRenderer->material->ambient = Colors.green;
+        
+        objectRenderer->material->EnableShadowVolumePass();
+        objectRenderer->material->SetShadowVolumeColor(Colors.dkgray);
+        objectRenderer->material->SetShadowVolumeIntensityLow(0.0f);
+        objectRenderer->material->SetShadowVolumeIntensityHigh(0.0f);
+        objectRenderer->material->SetShadowVolumeColorIntensity(0.018f);
+        objectRenderer->material->SetShadowVolumeLength(12.0f);
+        
+        Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer );
+        
+    }
+    
+    
+    
+    */
+    
+    
+    
+    
+    
+    return;
     
     Button* buttonUI = Engine.CreateOverlayButtonCallback(120, 120, 32, 32, ButtonPressed);
     buttonUI->triggerOnLeftButton = true;
