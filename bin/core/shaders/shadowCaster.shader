@@ -36,25 +36,23 @@ void main() {
     float shadowIntensityLow   = u_light_attenuation[0].a;
     
     vec4 shadowPos = u_model * u_shadow * vec4(l_position, 1);
+    vec4 shadowOrig = u_shadow * vec4(l_position, 1);
     
     vec3 viewDir = normalize(u_angle);
     
-    vec3 lightDirection = normalize( u_light_direction[0] );
+    vec3 lightDirection = normalize(u_light_direction[0]);
     
     // Intensify along the light angle
-    float spec = min( pow( dot( viewDir, lightDirection ), shadowAngleOfView), shadowIntensityHigh);
+    float spec = min(pow(dot(viewDir, lightDirection), shadowAngleOfView), 1.0);
     
-    if (spec > shadowIntensityHigh) 
-        spec = shadowIntensityHigh;
+    // Apply fade based on shadowIntensityHigh and shadowIntensityLow
+    float fade = mix(0.0f, shadowColorIntensity, spec);
     
-    // Fade off height difference
-    vec4 vertexPos = u_model * vec4(l_position, 1);
+    // Calculate the fade effect along the shadow's length
+    float fadeOut = 1.0 - shadowOrig.z / shadowOrig.w; // Assuming z/w gives the length of the shadow
+    float attenuation = fade / fadeOut;
     
-    v_color = vec4( u_light_color[0], shadowIntensityLow * spec );
-    
-    // Shadow stencil fade off
-    if (shadowPos.y > (vertexPos.y - 1)) 
-        v_color = vec4(u_light_color[0], 1) * vec4( u_light_color[0], shadowIntensityHigh * spec ) * shadowColorIntensity;
+    v_color = vec4(u_light_color[0], attenuation);
     
     gl_Position = vec4(u_proj * shadowPos);
     
@@ -62,8 +60,6 @@ void main() {
 };
 
 [end]
-
-
 
 [begin] fragment
 
