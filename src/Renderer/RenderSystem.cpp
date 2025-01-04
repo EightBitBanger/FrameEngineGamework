@@ -18,6 +18,7 @@ bool isThreadActive = true;
 void RenderThreadMain(void);
 
 
+
 RenderSystem::RenderSystem() : 
     viewport(Viewport(0, 0, 0, 0)),
     
@@ -25,18 +26,6 @@ RenderSystem::RenderSystem() :
     displayCenter(glm::vec2(0, 0)),
     
     doUpdateLightsEveryFrame(true),
-    
-    fogActive{false, false, false, false},
-    
-    fogDensity{0.8f,0.8f,0.8f,0.8f},
-    
-    fogHeightCutoff{1000000.0f, 1000000.0f, 1000000.0f, 1000000.0f},
-    
-    fogBegin{40.0f,40.0f,40.0f,40.0f},
-    fogEnd{180.0f,180.0f,180.0f,180.0f},
-    
-    fogColorBegin{Colors.white, Colors.white, Colors.white, Colors.white},
-    fogColorEnd{Colors.dkgray, Colors.dkgray, Colors.dkgray, Colors.dkgray},
     
     mNumberOfDrawCalls(0),
     mNumberOfFrames(0),
@@ -162,6 +151,20 @@ bool RenderSystem::DestroyFrameBuffer(FrameBuffer* frameBufferPtr) {
 unsigned int RenderSystem::GetNumberOfFrameBuffers(void) {
     return mFrameBuffer.Size();
 }
+
+Fog* RenderSystem::CreateFog(void) {
+    Fog* fogLayer = mFog.Create();
+    return fogLayer;
+}
+
+bool RenderSystem::DestroyFog(Fog* fogLayer) {
+    return mFog.Destroy(fogLayer);
+}
+
+unsigned int RenderSystem::GetNumberOfFogLayers(void) {
+    return mFog.Size();
+}
+
 
 void RenderSystem::Initiate(void) {
     

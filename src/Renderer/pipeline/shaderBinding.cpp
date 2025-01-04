@@ -22,6 +22,18 @@ bool RenderSystem::BindShader(Shader* shaderPtr) {
     mCurrentShader->SetLightAttenuation(mNumberOfLights, mLightAttenuation);
     mCurrentShader->SetLightColors(mNumberOfLights, mLightColor);
     
+    // Send in the fog list
+    mCurrentShader->SetFogCount(mNumberOfFogLayers);
+    
+    mCurrentShader->SetFogDensity(mNumberOfFogLayers, mFogDensity);
+    mCurrentShader->SetFogHeightCutoff(mNumberOfFogLayers, mFogHeightCutoff);
+    
+    mCurrentShader->SetFogBegin(mNumberOfFogLayers, mFogBegin);
+    mCurrentShader->SetFogEnd(mNumberOfFogLayers, mFogEnd);
+    
+    mCurrentShader->SetFogColorBegin(mNumberOfFogLayers, mFogColorBegin);
+    mCurrentShader->SetFogColorEnd(mNumberOfFogLayers, mFogColorEnd);
+    
     return true;
 }
 

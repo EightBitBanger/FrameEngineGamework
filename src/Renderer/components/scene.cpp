@@ -46,7 +46,7 @@ bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int rend
             return true;
         }
     }
-    return false;    
+    return false;
 }
 
 void Scene::AddLightToSceneRoot(Light* light) {
@@ -62,6 +62,24 @@ bool Scene::RemoveLightFromSceneRoot(Light* light) {
             return true;
         }
     }
-    return false;    
+    return false;
+}
+
+unsigned int GetNumberOfFogLayers(void);
+
+void Scene::AddFogLayerToScene(Fog* fogLayer) {
+    mFogLayers.push_back( fogLayer );
+    return;
+}
+
+bool Scene::RemoveFogLayer(Fog* fogLayer) {
+    for (std::vector<Fog*>::iterator it = mFogLayers.begin(); it != mFogLayers.end(); ++it) {
+        Fog* fogLayerCheck = *it;
+        if (fogLayer == fogLayerCheck) {
+            mFogLayers.erase(it);
+            return true;
+        }
+    }
+    return false;
 }
 

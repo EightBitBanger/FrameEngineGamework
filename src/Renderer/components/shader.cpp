@@ -22,11 +22,11 @@ Shader::Shader() :
     mMaterialSpecularLocation(0),
     mSamplerLocation(0),
     
-    mFogDensityLocation{0, 1, 2, 3},
-    mFogBeginColorLocation{0, 1, 2, 3},
-    mFogEndColorLocation{0, 1, 2, 3},
-    mFogBeginLocation{0, 1, 2, 3},
-    mFogEndLocation{0, 1, 2, 3},
+    mFogDensityLocation(0),
+    mFogBeginColorLocation(0),
+    mFogEndColorLocation(0),
+    mFogBeginLocation(0),
+    mFogEndLocation(0),
     
     mLightCount(0),
     mLightPosition(0),
@@ -94,33 +94,38 @@ void Shader::SetTextureSampler(unsigned int index) {
 }
 
 
-void Shader::SetFogDensity(unsigned int index, float density) {
-    glUniform1f(mFogDensityLocation[index], density);
+void Shader::SetFogCount(int numberOfFogLayers) {
+    glUniform1i(mFogCountLocation, numberOfFogLayers);
     return;
 }
 
-void Shader::SetFogHeightCutoff(unsigned int index, float height) {
-    glUniform1f(mFogHeightCutoffLocation[index], height);
+void Shader::SetFogDensity(unsigned int numberOfLayers, float* density) {
+    glUniform1fv(mFogDensityLocation, numberOfLayers, density);
     return;
 }
 
-void Shader::SetFogBegin(unsigned int index, float begin) {
-    glUniform1f(mFogBeginLocation[index], begin);
+void Shader::SetFogHeightCutoff(unsigned int numberOfLayers, float* height) {
+    glUniform1fv(mFogHeightCutoffLocation, numberOfLayers, height);
     return;
 }
 
-void Shader::SetFogEnd(unsigned int index, float end) {
-    glUniform1f(mFogEndLocation[index], end);
+void Shader::SetFogBegin(unsigned int numberOfLayers, float* begin) {
+    glUniform1fv(mFogBeginLocation, numberOfLayers, begin);
     return;
 }
 
-void Shader::SetFogColorBegin(unsigned int index, Color color) {
-    glUniform3f(mFogBeginColorLocation[index], color.r, color.g, color.b);
+void Shader::SetFogEnd(unsigned int numberOfLayers, float* end) {
+    glUniform1fv(mFogEndLocation, numberOfLayers, end);
     return;
 }
 
-void Shader::SetFogColorEnd(unsigned int index, Color color) {
-    glUniform3f(mFogEndColorLocation[index], color.r, color.g, color.b);
+void Shader::SetFogColorBegin(unsigned int numberOfLayers, glm::vec3* color) {
+    glUniform3fv(mFogBeginColorLocation, numberOfLayers, &color[0][0]);
+    return;
+}
+
+void Shader::SetFogColorEnd(unsigned int numberOfLayers, glm::vec3* color) {
+    glUniform3fv(mFogEndColorLocation, numberOfLayers, &color[0][0]);
     return;
 }
 
@@ -165,40 +170,13 @@ void Shader::SetUniformLocations(void) {
     
     std::string samplerUniformName      = "u_sampler";
     
-    std::string fogDensityName[4];
-    std::string fogHeightCutoffName[4];
-    std::string fogBeginColorName[4];
-    std::string fogEndColorName[4];
-    std::string fogBeginName[4];
-    std::string fogEndName[4];
-    
-    fogDensityName[0]                        = "u_fogDensity1";
-    fogHeightCutoffName[0]                   = "u_fogCutoffHeight1";
-    fogBeginColorName[0]                     = "u_fogStartColor1";
-    fogEndColorName[0]                       = "u_fogEndColor1";
-    fogBeginName[0]                          = "u_fogStart1";
-    fogEndName[0]                            = "u_fogEnd1";
-    
-    fogDensityName[1]                        = "u_fogDensity2";
-    fogHeightCutoffName[1]                   = "u_fogCutoffHeight2";
-    fogBeginColorName[1]                     = "u_fogStartColor2";
-    fogEndColorName[1]                       = "u_fogEndColor2";
-    fogBeginName[1]                          = "u_fogStart2";
-    fogEndName[1]                            = "u_fogEnd2";
-    
-    fogDensityName[2]                        = "u_fogDensity3";
-    fogHeightCutoffName[2]                   = "u_fogCutoffHeight3";
-    fogBeginColorName[2]                     = "u_fogStartColor3";
-    fogEndColorName[2]                       = "u_fogEndColor3";
-    fogBeginName[2]                          = "u_fogStart3";
-    fogEndName[2]                            = "u_fogEnd3";
-    
-    fogDensityName[3]                        = "u_fogDensity4";
-    fogHeightCutoffName[3]                   = "u_fogCutoffHeight4";
-    fogBeginColorName[3]                     = "u_fogStartColor4";
-    fogEndColorName[3]                       = "u_fogEndColor4";
-    fogBeginName[3]                          = "u_fogStart4";
-    fogEndName[3]                            = "u_fogEnd4";
+    std::string fogCountName            = "u_fog_count";
+    std::string fogDensityName          = "u_fogDensity";
+    std::string fogHeightCutoffName     = "u_fogCutoffHeight";
+    std::string fogBeginColorName       = "u_fogStartColor";
+    std::string fogEndColorName         = "u_fogEndColor";
+    std::string fogBeginName            = "u_fogStart";
+    std::string fogEndName              = "u_fogEnd";
     
     std::string lightCountUniformName        = "u_light_count";
     std::string lightPositionUniformName     = "u_light_position";
@@ -222,19 +200,13 @@ void Shader::SetUniformLocations(void) {
     mSamplerLocation           = glGetUniformLocation(mShaderProgram, samplerUniformName.c_str());
     
     // Fog layers
-    for (unsigned int i=0; i < 4; i++) {
-        
-        mFogDensityLocation[i]       = glGetUniformLocation(mShaderProgram, fogDensityName[i].c_str());
-        
-        mFogHeightCutoffLocation[i]  = glGetUniformLocation(mShaderProgram, fogHeightCutoffName[i].c_str());
-        
-        mFogBeginColorLocation[i]    = glGetUniformLocation(mShaderProgram, fogBeginColorName[i].c_str()); 
-        mFogEndColorLocation[i]      = glGetUniformLocation(mShaderProgram, fogEndColorName[i].c_str());
-        
-        mFogBeginLocation[i]         = glGetUniformLocation(mShaderProgram, fogBeginName[i].c_str());
-        mFogEndLocation[i]           = glGetUniformLocation(mShaderProgram, fogEndName[i].c_str());
-        
-    }
+    mFogCountLocation          = glGetUniformLocation(mShaderProgram, fogCountName.c_str());
+    mFogDensityLocation        = glGetUniformLocation(mShaderProgram, fogDensityName.c_str());
+    mFogHeightCutoffLocation   = glGetUniformLocation(mShaderProgram, fogHeightCutoffName.c_str());
+    mFogBeginColorLocation     = glGetUniformLocation(mShaderProgram, fogBeginColorName.c_str()); 
+    mFogEndColorLocation       = glGetUniformLocation(mShaderProgram, fogEndColorName.c_str());
+    mFogBeginLocation          = glGetUniformLocation(mShaderProgram, fogBeginName.c_str());
+    mFogEndLocation            = glGetUniformLocation(mShaderProgram, fogEndName.c_str());
     
     // Lighting
     mLightCount                = glGetUniformLocation(mShaderProgram, lightCountUniformName.c_str());
@@ -270,10 +242,9 @@ int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentSc
     
     GLint state;
     glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &state);
-    if (state == GL_FALSE) {
-        std::cout << " ! Shader link error\n";
+    
+    if (state == GL_FALSE) 
         return 0;
-    }
     
     SetUniformLocations();
     

@@ -32,6 +32,8 @@ WeatherSystem::WeatherSystem() :
     mWeatherShiftCounter(0),
     mWeatherFogCounter(1),
     
+    mFogWorld(nullptr),
+    
     mWorldFogDensity(0.0f),
     mWorldFogNear(0.0f),
     mWorldFogFar(0.0f),
@@ -93,15 +95,16 @@ void WeatherSystem::Initiate(void) {
     
     // World fog
     
-    FogClear();
+    mFogWorld = Renderer.CreateFog();
+    Engine.sceneMain->AddFogLayerToScene(mFogWorld);
     
-    Renderer.fogActive[RENDER_FOG_LAYER_0]      = true;
+    mFogWorld->fogActive = true;
     
-    Renderer.fogDensity[RENDER_FOG_LAYER_0]     = mWorldFogDensity;
-    Renderer.fogBegin[RENDER_FOG_LAYER_0]       = mWorldFogNear;
-    Renderer.fogEnd[RENDER_FOG_LAYER_0]         = mWorldFogFar;
-    Renderer.fogColorBegin[RENDER_FOG_LAYER_0]  = mWorldFogColorNear;
-    Renderer.fogColorEnd[RENDER_FOG_LAYER_0]    = mWorldFogColorFar;
+    mFogWorld->fogDensity = mWorldFogDensity;
+    mFogWorld->fogBegin = mWorldFogNear;
+    mFogWorld->fogEnd = mWorldFogFar;
+    mFogWorld->fogColorBegin = mWorldFogColorNear;
+    mFogWorld->fogColorEnd = mWorldFogColorFar;
     
     
     // Rain emitter
@@ -227,20 +230,20 @@ void WeatherSystem::Update(void) {
     
     float fogBias = mWeatherFogCounter / fogBiasMax;
     
+    
     // Calculate fog color from time
     
-    Color finalColorNear = Colors.Lerp(Renderer.fogColorBegin[RENDER_FOG_LAYER_0], mWorldFogColorNear, fogBias);
-    Color finalColorFar  = Colors.Lerp(Renderer.fogColorEnd[RENDER_FOG_LAYER_0], mWorldFogColorFar, fogBias);
+    Color finalColorNear = Colors.Lerp(mFogWorld->fogColorBegin, mWorldFogColorNear, fogBias);
+    Color finalColorFar  = Colors.Lerp(mFogWorld->fogColorEnd, mWorldFogColorFar, fogBias);
     
     finalColorNear = Colors.Lerp(Colors.black, finalColorNear, mFogLightBias);
     finalColorFar  = Colors.Lerp(Colors.black, finalColorFar, mFogLightBias);
     
-    Renderer.fogDensity[RENDER_FOG_LAYER_0]     = Float.Lerp(Renderer.fogDensity[RENDER_FOG_LAYER_0], mWorldFogDensity, fogBias);
-    Renderer.fogBegin[RENDER_FOG_LAYER_0]       = Float.Lerp(Renderer.fogBegin[RENDER_FOG_LAYER_0], mWorldFogNear, fogBias);
-    Renderer.fogEnd[RENDER_FOG_LAYER_0]         = Float.Lerp(Renderer.fogEnd[RENDER_FOG_LAYER_0], mWorldFogFar, fogBias);
-    Renderer.fogColorBegin[RENDER_FOG_LAYER_0]  = finalColorNear;
-    Renderer.fogColorEnd[RENDER_FOG_LAYER_0]    = finalColorFar;
-    
+    mFogWorld->fogDensity = Float.Lerp(mFogWorld->fogDensity, mWorldFogDensity, fogBias);
+    mFogWorld->fogBegin = Float.Lerp(mFogWorld->fogBegin, mWorldFogNear, fogBias);
+    mFogWorld->fogEnd = Float.Lerp(mFogWorld->fogEnd, mWorldFogFar, fogBias);
+    mFogWorld->fogColorBegin = finalColorNear;
+    mFogWorld->fogColorEnd = finalColorFar;
     
     
     // Shift to the next weather cycle

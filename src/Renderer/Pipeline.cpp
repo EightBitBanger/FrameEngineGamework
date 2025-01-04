@@ -33,6 +33,9 @@ void RenderSystem::RenderFrame(void) {
         // Set the camera projection angle
         setTargetCamera(scenePtr->camera, eye, viewProjection);
         
+        // Gather fog layers
+        accumulateSceneFogLayers(scenePtr);
+        
         // Gather active lights in this scene
         if (scenePtr->doUpdateLights) {
             accumulateSceneLights(scenePtr, eye);

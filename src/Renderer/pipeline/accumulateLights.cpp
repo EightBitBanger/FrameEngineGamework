@@ -4,7 +4,7 @@
 #include <GameEngineFramework/Types/types.h>
 
 
-unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye) {
+void RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye) {
     
     std::vector<Light*>& lightList = currentScene->mLightList;
     unsigned int totalNumberOfLights = lightList.size();
@@ -75,6 +75,6 @@ unsigned int RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 
         continue;
     }
     
-    return i;
+    return;
 }
 

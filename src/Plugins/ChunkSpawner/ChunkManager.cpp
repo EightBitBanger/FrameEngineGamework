@@ -27,7 +27,9 @@ ChunkManager::ChunkManager() :
     mBreedingCoolDown(10),
     mDeathCoolDown(10),
     
-    waterMesh(nullptr)
+    waterMesh(nullptr),
+    
+    fogWater(nullptr)
 {
     
     return;
@@ -87,13 +89,9 @@ void ChunkManager::Initiate(void) {
     
     // Underwater blue fog
     
-    Renderer.fogActive[RENDER_FOG_LAYER_3]        = true;
+    fogWater = Renderer.CreateFog();
     
-    Renderer.fogDensity[RENDER_FOG_LAYER_3]       = 0.8f;
-    Renderer.fogBegin[RENDER_FOG_LAYER_3]         = 0.0f;
-    Renderer.fogEnd[RENDER_FOG_LAYER_3]           = 1.0f;
-    Renderer.fogColorBegin[RENDER_FOG_LAYER_3]    = Colors.blue;
-    Renderer.fogColorEnd[RENDER_FOG_LAYER_3]      = Colors.blue;
+    Engine.sceneMain->AddFogLayerToScene(fogWater);
     
     return;
 }
@@ -194,6 +192,10 @@ GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
     }
     
     Actor* actorPtr = actorObject->GetComponent<Actor>();
+    
+    std::vector<NeuralLayer> dummy;
+    actorPtr->SetNeuralTopology(dummy);
+    
     actorPtr->SetTargetPoint(glm::vec3(x, y, z));
     
     actorPtr->SetUserBitmask(0);
