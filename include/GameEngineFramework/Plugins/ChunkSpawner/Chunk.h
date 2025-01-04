@@ -40,12 +40,15 @@ public:
     /// Current seed used to generate this chunk
     int seed;
     
+    /// Chunk world position
     float x;
     float y;
     
+    /// Fade in effect counter
+    float fadeIn;
+    
     GameObject* gameObject;
     GameObject* staticObject;
-    GameObject* waterObject;
     
     rp3d::RigidBody* rigidBody;
     

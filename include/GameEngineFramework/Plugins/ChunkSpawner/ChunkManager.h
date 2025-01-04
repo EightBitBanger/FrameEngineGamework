@@ -129,7 +129,7 @@ public:
     
     Chunk* FindChunk(int x, int z);
     
-    void InitiateWorld(void);
+    void WorldDirectoryInitiate(void);
     
     // Save / load
     
