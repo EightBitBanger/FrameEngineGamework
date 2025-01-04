@@ -49,22 +49,22 @@ void Start() {
     
     //
     // Audio test sample
-    /*
+    
     Sound* soundA = Audio.CreateSound();
     AudioSample* sampleA = Audio.CreateAudioSample();
     
     sampleA->sample_rate = 44100;
     
     Samples.RenderBlankSpace(sampleA, 0.4f);
-    Samples.RenderSweepingSineWave(sampleA, 17000, 1000, 0.3f);
+    Samples.RenderSweepingSineWave(sampleA, 120, 10, 1.0f);
     
     soundA->LoadSample(sampleA);
     
-    soundA->SetVolume(0.9f);
+    soundA->SetVolume(0.1f);
     
     soundA->Play();
     while (soundA->IsSamplePlaying());
-    */
+    
     
     
     //
