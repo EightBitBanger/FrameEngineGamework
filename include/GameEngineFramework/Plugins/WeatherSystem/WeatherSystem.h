@@ -91,6 +91,8 @@ private:
     float mWeatherFogCounter;
     
     // World fog
+    Fog* mFogWorld;
+    
     float mWorldFogDensity;
     float mWorldFogNear;
     float mWorldFogFar;

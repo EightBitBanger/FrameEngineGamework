@@ -15,6 +15,7 @@
 #include <GameEngineFramework/Renderer/components/shader.h>
 #include <GameEngineFramework/Renderer/components/framebuffer.h>
 #include <GameEngineFramework/Renderer/components/texture.h>
+#include <GameEngineFramework/Renderer/components/fog.h>
 
 #include <GameEngineFramework/Engine/types/viewport.h>
 
@@ -29,8 +30,6 @@
 
 #define GLEW_STATIC
 #include "../../../vendor/gl/glew.h"
-
-
 
 class ENGINE_API RenderSystem {
     
@@ -47,23 +46,6 @@ public:
     
     /// Recalculate lights every frame.
     bool doUpdateLightsEveryFrame;
-    
-    /// Fog active state.
-    bool fogActive[4];
-    
-    /// Thickness of the fog between begin and end.
-    float fogDensity[4];
-    
-    /// Height cutoff of the fog.
-    float fogHeightCutoff[4];
-    
-    /// Distance range to render the fog.
-    float fogBegin[4];
-    float fogEnd[4];
-    
-    /// Color fade of the fog in the world.
-    Color fogColorBegin[4];
-    Color fogColorEnd[4];
     
     
     RenderSystem();
@@ -162,6 +144,16 @@ public:
     unsigned int GetNumberOfFrameBuffers(void);
     
     
+    /// Create a fog layer and return its pointer.
+    Fog* CreateFog(void);
+    
+    /// Destroy a fog layer and return true on success.
+    bool DestroyFog(Fog* fogLayer);
+    
+    /// Return the number of fog layer objects.
+    unsigned int GetNumberOfFogLayers(void);
+    
+    
     // Render queue
     
     /// Add a scene to the render queue for rendering.
@@ -224,6 +216,15 @@ private:
     glm::vec4    mLightAttenuation [RENDER_NUMBER_OF_LIGHTS];
     glm::vec3    mLightColor       [RENDER_NUMBER_OF_LIGHTS];
     
+    // Fog list
+    unsigned int mNumberOfFogLayers=0;
+    float        mFogDensity       [RENDER_NUMBER_OF_FOG_LAYERS];
+    float        mFogHeightCutoff  [RENDER_NUMBER_OF_FOG_LAYERS];
+    float        mFogBegin         [RENDER_NUMBER_OF_FOG_LAYERS];
+    float        mFogEnd           [RENDER_NUMBER_OF_FOG_LAYERS];
+    glm::vec3    mFogColorBegin    [RENDER_NUMBER_OF_FOG_LAYERS];
+    glm::vec3    mFogColorEnd      [RENDER_NUMBER_OF_FOG_LAYERS];
+    
     // Shadow list
     unsigned int mNumberOfShadows=0;
     glm::vec3    mShadowPosition    [RENDER_NUMBER_OF_SHADOWS];
@@ -245,6 +246,7 @@ private:
     PoolAllocator<Scene>           mScene;
     PoolAllocator<FrameBuffer>     mFrameBuffer;
     PoolAllocator<Texture>         mTexture;
+    PoolAllocator<Fog>             mFog;
     
     // TODO: Sorting and other non openGL related render functions could be threaded out here
     
@@ -260,7 +262,10 @@ private:
     bool setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::mat4& viewProjection);
     
     // Gather a list of active lights for rendering
-    unsigned int accumulateSceneLights(Scene* currentScene, glm::vec3 eye);
+    void accumulateSceneLights(Scene* currentScene, glm::vec3 eye);
+    
+    // Gather the fog layers for rendering
+    void accumulateSceneFogLayers(Scene* currentScene);
     
     // Asset binding
     

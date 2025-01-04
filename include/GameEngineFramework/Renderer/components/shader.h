@@ -44,23 +44,26 @@ public:
     void SetTextureSampler(unsigned int index);
     
     
+    /// Set the number of fog layers to be drawn.
+    void SetFogCount(int numberOfFogLayers);
+    
     /// Set the density for the fog effect.
-    void SetFogDensity(unsigned int index, float density);
+    void SetFogDensity(unsigned int numberOfLayers, float* density);
     
     /// Set the height cutoff for the fog effect.
-    void SetFogHeightCutoff(unsigned int index, float height);
+    void SetFogHeightCutoff(unsigned int numberOfLayers, float* height);
     
     /// Set the distance to begin rendering fog.
-    void SetFogBegin(unsigned int index, float begin);
+    void SetFogBegin(unsigned int numberOfLayers, float* begin);
     
     /// Set the distance to stop rendering fog.
-    void SetFogEnd(unsigned int index, float end);
+    void SetFogEnd(unsigned int numberOfLayers, float* end);
     
     /// Set the color at the start of the fog.
-    void SetFogColorBegin(unsigned int index, Color color);
+    void SetFogColorBegin(unsigned int numberOfLayers, glm::vec3* color);
     
     /// Set the fog at the end of the fog.
-    void SetFogColorEnd(unsigned int index, Color color);
+    void SetFogColorEnd(unsigned int numberOfLayers, glm::vec3* color);
     
     
     /// Set the number of uniform lights.
@@ -118,12 +121,13 @@ private:
     
     int mSamplerLocation;
     
-    int mFogDensityLocation[4];
-    int mFogHeightCutoffLocation[4];
-    int mFogBeginColorLocation[4];
-    int mFogEndColorLocation[4];
-    int mFogBeginLocation[4];
-    int mFogEndLocation[4];
+    int mFogCountLocation;
+    int mFogDensityLocation;
+    int mFogHeightCutoffLocation;
+    int mFogBeginColorLocation;
+    int mFogEndColorLocation;
+    int mFogBeginLocation;
+    int mFogEndLocation;
     
     int mLightCount;
     int mLightPosition;

@@ -4,6 +4,7 @@
 #include <GameEngineFramework/Renderer/components/meshrenderer.h>
 #include <GameEngineFramework/Renderer/components/camera.h>
 #include <GameEngineFramework/Renderer/components/light.h>
+#include <GameEngineFramework/Renderer/components/fog.h>
 
 
 class ENGINE_API Scene {
@@ -31,6 +32,12 @@ public:
     /// Remove a light from this scene.
     bool RemoveLightFromSceneRoot(Light* light);
     
+    /// Adds a layer of fog to the scene. The index of the
+    /// fog layer will be returned.
+    void AddFogLayerToScene(Fog* fogLayer);
+    
+    /// Remove a fog layer from the scene.
+    bool RemoveFogLayer(Fog* fogLayer);
     
     friend class RenderSystem;
     
@@ -39,8 +46,7 @@ public:
     
 private:
     
-    /// List of mesh renderer queue groups in this scene.
-    
+    // List of mesh renderer queue groups in this scene
     std::vector<MeshRenderer*>  mRenderQueueOverlay;
     std::vector<MeshRenderer*>  mRenderQueueForeground;
     std::vector<MeshRenderer*>  mRenderQueuePostGeometry;
@@ -49,8 +55,11 @@ private:
     std::vector<MeshRenderer*>  mRenderQueueBackground;
     std::vector<MeshRenderer*>  mRenderQueueSky;
     
-    /// List of lights in this scene.
+    // List of lights in this scene
     std::vector<Light*>  mLightList;
+    
+    // Fog layers to blend into this scene
+    std::vector<Fog*> mFogLayers;
     
 };
 

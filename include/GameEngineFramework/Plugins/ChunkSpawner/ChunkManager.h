@@ -205,6 +205,28 @@ public:
     
 private:
     
+    // World generation functions
+    
+    void GenerateChunks(const glm::vec3 &playerPosition);
+    
+    bool IsChunkFound(const glm::vec2 &chunkPosition);
+    
+    void GenerateChunk(const glm::vec2 &chunkPosition);
+    
+    void DestroyChunks(const glm::vec3 &playerPosition);
+    void UpdateActors(const glm::vec3 &playerPosition);
+    
+    void HandleActorLifeCycle(GameObject* actorObject);
+    void UpdateActorPosition(Actor* actorPtr, const glm::vec3 &playerPosition);
+    
+    void HandleAutoBreeding(Actor* actorPtr, unsigned int numberOfActors);
+    void AttemptBreeding(unsigned int numberOfActors);
+    void CheckActorBreeding(Actor* actorPtr);
+    
+    void UpdateFogSettings(const glm::vec3 &playerPosition);
+    
+    void InitializePlayerHeight(glm::vec3 &playerPosition);
+    
     // List of world rules
     
     std::vector<std::pair<std::string, std::string>> mWorldRules;
@@ -237,6 +259,10 @@ private:
     SubMesh subMeshTree;
     
     Mesh* waterMesh;
+    
+    // World fogs
+    
+    Fog* fogWater;
     
 };
 
