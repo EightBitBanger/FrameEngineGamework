@@ -51,6 +51,9 @@ public:
     /// Check if the audio device was initialized.
     bool CheckIsAudioEndpointActive(void);
     
+    /// Log errors to the log file.
+    void LogErrors(ALCdevice* devicePtr);
+    
 private:
     
     bool mIsDeviceActive;

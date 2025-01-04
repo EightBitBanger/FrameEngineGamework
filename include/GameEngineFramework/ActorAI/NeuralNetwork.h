@@ -6,30 +6,28 @@
 
 struct NeuralLayer {
     
-    std::vector<float> layer;
+    std::vector<float> neurons;
+    
+    std::vector<std::vector<float>> weights;
+    
+    std::vector<float> biases;
     
 };
-
 
 
 class NeuralNetwork {
     
 public:
     
-    /// Feed a set of input values into the network.
     void FeedForward(const std::vector<float>& input);
     
-    /// Get the resulting values after an input has been feed through.
     std::vector<float> GetResults(void);
     
-    /// Add a neural layer into the network.
-    void AddNeuralLayer(const std::vector<float>& layer);
+    void AddNeuralLayer(int numNeurons, int numInputs);
     
-    /// Clear all the neural layers resetting the network.
     void ClearTopology(void);
     
     NeuralNetwork();
-    
     
 private:
     
