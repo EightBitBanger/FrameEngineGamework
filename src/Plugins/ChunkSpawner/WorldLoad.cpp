@@ -9,7 +9,7 @@ bool ChunkManager::LoadWorld(void) {
     world.doGenerateChunks = true;
     
     // Setup world directory structure
-    InitiateWorld();
+    WorldDirectoryInitiate();
     
     // Load world data file
     std::string worldName   = "worlds/" + world.name;

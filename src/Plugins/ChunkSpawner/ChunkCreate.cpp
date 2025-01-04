@@ -4,8 +4,6 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     Chunk chunk;
     
-    chunk.isActive = true;
-    
     chunk.x = x;
     chunk.y = y;
     
@@ -33,10 +31,6 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     staticRenderer->SetBoundingBoxMin(boundMin);
     staticRenderer->SetBoundingBoxMax(boundMax);
-    
-    
-    Engine.sceneMain->AddMeshRendererToSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
-    Engine.sceneMain->AddMeshRendererToSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
     
     // Chunk renderer
     
@@ -89,34 +83,6 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
                                             x, y, worldSeed);
         
         continue;
-    }
-    
-    // Generate water below water level
-    if (min < (world.waterLevel - 32)) {
-        
-        /*
-        
-        chunk.waterObject = Engine.Create<GameObject>();
-        
-        chunk.waterObject->renderDistance = renderDistance * chunkSize * 0.99;
-        
-        chunk.waterObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-        MeshRenderer* waterRenderer = chunk.waterObject->GetComponent<MeshRenderer>();
-        
-        //Engine.sceneMain->AddMeshRendererToSceneRoot( waterRenderer, RENDER_QUEUE_POSTGEOMETRY );
-        
-        // Water renderer
-        Transform* waterTransform = chunk.waterObject->GetComponent<Transform>();
-        
-        waterTransform->position = glm::vec3( x, world.waterLevel, y);
-        waterTransform->scale = glm::vec3( chunkSize, 1, chunkSize );
-        
-        waterRenderer->mesh = Engine.meshes.plain;
-        waterRenderer->EnableFrustumCulling();
-        
-        waterRenderer->material = waterMaterial;
-        
-        */
     }
     
     // Generate terrain color

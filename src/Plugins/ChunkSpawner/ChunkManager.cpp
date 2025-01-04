@@ -3,9 +3,9 @@
 ChunkManager::ChunkManager() : 
     isInitiated(false),
     
-    renderDistance(10),
-    staticDistance(10),
-    actorDistance(10),
+    renderDistance(16),
+    staticDistance(renderDistance * 0.7f),
+    actorDistance(renderDistance * 0.5f),
     
     chunkSize(50),
     
@@ -96,7 +96,7 @@ void ChunkManager::Initiate(void) {
     return;
 }
 
-void ChunkManager::InitiateWorld(void) {
+void ChunkManager::WorldDirectoryInitiate(void) {
     
     std::string worldName   = "worlds/" + world.name;
     std::string worldChunks = "worlds/" + world.name + "/chunks";
