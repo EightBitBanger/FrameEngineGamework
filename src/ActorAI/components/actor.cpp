@@ -419,9 +419,14 @@ float Actor::GetHeightPreferenceMax(void) {
 
 void Actor::SetNeuralTopology(const std::vector<NeuralLayer>& layers) {
     mux.lock();
+    // TODO Set the layers by parameter rather than hard set values
     mNeuralNetwork.ClearTopology();
-    for (unsigned int i=0; i < layers.size(); i++) 
-        mNeuralNetwork.AddNeuralLayer( layers[i].layer );
+    
+    mNeuralNetwork.AddNeuralLayer(8, 8); // Input
+    mNeuralNetwork.AddNeuralLayer(10, 8);
+    mNeuralNetwork.AddNeuralLayer(12, 12);
+    mNeuralNetwork.AddNeuralLayer(12, 12);
+    mNeuralNetwork.AddNeuralLayer(10, 12); // Output
     mux.unlock();
     return;
 }

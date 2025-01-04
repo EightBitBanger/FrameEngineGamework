@@ -37,6 +37,7 @@ void ActorSystem::Update(void) {
     
     mux.lock();
     for (int i = 0; i < numberOfActorsPerCycle; i++) {
+        
         if (actorCounter >= numberOfActors) {
             actorCounter = 0;
             doUpdate = false;
@@ -57,6 +58,7 @@ void ActorSystem::Update(void) {
         }
         
         UpdateActorState(actor);
+        
         actor->mux.unlock();
     }
     mux.unlock();
@@ -68,42 +70,45 @@ void ActorSystem::UpdateActorState(Actor* actor) {
     
     bool isAquatic = actor->mHeightPreferenceMax < mWorldWaterLevel;
     
-    if (HandleBreedingState(actor)) 
-        return;
-    
-    if (!isAquatic && HandleWalkingChance(actor)) 
-        return;
-    
+    HandleWalkingChance(actor);
     HandleObservationCooldown(actor);
     HandleFocusOnNearbyActor(actor);
     HandleMovementCooldown(actor, isAquatic);
     HandleStopWalkingChance(actor);
-    HandleNeuralNetwork(actor);
+    
+    //HandleNeuralNetwork(actor);
     
     return;
 }
 
 void ActorSystem::HandleNeuralNetwork(Actor* actor) {
     
-    /*
+    // Send in some input values
+    glm::vec3 vel = actor->mVelocity;
+    glm::vec3 rot = actor->mRotation;
+    float speed = actor->mSpeed;
     
-    // Define the topology of the neural network
-    std::vector<int> topology = { 3, 2, 1 };
-    NeuralNetwork myNet(topology);
+    std::vector<float> inputVals = {vel.x, vel.y, vel.z,
+                                    rot.x, rot.y, rot.z,
+                                    speed};
     
-    // Define input values
-    std::vector<double> inputVals = { 1.0, 0.5, -1.5 };
-    myNet.feedForward(inputVals);
+    // Feed through the network
+    actor->mNeuralNetwork.FeedForward(inputVals);
     
-    // Define target values
-    std::vector<double> targetVals = { 0.8 };
-    myNet.backProp(targetVals);
+    // Extract results
+    std::vector<float> resultVals = actor->mNeuralNetwork.GetResults();
     
-    // Get the results
-    std::vector<double> resultVals;
-    myNet.getResults(resultVals);
+    unsigned int numberOfOutputs = resultVals.size();
+    if (numberOfOutputs > 6) {
+        
+        if (resultVals[0] > 0.9999f) HandleObservationCooldown(actor);
+        if (resultVals[2] > 0.9999f) HandleFocusOnNearbyActor(actor);
+        if (resultVals[3] > 0.9999f) HandleMovementCooldown(actor, false);
+        if (resultVals[5] > 0.9999f) HandleStopWalkingChance(actor);
+        if (resultVals[6] > 0.9999f) HandleBreedingState(actor);
+        
+    }
     
-    */
     
     return;
 }
@@ -129,8 +134,11 @@ bool ActorSystem::HandleBreedingState(Actor* actor) {
 
 bool ActorSystem::HandleWalkingChance(Actor* actor) {
     
-    if (actor->mTargetPoint.y > mWorldWaterLevel && Random.Range(0, DECISION_CHANCE_TO_WALK) < actor->mChanceToWalk) {
-        actor->mIsWalking = true;
+    if (actor->mTargetPoint.y > mWorldWaterLevel) {
+        
+        if (Random.Range(0, DECISION_CHANCE_TO_WALK) < actor->mChanceToWalk) 
+            actor->mIsWalking = true;
+        
         return true;
     }
     
@@ -174,10 +182,18 @@ void ActorSystem::HandleMovementCooldown(Actor* actor, bool isAquatic) {
         actor->mObservationCoolDownCounter = 0;
         
         if (Random.Range(0, DECISION_CHANCE_TO_CHANGE_DIRECTION) < actor->mChanceToChangeDirection) {
-            float randA = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
-            float randB = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
-            float randC = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
-            float randD = Random.Range(0.0f, actor->mDistanceToWalk) + (actor->mMovementCoolDownCounter + 1);
+            
+            float randA = Random.Range(0.0f, actor->mDistanceToWalk);
+            float randB = Random.Range(0.0f, actor->mDistanceToWalk);
+            float randC = Random.Range(0.0f, actor->mDistanceToWalk);
+            float randD = Random.Range(0.0f, actor->mDistanceToWalk);
+            
+            // Add cool down to expand random range distance
+            randA += actor->mMovementCoolDownCounter + 1;
+            randB += actor->mMovementCoolDownCounter + 1;
+            randC += actor->mMovementCoolDownCounter + 1;
+            randD += actor->mMovementCoolDownCounter + 1;
+            
             actor->mTargetPoint.x = (randA - randB) + actor->mPosition.x;
             actor->mTargetPoint.z = (randC - randD) + actor->mPosition.z;
         }

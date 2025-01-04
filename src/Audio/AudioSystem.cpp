@@ -9,40 +9,43 @@ bool isAudioDeviceActive = false;
 bool isAudioThreadActive = true;
 void AudioThreadMain(void);
 
-
 void AudioSystem::Initiate(void) {
     
     // Launch the audio thread
-    audioThread = new std::thread( AudioThreadMain );
+    audioThread = new std::thread(AudioThreadMain);
+    Log.Write(" >> Starting thread audio");
     
-    Log.Write( " >> Starting thread audio" );
     
-    mDevice = alcGetContextsDevice(mContext);
+    mDevice = alcOpenDevice(nullptr);
     
-    if (!mDevice) 
-        mDevice = alcOpenDevice(nullptr);
-    
-    if (mDevice) {
-        
-        mContext = alcGetCurrentContext();
-        
-        if (!mContext) {
-            
-            mContext = alcCreateContext(mDevice, nullptr);
-            
-            alcMakeContextCurrent(mContext);
-            
-            isAudioDeviceActive = true;
-        }
-        
-    } else {
+    if (mDevice == nullptr) {
         
         Log.Write("!! Unable to open audio device.");
         Log.WriteLn();
+        
+        LogErrors(mDevice);
+        
+        return;
     }
+    
+    mContext = alcCreateContext(mDevice, nullptr);
+    
+    if (mContext == nullptr) {
+        
+        Log.Write("!! Unable to create audio context.");
+        Log.WriteLn();
+        
+        LogErrors(mDevice);
+        
+        return;
+    }
+    
+    alcMakeContextCurrent(mContext);
+    isAudioDeviceActive = true;
     
     return;
 }
+
 
 void AudioSystem::Shutdown(void) {
     
@@ -88,6 +91,30 @@ bool AudioSystem::DestroyAudioSample(AudioSample* samplePtr) {
 bool AudioSystem::CheckIsAudioEndpointActive(void) {
     
     return mIsDeviceActive;
+}
+
+void AudioSystem::LogErrors(ALCdevice* devicePtr) {
+    
+    while(true) {
+        
+        ALCenum errorCode = alcGetError(devicePtr);
+        
+        switch (errorCode) {
+            
+            case ALC_NO_ERROR: {Log.Write("No error"); return;}
+            case ALC_INVALID_DEVICE: Log.Write("Invalid device");
+            case ALC_INVALID_CONTEXT: Log.Write("Invalid context");
+            case ALC_INVALID_ENUM: Log.Write("Invalid enum");
+            case ALC_INVALID_VALUE: Log.Write("Invalid value");
+            case ALC_OUT_OF_MEMORY: Log.Write("Out of memory");
+            
+            default: Log.Write("Unknown ALC error");
+            
+        }
+        
+    }
+    
+    return;
 }
 
 //
