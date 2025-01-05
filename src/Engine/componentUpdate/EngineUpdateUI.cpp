@@ -1,78 +1,64 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
+#include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateUI(void) {
     
-    //
-    // Check mouse / button interaction
-    //
+    float mouseX = Input.mouseX - Platform.clientArea.x;
+    float mouseY = Input.mouseY - Platform.clientArea.y;
     
-    unsigned int windowMouseX = Input.mouseX - Platform.windowLeft;
-    unsigned int windowMouseY = Input.mouseY - Platform.windowTop;
+    float windowWidth  = Platform.windowArea.w;
+    float windowHeight = Platform.windowArea.h;
+    
+    float mouseNormX = mouseX / windowWidth;
+    float mouseNormY = mouseY / windowHeight;
     
     for (unsigned int i = 0; i < mButtons.Size(); i++) {
         
         Button* button = mButtons[i];
         
-        bool leftActive   = false;
-        bool middleActive = false;
-        bool rightActive  = false;
+        if (!button->isActive) 
+            continue;
         
-        // Check button event
-        if (button->triggerOnPressed) {
-            if (Input.CheckMouseLeftPressed())   leftActive   = true;
-            if (Input.CheckMouseMiddlePressed()) middleActive = true;
-            if (Input.CheckMouseRightPressed())  rightActive  = true;
-        } else {
-            if (Input.CheckMouseLeftReleased())   leftActive   = true;
-            if (Input.CheckMouseMiddleReleased()) middleActive = true;
-            if (Input.CheckMouseRightReleased())  rightActive  = true;
-        }
-        
-        // Button parameters
-        unsigned int xx = button->x;
-        unsigned int yy = button->y;
-        
-        unsigned int ww = button->w;
-        unsigned int hh = button->h;
-        
-        // Check hovered
-        if ((windowMouseX > xx) && (windowMouseX < (xx + ww)) && 
-            (windowMouseY > yy) && (windowMouseY < (yy + hh))) {
+        // Check button anchoring
+        if (button->panelOverlay != nullptr) {
             
-            button->isHovering = true;
-            
-            bool isClicked = false;
-            
-            // Check clicked type and button
-            if ((button->triggerOnLeftButton)   && (leftActive))   isClicked = true;
-            if ((button->triggerOnMiddleButton) && (middleActive)) isClicked = true;
-            if ((button->triggerOnRightButton)  && (rightActive))  isClicked = true;
-            
-            if (isClicked) {
+            if (button->panel->canvas.anchorCenterHorz) {
                 
-                // Check button type
-                if (!button->isDragAndDrop) {
-                    
-                    // Call the button payload
-                    if (button->callback != nullptr) 
-                        button->callback();
-                    
-                } else {
-                    
-                    // Drag and drop element
-                    //mouseOldX
-                    //mouseOldY
-                    
-                }
+                glm::vec3 position = button->panelOverlay->GetPosition();
+                
+                Text* text = button->textObject->GetComponent<Text>();
+                
+                button->x = ((position.z / text->size) + text->x);
+                button->y = ((position.x / text->size) - text->y);
+                
+                text->canvas.x = (button->panel->canvas.x / text->size) + ((position.z / text->size) + text->x);
+                text->canvas.y = (button->panel->canvas.y / text->size) + ((position.x / text->size) - text->y);
                 
             }
             
+        }
+        
+        // Button parameters
+        float xx = button->x / windowWidth;
+        float yy = button->y / windowHeight;
+        
+        float ww = button->w / windowWidth;
+        float hh = button->h / windowHeight;
+        
+        // Check hovered
+        if ((mouseNormX > xx) && (mouseNormX < (xx + ww)) && 
+            (mouseNormY > yy) && (mouseNormY < (yy + hh))) {
+            
+            button->isHovering = true;
+            
         } else {
             
-            // Not hovering
             button->isHovering = false;
-            
         }
+        
+        // Call the button payload
+        if (button->callback != nullptr) 
+            button->callback(button);
         
     }
     
@@ -87,3 +73,5 @@ void EngineSystemManager::UpdateUI(void) {
     
     return;
 }
+
+

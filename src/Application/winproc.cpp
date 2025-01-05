@@ -53,7 +53,7 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             break;
         }
         
-        case WM_SIZE: // Window resize
+        case WM_SIZE: {// Window resize
             
             RECT WindowRect;
             GetWindowRect(wHnd, &WindowRect);
@@ -68,6 +68,32 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             Platform.windowTop    = Renderer.viewport.y;
             Platform.windowRight  = Renderer.viewport.w;
             Platform.windowBottom = Renderer.viewport.h;
+            
+            
+            RECT windowDim;
+            GetWindowRect(wHnd, &windowDim);
+            
+            RECT clientRect;
+            GetClientRect(wHnd, &clientRect);
+            
+            // Calculate the window's width and height
+            float windowWidth = windowDim.right - windowDim.left;
+            float windowHeight = windowDim.bottom - windowDim.top;
+            
+            // Calculate the client area width and height
+            float clientWidth = clientRect.right - clientRect.left;
+            float clientHeight = clientRect.bottom - clientRect.top;
+            
+            // Calculate the margins (borders)
+            float horizontalMargin = (windowWidth - clientWidth) / 2.0f;
+            float verticalMargin = (windowHeight - clientHeight) / 2.0f;
+            
+            // The starting position of the client area relative to the window
+            Platform.clientArea.x = windowDim.left + horizontalMargin + 2.0f;
+            Platform.clientArea.y = windowDim.top + verticalMargin - 2.0f;
+            Platform.clientArea.w = clientRect.right - clientRect.left;
+            Platform.clientArea.h = windowDim.bottom - windowDim.top;
+            
             
             // Update scene cameras
             for (unsigned int i=0; i < Renderer.GetRenderQueueSize(); i++) {
@@ -91,21 +117,50 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
                 // Update camera aspect
                 Renderer[i]->camera->aspect = Renderer.viewport.w / Renderer.viewport.h;
                 
-                //Renderer[i]->camera->aspect = Renderer.viewport.w / Renderer.viewport.h;
-                
-                //if (Renderer[i]->camera->aspect < 1.3) 
-                //    Renderer[i]->camera->aspect = 1.3;
+                if (Renderer[i]->camera->aspect < 1.3) 
+                    Renderer[i]->camera->aspect = 1.3;
                 
                 continue;
             }
             
             break;
+        }
         
         case WM_GETMINMAXINFO: { // Minimum window size
             
             LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
             lpMMI -> ptMinTrackSize.x = WINDOW_WIDTH_MIN;
             lpMMI -> ptMinTrackSize.y = WINDOW_HEIGHT_MIN;
+            
+            break;
+        }
+        
+        
+        case WM_MOVE: {
+            
+            RECT windowDim;
+            GetWindowRect(wHnd, &windowDim);
+            
+            RECT clientRect;
+            GetClientRect(wHnd, &clientRect);
+            
+            // Calculate the window's width and height
+            float windowWidth = windowDim.right - windowDim.left;
+            float windowHeight = windowDim.bottom - windowDim.top;
+            
+            // Calculate the client area width and height
+            float clientWidth = clientRect.right - clientRect.left;
+            float clientHeight = clientRect.bottom - clientRect.top;
+            
+            // Calculate the margins (borders)
+            float horizontalMargin = (windowWidth - clientWidth) / 2.0f;
+            float verticalMargin = (windowHeight - clientHeight) / 2.0f;
+            
+            // The starting position of the client area relative to the window
+            Platform.clientArea.x = windowDim.left + horizontalMargin + 2.0f;
+            Platform.clientArea.y = windowDim.top + verticalMargin - 2.0f;
+            Platform.clientArea.w = clientRect.right - clientRect.left;
+            Platform.clientArea.h = windowDim.bottom - windowDim.top;
             
             break;
         }

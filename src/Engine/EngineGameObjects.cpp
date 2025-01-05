@@ -15,7 +15,7 @@ bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     
     gameObjectPtr->isGarbage = true;
     
-    return true;
+    return false;
 }
 
 unsigned int EngineSystemManager::GetNumberOfGameObjects(void) {
@@ -173,7 +173,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     return overlayObject;
 }
 
-GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::string text, unsigned int textSize, Color color, std::string materialTag) {
+GameObject* EngineSystemManager::CreateOverlayTextRenderer(float x, float y, std::string text, unsigned int textSize, Color color, std::string materialTag) {
     
     GameObject* overlayObject = CreateOverlayRenderer();
     
@@ -188,14 +188,15 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     
     overlayObject->mTransformCache->scale = Vector3(textSize, 1, textSize);
     
-    textElement->canvas.x = x;
-    textElement->canvas.y = y;
+    textElement->canvas.x = x / textSize;
+    textElement->canvas.y = y / textSize;
     
     MeshRenderer* overlayRenderer = overlayObject->GetComponent<MeshRenderer>();
     
     // Sprite sheet material
     Destroy<Material>( overlayRenderer->material );
     overlayRenderer->material = Resources.CreateMaterialFromTag( materialTag );
+    
     overlayRenderer->material->ambient = Color(0.58f, 1, 0);
     overlayRenderer->material->shader = shaders.UI;
     
@@ -210,7 +211,7 @@ GameObject* EngineSystemManager::CreateOverlayTextRenderer(int x, int y, std::st
     return overlayObject;
 }
 
-GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int width, int height, std::string materialTag) {
+GameObject* EngineSystemManager::CreateOverlayPanelRenderer(float x, float y, float width, float height, std::string materialTag) {
     
     GameObject* overlayObject = CreateOverlayRenderer();
     
@@ -251,5 +252,40 @@ GameObject* EngineSystemManager::CreateOverlayPanelRenderer(int x, int y, int wi
     return overlayObject;
 }
 
+
+Button* EngineSystemManager::CreateButtonUI(float buttonX, float buttonY, float buttonW, float buttonH, float textX, float textY, std::string text, std::string materialName, ButtonCallBack callback) {
+    
+    Button* buttonUI = CreateOverlayButtonCallback(buttonX, buttonY, buttonW, buttonH, callback);
+    
+    GameObject* panelOverlay = CreateOverlayPanelRenderer(buttonX, buttonY, buttonW / 2.0f, buttonH / 2.0f, materialName);
+    buttonUI->panelOverlay = panelOverlay;
+    
+    MeshRenderer* buttonRenderer = panelOverlay->GetComponent<MeshRenderer>();
+    sceneOverlay->AddMeshRendererToSceneRoot(buttonRenderer, RENDER_QUEUE_GEOMETRY);
+    
+    Panel* panel = panelOverlay->GetComponent<Panel>();
+    panel->x = buttonW / 2;
+    panel->y = (buttonH / 2) + 16;
+    
+    buttonUI->panel = panel;
+    
+    // Button text
+    GameObject* textObject = CreateOverlayTextRenderer(buttonX, buttonY, "", 9, Colors.white, "font");
+    buttonUI->textObject = textObject;
+    
+    MeshRenderer* buttonTextRenderer = textObject->GetComponent<MeshRenderer>();
+    sceneOverlay->AddMeshRendererToSceneRoot(buttonTextRenderer, RENDER_QUEUE_POSTGEOMETRY);
+    
+    Text* textPtr = textObject->GetComponent<Text>();
+    textPtr->text = text;
+    
+    textPtr->canvas.x = (buttonX / textPtr->size) + textX;
+    textPtr->canvas.y = (buttonY / textPtr->size) - textY;
+    
+    textPtr->x = textX;
+    textPtr->y = textY;
+    
+    return buttonUI;
+}
 
 

@@ -90,6 +90,31 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     displayWidth  = GetDeviceCaps( (HDC)deviceContext, HORZRES );
     displayHeight = GetDeviceCaps( (HDC)deviceContext, VERTRES );
     
+    
+    RECT windowDim;
+    GetWindowRect((HWND)windowHandle, &windowDim);
+    
+    RECT clientRect;
+    GetClientRect((HWND)windowHandle, &clientRect);
+    
+    // Calculate the window's width and height
+    float windowWidth = windowDim.right - windowDim.left;
+    float windowHeight = windowDim.bottom - windowDim.top;
+    
+    // Calculate the client area width and height
+    float clientWidth = clientRect.right - clientRect.left;
+    float clientHeight = clientRect.bottom - clientRect.top;
+    
+    // Calculate the margins (borders)
+    float horizontalMargin = (windowWidth - clientWidth) / 2.0f;
+    float verticalMargin = (windowHeight - clientHeight) / 2.0f;
+    
+    // The starting position of the client area relative to the window
+    clientArea.x = windowDim.left + horizontalMargin + 2.0f;
+    clientArea.y = windowDim.top + verticalMargin - 2.0f;
+    clientArea.w = clientRect.right - clientRect.left;
+    clientArea.h = windowDim.bottom - windowDim.top;
+    
     mIsWindowRunning = true;
     return (void*)windowHandle;
 }
@@ -106,22 +131,39 @@ void PlatformLayer::SetWindowCenter(void) {
     displayWidth  = GetDeviceCaps( (HDC)deviceContext, HORZRES );
     displayHeight = GetDeviceCaps( (HDC)deviceContext, VERTRES );
     
-    RECT windowSz;
-    GetWindowRect((HWND)windowHandle, &windowSz);
+    RECT windowDim;
+    GetWindowRect((HWND)windowHandle, &windowDim);
     
     Viewport WindowSz;
-    WindowSz.w = windowSz.right  - windowSz.left;
-    WindowSz.h = windowSz.bottom - windowSz.top;
+    WindowSz.w = windowDim.right  - windowDim.left;
+    WindowSz.h = windowDim.bottom - windowDim.top;
     
     WindowSz.x = (displayWidth  / 2) - (WindowSz.w / 2);
     WindowSz.y = (displayHeight / 2) - (WindowSz.h / 2);
     
     SetWindowPos((HWND)windowHandle, NULL, WindowSz.x, WindowSz.y, WindowSz.w, WindowSz.h, SWP_SHOWWINDOW);
     
-    windowArea.x = WindowSz.x;
-    windowArea.y = WindowSz.y;
-    windowArea.w = WindowSz.w;
-    windowArea.h = WindowSz.h;
+    
+    RECT clientRect;
+    GetClientRect((HWND)windowHandle, &clientRect);
+    
+    // Calculate the window's width and height
+    float windowWidth = windowDim.right - windowDim.left;
+    float windowHeight = windowDim.bottom - windowDim.top;
+    
+    // Calculate the client area width and height
+    float clientWidth = clientRect.right - clientRect.left;
+    float clientHeight = clientRect.bottom - clientRect.top;
+    
+    // Calculate the margins (borders)
+    float horizontalMargin = (windowWidth - clientWidth) / 2.0f;
+    float verticalMargin = (windowHeight - clientHeight) / 2.0f;
+    
+    // The starting position of the client area relative to the window
+    clientArea.x = windowDim.left + horizontalMargin + 2.0f;
+    clientArea.y = windowDim.top + verticalMargin - 2.0f;
+    clientArea.w = clientRect.right - clientRect.left;
+    clientArea.h = windowDim.bottom - windowDim.top;
     
     return;
 }
@@ -138,6 +180,31 @@ void PlatformLayer::SetWindowCenterScale(float width, float height) {
     
     SetWindowPosition(newWindowSz);
     SetWindowCenter();
+    
+    RECT windowDim;
+    GetWindowRect((HWND)windowHandle, &windowDim);
+    
+    RECT clientRect;
+    GetClientRect((HWND)windowHandle, &clientRect);
+    
+    // Calculate the window's width and height
+    float windowWidth = windowDim.right - windowDim.left;
+    float windowHeight = windowDim.bottom - windowDim.top;
+    
+    // Calculate the client area width and height
+    float clientWidth = clientRect.right - clientRect.left;
+    float clientHeight = clientRect.bottom - clientRect.top;
+    
+    // Calculate the margins (borders)
+    float horizontalMargin = (windowWidth - clientWidth) / 2.0f;
+    float verticalMargin = (windowHeight - clientHeight) / 2.0f;
+    
+    // The starting position of the client area relative to the window
+    clientArea.x = windowDim.left + horizontalMargin + 2.0f;
+    clientArea.y = windowDim.top + verticalMargin - 2.0f;
+    clientArea.w = clientRect.right - clientRect.left;
+    clientArea.h = windowDim.bottom - windowDim.top;
+    
     return;
 }
 

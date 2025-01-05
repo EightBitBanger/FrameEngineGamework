@@ -69,40 +69,19 @@ EngineSystemManager::EngineSystemManager(void) :
 //
 
 void EngineSystemManager::SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value) {
-    
-    for (unsigned int x=0; x < width; x ++) {
-        
-        for (unsigned int z=0; z < height; z ++) {
-            
-            unsigned int index = z * width + x;
-            
-            heightField[index] = value;
-            
-            continue;
-        }
-        
-        continue;
+    unsigned int size = width * height;
+    for (unsigned int i = 0; i < size; i++) {
+        heightField[i] = value;
     }
-    
     return;
 }
 
 void EngineSystemManager::SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color) {
-    
-    for (unsigned int x=0; x < width; x ++) {
-        
-        for (unsigned int z=0; z < height; z ++) {
-            
-            unsigned int index = z * width + x;
-            
-            colorField[index] = glm::vec3(color.r, color.g, color.b);
-            
-            continue;
-        }
-        
-        continue;
+    glm::vec3 colorVec(color.r, color.g, color.b);
+    unsigned int size = width * height;
+    for (unsigned int i = 0; i < size; i++) {
+        colorField[i] = colorVec;
     }
-    
     return;
 }
 
@@ -110,117 +89,74 @@ float EngineSystemManager::AddHeightFieldFromPerlinNoise(float* heightField, uns
                                                         float noiseWidth, float noiseHeight, 
                                                         float noiseMul, int offsetX, int offsetZ, int seed) {
     float minimumHeight = 1000.0f;
+    unsigned int size = width * height;
     
-    for (unsigned int x=0; x < width; x ++) {
+    for (unsigned int i = 0; i < size; i++) {
+        unsigned int x = i % width;
+        unsigned int z = i / width;
         
-        for (unsigned int z=0; z < height; z ++) {
-            
-            float xCoord = ((float)x + offsetX) * noiseWidth;
-            float zCoord = ((float)z + offsetZ) * noiseHeight;
-            
-            float noise = Random.Perlin(xCoord, 0, zCoord, seed) * noiseMul;
-            
-            unsigned int index = z * width + x;
-            
-            heightField[index] += Math.Round( (noise * 10.0) ) * 0.1;
-            
-            if (heightField[index] < minimumHeight)
-                minimumHeight = heightField[index];
-            
-            continue;
-        }
+        float xCoord = ((float)x + offsetX) * noiseWidth;
+        float zCoord = ((float)z + offsetZ) * noiseHeight;
         
-        continue;
+        float noise = Random.Perlin(xCoord, 0, zCoord, seed) * noiseMul;
+        
+        heightField[i] += Math.Round((noise * 10.0)) * 0.1;
+        
+        if (heightField[i] < minimumHeight)
+            minimumHeight = heightField[i];
     }
     
     return minimumHeight;
 }
 
 void EngineSystemManager::GenerateWaterTableFromHeightField(float* heightField, unsigned int width, unsigned int height, float tableHeight) {
-    
-    for (unsigned int x=0; x < width; x ++) {
-        
-        for (unsigned int z=0; z < height; z ++) {
-            
-            unsigned int index = z * width + x;
-            
-            if (heightField[index] < tableHeight) heightField[index] *= 0.3;
-            
-            continue;
-        }
-        
-        continue;
+    unsigned int size = width * height;
+    for (unsigned int i = 0; i < size; i++) {
+        if (heightField[i] < tableHeight) heightField[i] *= 0.3;
     }
-    
     return;
 }
 
 void EngineSystemManager::GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, 
                                                             unsigned int width, unsigned int height, 
                                                             Color low, Color high, float bias) {
+    unsigned int size = width * height;
     
-    for (unsigned int x=0; x < width; x ++) {
+    for (unsigned int i = 0; i < size; i++) {
+        float heightBias = heightField[i] * bias;
+        heightBias = glm::clamp(heightBias, 0.0f, 1.0f);
         
-        for (unsigned int z=0; z < height; z ++) {
-            
-            unsigned int index = z * width + x;
-            
-            float heightBias = heightField[index] * bias;
-            
-            Color color = low;
-            
-            // Caps
-            if (heightBias < 0) heightBias = 0;
-            if (heightBias > 1) heightBias = 1;
-            
-            color = Colors.Lerp(low, high, heightBias);
-            
-            float uniformVariantR = (Random.Range(0, 100) * 0.00001f) - (Random.Range(0, 10) * 0.00001f);
-            float uniformVariantG = uniformVariantR;
-            float uniformVariantB = uniformVariantR;
-            
-            color.r += uniformVariantR;
-            color.g += uniformVariantG;
-            color.b += uniformVariantB;
-            
-            // Apply the final color
-            colorField[index] = glm::vec3( color.r, color.g, color.b );
-            
-            continue;
-        }
+        Color color = Colors.Lerp(low, high, heightBias);
         
-        continue;
+        float uniformVariant = (Random.Range(0, 100) * 0.00001f) - (Random.Range(0, 10) * 0.00001f);
+        
+        color.r += uniformVariant;
+        color.g += uniformVariant;
+        color.b += uniformVariant;
+        
+        colorField[i] = glm::vec3(color.r, color.g, color.b);
     }
-    
     return;
 }
 
 void EngineSystemManager::SetColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, 
                                                        float noiseWidth, float noiseHeight, float noiseThreshold, 
                                                        Color first, Color second, int offsetX, int offsetZ) {
+    unsigned int size = width * height;
     
-    for (unsigned int x=0; x < width; x ++) {
+    for (unsigned int i = 0; i < size; i++) {
+        unsigned int x = i % width;
+        unsigned int z = i / width;
         
-        for (unsigned int z=0; z < height; z ++) {
-            
-            float xCoord = ((float)x + offsetX) * noiseWidth;
-            float zCoord = ((float)z + offsetZ) * noiseHeight;
-            
-            float noise = Random.Perlin(xCoord, 0, zCoord, 100) + noiseThreshold;
-            
-            if (noise > 1) noise = 1;
-            if (noise < 0) noise = 0;
-            
-            Color result = Colors.Lerp(first, second, noise);
-            
-            unsigned int index = z * width + x;
-            
-            colorField[index] = glm::vec3(result.r, result.g, result.b);
-            
-            continue;
-        }
+        float xCoord = ((float)x + offsetX) * noiseWidth;
+        float zCoord = ((float)z + offsetZ) * noiseHeight;
         
-        continue;
+        float noise = Random.Perlin(xCoord, 0, zCoord, 100) + noiseThreshold;
+        noise = glm::clamp(noise, 0.0f, 1.0f);
+        
+        Color result = Colors.Lerp(first, second, noise);
+        
+        colorField[i] = glm::vec3(result.r, result.g, result.b);
     }
     
     return;
@@ -229,33 +165,19 @@ void EngineSystemManager::SetColorFieldFromPerlinNoise(glm::vec3* colorField, un
 void EngineSystemManager::AddColorFieldSnowCap(glm::vec3* colorField, float* heightField, 
                                                unsigned int width, unsigned int height, 
                                                Color capColor, float beginHeight, float bias) {
+    unsigned int size = width * height;
     
-    for (unsigned int x=0; x < width; x ++) {
+    for (unsigned int i = 0; i < size; i++) {
+        float heightBias = heightField[i] * 0.01;
+        heightBias = glm::clamp(heightBias, 0.0f, 1.0f);
         
-        for (unsigned int z=0; z < height; z ++) {
-            
-            unsigned int index = z * width + x;
-            
-            float heightBias = heightField[index] * 0.01;
-            
-            Color color( colorField[index].x, colorField[index].y, colorField[index].z );
-            
-            // Caps
-            if (heightBias < 0) heightBias = 0;
-            if (heightBias > 1) heightBias = 1;
-            
-            int diff = ((beginHeight - (beginHeight - 20)) - (heightField[index] - beginHeight)) * bias;
-            
-            if (Random.Range(0, 100) > diff) 
-                color = Colors.Lerp(color, capColor, heightField[index] * 0.07);
-            
-            // Apply the final color
-            colorField[index] = glm::vec3( color.r, color.g, color.b );
-            
-            continue;
-        }
+        Color color(colorField[i].x, colorField[i].y, colorField[i].z);
+        int diff = ((beginHeight - (beginHeight - 20)) - (heightField[i] - beginHeight)) * bias;
         
-        continue;
+        if (Random.Range(0, 100) > diff) 
+            color = Colors.Lerp(color, capColor, heightField[i] * 0.07);
+        
+        colorField[i] = glm::vec3(color.r, color.g, color.b);
     }
     
     return;
@@ -264,79 +186,40 @@ void EngineSystemManager::AddColorFieldSnowCap(glm::vec3* colorField, float* hei
 void EngineSystemManager::AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, 
                                                   unsigned int width, unsigned int height, 
                                                   Color waterColor, float beginHeight, float bias, float waterTableHeight) {
+    unsigned int size = width * height;
     
-    for (unsigned int x=0; x < width; x ++) {
+    for (unsigned int i = 0; i < size; i++) {
         
-        for (unsigned int z=0; z < height; z ++) {
-            
-            unsigned int index = z * width + x;
-            
-            if (heightField[index] > waterTableHeight) 
-                continue;
-            
-            Color color( colorField[index].x, colorField[index].y, colorField[index].z );
-            waterColor = 0.001f;
-            
-            if (heightField[index]  <= (waterTableHeight - 9.0f))   color = Colors.Lerp(color, waterColor, 1.0f);
-            
-            if ((heightField[index] <= (waterTableHeight - 8.0f)) & 
-                (heightField[index] > (waterTableHeight - 9.0f)))  color = Colors.Lerp(color, waterColor, 0.9f);
-            
-            if ((heightField[index] <= (waterTableHeight - 7.0f)) & 
-                (heightField[index] > (waterTableHeight - 8.0f)))  color = Colors.Lerp(color, waterColor, 0.85f);
-            
-            if ((heightField[index] <= (waterTableHeight - 6.0f)) & 
-                (heightField[index] > (waterTableHeight - 7.0f)))  color = Colors.Lerp(color, waterColor, 0.8f);
-            
-            if ((heightField[index] <= (waterTableHeight - 5.0f)) & 
-                (heightField[index] > (waterTableHeight - 6.0f)))  color = Colors.Lerp(color, waterColor, 0.75f);
-            
-            if ((heightField[index] <= (waterTableHeight - 4.0f)) & 
-                (heightField[index] > (waterTableHeight - 5.0f)))  color = Colors.Lerp(color, waterColor, 0.7f);
-            
-            if ((heightField[index] <= (waterTableHeight - 3.0f)) & 
-                (heightField[index] > (waterTableHeight - 4.0f)))  color = Colors.Lerp(color, waterColor, 0.65f);
-            
-            if ((heightField[index] <= (waterTableHeight - 2.0f)) & 
-                (heightField[index] > (waterTableHeight - 3.0f)))  color = Colors.Lerp(color, waterColor, 0.6f);
-            
-            if ((heightField[index] <= (waterTableHeight - 1.0f)) & 
-                (heightField[index] > (waterTableHeight - 2.0f)))  color = Colors.Lerp(color, waterColor, 0.55f);
-            
-            if ((heightField[index] <= (waterTableHeight - 0.0f)) & 
-                (heightField[index] > (waterTableHeight - 1.0f)))  color = Colors.Lerp(color, waterColor, 0.5f);
-            
-            // Deep
-            if (heightField[index] < (waterTableHeight - 7.0f)) 
-                if (Random.Range(1, 100) > 70) color = Colors.orange * 0.003f;
-            
-            if (heightField[index] < (waterTableHeight - 10.0f)) 
-                if (Random.Range(1, 100) > 90) color = Colors.green * 0.003f;
-            
-            if ((heightField[index] >= (waterTableHeight - 10.0f)) & (heightField[index] < (waterTableHeight - 4.0f))) 
-                if (Random.Range(1, 100) > 88) color = Colors.green * 0.002f;
-            
-            if ((heightField[index] >= (waterTableHeight - 10.0f)) & (heightField[index] < (waterTableHeight - 4.0f))) 
-                if (Random.Range(1, 100) > 80) color = Colors.green * 0.005f;
-            
-            // Shallow
-            if ((heightField[index] >= (waterTableHeight - 7.0f)) & (heightField[index] < (waterTableHeight))) 
-                if (Random.Range(1, 100) > 90) color = Colors.brown * 0.01f;
-            
-            // Apply the final color
-            colorField[index] = glm::vec3( color.r, color.g, color.b );
-            
-            continue;
-        }
+        if (heightField[i] > waterTableHeight) continue;
         
-        continue;
+        Color color( colorField[i].x, colorField[i].y, colorField[i].z );
+        waterColor = 0.001f;
+        
+        float height = heightField[i];
+        if (height <= (waterTableHeight - 9.0f))   color = Colors.Lerp(color, waterColor, 1.0f);
+        else if (height <= (waterTableHeight - 8.0f)) color = Colors.Lerp(color, waterColor, 0.9f);
+        else if (height <= (waterTableHeight - 7.0f)) color = Colors.Lerp(color, waterColor, 0.85f);
+        else if (height <= (waterTableHeight - 6.0f)) color = Colors.Lerp(color, waterColor, 0.8f);
+        else if (height <= (waterTableHeight - 5.0f)) color = Colors.Lerp(color, waterColor, 0.75f);
+        else if (height <= (waterTableHeight - 4.0f)) color = Colors.Lerp(color, waterColor, 0.7f);
+        else if (height <= (waterTableHeight - 3.0f)) color = Colors.Lerp(color, waterColor, 0.65f);
+        else if (height <= (waterTableHeight - 2.0f)) color = Colors.Lerp(color, waterColor, 0.6f);
+        else if (height <= (waterTableHeight - 1.0f)) color = Colors.Lerp(color, waterColor, 0.55f);
+        else if (height <= waterTableHeight) color = Colors.Lerp(color, waterColor, 0.5f);
+        
+        if (height < (waterTableHeight - 7.0f) && Random.Range(1, 100) > 70) color = Colors.orange * 0.003f;
+        if (height < (waterTableHeight - 10.0f) && Random.Range(1, 100) > 90) color = Colors.green * 0.003f;
+        if (height >= (waterTableHeight - 10.0f) && height < (waterTableHeight - 4.0f) && Random.Range(1, 100) > 88) color = Colors.green * 0.002f;
+        if (height >= (waterTableHeight - 10.0f) && height < (waterTableHeight - 4.0f) && Random.Range(1, 100) > 80) color = Colors.green * 0.005f;
+        if (height >= (waterTableHeight - 7.0f) && height < waterTableHeight && Random.Range(1, 100) > 90) color = Colors.brown * 0.01f;
+        
+        colorField[i] = glm::vec3(color.r, color.g, color.b);
     }
     
     return;
 }
 
 Mesh* EngineSystemManager::CreateMeshFromHeightField(float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ) {
-    
     Mesh* mesh = Create<Mesh>();
     
     AddHeightFieldToMesh(mesh, heightField, colorField, width, height, offsetX, offsetZ);
@@ -345,16 +228,10 @@ Mesh* EngineSystemManager::CreateMeshFromHeightField(float* heightField, glm::ve
 }
 
 void EngineSystemManager::AddHeightStepToMesh(float* heightField, unsigned int width, unsigned int height) {
+    unsigned int size = width * height;
     
-    for (unsigned int x=0; x < width; x ++) {
-        
-        for (unsigned int z=0; z < height; z ++) {
-            
-            heightField[x * z] = (Math.Round( (heightField[x * z] * 10) ) / 10);
-            
-        }
-        
-    }
+    for (unsigned int i = 0; i < size; i++) 
+        heightField[i] = Math.Round((heightField[i] * 10)) / 10;
     
     return;
 }
@@ -368,125 +245,59 @@ void EngineSystemManager::AddHeightFieldToMesh(Mesh* mesh,
     unsigned int fieldWidth = (width / subTessX) - 1;
     unsigned int fieldHeight = (height / subTessZ) - 1;
     
-    unsigned int ww = width;
-    unsigned int hh = height;
+    float sx = (subTessX > 1) ? subTessX * 4.0f : 1.0f;
+    float sz = (subTessZ > 1) ? subTessZ * 4.0f : 1.0f;
     
-    float sx = 1.0f;
-    float sz = 1.0f;
-    
-    if (subTessX > 1) 
-        sx = subTessX * 4.0f;
-    
-    if (subTessX > 1) 
-        sz = subTessZ * 4.0f;
-    
-    for (unsigned int x=0; x < fieldWidth; x ++) {
+    for (unsigned int x = 0; x < fieldWidth; x++) {
         
-        for (unsigned int z=0; z < fieldHeight; z ++) {
-            
+        for (unsigned int z = 0; z < fieldHeight; z++) {
             unsigned int xa = x * subTessX;
             unsigned int za = z * subTessZ;
             
-            // Get height values
-            float yyA = heightField[ za    * ww +  xa   ];
-            float yyB = heightField[ za    * ww + (xa+1)];
-            float yyC = heightField[(za+1) * ww + (xa+1)];
-            float yyD = heightField[(za+1) * ww +  xa   ];
+            float yyA = heightField[za * width + xa];
+            float yyB = heightField[za * width + (xa + 1)];
+            float yyC = heightField[(za + 1) * width + (xa + 1)];
+            float yyD = heightField[(za + 1) * width + xa];
             
-            //glm::vec3 cA = colorField[ za    * ww +  xa   ];
-            //glm::vec3 cB = colorField[ za    * ww + (xa+1)];
-            //glm::vec3 cC = colorField[(za+1) * ww + (xa+1)];
-            //glm::vec3 cD = colorField[(za+1) * ww +  xa   ];
+            glm::vec3 cA = colorField[za * width + xa];
+            glm::vec3 cB = colorField[za * width + xa];
+            glm::vec3 cC = colorField[za * width + xa];
+            glm::vec3 cD = colorField[za * width + xa];
             
-            glm::vec3 cA = colorField[za * ww + xa];
-            glm::vec3 cB = colorField[za * ww + xa];
-            glm::vec3 cC = colorField[za * ww + xa];
-            glm::vec3 cD = colorField[za * ww + xa];
+            float xx = (((float)x + offsetX - (float)width / 2) / 2) + 0.25;
+            float zz = (((float)z + offsetZ - (float)height / 2) / 2) + 0.25;
             
-            // Calculate chunk position and offset
-            float xx = ( ( ( (float)x + offsetX) - (float)ww / 2) / 2) + 0.25;
-            float zz = ( ( ( (float)z + offsetZ) - (float)hh / 2) / 2) + 0.25;
+            Vertex vertex[4] = {
+                Vertex(xx, yyA, zz, cA.x, cA.y, cA.z, 0, 1, 0, 0, 0),
+                Vertex(xx + sx, yyB, zz, cB.x, cB.y, cB.z, 0, 1, 0, 1, 0),
+                Vertex(xx + sx, yyC, zz + sz, cC.x, cC.y, cC.z, 0, 1, 0, 1, 1),
+                Vertex(xx, yyD, zz + sz, cD.x, cD.y, cD.z, 0, 1, 0, 0, 1)
+            };
             
-            // Generate quad
-            Vertex vertex[4];
-            vertex[0] = Vertex( xx,    yyA, zz,     cA.x, cA.y, cA.z,   0, 1, 0,  0, 0 );
-            vertex[1] = Vertex( xx+sx, yyB, zz,     cB.x, cB.y, cB.z,   0, 1, 0,  1, 0 );
-            vertex[2] = Vertex( xx+sx, yyC, zz+sz,  cC.x, cC.y, cC.z,   0, 1, 0,  1, 1 );
-            vertex[3] = Vertex( xx,    yyD, zz+sz,  cD.x, cD.y, cD.z,   0, 1, 0,  0, 1 );
+            glm::vec3 U = glm::vec3(vertex[2].x, vertex[2].y, vertex[2].z) - glm::vec3(vertex[0].x, vertex[0].y, vertex[0].z);
+            glm::vec3 V = glm::vec3(vertex[1].x, vertex[1].y, vertex[1].z) - glm::vec3(vertex[0].x, vertex[0].y, vertex[0].z);
+            glm::vec3 normal = glm::cross(U, V);
             
-            Vertex vertA = vertex[0];
-            Vertex vertB = vertex[1];
-            Vertex vertC = vertex[2];
-            Vertex vertD = vertex[3];
+            for (int i = 0; i < 4; i++) {
+                vertex[i].nx = normal.x;
+                vertex[i].ny = normal.y;
+                vertex[i].nz = normal.z;
+            }
             
-            // Calculate vertex normals
-            
-            glm::vec3 U;
-            glm::vec3 V;
-            
-            V.x = vertB.x - vertA.x;
-            V.y = vertB.y - vertA.y;
-            V.z = vertB.z - vertA.z;
-            
-            U.x = vertC.x - vertA.x;
-            U.y = vertC.y - vertA.y;
-            U.z = vertC.z - vertA.z;
-            
-            glm::vec3 normal;
-            normal.x = (U.y * V.z) - (U.z * V.y);
-            normal.y = (U.z * V.x) - (U.x * V.z);
-            normal.z = (U.x * V.y) - (U.y * V.x);
-            
-            vertA.nx = normal.x;
-            vertA.ny = normal.y;
-            vertA.nz = normal.z;
-            
-            vertB.nx = normal.x;
-            vertB.ny = normal.y;
-            vertB.nz = normal.z;
-            
-            vertC.nx = normal.x;
-            vertC.ny = normal.y;
-            vertC.nz = normal.z;
-            
-            vertD.nx = normal.x;
-            vertD.ny = normal.y;
-            vertD.nz = normal.z;
-            
-            vertex[0] = vertA;
-            vertex[1] = vertB;
-            vertex[2] = vertC;
-            vertex[3] = vertD;
-            
-            
-            // Load the sub mesh into the buffer
             SubMesh subBuffer;
-            subBuffer.vertexBuffer.push_back(vertex[0]);
-            subBuffer.vertexBuffer.push_back(vertex[1]);
-            subBuffer.vertexBuffer.push_back(vertex[2]);
-            subBuffer.vertexBuffer.push_back(vertex[3]);
-            
-            subBuffer.indexBuffer.push_back(0);
-            subBuffer.indexBuffer.push_back(2);
-            subBuffer.indexBuffer.push_back(1);
-            
-            subBuffer.indexBuffer.push_back(0);
-            subBuffer.indexBuffer.push_back(3);
-            subBuffer.indexBuffer.push_back(2);
+            subBuffer.vertexBuffer.assign(vertex, vertex + 4);
+            subBuffer.indexBuffer = {0, 2, 1, 0, 3, 2};
             
             mesh->AddSubMesh(xx, 0, zz, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
-            
-            continue;
         }
         
-        continue;
     }
     
     return;
 }
 
 
-Button* EngineSystemManager::CreateOverlayButtonCallback(int x, int y, int width, int height, ButtonCallBack callback) {
+Button* EngineSystemManager::CreateOverlayButtonCallback(float x, float y, float width, float height, ButtonCallBack callback) {
     Button* newButton = mButtons.Create();
     newButton->x = x;
     newButton->y = y;
