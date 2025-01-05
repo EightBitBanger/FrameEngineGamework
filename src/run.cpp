@@ -17,9 +17,53 @@ Actor* actorSelected = nullptr;
 
 float ambientLight = 0.0f;
 
+NeuralNetwork net;
+bool initNet = false;
+
+
+extern Button* loadWorldButton;
+extern Button* saveWorldButton;
+extern Button* clearWorldButton;
+
 
 
 void Run() {
+    
+    /*
+    
+    if (!initNet) {
+        initNet = true;
+        
+        net.AddNeuralLayer(4, 4);
+        net.AddNeuralLayer(4, 4);
+        net.AddNeuralLayer(4, 4);
+        net.AddNeuralLayer(4, 4);
+        net.AddNeuralLayer(4, 4);
+        net.AddNeuralLayer(4, 4);
+    }
+    
+    if (Input.CheckKeyPressed(VK_N)) {
+        
+        std::vector<float> inputs = {(Random.Range(0, 10000) * 0.1f) - (Random.Range(0, 10000) * 0.1f),
+                                     (Random.Range(0, 10000) * 0.1f) - (Random.Range(0, 10000) * 0.1f),
+                                     (Random.Range(0, 10000) * 0.1f) - (Random.Range(0, 10000) * 0.1f)};
+        
+        for (unsigned int i=0; i < inputs.size(); i++) 
+            Engine.WriteDialog( 15 + i, Float.ToString(inputs[i]) );
+        
+        net.FeedForward(inputs);
+    }
+    
+    std::vector<float> outputs = net.GetResults();
+    for (unsigned int i=0; i < outputs.size(); i++) {
+        
+        Engine.WriteDialog( 19 + i, Float.ToString(outputs[i]) );
+        
+    }
+    
+    */
+    
+    
     
     // Update plug-in systems
     
@@ -443,6 +487,11 @@ void Run() {
             
             Platform.ShowMouseCursor();
             
+            // Enable menu UI
+            loadWorldButton->Activate();
+            saveWorldButton->Activate();
+            clearWorldButton->Activate();
+            
         } else {
             
             Engine.DisableConsole();
@@ -458,6 +507,12 @@ void Run() {
             // Reset timers
             Time.Update();
             PhysicsTime.Update();
+            
+            // Disable menu UI
+            loadWorldButton->Deactivate();
+            saveWorldButton->Deactivate();
+            clearWorldButton->Deactivate();
+            
         }
         
     }

@@ -4,10 +4,45 @@
 #include <GameEngineFramework/plugins.h>
 
 
-void ButtonPressed(void) {
-    Engine.Print("CLICKED TEST");
+void ButtonLoadWorld(Button* currentButton) {
+    
+    if (!currentButton->isHovering) {Engine.WriteDialog(16, "");} else {Engine.WriteDialog(16, "Hovering");}
+    
+    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
+        return;
+    
+    chunkManager.LoadWorld();
+    
     return;
 }
+
+void ButtonSaveWorld(Button* currentButton) {
+    
+    if (!currentButton->isHovering) {Engine.WriteDialog(17, "");} else {Engine.WriteDialog(17, "Hovering");}
+    
+    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
+        return;
+    
+    chunkManager.SaveWorld();
+    
+    return;
+}
+
+void ButtonClearWorld(Button* currentButton) {
+    
+    if (!currentButton->isHovering) {Engine.WriteDialog(18, "");} else {Engine.WriteDialog(18, "Hovering");}
+    
+    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
+        return;
+    
+    chunkManager.ClearWorld();
+    
+    return;
+}
+
+Button* loadWorldButton;
+Button* saveWorldButton;
+Button* clearWorldButton;
 
 void Start() {
     
@@ -50,6 +85,8 @@ void Start() {
     //
     // Audio test sample
     
+    /*
+    
     Sound* soundA = Audio.CreateSound();
     AudioSample* sampleA = Audio.CreateAudioSample();
     
@@ -65,6 +102,7 @@ void Start() {
     soundA->Play();
     while (soundA->IsSamplePlaying());
     
+    */
     
     
     //
@@ -96,16 +134,6 @@ void Start() {
     weather.SetStaticMaterial(chunkManager.staticMaterial);
     weather.SetWaterMaterial(chunkManager.waterMaterial);
     
-    
-    //chunkManager.staticMaterial->EnableShadowVolumePass();
-    //chunkManager.staticMaterial->SetShadowVolumeIntensityHigh(1.0f);
-    //chunkManager.staticMaterial->SetShadowVolumeIntensityLow(1.0f);
-    
-    //chunkManager.staticMaterial->SetShadowVolumeColor(Colors.red);
-    //chunkManager.staticMaterial->SetShadowVolumeColorIntensity(10.0f);
-    
-    //chunkManager.staticMaterial->SetShadowVolumeLength();
-    //chunkManager.staticMaterial->SetShadowVolumeAngleOfView();
     
     
     
@@ -233,7 +261,7 @@ void Start() {
     // Structure test
     Structure structure;
     structure.name = "";
-    structure.rarity = 10000;
+    structure.rarity = 30000;
     
     structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 0, 0)) );
     structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 1, 0)) );
@@ -264,9 +292,9 @@ void Start() {
     
     
     // World rendering
-    chunkManager.chunkSize = 64;
+    chunkManager.chunkSize = 50;
     
-    chunkManager.renderDistance = 18;
+    chunkManager.renderDistance = 16;
     chunkManager.staticDistance = chunkManager.renderDistance * 0.7f;
     chunkManager.actorDistance  = chunkManager.renderDistance * 0.5f;
     
@@ -274,12 +302,8 @@ void Start() {
     
     
     
-    /*
-    
-    
     // Shadow test
-    
-    
+    /*
     for (unsigned int i=0; i < 1000; i++) {
         
         GameObject* gameObject = Engine.Create<GameObject>();
@@ -311,31 +335,28 @@ void Start() {
         Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer );
         
     }
-    
-    
-    
     */
     
     
     
     
     
+    loadWorldButton  = Engine.CreateButtonUI(100, 20, 115, 24, 0.87f, 1.25f, "Load world",  "panel_blue", ButtonLoadWorld);
+    saveWorldButton  = Engine.CreateButtonUI(0, 50, 115, 24, 0.87f, 1.25f, "Save world",  "panel_blue", ButtonSaveWorld);
+    clearWorldButton = Engine.CreateButtonUI(0, 80, 115, 24, 0.87f, 1.25f, "Clear world", "panel_blue", ButtonClearWorld);
+    
+    loadWorldButton->panel->canvas.anchorCenterHorz = true;
+    saveWorldButton->panel->canvas.anchorCenterHorz = true;
+    clearWorldButton->panel->canvas.anchorCenterHorz = true;
+    
+    loadWorldButton->Deactivate();
+    saveWorldButton->Deactivate();
+    clearWorldButton->Deactivate();
+    
+    
+    
     return;
     
-    Button* buttonUI = Engine.CreateOverlayButtonCallback(120, 120, 32, 32, ButtonPressed);
-    buttonUI->triggerOnLeftButton = true;
-    
-    
-    GameObject* buttonOverlay = Engine.CreateOverlayPanelRenderer(120, 120, 32, 32, "panel_blue");
-    
-    MeshRenderer* buttonRenderer = buttonOverlay->GetComponent<MeshRenderer>();
-    Engine.sceneOverlay->AddMeshRendererToSceneRoot(buttonRenderer, RENDER_QUEUE_GEOMETRY);
-    
-    //buttonRenderer->material->
-    
-    
-    
-    return;
     
     
     // Fire emitter test
