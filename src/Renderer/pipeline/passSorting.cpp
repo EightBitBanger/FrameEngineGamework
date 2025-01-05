@@ -4,7 +4,7 @@
 #include <GameEngineFramework/Types/types.h>
 
 
-bool RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup, unsigned int queueGroupIndex) {
+bool RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup) {
     
     std::vector< std::pair<float, MeshRenderer*> > sortList;
     sortList.reserve(renderQueueGroup->size());

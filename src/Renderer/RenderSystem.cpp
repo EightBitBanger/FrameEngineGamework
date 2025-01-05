@@ -218,6 +218,98 @@ void RenderSystem::SetViewport(unsigned int x, unsigned int y, unsigned int w, u
     return;
 }
 
+// Extract frustum planes from view-projection matrix
+Frustum RenderSystem::FrustumExtractPlanes(glm::mat4& viewProjMatrix) {
+    
+    Frustum frustum;
+    
+    // Left
+    frustum.planes[0] = glm::vec4(
+        viewProjMatrix[0][3] + viewProjMatrix[0][0],
+        viewProjMatrix[1][3] + viewProjMatrix[1][0],
+        viewProjMatrix[2][3] + viewProjMatrix[2][0],
+        viewProjMatrix[3][3] + viewProjMatrix[3][0]
+    );
+    
+    // Right
+    frustum.planes[1] = glm::vec4(
+        viewProjMatrix[0][3] - viewProjMatrix[0][0],
+        viewProjMatrix[1][3] - viewProjMatrix[1][0],
+        viewProjMatrix[2][3] - viewProjMatrix[2][0],
+        viewProjMatrix[3][3] - viewProjMatrix[3][0]
+    );
+    
+    // Bottom
+    frustum.planes[2] = glm::vec4(
+        viewProjMatrix[0][3] + viewProjMatrix[0][1],
+        viewProjMatrix[1][3] + viewProjMatrix[1][1],
+        viewProjMatrix[2][3] + viewProjMatrix[2][1],
+        viewProjMatrix[3][3] + viewProjMatrix[3][1]
+    );
+    
+    // Top
+    frustum.planes[3] = glm::vec4(
+        viewProjMatrix[0][3] - viewProjMatrix[0][1],
+        viewProjMatrix[1][3] - viewProjMatrix[1][1],
+        viewProjMatrix[2][3] - viewProjMatrix[2][1],
+        viewProjMatrix[3][3] - viewProjMatrix[3][1]
+    );
+    
+    // Near
+    frustum.planes[4] = glm::vec4(
+        viewProjMatrix[0][3] + viewProjMatrix[0][2],
+        viewProjMatrix[1][3] + viewProjMatrix[1][2],
+        viewProjMatrix[2][3] + viewProjMatrix[2][2],
+        viewProjMatrix[3][3] + viewProjMatrix[3][2]
+    );
+    
+    // Far
+    frustum.planes[5] = glm::vec4(
+        viewProjMatrix[0][3] - viewProjMatrix[0][2],
+        viewProjMatrix[1][3] - viewProjMatrix[1][2],
+        viewProjMatrix[2][3] - viewProjMatrix[2][2],
+        viewProjMatrix[3][3] - viewProjMatrix[3][2]
+    );
+    
+    // Normalize the planes
+    for (int i = 0; i < 6; i++) {
+        float length = glm::length(glm::vec3(frustum.planes[i]));
+        frustum.planes[i] /= length;
+    }
+    
+    return frustum;
+}
+
+// Check if a point is inside the frustum
+bool RenderSystem::FrustumCheckPoint(Frustum& frustum, glm::vec3& point) {
+    
+    for (int i = 0; i < 6; i++) {
+        
+        if (glm::dot(glm::vec3(frustum.planes[i]), point) + frustum.planes[i].w < 0) 
+            return false;
+        
+    }
+    
+    return true;
+}
+
+// Check if a bounding box is inside the frustum
+bool RenderSystem::FrustumCheckAABB(Frustum& frustum, glm::vec3& min, glm::vec3& max) {
+    for (int i = 0; i < 6; i++) {
+        
+        glm::vec3 positiveVertex = min;
+        
+        if (frustum.planes[i].x >= 0) positiveVertex.x = max.x;
+        if (frustum.planes[i].y >= 0) positiveVertex.y = max.y;
+        if (frustum.planes[i].z >= 0) positiveVertex.z = max.z;
+        
+        if (glm::dot(glm::vec3(frustum.planes[i]), positiveVertex) + frustum.planes[i].w < 0) 
+            return false;
+        
+    }
+    return true;
+}
+
 std::vector<std::string> RenderSystem::GetGLErrorCodes(std::string errorLocationString) {
     
     GLenum glError;

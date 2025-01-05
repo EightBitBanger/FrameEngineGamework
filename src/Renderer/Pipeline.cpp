@@ -33,6 +33,10 @@ void RenderSystem::RenderFrame(void) {
         // Set the camera projection angle
         setTargetCamera(scenePtr->camera, eye, viewProjection);
         
+        // Extract camera project edges for clipping
+        glm::mat4 inverseViewProjMatrix = glm::inverse( viewProjection );
+        Frustum frustum = FrustumExtractPlanes(inverseViewProjMatrix);
+        
         // Gather fog layers
         accumulateSceneFogLayers(scenePtr);
         
@@ -65,12 +69,12 @@ void RenderSystem::RenderFrame(void) {
                 continue;
             
             // Sorting
-            SortingPass(eye, renderQueueGroup, group);
+            //SortingPass(eye, renderQueueGroup);
             
             // Geometry pass
             for (MeshRenderer* currentEntity : *renderQueueGroup) {
                 
-                if (currentEntity->mDoCulling && CullingPass(currentEntity, scenePtr->camera, viewProjection))
+                if (currentEntity->mDoCulling && CullingPass(currentEntity, scenePtr->camera, viewProjection, frustum))
                     continue;
                 
                 GeometryPass(currentEntity, eye, scenePtr->camera->forward, viewProjection);

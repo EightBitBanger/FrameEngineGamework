@@ -4,7 +4,7 @@
 #include <GameEngineFramework/Types/types.h>
 
 
-bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3 cameraAngle, glm::mat4& viewProjection) {
+bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection) {
     
     if (!currentEntity->isActive) 
         return false;

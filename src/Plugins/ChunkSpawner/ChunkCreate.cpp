@@ -23,8 +23,8 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
     
     // Bounding box area
-    glm::vec3 boundMin(-chunkSize, -100, -chunkSize);
-    glm::vec3 boundMax(chunkSize, 100, chunkSize);
+    glm::vec3 boundMin(-chunkSize, -1, -chunkSize);
+    glm::vec3 boundMax(chunkSize, 1, chunkSize);
     
     chunkRenderer->SetBoundingBoxMin(boundMin);
     chunkRenderer->SetBoundingBoxMax(boundMax);
