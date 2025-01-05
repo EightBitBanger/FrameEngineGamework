@@ -266,4 +266,16 @@ private:
     
 };
 
+
+struct StaticElement {
+    
+    glm::vec3 position;
+    
+    glm::vec3 color;
+    
+    uint8_t type;
+    
+};
+
+
 #endif

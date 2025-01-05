@@ -31,6 +31,16 @@
 #define GLEW_STATIC
 #include "../../../vendor/gl/glew.h"
 
+
+struct Frustum {
+    
+    // Left, Right, Bottom, Top, Near, Far
+    glm::vec4 planes[6];
+    
+};
+
+
+
 class ENGINE_API RenderSystem {
     
 public:
@@ -186,7 +196,6 @@ public:
     /// Get number of draw calls made in the last frame.
     unsigned int GetNumberOfDrawCalls(void);
     
-    
     friend class EngineSystemManager;
     
     
@@ -277,15 +286,25 @@ private:
     
     // Passes
     
-    bool GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3 cameraAngle, glm::mat4& viewProjection);
+    bool GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection);
     
-    bool ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3 cameraAngle, glm::mat4& viewProjection);
+    bool ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection);
     
-    bool SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup, unsigned int queueGroupIndex);
+    bool SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup);
     
     void LevelOfDetailPass(MeshRenderer* currentEntity, glm::vec3& eye);
     
-    bool CullingPass(MeshRenderer* currentEntity, Camera* currentCamera, glm::mat4& viewProjection);
+    bool CullingPass(MeshRenderer* currentEntity, Camera* currentCamera, glm::mat4& viewProjection, Frustum& frustum);
+    
+    
+    // Get the edge planes from the projection matrix
+    Frustum FrustumExtractPlanes(glm::mat4& viewProjMatrix);
+    
+    // Check of a point is with the frustum boundary
+    bool FrustumCheckPoint(Frustum& frustum, glm::vec3& point);
+    
+    // Check of an axis aligned bounding box is with the frustum boundary
+    bool FrustumCheckAABB(Frustum& frustum, glm::vec3& min, glm::vec3& max);
     
     
     // Default assets
@@ -318,7 +337,6 @@ public:
     DefaultMeshes  meshes;
     
 };
-
 
 
 #endif
