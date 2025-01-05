@@ -4,7 +4,9 @@
 #include <cstdlib>
 #include <vector>
 
-struct NeuralLayer {
+#include <GameEngineFramework/configuration.h>
+
+struct ENGINE_API NeuralLayer {
     
     std::vector<float> neurons;
     
@@ -15,7 +17,7 @@ struct NeuralLayer {
 };
 
 
-class NeuralNetwork {
+class ENGINE_API NeuralNetwork {
     
 public:
     

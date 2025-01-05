@@ -7,10 +7,10 @@ class Sprite {
 public:
     
     /// Width of the sprite texture.
-    int width;
+    float width;
     
     /// Height of the sprite texture.
-    int height;
+    float height;
     
     // Sub sprite atlas layout
     
@@ -28,13 +28,13 @@ public:
     
     
     Sprite() : 
-        width(15),
-        height(15),
+        width(15.0f),
+        height(15.0f),
         
         subSpriteX(0),
-        subSpriteY(-0.003),
-        subSpriteWidth(0.03127),
-        subSpriteHeight(0.0274)
+        subSpriteY(-0.003f),
+        subSpriteWidth(0.03127f),
+        subSpriteHeight(0.0274f)
     {
     }
     

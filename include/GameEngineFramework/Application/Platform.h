@@ -43,6 +43,7 @@ public:
     int windowBottom;
     
     Viewport windowArea;
+    Viewport clientArea;
     
     /// Game paused state.
     bool isPaused;

@@ -9,16 +9,16 @@ class Panel {
 public:
     
     /// Horizontal position in the window in pixels.
-    int x;
+    float x;
     
     /// Vertical position in the window in pixels.
-    int y;
+    float y;
     
     /// Width of the panel in pixels.
-    int width;
+    float width;
     
     /// Height of the panel in pixels.
-    int height;
+    float height;
     
     /// Window anchoring layout.
     Canvas canvas;

@@ -7,10 +7,10 @@ class Canvas {
 public:
     
     /// The x position of the canvas relative to the window.
-    int x;
+    float x;
     
     /// The y position of the canvas relative to the window.
-    int y;
+    float y;
     
     /// Anchor the canvas to the top of the window.
     bool anchorTop;

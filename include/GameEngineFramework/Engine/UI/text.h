@@ -14,6 +14,11 @@ public:
     
     friend class EngineSystemManager;
     
+    /// Offset X position of the text.
+    float x;
+    
+    /// Offset Y position of the text.
+    float y;
     
     /// Text to be rendered.
     std::string text;
@@ -46,15 +51,18 @@ public:
     
     
     Text() : 
+        x(0),
+        y(0),
+        
         text(""),
         
         size(0),
         
-        width(0.5),
-        height(0.9),
+        width(0.5f),
+        height(0.9f),
         
-        glyphWidth(0.9),
-        glyphHeight(0.9),
+        glyphWidth(0.9f),
+        glyphHeight(0.9f),
         
         mCurrentText("")
     {

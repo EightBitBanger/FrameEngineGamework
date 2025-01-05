@@ -42,7 +42,7 @@
 #endif
 
 // UI callback type
-typedef void(*ButtonCallBack)();
+typedef void(*ButtonCallBack)(Button*);
 
 
 #define COMPONENT_STREAM_BUFFER_SIZE   1024 * 64
@@ -95,16 +95,19 @@ public:
     GameObject* CreateOverlayRenderer(void);
     
     /// Create a text overlay and return its object.
-    GameObject* CreateOverlayTextRenderer(int x, int y, std::string text, unsigned int textSize, Color color, std::string materialTag);
+    GameObject* CreateOverlayTextRenderer(float x, float y, std::string text, unsigned int textSize, Color color, std::string materialTag);
     
     /// Create a panel overlay and return its object.
-    GameObject* CreateOverlayPanelRenderer(int x, int y, int width, int height, std::string materialTag);
+    GameObject* CreateOverlayPanelRenderer(float x, float y, float width, float height, std::string materialTag);
+    
+    /// Create a button callback with an overlay panel and text.
+    Button* CreateButtonUI(float buttonX, float buttonY, float buttonW, float buttonH, float textX, float textY, std::string text, std::string materialName, ButtonCallBack callback);
     
     
     // Mouse button event callback
     
     /// Create a button and return its pointer.
-    Button* CreateOverlayButtonCallback(int x, int y, int width, int height, ButtonCallBack callback);
+    Button* CreateOverlayButtonCallback(float x, float y, float width, float height, ButtonCallBack callback);
     
     /// Destroy a button 
     bool DestroyOverlayButtonCallback(Button* button);

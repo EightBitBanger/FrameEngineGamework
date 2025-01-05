@@ -4,59 +4,74 @@
 
 struct Button {
     
+    /// Is the button currently active in the scene.
+    bool isActive;
+    
     /// Button X position in the window.
-    unsigned int x;
+    float x;
     
     /// Button Y position in the window.
-    unsigned int y;
+    float y;
     
     /// Button width.
-    unsigned int w;
+    float w;
     
     /// Button height.
-    unsigned int h;
+    float h;
     
     /// (Read only) State whether the mouse is hovering over the button.
     bool isHovering;
     
-    /// State whether this is a simple button element or a drag and drop element.
-    bool isDragAndDrop;
-    
-    /// Trigger on the left mouse button event.
-    bool triggerOnLeftButton;
-    
-    /// Trigger on the middle mouse button event.
-    bool triggerOnMiddleButton;
-    
-    /// Trigger on the right mouse button event.
-    bool triggerOnRightButton;
-    
-    /// Trigger when the mouse button is pressed.
-    bool triggerOnPressed;
-    
-    /// Trigger when the mouse button is released.
-    bool triggerOnRelease;
+    /// Associated panel element.
+    Panel* panel;
     
     /// Function pointer to an event callback.
-    void(*callback)();
+    void(*callback)(Button*);
+    
+    /// Pointer to the associated game objects
+    GameObject* panelOverlay;
+    GameObject* textObject;
+    
+    /// Activate the button, showing it and enabling its callback.
+    void Activate(void) {
+        
+        isActive = true;
+        
+        panelOverlay->Activate();
+        
+        textObject->Activate();
+        
+        return;
+    }
+    
+    /// Deactivate the button, hiding it and ignoring its callback.
+    void Deactivate(void) {
+        
+        isActive = false;
+        
+        panelOverlay->Deactivate();
+        
+        textObject->Deactivate();
+        
+        return;
+    }
     
     Button() : 
+        isActive(true),
         x(0),
         y(0),
         
-        w(0),
-        h(0),
+        w(16),
+        h(16),
         
         isHovering(false),
         
-        triggerOnLeftButton(false),
-        triggerOnMiddleButton(false),
-        triggerOnRightButton(false),
+        panel(nullptr),
         
-        triggerOnPressed(false),
-        triggerOnRelease(false),
+        callback(nullptr),
+        panelOverlay(nullptr),
+        textObject(nullptr)
         
-        callback(nullptr)
     {
     }
     
