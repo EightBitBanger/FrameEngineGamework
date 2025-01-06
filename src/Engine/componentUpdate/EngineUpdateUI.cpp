@@ -28,11 +28,17 @@ void EngineSystemManager::UpdateUI(void) {
                 
                 Text* text = button->textObject->GetComponent<Text>();
                 
-                button->x = ((position.z / text->size) + text->x);
-                button->y = ((position.x / text->size) - text->y);
+                float canvasX = (button->panel->canvas.x) / text->size;
+                float canvasY = button->panel->canvas.y;
                 
-                text->canvas.x = (button->panel->canvas.x / text->size) + ((position.z / text->size) + text->x);
-                text->canvas.y = (button->panel->canvas.y / text->size) + ((position.x / text->size) - text->y);
+                // TODO fix button alignment
+                canvasX -= 57;
+                
+                button->x = (position.z + text->x) + canvasX;
+                button->y = (position.x - text->y) + canvasY;
+                
+                //text->canvas.x = (canvasX / text->size) + ((position.z / text->size) + text->x);
+                //text->canvas.y = (canvasY / text->size) + ((position.x / text->size) - text->y);
                 
             }
             

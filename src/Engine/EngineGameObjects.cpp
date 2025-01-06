@@ -173,7 +173,7 @@ GameObject* EngineSystemManager::CreateOverlayRenderer(void) {
     return overlayObject;
 }
 
-GameObject* EngineSystemManager::CreateOverlayTextRenderer(float x, float y, std::string text, unsigned int textSize, Color color, std::string materialTag) {
+GameObject* EngineSystemManager::CreateOverlayTextRenderer(float x, float y, std::string text, float textSize, Color color, std::string materialTag) {
     
     GameObject* overlayObject = CreateOverlayRenderer();
     

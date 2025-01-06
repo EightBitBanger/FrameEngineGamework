@@ -16,8 +16,9 @@ void EngineSystemManager::UpdatePanelUI(unsigned int index) {
         mStreamBuffer[index].transform->position.z += mStreamBuffer[index].panel->width + mStreamBuffer[index].panel->x;
         
         // Anchor CENTER horizontally
-        if (mStreamBuffer[index].panel->canvas.anchorCenterHorz) 
-            mStreamBuffer[index].transform->position.z = (Renderer.viewport.w / 2) + (mStreamBuffer[index].panel->canvas.x * mStreamBuffer[index].panel->width);
+        if (mStreamBuffer[index].panel->canvas.anchorCenterHorz) {
+            mStreamBuffer[index].transform->position.z  = (Renderer.viewport.w / 2) + (mStreamBuffer[index].panel->canvas.x * mStreamBuffer[index].panel->width);
+        }
         
     }
     

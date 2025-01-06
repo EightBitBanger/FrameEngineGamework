@@ -494,13 +494,17 @@ void EngineSystemManager::Initiate() {
         meshRenderer->material->EnableBlending();
         meshRenderer->material->SetBlending(BLEND_SRC_ALPHA, BLEND_ONE_MINUS_SRC_ALPHA);
         
-        sceneOverlay->AddMeshRendererToSceneRoot( meshRenderer, RENDER_QUEUE_OVERLAY );
+        sceneOverlay->AddMeshRendererToSceneRoot( meshRenderer, RENDER_QUEUE_PREGEOMETRY );
         
         mConsoleText[i] = mConsoleTextObjects[i]->GetComponent<Text>();
         mConsoleText[i]->canvas.anchorTop = false;
         
+        mConsoleText[i]->text = "FUCKERYFUCKERYFUCKERYFUCKERYFUCKERYFUCKERY";
+        
         mConsoleText[i]->canvas.x = 0;
-        mConsoleText[i]->canvas.y = -(2 * i + 4);
+        mConsoleText[i]->canvas.y = -(2 * i + 4) + 40;
+        
+        //mConsoleText[i]->canvas.y -= 50;
         
     }
     
