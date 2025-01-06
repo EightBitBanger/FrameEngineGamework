@@ -4,21 +4,59 @@
 #include <GameEngineFramework/plugins.h>
 
 
+
+// Menu UI
+GameObject* menuPanelObject;
+GameObject* versionTextObject;
+
+Button* loadWorldButton;
+Button* saveWorldButton;
+Button* clearWorldButton;
+Button* quitButton;
+
+
+
+
 void ButtonLoadWorld(Button* currentButton) {
     
-    if (!currentButton->isHovering) {Engine.WriteDialog(16, "");} else {Engine.WriteDialog(16, "Hovering");}
+    // Mouse hovering over button check
+    //if (!currentButton->isHovering) {Engine.WriteDialog(14, "");} else {Engine.WriteDialog(14, "Hovering");}
     
     if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
         return;
     
-    chunkManager.LoadWorld();
+    if (!chunkManager.LoadWorld()) 
+        return;
+    
+    // Disable the console
+    Platform.isPaused = false;
+    
+    Engine.DisableConsole();
+    Engine.ConsoleClearInputString();
+    
+    Engine.sceneMain->camera->EnableMouseLook();
+    
+    // Reset mouse position
+    Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    
+    Platform.HideMouseCursor();
+    
+    // Reset timers
+    Time.Update();
+    PhysicsTime.Update();
+    
+    // Disable menu UI
+    menuPanelObject->Deactivate();
+    versionTextObject->Deactivate();
+    loadWorldButton->Deactivate();
+    saveWorldButton->Deactivate();
+    clearWorldButton->Deactivate();
+    quitButton->Deactivate();
     
     return;
 }
 
 void ButtonSaveWorld(Button* currentButton) {
-    
-    if (!currentButton->isHovering) {Engine.WriteDialog(17, "");} else {Engine.WriteDialog(17, "Hovering");}
     
     if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
         return;
@@ -30,8 +68,6 @@ void ButtonSaveWorld(Button* currentButton) {
 
 void ButtonClearWorld(Button* currentButton) {
     
-    if (!currentButton->isHovering) {Engine.WriteDialog(18, "");} else {Engine.WriteDialog(18, "Hovering");}
-    
     if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
         return;
     
@@ -40,9 +76,14 @@ void ButtonClearWorld(Button* currentButton) {
     return;
 }
 
-Button* loadWorldButton;
-Button* saveWorldButton;
-Button* clearWorldButton;
+void ButtonQuitApplication(Button* currentButton) {
+    
+    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
+        return;
+    
+    Platform.isActive = false;
+    
+}
 
 void Start() {
     
@@ -61,9 +102,12 @@ void Start() {
     Engine.ConsoleRegisterCommand("weather", FuncWeather);
     
     
-    Platform.HideMouseCursor();
+    Platform.ShowMouseCursor();
     Engine.DisableConsoleCloseOnReturn();
     
+    Platform.isPaused = true;
+    Engine.EnableConsole();
+    Engine.EnableConsoleFadeOutTextElements();
     
     // User plug-in initiation
     chunkManager.Initiate();
@@ -73,13 +117,13 @@ void Start() {
     
     
     // Event callbacks
-    
     Platform.EventCallbackLoseFocus = EventLostFocus;
     
     
     //Engine.EnableProfiler();
     
     //Engine.EnablePhysicsDebugRenderer();
+    
     
     
     //
@@ -118,8 +162,8 @@ void Start() {
     // Assign the camera controller's camera for rendering the main scene.
     Engine.sceneMain->camera = Engine.cameraController->GetComponent<Camera>();
     
-    // Use the mouse to look around.
-    Engine.sceneMain->camera->EnableMouseLook();
+    // Disable mouse look on startup.
+    Engine.sceneMain->camera->DisableMouseLook();
     
     // Create a box collider for the player.
     rp3d::BoxShape* boxShape = Physics.CreateColliderBox(1, 1, 1);
@@ -338,20 +382,63 @@ void Start() {
     */
     
     
+    // Initiate UI
     
+    // Menu overlay
+    menuPanelObject = Engine.CreateOverlayPanelRenderer(0, 300, 230, 150, "panel_menu");
+    Panel* panel = menuPanelObject->GetComponent<Panel>();
+    panel->canvas.anchorCenterHorz = true;
     
+    MeshRenderer* menuPanelRenderer = menuPanelObject->GetComponent<MeshRenderer>();
+    Engine.sceneOverlay->AddMeshRendererToSceneRoot(menuPanelRenderer);
+    menuPanelRenderer->material->ambient = Colors.MakeGrayScale(0.7f);
     
-    loadWorldButton  = Engine.CreateButtonUI(100, 20, 115, 24, 0.87f, 1.25f, "Load world",  "panel_blue", ButtonLoadWorld);
-    saveWorldButton  = Engine.CreateButtonUI(0, 50, 115, 24, 0.87f, 1.25f, "Save world",  "panel_blue", ButtonSaveWorld);
-    clearWorldButton = Engine.CreateButtonUI(0, 80, 115, 24, 0.87f, 1.25f, "Clear world", "panel_blue", ButtonClearWorld);
+    // Version text
+    Color versionColor = Colors.Lerp(Colors.black, Colors.green, 0.6f);
+    versionTextObject = Engine.CreateOverlayTextRenderer(-15, -1, "0.1.0", 9, versionColor, "font");
+    MeshRenderer* versionTextRenderer = versionTextObject->GetComponent<MeshRenderer>();
+    Engine.sceneOverlay->AddMeshRendererToSceneRoot(versionTextRenderer);
+    
+    versionTextRenderer->material->diffuse = Colors.MakeGrayScale(0.24f);
+    
+    Text* versionText = versionTextObject->GetComponent<Text>();
+    versionText->canvas.anchorTop = false;
+    versionText->canvas.anchorRight = true;
+    
+    // Menu buttons
+    loadWorldButton  = Engine.CreateButtonUI(0, 260, 115, 24,-4.1f, 1.25f, "Load world",  "button_blue", ButtonLoadWorld);
+    saveWorldButton  = Engine.CreateButtonUI(0, 300, 115, 24,-4.1f, 1.25f, "Save world",  "button_blue", ButtonSaveWorld);
+    clearWorldButton = Engine.CreateButtonUI(0, 340, 115, 24,-4.4f, 1.25f, "Clear world", "button_blue", ButtonClearWorld);
+    quitButton       = Engine.CreateButtonUI(0, 380, 115, 24,-5.4f, 1.25f, "    Quit",    "button_blue", ButtonQuitApplication);
     
     loadWorldButton->panel->canvas.anchorCenterHorz = true;
     saveWorldButton->panel->canvas.anchorCenterHorz = true;
     clearWorldButton->panel->canvas.anchorCenterHorz = true;
+    quitButton->panel->canvas.anchorCenterHorz = true;
     
-    loadWorldButton->Deactivate();
-    saveWorldButton->Deactivate();
-    clearWorldButton->Deactivate();
+    Text* loadWorldText = loadWorldButton->textObject->GetComponent<Text>();
+    Text* saveWorldText = saveWorldButton->textObject->GetComponent<Text>();
+    Text* clearWorldText = clearWorldButton->textObject->GetComponent<Text>();
+    Text* quitWorldText = quitButton->textObject->GetComponent<Text>();
+    
+    loadWorldText->canvas.anchorCenterHorz = true;
+    saveWorldText->canvas.anchorCenterHorz = true;
+    clearWorldText->canvas.anchorCenterHorz = true;
+    quitWorldText->canvas.anchorCenterHorz = true;
+    
+    
+    //menuPanelObject->Deactivate();
+    //versionTextObject->Deactivate();
+    //loadWorldButton->Deactivate();
+    //saveWorldButton->Deactivate();
+    //clearWorldButton->Deactivate();
+    //quitButton->Deactivate();
+    
+    
+    
+    
+    
+    
     
     
     

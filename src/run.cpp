@@ -21,10 +21,12 @@ NeuralNetwork net;
 bool initNet = false;
 
 
+extern GameObject* menuPanelObject;
+extern GameObject* versionTextObject;
 extern Button* loadWorldButton;
 extern Button* saveWorldButton;
 extern Button* clearWorldButton;
-
+extern Button* quitButton;
 
 
 void Run() {
@@ -488,9 +490,12 @@ void Run() {
             Platform.ShowMouseCursor();
             
             // Enable menu UI
+            menuPanelObject->Activate();
+            versionTextObject->Activate();
             loadWorldButton->Activate();
             saveWorldButton->Activate();
             clearWorldButton->Activate();
+            quitButton->Activate();
             
         } else {
             
@@ -509,9 +514,12 @@ void Run() {
             PhysicsTime.Update();
             
             // Disable menu UI
+            menuPanelObject->Deactivate();
+            versionTextObject->Deactivate();
             loadWorldButton->Deactivate();
             saveWorldButton->Deactivate();
             clearWorldButton->Deactivate();
+            quitButton->Deactivate();
             
         }
         
