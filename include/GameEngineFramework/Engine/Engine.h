@@ -95,7 +95,7 @@ public:
     GameObject* CreateOverlayRenderer(void);
     
     /// Create a text overlay and return its object.
-    GameObject* CreateOverlayTextRenderer(float x, float y, std::string text, unsigned int textSize, Color color, std::string materialTag);
+    GameObject* CreateOverlayTextRenderer(float x, float y, std::string text, float textSize, Color color, std::string materialTag);
     
     /// Create a panel overlay and return its object.
     GameObject* CreateOverlayPanelRenderer(float x, float y, float width, float height, std::string materialTag);

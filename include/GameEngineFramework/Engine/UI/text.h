@@ -27,7 +27,7 @@ public:
     Color color;
     
     /// Size of the font.
-    unsigned int size;
+    float size;
     
     /// Window anchoring layout.
     Canvas canvas;
