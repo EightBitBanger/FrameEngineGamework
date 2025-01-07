@@ -1,10 +1,10 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 #include <GameEngineFramework/Engine/Engine.h>
 
+#include <GameEngineFramework/plugins.h>
+
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
 
-extern ParticleSystem  particle;
-extern ChunkManager    chunkManager;
 
 WeatherSystem::WeatherSystem() : 
     weatherStateCounter(320),
@@ -109,7 +109,7 @@ void WeatherSystem::Initiate(void) {
     
     // Rain emitter
     
-    mRainEmitter = particle.CreateEmitter();
+    mRainEmitter = Particle.CreateEmitter();
     
     mRainEmitter->type = EmitterType::AreaEffector;
     mRainEmitter->position = glm::vec3(0, 0, 0);
@@ -126,11 +126,11 @@ void WeatherSystem::Initiate(void) {
     
     mRainEmitter->maxParticles = 2000;
     
-    mRainEmitter->heightMinimum = chunkManager.world.waterLevel;
+    mRainEmitter->heightMinimum = GameWorld.world.waterLevel;
     
     // Snow emitter
     
-    mSnowEmitter = particle.CreateEmitter();
+    mSnowEmitter = Particle.CreateEmitter();
     
     mSnowEmitter->type = EmitterType::AreaEffector;
     mSnowEmitter->position = glm::vec3(0, 0, 0);
@@ -147,7 +147,7 @@ void WeatherSystem::Initiate(void) {
     
     mSnowEmitter->maxParticles = 2000;
     
-    mSnowEmitter->heightMinimum = chunkManager.world.waterLevel;
+    mSnowEmitter->heightMinimum = GameWorld.world.waterLevel;
     
     // Zero the weather systems
     SetWeather( WeatherType::Clear );

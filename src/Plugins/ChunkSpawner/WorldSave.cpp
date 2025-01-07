@@ -1,6 +1,9 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
 
+#include <GameEngineFramework/plugins.h>
+
+
 extern WeatherSystem  weather;
 
 
@@ -47,11 +50,11 @@ bool ChunkManager::SaveWorld(void) {
     worldDataBuffer += Float.ToString(playerPosition.x) + "," + Float.ToString(playerPosition.y) + "," + Float.ToString(playerPosition.z) + "\n";
     worldDataBuffer += Float.ToString(playerYaw) + "," + Float.ToString(playerPitch) + "\n";
     worldDataBuffer += Int.ToString(worldSeed) + "\n";
-    worldDataBuffer += Float.ToString(weather.GetTime()) + "\n";
+    worldDataBuffer += Float.ToString(Weather.GetTime()) + "\n";
     // Weather
-    worldDataBuffer += Int.ToString((int)weather.GetWeatherCurrent()) + "\n";
-    worldDataBuffer += Int.ToString((int)weather.GetWeatherNext()) + "\n";
-    worldDataBuffer += Float.ToString(weather.GetWeatherCycleCounter()) + "\n";
+    worldDataBuffer += Int.ToString((int)Weather.GetWeatherCurrent()) + "\n";
+    worldDataBuffer += Int.ToString((int)Weather.GetWeatherNext()) + "\n";
+    worldDataBuffer += Float.ToString(Weather.GetWeatherCycleCounter()) + "\n";
     
     Serializer.Serialize(worldName + "/world.dat", (void*)worldDataBuffer.data(), worldDataBuffer.size());
     

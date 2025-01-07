@@ -499,12 +499,12 @@ void EngineSystemManager::Initiate() {
         mConsoleText[i] = mConsoleTextObjects[i]->GetComponent<Text>();
         mConsoleText[i]->canvas.anchorTop = false;
         
-        mConsoleText[i]->text = "FUCKERYFUCKERYFUCKERYFUCKERYFUCKERYFUCKERY";
+        mConsoleText[i]->text = "";
         
         mConsoleText[i]->canvas.x = 0;
         mConsoleText[i]->canvas.y = -(2 * i + 4) + 40;
         
-        //mConsoleText[i]->canvas.y -= 50;
+        mConsoleText[i]->canvas.y -= 39;
         
     }
     

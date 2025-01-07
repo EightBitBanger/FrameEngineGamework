@@ -1,7 +1,8 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
 
-extern WeatherSystem  weather;
+#include <GameEngineFramework/plugins.h>
+
 
 
 bool ChunkManager::LoadWorld(void) {
@@ -48,9 +49,9 @@ bool ChunkManager::LoadWorld(void) {
     int weatherNext = String.ToInt(bufferArray[5]);
     float weatherCycleCounter = String.ToFloat(bufferArray[6]);
     
-    weather.SetWeather( (WeatherType)weatherCurrent );
-    weather.SetWeatherNext( (WeatherType)weatherNext );
-    weather.SetWeatherCycleCounter(weatherCycleCounter);
+    Weather.SetWeather( (WeatherType)weatherCurrent );
+    Weather.SetWeatherNext( (WeatherType)weatherNext );
+    Weather.SetWeatherCycleCounter(weatherCycleCounter);
     
     Camera* cameraPtr = Engine.cameraController->GetComponent<Camera>();
     
@@ -58,7 +59,7 @@ bool ChunkManager::LoadWorld(void) {
     
     Engine.cameraController->SetPosition( glm::vec3(posX, posY, posZ) );
     
-    weather.SetTime( worldTime );
+    Weather.SetTime( worldTime );
     
     // Load world rules
     
