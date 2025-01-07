@@ -7,8 +7,10 @@
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
 #include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
 
-extern ChunkManager     chunkManager;
-extern WeatherSystem    weather;
-extern ParticleSystem   particle;
+
+extern ChunkManager     GameWorld;
+extern WeatherSystem    Weather;
+extern ParticleSystem   Particle;
+
 
 #endif

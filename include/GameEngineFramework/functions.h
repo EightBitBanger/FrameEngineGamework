@@ -2,6 +2,24 @@
 
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
+#include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
+
+
+// UI
+extern GameObject* menuPanelObject;
+extern GameObject* versionTextObject;
+extern Button* loadWorldButton;
+extern Button* saveWorldButton;
+extern Button* clearWorldButton;
+extern Button* quitButton;
+
+void MainMenuEnable(void);
+void MainMenuDisable(void);
+
+void ButtonLoadWorld(Button* currentButton);
+void ButtonSaveWorld(Button* currentButton);
+void ButtonClearWorld(Button* currentButton);
+void ButtonQuitApplication(Button* currentButton);
 
 
 // List worlds
