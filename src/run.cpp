@@ -14,19 +14,11 @@ std::string targetGene = "";
 
 Actor* actorSelected = nullptr;
 
-
-float ambientLight = 0.0f;
-
 NeuralNetwork net;
 bool initNet = false;
 
 
-extern GameObject* menuPanelObject;
-extern GameObject* versionTextObject;
-extern Button* loadWorldButton;
-extern Button* saveWorldButton;
-extern Button* clearWorldButton;
-extern Button* quitButton;
+
 
 
 void Run() {
@@ -69,11 +61,11 @@ void Run() {
     
     // Update plug-in systems
     
-    weather.Update();
+    Weather.Update();
     
-    particle.Update();
+    Particle.Update();
     
-    chunkManager.Update();
+    GameWorld.Update();
     
     
     // Cast a ray from the player
@@ -213,7 +205,7 @@ void Run() {
                 (sourceArray[0][2] == 'n') & 
                 (sourceArray[0][3] == 'e')) {
                 
-                GameObject* newActorObject = chunkManager.SpawnActor( hit.point.x, hit.point.y, hit.point.z );
+                GameObject* newActorObject = GameWorld.SpawnActor( hit.point.x, hit.point.y, hit.point.z );
                 
                 GameObject* hitObject = (GameObject*)hit.gameObject;
                 Actor* newActor = newActorObject->GetComponent<Actor>();
@@ -244,7 +236,7 @@ void Run() {
             float posX = String.ToInt( name_pos[0] );
             float posZ = String.ToInt( name_pos[1] );
             
-            Chunk* chunk = chunkManager.FindChunk(posX, posZ);
+            Chunk* chunk = GameWorld.FindChunk(posX, posZ);
             
             if (chunk->gameObject != nullptr) {
                 
@@ -261,7 +253,7 @@ void Run() {
                 staticObj.y = chunkPosY;
                 staticObj.z = chunkPosZ;
                 
-                chunkManager.AddDecorTree(*chunk, staticObj, chunkRenderer->mesh, -chunkPosX, chunkPosY, -chunkPosZ, Decoration::TreeOak);
+                GameWorld.AddDecorTree(*chunk, staticObj, chunkRenderer->mesh, -chunkPosX, chunkPosY, -chunkPosZ, Decoration::TreeOak);
                 chunkRenderer->mesh->Load();
                 
             }
@@ -276,7 +268,7 @@ void Run() {
         
         if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
             
-            chunkManager.KillActor( (GameObject*)hit.gameObject );
+            GameWorld.KillActor( (GameObject*)hit.gameObject );
             
         }
         
@@ -383,16 +375,16 @@ void Run() {
             Engine.WriteDialog(4, hitActor->GetName());
             Engine.WriteDialog(5, "Age: " + Int.ToString(hitActor->GetAge()));
             
-            float actorChunkX = Math.Round( hitObject->GetPosition().x / chunkManager.chunkSize ) * chunkManager.chunkSize;
-            float actorChunkZ = Math.Round( hitObject->GetPosition().z / chunkManager.chunkSize ) * chunkManager.chunkSize;
+            float actorChunkX = Math.Round( hitObject->GetPosition().x / GameWorld.chunkSize ) * GameWorld.chunkSize;
+            float actorChunkZ = Math.Round( hitObject->GetPosition().z / GameWorld.chunkSize ) * GameWorld.chunkSize;
             
             // Set actor chunk to the current chunk
-            Chunk* chunkPtr = chunkManager.CheckChunk( glm::vec2(actorChunkX, actorChunkZ) );
+            Chunk* chunkPtr = GameWorld.CheckChunk( glm::vec2(actorChunkX, actorChunkZ) );
             if (chunkPtr != nullptr) {
                 
-                Engine.WriteDialog(6, Float.ToString(chunkPtr->position.x / chunkManager.chunkSize) + 
+                Engine.WriteDialog(6, Float.ToString(chunkPtr->position.x / GameWorld.chunkSize) + 
                                       ", " + 
-                                      Float.ToString(chunkPtr->position.y / chunkManager.chunkSize));
+                                      Float.ToString(chunkPtr->position.y / GameWorld.chunkSize));
                 
             }
             
@@ -481,45 +473,11 @@ void Run() {
         
         if (Platform.isPaused) {
             
-            Engine.EnableConsole();
-            
-            mainCamera->DisableMouseLook();
-            
-            Input.ClearKeys();
-            
-            Platform.ShowMouseCursor();
-            
-            // Enable menu UI
-            menuPanelObject->Activate();
-            versionTextObject->Activate();
-            loadWorldButton->Activate();
-            saveWorldButton->Activate();
-            clearWorldButton->Activate();
-            quitButton->Activate();
+            MainMenuEnable();
             
         } else {
             
-            Engine.DisableConsole();
-            Engine.ConsoleClearInputString();
-            
-            mainCamera->EnableMouseLook();
-            
-            // Reset mouse position
-            Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
-            
-            Platform.HideMouseCursor();
-            
-            // Reset timers
-            Time.Update();
-            PhysicsTime.Update();
-            
-            // Disable menu UI
-            menuPanelObject->Deactivate();
-            versionTextObject->Deactivate();
-            loadWorldButton->Deactivate();
-            saveWorldButton->Deactivate();
-            clearWorldButton->Deactivate();
-            quitButton->Deactivate();
+            MainMenuDisable();
             
         }
         

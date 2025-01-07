@@ -4,6 +4,6 @@
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
 #include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
 
-ChunkManager     chunkManager;
-WeatherSystem    weather;
-ParticleSystem   particle;
+ChunkManager     GameWorld;
+WeatherSystem    Weather;
+ParticleSystem   Particle;

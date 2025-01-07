@@ -6,10 +6,10 @@
 
 void Shutdown(void) {
     
-    //if (chunkManager.world.doGenerateChunks) 
-    //    chunkManager.SaveWorld();
+    //if (GameWorld.world.doGenerateChunks) 
+    //    GameWorld.SaveWorld();
     
-    //chunkManager.world.doGenerateChunks = false;
+    //GameWorld.world.doGenerateChunks = false;
     
     return;
 }

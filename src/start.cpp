@@ -17,74 +17,6 @@ Button* quitButton;
 
 
 
-void ButtonLoadWorld(Button* currentButton) {
-    
-    // Mouse hovering over button check
-    //if (!currentButton->isHovering) {Engine.WriteDialog(14, "");} else {Engine.WriteDialog(14, "Hovering");}
-    
-    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
-        return;
-    
-    if (!chunkManager.LoadWorld()) 
-        return;
-    
-    // Disable the console
-    Platform.isPaused = false;
-    
-    Engine.DisableConsole();
-    Engine.ConsoleClearInputString();
-    
-    Engine.sceneMain->camera->EnableMouseLook();
-    
-    // Reset mouse position
-    Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
-    
-    Platform.HideMouseCursor();
-    
-    // Reset timers
-    Time.Update();
-    PhysicsTime.Update();
-    
-    // Disable menu UI
-    menuPanelObject->Deactivate();
-    versionTextObject->Deactivate();
-    loadWorldButton->Deactivate();
-    saveWorldButton->Deactivate();
-    clearWorldButton->Deactivate();
-    quitButton->Deactivate();
-    
-    return;
-}
-
-void ButtonSaveWorld(Button* currentButton) {
-    
-    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
-        return;
-    
-    chunkManager.SaveWorld();
-    
-    return;
-}
-
-void ButtonClearWorld(Button* currentButton) {
-    
-    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
-        return;
-    
-    chunkManager.ClearWorld();
-    
-    return;
-}
-
-void ButtonQuitApplication(Button* currentButton) {
-    
-    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
-        return;
-    
-    Platform.isActive = false;
-    
-}
-
 void Start() {
     
     // Load console functions
@@ -109,10 +41,15 @@ void Start() {
     Engine.EnableConsole();
     Engine.EnableConsoleFadeOutTextElements();
     
+    
     // User plug-in initiation
-    chunkManager.Initiate();
-    weather.Initiate();
-    particle.Initiate();
+    GameWorld.Initiate();
+    
+    Weather.Initiate();
+    
+    Particle.Initiate();
+    
+    
     
     
     
@@ -173,10 +110,10 @@ void Start() {
     
     // Weather system
     
-    weather.SetPlayerObject(Engine.cameraController);
-    weather.SetWorldMaterial(chunkManager.worldMaterial);
-    weather.SetStaticMaterial(chunkManager.staticMaterial);
-    weather.SetWaterMaterial(chunkManager.waterMaterial);
+    Weather.SetPlayerObject(Engine.cameraController);
+    Weather.SetWorldMaterial(GameWorld.worldMaterial);
+    Weather.SetStaticMaterial(GameWorld.staticMaterial);
+    Weather.SetWaterMaterial(GameWorld.waterMaterial);
     
     
     
@@ -187,27 +124,27 @@ void Start() {
     
     DecorationSpecifier decorGrass;
     decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 100;
+    decorGrass.density = 2000;
     decorGrass.spawnHeightMaximum = 35;
-    decorGrass.spawnHeightMinimum = chunkManager.world.waterLevel;
+    decorGrass.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
     decorGrass.spawnStackHeightMax = 2;
-    decorGrass.threshold = 0.1f;
-    decorGrass.noise = 0.4f;
+    decorGrass.threshold = 0.03f;
+    decorGrass.noise = 0.08f;
     
     DecorationSpecifier decorTrees;
     decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 10;
+    decorTrees.density = 40;
     decorTrees.spawnHeightMaximum = 20;
-    decorTrees.spawnHeightMinimum = chunkManager.world.waterLevel;
+    decorTrees.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
     decorTrees.spawnStackHeightMax = 8;
-    decorTrees.threshold = 0.2f;
-    decorTrees.noise = 0.07f;
+    decorTrees.threshold = 0.01f;
+    decorTrees.noise = 0.3f;
     
     DecorationSpecifier decorTreeHights;
     decorTreeHights.type = DECORATION_TREE;
-    decorTreeHights.density = 150;
+    decorTreeHights.density = 200;
     decorTreeHights.spawnHeightMaximum = 40;
     decorTreeHights.spawnHeightMinimum = 10;
     decorTreeHights.spawnStackHeightMin = 4;
@@ -217,8 +154,8 @@ void Start() {
     
     DecorationSpecifier decorWaterPlants;
     decorWaterPlants.type = DECORATION_GRASS_THIN;
-    decorWaterPlants.density = 80;
-    decorWaterPlants.spawnHeightMaximum = chunkManager.world.waterLevel;
+    decorWaterPlants.density = 40;
+    decorWaterPlants.spawnHeightMaximum = GameWorld.world.waterLevel;
     decorWaterPlants.spawnHeightMinimum = -100;
     decorWaterPlants.spawnStackHeightMax = 4;
     decorWaterPlants.spawnStackHeightMin = 2;
@@ -232,7 +169,7 @@ void Start() {
     decorSheep.name = "Sheep";
     decorSheep.density = 30;
     decorSheep.spawnHeightMaximum = 10;
-    decorSheep.spawnHeightMinimum = chunkManager.world.waterLevel;
+    decorSheep.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorSheep.threshold = 0.1f;
     decorSheep.noise = 0.4f;
     
@@ -246,14 +183,14 @@ void Start() {
     decorBear.noise = 0.4f;
     
     
-    chunkManager.world.mDecorations.push_back(decorGrass);
-    chunkManager.world.mDecorations.push_back(decorTrees);
-    chunkManager.world.mDecorations.push_back(decorTreeHights);
+    GameWorld.world.mDecorations.push_back(decorGrass);
+    GameWorld.world.mDecorations.push_back(decorTrees);
+    GameWorld.world.mDecorations.push_back(decorTreeHights);
     
-    chunkManager.world.mDecorations.push_back(decorWaterPlants);
+    GameWorld.world.mDecorations.push_back(decorWaterPlants);
     
-    chunkManager.world.mDecorations.push_back(decorSheep);
-    chunkManager.world.mDecorations.push_back(decorBear);
+    GameWorld.world.mDecorations.push_back(decorSheep);
+    GameWorld.world.mDecorations.push_back(decorBear);
     
     
     // Perlin layers
@@ -295,17 +232,17 @@ void Start() {
     perlinFlatland.noiseHeight = 0.007;
     
     
-    chunkManager.perlin.push_back(perlinMountainB);
-    chunkManager.perlin.push_back(perlinMountainA);
-    chunkManager.perlin.push_back(perlinBase);
-    chunkManager.perlin.push_back(perlinLayerA);
-    chunkManager.perlin.push_back(perlinLayerB);
-    chunkManager.perlin.push_back(perlinFlatland);
+    GameWorld.perlin.push_back(perlinMountainB);
+    GameWorld.perlin.push_back(perlinMountainA);
+    GameWorld.perlin.push_back(perlinBase);
+    GameWorld.perlin.push_back(perlinLayerA);
+    GameWorld.perlin.push_back(perlinLayerB);
+    GameWorld.perlin.push_back(perlinFlatland);
     
     // Structure test
     Structure structure;
     structure.name = "";
-    structure.rarity = 30000;
+    structure.rarity = 300000;
     
     structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 0, 0)) );
     structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 1, 0)) );
@@ -318,29 +255,29 @@ void Start() {
     structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 8, 0)) );
     structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 9, 0)) );
     
-    chunkManager.world.mStructures.push_back(structure);
+    GameWorld.world.mStructures.push_back(structure);
     
     
     
     // Lighting levels
     
-    chunkManager.world.chunkColorLow   = Colors.MakeGrayScale(0.3f);
-    chunkManager.world.staticColorLow  = Colors.MakeGrayScale(0.3f);
-    chunkManager.world.actorColorLow   = Colors.MakeGrayScale(0.02f);
+    GameWorld.world.chunkColorLow   = Colors.MakeGrayScale(0.3f);
+    GameWorld.world.staticColorLow  = Colors.MakeGrayScale(0.3f);
+    GameWorld.world.actorColorLow   = Colors.MakeGrayScale(0.02f);
     
-    chunkManager.world.chunkColorHigh  = Colors.MakeGrayScale(0.87f);
-    chunkManager.world.staticColorHigh = Colors.MakeGrayScale(0.87f);
-    chunkManager.world.actorColorHigh  = Colors.MakeGrayScale(0.87f);
+    GameWorld.world.chunkColorHigh  = Colors.MakeGrayScale(0.87f);
+    GameWorld.world.staticColorHigh = Colors.MakeGrayScale(0.87f);
+    GameWorld.world.actorColorHigh  = Colors.MakeGrayScale(0.87f);
     
-    chunkManager.world.ambientLight = 0.87f;
+    GameWorld.world.ambientLight = 0.87f;
     
     
     // World rendering
-    chunkManager.chunkSize = 50;
+    GameWorld.chunkSize = 50;
     
-    chunkManager.renderDistance = 16;
-    chunkManager.staticDistance = chunkManager.renderDistance * 0.7f;
-    chunkManager.actorDistance  = chunkManager.renderDistance * 0.5f;
+    GameWorld.renderDistance = 16;
+    GameWorld.staticDistance = GameWorld.renderDistance * 0.7f;
+    GameWorld.actorDistance  = GameWorld.renderDistance * 0.5f;
     
     
     
@@ -394,7 +331,7 @@ void Start() {
     menuPanelRenderer->material->ambient = Colors.MakeGrayScale(0.7f);
     
     // Version text
-    Color versionColor = Colors.Lerp(Colors.black, Colors.green, 0.6f);
+    Color versionColor = Colors.Lerp(Colors.black, Colors.green, 0.37f);
     versionTextObject = Engine.CreateOverlayTextRenderer(-15, -1, "0.1.0", 9, versionColor, "font");
     MeshRenderer* versionTextRenderer = versionTextObject->GetComponent<MeshRenderer>();
     Engine.sceneOverlay->AddMeshRendererToSceneRoot(versionTextRenderer);
@@ -427,14 +364,6 @@ void Start() {
     quitWorldText->canvas.anchorCenterHorz = true;
     
     
-    //menuPanelObject->Deactivate();
-    //versionTextObject->Deactivate();
-    //loadWorldButton->Deactivate();
-    //saveWorldButton->Deactivate();
-    //clearWorldButton->Deactivate();
-    //quitButton->Deactivate();
-    
-    
     
     
     
@@ -448,7 +377,7 @@ void Start() {
     
     // Fire emitter test
     
-    Emitter* fireEmitter = particle.CreateEmitter();
+    Emitter* fireEmitter = Particle.CreateEmitter();
     
     fireEmitter->type = EmitterType::Point;
     fireEmitter->position = playerPosition;
@@ -472,7 +401,7 @@ void Start() {
     fireEmitter->maxParticles = 20;
     fireEmitter->spawnRate = 20;
     
-    fireEmitter->heightMinimum = chunkManager.world.waterLevel;
+    fireEmitter->heightMinimum = GameWorld.world.waterLevel;
     
     Material* fireEmitterMaterial = fireEmitter->GetMaterial();
     
@@ -486,7 +415,7 @@ void Start() {
     
     // Smoke emitter test
     
-    Emitter* smokeEmitter = particle.CreateEmitter();
+    Emitter* smokeEmitter = Particle.CreateEmitter();
     
     smokeEmitter->type = EmitterType::Point;
     
@@ -513,7 +442,7 @@ void Start() {
     smokeEmitter->maxParticles = 2000;
     smokeEmitter->spawnRate = 1;
     
-    smokeEmitter->heightMinimum = chunkManager.world.waterLevel;
+    smokeEmitter->heightMinimum = GameWorld.world.waterLevel;
     
     Material* smokeEmitterMaterial = smokeEmitter->GetMaterial();
     

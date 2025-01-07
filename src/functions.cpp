@@ -1,5 +1,7 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
+#include <GameEngineFramework/functions.h>
+
 #include <GameEngineFramework/plugins.h>
 
 
@@ -43,16 +45,16 @@ void FuncList(std::vector<std::string> args) {
 void FuncSave(std::vector<std::string> args) {
     
     if (args[0] != "") 
-        chunkManager.world.name = args[0];
+        GameWorld.world.name = args[0];
     
-    if (chunkManager.SaveWorld()) {
+    if (GameWorld.SaveWorld()) {
         
-        Engine.Print("Saving: " + chunkManager.world.name);
+        Engine.Print("Saving: " + GameWorld.world.name);
         
         return;
     }
     
-    Engine.Print("Error saving world: " + chunkManager.world.name);
+    Engine.Print("Error saving world: " + GameWorld.world.name);
     
     return;
 }
@@ -61,20 +63,20 @@ void FuncSave(std::vector<std::string> args) {
 void FuncLoad(std::vector<std::string> args) {
     
     if (args[0] != "") 
-        chunkManager.world.name = args[0];
+        GameWorld.world.name = args[0];
     
-    if (chunkManager.LoadWorld()) {
+    if (GameWorld.LoadWorld()) {
         
-        Engine.Print("Loading: " + chunkManager.world.name);
+        Engine.Print("Loading: " + GameWorld.world.name);
         
         return;
     }
     
-    Engine.Print("Generating: " + chunkManager.world.name);
+    Engine.Print("Generating: " + GameWorld.world.name);
     
-    chunkManager.worldSeed = Random.Range(100, 10000000) - Random.Range(100, 10000000);
+    GameWorld.worldSeed = Random.Range(100, 10000000) - Random.Range(100, 10000000);
     
-    chunkManager.SaveWorld();
+    GameWorld.SaveWorld();
     
     return;
 }
@@ -85,7 +87,7 @@ void FuncRemove(std::vector<std::string> args) {
     if (args[0] == "") 
         return;
     
-    if (chunkManager.DestroyWorld( args[0] )) {
+    if (GameWorld.DestroyWorld( args[0] )) {
         
         Engine.Print("Deleted: " + args[0]);
         
@@ -100,7 +102,7 @@ void FuncRemove(std::vector<std::string> args) {
 
 void FuncClear(std::vector<std::string> args) {
     
-    chunkManager.ClearWorld();
+    GameWorld.ClearWorld();
     
     Engine.cameraController->SetPosition(0, 0, 0);
     Camera* camera = Engine.cameraController->GetComponent<Camera>();
@@ -117,14 +119,14 @@ void FuncSeed(std::vector<std::string> args) {
     
     if (args[0] == "") {
         
-        Engine.Print("World seed: " + Int.ToString(chunkManager.worldSeed));
+        Engine.Print("World seed: " + Int.ToString(GameWorld.worldSeed));
         
         return;
     }
     
-    chunkManager.worldSeed = String.ToInt(args[0]);
+    GameWorld.worldSeed = String.ToInt(args[0]);
     
-    Engine.Print("World seed: " + Int.ToString(chunkManager.worldSeed));
+    Engine.Print("World seed: " + Int.ToString(GameWorld.worldSeed));
     
     return;
 }
@@ -151,7 +153,7 @@ void FuncSummon(std::vector<std::string> args) {
         randomOffset.x += Random.Range(0, 20) - Random.Range(0, 20);
         randomOffset.z += Random.Range(0, 20) - Random.Range(0, 20);
         
-        GameObject* newActorObject = chunkManager.SpawnActor( randomOffset.x, randomOffset.y, randomOffset.z );
+        GameObject* newActorObject = GameWorld.SpawnActor( randomOffset.x, randomOffset.y, randomOffset.z );
         
         Actor* newActor = newActorObject->GetComponent<Actor>();
         
@@ -183,51 +185,37 @@ void FuncTime(std::vector<std::string> args) {
         std::string msgTimeSetTo = "Time set to ";
         
         if (args[1] == "day") {
-            
-            weather.SetTime(7000);
-            
+            Weather.SetTime(7000);
             Engine.Print(msgTimeSetTo + "day");
-            
             return;
         }
         
         if (args[1] == "noon") {
-            
-            weather.SetTime(12000);
-            
+            Weather.SetTime(12000);
             Engine.Print(msgTimeSetTo + "noon");
-            
             return;
         }
         
         if (args[1] == "night") {
-            
-            weather.SetTime(17000);
-            
+            Weather.SetTime(17000);
             Engine.Print(msgTimeSetTo + "night");
-            
             return;
         }
         
         if (args[1] == "midnight") {
-            
-            weather.SetTime(0);
-            
+            Weather.SetTime(0);
             Engine.Print(msgTimeSetTo + "midnight");
-            
             return;
         }
         
         if (!String.IsNumeric(args[1])) {
-            
             Engine.Print("Invalid time " + args[1]);
-            
             return;
         }
         
         int time = String.ToInt(args[1]);
         
-        weather.SetTime((float)time);
+        Weather.SetTime((float)time);
         
         Engine.Print(msgTimeSetTo + args[1]);
         
@@ -243,22 +231,124 @@ void FuncWeather(std::vector<std::string> args) {
     std::string msgWeatherSet = "Weather ";
     
     if (args[0] == "clear") {
-        weather.SetWeatherNext(WeatherType::Clear);
+        Weather.SetWeatherNext(WeatherType::Clear);
         Engine.Print(msgWeatherSet + "clear");
         return;
     }
     if (args[0] == "rain") {
-        weather.SetWeatherNext(WeatherType::Rain);
+        Weather.SetWeatherNext(WeatherType::Rain);
         Engine.Print(msgWeatherSet + "rain");
         return;
     }
     if (args[0] == "snow") {
-        weather.SetWeatherNext(WeatherType::Snow);
+        Weather.SetWeatherNext(WeatherType::Snow);
         Engine.Print(msgWeatherSet + "snow");
         return;
     }
     
     Engine.Print(msgWeatherSet + " invalid");
+    
+    return;
+}
+
+
+// Button callbacks
+
+
+void ButtonLoadWorld(Button* currentButton) {
+    
+    // Mouse hovering over button check
+    //if (!currentButton->isHovering) {Engine.WriteDialog(14, "");} else {Engine.WriteDialog(14, "Hovering");}
+    
+    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
+        return;
+    
+    MainMenuDisable();
+    
+    Platform.isPaused = false;
+    
+    if (!GameWorld.LoadWorld()) 
+        return;
+    
+    return;
+}
+
+void ButtonSaveWorld(Button* currentButton) {
+    
+    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
+        return;
+    
+    GameWorld.SaveWorld();
+    
+    return;
+}
+
+void ButtonClearWorld(Button* currentButton) {
+    
+    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
+        return;
+    
+    GameWorld.ClearWorld();
+    
+    Weather.SetWeather( WeatherType::Clear );
+    
+    return;
+}
+
+void ButtonQuitApplication(Button* currentButton) {
+    
+    if (!currentButton->isHovering || !Input.CheckMouseLeftPressed()) 
+        return;
+    
+    Platform.isActive = false;
+    
+    return;
+}
+
+void MainMenuEnable(void) {
+    
+    Engine.EnableConsole();
+    
+    Engine.sceneMain->camera->DisableMouseLook();
+    
+    Input.ClearKeys();
+    
+    Platform.ShowMouseCursor();
+    
+    // Enable menu UI
+    menuPanelObject->Activate();
+    versionTextObject->Activate();
+    loadWorldButton->Activate();
+    saveWorldButton->Activate();
+    clearWorldButton->Activate();
+    quitButton->Activate();
+    
+    return;
+}
+
+void MainMenuDisable(void) {
+    
+    Engine.DisableConsole();
+    Engine.ConsoleClearInputString();
+    
+    Engine.sceneMain->camera->EnableMouseLook();
+    
+    // Reset mouse position
+    Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+    
+    Platform.HideMouseCursor();
+    
+    // Reset timers
+    Time.Update();
+    PhysicsTime.Update();
+    
+    // Disable menu UI
+    menuPanelObject->Deactivate();
+    versionTextObject->Deactivate();
+    loadWorldButton->Deactivate();
+    saveWorldButton->Deactivate();
+    clearWorldButton->Deactivate();
+    quitButton->Deactivate();
     
     return;
 }
