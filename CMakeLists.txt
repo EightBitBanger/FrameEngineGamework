@@ -208,6 +208,9 @@ set (GAME_HEADERS
     
     "include/GameEngineFramework/plugins/WeatherSystem/WeatherSystem.h"
     
+    "include/GameEngineFramework/plugins/Emitter.h"
+    "include/GameEngineFramework/plugins/ParticleSystem.h"
+    
     "include/GameEngineFramework/Audio/AudioSystem.h"
     "include/GameEngineFramework/Audio/components/sound.h"
     "include/GameEngineFramework/Audio/components/samplebuffer.h"
@@ -306,6 +309,7 @@ set (GAME_SOURCES
     
     "src/plugins/WeatherSystem/WeatherSystem.cpp"
     
+    "src/plugins/ParticleSystem/Emitter.h"
     "src/plugins/ParticleSystem/ParticleSystem.cpp"
     
     "src/start.cpp"
