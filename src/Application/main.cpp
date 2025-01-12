@@ -97,6 +97,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         std::string freeze;
         std::cin >> freeze;
     }
+    
 #endif
     
     Log.WriteLn();
@@ -127,10 +128,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     tickTimer.Update();
     AI.UpdateSendSignal();
     
-    
-    //
-    // Game loop
-    //
     
     while (Platform.isActive) {
         

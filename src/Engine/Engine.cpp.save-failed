@@ -286,10 +286,10 @@ void EngineSystemManager::AddHeightFieldToMeshHalfSize(Mesh* mesh,
             unsigned int xa = x * 2;
             unsigned int za = z * 2;
             
-            float yyA = heightField[za * width + xa] - 0.25f;
-            float yyB = heightField[za * width + (xa + 2)] - 0.25f;
-            float yyC = heightField[(za + 2) * width + (xa + 2)] - 0.25f;
-            float yyD = heightField[(za + 2) * width + xa] - 0.25f;
+            float yyA = heightField[za * width + xa];
+            float yyB = heightField[za * width + (xa + 2)];
+            float yyC = heightField[(za + 2) * width + (xa + 2)];
+            float yyD = heightField[(za + 2) * width + xa];
             
             glm::vec3 cA = colorField[za * width + xa];
             glm::vec3 cB = colorField[za * width + (xa + 2)];

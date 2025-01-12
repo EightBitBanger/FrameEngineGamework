@@ -15,7 +15,6 @@ void AudioSystem::Initiate(void) {
     audioThread = new std::thread(AudioThreadMain);
     Log.Write(" >> Starting thread audio");
     
-    
     mDevice = alcOpenDevice(nullptr);
     
     if (mDevice == nullptr) {
@@ -23,7 +22,8 @@ void AudioSystem::Initiate(void) {
         Log.Write("!! Unable to open audio device.");
         Log.WriteLn();
         
-        LogErrors(mDevice);
+        Log.Write( LogErrors(mDevice) );
+        Log.WriteLn();
         
         return;
     }
@@ -35,7 +35,8 @@ void AudioSystem::Initiate(void) {
         Log.Write("!! Unable to create audio context.");
         Log.WriteLn();
         
-        LogErrors(mDevice);
+        Log.Write( LogErrors(mDevice) );
+        Log.WriteLn();
         
         return;
     }
@@ -93,28 +94,22 @@ bool AudioSystem::CheckIsAudioEndpointActive(void) {
     return mIsDeviceActive;
 }
 
-void AudioSystem::LogErrors(ALCdevice* devicePtr) {
+std::string AudioSystem::LogErrors(ALCdevice* devicePtr) {
     
-    while(true) {
+    ALCenum errorCode = alcGetError(devicePtr);
+    
+    switch (errorCode) {
         
-        ALCenum errorCode = alcGetError(devicePtr);
-        
-        switch (errorCode) {
-            
-            case ALC_NO_ERROR: {Log.Write("No error"); return;}
-            case ALC_INVALID_DEVICE: Log.Write("Invalid device");
-            case ALC_INVALID_CONTEXT: Log.Write("Invalid context");
-            case ALC_INVALID_ENUM: Log.Write("Invalid enum");
-            case ALC_INVALID_VALUE: Log.Write("Invalid value");
-            case ALC_OUT_OF_MEMORY: Log.Write("Out of memory");
-            
-            default: Log.Write("Unknown ALC error");
-            
-        }
+        case ALC_NO_ERROR: return "No error";
+        case ALC_INVALID_DEVICE: return "Invalid device";
+        case ALC_INVALID_CONTEXT: return "Invalid context";
+        case ALC_INVALID_ENUM: return "Invalid enumerator";
+        case ALC_INVALID_VALUE: return "Invalid value";
+        case ALC_OUT_OF_MEMORY: return "Out of memory";
         
     }
     
-    return;
+    return "Unknown ALC error";
 }
 
 //
