@@ -52,7 +52,7 @@ public:
     bool CheckIsAudioEndpointActive(void);
     
     /// Log errors to the log file.
-    void LogErrors(ALCdevice* devicePtr);
+    std::string LogErrors(ALCdevice* devicePtr);
     
 private:
     

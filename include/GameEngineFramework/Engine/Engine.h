@@ -33,6 +33,8 @@
 
 #include <GameEngineFramework/Networking/NetworkSystem.h>
 
+#include <GameEngineFramework/Engine/EngineSystems.h>
+
 #define  CONSOLE_NUMBER_OF_ELEMENTS   32
 #define  PROFILER_NUMBER_OF_ELEMENTS  24
 
@@ -215,6 +217,13 @@ public:
     
     /// Apply the height field values to a mesh.
     void AddHeightFieldToMesh(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int subTessX=1.0f, unsigned int subTessZ=1.0f);
+    
+    /// Apply a reduced quality version of the height field values to a mesh. This function will
+    /// reduce the mesh by one half of the original size.
+    void AddHeightFieldToMeshHalfSize(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
+    
+    /// Apply the height field values to the mesh using a quality resolution value.
+    void AddHeightFieldToMeshReduced(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int resolution);
     
     /// Generate a height field mesh from perlin noise.
     Mesh* CreateMeshFromHeightField(float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
