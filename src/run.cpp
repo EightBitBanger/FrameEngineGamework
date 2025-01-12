@@ -14,48 +14,68 @@ std::string targetGene = "";
 
 Actor* actorSelected = nullptr;
 
-NeuralNetwork net;
-bool initNet = false;
-
-
-
+bool isNetInit = true;
 
 
 void Run() {
     
-    /*
+    // Create a neural network
+    NeuralNetwork nnet;
     
-    if (!initNet) {
-        initNet = true;
+    if (isNetInit == false) {
+        isNetInit = true;
         
-        net.AddNeuralLayer(4, 4);
-        net.AddNeuralLayer(4, 4);
-        net.AddNeuralLayer(4, 4);
-        net.AddNeuralLayer(4, 4);
-        net.AddNeuralLayer(4, 4);
-        net.AddNeuralLayer(4, 4);
+        // Add layers to the neural network
+        nnet.AddNeuralLayer(8, 3);
+        
+        nnet.AddNeuralLayer(8, 8);
+        nnet.AddNeuralLayer(8, 8);
+        
+        nnet.AddNeuralLayer(4, 8);
+        
+        // Train the model
+        
+        std::vector<TrainingSet> trainingBook;
+        
+        TrainingSet ts[3];
+        
+        ts[0].input  = {0.3f, 0.8f, 0.5f};
+        ts[0].target = {0.2f, 0.2f, 0.2f, 0.2f};
+        
+        ts[1].input  = {0.1f, 0.1f, 0.1f};
+        ts[1].target = {0.2f, 0.2f, 0.2f, 0.2f};
+        
+        ts[2].input  = {0.3f, 0.3f, 0.3f};
+        ts[2].target = {0.87f, 0.87f, 0.87f, 0.87f};
+        
+        trainingBook.push_back(ts[0]);
+        trainingBook.push_back(ts[1]);
+        trainingBook.push_back(ts[2]);
+        
+        for (int epoch = 0; epoch < 100000; epoch++) {
+            for (std::vector<TrainingSet>::iterator it = trainingBook.begin(); it != trainingBook.end(); ++it) {
+                nnet.Train(*it, 0.07f);
+            }
+        }
+        
+        
+        std::vector<float> dataset = {0.1f, 0.1f, 0.1f};
+        
+        nnet.FeedForward(dataset);
+        
+        std::vector<float> results = nnet.GetResults();
+        
+        std::string output = Float.ToString(results[0]) + " - " + Float.ToString(results[1]) + " - " + Float.ToString(results[2]);
+        
+        Engine.WriteDialog(1, output);
+        
     }
     
-    if (Input.CheckKeyPressed(VK_N)) {
-        
-        std::vector<float> inputs = {(Random.Range(0, 10000) * 0.1f) - (Random.Range(0, 10000) * 0.1f),
-                                     (Random.Range(0, 10000) * 0.1f) - (Random.Range(0, 10000) * 0.1f),
-                                     (Random.Range(0, 10000) * 0.1f) - (Random.Range(0, 10000) * 0.1f)};
-        
-        for (unsigned int i=0; i < inputs.size(); i++) 
-            Engine.WriteDialog( 15 + i, Float.ToString(inputs[i]) );
-        
-        net.FeedForward(inputs);
-    }
     
-    std::vector<float> outputs = net.GetResults();
-    for (unsigned int i=0; i < outputs.size(); i++) {
-        
-        Engine.WriteDialog( 19 + i, Float.ToString(outputs[i]) );
-        
-    }
     
-    */
+    
+    
+    
     
     
     
@@ -414,7 +434,7 @@ void Run() {
     if (Engine.cameraController == nullptr) 
         return;
     
-    float forceAccelerate = 0.0034f;
+    float forceAccelerate = 0.0334f;
     float forceDecelerate = 0.015f;
     
     Camera* mainCamera = Engine.sceneMain->camera;

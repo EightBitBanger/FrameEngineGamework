@@ -16,7 +16,6 @@ Button* quitButton;
 
 
 
-
 void Start() {
     
     // Load console functions
@@ -86,6 +85,8 @@ void Start() {
     */
     
     
+    
+    
     //
     // Create a camera controller
     //
@@ -129,22 +130,22 @@ void Start() {
     decorGrass.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
     decorGrass.spawnStackHeightMax = 2;
-    decorGrass.threshold = 0.03f;
-    decorGrass.noise = 0.08f;
+    decorGrass.threshold = 0.2f;
+    decorGrass.noise = 0.04f;
     
     DecorationSpecifier decorTrees;
     decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 40;
+    decorTrees.density = 8;
     decorTrees.spawnHeightMaximum = 20;
     decorTrees.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
     decorTrees.spawnStackHeightMax = 8;
-    decorTrees.threshold = 0.01f;
+    decorTrees.threshold = 0.08f;
     decorTrees.noise = 0.3f;
     
     DecorationSpecifier decorTreeHights;
     decorTreeHights.type = DECORATION_TREE;
-    decorTreeHights.density = 200;
+    decorTreeHights.density = 40;
     decorTreeHights.spawnHeightMaximum = 40;
     decorTreeHights.spawnHeightMinimum = 10;
     decorTreeHights.spawnStackHeightMin = 4;
@@ -239,6 +240,7 @@ void Start() {
     GameWorld.perlin.push_back(perlinLayerB);
     GameWorld.perlin.push_back(perlinFlatland);
     
+    
     // Structure test
     Structure structure;
     structure.name = "";
@@ -275,48 +277,9 @@ void Start() {
     // World rendering
     GameWorld.chunkSize = 50;
     
-    GameWorld.renderDistance = 16;
-    GameWorld.staticDistance = GameWorld.renderDistance * 0.7f;
-    GameWorld.actorDistance  = GameWorld.renderDistance * 0.5f;
-    
-    
-    
-    
-    
-    // Shadow test
-    /*
-    for (unsigned int i=0; i < 1000; i++) {
-        
-        GameObject* gameObject = Engine.Create<GameObject>();
-        
-        float randX = Random.Range(0, 100) - Random.Range(0, 100);
-        float randY = Random.Range(0, 100) - Random.Range(0, 100);
-        float randZ = Random.Range(0, 100) - Random.Range(0, 100);
-        
-        gameObject->SetPosition( randX, randY, randZ );
-        
-        
-        gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-        
-        MeshRenderer* objectRenderer = gameObject->GetComponent<MeshRenderer>();
-        
-        objectRenderer->mesh = Engine.meshes.cube;
-        objectRenderer->material = Engine.Create<Material>();
-        objectRenderer->material->shader = Engine.shaders.color;
-        objectRenderer->material->diffuse = Colors.green;
-        objectRenderer->material->ambient = Colors.green;
-        
-        objectRenderer->material->EnableShadowVolumePass();
-        objectRenderer->material->SetShadowVolumeColor(Colors.dkgray);
-        objectRenderer->material->SetShadowVolumeIntensityLow(0.0f);
-        objectRenderer->material->SetShadowVolumeIntensityHigh(0.0f);
-        objectRenderer->material->SetShadowVolumeColorIntensity(0.018f);
-        objectRenderer->material->SetShadowVolumeLength(12.0f);
-        
-        Engine.sceneMain->AddMeshRendererToSceneRoot( objectRenderer );
-        
-    }
-    */
+    GameWorld.renderDistance = 24;
+    GameWorld.staticDistance = GameWorld.renderDistance * 0.9f;
+    GameWorld.actorDistance  = GameWorld.renderDistance * 0.9f;
     
     
     // Initiate UI
