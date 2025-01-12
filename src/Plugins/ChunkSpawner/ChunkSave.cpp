@@ -64,12 +64,13 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
             continue;
         }
         
+        unsigned int bufferSz = buffer.size();
+        
+        if (bufferSz != 0) 
+            Serializer.Serialize(chunkName, (void*)buffer.data(), bufferSz);
+        
     }
     
-    unsigned int bufferSz = buffer.size();
-    
-    if (bufferSz != 0) 
-        Serializer.Serialize(chunkName, (void*)buffer.data(), bufferSz);
     
     
     // Save static objects
@@ -95,9 +96,10 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
             continue;
         }
         
+        Serializer.Serialize(staticName, (void*)staticElements, sizeof(StaticElement) * numberOfStatics);
+        
     }
     
-    Serializer.Serialize(staticName, (void*)staticElements, sizeof(StaticElement) * numberOfStatics);
     
     return 0;
 }

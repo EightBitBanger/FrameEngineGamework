@@ -11,12 +11,13 @@ bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     
     // Mesh binding
     
-    Mesh* meshPtr = currentEntity->mesh;
+    // Level of detail shift selection
+    Mesh* meshLOD = LevelOfDetailPass(currentEntity, eye);
     
-    if (meshPtr == nullptr) 
+    if (meshLOD == nullptr) 
         return false;
     
-    BindMesh( meshPtr );
+    BindMesh( meshLOD );
     
     // Material binding
     

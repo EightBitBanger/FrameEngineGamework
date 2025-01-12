@@ -12,8 +12,8 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     chunk.gameObject->name = Float.ToString(x) + "_" + Float.ToString(y);
     
-    chunk.gameObject->renderDistance   = renderDistance * chunkSize * 0.5f;
-    chunk.staticObject->renderDistance = staticDistance * chunkSize * 0.5f;
+    chunk.gameObject->renderDistance   = renderDistance * chunkSize * 0.7f;
+    chunk.staticObject->renderDistance = staticDistance * chunkSize * 0.6f;
     
     // Add renderers
     chunk.gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
@@ -22,9 +22,11 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
     MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
     
+    chunkRenderer->distance = renderDistance * chunkSize * 0.25f;
+    
     // Bounding box area
-    glm::vec3 boundMin(-chunkSize, -1, -chunkSize);
-    glm::vec3 boundMax(chunkSize, 1, chunkSize);
+    glm::vec3 boundMin(-chunkSize, -10, -chunkSize);
+    glm::vec3 boundMax(chunkSize, 10, chunkSize);
     
     chunkRenderer->SetBoundingBoxMin(boundMin);
     chunkRenderer->SetBoundingBoxMax(boundMax);
@@ -40,7 +42,10 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     chunkTransform->scale = glm::vec3( 1, 1, 1 );
     
     chunkRenderer->mesh = Engine.Create<Mesh>();
+    chunkRenderer->meshLod = Engine.Create<Mesh>();
     chunkRenderer->mesh->isShared = false;
+    chunkRenderer->meshLod->isShared = false;
+    
     chunkRenderer->EnableFrustumCulling();
     
     chunkRenderer->material = worldMaterial;
@@ -60,12 +65,13 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     
     // Generate perlin
+    int chunkSZ = chunkSize+1;
     
-    float heightField [ (chunkSize+1) * (chunkSize+1) ];
-    glm::vec3 colorField  [ (chunkSize+1) * (chunkSize+1) ];
+    float heightField [ chunkSZ * chunkSZ ];
+    glm::vec3 colorField  [ chunkSZ * chunkSZ ];
     
-    Engine.SetHeightFieldValues(heightField, chunkSize+1, chunkSize+1, 0);
-    Engine.SetColorFieldValues(colorField, chunkSize+1, chunkSize+1, Colors.white);
+    Engine.SetHeightFieldValues(heightField, chunkSZ, chunkSZ, 0);
+    Engine.SetColorFieldValues(colorField, chunkSZ, chunkSZ, Colors.white);
     
     unsigned int numberOfLayers = perlin.size();
     
@@ -76,7 +82,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
         Perlin* perlinLayer = &perlin[l];
         
         min = 
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSize+1, chunkSize+1, 
+        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSZ, chunkSZ, 
                                             perlinLayer->noiseWidth, 
                                             perlinLayer->noiseHeight, 
                                             perlinLayer->heightMultuplier, 
@@ -93,17 +99,21 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     colorLow  = Colors.brown * Colors.green * Colors.MakeGrayScale(0.4f);
     colorHigh = Colors.brown * Colors.MakeGrayScale(0.2f);
     
-    Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSize+1, chunkSize+1, colorLow, colorHigh, 0.024f);
+    Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSZ, chunkSZ, colorLow, colorHigh, 0.024f);
     
-    Engine.AddColorFieldSnowCap(colorField, heightField, chunkSize+1, chunkSize+1, Colors.white, 80.0f, 2.0f);
+    Engine.AddColorFieldSnowCap(colorField, heightField, chunkSZ, chunkSZ, Colors.white, 80.0f, 2.0f);
     
-    Engine.GenerateWaterTableFromHeightField(heightField, chunkSize+1, chunkSize+1, 0);
+    Engine.GenerateWaterTableFromHeightField(heightField, chunkSZ, chunkSZ, 0);
+    
     
     // Finalize chunk
     
-    Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSize+1, chunkSize+1, 0, 0, 1, 1);
+    Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSZ, chunkSZ, 0, 0, 1, 1);
+    Engine.AddHeightFieldToMeshHalfSize(chunkRenderer->meshLod, heightField, colorField, chunkSZ, chunkSZ, 0, 0);
     
     chunkRenderer->mesh->Load();
+    chunkRenderer->meshLod->Load();
+    
     
     // Physics
     
@@ -115,11 +125,12 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     rp3d::Transform bodyTransform = rp3d::Transform::identity();
     bodyTransform.setPosition( rp3d::Vector3(x, 0, y) );
+    
     chunk.rigidBody->setTransform(bodyTransform);
     
     // Generate a height field collider
     
-    MeshCollider*  meshCollider = Physics.CreateHeightFieldMap(heightField, chunkSize+1, chunkSize+1);
+    MeshCollider*  meshCollider = Physics.CreateHeightFieldMap(heightField, chunkSZ, chunkSZ, 1, 1, 1);
     
     rp3d::Collider* bodyCollider = chunk.rigidBody->addCollider( meshCollider->heightFieldShape, rp3d::Transform::identity() );
     bodyCollider->setUserData( (void*)chunk.gameObject );

@@ -39,6 +39,7 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
             }
             
             int zz = mChunkCounterZ;
+            
             float chunkX = Math.Round(playerPosition.x / chunkSize + xx);
             float chunkZ = Math.Round(playerPosition.z / chunkSize + zz);
             
@@ -126,6 +127,9 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
         for (unsigned int c = 0; c < numberOfChunks; c++) {
             
             Chunk& chunk = chunks[mChunkIndex];
+            
+            if (chunk.gameObject == nullptr) 
+                continue;
             
             glm::vec3 chunkPos(chunk.x, 0, chunk.y);
             glm::vec3 playerPos(playerPosition.x, 0, playerPosition.z);

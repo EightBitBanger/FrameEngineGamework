@@ -69,7 +69,7 @@ void RenderSystem::RenderFrame(void) {
                 continue;
             
             // Sorting
-            //SortingPass(eye, renderQueueGroup);
+            SortingPass(eye, renderQueueGroup);
             
             // Geometry pass
             for (MeshRenderer* currentEntity : *renderQueueGroup) {

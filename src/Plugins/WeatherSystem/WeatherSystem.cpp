@@ -96,6 +96,7 @@ void WeatherSystem::Initiate(void) {
     // World fog
     
     mFogWorld = Renderer.CreateFog();
+    
     Engine.sceneMain->AddFogLayerToScene(mFogWorld);
     
     mFogWorld->fogActive = true;
