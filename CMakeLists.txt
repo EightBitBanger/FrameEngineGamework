@@ -470,6 +470,7 @@ set (CORE_SOURCES
     "src/Networking/NetworkSystem.cpp"
     
     "src/Engine/Engine.cpp"
+    "src/Engine/EngineSystems.cpp"
     "src/Engine/EngineUpdate.cpp"
     "src/Engine/EngineConsole.cpp"
     "src/Engine/EngineGameObjects.cpp"
@@ -544,6 +545,7 @@ set (CORE_SOURCES
     "src/Renderer/pipeline/shaderBinding.cpp"
     
     "src/Renderer/pipeline/passGeometry.cpp"
+    "src/Renderer/pipeline/passLevelOfDetail.cpp"
     "src/Renderer/pipeline/passShadowVolume.cpp"
     "src/Renderer/pipeline/passSorting.cpp"
     "src/Renderer/pipeline/passCulling.cpp"
