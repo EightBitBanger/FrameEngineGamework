@@ -6,17 +6,6 @@
 #include <GameEngineFramework/Renderer/components/material.h>
 #include <GameEngineFramework/Renderer/components/mesh.h>
 
-class ENGINE_API LevelOfDetail {
-    
-public:
-    
-    float distance;
-    
-    Mesh* mesh;
-    
-};
-
-
 
 
 class ENGINE_API MeshRenderer {
@@ -34,6 +23,12 @@ public:
     
     /// Transformation element.
     Transform transform;
+    
+    /// Level of detail distance to switch models
+    float distance;
+    
+    /// Lower detail model to use. NOTE: "nullptr" will disable level of detail rendering.
+    Mesh* meshLod;
     
     /// Enable culling for this entity
     void EnableFrustumCulling(void);

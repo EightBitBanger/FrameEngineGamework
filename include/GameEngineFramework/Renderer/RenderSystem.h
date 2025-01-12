@@ -292,7 +292,7 @@ private:
     
     bool SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup);
     
-    void LevelOfDetailPass(MeshRenderer* currentEntity, glm::vec3& eye);
+    Mesh* LevelOfDetailPass(MeshRenderer* currentEntity, glm::vec3& eye);
     
     bool CullingPass(MeshRenderer* currentEntity, Camera* currentCamera, glm::mat4& viewProjection, Frustum& frustum);
     
