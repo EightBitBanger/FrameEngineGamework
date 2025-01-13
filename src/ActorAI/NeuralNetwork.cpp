@@ -1,4 +1,8 @@
 #include <GameEngineFramework/ActorAI/NeuralNetwork.h>
+#include <GameEngineFramework/Types/Types.h>
+
+extern FloatType   Float;
+extern UIntType    UInt;
 
 
 NeuralNetwork::NeuralNetwork() {}
@@ -34,19 +38,22 @@ std::vector<float> NeuralNetwork::GetResults(void) {
     return mTopology.back().neurons;
 }
 
-void NeuralNetwork::AddNeuralLayer(int numNeurons, int numInputs) {
+void NeuralNetwork::AddNeuralLayer(int numberOfNeurons, int numberOfInputs) {
     NeuralLayer layer;
     
-    layer.neurons.resize(numNeurons);
-    layer.biases.resize(numNeurons);
-    layer.weights.resize(numNeurons, std::vector<float>(numInputs));
+    layer.numberOfInputs = numberOfInputs;
+    layer.numberOfNeurons = numberOfNeurons;
+    
+    layer.neurons.resize(numberOfNeurons);
+    layer.biases.resize(numberOfNeurons);
+    layer.weights.resize(numberOfNeurons, std::vector<float>(numberOfInputs));
     
     // Initialize weights and biases
-    for (int i = 0; i < numNeurons; ++i) {
+    for (int i = 0; i < numberOfNeurons; ++i) {
         
         layer.biases[i] = static_cast<float>(rand()) / RAND_MAX;
         
-        for (int j = 0; j < numInputs; ++j) {
+        for (int j = 0; j < numberOfInputs; ++j) {
             
             layer.weights[i][j] = static_cast<float>(rand()) / RAND_MAX;
         }
@@ -123,5 +130,70 @@ void NeuralNetwork::UpdateWeights(const std::vector<float>& input, const std::ve
 
 float NeuralNetwork::ActivationFunctionDerivative(float value) {
     return 1.0f - std::pow(tanh(value), 2);
+}
+
+
+void NeuralNetwork::LoadState(std::vector<std::string>& state) {
+    
+    mTopology.clear();
+    
+    // Setup the layers
+    for (unsigned int i=0; i < state.size(); i++) {
+        
+        std::string& layerString = state[i];
+        
+    }
+    
+    return;
+}
+
+
+std::vector<std::string> NeuralNetwork::SaveState(void) {
+    
+    // Each layer
+    unsigned int numberOfLayers = mTopology.size();
+    
+    std::vector<std::string> state;
+    std::string layerString;
+    
+    for (unsigned int i=0; i < numberOfLayers; i++) {
+        
+        NeuralLayer& layer = mTopology[i];
+        
+        unsigned int numberOfNeurons     = layer.neurons.size();
+        unsigned int numberOfBiases      = layer.biases.size();
+        unsigned int numberOfWeightLists = layer.weights.size();
+        
+        layerString  = UInt.ToString(layer.numberOfInputs) + " ";
+        layerString += UInt.ToString(layer.numberOfNeurons) + " ";
+        
+        layerString += UInt.ToString(numberOfNeurons) + " ";
+        layerString += UInt.ToString(numberOfBiases) + " ";
+        layerString += UInt.ToString(numberOfWeightLists) + " ";
+        
+        // Each bias
+        for (unsigned int b=0; b < numberOfBiases; b++) {
+            
+            layerString += Float.ToString( layer.biases[b] ) + " ";
+            
+        }
+        
+        // Each set of weights
+        for (unsigned int ws=0; ws < numberOfWeightLists; ws++) {
+            
+            std::vector<float>& weights = layer.weights[ws];
+            
+            unsigned int numberOfWeights = weights.size();
+            
+            // Each weight
+            for (unsigned int w=0; w < numberOfWeights; w++) 
+                layerString += Float.ToString( weights[w] ) + " ";
+            
+        }
+        
+        state.push_back(layerString);
+    }
+    
+    return state;
 }
 
