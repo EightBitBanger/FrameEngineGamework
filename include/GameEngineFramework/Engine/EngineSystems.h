@@ -2,6 +2,7 @@
 
 ENGINE_API extern IntType           Int;
 ENGINE_API extern IntLongType       IntLong;
+ENGINE_API extern UIntType          UInt;
 ENGINE_API extern FloatType         Float;
 ENGINE_API extern StringType        String;
 

@@ -191,7 +191,10 @@ public:
     // Neural network
     
     /// Assign a set of neural layers to the neural network.
-    void SetNeuralTopology(const std::vector<NeuralLayer>& layers);
+    void SetNeuralTopology(std::vector<NeuralLayer>& layers);
+    
+    /// Load a vector of strings defining the neural network weight parameters.
+    void LoadNeuralStates(std::vector<std::string> states);
     
     // Memories
     
@@ -230,6 +233,12 @@ public:
     Actor();
     
 private:
+    
+    // Encode the actor state dataset and send it through the network.
+    void EncodeInputLayer(void);
+    
+    // Decode the actor state dataset and apply the changes to the actor.
+    void DecodeOutputLayer(void);
     
     // Actor name string
     std::string mName;

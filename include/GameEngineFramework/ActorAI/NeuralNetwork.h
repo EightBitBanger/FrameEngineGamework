@@ -67,6 +67,7 @@ public:
     /// Load a neural state into the network.
     void LoadState(std::vector<std::string>& state);
     
+    
     NeuralNetwork();
     
 private:
