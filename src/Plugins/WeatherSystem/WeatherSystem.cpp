@@ -9,7 +9,7 @@
 WeatherSystem::WeatherSystem() : 
     weatherStateCounter(320),
     
-    mWorldTime(9000),
+    mWorldTime(0000),
     
     mLightIntensity(1.0f),
     mLightAngle(glm::vec3(0)),
@@ -90,7 +90,7 @@ void WeatherSystem::Initiate(void) {
     MeshRenderer* skyRenderer = mSkyObject->GetComponent<MeshRenderer>();
     mSkyMaterial = skyRenderer->material;
     mSkyMaterial->diffuse = Colors.dkgray;
-    mSkyMaterial->ambient = Colors.white;
+    mSkyMaterial->ambient = Colors.black;
     
     
     // World fog

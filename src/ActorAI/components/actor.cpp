@@ -417,17 +417,60 @@ float Actor::GetHeightPreferenceMax(void) {
 
 // Neural network
 
-void Actor::SetNeuralTopology(const std::vector<NeuralLayer>& layers) {
+void Actor::SetNeuralTopology(std::vector<NeuralLayer>& layers) {
     mux.lock();
-    // TODO Set the layers by parameter rather than hard set values
+    
     mNeuralNetwork.ClearTopology();
     
-    mNeuralNetwork.AddNeuralLayer(8, 8); // Input
-    mNeuralNetwork.AddNeuralLayer(10, 8);
-    mNeuralNetwork.AddNeuralLayer(12, 12);
-    mNeuralNetwork.AddNeuralLayer(12, 12);
-    mNeuralNetwork.AddNeuralLayer(10, 12); // Output
+    unsigned int numberOfLayers = layers.size();
+    
+    for (unsigned int i=0; i < numberOfLayers; i++) {
+        NeuralLayer& layer = layers[i];
+        
+        mNeuralNetwork.AddNeuralLayer(layer.numberOfNeurons, layer.numberOfInputs);
+    }
+    
     mux.unlock();
+    return;
+}
+
+void Actor::LoadNeuralStates(std::vector<std::string> states) {
+    mux.lock();
+    
+    mNeuralNetwork.LoadState( states );
+    
+    mux.unlock();
+    return;
+}
+
+void Actor::EncodeInputLayer(void) {
+    
+    // Encode the data set
+    std::vector<float> dataset;
+    dataset.push_back(0.87f);
+    
+    // Send the dataset into the network
+    mNeuralNetwork.FeedForward(dataset);
+    
+    return;
+}
+
+void Actor::DecodeOutputLayer(void) {
+    
+    std::vector<float> resultVals = mNeuralNetwork.GetResults();
+    
+    if (resultVals.size() == 0) 
+        return;
+    
+    if (resultVals[0] > 0.249f && resultVals[0] < 0.251f) {
+        
+        mIsWalking = true;
+        mIsRunning = true;
+        
+        mIsActive = false;
+        
+    }
+    
     return;
 }
 

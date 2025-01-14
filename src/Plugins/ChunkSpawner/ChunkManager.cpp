@@ -162,6 +162,10 @@ bool ChunkManager::DestroyWorld(std::string worldname) {
 }
 
 
+// TESTING 
+std::vector<std::string> states;
+
+
 GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
     
     GameObject* actorObject = nullptr;
@@ -193,9 +197,6 @@ GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
     
     Actor* actorPtr = actorObject->GetComponent<Actor>();
     
-    std::vector<NeuralLayer> dummy;
-    actorPtr->SetNeuralTopology(dummy);
-    
     actorPtr->SetTargetPoint(glm::vec3(x, y, z));
     
     actorPtr->SetUserBitmask(0);
@@ -204,6 +205,22 @@ GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
         actorPtr->SetHeightPreferenceMin(world.waterLevel);
     
     numberOfActiveActors++;
+    
+    // Initiate neural network
+    if (states.size() == 0) {
+        
+        std::string buffer;
+        
+        unsigned int fileSz = Serializer.GetFileSize("neuralstates.dat");
+        
+        buffer.resize(fileSz);
+        Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
+        
+        std::vector<std::string> states = String.Explode(buffer, '\n');
+        
+    }
+    
+    actorPtr->LoadNeuralStates( states );
     
     return actorObject;
 }

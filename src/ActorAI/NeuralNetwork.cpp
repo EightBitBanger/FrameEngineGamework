@@ -1,14 +1,20 @@
 #include <GameEngineFramework/ActorAI/NeuralNetwork.h>
 #include <GameEngineFramework/Types/Types.h>
+#include <GameEngineFramework/Engine/Engine.h>
 
-extern FloatType   Float;
-extern UIntType    UInt;
+#include <sstream>
+
+extern FloatType    Float;
+extern UIntType     UInt;
+extern StringType   String;
 
 
 NeuralNetwork::NeuralNetwork() {}
 
 void NeuralNetwork::FeedForward(const std::vector<float>& input) {
-    if (mTopology.empty()) return;
+    
+    if (mTopology.empty()) 
+        return;
     
     // Set input layer
     mTopology[0].neurons = input;
@@ -134,14 +140,47 @@ float NeuralNetwork::ActivationFunctionDerivative(float value) {
 
 
 void NeuralNetwork::LoadState(std::vector<std::string>& state) {
-    
     mTopology.clear();
     
     // Setup the layers
-    for (unsigned int i=0; i < state.size(); i++) {
+    for (const std::string& layerString : state) {
+        std::istringstream stream(layerString);
         
-        std::string& layerString = state[i];
+        NeuralLayer layer;
+        stream >> layer.numberOfInputs;
+        stream >> layer.numberOfNeurons;
         
+        unsigned int numberOfNeurons, numberOfBiases, numberOfWeightLists;
+        stream >> numberOfNeurons;
+        stream >> numberOfBiases;
+        stream >> numberOfWeightLists;
+        
+        // Resize the vectors to hold the biases and weights
+        layer.neurons.resize(numberOfNeurons);
+        layer.biases.resize(numberOfBiases);
+        layer.weights.resize(numberOfWeightLists, std::vector<float>(layer.numberOfInputs));
+        
+        // Load biases
+        for (unsigned int b = 0; b < numberOfBiases; ++b) {
+            std::string biasString;
+            stream >> biasString;
+            
+            layer.biases[b] = String.ToFloat(biasString);
+        }
+        
+        // Load weights
+        for (unsigned int ws = 0; ws < numberOfWeightLists; ++ws) {
+            
+            for (unsigned int w = 0; w < layer.numberOfInputs; ++w) {
+                std::string weightString;
+                stream >> weightString;
+                
+                layer.weights[ws][w] = String.ToFloat(weightString);
+            }
+            
+        }
+        
+        mTopology.push_back(layer);
     }
     
     return;

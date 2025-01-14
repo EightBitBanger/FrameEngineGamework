@@ -76,39 +76,16 @@ void ActorSystem::UpdateActorState(Actor* actor) {
     HandleMovementCooldown(actor, isAquatic);
     HandleStopWalkingChance(actor);
     
-    //HandleNeuralNetwork(actor);
+    HandleNeuralNetwork(actor);
     
     return;
 }
 
 void ActorSystem::HandleNeuralNetwork(Actor* actor) {
     
-    // Send in some input values
-    glm::vec3 vel = actor->mVelocity;
-    glm::vec3 rot = actor->mRotation;
-    float speed = actor->mSpeed;
+    actor->EncodeInputLayer();
     
-    std::vector<float> inputVals = {vel.x, vel.y, vel.z,
-                                    rot.x, rot.y, rot.z,
-                                    speed};
-    
-    // Feed through the network
-    actor->mNeuralNetwork.FeedForward(inputVals);
-    
-    // Extract results
-    std::vector<float> resultVals = actor->mNeuralNetwork.GetResults();
-    
-    unsigned int numberOfOutputs = resultVals.size();
-    if (numberOfOutputs > 6) {
-        
-        if (resultVals[0] > 0.9999f) HandleObservationCooldown(actor);
-        if (resultVals[2] > 0.9999f) HandleFocusOnNearbyActor(actor);
-        if (resultVals[3] > 0.9999f) HandleMovementCooldown(actor, false);
-        if (resultVals[5] > 0.9999f) HandleStopWalkingChance(actor);
-        if (resultVals[6] > 0.9999f) HandleBreedingState(actor);
-        
-    }
-    
+    actor->DecodeOutputLayer();
     
     return;
 }
