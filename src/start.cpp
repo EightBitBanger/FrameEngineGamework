@@ -326,7 +326,7 @@ void Start() {
     clearWorldText->canvas.anchorCenterHorz = true;
     quitWorldText->canvas.anchorCenterHorz = true;
     
-    
+    MainMenuDisable();
     
     
     

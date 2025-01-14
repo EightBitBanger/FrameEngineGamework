@@ -122,7 +122,7 @@ std::string IntLongType::ToString(long int value) {
     return sstream.str();
 }
 
-std::string UintType::ToString(unsigned int value) {
+std::string UIntType::ToString(unsigned int value) {
     std::stringstream sstream;
     sstream << value;
     return sstream.str();
@@ -144,6 +144,6 @@ long int IntLongType::Lerp(long int min, long int max, float bias) {
     return glm::lerp((float)min, (float)max, bias);
 }
 
-unsigned int UintType::Lerp(unsigned int min, unsigned int max, float bias) {
+unsigned int UIntType::Lerp(unsigned int min, unsigned int max, float bias) {
     return glm::lerp((float)min, (float)max, bias);
 }

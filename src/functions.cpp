@@ -76,6 +76,9 @@ void FuncLoad(std::vector<std::string> args) {
     
     GameWorld.worldSeed = Random.Range(100, 10000000) - Random.Range(100, 10000000);
     
+    Weather.SetTime(9000);
+    Weather.SetWeather(WeatherType::Clear);
+    
     GameWorld.SaveWorld();
     
     return;
@@ -267,8 +270,10 @@ void ButtonLoadWorld(Button* currentButton) {
     
     Platform.isPaused = false;
     
-    if (!GameWorld.LoadWorld()) 
-        return;
+    std::vector<std::string> arg;
+    arg.push_back("");
+    
+    FuncLoad(arg);
     
     return;
 }

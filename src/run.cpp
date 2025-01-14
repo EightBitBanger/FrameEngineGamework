@@ -14,7 +14,7 @@ std::string targetGene = "";
 
 Actor* actorSelected = nullptr;
 
-bool isNetInit = true;
+bool isNetInit = false;
 
 
 void Run() {
@@ -25,28 +25,50 @@ void Run() {
     if (isNetInit == false) {
         isNetInit = true;
         
+        
+        
+        
+        
+        // Load the neural state
+        
+        std::string buffer;
+        unsigned int fileSz = Serializer.GetFileSize("neuralstates.dat");
+        
+        buffer.resize(fileSz);
+        Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
+        
+        std::vector<std::string> states = String.Explode(buffer, '\n');
+        nnet.LoadState( states );
+        
+        
+        
+        
+        
+        
         // Add layers to the neural network
-        nnet.AddNeuralLayer(8, 3);
         
-        nnet.AddNeuralLayer(8, 8);
-        nnet.AddNeuralLayer(8, 8);
+        /*
         
-        nnet.AddNeuralLayer(4, 8);
+        nnet.AddNeuralLayer(16, 1);
+        
+        nnet.AddNeuralLayer(16, 16);
+        nnet.AddNeuralLayer(16, 16);
+        
+        nnet.AddNeuralLayer(1, 16);
+        
         
         // Train the model
         
         std::vector<TrainingSet> trainingBook;
         
-        TrainingSet ts[3];
+        TrainingSet ts[5];
         
-        ts[0].input  = {0.3f, 0.8f, 0.5f};
-        ts[0].target = {0.2f, 0.2f, 0.2f, 0.2f};
-        
-        ts[1].input  = {0.1f, 0.1f, 0.1f};
-        ts[1].target = {0.2f, 0.2f, 0.2f, 0.2f};
-        
-        ts[2].input  = {0.3f, 0.3f, 0.3f};
-        ts[2].target = {0.87f, 0.87f, 0.87f, 0.87f};
+        ts[0].input  = {0.87f,};
+        ts[0].target = {0.25f,};
+        ts[1].input  = {0.4f,};
+        ts[1].target = {0.2f,};
+        ts[2].input  = {0.3f,};
+        ts[2].target = {0.3f,};
         
         trainingBook.push_back(ts[0]);
         trainingBook.push_back(ts[1]);
@@ -58,16 +80,40 @@ void Run() {
             }
         }
         
+        */
         
-        std::vector<float> dataset = {0.1f, 0.1f, 0.1f};
+        
+        // Test the network
+        
+        std::vector<float> dataset = {0.87f};
         
         nnet.FeedForward(dataset);
         
         std::vector<float> results = nnet.GetResults();
         
-        std::string output = Float.ToString(results[0]) + " - " + Float.ToString(results[1]) + " - " + Float.ToString(results[2]);
+        std::string output = Float.ToString( results[0] ) + " - " + 
+                             Float.ToString( results[1] );
         
         Engine.WriteDialog(1, output);
+        
+        
+        
+        // Save the state
+        
+        /*
+        
+        std::vector<std::string> states = nnet.SaveState();
+        
+        unsigned int numberOfStates = states.size();
+        
+        std::string saveString;
+        
+        for (unsigned int i=0; i < numberOfStates; i++) 
+            saveString += states[i] + "\n";
+        
+        Serializer.Serialize("neuralstates.dat", (void*)saveString.data(), saveString.size());
+        
+        */
         
     }
     
