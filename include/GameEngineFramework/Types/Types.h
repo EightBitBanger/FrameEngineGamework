@@ -104,7 +104,7 @@ public:
     
 };
 
-class ENGINE_API UintType {
+class ENGINE_API UIntType {
     
 public:
     
