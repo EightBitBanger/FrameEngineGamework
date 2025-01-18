@@ -51,6 +51,9 @@ public:
     /// has been fed through the network.
     std::vector<float> GetResults(void);
     
+    /// Get the number of layers in the neural network.
+    unsigned int GetNumberOfLayers(void);
+    
     /// Add a neural layer to the network. The number of inputs should match
     /// the previous layer`s neuron count.
     void AddNeuralLayer(int numberOfNeurons, int numberOfInputs);
@@ -83,6 +86,10 @@ private:
     
     // Back propagation training activation function
     float ActivationFunctionDerivative(float value);
+    
+    //ReLU
+    float ActivationReLU(float value);
+    float ActivationReLUDerivative(float value);
     
 };
 
