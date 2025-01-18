@@ -34,14 +34,22 @@ void NeuralNetwork::FeedForward(const std::vector<float>& input) {
             }
             
             currentLayer.neurons[j] = tanh(sum);
+            
+            //currentLayer.neurons[j] = ActivationReLU(sum);
+            
         }
     }
     return;
 }
 
 std::vector<float> NeuralNetwork::GetResults(void) {
-    if (mTopology.empty()) return {};
+    if (mTopology.empty()) return {0.0f};
     return mTopology.back().neurons;
+}
+
+unsigned int NeuralNetwork::GetNumberOfLayers(void) {
+    
+    return mTopology.size();
 }
 
 void NeuralNetwork::AddNeuralLayer(int numberOfNeurons, int numberOfInputs) {
@@ -54,16 +62,23 @@ void NeuralNetwork::AddNeuralLayer(int numberOfNeurons, int numberOfInputs) {
     layer.biases.resize(numberOfNeurons);
     layer.weights.resize(numberOfNeurons, std::vector<float>(numberOfInputs));
     
-    // Initialize weights and biases
+    
     for (int i = 0; i < numberOfNeurons; ++i) {
-        
-        layer.biases[i] = static_cast<float>(rand()) / RAND_MAX;
-        
         for (int j = 0; j < numberOfInputs; ++j) {
-            
-            layer.weights[i][j] = static_cast<float>(rand()) / RAND_MAX;
+            layer.weights[i][j] = ((Random.Range(0, 100) * 0.01) / 2) * 0.5f;
         }
     }
+    
+    // Xavier initialization
+    /*
+    float range = sqrt(6.0f / (numberOfInputs + numberOfNeurons));
+    
+    for (int i = 0; i < numberOfNeurons; ++i) {
+        for (int j = 0; j < numberOfInputs; ++j) {
+            layer.weights[i][j] = (static_cast<float>(rand()) / RAND_MAX) * 2 * range - range;
+        }
+    }
+    */
     
     mTopology.push_back(layer);
     return;
@@ -87,9 +102,14 @@ std::vector<std::vector<float>> NeuralNetwork::CalculateDeltas(const std::vector
     // Calculate output layer deltas
     NeuralLayer& outputLayer = mTopology.back();
     deltas.back().resize(outputLayer.neurons.size());
+    
     for (size_t i = 0; i < outputLayer.neurons.size(); ++i) {
+        
         float error = target[i] - outputLayer.neurons[i];
-        deltas.back()[i] = error * ActivationFunctionDerivative(outputLayer.neurons[i]);
+        
+        //deltas.back()[i] = error * ActivationFunctionDerivative( outputLayer.neurons[i] );
+        deltas.back()[i] = error * ActivationReLUDerivative( outputLayer.neurons[i] );
+        
     }
     
     // Calculate hidden layer deltas
@@ -108,7 +128,8 @@ std::vector<std::vector<float>> NeuralNetwork::CalculateDeltas(const std::vector
                 error += nextLayer.weights[k][j] * deltas[i + 1][k];
             }
             
-            deltas[i][j] = error * ActivationFunctionDerivative(currentLayer.neurons[j]);
+            //deltas[i][j] = error * ActivationFunctionDerivative( currentLayer.neurons[j] );
+            deltas[i][j] = error * ActivationReLUDerivative( currentLayer.neurons[j] );
             
         }
     }
@@ -123,8 +144,11 @@ void NeuralNetwork::UpdateWeights(const std::vector<float>& input, const std::ve
         NeuralLayer& currentLayer = mTopology[i];
         
         for (size_t j = 0; j < currentLayer.neurons.size(); ++j) {
+            
             currentLayer.biases[j] += learningRate * deltas[i][j];
+            
             for (size_t k = 0; k < previousLayerOutputs.size(); ++k) {
+                
                 currentLayer.weights[j][k] += learningRate * deltas[i][j] * previousLayerOutputs[k];
             }
         }
@@ -134,10 +158,21 @@ void NeuralNetwork::UpdateWeights(const std::vector<float>& input, const std::ve
     return;
 }
 
+// Activation functions
+
+float NeuralNetwork::ActivationReLU(float value) {
+    return std::max(0.0f, value);
+}
+
+float NeuralNetwork::ActivationReLUDerivative(float value) {
+    return value > 0 ? 1.0f : 0.0f;
+}
+
 float NeuralNetwork::ActivationFunctionDerivative(float value) {
     return 1.0f - std::pow(tanh(value), 2);
 }
 
+// Save/load neural states
 
 void NeuralNetwork::LoadState(std::vector<std::string>& state) {
     mTopology.clear();
