@@ -7,7 +7,6 @@ MeshRenderer::MeshRenderer() :
     material(nullptr),
     transform(Transform()),
     distance(0),
-    meshLod(nullptr),
     mDoCulling(false),
     mBoundingBoxMin(glm::vec3(-1.0f, -1.0f, -1.0f)),
     mBoundingBoxMax(glm::vec3(1.0f, 1.0f, 1.0f))

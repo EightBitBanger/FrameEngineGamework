@@ -52,6 +52,15 @@ bool RenderSystem::DestroyMeshRenderer(MeshRenderer* meshRendererPtr) {
         if (meshRendererPtr->mesh->isShared == false) 
             mMesh.Destroy(meshRendererPtr->mesh);
     
+    for (unsigned int i=0; i < meshRendererPtr->lods.size(); i++) {
+        Mesh* meshPtr = meshRendererPtr->lods[i];
+        
+        if (meshPtr->isShared == false) 
+            mMesh.Destroy(meshPtr);
+        
+    }
+    meshRendererPtr->lods.clear();
+    
     if (meshRendererPtr->material != nullptr) 
         if (meshRendererPtr->material->isShared == false) 
             mMaterial.Destroy(meshRendererPtr->material);
