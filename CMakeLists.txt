@@ -17,7 +17,7 @@ option(RUN_UNIT_TESTS       "Run unit tests at application start." OFF)
 
 # ==========================================================
 # Build configuration
-#
+# 
 
 if(EVENT_LOG_DETAILED)
     add_compile_definitions(EVENT_LOG_DETAILED)
@@ -28,10 +28,23 @@ if(RUN_UNIT_TESTS)
 endif()
 
 
+function(auto_sources var)
+    foreach(pattern IN LISTS ARGN)
+        file(GLOB_RECURSE matched_files ${pattern})
+        list(APPEND ${var} ${matched_files})
+    endforeach()
+    set(${var} ${${var}} PARENT_SCOPE)
+endfunction()
+
 
 # ==========================================================
+# ==========================================================
+# ==========================================================
+# 
 # Build executable
-#
+# 
+# ==========================================================
+# ==========================================================
 
 if(BUILD_RUNTIME_EXECUTABLE)
 
@@ -39,96 +52,10 @@ if(BUILD_CORE_ENGINE OR BUILD_APPLICATION_LIBRARY)
     message(FATAL_ERROR "Multiple project builds are set. Cmake can only build one project at a time.")
 endif()
 
-set (RUNTIME_HEADERS
-    
-    "include/GameEngineFramework/configuration.h"
-    
-    "include/GameEngineFramework/Application/Platform.h"
-    "include/GameEngineFramework/Application/winproc.h"
-    "include/GameEngineFramework/Application/main.h"
-    
-    "include/GameEngineFramework/Audio/AudioSystem.h"
-    "include/GameEngineFramework/Audio/components/sound.h"
-    "include/GameEngineFramework/Audio/components/samplebuffer.h"
-    
-    "include/GameEngineFramework/ActorAI/ActorSystem.h"
-    "include/GameEngineFramework/ActorAI/ActorStates.h"
-    "include/GameEngineFramework/ActorAI/NeuralNetwork.h"
-    "include/GameEngineFramework/ActorAI/GeneticPresets.h"
-    "include/GameEngineFramework/ActorAI/genetics/gene.h"
-    "include/GameEngineFramework/ActorAI/genetics/base.h"
-    "include/GameEngineFramework/ActorAI/components/actor.h"
-    
-    "include/GameEngineFramework/Serialization/Serialization.h"
-    
-    "include/GameEngineFramework/Transform/Transform.h"
-    
-    "include/GameEngineFramework/Math/Math.h"
-    "include/GameEngineFramework/Math/Random.h"
-    
-    "include/GameEngineFramework/Networking/NetworkSystem.h"
-    
-    "include/GameEngineFramework/Engine/Engine.h"
-    "include/GameEngineFramework/Engine/EngineSystems.h"
-    "include/GameEngineFramework/Engine/ComponentTypes.h"
-    
-    "include/GameEngineFramework/Engine/components/component.h"
-    "include/GameEngineFramework/Engine/components/gameobject.h"
-    
-    "include/GameEngineFramework/Engine/types/bufferlayout.h"
-    "include/GameEngineFramework/Engine/types/color.h"
-    "include/GameEngineFramework/Engine/types/viewport.h"
-    
-    "include/GameEngineFramework/Engine/UI/text.h"
-    "include/GameEngineFramework/Engine/UI/sprite.h"
-    "include/GameEngineFramework/Engine/UI/canvas.h"
-    "include/GameEngineFramework/Engine/UI/panel.h"
-    "include/GameEngineFramework/Engine/UI/button.h"
-    
-    "include/GameEngineFramework/Input/InputSystem.h"
-    "include/GameEngineFramework/Input/keys.h"
-    
-    "include/GameEngineFramework/Physics/PhysicsSystem.h"
-    "include/GameEngineFramework/Physics/components/meshcollider.h"
-    
-    "include/GameEngineFramework/Profiler/Profiler.h"
-    "include/GameEngineFramework/Types/Types.h"
-    "include/GameEngineFramework/Logging/Logging.h"
-    "include/GameEngineFramework/Timer/Timer.h"
-    "include/GameEngineFramework/MemoryAllocation/PoolAllocator.h"
-    
-    "include/GameEngineFramework/Renderer/enumerators.h"
-    "include/GameEngineFramework/Renderer/RenderSystem.h"
-    "include/GameEngineFramework/Renderer/components/camera.h"
-    "include/GameEngineFramework/Renderer/components/meshrenderer.h"
-    "include/GameEngineFramework/Renderer/components/material.h"
-    "include/GameEngineFramework/Renderer/components/mesh.h"
-    "include/GameEngineFramework/Renderer/components/fog.h"
-    "include/GameEngineFramework/Renderer/components/submesh.h"
-    "include/GameEngineFramework/Renderer/components/scene.h"
-    "include/GameEngineFramework/Renderer/components/light.h"
-    "include/GameEngineFramework/Renderer/components/shader.h"
-    "include/GameEngineFramework/Renderer/components/texture.h"
-    "include/GameEngineFramework/Renderer/components/framebuffer.h"
-    
-    "include/GameEngineFramework/Resources/FileLoader.h"
-    "include/GameEngineFramework/Resources/FileSystem.h"
-    "include/GameEngineFramework/Resources/ResourceManager.h"
-    "include/GameEngineFramework/Resources/assets/colliderTag.h"
-    "include/GameEngineFramework/Resources/assets/meshTag.h"
-    "include/GameEngineFramework/Resources/assets/shaderTag.h"
-    "include/GameEngineFramework/Resources/assets/textureTag.h"
-    
-    "include/GameEngineFramework/Scripting/ScriptSystem.h"
-    "include/GameEngineFramework/Scripting/components/script.h"
-    
+auto_sources(RUNTIME_HEADERS
+    "include/**/*.h"
     "tests/framework.h"
-    
-    "vendor/Bly7/OBJ_Loader.h"
-    
-    "vendor/AL/al.h"
-    "vendor/AL/alc.h"
-    
+    "vendor/**/*.h"
 )
 
 set (RUNTIME_SOURCES
@@ -181,8 +108,14 @@ endif()
 
 
 # ==========================================================
+# ==========================================================
+# ==========================================================
+# 
 # Build application dll
-#
+# 
+# ==========================================================
+# ==========================================================
+
 
 if(BUILD_APPLICATION_LIBRARY)
 
@@ -190,108 +123,9 @@ if(BUILD_CORE_ENGINE OR BUILD_RUNTIME_EXECUTABLE)
     message(FATAL_ERROR "Multiple build options are set. Please only select one build option at a time.")
 endif()
 
-set (GAME_HEADERS
-    
-    "include/GameEngineFramework/configuration.h"
-    "include/GameEngineFramework/functions.h"
-    "include/GameEngineFramework/plugins.h"
-    
-    "include/GameEngineFramework/Application/Platform.h"
-    "include/GameEngineFramework/Application/winproc.h"
-    "include/GameEngineFramework/Application/main.h"
-    
-    "include/GameEngineFramework/plugins/ChunkSpawner/ChunkManager.h"
-    "include/GameEngineFramework/plugins/ChunkSpawner/Chunk.h"
-    "include/GameEngineFramework/plugins/ChunkSpawner/Perlin.h"
-    "include/GameEngineFramework/plugins/ChunkSpawner/Decor.h"
-    "include/GameEngineFramework/plugins/ChunkSpawner/Structure.h"
-    
-    "include/GameEngineFramework/plugins/WeatherSystem/WeatherSystem.h"
-    
-    "include/GameEngineFramework/plugins/Emitter.h"
-    "include/GameEngineFramework/plugins/ParticleSystem.h"
-    
-    "include/GameEngineFramework/Audio/AudioSystem.h"
-    "include/GameEngineFramework/Audio/components/sound.h"
-    "include/GameEngineFramework/Audio/components/samplebuffer.h"
-    
-    "include/GameEngineFramework/ActorAI/ActorSystem.h"
-    "include/GameEngineFramework/ActorAI/ActorStates.h"
-    "include/GameEngineFramework/ActorAI/NeuralNetwork.h"
-    "include/GameEngineFramework/ActorAI/GeneticPresets.h"
-    "include/GameEngineFramework/ActorAI/genetics/gene.h"
-    "include/GameEngineFramework/ActorAI/genetics/base.h"
-    "include/GameEngineFramework/ActorAI/components/actor.h"
-    
-    "include/GameEngineFramework/Serialization/Serialization.h"
-    
-    "include/GameEngineFramework/Transform/Transform.h"
-    
-    "include/GameEngineFramework/Math/Math.h"
-    "include/GameEngineFramework/Math/Random.h"
-    
-    "include/GameEngineFramework/Networking/NetworkSystem.h"
-    
-    "include/GameEngineFramework/Engine/Engine.h"
-    "include/GameEngineFramework/Engine/EngineSystems.h"
-    "include/GameEngineFramework/Engine/ComponentTypes.h"
-    
-    "include/GameEngineFramework/Engine/components/component.h"
-    "include/GameEngineFramework/Engine/components/gameobject.h"
-    
-    "include/GameEngineFramework/Engine/types/bufferlayout.h"
-    "include/GameEngineFramework/Engine/types/color.h"
-    "include/GameEngineFramework/Engine/types/viewport.h"
-    
-    "include/GameEngineFramework/Engine/UI/text.h"
-    "include/GameEngineFramework/Engine/UI/sprite.h"
-    "include/GameEngineFramework/Engine/UI/canvas.h"
-    "include/GameEngineFramework/Engine/UI/panel.h"
-    "include/GameEngineFramework/Engine/UI/button.h"
-    
-    "include/GameEngineFramework/Input/InputSystem.h"
-    "include/GameEngineFramework/Input/keys.h"
-    
-    "include/GameEngineFramework/Physics/PhysicsSystem.h"
-    "include/GameEngineFramework/Physics/components/meshcollider.h"
-    
-    "include/GameEngineFramework/Profiler/Profiler.h"
-    
-    "include/GameEngineFramework/Types/Types.h"
-    "include/GameEngineFramework/Logging/Logging.h"
-    "include/GameEngineFramework/Timer/Timer.h"
-    "include/GameEngineFramework/MemoryAllocation/PoolAllocator.h"
-    
-    "include/GameEngineFramework/Renderer/enumerators.h"
-    "include/GameEngineFramework/Renderer/RenderSystem.h"
-    "include/GameEngineFramework/Renderer/components/camera.h"
-    "include/GameEngineFramework/Renderer/components/meshrenderer.h"
-    "include/GameEngineFramework/Renderer/components/material.h"
-    "include/GameEngineFramework/Renderer/components/mesh.h"
-    "include/GameEngineFramework/Renderer/components/fog.h"
-    "include/GameEngineFramework/Renderer/components/submesh.h"
-    "include/GameEngineFramework/Renderer/components/scene.h"
-    "include/GameEngineFramework/Renderer/components/light.h"
-    "include/GameEngineFramework/Renderer/components/shader.h"
-    "include/GameEngineFramework/Renderer/components/texture.h"
-    "include/GameEngineFramework/Renderer/components/framebuffer.h"
-    
-    "include/GameEngineFramework/Resources/FileLoader.h"
-    "include/GameEngineFramework/Resources/FileSystem.h"
-    "include/GameEngineFramework/Resources/ResourceManager.h"
-    "include/GameEngineFramework/Resources/assets/colliderTag.h"
-    "include/GameEngineFramework/Resources/assets/meshTag.h"
-    "include/GameEngineFramework/Resources/assets/shaderTag.h"
-    "include/GameEngineFramework/Resources/assets/textureTag.h"
-    
-    "include/GameEngineFramework/Scripting/ScriptSystem.h"
-    "include/GameEngineFramework/Scripting/components/script.h"
-    
-    "vendor/Bly7/OBJ_Loader.h"
-    
-    "vendor/AL/al.h"
-    "vendor/AL/alc.h"
-    
+auto_sources(GAME_SOURCES
+    "include/**/*.h"
+    "vendor/**/*.h"
 )
 
 set (GAME_SOURCES
@@ -309,7 +143,7 @@ set (GAME_SOURCES
     
     "src/plugins/WeatherSystem/WeatherSystem.cpp"
     
-    "src/plugins/ParticleSystem/Emitter.h"
+    "src/plugins/ParticleSystem/Emitter.cpp"
     "src/plugins/ParticleSystem/ParticleSystem.cpp"
     
     "src/start.cpp"
@@ -354,8 +188,13 @@ endif()
 
 
 # ==========================================================
+# ==========================================================
+# ==========================================================
+# 
 # Build engine core dll
 # 
+# ==========================================================
+# ==========================================================
 
 if(BUILD_CORE_ENGINE)
 
@@ -363,99 +202,9 @@ if(BUILD_APPLICATION_LIBRARY OR BUILD_RUNTIME_EXECUTABLE)
     message(FATAL_ERROR "Multiple build options are set. Please only select one build option at a time.")
 endif()
 
-set (CORE_HEADERS
-    
-    "include/GameEngineFramework/Application/Platform.h"
-    "include/GameEngineFramework/Application/winproc.h"
-    
-    "include/GameEngineFramework/Audio/AudioSystem.h"
-    "include/GameEngineFramework/Audio/components/sound.h"
-    "include/GameEngineFramework/Audio/components/samplebuffer.h"
-    
-    "include/GameEngineFramework/ActorAI/ActorSystem.h"
-    "include/GameEngineFramework/ActorAI/ActorStates.h"
-    "include/GameEngineFramework/ActorAI/NeuralNetwork.h"
-    "include/GameEngineFramework/ActorAI/GeneticPresets.h"
-    "include/GameEngineFramework/ActorAI/genetics/gene.h"
-    "include/GameEngineFramework/ActorAI/genetics/base.h"
-    "include/GameEngineFramework/ActorAI/components/actor.h"
-    
-    "include/GameEngineFramework/Serialization/Serialization.h"
-    
-    "include/GameEngineFramework/Transform/Transform.h"
-    
-    "include/GameEngineFramework/Math/Math.h"
-    "include/GameEngineFramework/Math/Random.h"
-    
-    "include/GameEngineFramework/Networking/NetworkSystem.h"
-    
-    "include/GameEngineFramework/Engine/Engine.h"
-    "include/GameEngineFramework/Engine/EngineSystems.h"
-    "include/GameEngineFramework/Engine/ComponentTypes.h"
-    
-    "include/GameEngineFramework/Engine/components/component.h"
-    "include/GameEngineFramework/Engine/components/gameobject.h"
-    
-    "include/GameEngineFramework/Engine/types/bufferlayout.h"
-    "include/GameEngineFramework/Engine/types/color.h"
-    "include/GameEngineFramework/Engine/types/viewport.h"
-    "include/GameEngineFramework/Engine/types/nulltype.h"
-    
-    "include/GameEngineFramework/Engine/UI/text.h"
-    "include/GameEngineFramework/Engine/UI/sprite.h"
-    "include/GameEngineFramework/Engine/UI/canvas.h"
-    "include/GameEngineFramework/Engine/UI/panel.h"
-    "include/GameEngineFramework/Engine/UI/button.h"
-    
-    "include/GameEngineFramework/Input/InputSystem.h"
-    "include/GameEngineFramework/Input/keys.h"
-    
-    "include/GameEngineFramework/Physics/Masks.h"
-    "include/GameEngineFramework/Physics/Raycast.h"
-    "include/GameEngineFramework/Physics/PhysicsSystem.h"
-    "include/GameEngineFramework/Physics/components/meshcollider.h"
-    
-    "include/GameEngineFramework/Profiler/Profiler.h"
-    
-    "include/GameEngineFramework/Types/Types.h"
-    "include/GameEngineFramework/Logging/Logging.h"
-    "include/GameEngineFramework/Timer/Timer.h"
-    "include/GameEngineFramework/MemoryAllocation/PoolAllocator.h"
-    
-    "include/GameEngineFramework/Renderer/enumerators.h"
-    "include/GameEngineFramework/Renderer/RenderSystem.h"
-    "include/GameEngineFramework/Renderer/components/camera.h"
-    "include/GameEngineFramework/Renderer/components/meshrenderer.h"
-    "include/GameEngineFramework/Renderer/components/material.h"
-    "include/GameEngineFramework/Renderer/components/mesh.h"
-    "include/GameEngineFramework/Renderer/components/fog.h"
-    "include/GameEngineFramework/Renderer/components/submesh.h"
-    "include/GameEngineFramework/Renderer/components/scene.h"
-    "include/GameEngineFramework/Renderer/components/light.h"
-    "include/GameEngineFramework/Renderer/components/shader.h"
-    "include/GameEngineFramework/Renderer/components/texture.h"
-    "include/GameEngineFramework/Renderer/components/framebuffer.h"
-    
-    "include/GameEngineFramework/Resources/FileLoader.h"
-    "include/GameEngineFramework/Resources/FileSystem.h"
-    "include/GameEngineFramework/Resources/ResourceManager.h"
-    "include/GameEngineFramework/Resources/assets/colliderTag.h"
-    "include/GameEngineFramework/Resources/assets/meshTag.h"
-    "include/GameEngineFramework/Resources/assets/shaderTag.h"
-    "include/GameEngineFramework/Resources/assets/textureTag.h"
-    
-    "include/GameEngineFramework/Scripting/ScriptSystem.h"
-    "include/GameEngineFramework/Scripting/components/script.h"
-    
-    "vendor/Bly7/OBJ_Loader.h"
-    
-    "vendor/AL/al.h"
-    "vendor/AL/alc.h"
-    
-    "vendor/stb/stb_image.h"
-    "vendor/stb/stb_perlin.h"
-    "vendor/stb/stb_truetype.h"
-    
+auto_sources(CORE_SOURCES
+    "include/**/*.h"
+    "vendor/**/*.h"
 )
 
 set (CORE_SOURCES
@@ -504,7 +253,9 @@ set (CORE_SOURCES
     "src/ActorAI/NeuralNetwork.cpp"
     "src/ActorAI/GeneticPresets.cpp"
     "src/ActorAI/genetics/gene.cpp"
-    "src/ActorAI/genetics/base.cpp"
+    "src/ActorAI/genetics/codon.cpp"
+    "src/ActorAI/genetics/phen.cpp"
+    "src/ActorAI/genetics/bio.cpp"
     "src/ActorAI/components/actor.cpp"
     
     "src/Serialization/Serialization.cpp"
@@ -537,6 +288,7 @@ set (CORE_SOURCES
     "src/Renderer/components/texture.cpp"
     "src/Renderer/components/framebuffer.cpp"
     
+    "src/Renderer/pipeline/accumulateFogLayers.cpp"
     "src/Renderer/pipeline/accumulateLights.cpp"
     "src/Renderer/pipeline/setCamera.cpp"
     
@@ -591,7 +343,7 @@ target_link_libraries(core opengl32.a)
 target_link_libraries(core Ws2_32.lib)
 
 target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
-target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/libOpenAL32.dll.a)
+target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/OpenAL32.lib)
 
 endif()
 
