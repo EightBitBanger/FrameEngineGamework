@@ -11,8 +11,8 @@ bool ChunkManager::DestroyChunk(Chunk& chunk) {
     Engine.Destroy<GameObject>( chunk.gameObject );
     Engine.Destroy<GameObject>( chunk.staticObject );
     
-    Physics.DestroyRigidBody( chunk.rigidBody );
-    Physics.DestroyHeightFieldMap(chunk.meshCollider);
+    //Physics.DestroyRigidBody( chunk.rigidBody );
+    //Physics.DestroyHeightFieldMap(chunk.meshCollider);
     
     return true;
 }

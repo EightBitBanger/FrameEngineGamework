@@ -33,10 +33,10 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
                 continue;
             
             // Check mark as saved
-            if (actorPtr->GetUserBitmask() == 'S') 
+            if (actorPtr->user.GetUserBitmask() == 'S') 
                 continue;
             
-            actorPtr->SetUserBitmask('S');
+            actorPtr->user.SetUserBitmask('S');
             
             if (actorPtr->GetName() == "") 
                 continue;
@@ -44,20 +44,22 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
             if (!actorPtr->GetActive()) 
                 continue;
             
+            // Position
             std::string actorPosStr = Float.ToString(actorPos.x) + "~" + 
                                       Float.ToString(actorPos.y) + "~" + 
                                       Float.ToString(actorPos.z) + "~";
             
-            std::string actorAge = IntLong.ToString( actorPtr->GetAge() ) + "~";
+            // Current actor age
+            std::string actorAge = IntLong.ToString( actorPtr->physical.GetAge() ) + "~";
             
+            // Genome
             std::string actorGenome = AI.genomes.ExtractGenome(actorPtr);
-            
             buffer += actorPosStr + actorAge + actorGenome + '\n';
             
             if (!doClearActors) 
                 continue;
             
-            actorPtr->SetUserBitmask(0);
+            actorPtr->user.SetUserBitmask(0);
             
             KillActor( actorObject );
             

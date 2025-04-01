@@ -12,8 +12,8 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     chunk.gameObject->name = Float.ToString(x) + "_" + Float.ToString(y);
     
-    chunk.gameObject->renderDistance   = renderDistance * chunkSize * 0.7f;
-    chunk.staticObject->renderDistance = staticDistance * chunkSize * 0.6f;
+    chunk.gameObject->renderDistance   = renderDistance * chunkSize * 0.5f;
+    chunk.staticObject->renderDistance = staticDistance * chunkSize * 0.45f;
     
     // Add renderers
     chunk.gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
@@ -22,17 +22,19 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
     MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
     
-    chunkRenderer->distance = renderDistance * chunkSize * 0.25f;
+    // Level of detail
+    //chunkRenderer->distance = renderDistance * chunkSize * 0.18f;
+    
     
     // Bounding box area
-    glm::vec3 boundMin(-chunkSize, -10, -chunkSize);
-    glm::vec3 boundMax(chunkSize, 10, chunkSize);
+    //glm::vec3 boundMin(-chunkSize, -10, -chunkSize);
+    //glm::vec3 boundMax(chunkSize, 10, chunkSize);
     
-    chunkRenderer->SetBoundingBoxMin(boundMin);
-    chunkRenderer->SetBoundingBoxMax(boundMax);
+    //chunkRenderer->SetBoundingBoxMin(boundMin);
+    //chunkRenderer->SetBoundingBoxMax(boundMax);
     
-    staticRenderer->SetBoundingBoxMin(boundMin);
-    staticRenderer->SetBoundingBoxMax(boundMax);
+    //staticRenderer->SetBoundingBoxMin(boundMin);
+    //staticRenderer->SetBoundingBoxMax(boundMax);
     
     // Chunk renderer
     
@@ -42,13 +44,22 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     chunkTransform->scale = glm::vec3( 1, 1, 1 );
     
     chunkRenderer->mesh = Engine.Create<Mesh>();
-    chunkRenderer->meshLod = Engine.Create<Mesh>();
     chunkRenderer->mesh->isShared = false;
-    chunkRenderer->meshLod->isShared = false;
     
     chunkRenderer->EnableFrustumCulling();
     
     chunkRenderer->material = worldMaterial;
+    
+    // Level of detail
+    //Mesh* lodMeshA = Engine.Create<Mesh>();
+    //Mesh* lodMeshB = Engine.Create<Mesh>();
+    
+    //lodMeshA->isShared = false;
+    //lodMeshB->isShared = false;
+    
+    //chunkRenderer->lods.push_back( lodMeshA );
+    //chunkRenderer->lods.push_back( lodMeshB );
+    
     
     // Static renderer
     
@@ -75,13 +86,11 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     unsigned int numberOfLayers = perlin.size();
     
-    float min=0.0;
-    
     for (unsigned int l=0; l < numberOfLayers; l++) {
         
         Perlin* perlinLayer = &perlin[l];
         
-        min = 
+        //min = 
         Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSZ, chunkSZ, 
                                             perlinLayer->noiseWidth, 
                                             perlinLayer->noiseHeight, 
@@ -109,10 +118,18 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     // Finalize chunk
     
     Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSZ, chunkSZ, 0, 0, 1, 1);
-    Engine.AddHeightFieldToMeshHalfSize(chunkRenderer->meshLod, heightField, colorField, chunkSZ, chunkSZ, 0, 0);
-    
     chunkRenderer->mesh->Load();
-    chunkRenderer->meshLod->Load();
+    
+    //Engine.AddHeightFieldToMeshHalfSize(chunkRenderer->lods[0], heightField, colorField, chunkSZ, chunkSZ, 0, 0);
+    //Engine.AddHeightFieldToMeshHalfSize(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0);
+    
+    //Engine.AddHeightFieldToMeshLOD(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 2);
+    //Engine.AddHeightFieldToMeshReduced(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 2);
+    //Engine.AddHeightFieldToMeshReduced(chunkRenderer->lods[2], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 20);
+    
+    //chunkRenderer->lods[0]->Load();
+    //chunkRenderer->lods[1]->Load();
+    //chunkRenderer->lods[2]->Load();
     
     
     // Physics

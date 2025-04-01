@@ -11,8 +11,6 @@ ChunkManager::ChunkManager() :
     
     worldSeed(100),
     
-    numberOfActiveActors(0),
-    
     waterMaterial(nullptr),
     
     worldMaterial(nullptr),
@@ -162,49 +160,42 @@ bool ChunkManager::DestroyWorld(std::string worldname) {
 }
 
 
-// TESTING 
-std::vector<std::string> states;
+// TESTING TODO Save and load the neural network states
+std::vector<float> states;
 
 
 GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
     
     GameObject* actorObject = nullptr;
     
-    unsigned int numberOfActors = actors.size();
-    
-    for (unsigned int a=0; a < numberOfActors; a++) {
+    // Check for a free actor
+    unsigned int numberOfActors = actorFreelist.size();
+    if (numberOfActors > 0) {
+        actorObject = actorFreelist.back();
         
-        if (actors[a]->isActive) 
-            continue;
-        
-        actorObject = actors[a];
-        actorObject->SetPosition(x, y, z);
-        
-        actorObject->Activate();
-        
-        break;
+        actorFreelist.erase( actorFreelist.end() - 1 );
     }
     
+    // Create a new actor
     if (actorObject == nullptr) {
-        
         actorObject = Engine.CreateAIActor( glm::vec3(x, y, z) );
-        
-        actorObject->renderDistance = staticDistance * chunkSize * 0.5f;
-        
-        actors.push_back( actorObject );
-        
+        actorObject->renderDistance = staticDistance * chunkSize * 0.8f;
     }
     
+    actorObject->Activate();
+    
+    actors.push_back( actorObject );
     Actor* actorPtr = actorObject->GetComponent<Actor>();
     
-    actorPtr->SetTargetPoint(glm::vec3(x, y, z));
+    // Reset to default some important values
+    actorPtr->Reset();
+    actorObject->SetPosition(x, y, z);
     
-    actorPtr->SetUserBitmask(0);
+    // This prevents the actors from initially navigating to world point 0,0,0
+    actorPtr->navigation.SetTargetPoint( glm::vec3(x, y, z) );
     
-    if (actorPtr->GetHeightPreferenceMin() == 0.0f) 
-        actorPtr->SetHeightPreferenceMin(world.waterLevel);
-    
-    numberOfActiveActors++;
+    if (actorPtr->behavior.GetHeightPreferenceMin() == 0.0f) 
+        actorPtr->behavior.SetHeightPreferenceMin(world.waterLevel);
     
     // Initiate neural network
     if (states.size() == 0) {
@@ -216,11 +207,14 @@ GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
         buffer.resize(fileSz);
         Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
         
-        std::vector<std::string> states = String.Explode(buffer, '\n');
+        std::vector<std::string> stringstates = String.Explode(buffer, '\n');
         
+        NeuralNetwork dummyNetwork;
+        dummyNetwork.LoadState( stringstates );
+        states = dummyNetwork.SaveStateBin();
     }
     
-    actorPtr->LoadNeuralStates( states );
+    actorPtr->idiosyncrasies.LoadNeuralStates( states );
     
     return actorObject;
 }
@@ -231,27 +225,23 @@ bool ChunkManager::KillActor(GameObject* actorObject) {
     
     actorObject->Deactivate();
     
-    if (actorPtr == nullptr) 
-        return false;
+    actorPtr->genetics.ClearGenome();
+    actorPtr->genetics.ClearPhenome();
+    actorPtr->idiosyncrasies.ClearMemories();
     
-    actorPtr->SetName("");
-    actorPtr->SetChanceToChangeDirection(0);
-    actorPtr->SetChanceToFocusOnActor(0);
-    actorPtr->SetChanceToStopWalking(0);
-    actorPtr->SetChanceToWalk(0);
-    actorPtr->SetTargetPoint(glm::vec3(0, 0, 0));
+    actorPtr->ReexpressPhenotype();
     
-    actorPtr->SetSpeed(0);
-    actorPtr->SetSpeedMultiplier(0);
+    // Remove from the active actor list
+    unsigned int numberOfActors = actors.size();
+    for (unsigned int i=0; i < numberOfActors; i++) {
+        if (actors[i] != actorObject) 
+            continue;
+        
+        actors.erase( actors.begin() + i );
+        break;
+    }
     
-    actorPtr->SetYouthScale(0);
-    actorPtr->SetAdultScale(0);
-    
-    actorPtr->ClearGenome();
-    actorPtr->ClearMemories();
-    
-    numberOfActiveActors--;
-    
+    actorFreelist.push_back(actorObject);
     return true;
 }
 

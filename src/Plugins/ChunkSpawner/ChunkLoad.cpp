@@ -32,20 +32,24 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 
                 std::vector<std::string> lineArray = String.Explode(lineString, '~');
                 
+                // Position
                 float posX = String.ToFloat( lineArray[0] );
                 float posY = String.ToFloat( lineArray[1] );
                 float posZ = String.ToFloat( lineArray[2] );
                 
                 glm::vec3 pos(posX, posY, posZ);
                 
+                // Set current age
                 unsigned long long int age = String.ToLongUint( lineArray[3] );
                 
                 GameObject* actorObject = SpawnActor(posX, posY, posZ);
                 Actor* actorPtr = actorObject->GetComponent<Actor>();
                 
+                // Set genome
                 AI.genomes.InjectGenome(actorPtr, lineArray[4]);
+                actorPtr->ReexpressPhenotype();
                 
-                actorPtr->SetAge(age);
+                actorPtr->physical.SetAge(age);
                 
                 continue;
             }
@@ -95,7 +99,7 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
             staticObj.type = type;
             
             
-            if (type = DECORATION_GRASS) {
+            if (type == DECORATION_GRASS) {
                 
                 chunk.statics.push_back(staticObj);
                 
@@ -113,7 +117,7 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 continue;
             }
             
-            if (type = DECORATION_GRASS_THICK) {
+            if (type == DECORATION_GRASS_THICK) {
                 
                 chunk.statics.push_back(staticObj);
                 
@@ -131,7 +135,7 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 continue;
             }
             
-            if (type = DECORATION_GRASS_THIN) {
+            if (type == DECORATION_GRASS_THIN) {
                 
                 chunk.statics.push_back(staticObj);
                 
@@ -149,7 +153,7 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 continue;
             }
             
-            if (type = DECORATION_TREE) {
+            if (type == DECORATION_TREE) {
                 
                 chunk.statics.push_back(staticObj);
                 
@@ -166,7 +170,7 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
             }
             
             
-            if (type = DECORATION_LEAVES) {
+            if (type == DECORATION_LEAVES) {
                 
                 chunk.statics.push_back(staticObj);
                 

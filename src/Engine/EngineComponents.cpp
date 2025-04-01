@@ -77,13 +77,13 @@ bool EngineSystemManager::DestroyComponent(Component* componentPtr) {
             
             Actor* actorPtr = (Actor*)componentPtr->GetComponent();
             
-            for (unsigned int i=0; i < actorPtr->mGeneticRenderers.size(); i++) 
-                sceneMain->RemoveMeshRendererFromSceneRoot( actorPtr->mGeneticRenderers[i], RENDER_QUEUE_GEOMETRY );
+            for (unsigned int i=0; i < actorPtr->genetics.mGeneticRenderers.size(); i++) 
+                sceneMain->RemoveMeshRendererFromSceneRoot( actorPtr->genetics.mGeneticRenderers[i], RENDER_QUEUE_GEOMETRY );
             
-            for (unsigned int i=0; i < actorPtr->mGeneticRenderers.size(); i++) 
-                Destroy<MeshRenderer>( actorPtr->mGeneticRenderers[i] );
+            for (unsigned int i=0; i < actorPtr->genetics.mGeneticRenderers.size(); i++) 
+                Destroy<MeshRenderer>( actorPtr->genetics.mGeneticRenderers[i] );
             
-            actorPtr->mGeneticRenderers.clear();
+            actorPtr->genetics.mGeneticRenderers.clear();
             
             AI.DestroyActor( actorPtr );
             

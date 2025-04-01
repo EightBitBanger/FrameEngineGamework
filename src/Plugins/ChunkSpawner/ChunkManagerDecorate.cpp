@@ -139,7 +139,7 @@ void ChunkManager::AddDecorTreeLogs(Chunk& chunk, StaticObject& staticObject, Me
 
 void ChunkManager::AddDecorTreeLeaves(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz) {
     
-    unsigned int leafAccent = Random.Range(0, 100);
+    //unsigned int leafAccent = Random.Range(0, 100);
     
     StaticObject newStaticObject = staticObject;
     newStaticObject.type = DECORATION_LEAVES;
@@ -442,9 +442,9 @@ void ChunkManager::Decorate(Chunk& chunk) {
                     
                     DecodeGenome(decor, actor);
                     
-                    actor->SetAge( 1000 + Random.Range(0, 1000) );
+                    actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
                     
-                    if (Random.Range(0, 100) > 95) {
+                    if (Random.Range(0, 100) > 92) {
                         
                         unsigned int numberOfChildren = Random.Range(0, 4);
                         
@@ -460,7 +460,7 @@ void ChunkManager::Decorate(Chunk& chunk) {
                             
                             DecodeGenome(decor, actor);
                             
-                            actor->SetAge( 100 + Random.Range(0, 200) );
+                            actor->physical.SetAge( 100 + Random.Range(0, 200) );
                             
                         }
                         

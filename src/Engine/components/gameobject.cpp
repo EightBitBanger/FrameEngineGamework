@@ -174,7 +174,7 @@ void GameObject::SetPosition(float x, float y, float z) {
         mCameraCache->transform.position = glm::vec3(x, y, z);
     }
     if (mActorCache!= nullptr) {
-        mActorCache->SetPosition( glm::vec3(x, y, z) );
+        mActorCache->navigation.SetPosition( glm::vec3(x, y, z) );
     }
     if (mLightCache != nullptr) {
         mLightCache->position = glm::vec3(x, y, z);

@@ -269,6 +269,67 @@ void EngineSystemManager::AddHeightFieldToMesh(Mesh* mesh,
     return;
 }
 
+
+
+void EngineSystemManager::AddHeightFieldToMeshLOD(Mesh* mesh, 
+                                                  float* heightField, glm::vec3* colorField, 
+                                                  unsigned int width, unsigned int height, 
+                                                  float offsetX, float offsetZ, 
+                                                  unsigned int lodFactor) {
+    
+    unsigned int fieldWidth = (width / lodFactor) - 1;
+    unsigned int fieldHeight = (height / lodFactor) - 1;
+    
+    float sx = (lodFactor > 1) ? lodFactor * 4.0f : 1.0f;
+    float sz = (lodFactor > 1) ? lodFactor * 4.0f : 1.0f;
+    
+    for (unsigned int x = 0; x < fieldWidth; x++) {
+        for (unsigned int z = 0; z < fieldHeight; z++) {
+            unsigned int xa = x * lodFactor;
+            unsigned int za = z * lodFactor;
+            
+            float yyA = heightField[za * width + xa];
+            float yyB = heightField[za * width + (xa + lodFactor)];
+            float yyC = heightField[(za + lodFactor) * width + (xa + lodFactor)];
+            float yyD = heightField[(za + lodFactor) * width + xa];
+            
+            glm::vec3 cA = colorField[za * width + xa];
+            glm::vec3 cB = colorField[za * width + (xa + lodFactor)];
+            glm::vec3 cC = colorField[(za + lodFactor) * width + (xa + lodFactor)];
+            glm::vec3 cD = colorField[(za + lodFactor) * width + xa];
+            
+            float xx = (((float)x + offsetX - (float)width / 2) / 2) + 0.25;
+            float zz = (((float)z + offsetZ - (float)height / 2) / 2) + 0.25;
+            
+            Vertex vertex[4] = {
+                Vertex(xx, yyA, zz, cA.x, cA.y, cA.z, 0, 1, 0, 0, 0),
+                Vertex(xx + sx, yyB, zz, cB.x, cB.y, cB.z, 0, 1, 0, 1, 0),
+                Vertex(xx + sx, yyC, zz + sz, cC.x, cC.y, cC.z, 0, 1, 0, 1, 1),
+                Vertex(xx, yyD, zz + sz, cD.x, cD.y, cD.z, 0, 1, 0, 0, 1)
+            };
+            
+            glm::vec3 U = glm::vec3(vertex[2].x, vertex[2].y, vertex[2].z) - glm::vec3(vertex[0].x, vertex[0].y, vertex[0].z);
+            glm::vec3 V = glm::vec3(vertex[1].x, vertex[1].y, vertex[1].z) - glm::vec3(vertex[0].x, vertex[0].y, vertex[0].z);
+            glm::vec3 normal = glm::cross(U, V);
+            
+            for (int i = 0; i < 4; i++) {
+                vertex[i].nx = normal.x;
+                vertex[i].ny = normal.y;
+                vertex[i].nz = normal.z;
+            }
+            
+            SubMesh subBuffer;
+            subBuffer.vertexBuffer.assign(vertex, vertex + 4);
+            subBuffer.indexBuffer = {0, 2, 1, 0, 3, 2};
+            
+            mesh->AddSubMesh(xx, 0, zz, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
+        }
+    }
+    
+    return;
+}
+
+
 void EngineSystemManager::AddHeightFieldToMeshHalfSize(Mesh* mesh, 
                                                float* heightField, glm::vec3* colorField, 
                                                unsigned int width, unsigned int height, 
@@ -335,14 +396,14 @@ void EngineSystemManager::AddHeightFieldToMeshReduced(Mesh* mesh,
                                                       float offsetX, float offsetZ, 
                                                       unsigned int resolution) {
     
-    unsigned int fieldWidth = width / resolution;
-    unsigned int fieldHeight = height / resolution;
+    int fieldWidth = width / resolution;
+    int fieldHeight = height / resolution;
     
-    for (unsigned int x = 0; x < fieldWidth; x++) {
+    for (int x = 0; x < fieldWidth; x++) {
         
-        for (unsigned int z = 0; z < fieldHeight; z++) {
-            unsigned int xa = x * resolution;
-            unsigned int za = z * resolution;
+        for (int z = 0; z < fieldHeight; z++) {
+            int xa = x * resolution;
+            int za = z * resolution;
             
             float yyA = heightField[za * width + xa];
             float yyB = heightField[za * width + (xa + resolution)];
@@ -374,7 +435,16 @@ void EngineSystemManager::AddHeightFieldToMeshReduced(Mesh* mesh,
                 vertex[i].nz = normal.z;
             }
             
+            float scale = 1.0f;
+            float scaleDv = 1.0f / 2.0f;
+            
             SubMesh subBuffer;
+            for (int i = 0; i < 4; i++) {
+                vertex[i].x  = (vertex[i].x * scale) - scaleDv;
+                vertex[i].y += (vertex[i].y) - scaleDv;
+                vertex[i].z  = (vertex[i].z * scale) - scaleDv;
+            }
+            
             subBuffer.vertexBuffer.assign(vertex, vertex + 4);
             subBuffer.indexBuffer = {0, 2, 1, 0, 3, 2};
             
@@ -385,6 +455,7 @@ void EngineSystemManager::AddHeightFieldToMeshReduced(Mesh* mesh,
     
     return;
 }
+
 
 // UI
 

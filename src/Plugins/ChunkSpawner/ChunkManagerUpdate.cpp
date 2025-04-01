@@ -122,7 +122,7 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
     unsigned int numberOfChunks = chunks.size();
     
     if (numberOfChunks > 0) {
-        unsigned int numberOfCycles = numberOfChunks / 3;
+        //unsigned int numberOfCycles = numberOfChunks / 3;
         
         for (unsigned int c = 0; c < numberOfChunks; c++) {
             
@@ -153,127 +153,199 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
 }
 
 void ChunkManager::UpdateActors(const glm::vec3 &playerPosition) {
+    
     unsigned int numberOfActors = actors.size();
-    if (numberOfActors > 0) {
-        GameObject* actorObject = actors[mActorIndex];
-        Actor* actorPtr = actorObject->GetComponent<Actor>();
+    
+    if (numberOfActors == 0) 
+        return;
+    
+    GameObject* actorObject = actors[mActorIndex];
+    Actor* actorPtr = actorObject->GetComponent<Actor>();
+    
+    if (actorObject->isActive) {
         
-        if (actorObject->isActive) {
-            HandleActorLifeCycle(actorObject);
-            UpdateActorPosition(actorPtr, playerPosition);
-            HandleAutoBreeding(actorPtr, numberOfActors);
-            CheckActorBreeding(actorPtr);
-        }
+        HandleActorLifeCycle(actorObject);
         
-        mActorIndex = (mActorIndex + 1) % numberOfActors;
+        UpdateActorPosition(actorPtr, playerPosition);
+        
+        HandleActorInteraction(actorPtr, numberOfActors);
+        
+        HandleAutoBreeding(actorPtr, numberOfActors);
+        
+        CheckActorBreeding(actorPtr);
+        
     }
+    
+    mActorIndex = (mActorIndex + 1) % numberOfActors;
+    return;
 }
 
 void ChunkManager::HandleActorLifeCycle(GameObject* actorObject) {
+    
     Actor* actorPtr = actorObject->GetComponent<Actor>();
     
-    if (numberOfActiveActors > 1000) {
-        
-        if (mDeathCoolDown > 0) 
-            mDeathCoolDown--;
-        
-        if (mDeathCoolDown == 0 && actorPtr->GetAge() > 10000) {
-            
-            mDeathCoolDown = 80;
-            
-            KillActor(actorObject);
-            
-            return;
-        }
-    }
-}
-
-void ChunkManager::UpdateActorPosition(Actor* actorPtr, const glm::vec3 &playerPosition) {
-    glm::vec3 actorPos = actorPtr->GetPosition();
+    if (actorPtr->physical.GetAge() > actorPtr->physical.GetSeniorAge()) 
+        actorPtr->biological.health -= 1.0f;
     
-    if (glm::distance(actorPos, playerPosition) < (renderDistance * chunkSize)) 
-        actorPtr->SetGeneticExpressionFlag();
-    
-    unsigned int breedingCoolDown = actorPtr->GetCoolDownBreeding();
-    if (breedingCoolDown != 0) {
-        
-        breedingCoolDown--;
-        actorPtr->SetCoolDownBreeding(breedingCoolDown);
-    }
+    // Check actor death
+    if (actorPtr->biological.health < 0) 
+        KillActor(actorObject);
     
     return;
 }
 
+void ChunkManager::UpdateActorPosition(Actor* actorPtr, const glm::vec3 &playerPosition) {
+    glm::vec3 actorPos = actorPtr->navigation.GetPosition();
+    
+    unsigned int breedingCoolDown = actorPtr->counters.GetCoolDownBreeding();
+    if (breedingCoolDown != 0) 
+        breedingCoolDown--;
+    
+    actorPtr->counters.SetCoolDownBreeding(breedingCoolDown);
+    
+    return;
+}
+
+
+// Check actor interaction
+
+void ChunkManager::HandleActorInteraction(Actor* actorPtr, unsigned int numberOfActors) {
+    
+    GameObject* actorObjectB = actors[Random.Range(0, numberOfActors)];
+    
+    Actor* actorPtrA = actorPtr;
+    Actor* actorPtrB = actorObjectB->GetComponent<Actor>();
+    
+    glm::vec3 posA = actorPtrA->navigation.GetPosition();
+    glm::vec3 posB = actorPtrB->navigation.GetPosition();
+    
+    //if (glm::distance(posA, posB) > 40.0f) 
+    //    continue;
+    
+    // Arbitrarily move towards actor
+    
+    // TODO Should select based on 'carnivore' flag
+    
+    if (actorPtrA->navigation.GetTargetActor() == nullptr || actorPtrB->navigation.GetTargetActor() == nullptr) 
+        return;
+    
+    actorPtrA->navigation.SetTargetActor( actorPtrB->navigation.GetTargetActor() );
+    actorPtrB->navigation.SetTargetActor( actorPtrA->navigation.GetTargetActor() );
+    
+    return;
+}
+
+// Breeding
+
 void ChunkManager::HandleAutoBreeding(Actor* actorPtr, unsigned int numberOfActors) {
     
-    if (world.doAutoBreeding && numberOfActiveActors < 1400 && numberOfActiveActors > 1) {
+    if (world.doAutoBreeding && actors.size() < 2000 && actors.size() > 1) {
         
-        if (mBreedingCoolDown != 0) 
+        if (mBreedingCoolDown > 0) 
             mBreedingCoolDown--;
         
         if (mBreedingCoolDown == 0) {
             
-            mBreedingCoolDown = 400;
+            mBreedingCoolDown = 20;
             
-            AttemptBreeding(numberOfActors);
+            for (unsigned int i=0; i < 8; i++) 
+                AttemptBreeding(numberOfActors);
         }
     }
     
     return;
 }
 
-void ChunkManager::AttemptBreeding(unsigned int numberOfActors) {
-    for (unsigned int i = 0; i < 8; i++) {
-        GameObject* actorObjectA = actors[Random.Range(0, numberOfActors)];
-        GameObject* actorObjectB = actors[Random.Range(0, numberOfActors)];
-        
-        if (!actorObjectA->isActive || !actorObjectB->isActive || actorObjectA == actorObjectB) 
-            continue;
-        
-        Actor* actorA = actorObjectA->GetComponent<Actor>();
-        Actor* actorB = actorObjectB->GetComponent<Actor>();
-        
-        if (actorA->GetCoolDownBreeding() != 0 || actorB->GetCoolDownBreeding() != 0) 
-            continue;
-        
-        glm::vec3 posA = actorObjectA->GetPosition();
-        glm::vec3 posB = actorObjectB->GetPosition();
-        
-        if (glm::distance(posA, posB) > 50.0f || actorA->GetAge() < 1000 || actorB->GetAge() < 1000) 
-            continue;
-        
-        actorA->SetBreedWithActor(actorB);
-        actorB->SetBreedWithActor(actorA);
-        
-        actorA->SetCoolDownBreeding(200);
-        actorB->SetCoolDownBreeding(200);
-        
-        break;
-    }
+bool ChunkManager::AttemptBreeding(unsigned int numberOfActors) {
+    GameObject* actorObjectA = actors[Random.Range(0, numberOfActors)];
+    GameObject* actorObjectB = actors[Random.Range(0, numberOfActors)];
+    
+    Actor* actorA = actorObjectA->GetComponent<Actor>();
+    Actor* actorB = actorObjectB->GetComponent<Actor>();
+    
+    // Check must be active
+    if (!actorObjectA->isActive || !actorObjectB->isActive) 
+        return false;
+    
+    // Check actors cannot be the same
+    if (actorObjectA == actorObjectB) 
+        return false;
+    
+    // Name must match
+    if (actorA->GetName() != actorB->GetName()) 
+        return false;
+    
+    // Check breeding cool down counter
+    if (actorA->counters.GetCoolDownBreeding() > 0 || actorB->counters.GetCoolDownBreeding() > 0) 
+        return false;
+    
+    // Check avoid homosexual pair
+    if (actorA->physical.GetSexualOrientation() == actorB->physical.GetSexualOrientation()) 
+        return false;
+    
+    glm::vec3 posA = actorObjectA->GetPosition();
+    glm::vec3 posB = actorObjectB->GetPosition();
+    
+    // Check maximum distance
+    if (glm::distance(posA, posB) > 80.0f) 
+        return false;
+    
+    // Check age is adult
+    if (actorA->physical.GetAge() < actorA->physical.GetAdultAge() || 
+        actorB->physical.GetAge() < actorB->physical.GetAdultAge()) 
+        return false;
+    
+    // Finally, select the pair for breeding
+    actorA->navigation.SetBreedWithActor(actorB);
+    actorB->navigation.SetBreedWithActor(actorA);
+    
+    // Allow some cool down time, allow extra cool down time
+    // for females, pregnancy time out
+    if (actorA->physical.GetSexualOrientation() == false) 
+    {actorA->counters.SetCoolDownBreeding(400);} else 
+    {actorA->counters.SetCoolDownBreeding(50);}
+    
+    if (actorB->physical.GetSexualOrientation() == false) 
+    {actorB->counters.SetCoolDownBreeding(400);} else 
+    {actorB->counters.SetCoolDownBreeding(50);}
+    
+    return true;
 }
 
 
 void ChunkManager::CheckActorBreeding(Actor* actorPtr) {
-    Actor* breedTarget = actorPtr->GetBreedWithActor();
+    
+    Actor* breedTarget = actorPtr->navigation.GetBreedWithActor();
+    
     if (breedTarget != nullptr) {
-        glm::vec3 posA = actorPtr->GetPosition();
-        glm::vec3 posB = breedTarget->GetPosition();
+        glm::vec3 posA = actorPtr->navigation.GetPosition();
+        glm::vec3 posB = breedTarget->navigation.GetPosition();
         
-        if (glm::distance(posA, posB) < 2.0f) {
-            glm::vec3 halfDistance = (posA + posB) * 0.5f;
-            GameObject* newChild = SpawnActor(halfDistance.x, halfDistance.y, halfDistance.z);
+        if (glm::distance(posA, posB) < 1.5f) {
+            
+            glm::vec3 spawnPoint;
+            
+            // Spawn next to the female
+            if (actorPtr->physical.GetSexualOrientation() == false) spawnPoint = posA;
+            if (breedTarget->physical.GetSexualOrientation() == false) spawnPoint = posB;
+            
+            GameObject* newChild = SpawnActor(spawnPoint.x, spawnPoint.y, spawnPoint.z);
             Actor* newChildActor = newChild->GetComponent<Actor>();
             
+            unsigned long int newAge = Random.Range(0, 100);
+            
+            newChildActor->physical.SetAge(newAge);
+            
             newChildActor->SetName(actorPtr->GetName());
-            AI.genomes.ConjugateGenome(actorPtr, breedTarget, newChildActor);
+            AI.genomes.BlendGenomes(actorPtr, breedTarget, newChildActor);
             
-            newChildActor->SetGeneticUpdateFlag();
-            newChildActor->SetGeneticExpressionFlag();
+            newChildActor->ReexpressPhenotype();
             
-            actorPtr->SetBreedWithActor(nullptr);
-            breedTarget->SetBreedWithActor(nullptr);
+            actorPtr->navigation.SetBreedWithActor(nullptr);
+            breedTarget->navigation.SetBreedWithActor(nullptr);
         }
     }
+    return;
 }
 
 
@@ -316,228 +388,4 @@ void ChunkManager::InitializePlayerHeight(glm::vec3 &playerPosition) {
     
     return;
 }
-
-
-
-
-
-
-
-/*
-
-void ChunkManager::Update(void) {
-    
-    if (Engine.cameraController == nullptr || !world.doGenerateChunks)
-        return;
-    
-    glm::vec3 playerPosition = Engine.cameraController->GetPosition();
-    
-    // New world, set player height
-    if (!isInitiated) {
-        
-        playerPosition.y = 0;
-        
-        Hit hit;
-        if (Physics.Raycast(playerPosition, glm::vec3(0, -1, 0), 100.0f, hit, LayerMask::Ground)) {
-            
-            playerPosition.y = hit.point.y + 3.5f;
-            Engine.cameraController->SetPosition(playerPosition);
-            isInitiated = true;
-        }
-    }
-    
-    // Check player underwater
-    if (playerPosition.y < world.waterLevel) {
-        // Underwater
-        Renderer.fogHeightCutoff[RENDER_FOG_LAYER_3] = 1000.0f;
-        Renderer.fogDensity[RENDER_FOG_LAYER_3] = 0.8f;
-        Renderer.fogBegin[RENDER_FOG_LAYER_3] = 0.0f;
-        Renderer.fogEnd[RENDER_FOG_LAYER_3] = 24.0f;
-        Renderer.fogColorBegin[RENDER_FOG_LAYER_3] = Colors.blue;
-        Renderer.fogColorEnd[RENDER_FOG_LAYER_3] = Colors.blue;
-    } else {
-        // Above water
-        Renderer.fogHeightCutoff[RENDER_FOG_LAYER_3] = world.waterLevel;
-        Renderer.fogDensity[RENDER_FOG_LAYER_3] = 0.8f;
-        Renderer.fogBegin[RENDER_FOG_LAYER_3] = 0.0f;
-        Renderer.fogEnd[RENDER_FOG_LAYER_3] = 1.0f;
-        Renderer.fogColorBegin[RENDER_FOG_LAYER_3] = Colors.blue;
-        Renderer.fogColorEnd[RENDER_FOG_LAYER_3] = Colors.blue;
-    }
-    
-    // Update actors
-    unsigned int numberOfActors = actors.size();
-    
-    if (numberOfActors > 0) {
-        GameObject* actorObject = actors[mActorIndex];
-        Actor* actorPtr = actorObject->GetComponent<Actor>();
-        
-        if (actorObject->isActive) {
-            if (numberOfActiveActors > 1000) {
-                if (mDeathCoolDown > 0) 
-                    mDeathCoolDown--;
-                
-                if (mDeathCoolDown == 0 && actorPtr->GetAge() > 10000) {
-                    mDeathCoolDown = 300;
-                    KillActor(actorObject);
-                    return;
-                }
-            }
-            
-            glm::vec3 actorPos = actorPtr->GetPosition();
-            if (glm::distance(actorPos, playerPosition) < (renderDistance * chunkSize)) 
-                actorPtr->SetGeneticExpressionFlag();
-            
-            unsigned int breedingCoolDown = actorPtr->GetCoolDownBreeding();
-            if (breedingCoolDown != 0) {
-                breedingCoolDown--;
-                actorPtr->SetCoolDownBreeding(breedingCoolDown);
-            }
-            
-            // Auto breeding
-            if (world.doAutoBreeding && numberOfActiveActors < 1400 && numberOfActiveActors > 1) {
-                if (mBreedingCoolDown != 0) 
-                    mBreedingCoolDown--;
-                
-                if (mBreedingCoolDown == 0) {
-                    mBreedingCoolDown = 400;
-                    
-                    for (unsigned int i = 0; i < 8; i++) {
-                        GameObject* actorObjectA = actors[Random.Range(0, numberOfActors)];
-                        GameObject* actorObjectB = actors[Random.Range(0, numberOfActors)];
-                        
-                        if (!actorObjectA->isActive || !actorObjectB->isActive || actorObjectA == actorObjectB) 
-                            continue;
-                        
-                        Actor* actorA = actorObjectA->GetComponent<Actor>();
-                        Actor* actorB = actorObjectB->GetComponent<Actor>();
-                        
-                        if (actorA->GetCoolDownBreeding() != 0 || actorB->GetCoolDownBreeding() != 0) 
-                            continue;
-                        
-                        glm::vec3 posA = actorObjectA->GetPosition();
-                        glm::vec3 posB = actorObjectB->GetPosition();
-                        
-                        if (glm::distance(posA, posB) > 50.0f || actorA->GetAge() < 1000 || actorB->GetAge() < 1000) 
-                            continue;
-                        
-                        actorA->SetBreedWithActor(actorB);
-                        actorB->SetBreedWithActor(actorA);
-                        
-                        actorA->SetCoolDownBreeding(200);
-                        actorB->SetCoolDownBreeding(200);
-                        
-                        break;
-                    }
-                }
-            }
-            
-            // Check actor breeding
-            Actor* breedTarget = actorPtr->GetBreedWithActor();
-            if (breedTarget != nullptr) {
-                glm::vec3 posA = actorPtr->GetPosition();
-                glm::vec3 posB = breedTarget->GetPosition();
-                
-                if (glm::distance(posA, posB) < 2.0f) {
-                    glm::vec3 halfDistance = (posA + posB) * 0.5f;
-                    
-                    GameObject* newChild = SpawnActor(halfDistance.x, halfDistance.y, halfDistance.z);
-                    Actor* newChildActor = newChild->GetComponent<Actor>();
-                    
-                    newChildActor->SetName(actorPtr->GetName());
-                    AI.genomes.ConjugateGenome(actorPtr, breedTarget, newChildActor);
-                    
-                    newChildActor->SetGeneticUpdateFlag();
-                    newChildActor->SetGeneticExpressionFlag();
-                    
-                    actorPtr->SetBreedWithActor(nullptr);
-                    breedTarget->SetBreedWithActor(nullptr);
-                }
-            }
-        }
-        
-        mActorIndex++;
-        if (mActorIndex >= numberOfActors) 
-            mActorIndex = 0;
-    }
-    
-    // Destroy chunks
-    unsigned int numberOfChunks = chunks.size();
-    if (numberOfChunks > 0) {
-        unsigned int numberOfCycles = numberOfChunks / 3;
-        
-        for (unsigned int c = 0; c < numberOfCycles; c++) {
-            Chunk& chunk = chunks[mChunkIndex];
-            glm::vec3 chunkPos(chunk.x, 0, chunk.y);
-            
-            if (glm::distance(chunkPos, playerPosition) > (renderDistance * chunkSize) * 1.5f) {
-                SaveChunk(chunk, true);
-                DestroyChunk(chunk);
-                chunks.erase(chunks.begin() + mChunkIndex);
-            }
-            
-            mChunkIndex++;
-            if (mChunkIndex >= numberOfChunks) 
-                mChunkIndex = 0;
-        }
-    }
-    
-    // Generate chunks
-    for (mChunkCounterX = 0; mChunkCounterX <= renderDistance; mChunkCounterX++) {
-        if (mChunkCounterX >= renderDistance) {
-            mChunkCounterX = 0;
-            break;
-        }
-        
-        int xx = mChunkCounterX;
-        
-        for (mChunkCounterZ = 0; mChunkCounterZ <= renderDistance; mChunkCounterZ++) {
-            if (mChunkCounterZ >= renderDistance) {
-                mChunkCounterZ = 0;
-                break;
-            }
-            
-            int zz = mChunkCounterZ;
-            float chunkX = Math.Round(playerPosition.x / chunkSize + xx);
-            float chunkZ = Math.Round(playerPosition.z / chunkSize + zz);
-            
-            glm::vec2 chunkPosition((chunkX * chunkSize) - (renderDistance * (chunkSize / 2)), 
-                                    (chunkZ * chunkSize) - (renderDistance * (chunkSize / 2)));
-            
-            bool chunkFound = false;
-            for (const auto& chunkPtr : chunks) {
-                if (glm::vec3(chunkPtr.x, 0, chunkPtr.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y)) {
-                    chunkFound = true;
-                    break;
-                }
-            }
-            
-            if (chunkFound || glm::distance(glm::vec3(chunkPosition.x, 0, chunkPosition.y), playerPosition) > (renderDistance * (chunkSize / 2))) 
-                continue;
-            
-            std::string filename = Int.ToString(chunkPosition.x) + "_" + Int.ToString(chunkPosition.y);
-            std::string chunkFilename = "worlds/" + world.name + "/chunks/" + filename;
-            std::string staticFilename = "worlds/" + world.name + "/static/" + filename;
-            
-            Chunk chunk = CreateChunk(chunkPosition.x, chunkPosition.y);
-            MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
-            
-            if (Serializer.CheckExists(chunkFilename) || Serializer.CheckExists(staticFilename)) {
-                LoadChunk(chunk);
-            } else {
-                chunk.seed = worldSeed + ((chunkPosition.x * 2) + (chunkPosition.y * 4) / 2);
-                Random.SetSeed(chunk.seed);
-                Decorate(chunk);
-            }
-            
-            staticRenderer->mesh->Load();
-            chunks.push_back(chunk);
-        }
-    }
-    
-    return;
-}
-
-
-*/
 

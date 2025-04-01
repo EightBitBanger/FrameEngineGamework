@@ -6,9 +6,9 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
         return;
     
     glm::vec3 actorPosition = mStreamBuffer[index].transform->position;
-    glm::vec3 actorRotation = mStreamBuffer[index].actor->mRotation;
-    glm::vec3 actorVelocity = mStreamBuffer[index].actor->mVelocity;
-    glm::vec3 actorTarget = mStreamBuffer[index].actor->mTargetPoint;
+    glm::vec3 actorRotation = mStreamBuffer[index].actor->navigation.mRotation;
+    glm::vec3 actorVelocity = mStreamBuffer[index].actor->navigation.mVelocity;
+    glm::vec3 actorTarget = mStreamBuffer[index].actor->navigation.mTargetPoint;
     
     rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
     rp3d::Vector3 currentPosition = transform.getPosition();
@@ -39,10 +39,10 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
         }
         
         
-        unsigned int numberOfRenderers = mStreamBuffer[index].actor->GetNumberOfMeshRenderers();
+        unsigned int numberOfRenderers = mStreamBuffer[index].actor->genetics.GetNumberOfMeshRenderers();
         for (unsigned int i=0; i < numberOfRenderers; i++) {
             
-            Material* actorMaterial = mStreamBuffer[index].actor->GetMeshRendererAtIndex(i)->material;
+            Material* actorMaterial = mStreamBuffer[index].actor->genetics.GetMeshRendererAtIndex(i)->material;
             
             actorMaterial->ambient = Colors.white;
         }
@@ -51,16 +51,18 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
         // Set current chunk
         GameObject* gameObject = (GameObject*)hit.gameObject;
         
-        mStreamBuffer[index].actor->mUserDataA = gameObject->GetUserData();
+        mStreamBuffer[index].actor->user.mUserDataA = gameObject->GetUserData();
         
     } else {
         
+        // No ground detected under actor
+        
         actorVelocity = glm::vec3(0, 0, 0);
         
-        unsigned int numberOfRenderers = mStreamBuffer[index].actor->GetNumberOfMeshRenderers();
+        unsigned int numberOfRenderers = mStreamBuffer[index].actor->genetics.GetNumberOfMeshRenderers();
         for (unsigned int i=0; i < numberOfRenderers; i++) {
             
-            Material* actorMaterial = mStreamBuffer[index].actor->GetMeshRendererAtIndex(i)->material;
+            Material* actorMaterial = mStreamBuffer[index].actor->genetics.GetMeshRendererAtIndex(i)->material;
             
             actorMaterial->ambient = Colors.black;
             
@@ -86,8 +88,8 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     mStreamBuffer[index].rigidBody->setTransform(transform);
     
     // Factor in youth speed multiplier
-    if (mStreamBuffer[index].actor->mAge < 1000) 
-        actorVelocity *= mStreamBuffer[index].actor->mSpeedYouth;
+    if (mStreamBuffer[index].actor->physical.mAge < 1000) 
+        actorVelocity *= mStreamBuffer[index].actor->physical.mSpeedYouth;
     
     // Apply force velocity
     mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, 
@@ -95,10 +97,10 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
                                                                                  actorVelocity.z) );
     
     // Sync actor position
-    mStreamBuffer[index].actor->mPosition = actorPosition;
-    mStreamBuffer[index].actor->mRotation = actorRotation;
-    mStreamBuffer[index].actor->mVelocity = actorVelocity;
-    mStreamBuffer[index].actor->mTargetPoint = actorTarget;
+    mStreamBuffer[index].actor->navigation.mPosition = actorPosition;
+    mStreamBuffer[index].actor->navigation.mRotation = actorRotation;
+    mStreamBuffer[index].actor->navigation.mVelocity = actorVelocity;
+    mStreamBuffer[index].actor->navigation.mTargetPoint = actorTarget;
     
     return;
 }

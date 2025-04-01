@@ -31,7 +31,7 @@ bool ChunkManager::SaveWorld(void) {
         GameObject* actorObject = actors[a];
         
         Actor* actorPtr = actorObject->GetComponent<Actor>();
-        actorPtr->SetUserBitmask(0);
+        actorPtr->user.SetUserBitmask(0);
         
         continue;
     }

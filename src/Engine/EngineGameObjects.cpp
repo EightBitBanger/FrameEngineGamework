@@ -31,10 +31,6 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position) {
     
     // Add a camera component
     Component* cameraComponent = CreateComponent(Components.Camera);
-    Camera* cameraMain = (Camera*)cameraComponent->mObject;
-    cameraMain->EnableMouseLook();
-    
-    SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
     
     // Add a rigid body component
     Component* rigidBodyComponent = CreateComponent(Components.RigidBody);

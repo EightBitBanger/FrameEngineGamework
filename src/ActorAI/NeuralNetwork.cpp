@@ -107,8 +107,10 @@ std::vector<std::vector<float>> NeuralNetwork::CalculateDeltas(const std::vector
         
         float error = target[i] - outputLayer.neurons[i];
         
-        //deltas.back()[i] = error * ActivationFunctionDerivative( outputLayer.neurons[i] );
-        deltas.back()[i] = error * ActivationReLUDerivative( outputLayer.neurons[i] );
+        // This activation function seems to yield more accurate results
+        deltas.back()[i] = error * ActivationFunctionDerivative( outputLayer.neurons[i] );
+        
+        //deltas.back()[i] = error * ActivationReLUDerivative( outputLayer.neurons[i] );
         
     }
     
@@ -128,8 +130,9 @@ std::vector<std::vector<float>> NeuralNetwork::CalculateDeltas(const std::vector
                 error += nextLayer.weights[k][j] * deltas[i + 1][k];
             }
             
-            //deltas[i][j] = error * ActivationFunctionDerivative( currentLayer.neurons[j] );
-            deltas[i][j] = error * ActivationReLUDerivative( currentLayer.neurons[j] );
+            deltas[i][j] = error * ActivationFunctionDerivative( currentLayer.neurons[j] );
+            
+            //deltas[i][j] = error * ActivationReLUDerivative( currentLayer.neurons[j] );
             
         }
     }
@@ -271,3 +274,61 @@ std::vector<std::string> NeuralNetwork::SaveState(void) {
     return state;
 }
 
+void NeuralNetwork::LoadStateBin(const std::vector<float>& state) {
+    mTopology.clear();
+    
+    size_t index = 0;
+    
+    while (index < state.size()) {
+        NeuralLayer layer;
+        layer.numberOfInputs = static_cast<int>(state[index++]);
+        layer.numberOfNeurons = static_cast<int>(state[index++]);
+        
+        unsigned int numberOfNeurons = static_cast<unsigned int>(state[index++]);
+        unsigned int numberOfBiases = static_cast<unsigned int>(state[index++]);
+        unsigned int numberOfWeightLists = static_cast<unsigned int>(state[index++]);
+        
+        layer.neurons.resize(numberOfNeurons);
+        layer.biases.resize(numberOfBiases);
+        layer.weights.resize(numberOfWeightLists, std::vector<float>(layer.numberOfInputs));
+        
+        for (unsigned int b = 0; b < numberOfBiases; ++b) {
+            layer.biases[b] = state[index++];
+        }
+        
+        for (unsigned int ws = 0; ws < numberOfWeightLists; ++ws) {
+            for (unsigned int w = 0; w < layer.numberOfInputs; ++w) {
+                layer.weights[ws][w] = state[index++];
+            }
+        }
+        
+        mTopology.push_back(std::move(layer));
+    }
+    
+    return;
+}
+
+std::vector<float> NeuralNetwork::SaveStateBin(void) {
+    std::vector<float> state;
+    
+    for (const NeuralLayer& layer : mTopology) {
+        
+        state.push_back(static_cast<float>(layer.numberOfInputs));
+        state.push_back(static_cast<float>(layer.numberOfNeurons));
+        state.push_back(static_cast<float>(layer.neurons.size()));
+        state.push_back(static_cast<float>(layer.biases.size()));
+        state.push_back(static_cast<float>(layer.weights.size()));
+        
+        for (const float bias : layer.biases) {
+            state.push_back(bias);
+        }
+        
+        for (const auto& weights : layer.weights) {
+            for (const float weight : weights) {
+                state.push_back(weight);
+            }
+        }
+    }
+    
+    return state;
+}
