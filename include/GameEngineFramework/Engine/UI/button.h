@@ -2,7 +2,9 @@
 #define BUTTON_UI_ELEMENT
 
 
-struct Button {
+class Button {
+    
+public:
     
     /// Is the button currently active in the scene.
     bool isActive;

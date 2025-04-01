@@ -9,12 +9,33 @@
 #include <GameEngineFramework/MemoryAllocation/PoolAllocator.h>
 
 #include <GameEngineFramework/ActorAI/Genetics/Gene.h>
+#include <GameEngineFramework/ActorAI/Genetics/Codon.h>
+#include <GameEngineFramework/ActorAI/Genetics/Phen.h>
+#include <GameEngineFramework/ActorAI/Genetics/Bio.h>
 
 #include <GameEngineFramework/ActorAI/components/actor.h>
 
 #include <thread>
 #include <mutex>
 #include <chrono>
+
+enum class NeuralState {
+    
+    idle,
+    move_to,
+    
+    avoid,
+    dodge,
+    
+    attack,
+    follow,
+    
+    defend,
+    flee,
+    
+    interact,
+    
+};
 
 
 class ENGINE_API ActorSystem {
@@ -78,13 +99,21 @@ private:
     // Behavioral state update
     void UpdateActorState(Actor* actor);
     
-    bool HandleWalkingChance(Actor* actor);
-    void HandleStopWalkingChance(Actor* actor);
-    void HandleMovementCooldown(Actor* actor, bool isAquatic);
-    void HandleObservationCooldown(Actor* actor);
+    void HandleWalkingChance(Actor* actor, bool isAquatic);
     void HandleFocusOnNearbyActor(Actor* actor);
     bool HandleBreedingState(Actor* actor);
     void HandleNeuralNetwork(Actor* actor);
+    
+    void HandleMovementHeight(Actor* actor, bool isAquatic);
+    
+    void UpdateTargetPoint(Actor* actor);
+    
+    void CheckTargetReached(Actor* actor);
+    
+    
+    // Neural network encoding
+    std::vector<float> Encode(const NeuralState neuralState);
+    
     
     // Current position of the player in the world
     glm::vec3 mPlayerPosition;
@@ -98,7 +127,7 @@ private:
     
     // Threading
     std::thread* mActorSystemThread;
-    std::mutex   mux;
+    std::mutex mux;
     
     // Object pools
     PoolAllocator<Actor> mActors;

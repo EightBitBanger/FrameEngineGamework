@@ -75,7 +75,7 @@ public:
     Color white    = {1, 1, 1, 1};
     Color black    = {0, 0, 0, 1};
     
-    Color brown    = {0.266, 0.18, 0.07};
+    Color brown    = {0.275, 0.18, 0.07};
     
     /// Return a random color interpolated between the given color values.
     Color& Range(Color begin, Color end);

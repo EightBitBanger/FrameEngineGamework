@@ -27,8 +27,8 @@ public:
     /// Level of detail distance to switch models
     float distance;
     
-    /// Lower detail model to use. NOTE: "nullptr" will disable level of detail rendering.
-    Mesh* meshLod;
+    /// Levels of detail.
+    std::vector<Mesh*> lods;
     
     /// Enable culling for this entity
     void EnableFrustumCulling(void);

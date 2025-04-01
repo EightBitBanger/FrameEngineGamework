@@ -70,6 +70,9 @@ public:
     /// Load a neural state into the network.
     void LoadState(std::vector<std::string>& state);
     
+    std::vector<float> SaveStateBin(void);
+    void LoadStateBin(const std::vector<float>& state);
+    
     
     NeuralNetwork();
     

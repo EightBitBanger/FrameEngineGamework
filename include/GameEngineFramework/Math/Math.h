@@ -27,6 +27,10 @@ public:
     
     float Round(float value);
     
+    float Diff(float value, float target);
+    
+    float NormDiff(float a, float b, float max);
+    
 };
 
 #endif

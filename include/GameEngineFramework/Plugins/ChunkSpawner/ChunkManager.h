@@ -187,15 +187,13 @@ public:
     
     void Decorate(Chunk& chunk);
     
-    
-    unsigned int numberOfActiveActors;
-    
     std::vector<Decoration> decoration;
     std::vector<Perlin> perlin;
     
     std::vector<Chunk> chunks;
     
     std::vector<GameObject*> actors;
+    std::vector<GameObject*> actorFreelist;
     
     // World material batches
     
@@ -219,8 +217,10 @@ private:
     void HandleActorLifeCycle(GameObject* actorObject);
     void UpdateActorPosition(Actor* actorPtr, const glm::vec3 &playerPosition);
     
+    void HandleActorInteraction(Actor* actorPtr, unsigned int numberOfActors);
+    
     void HandleAutoBreeding(Actor* actorPtr, unsigned int numberOfActors);
-    void AttemptBreeding(unsigned int numberOfActors);
+    bool AttemptBreeding(unsigned int numberOfActors);
     void CheckActorBreeding(Actor* actorPtr);
     
     void UpdateFogSettings(const glm::vec3 &playerPosition);

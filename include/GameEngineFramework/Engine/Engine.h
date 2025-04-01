@@ -222,6 +222,8 @@ public:
     /// reduce the mesh by one half of the original size.
     void AddHeightFieldToMeshHalfSize(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
     
+    void AddHeightFieldToMeshLOD(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int lodFactor);
+    
     /// Apply the height field values to the mesh using a quality resolution value.
     void AddHeightFieldToMeshReduced(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int resolution);
     
@@ -418,7 +420,6 @@ private:
     void ClearOldGeneticRenderers(unsigned int index);
     void GenerateCollider(unsigned int index);
     MeshRenderer* CreateMeshRendererForGene(unsigned int index, unsigned int geneIndex, Mesh* sourceMesh);
-    void UpdateGeneticAttributes(unsigned int index, unsigned int geneIndex, unsigned int attachmentIndex);
     void ExpressActorGenetics(unsigned int index);
     
     // Actor animation update

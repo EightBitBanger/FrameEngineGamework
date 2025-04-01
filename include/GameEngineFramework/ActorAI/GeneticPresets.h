@@ -9,18 +9,16 @@ class ENGINE_API GeneticPresets {
 public:
     
     /// Extract the genome from the entity and return it as a string.
-    std::string ExtractGenome(Actor* actorSource);
+    std::string ExtractGenome(Actor* sourceActor);
     
     /// Inject a genome string into an actor.
-    bool InjectGenome(Actor* actorSource, std::string genome);
+    bool InjectGenome(Actor* targetActor, std::string genome);
     
-    
-    /// Blend two genomes together creating a sub variant of the original pair.
-    bool ConjugateGenome(Actor* actorA, Actor* actorB, Actor* targetActor);
+    /// Blends two parent genomes into a single offspring genome.
+    bool BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspring);
     
     /// Clear all the genes from an actor genome.
     void ClearGenes(Actor* actorPtr);
-    
     
     /// Expose the genome to random changes.
     void ExposeToRadiation(Actor* actorPtr, float radiationAmount);
@@ -51,6 +49,14 @@ public:
         void Bear(Actor* targetActor);
         
         void Dog(Actor* targetActor);
+        
+        void Bovine(Actor* targetActor);
+        
+        void Horse(Actor* targetActor);
+        
+    private:
+        
+        void Creepy(Actor* targetActor);
         
     } presets;
     
