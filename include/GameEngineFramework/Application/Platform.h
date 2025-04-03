@@ -12,6 +12,8 @@
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Types/Types.h>
 
+#include <SDL3/SDL.h>
+
 extern Logger Log;
 extern IntType Int;
 

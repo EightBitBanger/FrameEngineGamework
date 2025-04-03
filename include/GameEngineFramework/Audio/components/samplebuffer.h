@@ -5,9 +5,6 @@
 #include <GameEngineFramework/Math/Random.h>
 #include <glm/glm.hpp>
 
-#include "../../../../vendor/AL/al.h"
-#include "../../../../vendor/AL/alc.h"
-
 #include <vector>
 
 extern NumberGeneration Random;
@@ -19,7 +16,7 @@ public:
     
     unsigned int sample_rate;
     
-    std::vector<ALshort> sampleBuffer;
+    std::vector<int16_t> sampleBuffer;
     
 };
 
