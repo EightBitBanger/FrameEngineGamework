@@ -4,6 +4,275 @@
 #include <GameEngineFramework/plugins.h>
 
 
+
+
+void ApplyGene(Actor* targetActor) {
+    
+    unsigned int chance = Random.Range(0, 100);
+    
+    targetActor->physical.SetAge( 0 );
+    targetActor->ReexpressPhenotype();
+    
+    //if (chance >  0 && chance < 40) {AI.genomes.presets.Bovine(targetActor); return;}
+    //if (chance > 40 && chance < 80) {AI.genomes.presets.Bear(targetActor); return;}
+    //if (chance > 20 && chance < 30) {AI.genomes.presets.Dog(targetActor); return;}
+    //if (chance > 80 && chance < 100) {AI.genomes.presets.Horse(targetActor); return;}
+    
+    AI.genomes.presets.Bovine(targetActor);
+    
+    return;
+    
+    targetActor->physical.SetAge( 1000 );
+    targetActor->physical.SetAdultAge( 1000 );
+    targetActor->physical.SetSeniorAge( 8000 );
+    
+    targetActor->ReexpressPhenotype();
+    
+    AI.genomes.ClearGenes(targetActor);
+    
+    targetActor->SetName("Human");
+    
+    targetActor->physical.SetSpeed(1.0);
+    targetActor->physical.SetSpeedYouth(0.8);
+    
+    targetActor->physical.SetYouthScale(0.3f);
+    targetActor->physical.SetAdultScale(1.0f);
+    
+    targetActor->behavior.SetHeightPreferenceMax(20.0f);
+    
+    targetActor->biological.health = 1;
+    
+    AI.genomes.mental.PreyBase(targetActor);
+    
+    if (Random.Range(0, 100) > 55) 
+    {targetActor->physical.SetSexualOrientation(true);} else  // Male
+    {targetActor->physical.SetSexualOrientation(false);}      // Female
+    
+    // Color variants
+    Color headColor = Colors.Lerp(Colors.white, Colors.yellow, 0.3);
+    Color limbColor = Colors.Lerp(Colors.white, Colors.yellow, 0.3);
+    Color bodyColor = Colors.Lerp(Colors.white, Colors.yellow, 0.3);
+    
+    bodyColor = Colors.Lerp(bodyColor, Colors.red, 0.5);
+    bodyColor = Colors.Lerp(bodyColor, Colors.brown, 0.9);
+    bodyColor = Colors.Lerp(bodyColor, Colors.black, 0.5);
+    bodyColor *= Colors.MakeRandomGrayScale() * 0.8f;
+    
+    // Limb colors
+    
+    // Red tint
+    int race = Random.Range(0, 100);
+    
+    if (race >= 0 && race < 5) {
+        headColor *= Colors.Lerp(headColor, Colors.orange, 0.6);
+        limbColor *= Colors.Lerp(limbColor, Colors.orange, 0.6);
+        race = -1;
+    }
+    
+    // Brown tint
+    if (race >= 5 && race < 10) {
+        headColor = Colors.Lerp(headColor, Colors.brown, 0.4);
+        limbColor = Colors.Lerp(limbColor, Colors.brown, 0.4);
+        headColor = Colors.Lerp(headColor, Colors.red, 0.087);
+        limbColor = Colors.Lerp(limbColor, Colors.red, 0.087);
+        headColor = Colors.Lerp(headColor, Colors.black, 0.87);
+        limbColor = Colors.Lerp(limbColor, Colors.black, 0.87);
+        race = -1;
+    }
+    
+    // Dark tone
+    if (race >= 10 && race < 20) {
+        headColor = Colors.Lerp(headColor, Colors.black, 0.998);
+        limbColor = Colors.Lerp(limbColor, Colors.black, 0.998);
+        race = -1;
+    }
+    
+    float headSize   = (Random.Range(0, 99) * 0.0001f);
+    float breastSize = (Random.Range(0, 99) * 0.00054f);
+    
+    // Body
+    Gene geneBody;
+    geneBody.offset    = Codon(0, 0, 0);
+    geneBody.position  = Codon(0, 0.9, 0);
+    geneBody.rotation  = Codon(0, 0, 0);
+    geneBody.scale     = Codon(0.37, 0.5, 0.24);
+    geneBody.color.x   = bodyColor.r;
+    geneBody.color.y   = bodyColor.g;
+    geneBody.color.z   = bodyColor.b;
+    
+    // Head
+    Gene geneHead;
+    geneHead.offset    = Codon(0, 0, 0);
+    geneHead.position  = Codon(0, 1.36, 0);
+    geneHead.rotation  = Codon(0, 0, 0);
+    geneHead.scale     = Codon(headSize + 0.3, 0.3, headSize + 0.3);
+    geneHead.color.x   = headColor.r;
+    geneHead.color.y   = headColor.g;
+    geneHead.color.z   = headColor.b;
+    
+    // Neck
+    Gene geneNeck;
+    geneNeck.offset    = Codon(0, 0, 0);
+    geneNeck.position  = Codon(0, 1.2, 0);
+    geneNeck.rotation  = Codon(0, 0, 0);
+    geneNeck.scale     = Codon(0.18, 0.1, 0.18);
+    geneNeck.color.x   = bodyColor.r;
+    geneNeck.color.y   = bodyColor.g;
+    geneNeck.color.z   = bodyColor.b;
+    geneNeck.colorIndex = 1;
+    
+    // Left breast
+    Gene geneBreastLeft;
+    geneBreastLeft.offset    = Codon(0.112, 1.03, breastSize + 0.06f);
+    geneBreastLeft.position  = Codon(0, 0, 0);
+    geneBreastLeft.rotation  = Codon(0, 0, 0);
+    geneBreastLeft.scale     = Codon(0.14, 0.14, 0.14);
+    geneBreastLeft.color.x   = bodyColor.r;
+    geneBreastLeft.color.y   = bodyColor.g;
+    geneBreastLeft.color.z   = bodyColor.b;
+    geneBreastLeft.type = EXPRESSION_TYPE_FEMALE;
+    geneBreastLeft.colorIndex       = 1;
+    geneBreastLeft.expressionFactor = 0.004;
+    geneBreastLeft.expressionMax    = 1.4;
+    geneBreastLeft.expressionBegin  = 900;
+    geneBreastLeft.expressionEnd    = 1400;
+    
+    // Right breast
+    Gene geneBreastRight;
+    geneBreastRight.offset    = Codon(-0.112, 1.03, breastSize + 0.06f);
+    geneBreastRight.position  = Codon(0, 0, 0);
+    geneBreastRight.rotation  = Codon(0, 0, 0);
+    geneBreastRight.scale     = Codon(0.14, 0.14, 0.14);
+    geneBreastRight.color.x   = bodyColor.r;
+    geneBreastRight.color.y   = bodyColor.g;
+    geneBreastRight.color.z   = bodyColor.b;
+    geneBreastRight.type = EXPRESSION_TYPE_FEMALE;
+    geneBreastRight.scaleIndex       = 4;
+    geneBreastRight.colorIndex       = 1;
+    geneBreastRight.expressionFactor = 0.004;
+    geneBreastRight.expressionMax    = 1.4;
+    geneBreastRight.expressionBegin  = 900;
+    geneBreastRight.expressionEnd    = 1400;
+    
+    // Left shoulder
+    Gene geneShoulderLeft;
+    geneShoulderLeft.offset    = Codon(0, 1.09, 0);
+    geneShoulderLeft.position  = Codon(0.24, -0.0425, 0);
+    geneShoulderLeft.rotation  = Codon(0, 0, 0);
+    geneShoulderLeft.scale     = Codon(0.12, 0.24, 0.12);
+    geneShoulderLeft.color.x   = limbColor.r;
+    geneShoulderLeft.color.y   = limbColor.g;
+    geneShoulderLeft.color.z   = limbColor.b;
+    geneShoulderLeft.doAnimationCycle = true;
+    geneShoulderLeft.animationAxis    = Codon(1, 0, 0);
+    geneShoulderLeft.animationRange   = 13;
+    geneShoulderLeft.colorIndex       = 2;
+    geneShoulderLeft.type = EXPRESSION_TYPE_MALE;
+    geneShoulderLeft.expressionFactor = 0.004;
+    geneShoulderLeft.expressionMax    = 1.1;
+    geneShoulderLeft.expressionBegin  = 900;
+    geneShoulderLeft.expressionEnd    = 1400;
+    
+    // Right shoulder
+    Gene geneShoulderRight;
+    geneShoulderRight.offset    = Codon(0, 1.09, 0);
+    geneShoulderRight.position  = Codon(-0.24, -0.0425, 0);
+    geneShoulderRight.rotation  = Codon(0, 0, 0);
+    geneShoulderRight.scale     = Codon(0.12, 0.24, 0.12);
+    geneShoulderRight.color.x   = limbColor.r;
+    geneShoulderRight.color.y   = limbColor.g;
+    geneShoulderRight.color.z   = limbColor.b;
+    geneShoulderRight.doAnimationCycle   = true;
+    geneShoulderRight.doInverseAnimation = true;
+    geneShoulderRight.animationAxis      = Codon(1, 0, 0);
+    geneShoulderRight.animationRange     = 13;
+    geneShoulderRight.colorIndex         = 2;
+    geneShoulderRight.type = EXPRESSION_TYPE_MALE;
+    geneShoulderRight.expressionFactor = 0.004;
+    geneShoulderRight.expressionMax    = 1.1;
+    geneShoulderRight.expressionBegin  = 900;
+    geneShoulderRight.expressionEnd    = 1400;
+    
+    // Left arm
+    Gene geneLimbFrontLeft;
+    geneLimbFrontLeft.offset    = Codon(0.24, 1.09, 0);
+    geneLimbFrontLeft.position  = Codon(0, -0.24, 0);
+    geneLimbFrontLeft.rotation  = Codon(0, 0, 0);
+    geneLimbFrontLeft.scale     = Codon(0.1, 0.55, 0.1);
+    geneLimbFrontLeft.color.x   = limbColor.r;
+    geneLimbFrontLeft.color.y   = limbColor.g;
+    geneLimbFrontLeft.color.z   = limbColor.b;
+    geneLimbFrontLeft.doAnimationCycle = true;
+    geneLimbFrontLeft.animationAxis    = Codon(1, 0, 0);
+    geneLimbFrontLeft.animationRange   = 13;
+    geneLimbFrontLeft.colorIndex       = 6;
+    
+    // Right arm
+    Gene geneLimbFrontRight;
+    geneLimbFrontRight.offset    = Codon(-0.24, 1.09, 0);
+    geneLimbFrontRight.position  = Codon(0, -0.24, 0);
+    geneLimbFrontRight.rotation  = Codon(0, 0, 0);
+    geneLimbFrontRight.scale     = Codon(0.1, 0.55, 0.1);
+    geneLimbFrontRight.color.x   = limbColor.r;
+    geneLimbFrontRight.color.y   = limbColor.g;
+    geneLimbFrontRight.color.z   = limbColor.b;
+    geneLimbFrontRight.doAnimationCycle   = true;
+    geneLimbFrontRight.doInverseAnimation = true;
+    geneLimbFrontRight.animationAxis      = Codon(1, 0, 0);
+    geneLimbFrontRight.animationRange     = 13;
+    geneLimbFrontRight.colorIndex         = 7;
+    
+    // Left Leg
+    Gene geneLimbRearLeft;
+    geneLimbRearLeft.offset    = Codon(0.12, 0.6, 0);
+    geneLimbRearLeft.position  = Codon(0, -0.24, 0);
+    geneLimbRearLeft.rotation  = Codon(0, 0, 0);
+    geneLimbRearLeft.scale     = Codon(0.18, 0.61, 0.18);
+    geneLimbRearLeft.color.x   = limbColor.r;
+    geneLimbRearLeft.color.y   = limbColor.g;
+    geneLimbRearLeft.color.z   = limbColor.b;
+    geneLimbRearLeft.doAnimationCycle = true;
+    geneLimbRearLeft.doInverseAnimation = true;
+    geneLimbRearLeft.animationAxis    = Codon(1, 0, 0);
+    geneLimbRearLeft.animationRange   = 13;
+    //geneLimbRearLeft.colorIndex       = 2;
+    
+    // Right Leg
+    Gene geneLimbRearRight;
+    geneLimbRearRight.offset    = Codon(-0.12, 0.6, 0);
+    geneLimbRearRight.position  = Codon(0, -0.24 , 0);
+    geneLimbRearRight.rotation  = Codon(0, 0, 0);
+    geneLimbRearRight.scale     = Codon(0.18, 0.61, 0.18);
+    geneLimbRearRight.color.x   = limbColor.r;
+    geneLimbRearRight.color.y   = limbColor.g;
+    geneLimbRearRight.color.z   = limbColor.b;
+    geneLimbRearRight.doAnimationCycle   = true;
+    geneLimbRearRight.animationAxis      = Codon(1, 0, 0);
+    geneLimbRearRight.animationRange     = 13;
+    //geneLimbRearRight.colorIndex         = 2;
+    
+    // Apply genes to the actor
+    targetActor->genetics.AddGene(geneBody);
+    targetActor->genetics.AddGene(geneHead);
+    targetActor->genetics.AddGene(geneNeck);
+    targetActor->genetics.AddGene(geneBreastLeft);
+    targetActor->genetics.AddGene(geneBreastRight);
+    targetActor->genetics.AddGene(geneShoulderLeft);
+    targetActor->genetics.AddGene(geneShoulderRight);
+    targetActor->genetics.AddGene(geneLimbFrontLeft);
+    targetActor->genetics.AddGene(geneLimbFrontRight);
+    targetActor->genetics.AddGene(geneLimbRearLeft);
+    targetActor->genetics.AddGene(geneLimbRearRight);
+    
+    return;
+}
+
+
+
+
+
+
+
 glm::vec3 force(0);
 float forceDblTime=0;
 
@@ -19,42 +288,22 @@ bool isNetInit = false;
 
 void Run() {
     
+    /*
+    
     // Create a neural network
     NeuralNetwork nnet;
     
     if (isNetInit == false) {
         isNetInit = true;
         
-        
-        
-        
-        
-        // Load the neural state
-        
-        std::string buffer;
-        unsigned int fileSz = Serializer.GetFileSize("neuralstates.dat");
-        
-        buffer.resize(fileSz);
-        Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
-        
-        std::vector<std::string> states = String.Explode(buffer, '\n');
-        nnet.LoadState( states );
-        
-        
-        
-        
-        
-        
         // Add layers to the neural network
         
-        /*
-        
-        nnet.AddNeuralLayer(16, 1);
+        nnet.AddNeuralLayer(16, 2);
         
         nnet.AddNeuralLayer(16, 16);
         nnet.AddNeuralLayer(16, 16);
         
-        nnet.AddNeuralLayer(1, 16);
+        nnet.AddNeuralLayer(8, 16);
         
         
         // Train the model
@@ -63,44 +312,55 @@ void Run() {
         
         TrainingSet ts[5];
         
-        ts[0].input  = {0.87f,};
-        ts[0].target = {0.25f,};
-        ts[1].input  = {0.4f,};
-        ts[1].target = {0.2f,};
-        ts[2].input  = {0.3f,};
-        ts[2].target = {0.3f,};
+        // Idle state
+        ts[0].input  = {0.5f, 0.5f};
+        ts[0].target = {0.06f, 0.4f, 0.01f, 0.9f,    0.1f, 0.1f, 0.1f, 0.1f};
+        
+        // Attack state
+        ts[1].input  = {0.5f, 0.3f};
+        ts[1].target = {0.5f, 0.5f, 0.5f, 0.5f,    0.3f, 0.2f, 0.3f, 0.3f};
+        
+        // Flee state
+        ts[2].input  = {0.3f, 0.5f};
+        ts[2].target = {0.8f, 0.8f, 0.8f, 0.8f,    0.6f, 0.2f, 0.5f, 0.5f};
+        
         
         trainingBook.push_back(ts[0]);
         trainingBook.push_back(ts[1]);
         trainingBook.push_back(ts[2]);
         
-        for (int epoch = 0; epoch < 100000; epoch++) {
+        for (int epoch = 0; epoch < 300000; epoch++) {
+            
             for (std::vector<TrainingSet>::iterator it = trainingBook.begin(); it != trainingBook.end(); ++it) {
-                nnet.Train(*it, 0.07f);
+                nnet.Train(*it, 0.4f);
             }
+            
         }
         
-        */
         
         
         // Test the network
         
-        std::vector<float> dataset = {0.87f};
+        std::vector<float> dataset = {0.5f, 0.5f};
         
         nnet.FeedForward(dataset);
         
         std::vector<float> results = nnet.GetResults();
         
-        std::string output = Float.ToString( results[0] ) + " - " + 
-                             Float.ToString( results[1] );
+        std::string output = Float.ToString( results[0] ) + " " + 
+                             Float.ToString( results[1] ) + " " + 
+                             Float.ToString( results[2] ) + " " + 
+                             Float.ToString( results[3] ) + " " + 
+                             
+                             Float.ToString( results[4] ) + " " + 
+                             Float.ToString( results[5] ) + " " + 
+                             Float.ToString( results[6] ) + " " + 
+                             Float.ToString( results[7] );
         
         Engine.WriteDialog(1, output);
         
         
-        
         // Save the state
-        
-        /*
         
         std::vector<std::string> states = nnet.SaveState();
         
@@ -113,9 +373,47 @@ void Run() {
         
         Serializer.Serialize("neuralstates.dat", (void*)saveString.data(), saveString.size());
         
-        */
+        std::vector<float> saveState = nnet.SaveStateBin();
+        
+        
+        
+        
+        // Load the neural state
+        /
+        NeuralNetwork newnet;
+        
+        std::string buffer;
+        unsigned int fileSz = Serializer.GetFileSize("neuralstates.dat");
+        
+        buffer.resize(fileSz);
+        Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
+        
+        std::vector<std::string> loadStates = String.Explode(buffer, '\n');
+        
+        
+        newnet.LoadStateBin( saveState );
+        
+        
+        
+        // Test the network
+        
+        std::vector<float> testdataset = {0.5f,0.7f};
+        
+        newnet.FeedForward(testdataset);
+        
+        std::vector<float> testresults = newnet.GetResults();
+        
+        std::string testoutput = Float.ToString( testresults[0] ) + " " + 
+                                 Float.ToString( testresults[1] ) + " " + 
+                                 Float.ToString( testresults[2] ) + " " + 
+                                 Float.ToString( testresults[3] );
+        
+        Engine.WriteDialog(1, testoutput);
+        /
+        
         
     }
+    */
     
     
     
@@ -175,9 +473,9 @@ void Run() {
         Actor* hitActor = hitObject->GetComponent<Actor>();
         
         Engine.WriteDialog( 2, hitActor->GetName() );
-        Engine.WriteDialog( 3, Int.ToString( hitActor->GetAge() ) );
+        Engine.WriteDialog( 3, Int.ToString( hitActor->physical.GetAge() ) );
         
-        unsigned int numberOfGenes = hitActor->GetNumberOfGenes();
+        unsigned int numberOfGenes = hitActor->genetics.GetNumberOfGenes();
         
     } else {
         
@@ -201,58 +499,28 @@ void Run() {
     }
     
     
-    
-    // Pick an actors genome
-    
-    if (Input.CheckMouseMiddlePressed()) {
-        
-        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
-            
-            GameObject* hitObject = (GameObject*)hit.gameObject;
-            Actor* hitActor = hitObject->GetComponent<Actor>();
-            
-            actorSelected = hitActor;
-            
-            targetGene = AI.genomes.ExtractGenome(hitActor);
-            
-            std::string destGene = "gene<" + targetGene;
-            
-            Platform.SetClipboardText( destGene );
-            
-            unsigned int numberOfGenes = hitActor->GetNumberOfGenes();
-            
-            for (unsigned int i=0 ; i < numberOfGenes; i++) {
-                
-                MeshRenderer* geneRenderer = hitActor->GetMeshRendererAtIndex(i);
-                
-                std::string geneDataString = "";
-                
-                float xPos = geneRenderer->transform.position.x;
-                float yPos = geneRenderer->transform.position.y;
-                float zPos = geneRenderer->transform.position.z;
-                
-                float xScale = geneRenderer->transform.scale.x;
-                float yScale = geneRenderer->transform.scale.y;
-                float zScale = geneRenderer->transform.scale.z;
-                
-                geneDataString += Float.ToString(xPos) + ", " + Float.ToString(yPos) + ", " + Float.ToString(zPos) + "    ";
-                geneDataString += Float.ToString(xScale) + ", " + Float.ToString(yScale) + ", " + Float.ToString(zScale);
-                
-                Engine.Print( geneDataString );
-                
-            }
-            
-        }
-        
-    }
-    
-    
     // Spawn an actor with the picked genome
     
     if (Input.CheckMouseLeftPressed()) {
         
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             
+            for (unsigned int retry=0; retry < 25; retry++) {
+                float randomX = Random.Range(0, 10) - Random.Range(0, 10);
+                float randomZ = Random.Range(0, 10) - Random.Range(0, 10);
+                GameObject* actorObject = GameWorld.SpawnActor( hit.point.x + randomX, hit.point.y, hit.point.z + randomZ);
+                Actor* actor = actorObject->GetComponent<Actor>();
+                
+                AI.genomes.mental.PreyBase( actor );
+                ApplyGene(actor);
+            }
+            
+            
+            //AI.genomes.presets.Horse(actor);
+            //actor->SetAge( 700 + Random.Range(0, 500) );
+            
+            
+            /*
             std::string sourceGene = Platform.GetClipboardText();
             
             if (sourceGene.size() == 0) 
@@ -285,10 +553,58 @@ void Run() {
                 newActor->SetGeneticUpdateFlag();
                 
             }
+            */
             
         }
         
     }
+    
+    
+    
+    // Pick an actors genome
+    
+    if (Input.CheckMouseMiddlePressed()) {
+        
+        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
+            
+            GameObject* hitObject = (GameObject*)hit.gameObject;
+            Actor* hitActor = hitObject->GetComponent<Actor>();
+            
+            actorSelected = hitActor;
+            
+            targetGene = AI.genomes.ExtractGenome(hitActor);
+            
+            std::string destGene = "gene<" + targetGene;
+            
+            Platform.SetClipboardText( destGene );
+            
+            unsigned int numberOfGenes = hitActor->genetics.GetNumberOfGenes();
+            
+            for (unsigned int i=0 ; i < numberOfGenes; i++) {
+                
+                MeshRenderer* geneRenderer = hitActor->genetics.GetMeshRendererAtIndex(i);
+                
+                std::string geneDataString = "";
+                
+                float xPos = geneRenderer->transform.position.x;
+                float yPos = geneRenderer->transform.position.y;
+                float zPos = geneRenderer->transform.position.z;
+                
+                float xScale = geneRenderer->transform.scale.x;
+                float yScale = geneRenderer->transform.scale.y;
+                float zScale = geneRenderer->transform.scale.z;
+                
+                geneDataString += Float.ToString(xPos) + ", " + Float.ToString(yPos) + ", " + Float.ToString(zPos) + "    ";
+                geneDataString += Float.ToString(xScale) + ", " + Float.ToString(yScale) + ", " + Float.ToString(zScale);
+                
+                Engine.Print( geneDataString );
+                
+            }
+            
+        }
+        
+    }
+    
     
     
     // Plant tree (testing)
@@ -480,7 +796,7 @@ void Run() {
     if (Engine.cameraController == nullptr) 
         return;
     
-    float forceAccelerate = 0.0334f;
+    float forceAccelerate = 0.0043f;
     float forceDecelerate = 0.015f;
     
     Camera* mainCamera = Engine.sceneMain->camera;

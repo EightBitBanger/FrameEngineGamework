@@ -16,7 +16,51 @@ Button* quitButton;
 
 
 
+
+
+
+#define SAMPLE_RATE 48000
+#define TONE_HZ 550
+#define DURATION_SECONDS 2
+#define VOLUME 28000
+
 void Start() {
+    
+    /*
+    
+    SDL_AudioSpec spec;
+    spec.freq = SAMPLE_RATE;
+    spec.format = SDL_AUDIO_S16;
+    spec.channels = 1;
+    
+    // Open an audio stream without a callback
+    SDL_AudioStream* stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
+    
+    // Generate a full sine wave buffer
+    int total_samples = SAMPLE_RATE * DURATION_SECONDS;
+    std::vector<int16_t> buffer(total_samples);
+    for (int i = 0; i < total_samples; ++i) {
+        double t = (double)i / SAMPLE_RATE;
+        buffer[i] = (int16_t)(VOLUME * sin(2.0 * 3.14159f * TONE_HZ * t));
+    }
+    
+    // Send buffer to stream
+    SDL_PutAudioStreamData(stream, buffer.data(), total_samples * sizeof(int16_t));
+    SDL_FlushAudioStream(stream);  // Let SDL know we’re done feeding data
+    
+    // Start playback
+    SDL_ResumeAudioStreamDevice(stream);
+    
+    // Wait for the audio to finish playing
+    SDL_Delay(DURATION_SECONDS * 1000 + 250);  // small buffer to ensure playback finishes
+    
+    // Cleanup
+    SDL_DestroyAudioStream(stream);
+    */
+    
+    
+    
+    
     
     // Load console functions
     Engine.ConsoleRegisterCommand("summon",  FuncSummon);
@@ -62,27 +106,28 @@ void Start() {
     
     
     
+    
+    
+    
+    
     //
     // Audio test sample
-    
-    /*
-    
     Sound* soundA = Audio.CreateSound();
     AudioSample* sampleA = Audio.CreateAudioSample();
     
     sampleA->sample_rate = 44100;
     
-    Samples.RenderBlankSpace(sampleA, 0.4f);
-    Samples.RenderSweepingSineWave(sampleA, 120, 10, 1.0f);
+    //Samples.RenderBlankSpace(sampleA, 0.4f);
+    //Samples.RenderSweepingSineWave(sampleA, 120, 10, 2.0f);
+    Samples.RenderSquareWave(sampleA, 400, 0.24);
     
     soundA->LoadSample(sampleA);
     
-    soundA->SetVolume(0.1f);
+    //soundA->SetVolume(0.1f);
     
     soundA->Play();
-    while (soundA->IsSamplePlaying());
+    //while (soundA->IsSamplePlaying());
     
-    */
     
     
     
@@ -168,7 +213,7 @@ void Start() {
     DecorationSpecifier decorSheep;
     decorSheep.type = DECORATION_ACTOR;
     decorSheep.name = "Sheep";
-    decorSheep.density = 30;
+    decorSheep.density = 13;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorSheep.threshold = 0.1f;
@@ -177,7 +222,7 @@ void Start() {
     DecorationSpecifier decorBear;
     decorBear.type = DECORATION_ACTOR;
     decorBear.name = "Bear";
-    decorBear.density = 20;
+    decorBear.density = 5;
     decorBear.spawnHeightMaximum = 40;
     decorBear.spawnHeightMinimum = 5;
     decorBear.threshold = 0.1f;
@@ -190,8 +235,8 @@ void Start() {
     
     GameWorld.world.mDecorations.push_back(decorWaterPlants);
     
-    GameWorld.world.mDecorations.push_back(decorSheep);
-    GameWorld.world.mDecorations.push_back(decorBear);
+    //GameWorld.world.mDecorations.push_back(decorSheep);
+    //GameWorld.world.mDecorations.push_back(decorBear);
     
     
     // Perlin layers
@@ -277,10 +322,12 @@ void Start() {
     // World rendering
     GameWorld.chunkSize = 50;
     
-    GameWorld.renderDistance = 24;
-    GameWorld.staticDistance = GameWorld.renderDistance * 0.9f;
-    GameWorld.actorDistance  = GameWorld.renderDistance * 0.9f;
+    GameWorld.renderDistance = 13;
+    GameWorld.staticDistance = GameWorld.renderDistance * 0.7f;
+    GameWorld.actorDistance  = GameWorld.renderDistance * 0.8f;
     
+    
+    return;
     
     // Initiate UI
     
@@ -326,15 +373,13 @@ void Start() {
     clearWorldText->canvas.anchorCenterHorz = true;
     quitWorldText->canvas.anchorCenterHorz = true;
     
-    MainMenuDisable();
+    //MainMenuDisable();
     
     
     
     
     
     
-    
-    return;
     
     
     

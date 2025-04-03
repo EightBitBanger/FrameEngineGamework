@@ -137,12 +137,14 @@ void FuncSeed(std::vector<std::string> args) {
 
 void FuncSummon(std::vector<std::string> args) {
     
-    for (uint8_t i=0; i < 24; i++) {
+    for (uint8_t i=0; i < 1; i++) {
         
         unsigned int entityType = 0;
         
         if (args[0] == "Sheep")   {entityType = 1;}
         if (args[0] == "Bear")    {entityType = 2;}
+        if (args[0] == "Horse")   {entityType = 3;}
+        if (args[0] == "Bovine")  {entityType = 4;}
         
         if (entityType == 0) {
             
@@ -162,13 +164,15 @@ void FuncSummon(std::vector<std::string> args) {
         
         unsigned long int actorAge = 900 + (Random.Range(0, 500) - Random.Range(0, 500));
         
-        newActor->SetAge( actorAge );
+        newActor->physical.SetAge( actorAge );
         
         switch (entityType) {
             
             default:
             case 1: AI.genomes.presets.Sheep( newActor ); break;
             case 2: AI.genomes.presets.Bear( newActor ); break;
+            case 3: AI.genomes.presets.Horse( newActor ); break;
+            case 4: AI.genomes.presets.Bovine( newActor ); break;
             
         }
         
@@ -321,12 +325,12 @@ void MainMenuEnable(void) {
     Platform.ShowMouseCursor();
     
     // Enable menu UI
-    menuPanelObject->Activate();
-    versionTextObject->Activate();
-    loadWorldButton->Activate();
-    saveWorldButton->Activate();
-    clearWorldButton->Activate();
-    quitButton->Activate();
+    //menuPanelObject->Activate();
+    //versionTextObject->Activate();
+    //loadWorldButton->Activate();
+    //saveWorldButton->Activate();
+    //clearWorldButton->Activate();
+    //quitButton->Activate();
     
     return;
 }
@@ -348,12 +352,12 @@ void MainMenuDisable(void) {
     PhysicsTime.Update();
     
     // Disable menu UI
-    menuPanelObject->Deactivate();
-    versionTextObject->Deactivate();
-    loadWorldButton->Deactivate();
-    saveWorldButton->Deactivate();
-    clearWorldButton->Deactivate();
-    quitButton->Deactivate();
+    //menuPanelObject->Deactivate();
+    //versionTextObject->Deactivate();
+    //loadWorldButton->Deactivate();
+    //saveWorldButton->Deactivate();
+    //clearWorldButton->Deactivate();
+    //quitButton->Deactivate();
     
     return;
 }
