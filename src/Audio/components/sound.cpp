@@ -1,96 +1,64 @@
 #include <GameEngineFramework/Audio/components/sound.h>
+#include <SDL3/SDL.h>
 
 extern bool isAudioDeviceActive;
 
 
 Sound::Sound() : 
-    mBuffer(0),
-    mSource(0),
-    mIsBufferConstructed(false)
+    mSample(nullptr),
+    mStream(nullptr),
+    mIsPlaying(false)
 {
 }
 
 Sound::~Sound() {
     
-    if (mIsBufferConstructed) {
-        alDeleteBuffers(1, &mBuffer);
-        alDeleteSources(1, &mSource);
-    }
-    
-    return;
 }
+
 
 void Sound::Play(void) {
     
-    if (!mIsBufferConstructed) 
-        return;
+    SDL_AudioSpec spec;
+    spec.freq = mSample->sample_rate;
+    spec.format = SDL_AUDIO_S16;
+    spec.channels = 1;
     
-    alSourcei(mSource, AL_BUFFER, mBuffer);
+    mStream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
     
-    alSourcePlay(mSource);
+    // Start playback
+    SDL_PutAudioStreamData(mStream, mSample->sampleBuffer.data(), mSample->sampleBuffer.size() * sizeof(int16_t));
+    SDL_FlushAudioStream(mStream);
+    SDL_ResumeAudioStreamDevice(mStream);
     
+    mIsPlaying = true;
     return;
 }
 
 void Sound::Stop(void) {
-    
-    if (!mIsBufferConstructed) 
+    mIsPlaying = false;
+    if (mStream == nullptr) 
         return;
-    
-    alSourceStop(mSource);
-    
+    SDL_DestroyAudioStream(mStream);
+    mStream = nullptr;
     return;
 }
 
 void Sound::SetVolume(float volume) {
-    
-    if (!mIsBufferConstructed) 
-        return;
-    
-    alSourcef(mSource, AL_GAIN, volume);
     
     return;
 }
 
 void Sound::SetPitch(float pitch) {
     
-    if (!mIsBufferConstructed) 
-        return;
-    
-    alSourcef(mSource, AL_PITCH, pitch);
-    
     return;
 }
 
 bool Sound::IsSamplePlaying(void) {
-    
-    if (!mIsBufferConstructed) 
-        return false;
-    
-    ALint state;
-    
-    alGetSourcei(mSource, AL_SOURCE_STATE, &state);
-    
-    return state == AL_PLAYING;
+    return mIsPlaying;
 }
 
 bool Sound::LoadSample(AudioSample* samplePtr) {
-    
-    if (!isAudioDeviceActive) 
-        return false;
-    
-    if (!mIsBufferConstructed) {
-        
-        alGenBuffers(1, &mBuffer);
-        alGenSources(1, &mSource);
-        
-        mIsBufferConstructed = true;
-    }
-    
-    unsigned int bufferSize = samplePtr->sampleBuffer.size() * sizeof(ALshort);
-    
-    alBufferData(mBuffer, AL_FORMAT_MONO16, samplePtr->sampleBuffer.data(), bufferSize, samplePtr->sample_rate);
-    
+    mSample = samplePtr;
     return true;
 }
 

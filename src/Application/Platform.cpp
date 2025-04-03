@@ -14,9 +14,6 @@
 
 #define IDI_ICON  101
 
-typedef BOOL (APIENTRY * PFNWGLSWAPINTERVALEXTPROC)(int interval);
-PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
-
 
 PlatformLayer::PlatformLayer() : 
     
@@ -46,7 +43,7 @@ void PlatformLayer::Pause(void) {
 }
 
 void* PlatformLayer::CreateWindowHandle(std::string className, std::string windowName, void* parentHandle, void* hInstance) {
-    
+#ifdef PLATFORM_WINDOWS
     isPaused = false;
     isActive = true;
     
@@ -117,17 +114,21 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     
     mIsWindowRunning = true;
     return (void*)windowHandle;
+#endif
 }
 
 void PlatformLayer::DestroyWindowHandle(void) {
+#ifdef PLATFORM_WINDOWS
     DestroyWindow((HWND)windowHandle);
     windowHandle = NULL;
     
     mIsWindowRunning = false;
+#endif
     return;
 }
 
 void PlatformLayer::SetWindowCenter(void) {
+#ifdef PLATFORM_WINDOWS
     displayWidth  = GetDeviceCaps( (HDC)deviceContext, HORZRES );
     displayHeight = GetDeviceCaps( (HDC)deviceContext, VERTRES );
     
@@ -164,11 +165,12 @@ void PlatformLayer::SetWindowCenter(void) {
     clientArea.y = windowDim.top + verticalMargin - 2.0f;
     clientArea.w = clientRect.right - clientRect.left;
     clientArea.h = windowDim.bottom - windowDim.top;
-    
+#endif
     return;
 }
 
 void PlatformLayer::SetWindowCenterScale(float width, float height) {
+#ifdef PLATFORM_WINDOWS
     Viewport newWindowSz;
     newWindowSz.y = 0;
     newWindowSz.x = 0;
@@ -204,21 +206,22 @@ void PlatformLayer::SetWindowCenterScale(float width, float height) {
     clientArea.y = windowDim.top + verticalMargin - 2.0f;
     clientArea.w = clientRect.right - clientRect.left;
     clientArea.h = windowDim.bottom - windowDim.top;
-    
+#endif
     return;
 }
 
 void PlatformLayer::SetWindowPosition(Viewport windowSize) {
-    
+#ifdef PLATFORM_WINDOWS
     SetWindowPos((HWND)windowHandle, NULL, windowSize.x, windowSize.y, windowSize.w, windowSize.h, SWP_SHOWWINDOW);
     
     windowArea.w = windowSize.w;
     windowArea.h = windowSize.h;
-    
+#endif
     return;
 }
 
 Viewport PlatformLayer::GetWindowArea(void) {
+#ifdef PLATFORM_WINDOWS
     RECT windowSz;
     GetWindowRect((HWND)windowHandle, &windowSz);
     
@@ -227,62 +230,75 @@ Viewport PlatformLayer::GetWindowArea(void) {
     area.y = windowSz.top;
     area.w = (windowSz.right  - windowSz.left);
     area.h = (windowSz.bottom - windowSz.top);
-    
     return area;
+#endif
 }
 
 void PlatformLayer::WindowEnableFullscreen(void) {
-    
+#ifdef PLATFORM_WINDOWS
     SetWindowLongPtr((HWND)windowHandle, GWL_STYLE, WS_POPUP);
     SetWindowPos((HWND)windowHandle, HWND_TOPMOST, 0, 0, displayWidth, displayHeight, SWP_FRAMECHANGED);
     ShowWindow((HWND)windowHandle, SW_MAXIMIZE);
-    
+#endif
     return;
 }
 
 void PlatformLayer::WindowDisableFullscreen(void) {
-    
+#ifdef PLATFORM_WINDOWS
     SetWindowLongPtr((HWND)windowHandle, GWL_STYLE, WS_OVERLAPPEDWINDOW);
     SetWindowPos((HWND)windowHandle, HWND_NOTOPMOST, windowArea.x, windowArea.y, windowArea.w, windowArea.h, SWP_FRAMECHANGED);
     ShowWindow((HWND)windowHandle, SW_RESTORE);
-    
+#endif
     return;
 }
 
 void PlatformLayer::HideWindowHandle(void) {
+#ifdef PLATFORM_WINDOWS
     ShowWindow((HWND)windowHandle, false);
+#endif
     return;
 }
 
 void PlatformLayer::ShowWindowHandle(void) {
+#ifdef PLATFORM_WINDOWS
     ShowWindow((HWND)windowHandle, true);
+#endif
     return;
 }
 
 void PlatformLayer::ShowMouseCursor(void) {
+#ifdef PLATFORM_WINDOWS
     while (ShowCursor(true) < 0);
+#endif
 }
 
 void PlatformLayer::HideMouseCursor(void) {
+#ifdef PLATFORM_WINDOWS
     while (ShowCursor(false) >= 0);
+#endif
 }
 
 int PlatformLayer::GetTaskbarHeight(void) {
+#ifdef PLATFORM_WINDOWS
     APPBARDATA abd;
     abd.cbSize = sizeof(APPBARDATA);
     
     SHAppBarMessage(ABM_GETTASKBARPOS, &abd);
     
     return abd.rc.bottom - abd.rc.top;
+#endif
 }
 
 int PlatformLayer::GetTitlebarHeight(void) {
+#ifdef PLATFORM_WINDOWS
     int titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
-    
+#endif
     return titleBarHeight;
 }
 
 void PlatformLayer::SetClipboardText(std::string text) {
+    
+#ifdef PLATFORM_WINDOWS
     
     if (OpenClipboard(nullptr)) {
         
@@ -302,10 +318,14 @@ void PlatformLayer::SetClipboardText(std::string text) {
         CloseClipboard();
     }
     
+#endif
+    
     return;
 }
 
 std::string PlatformLayer::GetClipboardText(void) {
+    
+#ifdef PLATFORM_WINDOWS
     
     std::string text;
     
@@ -326,10 +346,14 @@ std::string PlatformLayer::GetClipboardText(void) {
         CloseClipboard();
     }
     
+#endif
+    
     return text;
 }
 
 GLenum PlatformLayer::SetRenderTarget(void) {
+    
+#ifdef PLATFORM_WINDOWS
     
     int iFormat;
     std::string gcVendor, gcRenderer, gcExtensions, gcVersion, Line;
@@ -359,17 +383,22 @@ GLenum PlatformLayer::SetRenderTarget(void) {
     
     wglMakeCurrent((HDC)deviceContext, (HGLRC)renderContext);
     
-    // Initiate glew after setting the render target
-    GLenum passed = glewInit();
-    
     // Enable VSYNC
+    //typedef BOOL (APIENTRY * PFNWGLSWAPINTERVALEXTPROC)(int interval);
+    //PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
     //wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
     //wglSwapIntervalEXT(1);
+    
+#endif
+    
+    // Initiate glew after setting the render target
+    GLenum passed = glewInit();
     
     //
     // Log hardware details
     
 #ifdef  LOG_RENDER_DETAILS
+    
     const char* gcVendorConst     = (const char*)glGetString(GL_VENDOR);
     const char* gcRendererConst   = (const char*)glGetString(GL_RENDERER);
     const char* gcExtensionsConst = (const char*)glGetString(GL_EXTENSIONS);
@@ -398,6 +427,7 @@ GLenum PlatformLayer::SetRenderTarget(void) {
     Line = DetailStringHead + "Depth" + DetailStringEqu + Int.ToString(pfd.cDepthBits) + " bit"; Log.Write(Line);
     Log.WriteLn();
     Log.WriteLn();
+    
 #endif
     
     return passed;

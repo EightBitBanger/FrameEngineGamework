@@ -16,7 +16,7 @@ void AudioPreset::RenderWhiteNoise(AudioSample* sample, float duration) {
     int samples = (int)(sample->sample_rate * duration);
     
     for (int i = 0; i < samples; i++) 
-        sample->sampleBuffer.push_back( (ALshort)Random.Range(32767, -32767) );
+        sample->sampleBuffer.push_back( (int16_t)Random.Range(32767, -32767) );
     
     return;
 }
@@ -43,7 +43,7 @@ void AudioPreset::RenderSweepingSineWave(AudioSample* sample, double startFreq, 
         
         double frequency = startFreq + freqDelta * i;
         
-        sample->sampleBuffer.push_back( (ALshort)(32767 * std::sin(2 * 3.14159f * frequency * t)) );
+        sample->sampleBuffer.push_back( (int16_t)(32767 * std::sin(2 * 3.14159f * frequency * t)) );
     }
     
     return;
