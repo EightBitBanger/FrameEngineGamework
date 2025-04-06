@@ -4,30 +4,33 @@ project(framework VERSION 0.1.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+# Optional modules path, can be re-enabled later if needed
+# set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
+
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
-option(BUILD_APPLICATION_LIBRARY "Project will build the user application library." ON)
-option(BUILD_RUNTIME_EXECUTABLE "Project will build the runtime executable." OFF)
-option(BUILD_CORE_ENGINE "Project will build the core engine library" OFF)
+# Build toggles
+option(BUILD_APPLICATION_LIBRARY  "Build the user application library." ON)
+option(BUILD_RUNTIME_EXECUTABLE   "Build the runtime executable." OFF)
+option(BUILD_CORE_LIBRARY         "Build the core engine library." OFF)
 
-option(EVENT_LOG_DETAILED   "Log events out to the event log file." OFF)
-option(RUN_UNIT_TESTS       "Run unit tests at application start." OFF)
+option(ENABLE_WIN32_CONSOLE   "Enable the WIN32 console window in runtime executable." ON)
+option(ENABLE_LOG_DETAILS     "Log events to the event log file." OFF)
+option(ENABLE_UNIT_TESTS      "Run unit tests at application start." OFF)
 
-
-# ==========================================================
-# Build configuration
-# 
-
-if(EVENT_LOG_DETAILED)
+# Compile definitions
+if(ENABLE_LOG_DETAILS)
     add_compile_definitions(EVENT_LOG_DETAILED)
 endif()
 
-if(RUN_UNIT_TESTS)
+if(ENABLE_UNIT_TESTS)
     add_compile_definitions(RUN_UNIT_TESTS)
 endif()
 
+# Common libraries
+set(COMMON_LIBS glew32s.lib opengl32.a Ws2_32.lib)
 
+# Recursively collect files
 function(auto_sources var)
     foreach(pattern IN LISTS ARGN)
         file(GLOB_RECURSE matched_files ${pattern})
@@ -36,181 +39,141 @@ function(auto_sources var)
     set(${var} ${${var}} PARENT_SCOPE)
 endfunction()
 
+# Common target config
+function(configure_target_common target)
+    target_compile_features(${target} PUBLIC cxx_std_11)
+    set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)
+    target_compile_options(${target} PRIVATE -O2)
+
+    target_include_directories(${target} PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+    )
+endfunction()
 
 # ==========================================================
-# ==========================================================
-# ==========================================================
-# 
-# Build executable
-# 
-# ==========================================================
+# Runtime Executable
 # ==========================================================
 
 if(BUILD_RUNTIME_EXECUTABLE)
+    if(BUILD_CORE_LIBRARY OR BUILD_APPLICATION_LIBRARY)
+        message(FATAL_ERROR "Only one build target can be enabled at a time.")
+    endif()
 
-if(BUILD_CORE_ENGINE OR BUILD_APPLICATION_LIBRARY)
-    message(FATAL_ERROR "Multiple project builds are set. Cmake can only build one project at a time.")
+    auto_sources(RUNTIME_HEADERS
+        "include/**/*.h"
+        "tests/framework.h"
+        "vendor/**/*.h"
+    )
+
+    set(RUNTIME_SOURCES
+        "tests/framework.cpp"
+        "tests/units/testComponents.cpp"
+        "tests/units/testEngineFunctionality.cpp"
+        "tests/units/testGameObjects.cpp"
+        "tests/units/testRenderSystem.cpp"
+        "tests/units/testScriptSystem.cpp"
+        "tests/units/testPhysicsSystem.cpp"
+        "tests/units/testSerializer.cpp"
+        "tests/units/testTransform.cpp"
+        "src/Application/properties.rc"
+        "src/Application/main.cpp"
+    )
+
+    add_executable(runtime ${RUNTIME_HEADERS} ${RUNTIME_SOURCES})
+    add_compile_definitions(BUILD_RUNTIME)
+
+    configure_target_common(runtime)
+
+    set_target_properties(runtime PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+	ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/vendor"
+    )
+    
+    if(WIN32 AND NOT ENABLE_WIN32_CONSOLE)
+	set_target_properties(runtime PROPERTIES WIN32_EXECUTABLE TRUE)
+    endif()
+    
+    target_link_libraries(runtime ${COMMON_LIBS})
+    target_link_libraries(runtime
+        ${PROJECT_SOURCE_DIR}/vendor/libSDL3.dll.a
+	${PROJECT_SOURCE_DIR}/vendor/librp3d.a
+        ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a
+        ${PROJECT_SOURCE_DIR}/vendor/libgame.dll.a
+    )
 endif()
 
-auto_sources(RUNTIME_HEADERS
-    "include/**/*.h"
-    "tests/framework.h"
-    "vendor/**/*.h"
-)
-
-set (RUNTIME_SOURCES
-    
-    "tests/framework.cpp"
-    "tests/units/testComponents.cpp"
-    "tests/units/testEngineFunctionality.cpp"
-    "tests/units/testGameObjects.cpp"
-    "tests/units/testRenderSystem.cpp"
-    "tests/units/testScriptSystem.cpp"
-    "tests/units/testPhysicsSystem.cpp"
-    "tests/units/testSerializer.cpp"
-    "tests/units/testTransform.cpp"
-    
-    "src/Application/properties.rc"
-    "src/Application/main.cpp"
-    
-)
-
-
-add_executable(runtime ${RUNTIME_HEADERS} ${RUNTIME_SOURCES})
-
-add_compile_definitions(BUILD_RUNTIME)
-
-target_compile_features(runtime PUBLIC cxx_std_11)
-
-set_target_properties(runtime PROPERTIES CXX_EXTENSIONS OFF)
-
-set(CMAKE_CXX_FLAGS "-O2")
-
-set_target_properties(runtime PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
-)
-
-target_include_directories(runtime PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-	$<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries(runtime glew32s.lib)
-target_link_libraries(runtime Ws2_32.lib)
-target_link_libraries(runtime opengl32.a)
-
-target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
-target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
-target_link_libraries(runtime ${PROJECT_SOURCE_DIR}/vendor/libgame.dll.a)
-
-endif()
-
-
-
 # ==========================================================
+# Application DLL
 # ==========================================================
-# ==========================================================
-# 
-# Build application dll
-# 
-# ==========================================================
-# ==========================================================
-
 
 if(BUILD_APPLICATION_LIBRARY)
+    if(BUILD_CORE_LIBRARY OR BUILD_RUNTIME_EXECUTABLE)
+        message(FATAL_ERROR "Only one build target can be enabled at a time.")
+    endif()
 
-if(BUILD_CORE_ENGINE OR BUILD_RUNTIME_EXECUTABLE)
-    message(FATAL_ERROR "Multiple build options are set. Please only select one build option at a time.")
+    auto_sources(GAME_HEADERS
+        "include/**/*.h"
+        "vendor/**/*.h"
+    )
+
+    set(GAME_SOURCES
+        "src/plugins/ChunkSpawner/WorldLoad.cpp"
+        "src/plugins/ChunkSpawner/WorldSave.cpp"
+        "src/plugins/ChunkSpawner/ChunkLoad.cpp"
+        "src/plugins/ChunkSpawner/ChunkSave.cpp"
+        "src/plugins/ChunkSpawner/ChunkCreate.cpp"
+        "src/plugins/ChunkSpawner/ChunkDestroy.cpp"
+        "src/plugins/ChunkSpawner/ChunkManager.cpp"
+        "src/plugins/ChunkSpawner/ChunkManagerUpdate.cpp"
+        "src/plugins/ChunkSpawner/ChunkManagerDecorate.cpp"
+        "src/plugins/ChunkSpawner/Chunk.cpp"
+        "src/plugins/WeatherSystem/WeatherSystem.cpp"
+        "src/plugins/ParticleSystem/Emitter.cpp"
+        "src/plugins/ParticleSystem/ParticleSystem.cpp"
+        "src/start.cpp"
+        "src/run.cpp"
+        "src/shutdown.cpp"
+        "src/functions.cpp"
+        "src/plugins.cpp"
+    )
+
+    add_library(game SHARED ${GAME_HEADERS} ${GAME_SOURCES})
+    add_compile_definitions(BUILD_APPLICATION)
+
+    configure_target_common(game)
+
+    set_target_properties(game PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+        LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+        ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/vendor"
+    )
+
+    target_link_libraries(game ${COMMON_LIBS})
+    target_link_libraries(game
+        ${PROJECT_SOURCE_DIR}/vendor/librp3d.a
+        ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a
+    )
 endif()
 
-auto_sources(GAME_SOURCES
-    "include/**/*.h"
-    "vendor/**/*.h"
-)
-
-set (GAME_SOURCES
-    
-    "src/plugins/ChunkSpawner/WorldLoad.cpp"
-    "src/plugins/ChunkSpawner/WorldSave.cpp"
-    "src/plugins/ChunkSpawner/ChunkLoad.cpp"
-    "src/plugins/ChunkSpawner/ChunkSave.cpp"
-    "src/plugins/ChunkSpawner/ChunkCreate.cpp"
-    "src/plugins/ChunkSpawner/ChunkDestroy.cpp"
-    "src/plugins/ChunkSpawner/ChunkManager.cpp"
-    "src/plugins/ChunkSpawner/ChunkManagerUpdate.cpp"
-    "src/plugins/ChunkSpawner/ChunkManagerDecorate.cpp"
-    "src/plugins/ChunkSpawner/Chunk.cpp"
-    
-    "src/plugins/WeatherSystem/WeatherSystem.cpp"
-    
-    "src/plugins/ParticleSystem/Emitter.cpp"
-    "src/plugins/ParticleSystem/ParticleSystem.cpp"
-    
-    "src/start.cpp"
-    "src/run.cpp"
-    "src/shutdown.cpp"
-    "src/functions.cpp"
-    "src/plugins.cpp"
-    
-)
-
-
-add_library(game SHARED ${GAME_HEADERS} ${GAME_SOURCES})
-
-add_compile_definitions(BUILD_APPLICATION)
-
-target_compile_features(game PUBLIC cxx_std_11)
-
-set_target_properties(game PROPERTIES CXX_EXTENSIONS OFF)
-
-set(CMAKE_CXX_FLAGS "-O2")
-
-set_target_properties(game PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
-	LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
-	ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/vendor"
-)
-
-target_include_directories(game PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-	$<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries(game glew32s.lib)
-target_link_libraries(game opengl32.a)
-target_link_libraries(game Ws2_32.lib)
-
-target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
-target_link_libraries(game ${PROJECT_SOURCE_DIR}/vendor/libcore.dll.a)
-
-endif()
-
-
-
 # ==========================================================
-# ==========================================================
-# ==========================================================
-# 
-# Build engine core dll
-# 
-# ==========================================================
+# Core DLL
 # ==========================================================
 
-if(BUILD_CORE_ENGINE)
+if(BUILD_CORE_LIBRARY)
+    if(BUILD_APPLICATION_LIBRARY OR BUILD_RUNTIME_EXECUTABLE)
+        message(FATAL_ERROR "Only one build target can be enabled at a time.")
+    endif()
 
-if(BUILD_APPLICATION_LIBRARY OR BUILD_RUNTIME_EXECUTABLE)
-    message(FATAL_ERROR "Multiple build options are set. Please only select one build option at a time.")
-endif()
+    auto_sources(CORE_HEADERS
+        "include/**/*.h"
+        "vendor/**/*.h"
+    )
 
-auto_sources(CORE_SOURCES
-    "include/**/*.h"
-    "vendor/**/*.h"
-)
-
-set (CORE_SOURCES
-    
+    set(CORE_SOURCES
+        
     "src/Application/Platform.cpp"
-    "src/Application/winproc.cpp"
+    "src/Application/procedure.cpp"
     
     "src/Audio/AudioSystem.cpp"
     "src/Audio/components/sound.cpp"
@@ -313,38 +276,22 @@ set (CORE_SOURCES
     "src/Scripting/ScriptSystem.cpp"
     "src/Scripting/components/script.cpp"
     
-)
+    )
 
+    add_library(core SHARED ${CORE_HEADERS} ${CORE_SOURCES})
+    add_compile_definitions(BUILD_CORE)
 
+    configure_target_common(core)
 
-add_library(core SHARED ${CORE_HEADERS} ${CORE_SOURCES})
+    set_target_properties(core PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+        LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+        ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/vendor"
+    )
 
-add_compile_definitions(BUILD_CORE)
-
-target_compile_features(core PUBLIC cxx_std_11)
-
-set_target_properties(core PROPERTIES CXX_EXTENSIONS OFF)
-
-set(CMAKE_CXX_FLAGS "-O2")
-
-set_target_properties(core PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
-	LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
-	ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/vendor"
-)
-
-target_include_directories(core PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-	$<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries(core glew32s.lib)
-target_link_libraries(core opengl32.a)
-target_link_libraries(core Ws2_32.lib)
-
-target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/librp3d.a)
-target_link_libraries(core ${PROJECT_SOURCE_DIR}/vendor/OpenAL32.lib)
-
+    target_link_libraries(core ${COMMON_LIBS})
+    target_link_libraries(core
+        ${PROJECT_SOURCE_DIR}/vendor/librp3d.a
+	${PROJECT_SOURCE_DIR}/vendor/libSDL3.dll.a
+    )
 endif()
-
-
