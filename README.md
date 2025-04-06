@@ -11,6 +11,7 @@
   - Simple textured mesh renderer
   - Point and directional lights
   - Text rendering via sprite sheet
+  - Fog effects
 
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
   - Rigid body simulation
@@ -32,7 +33,7 @@
 
 
 ## Overview
- This framework is designed to provide the functionality of a game engine without an editor. The primary use case would be for the creation of applications that require user interactivity and physical simulation. The core fuctionality of the framework covers rendering, physics, AI and resource management.
+ This framework is designed to provide the functionality of a game engine without an editor. The primary use case would be for the creation of applications that require user interactivity and physical simulation. The core fuctionality of the framework covers rendering, physics, AI, resource management and much more.
 
 
 <br><br/>
@@ -47,7 +48,7 @@ While this framework currently only supports windows, I look forward to porting 
 
 
 ##  Building the repository
-First, clone the repository with git. You can then use cmake to generate the project files of your choice. You have three build options in cmake. Each option will generate a project file which will compile the selected part of the framework. To use the framework you would want to select `BUILD_APPLICATION_LIBRARY`. However, modifying the core requires you to select `BUILD_CORE_ENGINE`. To build the runtime executable select `BUILD_RUNTIME_EXECUTABLE`.
+First, clone the repository with git. You can then use cmake to generate the project files of your choice. You have three build options in cmake. Each option will generate a project file which will compile the selected part of the framework. To use the framework you would want to select `BUILD_APPLICATION_LIBRARY`. Modifying the core requires you to select `BUILD_CORE_LIBRARY`. To build the runtime executable select `BUILD_RUNTIME_EXECUTABLE`.
 
 ```
 git clone https://github.com/RetroBytes32/FrameEngineGamework
