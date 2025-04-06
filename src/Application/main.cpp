@@ -1,74 +1,64 @@
 #include <GameEngineFramework/Application/main.h>
+#include <GameEngineFramework/Application/procedure.h>
 
 #ifdef RUN_UNIT_TESTS
  #include "../../tests/framework.h"
 #endif
 
-int main() {
+int main(int argc, char* argv[]) {
     
-#ifdef PLATFORM_LINUX
+#ifdef RUN_UNIT_TESTS
+    TestFramework tests;
+    tests.Initiate();
     
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cerr << "SDL_Init failed: " << SDL_GetError() << std::endl;
-        return 1;
+    tests.AddTest( &tests.TestEngineFunctionality );
+    
+    tests.AddTest( &tests.TestRenderSystem );
+    tests.AddTest( &tests.TestScriptSystem );
+    
+    tests.AddTest( &tests.TestGameObject );
+    tests.AddTest( &tests.TestComponentObject );
+    
+    tests.AddTest( &tests.TestPhysicsSystem );
+    tests.AddTest( &tests.TestTransform );
+    
+    tests.AddTest( &tests.TestSerializerSystem );
+    
+    // Run all the tests
+    tests.RunTestSuite();
+    
+    // Finalize
+    if (!tests.hasTestFailed) {
+        tests.Complete();
+    } else {
+        DestroyWindow(wHndl);
+        std::string freeze;
+        std::cin >> freeze;
     }
     
-    SDL_SetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION, "1");
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl"); // Optional
+#endif
     
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); // or 4
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    
-    // Create the main window
-    SDL_Window* window = SDL_CreateWindow("Render window", 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-    if (!window) {
-        std::cerr << "SDL_CreateWindow failed: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-    
-    // Get the render context for openGL
-    SDL_GLContext glContext = SDL_GL_CreateContext(window);
-    if (!glContext) {
-        std::cerr << "Failed to create OpenGL context: " << SDL_GetError() << std::endl;
-        return -1;
-    }
-    SDL_GL_MakeCurrent(window, glContext);
-    
-    // Setup the window
-    SDL_SetWindowResizable(window, 1);
-    
+    Platform.windowHandle = Platform.CreateWindowHandle("windowFrame", "Render window");
     Log.Clear();
     
     Platform.SetRenderTarget();
     
     // Get display size
-    Renderer.displaySize.x = 1024;
-    Renderer.displaySize.y = 768;
+    glm::vec2 dim = Platform.GetDisplaySize();
+    Renderer.displaySize.x = dim.x;
+    Renderer.displaySize.y = dim.y;
     Renderer.displayCenter.x = Renderer.displaySize.x / 2;
     Renderer.displayCenter.y = Renderer.displaySize.y / 2;
     
-    //
-    // Initiate engine sub systems
-    
-    Resources.Initiate();
-    
     Log.WriteLn(); // For event log layout
     
+    // Initiate engine sub systems
+    Resources.Initiate();
     AI.Initiate();
-    
     Renderer.Initiate();
-    
     Audio.Initiate();
-    
     Physics.Initiate();
-    
     Network.Initiate();
-    
     Engine.Initiate();
     
     // Initiate 
@@ -96,29 +86,70 @@ int main() {
     double tickAccumulator=0;
     double tickUpdateMax = tickUpdateTimeout * 100;
     tickTimer.Update();
-    AI.UpdateSendSignal();
     
-    // Main loop
-    SDL_Event event;
-    bool isRunning = true;
-    while (isRunning) {
+    AI.UpdateSendSignal(); // Kick off AI updates
+    
+    while (Platform.isActive) {
+        
+#ifdef PLATFORM_LINUX
+        
+        SDL_Event event;
         
         while (SDL_PollEvent(&event)) {
+            
+            // Get event key parameter
+            SDL_Keycode keycode = event.key.key;
+            
+            int key = static_cast<int>(keycode);
+            
+            int VirtualKey=-1;
+            switch (keycode) {
+                case SDLK_F1: VirtualKey = VK_F1; break;
+                case SDLK_F2: VirtualKey = VK_F2; break;
+                case SDLK_F3: VirtualKey = VK_F3; break;
+                case SDLK_F4: VirtualKey = VK_F4; break;
+                case SDLK_F5: VirtualKey = VK_F5; break;
+                case SDLK_F6: VirtualKey = VK_F6; break;
+                case SDLK_F7: VirtualKey = VK_F7; break;
+                case SDLK_F8: VirtualKey = VK_F8; break;
+                case SDLK_F9: VirtualKey = VK_F9; break;
+                case SDLK_F10: VirtualKey = VK_F10; break;
+                case SDLK_F11: VirtualKey = VK_F11; break;
+                case SDLK_F12: VirtualKey = VK_F12; break;
+                
+                case SDLK_ESCAPE: VirtualKey = VK_ESCAPE; break;
+                
+                case SDLK_LCTRL: VirtualKey = VK_LCONTROL; break;
+                case SDLK_RCTRL: VirtualKey = VK_RCONTROL; break;
+                
+                case SDLK_LSHIFT: VirtualKey = VK_LSHIFT; break;
+                case SDLK_RSHIFT: VirtualKey = VK_RSHIFT; break;
+                
+            }
+            
             switch (event.type) {
                 
                 case SDL_EVENT_QUIT: 
-                    isRunning = false;
+                    Platform.isActive = false; 
                     break;
                 
-                case SDL_EVENT_KEY_DOWN:
-                    Input.SetKeyPressed(static_cast<uint8_t>(event.key.key));
+                case SDL_EVENT_KEY_DOWN: 
+                    if (VirtualKey != -1) 
+                        Input.SetKeyPressed(VirtualKey); // VK virtual keys
+                    else 
+                        Input.lastKeyPressed = key; // Text characters
+                    
                     break;
                 
-                case SDL_EVENT_KEY_UP:
-                    Input.SetKeyReleased(static_cast<uint8_t>(event.key.key));
+                case SDL_EVENT_KEY_UP: 
+                    if (VirtualKey != -1) 
+                        Input.SetKeyReleased(VirtualKey); // VK virtual keys
+                    else
+                        Input.lastKeyReleased = key; // Text characters
+                    
                     break;
                 
-                case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                case SDL_EVENT_MOUSE_BUTTON_DOWN: 
                     switch (event.button.button) {
                         case 1: Input.SetMouseLeftPressed(true); break;
                         case 2: Input.SetMouseMiddlePressed(true); break;
@@ -126,7 +157,8 @@ int main() {
                     }
                     break;
                 
-                case SDL_EVENT_MOUSE_BUTTON_UP:
+                
+                case SDL_EVENT_MOUSE_BUTTON_UP: 
                     switch (event.button.button) {
                         case 1: Input.SetMouseLeftReleased(true); break;
                         case 2: Input.SetMouseMiddleReleased(true); break;
@@ -134,23 +166,173 @@ int main() {
                     }
                     break;
                 
-                case SDL_EVENT_MOUSE_MOTION:
+                case SDL_EVENT_MOUSE_MOTION: 
                     Input.mouseX = event.motion.x;
                     Input.mouseY = event.motion.y;
                     break;
                 
-            }
+                case SDL_EVENT_WINDOW_RESIZED: 
+                    
+                    int x, y, w, h;
+                    SDL_GetWindowPosition((SDL_Window*)Platform.windowHandle, &x, &y);
+                    SDL_GetWindowSize((SDL_Window*)Platform.windowHandle, &w, &h);
+                    
+                    // Set window view port
+                    Renderer.viewport.x = x;
+                    Renderer.viewport.y = y;
+                    Renderer.viewport.w = w;
+                    Renderer.viewport.h = h;
+                    
+                    Platform.windowLeft   = Renderer.viewport.x;
+                    Platform.windowTop    = Renderer.viewport.y;
+                    Platform.windowRight  = Renderer.viewport.w;
+                    Platform.windowBottom = Renderer.viewport.h;
+                    
+                    Platform.windowArea.x = Platform.windowLeft;
+                    Platform.windowArea.y = Platform.windowTop;
+                    Platform.windowArea.w = Platform.windowRight;
+                    Platform.windowArea.h = Platform.windowBottom;
+                    
+                    // Update scene cameras
+                    for (unsigned int i=0; i < Renderer.GetRenderQueueSize(); i++) {
+                        
+                        if (Renderer[i]->camera == nullptr) 
+                            continue;
+                        
+                        // Fixed view port
+                        if (Renderer[i]->camera->isFixedAspect) 
+                            continue;
+                        
+                        // Update view port
+                        int windowWidth  = Renderer.viewport.w;
+                        int windowHeight = Renderer.viewport.h;
+                        
+                        Renderer[i]->camera->viewport.x = 0;
+                        Renderer[i]->camera->viewport.y = 0;
+                        Renderer[i]->camera->viewport.w = windowWidth;
+                        Renderer[i]->camera->viewport.h = windowHeight;
+                        
+                        // Update camera aspect
+                        Renderer[i]->camera->aspect = Renderer.viewport.w / Renderer.viewport.h;
+                        
+                        if (Renderer[i]->camera->aspect < 1.3) 
+                            Renderer[i]->camera->aspect = 1.3;
+                        
+                        continue;
+                    }
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    /*
+                    RECT WindowRect;
+                    GetWindowRect(wHnd, &WindowRect);
+                    
+                    // Set window view port
+                    Renderer.viewport.x = 0;
+                    Renderer.viewport.y = 0;
+                    Renderer.viewport.w = WindowRect.right - WindowRect.left;
+                    Renderer.viewport.h = WindowRect.bottom - WindowRect.top;
+                    
+                    Platform.windowLeft   = Renderer.viewport.x;
+                    Platform.windowTop    = Renderer.viewport.y;
+                    Platform.windowRight  = Renderer.viewport.w;
+                    Platform.windowBottom = Renderer.viewport.h;
+                    
+                    
+                    RECT windowDim;
+                    GetWindowRect(wHnd, &windowDim);
+                    
+                    RECT clientRect;
+                    GetClientRect(wHnd, &clientRect);
+                    
+                    // Calculate the window's width and height
+                    float windowWidth = windowDim.right - windowDim.left;
+                    float windowHeight = windowDim.bottom - windowDim.top;
+                    
+                    // Calculate the client area width and height
+                    float clientWidth = clientRect.right - clientRect.left;
+                    float clientHeight = clientRect.bottom - clientRect.top;
+                    
+                    // Calculate the margins (borders)
+                    float horizontalMargin = (windowWidth - clientWidth) / 2.0f;
+                    float verticalMargin = (windowHeight - clientHeight) / 2.0f;
+                    
+                    // The starting position of the client area relative to the window
+                    Platform.windowArea.x = windowDim.left + horizontalMargin + 2.0f;
+                    Platform.windowArea.y = windowDim.top + verticalMargin - 2.0f;
+                    Platform.windowArea.w = clientRect.right - clientRect.left;
+                    Platform.windowArea.h = windowDim.bottom - windowDim.top;
+                    
+                    
+                    // Update scene cameras
+                    for (unsigned int i=0; i < Renderer.GetRenderQueueSize(); i++) {
+                        
+                        if (Renderer[i]->camera == nullptr) 
+                            continue;
+                        
+                        // Fixed view port
+                        if (Renderer[i]->camera->isFixedAspect) 
+                            continue;
+                        
+                        // Update view port
+                        int windowWidth  = WindowRect.right - WindowRect.left;
+                        int windowHeight = WindowRect.bottom - WindowRect.top;
+                        
+                        Renderer[i]->camera->viewport.x = 0;
+                        Renderer[i]->camera->viewport.y = 0;
+                        Renderer[i]->camera->viewport.w = windowWidth;
+                        Renderer[i]->camera->viewport.h = windowHeight;
+                        
+                        // Update camera aspect
+                        Renderer[i]->camera->aspect = Renderer.viewport.w / Renderer.viewport.h;
+                        
+                        if (Renderer[i]->camera->aspect < 1.3) 
+                            Renderer[i]->camera->aspect = 1.3;
+                        
+                        continue;
+                    }
+                    */
+                    
+                    break;
+                    
+                }
             
         }
+        
+#endif
+        
+#ifdef PLATFORM_WINDOWS
+        
+        MSG messages;
+        
+        while (PeekMessage(&messages, NULL, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&messages);
+            DispatchMessage(&messages);
+        }
+        
+#endif
         
         // Reset mouse scroll wheel state
         Input.mouseWheelDelta = 0;
         
-        // Update mouse position
+#ifdef PLATFORM_WINDOWS
         POINT cursorPos;
         GetCursorPos(&cursorPos);
         Input.mouseX = cursorPos.x;
         Input.mouseY = cursorPos.y;
+#endif
+        
+#ifdef PLATFORM_LINUX
+        float mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
+        
+        Input.mouseX = (int)mouseX;
+        Input.mouseY = (int)mouseY;
+#endif
         
         //
         // Tick update timer (background update)
@@ -216,18 +398,13 @@ int main() {
                 // Update window area
                 //RECT windowRect;
                 //GetWindowRect(wHndl, &windowRect);
+                Viewport area = Platform.GetWindowArea();
+                Platform.windowLeft   = area.x;
+                Platform.windowTop    = area.y;
+                Platform.windowRight  = area.w - area.x;
+                Platform.windowBottom = area.h - area.y;
                 
-                //Platform.windowLeft   =  windowRect.left;
-                //Platform.windowTop    =  windowRect.top;
-                //Platform.windowRight  = (windowRect.right  - windowRect.left);
-                //Platform.windowBottom = (windowRect.bottom - windowRect.top);
-                
-                Platform.windowLeft   =  0;
-                Platform.windowTop    =  0;
-                Platform.windowRight  = 800;
-                Platform.windowBottom = 600;
-                
-                Renderer.SetViewport(0, 0, 800, 600);
+                Renderer.SetViewport(0, 0, area.w, area.h);
                 
                 // --- Profiling ---
                 if (Engine.CheckIsProfilerActive()) 
@@ -255,304 +432,26 @@ int main() {
             if (Engine.CheckIsProfilerActive()) 
                 Profiler.Begin();
             
-            int w = 800;
-            int h = 800;
+            //int w, h;
             
-            SDL_GetWindowSize(window, &w, &h);
+            //SDL_GetWindowSize((SDL_Window*)Platform.windowHandle, &w, &h);
             
             //glViewport(0, 0, 1280, 720);
-            //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
             //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
-            // Draw the current frame state
-            //Renderer.RenderFrame();
-            
-            // Turn over the frame buffer
-            //SwapBuffers( (HDC)Platform.deviceContext );
-            SDL_GL_SwapWindow(window);
-            
-            // --- Profiling ---
-            if (Engine.CheckIsProfilerActive()) 
-                Profiler.profileRenderSystem = Profiler.Query();
-            
-        }
-        
-        
-        //
-        // Physics timer
-        //
-        
-        if (PhysicsTime.Update()) {
-            
-            // --- Profiling ---
-            if (Engine.CheckIsProfilerActive()) 
-                Profiler.Begin();
-            
-            Physics.world->update( PHYSICS_UPDATES_PER_SECOND );
-            
-            // Generate the physics debug meshes
-            Engine.UpdatePhysicsDebugRenderer();
-            
-            
-            // --- Profiling ---
-            if (Engine.CheckIsProfilerActive()) 
-                Profiler.profilePhysicsSystem = Profiler.Query();
-            
-        }
-        
-        continue;
-    }
-    
-    return 0;
-    
-#endif
-    
-#ifdef PLATFORM_WINDOWS
-    
-    HWND wHndl = (HWND)Platform.CreateWindowHandle("windowFrame", "Render window", NULL, NULL);
-    
-    HWND cHnd = GetConsoleWindow();
-    
-#ifndef  WINDOW_CONSOLE_HIDE_ON_STARTUP
-    
-    ShowWindow(cHnd, SW_SHOW);
-    SetWindowPos(cHnd, NULL, WINDOW_CONSOLE_LEFT, WINDOW_CONSOLE_TOP, WINDOW_CONSOLE_WIDTH, WINDOW_CONSOLE_HEIGHT, SWP_SHOWWINDOW);
-    
-#else
-    
-    ShowWindow(cHnd, SW_HIDE);
-    
-#endif
-    
-    Log.Clear();
-    
-    Platform.SetRenderTarget();
-    
-    // Set the window handle and get the device context
-    HDC hDC = GetDC( wHndl );
-    
-    // Get display size
-    Renderer.displaySize.x = GetDeviceCaps(hDC, HORZRES);
-    Renderer.displaySize.y = GetDeviceCaps(hDC, VERTRES);
-    Renderer.displayCenter.x = Renderer.displaySize.x / 2;
-    Renderer.displayCenter.y = Renderer.displaySize.y / 2;
-    
-    // Get window area
-    RECT windowRect;
-    GetWindowRect(wHndl, &windowRect);
-    
-    Renderer.SetViewport(0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top);
-    
-    Platform.windowLeft   = windowRect.left;
-    Platform.windowTop    = windowRect.top;
-    Platform.windowRight  = windowRect.right;
-    Platform.windowBottom = windowRect.bottom;
-    
-    // Initiate window region
-    Platform.SetWindowCenterScale(WINDOW_WIDTH, WINDOW_HEIGHT);
-    
-    
-    //
-    // Initiate engine sub systems
-    //
-    
-    Resources.Initiate();
-    
-    Log.WriteLn(); // For event log layout
-    
-    AI.Initiate();
-    
-    Renderer.Initiate();
-    
-    Audio.Initiate();
-    
-    Physics.Initiate();
-    
-    Network.Initiate();
-    
-    Engine.Initiate();
-    
-#ifdef RUN_UNIT_TESTS
-    TestFramework testFrameWork;
-    testFrameWork.Initiate();
-    
-    testFrameWork.AddTest( &testFrameWork.TestEngineFunctionality );
-    
-    testFrameWork.AddTest( &testFrameWork.TestRenderSystem );
-    testFrameWork.AddTest( &testFrameWork.TestScriptSystem );
-    
-    testFrameWork.AddTest( &testFrameWork.TestGameObject );
-    testFrameWork.AddTest( &testFrameWork.TestComponentObject );
-    
-    testFrameWork.AddTest( &testFrameWork.TestPhysicsSystem );
-    testFrameWork.AddTest( &testFrameWork.TestTransform );
-    
-    testFrameWork.AddTest( &testFrameWork.TestSerializerSystem );
-    
-    // Run all the tests
-    testFrameWork.RunTestSuite();
-    
-    // Finalize
-    if (!testFrameWork.hasTestFailed) {
-        testFrameWork.Complete();
-    } else {
-        DestroyWindow(wHndl);
-        std::string freeze;
-        std::cin >> freeze;
-    }
-    
-#endif
-    
-    Log.WriteLn();
-    Log.Write("<MainScene>");
-    
-    Start();
-    
-    // Render timer
-    Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
-    Time.Update();
-    
-    // Physics timer
-    PhysicsTime.SetRefreshRate(PHYSICS_UPDATES_PER_SECOND);
-    PhysicsTime.Update();
-    
-    // Fixed rate update timer
-    Timer fixedTimer;
-    double fixedUpdateTimeout = 1000.0 / TICK_UPDATES_PER_SECOND;
-    double fixedAccumulator=0;
-    double fixedUpdateMax = fixedUpdateTimeout * 100;
-    fixedTimer.Update();
-    
-    // Tick update timer
-    Timer tickTimer;
-    double tickUpdateTimeout = 1000.0f / 1.3f;
-    double tickAccumulator=0;
-    double tickUpdateMax = tickUpdateTimeout * 100;
-    tickTimer.Update();
-    AI.UpdateSendSignal();
-    
-    
-    while (Platform.isActive) {
-        
-        MSG messages;
-        while (PeekMessage(&messages, NULL, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&messages);
-            DispatchMessage(&messages);
-        }
-        
-        // Reset mouse scroll wheel state
-        Input.mouseWheelDelta = 0;
-        
-        // Update mouse position
-        POINT cursorPos;
-        GetCursorPos(&cursorPos);
-        Input.mouseX = cursorPos.x;
-        Input.mouseY = cursorPos.y;
-        
-        //
-        // Tick update timer (background update)
-        //
-        
-        tickAccumulator = tickTimer.GetCurrentDelta();
-        
-        if (tickAccumulator > tickUpdateMax) 
-            tickAccumulator = tickUpdateMax;
-        
-        if (tickAccumulator >= tickUpdateTimeout) {
-            
-            tickTimer.Update();
-            
-            tickAccumulator -= tickUpdateTimeout;
-            
-            // Call extra updates on accumulated time
-            for (int i=0; i < 2; i++) {
-                
-                TickUpdate();
-                
-                tickAccumulator -= tickUpdateTimeout;
-                
-                // Break if no more accumulated time
-                if (tickAccumulator < tickUpdateTimeout) 
-                    break;
-                
-                continue;
-            }
-        }
-        
-        //
-        // Fixed rate update timer
-        //
-        
-        fixedAccumulator = fixedTimer.GetCurrentDelta();
-        
-        if (fixedAccumulator > fixedUpdateMax) 
-            fixedAccumulator = fixedUpdateMax;
-        
-        if (fixedAccumulator >= fixedUpdateTimeout) {
-            
-            fixedTimer.Update();
-            
-            AI.UpdateSendSignal();
-            
-            // Call extra updates on accumulated time
-            for (int i=0; i < 2; i++) {
-                
-                // --- Profiling ---
-                if (Engine.CheckIsProfilerActive()) 
-                    Profiler.Begin();
-                
-                
-                Run();
-                
-                Scripting.Update();
-                
-                Engine.Update();
-                
-                Network.Update();
-                
-                // Update window area
-                RECT windowRect;
-                GetWindowRect(wHndl, &windowRect);
-                
-                Platform.windowLeft   =  windowRect.left;
-                Platform.windowTop    =  windowRect.top;
-                Platform.windowRight  = (windowRect.right  - windowRect.left);
-                Platform.windowBottom = (windowRect.bottom - windowRect.top);
-                
-                
-                // --- Profiling ---
-                if (Engine.CheckIsProfilerActive()) 
-                    Profiler.profileGameEngineUpdate = Profiler.Query();
-                
-                
-                fixedAccumulator -= fixedUpdateTimeout;
-                
-                // Break if no more accumulated time
-                if (fixedAccumulator < fixedUpdateTimeout) 
-                    break;
-                
-                continue;
-            }
-        }
-        
-        
-        
-        //
-        // Render timer
-        //
-        
-        if (Time.Update()) {
-            
-            // --- Profiling ---
-            if (Engine.CheckIsProfilerActive()) 
-                Profiler.Begin();
             
             // Draw the current frame state
             Renderer.RenderFrame();
             
             // Turn over the frame buffer
-            SwapBuffers( (HDC)Platform.deviceContext );
             
+#ifdef PLATFORM_LINUX
+            SDL_GL_SwapWindow((SDL_Window*)Platform.windowHandle);
+#endif
+            
+#ifdef PLATFORM_WINDOWS
+            SwapBuffers( (HDC)Platform.deviceContext );
+#endif
             
             // --- Profiling ---
             if (Engine.CheckIsProfilerActive()) 
@@ -582,7 +481,6 @@ int main() {
                 Profiler.profilePhysicsSystem = Profiler.Query();
             
         }
-        
         
 #ifdef APPLICATION_ESCAPE_KEY_PAUSE
         if (Input.CheckKeyPressed(VK_ESCAPE)) {
@@ -609,7 +507,6 @@ int main() {
         continue;
     }
     
-    
     Log.WriteLn();
     
     // Shutdown engine & sub systems
@@ -630,8 +527,6 @@ int main() {
     Resources.DestroyAssets();
     
     Platform.DestroyWindowHandle();
-    
-#endif
     
     return 0;
 }

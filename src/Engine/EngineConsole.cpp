@@ -194,49 +194,32 @@ void EngineSystemManager::UpdateConsole(void) {
     
     if (Input.lastKeyPressed != -1) {
         
-        // Letter case
-        if (((Input.lastKeyPressed > 64) & (Input.lastKeyPressed < 91))) {
+        char lastChar = (char)Input.lastKeyPressed;
+        Input.lastKeyPressed = -1;
+        
+        // Add last character typed
+        if (lastChar > 0x20 && lastChar < 0x7a) {
             
-            char lastChar = (char)Input.lastKeyPressed;
-            
-            if (!isShifted) 
+            // Lowercase the character
+            if (lastChar > 0x40 && lastChar < 0x5b) 
                 lastChar += 0x20;
             
             mConsoleString += lastChar;
-            
-            Input.lastKeyPressed = -1;
-        }
-        
-        // Numbers
-        if ( (Input.lastKeyPressed > 47) & (Input.lastKeyPressed < 58) ) {
-            
-            char lastChar = (char)Input.lastKeyPressed;
-            
-            mConsoleString += lastChar;
-            
-            Input.lastKeyPressed = -1;
         }
         
         // Space
-        if (Input.lastKeyPressed == VK_SPACE) {
-            
+        if (lastChar == VK_SPACE) 
             mConsoleString += VK_SPACE;
-            
-            Input.lastKeyPressed = -1;
-        }
         
         // Backspace
-        if (Input.lastKeyPressed == VK_BACK) {
-            
-            Input.lastKeyPressed = -1;
-            
+        if (lastChar == VK_BACK) {
             int length = mConsoleString.size() - 1;
             if (length >= 0) 
                 mConsoleString.resize(length);
         }
         
         // Return - run the command
-        if (Input.lastKeyPressed == VK_RETURN) {
+        if (lastChar == VK_RETURN) {
             
             if (mConsoleString.size() < 1) 
                 return;
@@ -277,7 +260,6 @@ void EngineSystemManager::UpdateConsole(void) {
                 
             }
             
-            Input.lastKeyPressed = -1;
             mConsoleString = "";
             
             // Check close console after return

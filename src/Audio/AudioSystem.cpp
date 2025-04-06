@@ -54,9 +54,6 @@ bool AudioSystem::CheckIsAudioEndpointActive(void) {
     return mIsDeviceActive;
 }
 
-std::string AudioSystem::LogErrors(void) {
-    return "Unknown ALC error";
-}
 
 //
 // Audio thread entry point

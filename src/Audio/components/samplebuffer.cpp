@@ -1,6 +1,9 @@
 #include <GameEngineFramework/Audio/components/samplebuffer.h>
 
-
+AudioSample::AudioSample() : 
+    sample_rate(44100)
+{
+}
 /// Generate a square wave
 void AudioPreset::RenderBlankSpace(AudioSample* sample, float duration) {
     int samples = (int)(sample->sample_rate * duration);
@@ -24,7 +27,7 @@ void AudioPreset::RenderWhiteNoise(AudioSample* sample, float duration) {
 /// Generate square waves
 void AudioPreset::RenderSquareWave(AudioSample* sample, float frequency, float duration) {
     int samples = (int)(sample->sample_rate * duration);
-    int period = (int)(sample->sample_rate / frequency);
+    int period = (int)(sample->sample_rate / frequency) + 10;
     
     for (int i = 0; i < samples; i++) 
         sample->sampleBuffer.push_back((i % period < (period / 2)) ? 32767 : -32768);

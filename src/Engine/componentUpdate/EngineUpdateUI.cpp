@@ -3,8 +3,8 @@
 
 void EngineSystemManager::UpdateUI(void) {
     
-    float mouseX = Input.mouseX - Platform.clientArea.x;
-    float mouseY = Input.mouseY - Platform.clientArea.y;
+    float mouseX = Input.mouseX - Platform.windowArea.x;
+    float mouseY = Input.mouseY - Platform.windowArea.y;
     
     float windowWidth  = Platform.windowArea.w;
     float windowHeight = Platform.windowArea.h;

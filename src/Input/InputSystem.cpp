@@ -1,21 +1,16 @@
 #include <GameEngineFramework/Input/InputSystem.h>
+#include <GameEngineFramework/Application/Platform.h>
+#include <SDL3/SDL.h>
 
 #ifdef PLATFORM_WINDOWS
- #ifndef _WIN32_WINNT
- #define _WIN32_WINNT 0x500
- #endif
- 
- #define WIN32_LEAN_AND_MEAN
- 
- #include <sdkddkver.h>
- #include <windows.h>
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x500
 #endif
 
+#define WIN32_LEAN_AND_MEAN
 
-#ifdef PLATFORM_LINUX
- 
- #include <X11/Xlib.h>
- 
+#include <sdkddkver.h>
+#include <windows.h>
 #endif
 
 
@@ -38,32 +33,16 @@ extern InputSystem::InputSystem(void) :
 }
 
 void InputSystem::SetMousePosition(unsigned int x, unsigned int y) {
-    
 #ifdef PLATFORM_WINDOWS
-    
     SetCursorPos( (int)x, (int)y );
-    mouseX = x;
-    mouseY = y;
-    
 #endif
     
 #ifdef PLATFORM_LINUX
-    
-    Display* disp = XOpenDisplay(nullptr);
-    
-    if (disp == nullptr) 
-        return;
-    
-    Window root = DefaultRootWindow(disp);
-    
-    XWarpPointer(disp, 0, root, 0, 0, 0, 0, x, y);
-    
-    XFlush(disp);
-    
-    XCloseDisplay(disp);
-    
+    extern PlatformLayer Platform;
+    SDL_WarpMouseInWindow( (SDL_Window*)Platform.windowHandle, x, y);
 #endif
-    
+    mouseX = x;
+    mouseY = y;
     return;
 }
 

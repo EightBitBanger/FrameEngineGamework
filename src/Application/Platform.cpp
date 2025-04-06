@@ -1,18 +1,25 @@
 #include <GameEngineFramework/Application/Platform.h>
-#include <GameEngineFramework/Application/winproc.h>
+#include <GameEngineFramework/Application/procedure.h>
 #include <GameEngineFramework/Engine/types/nulltype.h>
 
+#include <GameEngineFramework/configuration.h>
+
+#include <SDL3/SDL.h>
+
+#ifdef PLATFORM_WINDOWS
 #ifndef _WIN32_WINNT
-  #define _WIN32_WINNT 0x500
+#define _WIN32_WINNT 0x500
 #endif
 
 #define WIN32_LEAN_AND_MEAN
 
 #include <sdkddkver.h>
 #include <windows.h>
-#include <shellapi.h>
 
+// Icon reference
 #define IDI_ICON  101
+#endif
+
 
 
 PlatformLayer::PlatformLayer() : 
@@ -32,8 +39,9 @@ PlatformLayer::PlatformLayer() :
     isPaused(false),
     isActive(true),
     
-    mIsWindowRunning(false),
-    EventCallbackLoseFocus(nullfunc)
+    EventCallbackLoseFocus(nullfunc),
+    
+    mIsWindowRunning(false)
 {
 }
 
@@ -42,14 +50,12 @@ void PlatformLayer::Pause(void) {
     return;
 }
 
-void* PlatformLayer::CreateWindowHandle(std::string className, std::string windowName, void* parentHandle, void* hInstance) {
+void* PlatformLayer::CreateWindowHandle(std::string className, std::string windowName) {
 #ifdef PLATFORM_WINDOWS
     isPaused = false;
     isActive = true;
     
     HICON__* hCursor = LoadCursor(NULL, IDC_ARROW);
-    
-    HINSTANCE instanceHandle = (HINSTANCE)hInstance;
     
     WNDCLASSEX wClassEx;
     wClassEx.lpszClassName   = className.c_str();
@@ -58,11 +64,11 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     wClassEx.lpfnWndProc     = (WNDPROC)WindowProc;
     wClassEx.cbClsExtra      = 0;
     wClassEx.cbWndExtra      = 0;
-    wClassEx.hInstance       = instanceHandle;
+    wClassEx.hInstance       = NULL;
     wClassEx.lpszMenuName    = NULL;
     wClassEx.hCursor         = hCursor;
-    wClassEx.hIcon           = LoadIcon(instanceHandle, MAKEINTRESOURCE(IDI_ICON));
-    wClassEx.hIconSm         = LoadIcon(instanceHandle, IDI_APPLICATION);
+    wClassEx.hIcon           = LoadIcon(NULL, MAKEINTRESOURCE(IDI_ICON));
+    wClassEx.hIconSm         = LoadIcon(NULL, IDI_APPLICATION);
     wClassEx.hbrBackground   = (HBRUSH)GetStockObject(BLACK_BRUSH);
     
     assert( RegisterClassEx(&wClassEx) );
@@ -70,8 +76,8 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     windowHandle = CreateWindowEx(0, className.c_str(), windowName.c_str(), 
                                   WS_OVERLAPPEDWINDOW, 
                                   CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 
-                                  (HWND)parentHandle, NULL, 
-                                  instanceHandle, NULL);
+                                  NULL, NULL, 
+                                  NULL, NULL);
     
     assert(windowHandle != NULL);
     
@@ -84,9 +90,9 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     
     deviceContext = GetDC( (HWND)windowHandle );
     
-    displayWidth  = GetDeviceCaps( (HDC)deviceContext, HORZRES );
-    displayHeight = GetDeviceCaps( (HDC)deviceContext, VERTRES );
-    
+    glm::vec2 dim = GetDisplaySize();
+    displayWidth  = dim.x;
+    displayHeight = dim.y;
     
     RECT windowDim;
     GetWindowRect((HWND)windowHandle, &windowDim);
@@ -107,21 +113,68 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     float verticalMargin = (windowHeight - clientHeight) / 2.0f;
     
     // The starting position of the client area relative to the window
-    clientArea.x = windowDim.left + horizontalMargin + 2.0f;
-    clientArea.y = windowDim.top + verticalMargin - 2.0f;
-    clientArea.w = clientRect.right - clientRect.left;
-    clientArea.h = windowDim.bottom - windowDim.top;
+    windowArea.x = windowDim.left + horizontalMargin + 2.0f;
+    windowArea.y = windowDim.top + verticalMargin - 2.0f;
+    windowArea.w = clientRect.right - clientRect.left;
+    windowArea.h = windowDim.bottom - windowDim.top;
     
     mIsWindowRunning = true;
     return (void*)windowHandle;
 #endif
+    
+#ifdef PLATFORM_LINUX
+    windowArea.x = 0;
+    windowArea.y = 0;
+    windowArea.w = 800;
+    windowArea.h = 600;
+    
+    SDL_SetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION, "1");
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl"); // Optional
+    
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); // or 4
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    
+    // Create the main window
+    windowHandle = SDL_CreateWindow("Render window", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    
+    assert(windowHandle != nullptr);
+    
+    SDL_SetWindowResizable((SDL_Window*)windowHandle, 1);
+    SetWindowCenterScale(WINDOW_WIDTH, WINDOW_HEIGHT);
+    
+    // Get windows area
+    int x, y, w, h;
+    SDL_GetWindowPosition((SDL_Window*)windowHandle, &x, &y);
+    SDL_GetWindowSize((SDL_Window*)windowHandle, &w, &h);
+    
+    // Set window view port
+    this->windowArea.x = this->windowLeft;
+    this->windowArea.y = this->windowTop;
+    this->windowArea.w = this->windowRight;
+    this->windowArea.h = this->windowBottom;
+    
+    mIsWindowRunning = true;
+    return (void*)windowHandle;
+#endif
+    
 }
 
 void PlatformLayer::DestroyWindowHandle(void) {
 #ifdef PLATFORM_WINDOWS
     DestroyWindow((HWND)windowHandle);
-    windowHandle = NULL;
+    windowHandle = nullptr;
     
+    mIsWindowRunning = false;
+#endif
+    
+#ifdef PLATFORM_LINUX
+    SDL_DestroyWindow((SDL_Window*)windowHandle);
+    windowHandle = nullptr;
     mIsWindowRunning = false;
 #endif
     return;
@@ -129,8 +182,9 @@ void PlatformLayer::DestroyWindowHandle(void) {
 
 void PlatformLayer::SetWindowCenter(void) {
 #ifdef PLATFORM_WINDOWS
-    displayWidth  = GetDeviceCaps( (HDC)deviceContext, HORZRES );
-    displayHeight = GetDeviceCaps( (HDC)deviceContext, VERTRES );
+    glm::vec2 dim = GetDisplaySize();
+    displayWidth  = dim.x;
+    displayHeight = dim.y;
     
     RECT windowDim;
     GetWindowRect((HWND)windowHandle, &windowDim);
@@ -161,10 +215,24 @@ void PlatformLayer::SetWindowCenter(void) {
     float verticalMargin = (windowHeight - clientHeight) / 2.0f;
     
     // The starting position of the client area relative to the window
-    clientArea.x = windowDim.left + horizontalMargin + 2.0f;
-    clientArea.y = windowDim.top + verticalMargin - 2.0f;
-    clientArea.w = clientRect.right - clientRect.left;
-    clientArea.h = windowDim.bottom - windowDim.top;
+    windowArea.x = windowDim.left + horizontalMargin + 2.0f;
+    windowArea.y = windowDim.top + verticalMargin - 2.0f;
+    windowArea.w = clientRect.right - clientRect.left;
+    windowArea.h = windowDim.bottom - windowDim.top;
+#endif
+#ifdef PLATFORM_LINUX
+    int screenW, screenH;
+    SDL_DisplayID display = SDL_GetDisplayForWindow((SDL_Window*)windowHandle);
+    SDL_Rect usableBounds;
+    SDL_GetDisplayUsableBounds(display, &usableBounds);
+    
+    int winW, winH;
+    SDL_GetWindowSize((SDL_Window*)windowHandle, &winW, &winH);
+    
+    int x = usableBounds.x + (usableBounds.w - winW) / 2;
+    int y = usableBounds.y + (usableBounds.h - winH) / 2;
+    
+    SDL_SetWindowPosition((SDL_Window*)windowHandle, x, y);
 #endif
     return;
 }
@@ -202,10 +270,22 @@ void PlatformLayer::SetWindowCenterScale(float width, float height) {
     float verticalMargin = (windowHeight - clientHeight) / 2.0f;
     
     // The starting position of the client area relative to the window
-    clientArea.x = windowDim.left + horizontalMargin + 2.0f;
-    clientArea.y = windowDim.top + verticalMargin - 2.0f;
-    clientArea.w = clientRect.right - clientRect.left;
-    clientArea.h = windowDim.bottom - windowDim.top;
+    windowArea.x = windowDim.left + horizontalMargin + 2.0f;
+    windowArea.y = windowDim.top + verticalMargin - 2.0f;
+    windowArea.w = clientRect.right - clientRect.left;
+    windowArea.h = windowDim.bottom - windowDim.top;
+#endif
+#ifdef PLATFORM_LINUX
+    
+    int windowWidth = displayWidth * width;
+    int windowHeight = displayHeight * height;
+    
+    SDL_SetWindowSize((SDL_Window*)windowHandle, windowWidth, windowHeight);
+    
+    int windowX = (this->displayWidth / 2) - (windowWidth / 2);
+    int windowY = (this->displayHeight / 2) - (windowHeight / 2);
+    
+    SDL_SetWindowPosition((SDL_Window*)windowHandle, windowX, windowY);
 #endif
     return;
 }
@@ -217,21 +297,50 @@ void PlatformLayer::SetWindowPosition(Viewport windowSize) {
     windowArea.w = windowSize.w;
     windowArea.h = windowSize.h;
 #endif
+    
+#ifdef PLATFORM_LINUX
+    SDL_SetWindowPosition((SDL_Window*)windowHandle, windowSize.x, windowSize.y);
+#endif
+    
     return;
 }
 
 Viewport PlatformLayer::GetWindowArea(void) {
+    Viewport area;
+    
 #ifdef PLATFORM_WINDOWS
     RECT windowSz;
     GetWindowRect((HWND)windowHandle, &windowSz);
     
-    Viewport area;
     area.x = windowSz.left;
     area.y = windowSz.top;
     area.w = (windowSz.right  - windowSz.left);
     area.h = (windowSz.bottom - windowSz.top);
-    return area;
 #endif
+    
+#ifdef PLATFORM_LINUX
+    SDL_GetWindowPosition((SDL_Window*)windowHandle, &area.x, &area.y);
+    SDL_GetWindowSize((SDL_Window*)windowHandle, &area.w, &area.h);
+#endif
+    
+    return area;
+}
+
+glm::vec2 PlatformLayer::GetDisplaySize(void) {
+    glm::vec2 dim;
+#ifdef PLATFORM_WINDOWS
+    dim.x = GetDeviceCaps( (HDC)deviceContext, HORZRES );
+    dim.y = GetDeviceCaps( (HDC)deviceContext, VERTRES );
+#endif
+#ifdef PLATFORM_LINUX
+    SDL_Rect bounds;
+    SDL_DisplayID display = SDL_GetDisplayForWindow((SDL_Window*)windowHandle);
+    
+    SDL_GetDisplayBounds(display, &bounds);
+    dim.x = bounds.w;
+    dim.y = bounds.h;
+#endif
+    return dim;
 }
 
 void PlatformLayer::WindowEnableFullscreen(void) {
@@ -239,6 +348,9 @@ void PlatformLayer::WindowEnableFullscreen(void) {
     SetWindowLongPtr((HWND)windowHandle, GWL_STYLE, WS_POPUP);
     SetWindowPos((HWND)windowHandle, HWND_TOPMOST, 0, 0, displayWidth, displayHeight, SWP_FRAMECHANGED);
     ShowWindow((HWND)windowHandle, SW_MAXIMIZE);
+#endif
+#ifdef PLATFORM_LINUX
+    SDL_SetWindowFullscreen((SDL_Window*)windowHandle, 1);
 #endif
     return;
 }
@@ -249,12 +361,18 @@ void PlatformLayer::WindowDisableFullscreen(void) {
     SetWindowPos((HWND)windowHandle, HWND_NOTOPMOST, windowArea.x, windowArea.y, windowArea.w, windowArea.h, SWP_FRAMECHANGED);
     ShowWindow((HWND)windowHandle, SW_RESTORE);
 #endif
+#ifdef PLATFORM_LINUX
+    SDL_SetWindowFullscreen((SDL_Window*)windowHandle, 0);
+#endif
     return;
 }
 
 void PlatformLayer::HideWindowHandle(void) {
 #ifdef PLATFORM_WINDOWS
     ShowWindow((HWND)windowHandle, false);
+#endif
+#ifdef PLATFORM_LINUX
+    SDL_HideWindow((SDL_Window*)windowHandle);
 #endif
     return;
 }
@@ -263,6 +381,9 @@ void PlatformLayer::ShowWindowHandle(void) {
 #ifdef PLATFORM_WINDOWS
     ShowWindow((HWND)windowHandle, true);
 #endif
+#ifdef PLATFORM_LINUX
+    SDL_ShowWindow((SDL_Window*)windowHandle);
+#endif
     return;
 }
 
@@ -270,30 +391,28 @@ void PlatformLayer::ShowMouseCursor(void) {
 #ifdef PLATFORM_WINDOWS
     while (ShowCursor(true) < 0);
 #endif
+#ifdef PLATFORM_LINUX
+    SDL_ShowCursor();
+#endif
 }
 
 void PlatformLayer::HideMouseCursor(void) {
 #ifdef PLATFORM_WINDOWS
     while (ShowCursor(false) >= 0);
 #endif
+#ifdef PLATFORM_LINUX
+    SDL_HideCursor();
+#endif
 }
 
 int PlatformLayer::GetTaskbarHeight(void) {
-#ifdef PLATFORM_WINDOWS
-    APPBARDATA abd;
-    abd.cbSize = sizeof(APPBARDATA);
-    
-    SHAppBarMessage(ABM_GETTASKBARPOS, &abd);
-    
-    return abd.rc.bottom - abd.rc.top;
-#endif
+
+    return 0;
 }
 
 int PlatformLayer::GetTitlebarHeight(void) {
-#ifdef PLATFORM_WINDOWS
-    int titleBarHeight = GetSystemMetrics(SM_CYCAPTION);
-#endif
-    return titleBarHeight;
+    
+    return 0;
 }
 
 void PlatformLayer::SetClipboardText(std::string text) {
@@ -324,11 +443,9 @@ void PlatformLayer::SetClipboardText(std::string text) {
 }
 
 std::string PlatformLayer::GetClipboardText(void) {
-    
-#ifdef PLATFORM_WINDOWS
-    
     std::string text;
     
+#ifdef PLATFORM_WINDOWS
     if (OpenClipboard(nullptr)) {
         
         HGLOBAL block = GetClipboardData(CF_TEXT);
@@ -345,21 +462,21 @@ std::string PlatformLayer::GetClipboardText(void) {
         
         CloseClipboard();
     }
-    
 #endif
     
     return text;
 }
 
 GLenum PlatformLayer::SetRenderTarget(void) {
+    int colorBits = 32;
+    int depthBits = 32;
     
 #ifdef PLATFORM_WINDOWS
     
     int iFormat;
-    std::string gcVendor, gcRenderer, gcExtensions, gcVersion, Line;
     
     // Set the window handle and get the device context
-    windowHandle  = (HWND)windowHandle;
+    //windowHandle  = (HWND)windowHandle;
     deviceContext = GetDC((HWND)windowHandle);
     
     // Pixel format descriptor
@@ -371,8 +488,8 @@ GLenum PlatformLayer::SetRenderTarget(void) {
     pfd.nVersion    = 1;
     pfd.dwFlags     = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
     pfd.iPixelType  = PFD_TYPE_RGBA;
-    pfd.cColorBits  = 32;
-    pfd.cDepthBits  = 32;
+    pfd.cColorBits  = colorBits;
+    pfd.cDepthBits  = depthBits;
     pfd.iLayerType  = PFD_MAIN_PLANE;
     
     // Setup pixel format
@@ -391,13 +508,27 @@ GLenum PlatformLayer::SetRenderTarget(void) {
     
 #endif
     
-    // Initiate glew after setting the render target
-    GLenum passed = glewInit();
+#ifdef PLATFORM_LINUX
+    
+    // Get the render context for openGL
+    deviceContext = (void*)SDL_GL_CreateContext( (SDL_Window*)windowHandle );
+    
+    if (!deviceContext) {
+        std::cerr << "Failed to create OpenGL context: " << SDL_GetError() << std::endl;
+        return -1;
+    }
+    SDL_GL_MakeCurrent((SDL_Window*)windowHandle, (SDL_GLContext)deviceContext);
+    
+#endif
     
     //
     // Log hardware details
     
+    // Initiate glew after setting the render target
+    GLenum passed = glewInit();
+    
 #ifdef  LOG_RENDER_DETAILS
+    std::string gcVendor, gcRenderer, gcExtensions, gcVersion, Line;
     
     const char* gcVendorConst     = (const char*)glGetString(GL_VENDOR);
     const char* gcRendererConst   = (const char*)glGetString(GL_RENDERER);
@@ -423,8 +554,8 @@ GLenum PlatformLayer::SetRenderTarget(void) {
     Log.WriteLn();
     
     Line = " Colors"; Log.Write(Line);
-    Line = DetailStringHead + "Color" + DetailStringEqu + Int.ToString(pfd.cColorBits) + " bit"; Log.Write(Line);
-    Line = DetailStringHead + "Depth" + DetailStringEqu + Int.ToString(pfd.cDepthBits) + " bit"; Log.Write(Line);
+    Line = DetailStringHead + "Color" + DetailStringEqu + Int.ToString(colorBits) + " bit"; Log.Write(Line);
+    Line = DetailStringHead + "Depth" + DetailStringEqu + Int.ToString(depthBits) + " bit"; Log.Write(Line);
     Log.WriteLn();
     Log.WriteLn();
     
