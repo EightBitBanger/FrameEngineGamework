@@ -154,7 +154,7 @@ void Mesh::AddSphere(float x, float y, float z, float radius, unsigned int rings
     
     float const R = 1.0f / (float)(rings - 1);
     float const S = 1.0f / (float)(sectors - 1);
-    int r, s;
+    unsigned int r, s;
     
     for (r = 0; r < rings; r++) {
         

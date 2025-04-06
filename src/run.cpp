@@ -7,7 +7,7 @@
 
 
 void ApplyGene(Actor* targetActor) {
-    
+    /*
     unsigned int chance = Random.Range(0, 100);
     
     targetActor->physical.SetAge( 0 );
@@ -21,10 +21,11 @@ void ApplyGene(Actor* targetActor) {
     AI.genomes.presets.Bovine(targetActor);
     
     return;
+    */
     
     targetActor->physical.SetAge( 1000 );
     targetActor->physical.SetAdultAge( 1000 );
-    targetActor->physical.SetSeniorAge( 8000 );
+    targetActor->physical.SetSeniorAge( 3000 );
     
     targetActor->ReexpressPhenotype();
     
@@ -447,17 +448,12 @@ void Run() {
         RigidBody* bodyPtr = Engine.cameraController->GetComponent<RigidBody>();
         
         rp3d::Transform transform = bodyPtr->getTransform();
-        
         rp3d::Vector3 position = transform.getPosition();
         
         if (position.y < hit.point.y) {
-            
             position.y = hit.point.y;
-            
             transform.setPosition( position );
-            
             bodyPtr->setTransform( transform );
-            
         }
         
     }
@@ -465,6 +461,8 @@ void Run() {
     
     
     // DEBUG - Show data on the aimed actor
+    
+    /*
     glm::vec3 fromHigh = from;
     
     if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
@@ -497,7 +495,7 @@ void Run() {
             Engine.WriteDialog(i + 2, "");
         
     }
-    
+    */
     
     // Spawn an actor with the picked genome
     
@@ -676,6 +674,7 @@ void Run() {
         
     }
     
+    /*
     if (Input.CheckKeyPressed(VK_F3)) {
         
         isDebugReportActive = !isDebugReportActive;
@@ -686,6 +685,7 @@ void Run() {
         }
         
     }
+    */
     
     if (Input.CheckKeyPressed(VK_F11)) {
         

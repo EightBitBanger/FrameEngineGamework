@@ -15,7 +15,132 @@ Button* clearWorldButton;
 Button* quitButton;
 
 
+#include <vector>
+#include <cmath>
+#include <cstdint>
+#include <vector>
+#include <cmath>
+#include <cstdint>
+#include <random>
 
+// Simple smooth interpolated noise (not Perlin, but deterministic)
+float ValueNoise1D(int x, uint32_t seed) {
+    std::mt19937 rng(seed + x);
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    return dist(rng);
+}
+
+float SmoothNoise(float x, uint32_t seed) {
+    int xi = static_cast<int>(x);
+    float frac = x - xi;
+    
+    float a = ValueNoise1D(xi, seed);
+    float b = ValueNoise1D(xi + 1, seed);
+    
+    // Smooth step interpolation
+    float t = frac * frac * (3.0f - 2.0f * frac);
+    return a * (1.0f - t) + b * t;
+}
+
+std::vector<int16_t> GenerateProceduralAudio(uint32_t seed, double durationSeconds, double baseFreq, double sweepRange, float noiseScale, int sampleRate = 44100, int16_t volume = 24000) {
+    int totalSamples = static_cast<int>(durationSeconds * sampleRate);
+    std::vector<int16_t> samples(totalSamples);
+    
+    // Parameters for noise sampling
+    float zOffset = seed * 0.137f;  // Seed variation via z-axis
+    
+    for (int i = 0; i < totalSamples; ++i) {
+        double t = static_cast<double>(i) / sampleRate;
+        
+        // Use Perlin noise to modulate frequency
+        float x = t * noiseScale;
+        float noiseVal = Random.Perlin(x, 0.0f, zOffset, seed);
+        noiseVal = (noiseVal + 1.0f) * 0.5f; // remap to range [0 - 1]
+        
+        double freq = baseFreq + sweepRange * noiseVal;
+        double angle = 2.0f * glm::pi<float>() * freq * t;
+        
+        samples[i] = static_cast<int16_t>(volume * sin(angle));
+    }
+    
+    return samples;
+}
+
+
+struct AudioGene {
+    float basePitch;       // in Hz
+    float pitchVariation;  // range of modulation
+    float noiseSpeed;      // how fast it warbles
+    float growliness;      // affects waveform shape or FM modulation
+    float intensity;       // growl intensity
+    float breathiness;     // adds filtered noise
+    float duration;        // length of call
+    float seed;            // noise seed
+};
+
+std::vector<int16_t> GenerateCreatureVoice(const AudioGene& gene, int sampleRate = 44100, int16_t volume = 24000) {
+    std::vector<int16_t> samples = GenerateProceduralAudio(gene.seed, gene.duration, gene.basePitch, gene.pitchVariation, gene.noiseSpeed, sampleRate, volume);
+    
+    float growlRateHz = gene.growliness;
+    float intensity = gene.intensity;
+    
+    for (size_t i = 0; i < samples.size(); ++i) {
+        
+        double t = static_cast<double>(i) / sampleRate;
+        
+        float mod = (1.0f - intensity) + intensity * glm::sin(2.0f * glm::pi<float>() * growlRateHz * t);
+        
+        samples[i] = static_cast<int16_t>(samples[i] * mod);
+    }
+    
+    
+    /*
+    int totalSamples = static_cast<int>(gene.duration * sampleRate);
+    for (int i = 0; i < totalSamples; ++i) {
+        double t = static_cast<double>(i) / sampleRate;
+        
+        float noise = Random.Perlin(t * noiseScale, 0.0f, z, gene.seed);
+        float pitchMod = (noise + 1.0f) * 0.5f * gene.pitchVariation;
+        
+        double freq = gene.basePitch + pitchMod;
+        double angle = 2.0 * 3.14159f * freq * t;
+        
+        // Optional: add growliness or breathiness
+        double wave = sin(angle);
+        if (gene.growliness > 0.0f)
+            wave *= sin(angle * gene.growliness); // crude FM modulation
+        if (gene.breathiness > 0.0f)
+            wave += gene.breathiness * ((rand() % 65536) / 32768.0 - 1.0);
+        
+        // Clamp
+        //if (wave > 1.0) wave = 1.0;
+        //if (wave < -1.0) wave = -1.0;
+        
+        samples[i] = static_cast<int16_t>(wave);
+    }
+    */
+    
+    return samples;
+}
+
+
+
+/// Generate a section of sine wave sweeping from start to end.
+std::vector<int16_t> GenerateSweepingSineWave(double startFreq, double endFreq, double durationSeconds, int sampleRate = 44100, int16_t amplitude = 24000) {
+    int totalSamples = static_cast<int>(durationSeconds * sampleRate);
+    std::vector<int16_t> samples(totalSamples);
+    
+    double freqDelta = (endFreq - startFreq) / totalSamples;
+    
+    for (int i = 0; i < totalSamples; i++) {
+        double t = static_cast<double>(i) / sampleRate;
+        double freq = startFreq + freqDelta * i;
+        double angle = 2.0d * glm::pi<double>() * freq * t;
+        samples[i] = static_cast<int16_t>(amplitude * glm::sin(angle));
+    }
+    
+    return samples;
+}
 
 
 
@@ -25,42 +150,6 @@ Button* quitButton;
 #define VOLUME 28000
 
 void Start() {
-    
-    /*
-    
-    SDL_AudioSpec spec;
-    spec.freq = SAMPLE_RATE;
-    spec.format = SDL_AUDIO_S16;
-    spec.channels = 1;
-    
-    // Open an audio stream without a callback
-    SDL_AudioStream* stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
-    
-    // Generate a full sine wave buffer
-    int total_samples = SAMPLE_RATE * DURATION_SECONDS;
-    std::vector<int16_t> buffer(total_samples);
-    for (int i = 0; i < total_samples; ++i) {
-        double t = (double)i / SAMPLE_RATE;
-        buffer[i] = (int16_t)(VOLUME * sin(2.0 * 3.14159f * TONE_HZ * t));
-    }
-    
-    // Send buffer to stream
-    SDL_PutAudioStreamData(stream, buffer.data(), total_samples * sizeof(int16_t));
-    SDL_FlushAudioStream(stream);  // Let SDL know we’re done feeding data
-    
-    // Start playback
-    SDL_ResumeAudioStreamDevice(stream);
-    
-    // Wait for the audio to finish playing
-    SDL_Delay(DURATION_SECONDS * 1000 + 250);  // small buffer to ensure playback finishes
-    
-    // Cleanup
-    SDL_DestroyAudioStream(stream);
-    */
-    
-    
-    
-    
     
     // Load console functions
     Engine.ConsoleRegisterCommand("summon",  FuncSummon);
@@ -112,6 +201,7 @@ void Start() {
     
     //
     // Audio test sample
+    /*
     Sound* soundA = Audio.CreateSound();
     AudioSample* sampleA = Audio.CreateAudioSample();
     
@@ -119,13 +209,44 @@ void Start() {
     
     //Samples.RenderBlankSpace(sampleA, 0.4f);
     //Samples.RenderSweepingSineWave(sampleA, 120, 10, 2.0f);
-    Samples.RenderSquareWave(sampleA, 400, 0.24);
+    //for (unsigned int i=0; i < 10; i++) 
+    //    Samples.RenderSquareWave(sampleA, 400 + (i * 10), 0.024);
     
-    soundA->LoadSample(sampleA);
+    sampleA->sampleBuffer = GenerateSweepingSineWave(400, 500, 0.5f);
+    
+    //sampleA->sampleBuffer = GenerateProceduralChirp(uint32_t seed, double durationSeconds, int sampleRate = 48000, int16_t amplitude = 24000);
+    
+    AudioGene voice;
+    voice.basePitch       = 200;
+    //voice.breathiness     = 0.1f;
+    voice.duration        = 0.6f;
+    voice.growliness      = 80.0f;    // Modulation rate
+    voice.intensity       = 0.9f;     // Modulation multiplier
+    voice.noiseSpeed      = 1.3f;
+    voice.pitchVariation  = 80;
+    voice.seed            = 68484;
+    
+    //sampleA->sampleBuffer = GenerateCreatureVoice(voice);
+    
+    */
+    
+    
+    /*
+    uint32_t seed    = 777;
+    double duration  = 1.0d;
+    double base      = 200;
+    double sweep     = 100;
+    float mul = 8.0f;
+    
+    sampleA->sampleBuffer = GenerateProceduralAudio(seed, duration, base, sweep, mul, 48000, 24000);
+    */
+    
+    
+    //soundA->LoadSample(sampleA);
     
     //soundA->SetVolume(0.1f);
     
-    soundA->Play();
+    //soundA->Play();
     //while (soundA->IsSamplePlaying());
     
     
