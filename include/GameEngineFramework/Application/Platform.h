@@ -61,7 +61,7 @@ public:
     void DestroyWindowHandle(void);
     
     /// Set the position of the window handle.
-    void SetWindowPosition(Viewport windowSize);
+    void SetWindowPosition(Viewport viewport);
     
     /// Set the position of the window handle to the screen center.
     void SetWindowCenter(void);
