@@ -204,9 +204,6 @@ public:
             T& poolPtr = *poolPair.first;
             std::vector<bool>& boolPtr = poolPair.second;
             
-            // Check if the pool allocated
-            if (&poolPtr == nullptr) return nullptr;
-            
 #ifdef ENABLE_CONSOLE_DEBUG__
     #ifdef ENABLE_DEBUG_ON_CONSTRUCT__
             
@@ -286,7 +283,7 @@ public:
     }
     
     /** Returns the number of active objects.*/
-    int Size(void) {
+    unsigned int Size(void) {
         return m_activeList.size();
     }
     

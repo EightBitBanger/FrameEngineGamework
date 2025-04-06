@@ -12,8 +12,6 @@
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Types/Types.h>
 
-#include <SDL3/SDL.h>
-
 extern Logger Log;
 extern IntType Int;
 
@@ -45,7 +43,6 @@ public:
     int windowBottom;
     
     Viewport windowArea;
-    Viewport clientArea;
     
     /// Game paused state.
     bool isPaused;
@@ -58,7 +55,7 @@ public:
     void Pause(void);
     
     /// Create the window and return its handle as a void pointer.
-    void* CreateWindowHandle(std::string className, std::string windowName, void* parentHandle, void* hInstance);
+    void* CreateWindowHandle(std::string className, std::string windowName);
     
     /// Destroy the window handle.
     void DestroyWindowHandle(void);
@@ -71,6 +68,9 @@ public:
     
     /// Set and scale the position of the window handle to the screen center.
     void SetWindowCenterScale(float width, float height);
+    
+    /// Get the size of the current display.
+    glm::vec2 GetDisplaySize(void);
     
     /// Get the area of the window in pixels.
     Viewport GetWindowArea(void);

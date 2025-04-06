@@ -19,7 +19,7 @@
 
 
 // Starting window dimensions relative to display size
-#define  WINDOW_WIDTH       0.7
+#define  WINDOW_WIDTH       0.75
 #define  WINDOW_HEIGHT      0.8
 
 // Minimum window size (In pixels)

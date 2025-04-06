@@ -49,9 +49,6 @@ public:
     /// Check if the audio device was initialized.
     bool CheckIsAudioEndpointActive(void);
     
-    /// Log errors to the log file.
-    std::string LogErrors(void);
-    
 private:
     
     bool mIsDeviceActive;

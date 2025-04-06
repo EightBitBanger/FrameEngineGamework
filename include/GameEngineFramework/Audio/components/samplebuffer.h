@@ -14,6 +14,8 @@ class ENGINE_API AudioSample {
     
 public:
     
+    AudioSample();
+    
     unsigned int sample_rate;
     
     std::vector<int16_t> sampleBuffer;
