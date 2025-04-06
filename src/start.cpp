@@ -258,7 +258,10 @@ void Start() {
     //
     
     // The position of the player in the world.
-    Vector3 playerPosition = Vector3(0, 0, 0);
+    Vector3 playerPosition;
+    playerPosition.x = Random.Range(-10, 10);
+    playerPosition.y = Random.Range(-10, 10);
+    playerPosition.z = Random.Range(-10, 10);
     
     // Create a new camera controller object
     Engine.cameraController = Engine.CreateCameraController(playerPosition);

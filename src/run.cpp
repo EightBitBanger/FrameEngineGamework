@@ -498,7 +498,7 @@ void Run() {
     */
     
     // Spawn an actor with the picked genome
-    
+    /*
     if (Input.CheckMouseLeftPressed()) {
         
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
@@ -516,6 +516,9 @@ void Run() {
             
             //AI.genomes.presets.Horse(actor);
             //actor->SetAge( 700 + Random.Range(0, 500) );
+            
+            */
+            
             
             
             /*
@@ -552,11 +555,11 @@ void Run() {
                 
             }
             */
+            /*
             
         }
         
     }
-    
     
     
     // Pick an actors genome
@@ -602,6 +605,7 @@ void Run() {
         }
         
     }
+    */
     
     
     
@@ -659,6 +663,7 @@ void Run() {
     // Profiling
     //
     
+    /*
     if (Input.CheckKeyPressed(VK_F4)) {
         
         if (Engine.CheckIsProfilerActive()) {
@@ -673,7 +678,7 @@ void Run() {
         }
         
     }
-    
+    */
     /*
     if (Input.CheckKeyPressed(VK_F3)) {
         
