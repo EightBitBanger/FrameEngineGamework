@@ -94,29 +94,7 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     displayWidth  = dim.x;
     displayHeight = dim.y;
     
-    RECT windowDim;
-    GetWindowRect((HWND)windowHandle, &windowDim);
-    
-    RECT clientRect;
-    GetClientRect((HWND)windowHandle, &clientRect);
-    
-    // Calculate the window's width and height
-    float windowWidth = windowDim.right - windowDim.left;
-    float windowHeight = windowDim.bottom - windowDim.top;
-    
-    // Calculate the client area width and height
-    float clientWidth = clientRect.right - clientRect.left;
-    float clientHeight = clientRect.bottom - clientRect.top;
-    
-    // Calculate the margins (borders)
-    float horizontalMargin = (windowWidth - clientWidth) / 2.0f;
-    float verticalMargin = (windowHeight - clientHeight) / 2.0f;
-    
-    // The starting position of the client area relative to the window
-    windowArea.x = windowDim.left + horizontalMargin + 2.0f;
-    windowArea.y = windowDim.top + verticalMargin - 2.0f;
-    windowArea.w = clientRect.right - clientRect.left;
-    windowArea.h = windowDim.bottom - windowDim.top;
+    SetWindowCenterScale(WINDOW_WIDTH, WINDOW_HEIGHT);
     
     mIsWindowRunning = true;
     return (void*)windowHandle;
@@ -135,14 +113,29 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     
+    // Pixel layout
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);         // if you want RGBA
+    
+    // Buffering
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     
+    // Optional: Set multisampling (anti-aliasing)
+    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+    
     // Create the main window
-    windowHandle = SDL_CreateWindow("Render window", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    windowHandle = SDL_CreateWindow("Render window", 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
     
     assert(windowHandle != nullptr);
+    
+    glm::vec2 dim = GetDisplaySize();
+    displayWidth  = dim.x;
+    displayHeight = dim.y;
     
     SDL_SetWindowResizable((SDL_Window*)windowHandle, 1);
     SetWindowCenterScale(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -157,6 +150,8 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     this->windowArea.y = this->windowTop;
     this->windowArea.w = this->windowRight;
     this->windowArea.h = this->windowBottom;
+    
+    SDL_ShowWindow((SDL_Window*)windowHandle);
     
     mIsWindowRunning = true;
     return (void*)windowHandle;
@@ -181,133 +176,50 @@ void PlatformLayer::DestroyWindowHandle(void) {
 }
 
 void PlatformLayer::SetWindowCenter(void) {
-#ifdef PLATFORM_WINDOWS
-    glm::vec2 dim = GetDisplaySize();
-    displayWidth  = dim.x;
-    displayHeight = dim.y;
     
-    RECT windowDim;
-    GetWindowRect((HWND)windowHandle, &windowDim);
+    Viewport area;
     
-    Viewport WindowSz;
-    WindowSz.w = windowDim.right  - windowDim.left;
-    WindowSz.h = windowDim.bottom - windowDim.top;
+    area.x = 0;
+    area.y = 0;
+    area.w = 400;
+    area.h = 400;
     
-    WindowSz.x = (displayWidth  / 2) - (WindowSz.w / 2);
-    WindowSz.y = (displayHeight / 2) - (WindowSz.h / 2);
+    SetWindowPosition(area);
     
-    SetWindowPos((HWND)windowHandle, NULL, WindowSz.x, WindowSz.y, WindowSz.w, WindowSz.h, SWP_SHOWWINDOW);
-    
-    
-    RECT clientRect;
-    GetClientRect((HWND)windowHandle, &clientRect);
-    
-    // Calculate the window's width and height
-    float windowWidth = windowDim.right - windowDim.left;
-    float windowHeight = windowDim.bottom - windowDim.top;
-    
-    // Calculate the client area width and height
-    float clientWidth = clientRect.right - clientRect.left;
-    float clientHeight = clientRect.bottom - clientRect.top;
-    
-    // Calculate the margins (borders)
-    float horizontalMargin = (windowWidth - clientWidth) / 2.0f;
-    float verticalMargin = (windowHeight - clientHeight) / 2.0f;
-    
-    // The starting position of the client area relative to the window
-    windowArea.x = windowDim.left + horizontalMargin + 2.0f;
-    windowArea.y = windowDim.top + verticalMargin - 2.0f;
-    windowArea.w = clientRect.right - clientRect.left;
-    windowArea.h = windowDim.bottom - windowDim.top;
-#endif
-#ifdef PLATFORM_LINUX
-    int screenW, screenH;
-    SDL_DisplayID display = SDL_GetDisplayForWindow((SDL_Window*)windowHandle);
-    SDL_Rect usableBounds;
-    SDL_GetDisplayUsableBounds(display, &usableBounds);
-    
-    int winW, winH;
-    SDL_GetWindowSize((SDL_Window*)windowHandle, &winW, &winH);
-    
-    int x = usableBounds.x + (usableBounds.w - winW) / 2;
-    int y = usableBounds.y + (usableBounds.h - winH) / 2;
-    
-    SDL_SetWindowPosition((SDL_Window*)windowHandle, x, y);
-#endif
     return;
 }
 
 void PlatformLayer::SetWindowCenterScale(float width, float height) {
-#ifdef PLATFORM_WINDOWS
-    Viewport newWindowSz;
-    newWindowSz.y = 0;
-    newWindowSz.x = 0;
-    newWindowSz.w = displayWidth  * width;
-    newWindowSz.h = displayHeight * height;
     
-    windowArea.w = newWindowSz.w;
-    windowArea.h = newWindowSz.h;
+    Viewport area;
     
-    SetWindowPosition(newWindowSz);
-    SetWindowCenter();
+    area.w = displayWidth * width;
+    area.h = displayHeight * height;
+    area.x = displayWidth / 2 - (area.w / 2);
+    area.y = displayHeight / 2 - (area.h / 2);
     
-    RECT windowDim;
-    GetWindowRect((HWND)windowHandle, &windowDim);
+    SetWindowPosition(area);
     
-    RECT clientRect;
-    GetClientRect((HWND)windowHandle, &clientRect);
-    
-    // Calculate the window's width and height
-    float windowWidth = windowDim.right - windowDim.left;
-    float windowHeight = windowDim.bottom - windowDim.top;
-    
-    // Calculate the client area width and height
-    float clientWidth = clientRect.right - clientRect.left;
-    float clientHeight = clientRect.bottom - clientRect.top;
-    
-    // Calculate the margins (borders)
-    float horizontalMargin = (windowWidth - clientWidth) / 2.0f;
-    float verticalMargin = (windowHeight - clientHeight) / 2.0f;
-    
-    // The starting position of the client area relative to the window
-    windowArea.x = windowDim.left + horizontalMargin + 2.0f;
-    windowArea.y = windowDim.top + verticalMargin - 2.0f;
-    windowArea.w = clientRect.right - clientRect.left;
-    windowArea.h = windowDim.bottom - windowDim.top;
-#endif
-#ifdef PLATFORM_LINUX
-    
-    int windowWidth = displayWidth * width;
-    int windowHeight = displayHeight * height;
-    
-    SDL_SetWindowSize((SDL_Window*)windowHandle, windowWidth, windowHeight);
-    
-    int windowX = (this->displayWidth / 2) - (windowWidth / 2);
-    int windowY = (this->displayHeight / 2) - (windowHeight / 2);
-    
-    SDL_SetWindowPosition((SDL_Window*)windowHandle, windowX, windowY);
-#endif
     return;
 }
 
-void PlatformLayer::SetWindowPosition(Viewport windowSize) {
+void PlatformLayer::SetWindowPosition(Viewport viewport) {
 #ifdef PLATFORM_WINDOWS
-    SetWindowPos((HWND)windowHandle, NULL, windowSize.x, windowSize.y, windowSize.w, windowSize.h, SWP_SHOWWINDOW);
-    
-    windowArea.w = windowSize.w;
-    windowArea.h = windowSize.h;
+    SetWindowPos((HWND)windowHandle, NULL, viewport.x, viewport.y, viewport.w, viewport.h, SWP_SHOWWINDOW);
 #endif
-    
 #ifdef PLATFORM_LINUX
-    SDL_SetWindowPosition((SDL_Window*)windowHandle, windowSize.x, windowSize.y);
+    SDL_SetWindowPosition((SDL_Window*)windowHandle, viewport.x, viewport.y);
+    SDL_SetWindowSize((SDL_Window*)windowHandle, viewport.w, viewport.h);
 #endif
-    
+    windowArea.x = viewport.x;
+    windowArea.y = viewport.y;
+    windowArea.w = viewport.w;
+    windowArea.h = viewport.h;
     return;
 }
 
 Viewport PlatformLayer::GetWindowArea(void) {
     Viewport area;
-    
 #ifdef PLATFORM_WINDOWS
     RECT windowSz;
     GetWindowRect((HWND)windowHandle, &windowSz);
@@ -317,12 +229,10 @@ Viewport PlatformLayer::GetWindowArea(void) {
     area.w = (windowSz.right  - windowSz.left);
     area.h = (windowSz.bottom - windowSz.top);
 #endif
-    
 #ifdef PLATFORM_LINUX
     SDL_GetWindowPosition((SDL_Window*)windowHandle, &area.x, &area.y);
     SDL_GetWindowSize((SDL_Window*)windowHandle, &area.w, &area.h);
 #endif
-    
     return area;
 }
 
