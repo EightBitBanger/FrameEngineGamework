@@ -54,26 +54,26 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             break;
         }
         
-        case WM_SIZE: {// Window resize
-            
-            RECT WindowRect;
-            GetWindowRect(wHnd, &WindowRect);
+        case WM_SIZE: {
+            Viewport viewport;
+            viewport = Platform.GetWindowArea();
+            int x = viewport.x;
+            int y = viewport.y;
+            int w = viewport.w;
+            int h = viewport.h;
             
             // Set window view port
-            Renderer.viewport.x = 0;
-            Renderer.viewport.y = 0;
-            Renderer.viewport.w = WindowRect.right - WindowRect.left;
-            Renderer.viewport.h = WindowRect.bottom - WindowRect.top;
+            Renderer.viewport.x = x;
+            Renderer.viewport.y = y;
+            Renderer.viewport.w = w;
+            Renderer.viewport.h = h;
             
-            Platform.windowLeft   = Renderer.viewport.x;
-            Platform.windowTop    = Renderer.viewport.y;
-            Platform.windowRight  = Renderer.viewport.w;
-            Platform.windowBottom = Renderer.viewport.h;
+            Platform.windowArea.x = Renderer.viewport.x;
+            Platform.windowArea.y = Renderer.viewport.y;
+            Platform.windowArea.w = Renderer.viewport.w;
+            Platform.windowArea.h = Renderer.viewport.h;
             
-            Platform.windowArea.x = Platform.windowLeft;
-            Platform.windowArea.y = Platform.windowTop;
-            Platform.windowArea.w = Platform.windowRight;
-            Platform.windowArea.h = Platform.windowBottom;
+            Renderer.SetViewport(0, 0, Platform.windowArea.w, Platform.windowArea.h);
             
             // Update scene cameras
             for (unsigned int i=0; i < Renderer.GetRenderQueueSize(); i++) {
@@ -86,8 +86,8 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
                     continue;
                 
                 // Update view port
-                int windowWidth  = WindowRect.right - WindowRect.left;
-                int windowHeight = WindowRect.bottom - WindowRect.top;
+                int windowWidth  = Renderer.viewport.w;
+                int windowHeight = Renderer.viewport.h;
                 
                 Renderer[i]->camera->viewport.x = 0;
                 Renderer[i]->camera->viewport.y = 0;

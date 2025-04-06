@@ -5,6 +5,7 @@
  #include "../../tests/framework.h"
 #endif
 
+
 int main(int argc, char* argv[]) {
     
 #ifdef RUN_UNIT_TESTS
@@ -67,7 +68,6 @@ int main(int argc, char* argv[]) {
     
     Start();
     
-    
     // Initiate timers
     Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     Time.Update();
@@ -119,13 +119,57 @@ int main(int argc, char* argv[]) {
                 
                 case SDLK_ESCAPE: VirtualKey = VK_ESCAPE; break;
                 
-                case SDLK_LCTRL: VirtualKey = VK_LCONTROL; break;
-                case SDLK_RCTRL: VirtualKey = VK_RCONTROL; break;
+                case SDLK_LCTRL: VirtualKey = VK_CONTROL; break;
+                case SDLK_RCTRL: VirtualKey = VK_CONTROL; break;
                 
-                case SDLK_LSHIFT: VirtualKey = VK_LSHIFT; break;
-                case SDLK_RSHIFT: VirtualKey = VK_RSHIFT; break;
+                case SDLK_LSHIFT: VirtualKey = VK_SHIFT; break;
+                case SDLK_RSHIFT: VirtualKey = VK_SHIFT; break;
+                
+                case SDLK_SPACE: VirtualKey = VK_SPACE; break;
+                
+                case SDLK_A: VirtualKey = VK_A; break;
+                case SDLK_B: VirtualKey = VK_B; break;
+                case SDLK_C: VirtualKey = VK_C; break;
+                case SDLK_D: VirtualKey = VK_D; break;
+                case SDLK_E: VirtualKey = VK_E; break;
+                case SDLK_F: VirtualKey = VK_F; break;
+                case SDLK_G: VirtualKey = VK_G; break;
+                case SDLK_H: VirtualKey = VK_H; break;
+                case SDLK_I: VirtualKey = VK_I; break;
+                case SDLK_J: VirtualKey = VK_J; break;
+                case SDLK_K: VirtualKey = VK_K; break;
+                case SDLK_L: VirtualKey = VK_L; break;
+                case SDLK_M: VirtualKey = VK_M; break;
+                case SDLK_N: VirtualKey = VK_N; break;
+                case SDLK_O: VirtualKey = VK_O; break;
+                case SDLK_P: VirtualKey = VK_P; break;
+                case SDLK_Q: VirtualKey = VK_Q; break;
+                case SDLK_R: VirtualKey = VK_R; break;
+                case SDLK_S: VirtualKey = VK_S; break;
+                case SDLK_T: VirtualKey = VK_T; break;
+                case SDLK_U: VirtualKey = VK_U; break;
+                case SDLK_V: VirtualKey = VK_V; break;
+                case SDLK_W: VirtualKey = VK_W; break;
+                case SDLK_X: VirtualKey = VK_X; break;
+                case SDLK_Y: VirtualKey = VK_Y; break;
+                case SDLK_Z: VirtualKey = VK_Z; break;
+                
+                case SDLK_0: VirtualKey = VK_0; break;
+                case SDLK_1: VirtualKey = VK_1; break;
+                case SDLK_2: VirtualKey = VK_2; break;
+                case SDLK_3: VirtualKey = VK_3; break;
+                case SDLK_4: VirtualKey = VK_4; break;
+                case SDLK_5: VirtualKey = VK_5; break;
+                case SDLK_6: VirtualKey = VK_6; break;
+                case SDLK_7: VirtualKey = VK_7; break;
+                case SDLK_8: VirtualKey = VK_8; break;
+                case SDLK_9: VirtualKey = VK_9; break;
                 
             }
+            
+            std::string dialog = " ";
+            dialog[0] = key;
+            Engine.WriteDialog(2, dialog);
             
             switch (event.type) {
                 
@@ -134,19 +178,19 @@ int main(int argc, char* argv[]) {
                     break;
                 
                 case SDL_EVENT_KEY_DOWN: 
-                    if (VirtualKey != -1) 
+                    if (VirtualKey != -1) {
                         Input.SetKeyPressed(VirtualKey); // VK virtual keys
-                    else 
+                        Input.lastKeyPressed = VirtualKey; // Text characters
+                    } else 
                         Input.lastKeyPressed = key; // Text characters
-                    
                     break;
                 
                 case SDL_EVENT_KEY_UP: 
-                    if (VirtualKey != -1) 
+                    if (VirtualKey != -1) {
                         Input.SetKeyReleased(VirtualKey); // VK virtual keys
-                    else
                         Input.lastKeyReleased = key; // Text characters
-                    
+                    } else 
+                        Input.lastKeyReleased = key; // Text characters
                     break;
                 
                 case SDL_EVENT_MOUSE_BUTTON_DOWN: 
@@ -172,10 +216,12 @@ int main(int argc, char* argv[]) {
                     break;
                 
                 case SDL_EVENT_WINDOW_RESIZED: 
-                    
-                    int x, y, w, h;
-                    SDL_GetWindowPosition((SDL_Window*)Platform.windowHandle, &x, &y);
-                    SDL_GetWindowSize((SDL_Window*)Platform.windowHandle, &w, &h);
+                    Viewport viewport;
+                    viewport = Platform.GetWindowArea();
+                    int x = viewport.x;
+                    int y = viewport.y;
+                    int w = viewport.w;
+                    int h = viewport.h;
                     
                     // Set window view port
                     Renderer.viewport.x = x;
@@ -183,15 +229,10 @@ int main(int argc, char* argv[]) {
                     Renderer.viewport.w = w;
                     Renderer.viewport.h = h;
                     
-                    Platform.windowLeft   = Renderer.viewport.x;
-                    Platform.windowTop    = Renderer.viewport.y;
-                    Platform.windowRight  = Renderer.viewport.w;
-                    Platform.windowBottom = Renderer.viewport.h;
-                    
-                    Platform.windowArea.x = Platform.windowLeft;
-                    Platform.windowArea.y = Platform.windowTop;
-                    Platform.windowArea.w = Platform.windowRight;
-                    Platform.windowArea.h = Platform.windowBottom;
+                    Platform.windowArea.x = Renderer.viewport.x;
+                    Platform.windowArea.y = Renderer.viewport.y;
+                    Platform.windowArea.w = Renderer.viewport.w;
+                    Platform.windowArea.h = Renderer.viewport.h;
                     
                     // Update scene cameras
                     for (unsigned int i=0; i < Renderer.GetRenderQueueSize(); i++) {
@@ -318,17 +359,6 @@ int main(int argc, char* argv[]) {
                 Engine.Update();
                 
                 Network.Update();
-                
-                // Update window area
-                //RECT windowRect;
-                //GetWindowRect(wHndl, &windowRect);
-                Viewport area = Platform.GetWindowArea();
-                Platform.windowLeft   = area.x;
-                Platform.windowTop    = area.y;
-                Platform.windowRight  = area.w - area.x;
-                Platform.windowBottom = area.h - area.y;
-                
-                Renderer.SetViewport(0, 0, area.w, area.h);
                 
                 // --- Profiling ---
                 if (Engine.CheckIsProfilerActive()) 

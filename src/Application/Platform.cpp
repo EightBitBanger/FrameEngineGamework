@@ -31,10 +31,7 @@ PlatformLayer::PlatformLayer() :
     displayWidth(1024),
     displayHeight(800),
     
-    windowLeft(0),
-    windowTop(0),
-    windowRight(0),
-    windowBottom(0),
+    windowArea({0, 0, 800, 600}),
     
     isPaused(false),
     isActive(true),
@@ -51,6 +48,13 @@ void PlatformLayer::Pause(void) {
 }
 
 void* PlatformLayer::CreateWindowHandle(std::string className, std::string windowName) {
+    
+    // Default window size and position
+    windowArea.x = 0;
+    windowArea.y = 0;
+    windowArea.w = 800;
+    windowArea.h = 600;
+    
 #ifdef PLATFORM_WINDOWS
     isPaused = false;
     isActive = true;
@@ -75,7 +79,7 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     
     windowHandle = CreateWindowEx(0, className.c_str(), windowName.c_str(), 
                                   WS_OVERLAPPEDWINDOW, 
-                                  CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 
+                                  windowArea.x, windowArea.y, windowArea.w, windowArea.h, 
                                   NULL, NULL, 
                                   NULL, NULL);
     
@@ -101,11 +105,6 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
 #endif
     
 #ifdef PLATFORM_LINUX
-    windowArea.x = 0;
-    windowArea.y = 0;
-    windowArea.w = 800;
-    windowArea.h = 600;
-    
     SDL_SetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION, "1");
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl"); // Optional
     
@@ -140,17 +139,6 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     SDL_SetWindowResizable((SDL_Window*)windowHandle, 1);
     SetWindowCenterScale(WINDOW_WIDTH, WINDOW_HEIGHT);
     
-    // Get windows area
-    int x, y, w, h;
-    SDL_GetWindowPosition((SDL_Window*)windowHandle, &x, &y);
-    SDL_GetWindowSize((SDL_Window*)windowHandle, &w, &h);
-    
-    // Set window view port
-    this->windowArea.x = this->windowLeft;
-    this->windowArea.y = this->windowTop;
-    this->windowArea.w = this->windowRight;
-    this->windowArea.h = this->windowBottom;
-    
     SDL_ShowWindow((SDL_Window*)windowHandle);
     
     mIsWindowRunning = true;
@@ -168,6 +156,7 @@ void PlatformLayer::DestroyWindowHandle(void) {
 #endif
     
 #ifdef PLATFORM_LINUX
+    SDL_HideWindow((SDL_Window*)windowHandle);
     SDL_DestroyWindow((SDL_Window*)windowHandle);
     windowHandle = nullptr;
     mIsWindowRunning = false;
@@ -176,21 +165,18 @@ void PlatformLayer::DestroyWindowHandle(void) {
 }
 
 void PlatformLayer::SetWindowCenter(void) {
-    
     Viewport area;
     
-    area.x = 0;
-    area.y = 0;
-    area.w = 400;
-    area.h = 400;
+    area.w = 800;
+    area.h = 600;
+    area.x = displayWidth / 2 - (area.w / 2);
+    area.y = displayHeight / 2 - (area.h / 2);
     
     SetWindowPosition(area);
-    
     return;
 }
 
 void PlatformLayer::SetWindowCenterScale(float width, float height) {
-    
     Viewport area;
     
     area.w = displayWidth * width;
@@ -199,7 +185,6 @@ void PlatformLayer::SetWindowCenterScale(float width, float height) {
     area.y = displayHeight / 2 - (area.h / 2);
     
     SetWindowPosition(area);
-    
     return;
 }
 
@@ -211,10 +196,6 @@ void PlatformLayer::SetWindowPosition(Viewport viewport) {
     SDL_SetWindowPosition((SDL_Window*)windowHandle, viewport.x, viewport.y);
     SDL_SetWindowSize((SDL_Window*)windowHandle, viewport.w, viewport.h);
 #endif
-    windowArea.x = viewport.x;
-    windowArea.y = viewport.y;
-    windowArea.w = viewport.w;
-    windowArea.h = viewport.h;
     return;
 }
 
