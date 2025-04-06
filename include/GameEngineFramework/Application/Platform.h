@@ -37,11 +37,6 @@ public:
     int displayWidth;
     int displayHeight;
     
-    int windowLeft;
-    int windowTop;
-    int windowRight;
-    int windowBottom;
-    
     Viewport windowArea;
     
     /// Game paused state.
