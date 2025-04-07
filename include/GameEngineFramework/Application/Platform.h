@@ -102,6 +102,8 @@ public:
     /// Event callback for window losing focus.
     void(*EventCallbackLoseFocus)(void);
     
+    /// Internal event loop calling function.
+    void EventLoop(void);
     
 private:
     

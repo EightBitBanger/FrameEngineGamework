@@ -16,10 +16,17 @@
 
 class ENGINE_API Sound {
     
+    friend class AudioSystem;
+    
 public:
     
+    /// Is this sound currently playing.
+    bool isPlaying;
+    
+    /// Current point in the audio playback.
+    unsigned int playbackCursor;
+    
     Sound();
-    ~Sound();
     
     void Play(void);
     void Stop(void);
@@ -30,22 +37,12 @@ public:
     /// Set the sample pitch.
     void SetPitch(float pitch);
     
-    /// Check if the sample is currently playing.
-    bool IsSamplePlaying(void);
-    
-    /// Load an audio sample for playback.
-    bool LoadSample(AudioSample* samplePtr);
-    
+    /// Sample buffer of audio
+    AudioSample* sample;
     
 private:
     
-    // Sample buffer
-    AudioSample* mSample;
-    
-    // Audio output stream
-    SDL_AudioStream* mStream;
-    
-    bool mIsPlaying = false;
+    std::mutex mux;
     
 };
 

@@ -24,10 +24,11 @@ class ENGINE_API AudioSystem {
     
 public:
     
+    /// World listening position in 3D space.
     glm::vec3 listenerPosition;
     
     AudioSystem() : 
-        mIsDeviceActive(false)
+        mStream(nullptr)
     {
     }
     
@@ -43,15 +44,26 @@ public:
     /// Destroy an old audio sample object.
     bool DestroyAudioSample(AudioSample* samplePtr);
     
+    /// Sends in a sound to be played by the mixer.
+    bool Play(Sound* soundPtr);
+    
+    
     void Initiate(void);
     void Shutdown(void);
     
     /// Check if the audio device was initialized.
     bool CheckIsAudioEndpointActive(void);
     
+    std::mutex mux;
+    
+    SDL_AudioStream* mStream;
+    
+    void MixActiveSounds(std::vector<int32_t>& buffer);
+    
 private:
     
-    bool mIsDeviceActive;
+    // List of currently playing sounds
+    std::vector<Sound*> mActiveSounds;
     
     PoolAllocator<Sound> mSounds;
     PoolAllocator<AudioSample> mSamples;

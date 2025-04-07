@@ -4,8 +4,8 @@
 //
 // Platform
 
-//#define  PLATFORM_WINDOWS
-#define  PLATFORM_LINUX
+#define  PLATFORM_WINDOWS
+//#define  PLATFORM_LINUX
 
 
 
@@ -19,8 +19,8 @@
 
 
 // Starting window dimensions relative to display size
-#define  WINDOW_WIDTH       0.75
-#define  WINDOW_HEIGHT      0.8
+#define  WINDOW_WIDTH       0.7
+#define  WINDOW_HEIGHT      0.75
 
 // Minimum window size (In pixels)
 #define  WINDOW_WIDTH_MIN   300
