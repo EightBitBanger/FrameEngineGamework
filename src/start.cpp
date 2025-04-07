@@ -201,18 +201,19 @@ void Start() {
     
     //
     // Audio test sample
-    /*
+    
     Sound* soundA = Audio.CreateSound();
     AudioSample* sampleA = Audio.CreateAudioSample();
     
     sampleA->sample_rate = 44100;
     
     //Samples.RenderBlankSpace(sampleA, 0.4f);
-    //Samples.RenderSweepingSineWave(sampleA, 120, 10, 2.0f);
+    Samples.RenderSweepingSineWave(sampleA, 120, 10, 2.0f);
+    
     //for (unsigned int i=0; i < 10; i++) 
     //    Samples.RenderSquareWave(sampleA, 400 + (i * 10), 0.024);
     
-    sampleA->sampleBuffer = GenerateSweepingSineWave(400, 500, 0.5f);
+    //sampleA->sampleBuffer = GenerateSweepingSineWave(400, 500, 0.5f);
     
     //sampleA->sampleBuffer = GenerateProceduralChirp(uint32_t seed, double durationSeconds, int sampleRate = 48000, int16_t amplitude = 24000);
     
@@ -228,7 +229,7 @@ void Start() {
     
     //sampleA->sampleBuffer = GenerateCreatureVoice(voice);
     
-    */
+    
     
     
     /*
@@ -242,7 +243,9 @@ void Start() {
     */
     
     
-    //soundA->LoadSample(sampleA);
+    soundA->sample = sampleA;
+    
+    Audio.Play(soundA);
     
     //soundA->SetVolume(0.1f);
     
