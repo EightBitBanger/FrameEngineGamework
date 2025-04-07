@@ -93,6 +93,8 @@ int main(int argc, char* argv[]) {
         
 #ifdef PLATFORM_LINUX
         
+        Platform.EventLoop();
+        
         SDL_Event event;
         
         while (SDL_PollEvent(&event)) {
@@ -118,6 +120,7 @@ int main(int argc, char* argv[]) {
                 case SDLK_F12: VirtualKey = VK_F12; break;
                 
                 case SDLK_ESCAPE: VirtualKey = VK_ESCAPE; break;
+                case SDLK_RETURN: VirtualKey = VK_RETURN; break;
                 
                 case SDLK_LCTRL: VirtualKey = VK_CONTROL; break;
                 case SDLK_RCTRL: VirtualKey = VK_CONTROL; break;
@@ -268,6 +271,13 @@ int main(int argc, char* argv[]) {
             
         }
         
+        // Get mouse position
+        float mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
+        
+        Input.mouseX = (int)mouseX;
+        Input.mouseY = (int)mouseY;
+        
 #endif
         
 #ifdef PLATFORM_WINDOWS
@@ -279,25 +289,16 @@ int main(int argc, char* argv[]) {
             DispatchMessage(&messages);
         }
         
-#endif
-        
-        // Reset mouse scroll wheel state
-        Input.mouseWheelDelta = 0;
-        
-#ifdef PLATFORM_WINDOWS
+        // Get mouse position
         POINT cursorPos;
         GetCursorPos(&cursorPos);
         Input.mouseX = cursorPos.x;
         Input.mouseY = cursorPos.y;
+        
 #endif
         
-#ifdef PLATFORM_LINUX
-        float mouseX, mouseY;
-        SDL_GetMouseState(&mouseX, &mouseY);
-        
-        Input.mouseX = (int)mouseX;
-        Input.mouseY = (int)mouseY;
-#endif
+        // Reset mouse scroll wheel state
+        Input.mouseWheelDelta = 0;
         
         //
         // Tick update timer (background update)
@@ -467,19 +468,12 @@ int main(int argc, char* argv[]) {
     Shutdown();
     
     Engine.Shutdown();
-    
     Network.Shutdown();
-    
     Physics.Shutdown();
-    
     Audio.Shutdown();
-    
     Renderer.Shutdown();
-    
     AI.Shutdown();
-    
     Resources.DestroyAssets();
-    
     Platform.DestroyWindowHandle();
     
     return 0;

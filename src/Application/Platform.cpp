@@ -108,6 +108,9 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     SDL_SetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION, "1");
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl"); // Optional
     
+    //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1); // <– Important!
+    
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); // or 4
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -124,8 +127,8 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     
     // Optional: Set multisampling (anti-aliasing)
-    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
     
     // Create the main window
     windowHandle = SDL_CreateWindow("Render window", 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
@@ -150,17 +153,13 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
 void PlatformLayer::DestroyWindowHandle(void) {
 #ifdef PLATFORM_WINDOWS
     DestroyWindow((HWND)windowHandle);
-    windowHandle = nullptr;
-    
-    mIsWindowRunning = false;
 #endif
-    
 #ifdef PLATFORM_LINUX
     SDL_HideWindow((SDL_Window*)windowHandle);
     SDL_DestroyWindow((SDL_Window*)windowHandle);
+#endif
     windowHandle = nullptr;
     mIsWindowRunning = false;
-#endif
     return;
 }
 
@@ -454,3 +453,9 @@ GLenum PlatformLayer::SetRenderTarget(void) {
     
     return passed;
 }
+
+
+void PlatformLayer::EventLoop(void) {
+    
+}
+
