@@ -124,7 +124,7 @@ void AudioSystem::MixActiveSounds(std::vector<int32_t>& buffer) {
         }
         
         // Get the audio sample
-        std::vector<int32_t>& sample = soundPtr->sample->bufferL;
+        std::vector<int32_t>& sample = soundPtr->sample->sampleBuffer;
         
         // Mix the next section of samples
         for (unsigned int s = 0; s < buffer.size(); s++) {
