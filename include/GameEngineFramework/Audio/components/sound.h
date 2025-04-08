@@ -31,16 +31,15 @@ public:
     void Play(void);
     void Stop(void);
     
-    /// Set the sample volume.
+    /// Set the playback volume for the sample.
     void SetVolume(float volume);
     
-    /// Set the sample pitch.
-    void SetPitch(float pitch);
-    
-    /// Sample buffer of audio
+    /// Sample buffer of audio.
     AudioSample* sample;
     
 private:
+    
+    float mVolume;
     
     std::mutex mux;
     

@@ -6,6 +6,7 @@
 #include <GameEngineFramework/configuration.h>
 #include <GameEngineFramework/Audio/components/sound.h>
 #include <GameEngineFramework/Audio/components/samplebuffer.h>
+#include <GameEngineFramework/Audio/SamplePresets.h>
 
 #include <GameEngineFramework/MemoryAllocation/poolallocator.h>
 #include <GameEngineFramework/Logging/Logging.h>
@@ -51,9 +52,9 @@ public:
     void Initiate(void);
     void Shutdown(void);
     
-    /// Check if the audio device was initialized.
-    bool CheckIsAudioEndpointActive(void);
+    AudioPreset Presets;
     
+    // Caution used be the audio thread
     std::mutex mux;
     
     SDL_AudioStream* mStream;
