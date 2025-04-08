@@ -6,8 +6,9 @@ extern bool isAudioDeviceActive;
 
 Sound::Sound() : 
     isPlaying(false),
+    playbackCursor(0),
     sample(nullptr),
-    playbackCursor(0)
+    mVolume(1.0f)
 {
 }
 
@@ -24,12 +25,7 @@ void Sound::Stop(void) {
 }
 
 void Sound::SetVolume(float volume) {
-    
-    return;
-}
-
-void Sound::SetPitch(float pitch) {
-    
+    mVolume = volume;
     return;
 }
 

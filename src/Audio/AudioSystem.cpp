@@ -1,14 +1,15 @@
 #include <GameEngineFramework/Audio/AudioSystem.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/compatibility.hpp>
+
 extern Logger Log;
 extern NumberGeneration Random;
 
 // Audio thread
 bool isAudioThreadActive = true;
 void AudioThreadMain(void);
-
-// Master final mix buffer
-std::vector<int16_t> mixBuffer(512);
 
 void AudioSystem::Initiate(void) {
     
@@ -78,24 +79,26 @@ void AudioThreadMain(void) {
     
     while (isAudioThreadActive) {
         
-        //std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
-        std::lock_guard<std::mutex> lock(Audio.mux);
+        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(5) );
         
         // Check if the buffer is low
         int available = SDL_GetAudioStreamAvailable(Audio.mStream);
-        if (available > 1024) 
+        if (available > 8192) 
             continue;
+        
+        std::lock_guard<std::mutex> lock(Audio.mux);
         
         // Temporary mix buffer
         std::vector<int32_t> buffer;
-        buffer.resize(512); // 512 samples
+        buffer.resize(512);
+        std::fill(buffer.begin(), buffer.end(), 0);
         
         // Mix the currently playing sounds
         Audio.MixActiveSounds(buffer);
         
         // Send in the next section of mixed audio
-        SDL_PutAudioStreamData(Audio.mStream, buffer.data(), buffer.size() * sizeof(int16_t));
-        //SDL_FlushAudioStream(Audio.mStream);
+        SDL_PutAudioStreamData(Audio.mStream, buffer.data(), buffer.size() * sizeof(int32_t));
+        SDL_FlushAudioStream(Audio.mStream);
         
         continue;
     }
@@ -109,7 +112,6 @@ void AudioThreadMain(void) {
 
 
 void AudioSystem::MixActiveSounds(std::vector<int32_t>& buffer) {
-    std::fill(buffer.begin(), buffer.end(), 0);
     
     for (unsigned int i=0; i < mActiveSounds.size(); i++) {
         Sound* soundPtr = mActiveSounds[i];
@@ -122,25 +124,30 @@ void AudioSystem::MixActiveSounds(std::vector<int32_t>& buffer) {
         }
         
         // Get the audio sample
-        std::vector<int16_t>& sample = soundPtr->sample->sampleBuffer;
+        std::vector<int32_t>& sample = soundPtr->sample->bufferL;
         
         // Mix the next section of samples
         for (unsigned int s = 0; s < buffer.size(); s++) {
             
             // Check sound has ended
             if (soundPtr->playbackCursor >= sample.size()) {
-                soundPtr->Stop();
+                soundPtr->isPlaying = false;
+                soundPtr->playbackCursor = 0;
                 mActiveSounds.erase(mActiveSounds.begin() + i);
                 break;
             }
             
-            // Mix the audio
-            int32_t mixed = buffer[s] + static_cast<int32_t>(sample[soundPtr->playbackCursor]);
-            soundPtr->playbackCursor++;
+            // Get source sample
+            int32_t currentSample = buffer[s];
+            int32_t sourceSample = static_cast<int32_t>(sample[soundPtr->playbackCursor]);
             
-            // Cap the audio
-            if (mixed > 32767) mixed = 32767;
-            if (mixed < -32768) mixed = -32768;
+            // Sample volume
+            sourceSample *= soundPtr->mVolume;
+            
+            // Mix the audio
+            int32_t mixed = (currentSample + sourceSample) / 2;
+            
+            soundPtr->playbackCursor++;
             
             buffer[s] = mixed;
         }
