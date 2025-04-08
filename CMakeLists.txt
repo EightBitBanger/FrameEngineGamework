@@ -176,6 +176,7 @@ if(BUILD_CORE_LIBRARY)
     "src/Application/procedure.cpp"
     
     "src/Audio/AudioSystem.cpp"
+    "src/Audio/SamplePresets.cpp"
     "src/Audio/components/sound.cpp"
     "src/Audio/components/samplebuffer.cpp"
     
