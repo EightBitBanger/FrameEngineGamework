@@ -91,9 +91,8 @@ Links to the latest version of these libraries could be found below. Note: The l
 
 
 ## Application entry point
-The source file "Application.cpp" is the application layer entry point and the starting point for your application code.
-The framework will provide you with the functions `Start()` and `Run()`. These functions will serve as an entry point for your application.
-The `Start()` function will be called once during application initiation while `Run()` will be called once per frame.
+The source files "start.cpp" and "run.cpp" contain the application entry point and the starting point for your application code.
+The framework provides you with the functions `Start()` and `Run()`. The `Start()` function will be called once during application initiation while `Run()` will be called once per frame.
 
 
 <br><br/>
