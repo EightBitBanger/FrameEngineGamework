@@ -35,7 +35,7 @@
 
 - Plugins
   - Particle emitter
-  - Chunk generator
+  - Chunk generator (World terrain)
   - Weather system
 
 <br><br/>
