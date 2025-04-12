@@ -6,6 +6,7 @@
 #include <GameEngineFramework/configuration.h>
 #include <GameEngineFramework/Audio/components/sound.h>
 #include <GameEngineFramework/Audio/components/samplebuffer.h>
+#include <GameEngineFramework/Audio/components/playback.h>
 #include <GameEngineFramework/Audio/SamplePresets.h>
 
 #include <GameEngineFramework/MemoryAllocation/poolallocator.h>
@@ -25,13 +26,11 @@ class ENGINE_API AudioSystem {
     
 public:
     
-    /// World listening position in 3D space.
+    /// World listening position and orientation in 3D space.
     glm::vec3 listenerPosition;
+    glm::vec3 listenerDirection;
     
-    AudioSystem() : 
-        mStream(nullptr)
-    {
-    }
+    AudioSystem();
     
     /// Create a new sound object and return its pointer.
     Sound* CreateSound(void);
@@ -46,7 +45,12 @@ public:
     bool DestroyAudioSample(AudioSample* samplePtr);
     
     /// Sends in a sound to be played by the mixer.
-    bool Play(Sound* soundPtr);
+    Playback* Play(Sound* soundPtr);
+    
+    // Master effects
+    
+    /// Set the master volume over all sounds.
+    void SetVolume(float volume);
     
     
     void Initiate(void);
@@ -63,11 +67,15 @@ public:
     
 private:
     
+    // Master playback volume
+    float mMasterVolume;
+    
     // List of currently playing sounds
-    std::vector<Sound*> mActiveSounds;
+    std::vector<Playback*> mActiveSounds;
     
     PoolAllocator<Sound> mSounds;
     PoolAllocator<AudioSample> mSamples;
+    PoolAllocator<Playback> mPlaybacks;
     
     std::thread* audioThread;
     

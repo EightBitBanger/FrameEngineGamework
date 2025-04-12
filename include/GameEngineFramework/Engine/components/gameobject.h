@@ -6,6 +6,7 @@
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
 #include <GameEngineFramework/Resources/ResourceManager.h>
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/Audio/components/sound.h>
 
 #include <GameEngineFramework/Engine/UI/panel.h>
 #include <GameEngineFramework/Engine/UI/text.h>
@@ -61,6 +62,7 @@ public:
         if (std::is_same<T, Actor>::value)            return (T*)mActorCache;
         if (std::is_same<T, Text>::value)             return (T*)mTextCache;
         if (std::is_same<T, Panel>::value)            return (T*)mPanelCache;
+        if (std::is_same<T, Sound>::value)            return (T*)mSoundCache;
         
         return nullptr;
     }
@@ -91,7 +93,7 @@ public:
     /// Set the position of the object.
     void SetPosition(float x, float y, float z);
     
-    /// Set the position of the object from a Vector3.
+    /// Set the position of the object from a vector.
     void SetPosition(glm::vec3 newPosition);
     
     
@@ -194,6 +196,7 @@ private:
     Actor*           mActorCache;
     Text*            mTextCache;
     Panel*           mPanelCache;
+    Sound*           mSoundCache;
     
 };
 

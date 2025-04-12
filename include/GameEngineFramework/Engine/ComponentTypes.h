@@ -36,6 +36,9 @@ struct ENGINE_API EngineComponents {
     
     /// Panel UI component.
     constexpr static short int Panel = 9;
+    
+    /// Audio sample component.
+    constexpr static short int Sound = 10;
 };
 
 

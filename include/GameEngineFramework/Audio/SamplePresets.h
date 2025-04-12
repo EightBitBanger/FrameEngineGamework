@@ -7,6 +7,10 @@
 #include <GameEngineFramework/Audio/components/sound.h>
 #include <GameEngineFramework/Audio/components/samplebuffer.h>
 
+#include <glm/glm.hpp>
+#include <vector>
+
+
 //
 // Audio rendering
 

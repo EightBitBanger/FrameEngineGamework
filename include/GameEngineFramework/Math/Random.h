@@ -2,6 +2,7 @@
 #define _RANDOM_NUMBER_GENERATION__
 
 #include <GameEngineFramework/configuration.h>
+#include <glm/glm.hpp>
 
 class ENGINE_API NumberGeneration {
     
@@ -23,6 +24,9 @@ public:
     
     /// Return an integer between the min and max values.
     int Range(int min, int max);
+    
+    /// Return a vector 3 with each element ranging between the min and max values.
+    glm::vec3 RangedVector(int min, int max);
     
     /// Return a perlin noise value based on the input coordinates.
     float Perlin(float xcoord, float ycoord, float zcoord, int seed);

@@ -84,9 +84,6 @@ public:
     /// Create a mesh renderer component and return its pointer.
     Component* CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr);
     
-    /// Create a point light component and return its pointer.
-    Component* CreateComponentLight(glm::vec3 position);
-    
     /// Create an AI actor component and return its pointer.
     GameObject* CreateAIActor(glm::vec3 position);
     
@@ -287,11 +284,7 @@ public:
         
         // AI
         if (std::is_same<T, Actor>::value) {
-            
-            Actor* actorPtr = (Actor*)objectPtr;
-            
-            AI.DestroyActor( actorPtr );
-            
+            AI.DestroyActor( (Actor*)objectPtr );
         }
         
         return false;
@@ -299,7 +292,6 @@ public:
     
     /// Create a component object containing the type specified.
     template <typename T> Component* CreateComponent(void) {
-        
         // Engine
         if (std::is_same<T, Transform>::value)    return CreateComponent(Components.Transform);
         
@@ -319,6 +311,8 @@ public:
         if (std::is_same<T, Text>::value)         return CreateComponent(Components.Text);
         if (std::is_same<T, Panel>::value)        return CreateComponent(Components.Panel);
         
+        // Audio
+        if (std::is_same<T, Sound>::value)        return CreateComponent(Components.Sound);
         return nullptr;
     }
     
@@ -408,6 +402,7 @@ private:
     void UpdateTextUI(unsigned int index);
     void UpdateCamera(unsigned int index);
     void UpdateLight(unsigned int index);
+    void UpdateAudio(unsigned int index);
     
     // AI update functions
     void UpdateActor(unsigned int index);
@@ -509,6 +504,8 @@ private:
         // UI
         Text*          text;
         Panel*         panel;
+        // Audio
+        Sound*         sound;
     };
     
     ComponentDataStreamBuffer mStreamBuffer[ COMPONENT_STREAM_BUFFER_SIZE ];
