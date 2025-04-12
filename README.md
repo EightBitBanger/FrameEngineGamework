@@ -18,16 +18,25 @@
   - Terrain height field mapping
   - <a href="https://github.com/DanielChappuis/reactphysics3d/blob/master/documentation/UserDocumentation.md">Much more...</a>⁭
 
+- Audio
+  - Spatial 3D audio
+  - Sample generation functions
+  - Mixing on a seperate thread
+
 - ActorAI
   - Psudo-genetics based actor generation
   - Neural network / state machine hybrid for actor personality
-  - Updated on a separate thread
+  - Simulated on a separate thread
 
 - Resource management
   - Resource files are loaded automatically at startup
   - Image: PNG BMP
   - Models: OBJ
 
+- Plugins
+  - Particle emitter
+  - Chunk generator
+  - Weather system
 
 <br><br/>
 
