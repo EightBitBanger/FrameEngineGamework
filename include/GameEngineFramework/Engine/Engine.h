@@ -81,9 +81,6 @@ public:
     /// Generate a sky object and return its pointer.
     GameObject* CreateSky(std::string meshTagName, Color colorLow, Color colorHigh, float biasMul);
     
-    /// Create a mesh renderer component and return its pointer.
-    Component* CreateComponentMeshRenderer(Mesh* meshPtr, Material* materialPtr);
-    
     /// Create an AI actor component and return its pointer.
     GameObject* CreateAIActor(glm::vec3 position);
     
@@ -177,58 +174,35 @@ public:
     /// Add a quad to a mesh mapping to a sub sprite from a sprite sheet texture.
     void AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float width, float height, int index, Color meshColor);
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // Height field chunk generation
     
     // Perlin generation
     
-    /// Initiates a height field grid array of points and set them to zero.
-    void SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value);
     
-    /// Add a layer of perlin noise into a height field. The minimum 
-    /// height value will be returned.
-    float AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ, int seed);
     
-    // Color field
     
-    /// Initiates a color field grid array of colors and set them to zero.
-    void SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color);
     
-    /// Generate a color field containing a color range from from low to high. The bias will determine the fade 
-    /// from the low color to the high color based on the height field values.
-    void GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color low, Color high, float bias);
     
-    /// Smooth the terrain height starting at a given height level and moving downward.
-    void GenerateWaterTableFromHeightField(float* heightField, unsigned int width, unsigned int height, float tableHeight);
     
-    /// Set a layer of perlin noise into a color field. The perlin noise is used to fade from the first color to the second.
-    void SetColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseThreshold, Color first, Color second, int offsetX, int offsetZ);
     
-    /// Generate a snow cap effect of a given color capColor and starting at the height beginHeight.
-    /// The bias will determine how much snow will be added.
-    void AddColorFieldSnowCap(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color capColor, float beginHeight, float bias);
     
-    /// Generate a water level effect.
-    void AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color waterColor, float beginHeight, float bias, float waterTableHeight);
     
-    // Mapping to a mesh
     
-    /// Apply the height field values to a mesh.
-    void AddHeightFieldToMesh(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int subTessX=1.0f, unsigned int subTessZ=1.0f);
     
-    /// Apply a reduced quality version of the height field values to a mesh. This function will
-    /// reduce the mesh by one half of the original size.
-    void AddHeightFieldToMeshHalfSize(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
     
-    void AddHeightFieldToMeshLOD(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int lodFactor);
-    
-    /// Apply the height field values to the mesh using a quality resolution value.
-    void AddHeightFieldToMeshReduced(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int resolution);
-    
-    /// Generate a height field mesh from perlin noise.
-    Mesh* CreateMeshFromHeightField(float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
-    
-    /// Apply a height stepping effect to the mesh.
-    void AddHeightStepToMesh(float* heightField, unsigned int width, unsigned int height);
     
     
     EngineSystemManager();
@@ -249,7 +223,6 @@ public:
         
         // Engine
         if (std::is_same<T, GameObject>::value)    return (T*)CreateGameObject();
-        if (std::is_same<T, Component>::value)     return (T*)CreateComponent( Components.Undefined );
         
         // Renderer
         if (std::is_same<T, Mesh>::value)          return (T*)Renderer.CreateMesh();
@@ -270,11 +243,9 @@ public:
         
         extern ActorSystem AI;
         
-        // Engine
         if (std::is_same<T, GameObject>::value)    return DestroyGameObject( (GameObject*)objectPtr );
         if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
         
-        // Renderer
         if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh( (Mesh*)objectPtr );
         if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial( (Material*)objectPtr );
         if (std::is_same<T, Shader>::value)        return Renderer.DestroyShader( (Shader*)objectPtr );
@@ -282,43 +253,86 @@ public:
         if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera( (Camera*)objectPtr );
         if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer( (MeshRenderer*)objectPtr );
         
-        // AI
-        if (std::is_same<T, Actor>::value) {
-            AI.DestroyActor( (Actor*)objectPtr );
-        }
+        if (std::is_same<T, Actor>::value)         return AI.DestroyActor( (Actor*)objectPtr );
         
         return false;
     }
     
     /// Create a component object containing the type specified.
     template <typename T> Component* CreateComponent(void) {
-        // Engine
-        if (std::is_same<T, Transform>::value)    return CreateComponent(Components.Transform);
+        void* componentObjectPtr = nullptr;
         
-        // Renderer
-        if (std::is_same<T, MeshRenderer>::value) return CreateComponent(Components.MeshRenderer);
-        if (std::is_same<T, Camera>::value)       return CreateComponent(Components.Camera);
-        if (std::is_same<T, Light>::value)        return CreateComponent(Components.Light);
-        if (std::is_same<T, Script>::value)       return CreateComponent(Components.Script);
+        ComponentType type = EngineComponents::Undefined;
         
-        // Physics
-        if (std::is_same<T, RigidBody>::value)    return CreateComponent(Components.RigidBody);
+        if (std::is_same<T, Transform>::value)    {type = EngineComponents::Transform;     componentObjectPtr = (void*)mTransforms.Create();}
+        if (std::is_same<T, MeshRenderer>::value) {type = EngineComponents::MeshRenderer;  componentObjectPtr = (void*)Renderer.CreateMeshRenderer();}
+        if (std::is_same<T, Camera>::value)       {type = EngineComponents::Camera;        componentObjectPtr = (void*)Renderer.CreateCamera();}
+        if (std::is_same<T, Light>::value)        {type = EngineComponents::Light;         componentObjectPtr = (void*)Renderer.CreateLight();}
+        if (std::is_same<T, Script>::value)       {type = EngineComponents::Script;        componentObjectPtr = (void*)Scripting.CreateScript();}
+        if (std::is_same<T, RigidBody>::value)    {type = EngineComponents::RigidBody;     componentObjectPtr = (void*)Physics.CreateRigidBody();}
+        if (std::is_same<T, Actor>::value)        {type = EngineComponents::Actor;         componentObjectPtr = (void*)AI.CreateActor();}
+        if (std::is_same<T, Text>::value)         {type = EngineComponents::Text;          componentObjectPtr = (void*)mTextObjects.Create();}
+        if (std::is_same<T, Panel>::value)        {type = EngineComponents::Panel;         componentObjectPtr = (void*)mPanelObjects.Create();}
+        if (std::is_same<T, Sound>::value)        {type = EngineComponents::Sound;         componentObjectPtr = (void*)Audio.CreateSound();}
         
-        // AI
-        if (std::is_same<T, Actor>::value)        return CreateComponent(Components.Actor);
+        // Check bad type
+        if (type == EngineComponents::Undefined || componentObjectPtr == nullptr) {
+            Log.Write("!! Created invalid component");
+            return nullptr;
+        }
         
-        // UI
-        if (std::is_same<T, Text>::value)         return CreateComponent(Components.Text);
-        if (std::is_same<T, Panel>::value)        return CreateComponent(Components.Panel);
+        // Assemble the component
+        Component* newComponent = mComponents.Create();
+        newComponent->SetComponent(type, componentObjectPtr);
         
-        // Audio
-        if (std::is_same<T, Sound>::value)        return CreateComponent(Components.Sound);
-        return nullptr;
+        return newComponent;
     }
     
     
     /// Destroy a component object.
-    bool DestroyComponent(Component* componentPtr);
+    bool DestroyComponent(Component* componentPtr) {
+        
+        ComponentType componentType = componentPtr->GetType();
+        
+        switch (componentType) {
+            
+            case Components.MeshRenderer: {
+                MeshRenderer* meshRenderer = (MeshRenderer*)componentPtr->GetComponent();
+                Renderer.DestroyMeshRenderer(meshRenderer);
+                break;
+            }
+            
+            case Components.RigidBody: {
+                rp3d::RigidBody* bodyPtr = (RigidBody*)componentPtr->GetComponent();
+                bodyPtr->setIsActive( false );
+                Physics.DestroyRigidBody( bodyPtr );
+                break;
+            }
+            
+            case Components.Actor: {
+                Actor* actorPtr = (Actor*)componentPtr->GetComponent();
+                for (unsigned int i=0; i < actorPtr->genetics.mGeneticRenderers.size(); i++) 
+                    sceneMain->RemoveMeshRendererFromSceneRoot( actorPtr->genetics.mGeneticRenderers[i], RENDER_QUEUE_GEOMETRY );
+                for (unsigned int i=0; i < actorPtr->genetics.mGeneticRenderers.size(); i++) 
+                    Destroy<MeshRenderer>( actorPtr->genetics.mGeneticRenderers[i] );
+                actorPtr->genetics.mGeneticRenderers.clear();
+                AI.DestroyActor( actorPtr );
+                break;
+            }
+            
+            case Components.Transform: {mTransforms.Destroy( (Transform*)componentPtr->GetComponent() ); break;}
+            case Components.Camera:    {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
+            case Components.Light:     {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
+            case Components.Script:    {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
+            case Components.Text:      {mTextObjects.Destroy( (Text*)componentPtr->GetComponent() ); break;}
+            case Components.Panel:     {mPanelObjects.Destroy( (Panel*)componentPtr->GetComponent() ); break;}
+            case Components.Sound:     {Audio.DestroySound( (Sound*)componentPtr->GetComponent() ); break;}
+            
+            default: break;
+        }
+        
+        return true;
+    }
     
     /// Get the number of component objects.
     unsigned int GetNumberOfComponents(void);
@@ -331,9 +345,6 @@ public:
     
     
 private:
-    
-    // Create a component object with initial type information and return its pointer.
-    Component* CreateComponent(ComponentType type);
     
     // Create a game object and return its pointer.
     GameObject* CreateGameObject(void);

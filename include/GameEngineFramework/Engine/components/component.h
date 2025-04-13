@@ -24,13 +24,13 @@ public:
     /// Return the component type.
     ComponentType GetType(void);
     
-    /// Set the component type and reference object.
-    void SetComponent(ComponentType type, void* object);
-    
     Component();
     
     
 private:
+    
+    // Set the component type and reference object.
+    void SetComponent(ComponentType type, void* object);
     
     // Type identifier declaring the component pointer type.
     ComponentType mType;

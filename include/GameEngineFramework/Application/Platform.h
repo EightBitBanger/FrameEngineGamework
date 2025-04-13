@@ -43,6 +43,8 @@ public:
     bool isPaused;
     /// Game loop running state. Setting this to false will exit the loop.
     bool isActive;
+    /// Screen state.
+    bool isFullscreen;
     
     PlatformLayer();
     
