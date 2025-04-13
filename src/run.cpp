@@ -285,9 +285,32 @@ std::string targetGene = "";
 Actor* actorSelected = nullptr;
 
 bool isNetInit = false;
+bool isTrigger = false;
 
+AudioSample* sample;
+Sound* sound;
 
 void Run() {
+    
+    sample = Audio.CreateAudioSample();
+    Audio.Presets.RenderWhiteNoise(sample, 0.8f);
+    
+    if (!isTrigger) {
+        isTrigger = true;
+        sample = Audio.CreateAudioSample();
+        Audio.Presets.RenderWhiteNoise(sample, 0.1f);
+        
+    }
+    
+    if (Input.CheckKeyCurrent(VK_P)) {
+        
+        Playback* samplePlayer = Audio.Play(sound);
+        samplePlayer->SetVolume(0.01);
+        samplePlayer->doRepeat = true;
+        samplePlayer->isGarbage = true;
+        
+    }
+    
     
     /*
     
@@ -498,26 +521,67 @@ void Run() {
     */
     
     // Spawn an actor with the picked genome
-    /*
+    
     if (Input.CheckMouseLeftPressed()) {
         
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             
-            for (unsigned int retry=0; retry < 25; retry++) {
-                float randomX = Random.Range(0, 10) - Random.Range(0, 10);
-                float randomZ = Random.Range(0, 10) - Random.Range(0, 10);
+            for (unsigned int retry=0; retry < 24; retry++) {
+                float randomX = Random.Range(0, 30) - Random.Range(0, 30);
+                float randomZ = Random.Range(0, 30) - Random.Range(0, 30);
                 GameObject* actorObject = GameWorld.SpawnActor( hit.point.x + randomX, hit.point.y, hit.point.z + randomZ);
                 Actor* actor = actorObject->GetComponent<Actor>();
                 
+                actor->physical.SetAge(400 + Random.Range(0, 100));
+                
                 AI.genomes.mental.PreyBase( actor );
                 ApplyGene(actor);
+                
+                
+                
+                // TEST sound attachment test
+                
+                /*
+                Sound* sound = Audio.CreateSound();
+                sound->sample = sample;
+                sound->isSample3D = true;
+                
+                Playback* samplePlayer = Audio.Play(sound);
+                samplePlayer->SetVolume(1.0);
+                samplePlayer->doRepeat = true;
+                */
+                
+                actorObject->AddComponent( Engine.CreateComponent<Sound>() );
+                Sound* soundPtr = actorObject->GetComponent<Sound>();
+                
+                AudioSample* samplePtr = Audio.CreateAudioSample();
+                
+                float low  = Random.Range(500, 1000);
+                float high = Random.Range(500, 1000);
+                
+                Audio.Presets.RenderSweepingSineWave(samplePtr, low, high, 0.2);
+                
+                soundPtr->isSample3D = true;
+                soundPtr->sample = samplePtr;
+                soundPtr->SetMaximumFalloff(30.0f);
+                soundPtr->SetMinimumFalloff(0.0f);
+                soundPtr->SetFalloffMultiplier(8.0f);
+                
+                Playback* playback = Audio.Play(soundPtr);
+                playback->doRepeat = true;
+                playback->SetVolume(0.1f);
+                
             }
             
             
             //AI.genomes.presets.Horse(actor);
             //actor->SetAge( 700 + Random.Range(0, 500) );
             
-            */
+            
+            //Playback* samplePlayer = Audio.Play(sound);
+            //samplePlayer->SetVolume(0.01);
+            //samplePlayer->isGarbage = true;
+            
             
             
             
@@ -555,13 +619,13 @@ void Run() {
                 
             }
             */
-            /*
+            
             
         }
         
     }
     
-    
+    /*
     // Pick an actors genome
     
     if (Input.CheckMouseMiddlePressed()) {
@@ -608,6 +672,7 @@ void Run() {
     */
     
     
+    /*
     
     // Plant tree (testing)
     if (Input.CheckKeyPressed(VK_P)) {
@@ -646,6 +711,7 @@ void Run() {
         
     }
     
+    */
     
     // Kill actor test
     if (Input.CheckMouseRightPressed()) {
@@ -679,7 +745,8 @@ void Run() {
         
     }
     */
-    /*
+    
+    
     if (Input.CheckKeyPressed(VK_F3)) {
         
         isDebugReportActive = !isDebugReportActive;
@@ -690,7 +757,7 @@ void Run() {
         }
         
     }
-    */
+    
     
     if (Input.CheckKeyPressed(VK_F11)) {
         
@@ -710,7 +777,7 @@ void Run() {
     
     // Debug report
     
-    /*
+    
     
     if (isDebugReportActive) {
         
@@ -733,9 +800,6 @@ void Run() {
                 
                 Engine.WriteDialog(0, chunkPosition);
                 
-                if (hitChunk->actorList.size() > 0) 
-                    Engine.WriteDialog(1, "Actors " + Int.ToString(hitChunk->actorList.size()));
-                
             }
             
         }
@@ -743,16 +807,18 @@ void Run() {
         // Print player position
         glm::vec3 cameraPosition = Engine.cameraController->GetPosition();
         
-        std::string playerPosition = "x: ";
+        std::string playerPosition = "x ";
         playerPosition += Int.ToString( cameraPosition.x );
-        playerPosition += " y: ";
+        playerPosition += "  y ";
         playerPosition += Int.ToString( cameraPosition.y );
-        playerPosition += " z: ";
+        playerPosition += "  z ";
         playerPosition += Int.ToString( cameraPosition.z );
         
         Engine.WriteDialog(3, playerPosition);
         
         // Check object in front of camera
+        
+        /*
         
         if (Physics.Raycast(from, direction, distance, hit, LayerMask::Actor)) {
             
@@ -785,11 +851,10 @@ void Run() {
                 Engine.WriteDialog(4 + i, "");
             
         }
+        */
         
     }
     
-    
-    */
     
     
     

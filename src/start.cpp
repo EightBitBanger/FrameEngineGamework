@@ -42,9 +42,9 @@ float SmoothNoise(float x, uint32_t seed) {
     return a * (1.0f - t) + b * t;
 }
 
-std::vector<int16_t> GenerateProceduralAudio(uint32_t seed, double durationSeconds, double baseFreq, double sweepRange, float noiseScale, int sampleRate = 44100, int16_t volume = 24000) {
+std::vector<int32_t> GenerateProceduralAudio(uint32_t seed, double durationSeconds, double baseFreq, double sweepRange, float noiseScale, int sampleRate = 44100, int16_t volume = 24000) {
     int totalSamples = static_cast<int>(durationSeconds * sampleRate);
-    std::vector<int16_t> samples(totalSamples);
+    std::vector<int32_t> samples(totalSamples);
     
     // Parameters for noise sampling
     float zOffset = seed * 0.137f;  // Seed variation via z-axis
@@ -60,7 +60,7 @@ std::vector<int16_t> GenerateProceduralAudio(uint32_t seed, double durationSecon
         double freq = baseFreq + sweepRange * noiseVal;
         double angle = 2.0f * glm::pi<float>() * freq * t;
         
-        samples[i] = static_cast<int16_t>(volume * sin(angle));
+        samples[i] = static_cast<int32_t>(volume * sin(angle));
     }
     
     return samples;
@@ -78,17 +78,17 @@ struct AudioGene {
     float seed;            // noise seed
 };
 
-std::vector<int16_t> GenerateCreatureVoice(const AudioGene& gene, int sampleRate = 44100, int16_t volume = 24000) {
-    std::vector<int16_t> samples = GenerateProceduralAudio(gene.seed, gene.duration, gene.basePitch, gene.pitchVariation, gene.noiseSpeed, sampleRate, volume);
+std::vector<int32_t> GenerateCreatureVoice(const AudioGene& gene, int sampleRate = 44100, int16_t volume = 24000) {
+    std::vector<int32_t> samples = GenerateProceduralAudio(gene.seed, gene.duration, gene.basePitch, gene.pitchVariation, gene.noiseSpeed, sampleRate, volume);
     
     float growlRateHz = gene.growliness;
     float intensity = gene.intensity;
     
     for (size_t i = 0; i < samples.size(); ++i) {
         
-        double t = static_cast<double>(i) / sampleRate;
+        float slice = static_cast<double>(i) / sampleRate;
         
-        float mod = (1.0f - intensity) + intensity * glm::sin(2.0f * glm::pi<float>() * growlRateHz * t);
+        float mod = (1.0f - intensity) + intensity * glm::sin(2.0f * glm::pi<float>() * growlRateHz * slice);
         
         samples[i] = static_cast<int16_t>(samples[i] * mod);
     }
@@ -125,29 +125,6 @@ std::vector<int16_t> GenerateCreatureVoice(const AudioGene& gene, int sampleRate
 
 
 
-/// Generate a section of sine wave sweeping from start to end.
-std::vector<int16_t> GenerateSweepingSineWave(double startFreq, double endFreq, double durationSeconds, int sampleRate = 44100, int16_t amplitude = 24000) {
-    int totalSamples = static_cast<int>(durationSeconds * sampleRate);
-    std::vector<int16_t> samples(totalSamples);
-    
-    double freqDelta = (endFreq - startFreq) / totalSamples;
-    
-    for (int i = 0; i < totalSamples; i++) {
-        double t = static_cast<double>(i) / sampleRate;
-        double freq = startFreq + freqDelta * i;
-        double angle = 2.0d * glm::pi<double>() * freq * t;
-        samples[i] = static_cast<int16_t>(amplitude * glm::sin(angle));
-    }
-    
-    return samples;
-}
-
-
-
-#define SAMPLE_RATE 48000
-#define TONE_HZ 550
-#define DURATION_SECONDS 2
-#define VOLUME 28000
 
 void Start() {
     
@@ -201,35 +178,50 @@ void Start() {
     
     //
     // Audio test sample
-    
+    /*
     Sound* soundA = Audio.CreateSound();
+    Sound* soundB = Audio.CreateSound();
+    Sound* soundC = Audio.CreateSound();
     AudioSample* sampleA = Audio.CreateAudioSample();
+    AudioSample* sampleB = Audio.CreateAudioSample();
+    AudioSample* sampleC = Audio.CreateAudioSample();
     
     sampleA->sample_rate = 44100;
+    sampleB->sample_rate = 44100;
+    sampleC->sample_rate = 44100;
     
-    //Samples.RenderBlankSpace(sampleA, 0.4f);
-    Samples.RenderSweepingSineWave(sampleA, 120, 10, 2.0f);
+    Audio.Presets.RenderWhiteNoise(sampleA, 5.0f);
+    Audio.Presets.RenderSweepingSineWave(sampleB, 800, 500, 5.0f);
+    Audio.Presets.RenderSweepingSineWave(sampleC, 500, 800, 5.0f);
     
-    //for (unsigned int i=0; i < 10; i++) 
-    //    Samples.RenderSquareWave(sampleA, 400 + (i * 10), 0.024);
+    soundA->sample = sampleA;
+    soundB->sample = sampleB;
+    soundC->sample = sampleC;
+    soundA->SetVolume(0.1f);
+    soundB->SetVolume(0.4f);
+    soundC->SetVolume(0.4f);
     
-    //sampleA->sampleBuffer = GenerateSweepingSineWave(400, 500, 0.5f);
+    Audio.Play(soundA);
+    Audio.Play(soundB);
+    Audio.Play(soundC);
+    */
     
-    //sampleA->sampleBuffer = GenerateProceduralChirp(uint32_t seed, double durationSeconds, int sampleRate = 48000, int16_t amplitude = 24000);
     
+    
+    /*
     AudioGene voice;
-    voice.basePitch       = 200;
+    voice.basePitch       = 380;
     //voice.breathiness     = 0.1f;
     voice.duration        = 0.6f;
-    voice.growliness      = 80.0f;    // Modulation rate
-    voice.intensity       = 0.9f;     // Modulation multiplier
+    voice.growliness      = 140.0f;   // Modulation rate
+    voice.intensity       = 0.1f;     // Modulation multiplier
     voice.noiseSpeed      = 1.3f;
     voice.pitchVariation  = 80;
     voice.seed            = 68484;
     
-    //sampleA->sampleBuffer = GenerateCreatureVoice(voice);
-    
-    
+    AudioSample* sample = Audio.CreateAudioSample();
+    sample->sampleBuffer = GenerateCreatureVoice(voice);
+    */
     
     
     /*
@@ -241,16 +233,6 @@ void Start() {
     
     sampleA->sampleBuffer = GenerateProceduralAudio(seed, duration, base, sweep, mul, 48000, 24000);
     */
-    
-    
-    soundA->sample = sampleA;
-    
-    Audio.Play(soundA);
-    
-    //soundA->SetVolume(0.1f);
-    
-    //soundA->Play();
-    //while (soundA->IsSamplePlaying());
     
     
     
@@ -449,7 +431,7 @@ void Start() {
     // World rendering
     GameWorld.chunkSize = 50;
     
-    GameWorld.renderDistance = 13;
+    GameWorld.renderDistance = 16;
     GameWorld.staticDistance = GameWorld.renderDistance * 0.7f;
     GameWorld.actorDistance  = GameWorld.renderDistance * 0.8f;
     
