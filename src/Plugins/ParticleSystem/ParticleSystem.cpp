@@ -174,7 +174,11 @@ Emitter* ParticleSystem::CreateEmitter(void) {
     
     particleMesh->isShared = false;
     
-    newEmitter->mParticleObject->AddComponent(Engine.CreateComponentMeshRenderer(particleMesh, particleMaterial));
+    Component* particleRendererComponent = Engine.CreateComponent<MeshRenderer>();
+    newEmitter->mParticleObject->AddComponent(particleRendererComponent);
+    MeshRenderer* particleRenderer = newEmitter->mParticleObject->GetComponent<MeshRenderer>();
+    particleRenderer->mesh = particleMesh;
+    particleRenderer->material = particleMaterial;
     
     Engine.sceneMain->AddMeshRendererToSceneRoot(newEmitter->mParticleObject->GetComponent<MeshRenderer>(), RENDER_QUEUE_GEOMETRY);
     

@@ -109,6 +109,8 @@ MeshCollider* PhysicsSystem::CreateHeightFieldMap(float* heightField, unsigned i
     
     collider->heightMapBuffer = new float[ mapSize ];
     
+    memcpy(collider->heightMapBuffer, heightField, mapSize);
+    
     for (unsigned int index=0; index < mapSize; index++) 
         collider->heightMapBuffer[index] = heightField[index];
     

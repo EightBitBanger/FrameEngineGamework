@@ -35,6 +35,7 @@ PlatformLayer::PlatformLayer() :
     
     isPaused(false),
     isActive(true),
+    isFullscreen(false),
     
     EventCallbackLoseFocus(nullfunc),
     
@@ -206,8 +207,8 @@ Viewport PlatformLayer::GetWindowArea(void) {
     
     area.x = windowSz.left;
     area.y = windowSz.top;
-    area.w = (windowSz.right  - windowSz.left);
-    area.h = (windowSz.bottom - windowSz.top);
+    area.w = windowSz.right - windowSz.left;
+    area.h = windowSz.bottom - windowSz.top;
 #endif
 #ifdef PLATFORM_LINUX
     SDL_GetWindowPosition((SDL_Window*)windowHandle, &area.x, &area.y);
@@ -233,11 +234,36 @@ glm::vec2 PlatformLayer::GetDisplaySize(void) {
     return dim;
 }
 
+
+    // Previous screen state
+    char mOldWindowRect[sizeof(long) * 4];
+    unsigned long mOldStyle = 0;
+    unsigned long mOldExStyle = 0;
+    
 void PlatformLayer::WindowEnableFullscreen(void) {
 #ifdef PLATFORM_WINDOWS
-    SetWindowLongPtr((HWND)windowHandle, GWL_STYLE, WS_POPUP);
-    SetWindowPos((HWND)windowHandle, HWND_TOPMOST, 0, 0, displayWidth, displayHeight, SWP_FRAMECHANGED);
-    ShowWindow((HWND)windowHandle, SW_MAXIMIZE);
+    HWND hwnd = (HWND)windowHandle;
+    
+    // Save old window styles and position
+    mOldStyle = (unsigned long)GetWindowLong(hwnd, GWL_STYLE);
+    mOldExStyle = (unsigned long)GetWindowLong(hwnd, GWL_EXSTYLE);
+    GetWindowRect(hwnd, (LPRECT)&mOldWindowRect);
+    
+    // Remove window borders
+    SetWindowLong(hwnd, GWL_STYLE, (DWORD)mOldStyle & ~WS_OVERLAPPEDWINDOW);
+    SetWindowLong(hwnd, GWL_EXSTYLE, (DWORD)mOldExStyle & ~WS_EX_APPWINDOW);
+    
+    // Get monitor info
+    MONITORINFO mi = { sizeof(mi) };
+    GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &mi);
+    
+    SetWindowPos(hwnd, HWND_TOPMOST,
+                 mi.rcMonitor.left, mi.rcMonitor.top,
+                 mi.rcMonitor.right - mi.rcMonitor.left,
+                 mi.rcMonitor.bottom - mi.rcMonitor.top,
+                 SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    
+    isFullscreen = true;
 #endif
 #ifdef PLATFORM_LINUX
     SDL_SetWindowFullscreen((SDL_Window*)windowHandle, 1);
@@ -247,9 +273,22 @@ void PlatformLayer::WindowEnableFullscreen(void) {
 
 void PlatformLayer::WindowDisableFullscreen(void) {
 #ifdef PLATFORM_WINDOWS
-    SetWindowLongPtr((HWND)windowHandle, GWL_STYLE, WS_OVERLAPPEDWINDOW);
-    SetWindowPos((HWND)windowHandle, HWND_NOTOPMOST, windowArea.x, windowArea.y, windowArea.w, windowArea.h, SWP_FRAMECHANGED);
-    ShowWindow((HWND)windowHandle, SW_RESTORE);
+    if (!isFullscreen) return;
+    
+    HWND hwnd = (HWND)windowHandle;
+    
+    // Restore window styles
+    SetWindowLong(hwnd, GWL_STYLE, (DWORD)mOldStyle);
+    SetWindowLong(hwnd, GWL_EXSTYLE, (DWORD)mOldExStyle);
+    
+    RECT& oldRect = *(RECT*)mOldWindowRect;
+    SetWindowPos(hwnd, HWND_NOTOPMOST,
+                 oldRect.left, oldRect.top,
+                 oldRect.right - oldRect.left,
+                 oldRect.bottom - oldRect.top,
+                 SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    
+    isFullscreen = false;
 #endif
 #ifdef PLATFORM_LINUX
     SDL_SetWindowFullscreen((SDL_Window*)windowHandle, 0);

@@ -81,8 +81,8 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     float heightField [ chunkSZ * chunkSZ ];
     glm::vec3 colorField  [ chunkSZ * chunkSZ ];
     
-    Engine.SetHeightFieldValues(heightField, chunkSZ, chunkSZ, 0);
-    Engine.SetColorFieldValues(colorField, chunkSZ, chunkSZ, Colors.white);
+    SetHeightFieldValues(heightField, chunkSZ, chunkSZ, 0);
+    SetColorFieldValues(colorField, chunkSZ, chunkSZ, Colors.white);
     
     unsigned int numberOfLayers = perlin.size();
     
@@ -91,11 +91,11 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
         Perlin* perlinLayer = &perlin[l];
         
         //min = 
-        Engine.AddHeightFieldFromPerlinNoise(heightField, chunkSZ, chunkSZ, 
-                                            perlinLayer->noiseWidth, 
-                                            perlinLayer->noiseHeight, 
-                                            perlinLayer->heightMultuplier, 
-                                            x, y, worldSeed);
+        AddHeightFieldFromPerlinNoise(heightField, chunkSZ, chunkSZ, 
+                                      perlinLayer->noiseWidth, 
+                                      perlinLayer->noiseHeight, 
+                                      perlinLayer->heightMultuplier, 
+                                      x, y, worldSeed);
         
         continue;
     }
@@ -108,24 +108,24 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     colorLow  = Colors.brown * Colors.green * Colors.MakeGrayScale(0.4f);
     colorHigh = Colors.brown * Colors.MakeGrayScale(0.2f);
     
-    Engine.GenerateColorFieldFromHeightField(colorField, heightField, chunkSZ, chunkSZ, colorLow, colorHigh, 0.024f);
+    GenerateColorFieldFromHeightField(colorField, heightField, chunkSZ, chunkSZ, colorLow, colorHigh, 0.024f);
     
-    Engine.AddColorFieldSnowCap(colorField, heightField, chunkSZ, chunkSZ, Colors.white, 80.0f, 2.0f);
+    AddColorFieldSnowCap(colorField, heightField, chunkSZ, chunkSZ, Colors.white, 80.0f, 2.0f);
     
-    Engine.GenerateWaterTableFromHeightField(heightField, chunkSZ, chunkSZ, 0);
+    GenerateWaterTableFromHeightField(heightField, chunkSZ, chunkSZ, 0);
     
     
     // Finalize chunk
     
-    Engine.AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSZ, chunkSZ, 0, 0, 1, 1);
+    AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSZ, chunkSZ, 0, 0, 1, 1);
     chunkRenderer->mesh->Load();
     
-    //Engine.AddHeightFieldToMeshHalfSize(chunkRenderer->lods[0], heightField, colorField, chunkSZ, chunkSZ, 0, 0);
-    //Engine.AddHeightFieldToMeshHalfSize(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0);
+    //AddHeightFieldToMeshHalfSize(chunkRenderer->lods[0], heightField, colorField, chunkSZ, chunkSZ, 0, 0);
+    //AddHeightFieldToMeshHalfSize(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0);
     
-    //Engine.AddHeightFieldToMeshLOD(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 2);
-    //Engine.AddHeightFieldToMeshReduced(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 2);
-    //Engine.AddHeightFieldToMeshReduced(chunkRenderer->lods[2], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 20);
+    //AddHeightFieldToMeshLOD(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 2);
+    //AddHeightFieldToMeshReduced(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 2);
+    //AddHeightFieldToMeshReduced(chunkRenderer->lods[2], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 20);
     
     //chunkRenderer->lods[0]->Load();
     //chunkRenderer->lods[1]->Load();

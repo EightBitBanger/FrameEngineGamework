@@ -23,20 +23,12 @@ void EngineSystemManager::UpdateComponentStream(void) {
                 shouldRender = false;
         }
         
-        // Update the state of associated components
+        // Update the active state of associated components
         bool activeState = gameObject->isActive && shouldRender;
-        
-        if (gameObject->mActorCache != nullptr) 
-            gameObject->mActorCache->SetActive(activeState);
-        
-        if (gameObject->mMeshRendererCache != nullptr) 
-            gameObject->mMeshRendererCache->isActive = activeState;
-        
-        if (gameObject->mLightCache != nullptr) 
-            gameObject->mLightCache->isActive = activeState;
-        
-        if (gameObject->mRigidBodyCache != nullptr) 
-            gameObject->mRigidBodyCache->setIsActive(activeState);
+        if (gameObject->mActorCache != nullptr)          gameObject->mActorCache->SetActive(activeState);
+        if (gameObject->mMeshRendererCache != nullptr)   gameObject->mMeshRendererCache->isActive = activeState;
+        if (gameObject->mLightCache != nullptr)          gameObject->mLightCache->isActive = activeState;
+        if (gameObject->mRigidBodyCache != nullptr)      gameObject->mRigidBodyCache->setIsActive(activeState);
         
         // Check last object
         if (mObjectIndex == numberOfGameObjects - 1) {
@@ -52,23 +44,19 @@ void EngineSystemManager::UpdateComponentStream(void) {
             
             // Remove the game object from the active list
             for (std::vector<GameObject*>::iterator it = mGameObjectActive.begin(); it != mGameObjectActive.end(); ++it) {
-                
                 if (gameObject != *it) 
                     continue;
                 
                 mGameObjectActive.erase(it);
-                
                 break;
             }
-
+            
             gameObject->Deactivate();
             
             // Destroy the components
             unsigned int numberOfComponents = gameObject->GetComponentCount();
             for (unsigned int i = 0; i < numberOfComponents; i++) {
-                
                 DestroyComponent(gameObject->GetComponentIndex(i));
-                
                 mComponents.Destroy(gameObject->GetComponentIndex(i));
             }
             
@@ -76,9 +64,11 @@ void EngineSystemManager::UpdateComponentStream(void) {
             continue;
         }
         
-        // Set buffer stream objects and components
         if ((!gameObject->isActive || !shouldRender) && !isUIElement) 
             continue;
+        
+        //
+        // Set buffer stream objects and components
         
         mStreamBuffer[mDataStreamIndex].gameObject    = gameObject;
         mStreamBuffer[mDataStreamIndex].transform     = gameObject->mTransformCache;
@@ -89,6 +79,7 @@ void EngineSystemManager::UpdateComponentStream(void) {
         mStreamBuffer[mDataStreamIndex].meshRenderer  = gameObject->mMeshRendererCache;
         mStreamBuffer[mDataStreamIndex].text          = gameObject->mTextCache;
         mStreamBuffer[mDataStreamIndex].panel         = gameObject->mPanelCache;
+        mStreamBuffer[mDataStreamIndex].sound         = gameObject->mSoundCache;
         
         mDataStreamIndex++;
         mStreamSize = std::max(mStreamSize, mDataStreamIndex);

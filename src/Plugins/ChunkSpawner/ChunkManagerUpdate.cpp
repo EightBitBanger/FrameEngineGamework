@@ -187,6 +187,10 @@ void ChunkManager::HandleActorLifeCycle(GameObject* actorObject) {
     if (actorPtr->physical.GetAge() > actorPtr->physical.GetSeniorAge()) 
         actorPtr->biological.health -= 1.0f;
     
+    if (actors.size() > 1000) 
+        if (Random.Range(0, 100) > 40) 
+            actorPtr->biological.health -= 100.0f;
+    
     // Check actor death
     if (actorPtr->biological.health < 0) 
         KillActor(actorObject);

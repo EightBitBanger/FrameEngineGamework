@@ -1,4 +1,7 @@
 #include <GameEngineFramework/Audio/SamplePresets.h>
+#include <GameEngineFramework/Math/Random.h>
+
+extern NumberGeneration Random;
 
 /// Generate a square wave
 void AudioPreset::RenderBlankSpace(AudioSample* sample, float duration) {

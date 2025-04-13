@@ -17,6 +17,10 @@ void EngineSystemManager::Update(void) {
         if (activeCamera != nullptr) 
             AI.SetPlayerWorldPosition( activeCamera->transform.position );
         
+        // Update audio listener world position and orientation
+        Audio.listenerPosition = activeCamera->transform.position;
+        Audio.listenerDirection = activeCamera->forward;
+        
     }
     
     // Update component stream buffer
@@ -25,11 +29,8 @@ void EngineSystemManager::Update(void) {
     // Run through the parent matrix transform chains and apply the matrices therein
     UpdateTransformationChains();
     
-    // Process UI elements
-    UpdateUI();
-    
-    // Process console input
-    UpdateConsole();
+    UpdateUI();         // Process UI elements
+    UpdateConsole();    // Process console input
     
     //
     // Update attached components
@@ -46,6 +47,8 @@ void EngineSystemManager::Update(void) {
         
         if ((mStreamBuffer[i].panel != nullptr) & 
             (mStreamBuffer[i].meshRenderer != nullptr))  UpdatePanelUI(i);
+        
+        if (mStreamBuffer[i].sound != nullptr)           UpdateAudio(i);
         
         continue;
     }

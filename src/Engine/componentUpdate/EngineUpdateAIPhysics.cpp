@@ -48,9 +48,8 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
         }
         
         
-        // Set current chunk
+        // Set associated game object reference
         GameObject* gameObject = (GameObject*)hit.gameObject;
-        
         mStreamBuffer[index].actor->user.mUserDataA = gameObject->GetUserData();
         
     } else {

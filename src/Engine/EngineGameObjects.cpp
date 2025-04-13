@@ -30,10 +30,10 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position) {
     cameraController->mTransformCache->position = position;
     
     // Add a camera component
-    Component* cameraComponent = CreateComponent(Components.Camera);
+    Component* cameraComponent = CreateComponent<Camera>();
     
     // Add a rigid body component
-    Component* rigidBodyComponent = CreateComponent(Components.RigidBody);
+    Component* rigidBodyComponent = CreateComponent<RigidBody>();
     rp3d::RigidBody* rigidBody = (RigidBody*)rigidBodyComponent->mObject;
     
     rp3d::Vector3 bodyPosition(position.x, position.y, position.z);
@@ -106,7 +106,13 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     
     GameObject* skyObject = CreateGameObject();
     skyObject->name = "sky";
-    skyObject->AddComponent( CreateComponentMeshRenderer(skyMesh, skyMaterial) );
+    
+    Component* skyRendererComponent = CreateComponent<MeshRenderer>();
+    skyObject->AddComponent( skyRendererComponent );
+    MeshRenderer* skyRenderer = skyObject->GetComponent<MeshRenderer>();
+    skyRenderer->mesh = skyMesh;
+    skyRenderer->material = skyMaterial;
+    
     skyObject->renderDistance = -1;
     
     skyObject->mTransformCache->SetScale(10000, 2000, 10000);
@@ -118,8 +124,10 @@ GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
     
     GameObject* newGameObject = CreateGameObject();
     
-    newGameObject->AddComponent( CreateComponent( Components.Actor ) );
-    newGameObject->AddComponent( CreateComponent( Components.RigidBody ) );
+    Component* actorComponent = CreateComponent<Actor>();
+    Component* rigidBodyComponent = CreateComponent<RigidBody>();
+    newGameObject->AddComponent( actorComponent );
+    newGameObject->AddComponent( rigidBodyComponent );
     
     newGameObject->renderDistance = -1;
     

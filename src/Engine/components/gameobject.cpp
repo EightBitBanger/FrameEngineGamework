@@ -15,7 +15,8 @@ GameObject::GameObject() :
     mLightCache(nullptr),
     mActorCache(nullptr),
     mTextCache(nullptr),
-    mPanelCache(nullptr)
+    mPanelCache(nullptr),
+    mSoundCache(nullptr)
 {
 }
 
@@ -69,6 +70,11 @@ void GameObject::AddComponent(Component* component) {
         case Components.Panel: {
             assert(mPanelCache == nullptr);
             mPanelCache = (Panel*)component->GetComponent();
+            break;
+        }
+        case Components.Sound: {
+            assert(mSoundCache == nullptr);
+            mSoundCache = (Sound*)component->GetComponent();
             break;
         }
         
@@ -132,6 +138,11 @@ bool GameObject::RemoveComponent(Component* component) {
                 mPanelCache = nullptr;
                 break;
             }
+            case Components.Sound: {
+                assert(mSoundCache != nullptr);
+                mSoundCache = nullptr;
+                break;
+            }
             
             default: break;
         }
@@ -167,18 +178,16 @@ void GameObject::SetPosition(float x, float y, float z) {
         bodyTransform.setPosition(position);
         mRigidBodyCache->setTransform(bodyTransform);
     }
-    if (mMeshRendererCache != nullptr) {
+    if (mMeshRendererCache != nullptr) 
         mMeshRendererCache->transform.position = glm::vec3(x, y, z);
-    }
-    if (mCameraCache != nullptr) {
+    if (mCameraCache != nullptr) 
         mCameraCache->transform.position = glm::vec3(x, y, z);
-    }
-    if (mActorCache!= nullptr) {
+    if (mActorCache!= nullptr) 
         mActorCache->navigation.SetPosition( glm::vec3(x, y, z) );
-    }
-    if (mLightCache != nullptr) {
+    if (mLightCache != nullptr) 
         mLightCache->position = glm::vec3(x, y, z);
-    }
+    if (mSoundCache != nullptr) 
+        mSoundCache->SetPosition( glm::vec3(x, y, z) );
     return;
 }
 
@@ -217,6 +226,10 @@ void GameObject::Activate(void) {
             Actor* actor = (Actor*)componentPtr->GetComponent();
             actor->SetActive(true);
         }
+        if (type == Components.Sound) {
+            Sound* sound = (Sound*)componentPtr->GetComponent();
+            sound->isActive = true;
+        }
         
         continue;
     }
@@ -253,6 +266,10 @@ void GameObject::Deactivate(void) {
         if (type == Components.Actor) {
             Actor* actor = (Actor*)componentPtr->GetComponent();
             actor->SetActive(false);
+        }
+        if (type == Components.Sound) {
+            Sound* sound = (Sound*)componentPtr->GetComponent();
+            sound->isActive = false;
         }
         
         continue;

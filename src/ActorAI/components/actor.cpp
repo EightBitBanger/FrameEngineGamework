@@ -201,8 +201,7 @@ void Actor::ReexpressPhenotype(void) {
 }
 
 std::string Actor::GetName(void) {
-    std::string nameString = mName;
-    return nameString;
+    return mName;
 }
 
 
@@ -210,47 +209,45 @@ std::string Actor::GetName(void) {
 // Targeting / navigation and focus
 
 void Actor::NavigationSystem::SetPosition(glm::vec3 position) {
-    mux.lock();
+    std::lock_guard<std::mutex> lock(mux);
     mPosition = position;
-    mux.unlock();
     return;
 }
 
 glm::vec3 Actor::NavigationSystem::GetPosition(void) {
-    mux.lock();
-    glm::vec3 position = mPosition;
-    mux.unlock();
-    return position;
+    std::lock_guard<std::mutex> lock(mux);
+    return mPosition;
 }
 
 void Actor::NavigationSystem::SetTargetPoint(glm::vec3 position) {
-    mux.lock();
+    std::lock_guard<std::mutex> lock(mux);
     mTargetPoint = position;
-    mux.unlock();
     return;
 }
 
 glm::vec3 Actor::NavigationSystem::GetTargetPoint(void) {
-    mux.lock();
-    glm::vec3 position = mTargetPoint;
-    mux.unlock();
-    return position;
+    std::lock_guard<std::mutex> lock(mux);
+    return mTargetPoint;
 }
 
 Actor* Actor::NavigationSystem::GetBreedWithActor(void) {
+    std::lock_guard<std::mutex> lock(mux);
     return mTargetBreeding;
 }
 
 void Actor::NavigationSystem::SetBreedWithActor(Actor* actorPtr) {
+    std::lock_guard<std::mutex> lock(mux);
     mTargetBreeding = actorPtr;
     return;
 }
 
 Actor* Actor::NavigationSystem::GetTargetActor(void) {
+    std::lock_guard<std::mutex> lock(mux);
     return mTargetActor;
 }
 
 void Actor::NavigationSystem::SetTargetActor(Actor* actorPtr) {
+    std::lock_guard<std::mutex> lock(mux);
     mTargetActor = actorPtr;
     return;
 }
@@ -260,56 +257,68 @@ void Actor::NavigationSystem::SetTargetActor(Actor* actorPtr) {
 // AI state behavioral hardwiring
 
 void Actor::Behavior::SetDistanceToFocus(float distance) {
+    std::lock_guard<std::mutex> lock(mux);
     mDistanceToFocus = distance;
     return;
 }
 
 float Actor::Behavior::GetDistanceToFocus(void) {
+    std::lock_guard<std::mutex> lock(mux);
     return mDistanceToFocus;
 }
 
 void Actor::Behavior::SetDistanceToWalk(float distance) {
+    std::lock_guard<std::mutex> lock(mux);
     mDistanceToWalk = distance;
     return;
 }
 
 float Actor::Behavior::GetDistanceToWalk(void) {
+    std::lock_guard<std::mutex> lock(mux);
     return mDistanceToWalk;
 }
 
 void Actor::Behavior::SetDistanceToAttack(float distance) {
+    std::lock_guard<std::mutex> lock(mux);
     mDistanceToAttack = distance;
     return;
 }
 
 float Actor::Behavior::GetDistanceToAttack(void) {
+    std::lock_guard<std::mutex> lock(mux);
     return mDistanceToAttack;
 }
 
 void Actor::Behavior::SetDistanceToFlee(float distance) {
+    std::lock_guard<std::mutex> lock(mux);
     mDistanceToFlee = distance;
     return;
 }
 
 float Actor::Behavior::GetDistanceToFlee(void) {
+    std::lock_guard<std::mutex> lock(mux);
     return mDistanceToFlee;
 }
 
 void Actor::Behavior::SetHeightPreferenceMin(float height) {
+    std::lock_guard<std::mutex> lock(mux);
     mHeightPreferenceMin = height;
     return;
 }
 
 float Actor::Behavior::GetHeightPreferenceMin(void) {
+    std::lock_guard<std::mutex> lock(mux);
     return mHeightPreferenceMin;
 }
 
 void Actor::Behavior::SetHeightPreferenceMax(float height) {
+    std::lock_guard<std::mutex> lock(mux);
     mHeightPreferenceMax = height;
     return;
 }
 
 float Actor::Behavior::GetHeightPreferenceMax(void) {
+    std::lock_guard<std::mutex> lock(mux);
     return mHeightPreferenceMax;
 }
 
@@ -318,7 +327,7 @@ float Actor::Behavior::GetHeightPreferenceMax(void) {
 // Neural network
 
 void Actor::IdiosyncraticCharacteristics::SetNeuralTopology(std::vector<NeuralLayer>& layers) {
-    mux.lock();
+    std::lock_guard<std::mutex> lock(mux);
     
     mNeuralNetwork.ClearTopology();
     
@@ -326,45 +335,43 @@ void Actor::IdiosyncraticCharacteristics::SetNeuralTopology(std::vector<NeuralLa
     
     for (unsigned int i=0; i < numberOfLayers; i++) {
         NeuralLayer& layer = layers[i];
-        
         mNeuralNetwork.AddNeuralLayer(layer.numberOfNeurons, layer.numberOfInputs);
     }
-    
-    mux.unlock();
     return;
 }
 
 std::vector<float> Actor::IdiosyncraticCharacteristics::SaveNeuralStates(void) {
-    mux.lock();
-    std::vector<float> states = mNeuralNetwork.SaveStateBin();
-    mux.unlock();
-    return states;
+    std::lock_guard<std::mutex> lock(mux);
+    return mNeuralNetwork.SaveStateBin();
 }
 
 void Actor::IdiosyncraticCharacteristics::LoadNeuralStates(std::vector<float>& states) {
-    mux.lock();
+    std::lock_guard<std::mutex> lock(mux);
     mNeuralNetwork.LoadStateBin( states );
-    mux.unlock();
     return;
 }
 
 
 void Actor::IdiosyncraticCharacteristics::AddMemory(std::string name, std::string memory) {
+    std::lock_guard<std::mutex> lock(mux);
     mMemories[name] = memory;
     return;
 }
 
 bool Actor::IdiosyncraticCharacteristics::RemoveMemory(std::string name) {
+    std::lock_guard<std::mutex> lock(mux);
     mMemories.erase(name);
     return false;
 }
 
 void Actor::IdiosyncraticCharacteristics::ClearMemories(void) {
+    std::lock_guard<std::mutex> lock(mux);
     mMemories.clear();
     return;
 }
 
 bool Actor::IdiosyncraticCharacteristics::CheckMemoryExists(std::string name) {
+    std::lock_guard<std::mutex> lock(mux);
     std::unordered_map<std::string, std::string>::iterator it = mMemories.find(name);
     if (it != mMemories.end()) 
         return true;
@@ -424,6 +431,9 @@ MeshRenderer* Actor::GeneticsSystem::GetMeshRendererAtIndex(unsigned int index) 
     return mGeneticRenderers[index];
 }
 
+
+//
+// Physical characteristics
 
 void Actor::PhysicalAttributes::SetAge(unsigned long int newAge) {
     mAge = newAge;
@@ -507,6 +517,9 @@ bool Actor::PhysicalAttributes::GetSexualOrientation(void) {
 }
 
 
+//
+// Cool down counters
+
 void Actor::CooldownCounters::SetCoolDownBreeding(unsigned int counter) {
     mBreedingCoolDownCounter = counter;
     return;
@@ -516,6 +529,9 @@ unsigned int Actor::CooldownCounters::GetCoolDownBreeding(void) {
     return mBreedingCoolDownCounter;
 }
 
+
+//
+// User assignable variables
 
 void Actor::UserVariables::SetUserBitmask(uint8_t bitmask) {
     mBitmask = bitmask;

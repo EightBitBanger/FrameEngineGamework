@@ -31,6 +31,14 @@ int NumberGeneration::Range(int min, int max) {
     return (rand() % max) + min;
 }
 
+glm::vec3 NumberGeneration::RangedVector(int min, int max) {
+    glm::vec3 vec(Range(min, max), 
+                  Range(min, max), 
+                  Range(min, max));
+    return vec;
+}
+
+
 float NumberGeneration::Range(float min, float max) {
     return ((float)(rand() % (int)(max * 100.0f)) * 0.01f) + min;
 }
