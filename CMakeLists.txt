@@ -179,6 +179,7 @@ if(BUILD_CORE_LIBRARY)
     "src/Audio/SamplePresets.cpp"
     "src/Audio/components/sound.cpp"
     "src/Audio/components/samplebuffer.cpp"
+    "src/Audio/components/playback.cpp"
     
     "src/Networking/NetworkSystem.cpp"
     
@@ -187,7 +188,6 @@ if(BUILD_CORE_LIBRARY)
     "src/Engine/EngineUpdate.cpp"
     "src/Engine/EngineConsole.cpp"
     "src/Engine/EngineGameObjects.cpp"
-    "src/Engine/EngineComponents.cpp"
     "src/Engine/EngineUpdateStream.cpp"
     
     "src/Engine/componentUpdate/EngineUpdateUI.cpp"
@@ -196,6 +196,7 @@ if(BUILD_CORE_LIBRARY)
     "src/Engine/componentUpdate/EngineUpdateAITargeting.cpp"
     "src/Engine/componentUpdate/EngineUpdateAIAnimations.cpp"
     "src/Engine/componentUpdate/EngineUpdateAIPhysics.cpp"
+    "src/Engine/componentUpdate/EngineUpdateAudio.cpp"
     "src/Engine/componentUpdate/EngineUpdateCamera.cpp"
     "src/Engine/componentUpdate/EngineUpdatePanel.cpp"
     "src/Engine/componentUpdate/EngineUpdateText.cpp"
