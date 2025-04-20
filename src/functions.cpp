@@ -7,11 +7,12 @@
 
 void EventLostFocus(void) {
     
-    Engine.EnableConsole();
+    Engine.console.Enable();
     
-    Camera* mainCamera = Engine.cameraController->GetComponent<Camera>();
-    
-    mainCamera->DisableMouseLook();
+    if (Engine.cameraController != nullptr) {
+        Camera* mainCamera = Engine.cameraController->GetComponent<Camera>();
+        mainCamera->DisableMouseLook();
+    }
     
     Input.ClearKeys();
     
@@ -30,13 +31,13 @@ void FuncList(std::vector<std::string> args) {
     
     if (dirList.size() == 0) {
         
-        Engine.Print("No worlds");
+        //Engine.Print("No worlds");
         
         return;
     }
     
-    for (unsigned int i=0; i < dirList.size(); i++) 
-        Engine.Print( dirList[i] );
+    //for (unsigned int i=0; i < dirList.size(); i++) 
+    //    Engine.Print( dirList[i] );
     
     return;
 }
@@ -49,12 +50,12 @@ void FuncSave(std::vector<std::string> args) {
     
     if (GameWorld.SaveWorld()) {
         
-        Engine.Print("Saving: " + GameWorld.world.name);
+        //Engine.Print("Saving: " + GameWorld.world.name);
         
         return;
     }
     
-    Engine.Print("Error saving world: " + GameWorld.world.name);
+    //Engine.Print("Error saving world: " + GameWorld.world.name);
     
     return;
 }
@@ -67,12 +68,12 @@ void FuncLoad(std::vector<std::string> args) {
     
     if (GameWorld.LoadWorld()) {
         
-        Engine.Print("Loading: " + GameWorld.world.name);
+        //Engine.Print("Loading: " + GameWorld.world.name);
         
         return;
     }
     
-    Engine.Print("Generating: " + GameWorld.world.name);
+    //Engine.Print("Generating: " + GameWorld.world.name);
     
     GameWorld.worldSeed = Random.Range(100, 10000000) - Random.Range(100, 10000000);
     
@@ -92,12 +93,12 @@ void FuncRemove(std::vector<std::string> args) {
     
     if (GameWorld.DestroyWorld( args[0] )) {
         
-        Engine.Print("Deleted: " + args[0]);
+        //Engine.Print("Deleted: " + args[0]);
         
         return;
     }
     
-    Engine.Print("Error deleting world: " + args[0]);
+    //Engine.Print("Error deleting world: " + args[0]);
     
     return;
 }
@@ -112,7 +113,7 @@ void FuncClear(std::vector<std::string> args) {
     
     camera->mouseLookAngle = glm::vec2(0, 0);
     
-    Engine.Print("World cleared");
+    //Engine.Print("World cleared");
     
     return;
 }
@@ -122,14 +123,14 @@ void FuncSeed(std::vector<std::string> args) {
     
     if (args[0] == "") {
         
-        Engine.Print("World seed: " + Int.ToString(GameWorld.worldSeed));
+        //Engine.Print("World seed: " + Int.ToString(GameWorld.worldSeed));
         
         return;
     }
     
     GameWorld.worldSeed = String.ToInt(args[0]);
     
-    Engine.Print("World seed: " + Int.ToString(GameWorld.worldSeed));
+    //Engine.Print("World seed: " + Int.ToString(GameWorld.worldSeed));
     
     return;
 }
@@ -148,7 +149,7 @@ void FuncSummon(std::vector<std::string> args) {
         
         if (entityType == 0) {
             
-            Engine.Print("Unknown actor type");
+            //Engine.Print("Unknown actor type");
             
             return;
         }
@@ -179,7 +180,7 @@ void FuncSummon(std::vector<std::string> args) {
         continue;
     }
     
-    Engine.Print("Actor summoned");
+    //Engine.Print("Actor summoned");
     
     return;
 }
@@ -193,30 +194,30 @@ void FuncTime(std::vector<std::string> args) {
         
         if (args[1] == "day") {
             Weather.SetTime(7000);
-            Engine.Print(msgTimeSetTo + "day");
+            //Engine.Print(msgTimeSetTo + "day");
             return;
         }
         
         if (args[1] == "noon") {
             Weather.SetTime(12000);
-            Engine.Print(msgTimeSetTo + "noon");
+            //Engine.Print(msgTimeSetTo + "noon");
             return;
         }
         
         if (args[1] == "night") {
             Weather.SetTime(17000);
-            Engine.Print(msgTimeSetTo + "night");
+            //Engine.Print(msgTimeSetTo + "night");
             return;
         }
         
         if (args[1] == "midnight") {
             Weather.SetTime(0);
-            Engine.Print(msgTimeSetTo + "midnight");
+            //Engine.Print(msgTimeSetTo + "midnight");
             return;
         }
         
         if (!String.IsNumeric(args[1])) {
-            Engine.Print("Invalid time " + args[1]);
+            //Engine.Print("Invalid time " + args[1]);
             return;
         }
         
@@ -224,7 +225,7 @@ void FuncTime(std::vector<std::string> args) {
         
         Weather.SetTime((float)time);
         
-        Engine.Print(msgTimeSetTo + args[1]);
+        //Engine.Print(msgTimeSetTo + args[1]);
         
         return;
     }
@@ -239,21 +240,21 @@ void FuncWeather(std::vector<std::string> args) {
     
     if (args[0] == "clear") {
         Weather.SetWeatherNext(WeatherType::Clear);
-        Engine.Print(msgWeatherSet + "clear");
+        //Engine.Print(msgWeatherSet + "clear");
         return;
     }
     if (args[0] == "rain") {
         Weather.SetWeatherNext(WeatherType::Rain);
-        Engine.Print(msgWeatherSet + "rain");
+        //Engine.Print(msgWeatherSet + "rain");
         return;
     }
     if (args[0] == "snow") {
         Weather.SetWeatherNext(WeatherType::Snow);
-        Engine.Print(msgWeatherSet + "snow");
+        //Engine.Print(msgWeatherSet + "snow");
         return;
     }
     
-    Engine.Print(msgWeatherSet + " invalid");
+    //Engine.Print(msgWeatherSet + " invalid");
     
     return;
 }
@@ -261,6 +262,7 @@ void FuncWeather(std::vector<std::string> args) {
 
 // Button callbacks
 
+/*
 
 void ButtonLoadWorld(Button* currentButton) {
     
@@ -313,10 +315,12 @@ void ButtonQuitApplication(Button* currentButton) {
     
     return;
 }
+*/
+
 
 void MainMenuEnable(void) {
     
-    Engine.EnableConsole();
+    Engine.console.Enable();
     
     Engine.sceneMain->camera->DisableMouseLook();
     
@@ -324,21 +328,14 @@ void MainMenuEnable(void) {
     
     Platform.ShowMouseCursor();
     
-    // Enable menu UI
-    //menuPanelObject->Activate();
-    //versionTextObject->Activate();
-    //loadWorldButton->Activate();
-    //saveWorldButton->Activate();
-    //clearWorldButton->Activate();
-    //quitButton->Activate();
-    
     return;
 }
 
 void MainMenuDisable(void) {
     
-    Engine.DisableConsole();
-    Engine.ConsoleClearInputString();
+    // Clear the console
+    Engine.console.Disable();
+    Engine.console.Clear();
     
     Engine.sceneMain->camera->EnableMouseLook();
     
@@ -350,14 +347,6 @@ void MainMenuDisable(void) {
     // Reset timers
     Time.Update();
     PhysicsTime.Update();
-    
-    // Disable menu UI
-    //menuPanelObject->Deactivate();
-    //versionTextObject->Deactivate();
-    //loadWorldButton->Deactivate();
-    //saveWorldButton->Deactivate();
-    //clearWorldButton->Deactivate();
-    //quitButton->Deactivate();
     
     return;
 }

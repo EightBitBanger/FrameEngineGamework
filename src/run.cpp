@@ -292,6 +292,11 @@ Sound* sound;
 
 void Run() {
     
+    // Update plug-in systems
+    Weather.Update();
+    Particle.Update();
+    GameWorld.Update();
+    
     sample = Audio.CreateAudioSample();
     Audio.Presets.RenderWhiteNoise(sample, 0.8f);
     
@@ -447,15 +452,6 @@ void Run() {
     
     
     
-    // Update plug-in systems
-    
-    Weather.Update();
-    
-    Particle.Update();
-    
-    GameWorld.Update();
-    
-    
     // Cast a ray from the player
     
     Hit hit;
@@ -551,6 +547,12 @@ void Run() {
                 samplePlayer->doRepeat = true;
                 */
                 
+                
+                
+                
+                
+                
+                /*
                 actorObject->AddComponent( Engine.CreateComponent<Sound>() );
                 Sound* soundPtr = actorObject->GetComponent<Sound>();
                 
@@ -570,7 +572,7 @@ void Run() {
                 Playback* playback = Audio.Play(soundPtr);
                 playback->doRepeat = true;
                 playback->SetVolume(0.1f);
-                
+                */
             }
             
             
@@ -752,8 +754,8 @@ void Run() {
         isDebugReportActive = !isDebugReportActive;
         
         if (!isDebugReportActive) {
-            for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
-                Engine.WriteDialog(i, "");
+            //for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
+            //    Engine.WriteDialog(i, "");
         }
         
     }
@@ -798,7 +800,7 @@ void Run() {
                 chunkPosition += ", ";
                 chunkPosition += Float.ToString( hitObject->GetPosition().z );
                 
-                Engine.WriteDialog(0, chunkPosition);
+                //Engine.WriteDialog(0, chunkPosition);
                 
             }
             
@@ -814,7 +816,7 @@ void Run() {
         playerPosition += "  z ";
         playerPosition += Int.ToString( cameraPosition.z );
         
-        Engine.WriteDialog(3, playerPosition);
+        //Engine.WriteDialog(3, playerPosition);
         
         // Check object in front of camera
         

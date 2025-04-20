@@ -3,18 +3,6 @@
 
 #include <GameEngineFramework/plugins.h>
 
-
-
-// Menu UI
-GameObject* menuPanelObject;
-GameObject* versionTextObject;
-
-Button* loadWorldButton;
-Button* saveWorldButton;
-Button* clearWorldButton;
-Button* quitButton;
-
-
 #include <vector>
 #include <cmath>
 #include <cstdint>
@@ -128,27 +116,31 @@ std::vector<int32_t> GenerateCreatureVoice(const AudioGene& gene, int sampleRate
 
 void Start() {
     
-    // Load console functions
-    Engine.ConsoleRegisterCommand("summon",  FuncSummon);
-    Engine.ConsoleRegisterCommand("list",    FuncList);
+    // Initiate the command console and 
+    // load the required command functions
+    Engine.console.Enable();
     
-    Engine.ConsoleRegisterCommand("save",    FuncSave);
-    Engine.ConsoleRegisterCommand("load",    FuncLoad);
-    Engine.ConsoleRegisterCommand("remove",  FuncRemove);
+    Engine.console.RegisterCommand("summon",  FuncSummon);
+    Engine.console.RegisterCommand("list",    FuncList);
     
-    Engine.ConsoleRegisterCommand("clear",   FuncClear);
-    Engine.ConsoleRegisterCommand("seed",    FuncSeed);
+    Engine.console.RegisterCommand("save",    FuncSave);
+    Engine.console.RegisterCommand("load",    FuncLoad);
+    Engine.console.RegisterCommand("remove",  FuncRemove);
     
-    Engine.ConsoleRegisterCommand("time",    FuncTime);
-    Engine.ConsoleRegisterCommand("weather", FuncWeather);
+    Engine.console.RegisterCommand("clear",   FuncClear);
+    Engine.console.RegisterCommand("seed",    FuncSeed);
+    
+    Engine.console.RegisterCommand("time",    FuncTime);
+    Engine.console.RegisterCommand("weather", FuncWeather);
     
     
+    // Initiate platform state
     Platform.ShowMouseCursor();
-    Engine.DisableConsoleCloseOnReturn();
+    //Engine.DisableConsoleCloseOnReturn();
     
     Platform.isPaused = true;
-    Engine.EnableConsole();
-    Engine.EnableConsoleFadeOutTextElements();
+    //Engine.EnableConsole();
+    //Engine.EnableConsoleFadeOutTextElements();
     
     
     // User plug-in initiation
@@ -344,8 +336,8 @@ void Start() {
     
     GameWorld.world.mDecorations.push_back(decorWaterPlants);
     
-    //GameWorld.world.mDecorations.push_back(decorSheep);
-    //GameWorld.world.mDecorations.push_back(decorBear);
+    GameWorld.world.mDecorations.push_back(decorSheep);
+    GameWorld.world.mDecorations.push_back(decorBear);
     
     
     // Perlin layers
@@ -436,9 +428,33 @@ void Start() {
     GameWorld.actorDistance  = GameWorld.renderDistance * 0.8f;
     
     
+    
+    
+    
+    
+    
+    //Text* text = UI.CreateText();
+    //text->x = 0;
+    //text->y = 0;
+    //text->text = "test string of text";
+    
+    //Panel* panel = UI.CreatePanel();
+    //panel->x = 10;
+    //panel->y = 10;
+    //panel->w = 100;
+    //panel->h = 100;
+    
+    
+    
+    
+    
+    
+    
     return;
     
     // Initiate UI
+    
+    /*
     
     // Menu overlay
     menuPanelObject = Engine.CreateOverlayPanelRenderer(0, 300, 230, 150, "panel_menu");
@@ -483,7 +499,7 @@ void Start() {
     quitWorldText->canvas.anchorCenterHorz = true;
     
     //MainMenuDisable();
-    
+    */
     
     
     
