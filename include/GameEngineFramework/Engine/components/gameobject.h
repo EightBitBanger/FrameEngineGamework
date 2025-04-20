@@ -8,9 +8,6 @@
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
 #include <GameEngineFramework/Audio/components/sound.h>
 
-#include <GameEngineFramework/Engine/UI/panel.h>
-#include <GameEngineFramework/Engine/UI/text.h>
-
 #include <GameEngineFramework/Engine/components/component.h>
 
 #include <type_traits>
@@ -60,8 +57,6 @@ public:
         if (std::is_same<T, MeshRenderer>::value)     return (T*)mMeshRendererCache;
         if (std::is_same<T, RigidBody>::value)        return (T*)mRigidBodyCache;
         if (std::is_same<T, Actor>::value)            return (T*)mActorCache;
-        if (std::is_same<T, Text>::value)             return (T*)mTextCache;
-        if (std::is_same<T, Panel>::value)            return (T*)mPanelCache;
         if (std::is_same<T, Sound>::value)            return (T*)mSoundCache;
         
         return nullptr;
@@ -194,8 +189,6 @@ private:
     MeshRenderer*    mMeshRendererCache;
     Light*           mLightCache;
     Actor*           mActorCache;
-    Text*            mTextCache;
-    Panel*           mPanelCache;
     Sound*           mSoundCache;
     
 };

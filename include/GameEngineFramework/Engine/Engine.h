@@ -4,13 +4,8 @@
 #include <GameEngineFramework/Engine/components/gameobject.h>
 #include <GameEngineFramework/Engine/components/component.h>
 
-#include <GameEngineFramework/Engine/UI/canvas.h>
-#include <GameEngineFramework/Engine/UI/panel.h>
-#include <GameEngineFramework/Engine/UI/sprite.h>
-#include <GameEngineFramework/Engine/UI/text.h>
-#include <GameEngineFramework/Engine/UI/button.h>
-
 #include <GameEngineFramework/application/Platform.h>
+#include <GameEngineFramework/UI/UserInterfaceSystem.h>
 
 #include <GameEngineFramework/Resources/ResourceManager.h>
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
@@ -43,11 +38,8 @@
     #include <GameEngineFramework/Engine/EngineSystems.h>
 #endif
 
-// UI callback type
-typedef void(*ButtonCallBack)(Button*);
 
-
-#define COMPONENT_STREAM_BUFFER_SIZE   1024 * 64
+#define COMPONENT_STREAM_BUFFER_SIZE   1024 * 1024   // One magabyte
 
 
 class ENGINE_API EngineSystemManager {
@@ -62,7 +54,6 @@ public:
     
     /// Assigned game object acting as a camera controller object.
     GameObject* cameraController;
-    
     
     // Game objects
     
@@ -85,124 +76,13 @@ public:
     GameObject* CreateAIActor(glm::vec3 position);
     
     
-    // UI elements
-    
-    /// Create an empty overlay renderer and return its object.
-    GameObject* CreateOverlayRenderer(void);
-    
-    /// Create a text overlay and return its object.
-    GameObject* CreateOverlayTextRenderer(float x, float y, std::string text, float textSize, Color color, std::string materialTag);
-    
-    /// Create a panel overlay and return its object.
-    GameObject* CreateOverlayPanelRenderer(float x, float y, float width, float height, std::string materialTag);
-    
-    /// Create a button callback with an overlay panel and text.
-    Button* CreateButtonUI(float buttonX, float buttonY, float buttonW, float buttonH, float textX, float textY, std::string text, std::string materialName, ButtonCallBack callback);
-    
-    
-    // Mouse button event callback
-    
-    /// Create a button and return its pointer.
-    Button* CreateOverlayButtonCallback(float x, float y, float width, float height, ButtonCallBack callback);
-    
-    /// Destroy a button 
-    bool DestroyOverlayButtonCallback(Button* button);
-    
-    // Console
-    
-    /// Enable and render the console text elements.
-    void EnableConsole(void);
-    
-    /// Disable and deactivate the rendering of the console text elements.
-    void DisableConsole(void);
-    
-    /// Return whether the console is currently active
-    bool CheckIsConsoleActive(void);
-    
-    /// Enable console back panel.
-    void EnableConsoleBackPanel(void);
-    
-    /// Disable console back panel.
-    void DisableConsoleBackPanel(void);
-    
-    /// Enable the fade out of text elements after a period of time.
-    void EnableConsoleFadeOutTextElements(void);
-    
-    /// Disable the fade out of text elements after a period of time.
-    void DisableConsoleFadeOutTextElements(void);
-    
-    /// Set the number of frames after which the text element will begin fading out.
-    void SetConsoleFadeOutTimer(unsigned int numberOfFrames);
-    
-    /// Enable automatic close after a command is entered.
-    void EnableConsoleCloseOnReturn(void);
-    
-    /// Disable automatic close after a command is entered.
-    void DisableConsoleCloseOnReturn(void);
-    
-    /// Register a command function into the console to be used at runtime.
-    void ConsoleRegisterCommand(std::string name, void(*function)(std::vector<std::string>));
-    
-    /// Clear the text in the console input string.
-    void ConsoleClearInputString(void);
-    
-    /// Clear the logged messaged above the console input string.
-    void ConsoleClearLog(void);
-    
-    /// Shift the console log text elements up and add the text string into the console log.
-    void Print(std::string text, unsigned int fadeTimer = 0);
-    
-    /// Write a string of text to the dialog text element referenced by index.
-    void WriteDialog(unsigned int index, std::string text);
-    
-    // Profiler
-    
-    /// Allow the profiler to print the results to the display.
-    void EnableProfiler(void);
-    
-    /// Disable the profiler from printing to the display.
-    void DisableProfiler(void);
-    
-    /// Return whether the profiler is currently active
-    bool CheckIsProfilerActive(void);
-    
-    // Lower level UI rendering
+    // Lower level UI sprite rendering
     
     /// Add a string of sprite quads to a mesh.
     void AddMeshText(GameObject* overlayObject, float xPos, float yPos, float width, float height, std::string text, Color textColor);
     
     /// Add a quad to a mesh mapping to a sub sprite from a sprite sheet texture.
     void AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float width, float height, int index, Color meshColor);
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    // Height field chunk generation
-    
-    // Perlin generation
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     EngineSystemManager();
@@ -271,8 +151,6 @@ public:
         if (std::is_same<T, Script>::value)       {type = EngineComponents::Script;        componentObjectPtr = (void*)Scripting.CreateScript();}
         if (std::is_same<T, RigidBody>::value)    {type = EngineComponents::RigidBody;     componentObjectPtr = (void*)Physics.CreateRigidBody();}
         if (std::is_same<T, Actor>::value)        {type = EngineComponents::Actor;         componentObjectPtr = (void*)AI.CreateActor();}
-        if (std::is_same<T, Text>::value)         {type = EngineComponents::Text;          componentObjectPtr = (void*)mTextObjects.Create();}
-        if (std::is_same<T, Panel>::value)        {type = EngineComponents::Panel;         componentObjectPtr = (void*)mPanelObjects.Create();}
         if (std::is_same<T, Sound>::value)        {type = EngineComponents::Sound;         componentObjectPtr = (void*)Audio.CreateSound();}
         
         // Check bad type
@@ -324,8 +202,6 @@ public:
             case Components.Camera:    {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
             case Components.Light:     {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
             case Components.Script:    {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
-            case Components.Text:      {mTextObjects.Destroy( (Text*)componentPtr->GetComponent() ); break;}
-            case Components.Panel:     {mPanelObjects.Destroy( (Panel*)componentPtr->GetComponent() ); break;}
             case Components.Sound:     {Audio.DestroySound( (Sound*)componentPtr->GetComponent() ); break;}
             
             default: break;
@@ -343,8 +219,35 @@ public:
     /// Render the physics debug lines / triangles.
     void UpdatePhysicsDebugRenderer(void);
     
+    // Command console
+    
+    class ENGINE_API CommandConsole {
+        
+    public:
+        
+        bool doCloseConsoleAfterCommand;
+        
+        TextField* input;
+        
+        void Enable(void);
+        void Disable(void);
+        
+        void Clear(void);
+        void Print(std::string text);
+        
+        void ShiftUp(void);
+        
+        bool RegisterCommand(std::string name, void(*function_ptr)(std::vector<std::string>));
+        
+        void ConsoleReturnCallback(std::string& console_text);
+        
+        std::vector<Text*> textElements;
+        
+    } console;
+    
     
 private:
+    
     
     // Create a game object and return its pointer.
     GameObject* CreateGameObject(void);
@@ -352,65 +255,12 @@ private:
     // Destroy a game object.
     bool DestroyGameObject(GameObject* gameObjectPtr);
     
-    
-    //
-    // Profiler
-    
-    bool mIsProfilerEnabled;
-    
-    GameObject* mProfilerTextObjects[PROFILER_NUMBER_OF_ELEMENTS];
-    
-    Text* mProfilerText[PROFILER_NUMBER_OF_ELEMENTS];
-    
-    
-    //
-    // Console
-    
-    bool mIsConsoleEnabled;
-    bool mShowConsoleBackPanel;
-    bool mConsoleCloseAfterCommandEntered;
-    bool mConsoleDoFadeOutTexts;
-    
-    unsigned int mConsoleFadeOutTimer;
-    
-    std::string mConsolePrompt;
-    std::string mConsoleString;
-    
-    Text* mConsoleInput;
-    Text* mConsoleText[CONSOLE_NUMBER_OF_ELEMENTS];
-    
-    GameObject* mConsoleInputObject;
-    GameObject* mConsoleTextObjects[CONSOLE_NUMBER_OF_ELEMENTS];
-    
-    GameObject* mConsolePanelObject;
-    
-    unsigned int mConsoleTimers[CONSOLE_NUMBER_OF_ELEMENTS];
-    
-    // Command function routing
-    struct ConsoleCommand {
-        std::string name;
-        void(*function)(std::vector<std::string>);
-        ConsoleCommand() : 
-            name(""),
-            function(nullptr)
-        {}
-    };
-    
-    std::vector<ConsoleCommand> mConsoleCommands;
-    
-    
     // Batch update engine components
     void UpdateTransformationChains(void);
-    void UpdateUI(void);
-    
-    // Console
-    void UpdateConsole(void);
     
     // Update component by index
     void UpdateMeshRenderer(unsigned int index);
     void UpdateRigidBody(unsigned int index);
-    void UpdatePanelUI(unsigned int index);
-    void UpdateTextUI(unsigned int index);
     void UpdateCamera(unsigned int index);
     void UpdateLight(unsigned int index);
     void UpdateAudio(unsigned int index);
@@ -445,11 +295,6 @@ private:
     // Component allocators
     PoolAllocator<GameObject> mGameObjects;
     PoolAllocator<Component>  mComponents;
-    
-    PoolAllocator<Text>       mTextObjects;
-    PoolAllocator<Panel>      mPanelObjects;
-    PoolAllocator<Button>     mButtons;
-    
     PoolAllocator<Transform>  mTransforms;
     
     // Default assets
@@ -512,9 +357,6 @@ private:
         Camera*        camera;
         RigidBody*     rigidBody;
         MeshRenderer*  meshRenderer;
-        // UI
-        Text*          text;
-        Panel*         panel;
         // Audio
         Sound*         sound;
     };

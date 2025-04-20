@@ -59,7 +59,6 @@ public:
     
     // Actors
     unsigned int actorDensity;
-    float actorHeightCutoff;
     
     
     WorldGeneration() :
@@ -98,10 +97,7 @@ public:
         leafSpreadHeight(1.4f),
         leafHeightOffset(-0.4f),
         
-        actorDensity(10),
-        
-        actorHeightCutoff(20.0f)
-        
+        actorDensity(10)
     {
     }
     
