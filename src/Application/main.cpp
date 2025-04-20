@@ -44,6 +44,9 @@ int main(int argc, char* argv[]) {
     
     Platform.SetRenderTarget();
     
+    // Initiate user interface system
+    UI.Initiate(Platform.windowHandle, Platform.deviceContext);
+    
     // Get display size
     glm::vec2 dim = Platform.GetDisplaySize();
     Renderer.displaySize.x = dim.x;
@@ -98,6 +101,8 @@ int main(int argc, char* argv[]) {
         SDL_Event event;
         
         while (SDL_PollEvent(&event)) {
+            
+            UI.ProcedureHandlerSDL(event);
             
             // Get event key parameter
             SDL_Keycode keycode = event.key.key;
@@ -169,10 +174,6 @@ int main(int argc, char* argv[]) {
                 case SDLK_9: VirtualKey = VK_9; break;
                 
             }
-            
-            std::string dialog = " ";
-            dialog[0] = key;
-            Engine.WriteDialog(2, dialog);
             
             switch (event.type) {
                 
@@ -300,6 +301,7 @@ int main(int argc, char* argv[]) {
         // Reset mouse scroll wheel state
         Input.mouseWheelDelta = 0;
         
+        
         //
         // Tick update timer (background update)
         //
@@ -350,8 +352,8 @@ int main(int argc, char* argv[]) {
             for (int i=0; i < 2; i++) {
                 
                 // --- Profiling ---
-                if (Engine.CheckIsProfilerActive()) 
-                    Profiler.Begin();
+                //if (Engine.CheckIsProfilerActive()) 
+                //    Profiler.Begin();
                 
                 Run();
                 
@@ -362,8 +364,8 @@ int main(int argc, char* argv[]) {
                 Network.Update();
                 
                 // --- Profiling ---
-                if (Engine.CheckIsProfilerActive()) 
-                    Profiler.profileGameEngineUpdate = Profiler.Query();
+                //if (Engine.CheckIsProfilerActive()) 
+                //    Profiler.profileGameEngineUpdate = Profiler.Query();
                 
                 
                 fixedAccumulator -= fixedUpdateTimeout;
@@ -384,19 +386,14 @@ int main(int argc, char* argv[]) {
         if (Time.Update()) {
             
             // --- Profiling ---
-            if (Engine.CheckIsProfilerActive()) 
-                Profiler.Begin();
-            
-            //int w, h;
-            
-            //SDL_GetWindowSize((SDL_Window*)Platform.windowHandle, &w, &h);
-            
-            //glViewport(0, 0, 1280, 720);
-            glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
-            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            //if (Engine.CheckIsProfilerActive()) 
+            //    Profiler.Begin();
             
             // Draw the current frame state
             Renderer.RenderFrame();
+            
+            // Draw the UI overlay
+            UI.Render();
             
             // Turn over the frame buffer
             
@@ -409,8 +406,8 @@ int main(int argc, char* argv[]) {
 #endif
             
             // --- Profiling ---
-            if (Engine.CheckIsProfilerActive()) 
-                Profiler.profileRenderSystem = Profiler.Query();
+            //if (Engine.CheckIsProfilerActive()) 
+            //    Profiler.profileRenderSystem = Profiler.Query();
             
         }
         
@@ -422,8 +419,8 @@ int main(int argc, char* argv[]) {
         if (PhysicsTime.Update()) {
             
             // --- Profiling ---
-            if (Engine.CheckIsProfilerActive()) 
-                Profiler.Begin();
+            //if (Engine.CheckIsProfilerActive()) 
+            //    Profiler.Begin();
             
             Physics.world->update( PHYSICS_UPDATES_PER_SECOND );
             
@@ -432,8 +429,8 @@ int main(int argc, char* argv[]) {
             
             
             // --- Profiling ---
-            if (Engine.CheckIsProfilerActive()) 
-                Profiler.profilePhysicsSystem = Profiler.Query();
+            //if (Engine.CheckIsProfilerActive()) 
+            //    Profiler.profilePhysicsSystem = Profiler.Query();
             
         }
         

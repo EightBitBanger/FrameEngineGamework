@@ -14,8 +14,6 @@ GameObject::GameObject() :
     mMeshRendererCache(nullptr),
     mLightCache(nullptr),
     mActorCache(nullptr),
-    mTextCache(nullptr),
-    mPanelCache(nullptr),
     mSoundCache(nullptr)
 {
 }
@@ -30,54 +28,13 @@ void GameObject::AddComponent(Component* component) {
     mComponentList.push_back(component);
     
     switch (component->GetType()) {
-        
-        case Components.Transform: {
-            assert(mTransformCache == nullptr);
-            mTransformCache = (Transform*)component->GetComponent();
-            break;
-        }
-        case Components.RigidBody: {
-            assert(mRigidBodyCache == nullptr);
-            mRigidBodyCache = (rp3d::RigidBody*)component->GetComponent();
-            mRigidBodyCache->setUserData( (void*)this );
-            break;
-        }
-        case Components.MeshRenderer: {
-            assert(mMeshRendererCache == nullptr);
-            mMeshRendererCache = (MeshRenderer*)component->GetComponent();
-            break;
-        }
-        case Components.Camera: {
-            assert(mCameraCache == nullptr);
-            mCameraCache = (Camera*)component->GetComponent();
-            break;
-        }
-        case Components.Light: {
-            assert(mLightCache == nullptr);
-            mLightCache = (Light*)component->GetComponent();
-            break;
-        }
-        case Components.Actor: {
-            assert(mActorCache == nullptr);
-            mActorCache = (Actor*)component->GetComponent();
-            break;
-        }
-        case Components.Text: {
-            assert(mTextCache == nullptr);
-            mTextCache = (Text*)component->GetComponent();
-            break;
-        }
-        case Components.Panel: {
-            assert(mPanelCache == nullptr);
-            mPanelCache = (Panel*)component->GetComponent();
-            break;
-        }
-        case Components.Sound: {
-            assert(mSoundCache == nullptr);
-            mSoundCache = (Sound*)component->GetComponent();
-            break;
-        }
-        
+        case Components.Transform: {mTransformCache = (Transform*)component->GetComponent(); break;}
+        case Components.RigidBody: {mRigidBodyCache = (rp3d::RigidBody*)component->GetComponent(); mRigidBodyCache->setUserData( (void*)this ); break;}
+        case Components.MeshRenderer: {mMeshRendererCache = (MeshRenderer*)component->GetComponent(); break;}
+        case Components.Camera: {mCameraCache = (Camera*)component->GetComponent(); break;}
+        case Components.Light: {mLightCache = (Light*)component->GetComponent(); break;}
+        case Components.Actor: {mActorCache = (Actor*)component->GetComponent(); break;}
+        case Components.Sound: {mSoundCache = (Sound*)component->GetComponent(); break;}
         default: break;
     }
     
@@ -96,54 +53,13 @@ bool GameObject::RemoveComponent(Component* component) {
         mComponentList.erase(it);
         
         switch ( component->GetType() ) {
-            
-            case Components.Transform: {
-                assert(mTransformCache != nullptr);
-                mTransformCache = nullptr;
-                break;
-            }
-            case Components.MeshRenderer: {
-                assert(mMeshRendererCache != nullptr);
-                mMeshRendererCache = nullptr;
-                break;
-            }
-            case Components.RigidBody: {
-                assert(mRigidBodyCache != nullptr);
-                mRigidBodyCache->setUserData( nullptr );
-                mRigidBodyCache = nullptr;
-                break;
-            }
-            case Components.Camera: {
-                assert(mCameraCache != nullptr);
-                mCameraCache = nullptr;
-                break;
-            }
-            case Components.Light: {
-                assert(mLightCache != nullptr);
-                mLightCache = nullptr;
-                break;
-            }
-            case Components.Actor: {
-                assert(mActorCache != nullptr);
-                mActorCache = nullptr;
-                break;
-            }
-            case Components.Text: {
-                assert(mTextCache != nullptr);
-                mTextCache = nullptr;
-                break;
-            }
-            case Components.Panel: {
-                assert(mPanelCache != nullptr);
-                mPanelCache = nullptr;
-                break;
-            }
-            case Components.Sound: {
-                assert(mSoundCache != nullptr);
-                mSoundCache = nullptr;
-                break;
-            }
-            
+            case Components.Transform: {mTransformCache = nullptr; break;}
+            case Components.MeshRenderer: {mMeshRendererCache = nullptr; break;}
+            case Components.RigidBody: {mRigidBodyCache->setUserData( nullptr ); mRigidBodyCache = nullptr; break;}
+            case Components.Camera: {mCameraCache = nullptr; break;}
+            case Components.Light: {mLightCache = nullptr; break;}
+            case Components.Actor: {mActorCache = nullptr; break;}
+            case Components.Sound: {mSoundCache = nullptr; break;}
             default: break;
         }
         

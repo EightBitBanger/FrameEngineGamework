@@ -1,15 +1,24 @@
 #include <GameEngineFramework/Application/procedure.h>
 #include <GameEngineFramework/configuration.h>
+#include <GameEngineFramework/UI/UserInterfaceSystem.h>
 
-extern InputSystem    Input;
-extern RenderSystem   Renderer;
-extern PlatformLayer  Platform;
+extern InputSystem          Input;
+extern RenderSystem         Renderer;
+extern PlatformLayer        Platform;
+extern UserInterfaceSystem  UI;
 
 #ifdef PLATFORM_WINDOWS
 
 extern "C" ENGINE_API LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam);
 
 LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lParam) {
+    
+    uintptr_t wHandle     = reinterpret_cast<uintptr_t>(wHnd);
+    uint32_t message      = static_cast<uint32_t>(Messages);
+    uintptr_t wParameter  = static_cast<uintptr_t>(wParam);
+    uintptr_t lParameter  = static_cast<uintptr_t>(lParam);
+    
+    UI.ProcedureHandler(wHandle, message, wParameter, lParameter);
     
     switch (Messages) {
         

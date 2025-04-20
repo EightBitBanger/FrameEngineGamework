@@ -53,7 +53,16 @@ std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
     for (unsigned int i=0; i < numberOfGenes; i++) {
         
         Gene gene = sourceActor->genetics.GetGeneFromGenome( i );
+        
+        // Check invalid gene
+        if (gene.color.x == -1.0f) 
+            continue;
+        
         Phen phen = sourceActor->genetics.GetPhenFromPhenotype( i );
+        
+        // Check invalid phen
+        if (phen.color.x == -1.0f) 
+            continue;
         
         genetics += "#";
         

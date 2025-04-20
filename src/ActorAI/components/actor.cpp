@@ -407,11 +407,20 @@ unsigned int Actor::GeneticsSystem::GetNumberOfGenes(void) {
 }
 
 Gene Actor::GeneticsSystem::GetGeneFromGenome(unsigned int index) {
-    return mGenes[index];
+    if (index < mGenes.size()) 
+        return mGenes[index];
+    Gene gene;
+    gene.color.x = -1.0f;
+    return gene;
+    
 }
 
 Phen Actor::GeneticsSystem::GetPhenFromPhenotype(unsigned int index) {
-    return mPhen[index];
+    if (index < mPhen.size()) 
+        return mPhen[index];
+    Phen phen;
+    phen.color.x = -1.0f;
+    return phen;
 }
 
 void Actor::GeneticsSystem::SetGeneration(unsigned int newGeneration) {
@@ -428,7 +437,9 @@ unsigned int Actor::GeneticsSystem::GetNumberOfMeshRenderers(void) {
 }
 
 MeshRenderer* Actor::GeneticsSystem::GetMeshRendererAtIndex(unsigned int index) {
-    return mGeneticRenderers[index];
+    if (index < mGeneticRenderers.size()) 
+        return mGeneticRenderers[index];
+    return nullptr;
 }
 
 

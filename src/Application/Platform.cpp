@@ -18,6 +18,19 @@
 
 // Icon reference
 #define IDI_ICON  101
+
+#include "imgui.h"
+#include "backends/imgui_impl_win32.h"
+#include "backends/imgui_impl_opengl3.h"
+
+#endif
+
+#ifdef PLATFORM_LINUX
+
+#include "imgui.h"
+#include "backends/imgui_impl_sdl3.h"
+#include "backends/imgui_impl_opengl3.h"
+
 #endif
 
 

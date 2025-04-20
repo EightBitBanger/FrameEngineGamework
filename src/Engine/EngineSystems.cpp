@@ -8,6 +8,7 @@ ENGINE_API Timer                PhysicsTime;
 ENGINE_API Timer                Time;
 ENGINE_API ProfilerTimer        Profiler;
 
+ENGINE_API UserInterfaceSystem  UI;
 ENGINE_API Serialization        Serializer;
 ENGINE_API ResourceManager      Resources;
 ENGINE_API ScriptSystem         Scripting;

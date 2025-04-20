@@ -38,18 +38,7 @@ void EngineSystemManager::UpdateCamera(unsigned int index) {
     mStreamBuffer[index].camera->lookAngle.y = (((glm::degrees( mStreamBuffer[index].camera->transform.rotation.y ) - 6.28277f) * 1.91f * 30.0f) + 360.0f);
     mStreamBuffer[index].camera->lookAngle.y = Math.Round( +mStreamBuffer[index].camera->lookAngle.y );
     
-    // Check camera panel
-    if (mStreamBuffer[index].panel != nullptr) {
-        
-        //
-        // TODO: Add ability to align the camera view port with a panel canvas here
-        //
-        
-    } else {
-        
-        mStreamBuffer[index].camera->transform.position = mStreamBuffer[index].transform->position;
-        
-    }
+    mStreamBuffer[index].camera->transform.position = mStreamBuffer[index].transform->position;
     
     return;
 }

@@ -6,21 +6,6 @@ EngineSystemManager::EngineSystemManager(void) :
     sceneOverlay(nullptr),
     cameraController(nullptr),
     
-    mIsProfilerEnabled(false),
-    
-    mIsConsoleEnabled(false),
-    mShowConsoleBackPanel(true),
-    mConsoleCloseAfterCommandEntered(true),
-    mConsoleDoFadeOutTexts(true),
-    
-    mConsoleFadeOutTimer(700),
-    
-    mConsolePrompt("-"),
-    mConsoleString(""),
-    mConsoleInput(nullptr),
-    mConsoleInputObject(nullptr),
-    mConsolePanelObject(nullptr),
-    
     mDataStreamIndex(0),
     mObjectIndex(0),
     mStreamSize(0),
@@ -36,113 +21,40 @@ unsigned int EngineSystemManager::GetNumberOfComponents(void) {
     return mComponents.Size();
 }
 
-
-
-
-
-
-
-//
-// Generation
-//
-
-
-// UI
-
-
-Button* EngineSystemManager::CreateOverlayButtonCallback(float x, float y, float width, float height, ButtonCallBack callback) {
-    Button* newButton = mButtons.Create();
-    newButton->x = x;
-    newButton->y = y;
-    newButton->w = width;
-    newButton->h = height;
-    newButton->callback = callback;
-    return newButton;
-}
-
-bool EngineSystemManager::DestroyOverlayButtonCallback(Button* button) {
-    return mButtons.Destroy( button );
-}
-
-void EngineSystemManager::AddMeshText(GameObject* overlayObject, 
-                                      float xPos, float yPos, 
-                                      float width, float height, 
-                                      std::string text, Color textColor) {
-    
-    Mesh* meshPtr = overlayObject->GetComponent<MeshRenderer>()->mesh;
-    if (meshPtr == nullptr) 
-        return;
-    
-    for (unsigned int i=0; i < text.size(); i++)
-        AddMeshSubSprite(overlayObject, xPos + i, yPos, width, height, text[i], textColor);
-    
-    meshPtr->Load();
-    
-    return;
-}
-
-void EngineSystemManager::AddMeshSubSprite(GameObject* overlayObject, 
-                                           float xPos, float yPos, 
-                                           float width, float height, 
-                                           int index, Color meshColor) {
-    
-    Mesh* meshPtr = overlayObject->GetComponent<MeshRenderer>()->mesh;
-    if (meshPtr == nullptr) 
-        return;
-    
-    Text* textPtr = overlayObject->GetComponent<Text>();
-    if (textPtr == nullptr) 
-        return;
-    
-    // Sprite atlas layout
-    float spriteStartX  = textPtr->sprite.subSpriteX;
-    float spriteStartY  = textPtr->sprite.subSpriteY;
-    float spriteWidth   = textPtr->sprite.subSpriteWidth;
-    float spriteHeight  = textPtr->sprite.subSpriteHeight;
-    
-    float spacingWidth  = textPtr->width;
-    float spacingHeight = textPtr->height;
-    
-    int mapWidth  = textPtr->sprite.width;
-    int mapHeight = textPtr->sprite.height;
-    
-    // Calculate the sub sprite in the map grid
-    int subWidth  = 0;
-    int subHeight = 0;
-    
-    for (int i=0; i < index; i++) {
-        
-        subWidth++;
-        
-        if (subWidth > mapWidth) {
-            subWidth=0;
-            
-            subHeight++;
-            
-            if (subHeight > mapHeight)
-                return;
-        }
-    }
-    
-    meshPtr->AddPlain(yPos * spacingHeight, 
-                      0, 
-                      -(xPos * spacingWidth), 
-                      width, height, 
-                      meshColor, 
-                      spriteWidth, spriteHeight, 
-                      spriteStartX, spriteStartY, 
-                      subWidth, subHeight);
-    
-    return;
-}
-
 GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
     if (index < mGameObjects.Size()) 
         return mGameObjects[index];
     return nullptr;
 }
 
+
+
 void EngineSystemManager::Initiate() {
+    
+    // Initiate console
+    console.input = UI.CreateTextField();
+    console.input->doStayInFocus = true;
+    
+    // Initiate console 
+    for (unsigned int i=0; i < 32; i++) {
+        
+        Text* text = UI.CreateText();
+        text->x = 5;
+        text->y = Platform.windowArea.h - (90 + (16 * i));
+        
+        text->text = "";
+        text->color.a = 3.0f;
+        text->doFadeout = true;
+        
+        console.textElements.push_back(text);
+        
+    }
+    
+    // Return callback
+    extern void ConsoleReturnCallback(std::string& console_text);
+    console.input->callback = &ConsoleReturnCallback;
+    console.doCloseConsoleAfterCommand = true;
+    console.Disable();
     
     // Load default shaders
     shaders.texture       = Resources.CreateShaderFromTag("texture");
@@ -215,77 +127,6 @@ void EngineSystemManager::Initiate() {
     
     sceneOverlay->camera->clipFar  =  100;
     sceneOverlay->camera->clipNear = -100;
-    
-    // Console panel overlay
-    mConsolePanelObject = CreateOverlayPanelRenderer(200, -8, 5000, 10, "panel_blue");
-    MeshRenderer* panelRenderer = mConsolePanelObject->GetComponent<MeshRenderer>();
-    sceneOverlay->AddMeshRendererToSceneRoot( panelRenderer, RENDER_QUEUE_BACKGROUND );
-    mConsolePanelObject->isActive = false;
-    
-    float alphaBlend = 0.87;
-    panelRenderer->material->ambient.g = alphaBlend;
-    
-    Panel* panel = mConsolePanelObject->GetComponent<Panel>();
-    panel->canvas.anchorRight = false;
-    panel->canvas.anchorTop = false;
-    
-    // Initiate console input text
-    
-    mConsoleInputObject = CreateOverlayTextRenderer(0, 0, "", 9, Colors.ltgray, "font");
-    MeshRenderer* inputRenderer = mConsoleInputObject->GetComponent<MeshRenderer>();
-    inputRenderer->isActive = false;
-    
-    sceneOverlay->AddMeshRendererToSceneRoot( inputRenderer, RENDER_QUEUE_OVERLAY );
-    
-    mConsoleInput = mConsoleInputObject->GetComponent<Text>();
-    mConsoleInput->canvas.anchorTop = false;
-    
-    mConsoleInput->canvas.x = 0;
-    mConsoleInput->canvas.y = 0;
-    
-    // Initiate console text elements
-    
-    for (unsigned int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) {
-        
-        mConsoleTextObjects[i] = CreateOverlayTextRenderer(0, 0, "", 9, Colors.MakeGrayScale(0.87), "font");
-        
-        MeshRenderer* meshRenderer = mConsoleTextObjects[i]->GetComponent<MeshRenderer>();
-        meshRenderer->material->EnableBlending();
-        meshRenderer->material->SetBlending(BLEND_SRC_ALPHA, BLEND_ONE_MINUS_SRC_ALPHA);
-        
-        sceneOverlay->AddMeshRendererToSceneRoot( meshRenderer, RENDER_QUEUE_PREGEOMETRY );
-        
-        mConsoleText[i] = mConsoleTextObjects[i]->GetComponent<Text>();
-        mConsoleText[i]->canvas.anchorTop = false;
-        
-        mConsoleText[i]->text = "";
-        
-        mConsoleText[i]->canvas.x = 0;
-        mConsoleText[i]->canvas.y = -(2 * i + 4) + 40;
-        
-        mConsoleText[i]->canvas.y -= 39;
-        
-    }
-    
-    // Initiate the profiler text elements
-    
-    for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) {
-        
-        mProfilerTextObjects[i] = CreateOverlayTextRenderer(0, 0, "", 9, Colors.MakeGrayScale(0.87), "font");
-        
-        MeshRenderer* meshRenderer = mProfilerTextObjects[i]->GetComponent<MeshRenderer>();
-        meshRenderer->material->EnableBlending();
-        meshRenderer->material->SetBlending(BLEND_SRC_ALPHA, BLEND_ONE_MINUS_SRC_ALPHA);
-        
-        sceneOverlay->AddMeshRendererToSceneRoot( meshRenderer, RENDER_QUEUE_OVERLAY );
-        
-        mProfilerText[i] = mProfilerTextObjects[i]->GetComponent<Text>();
-        mProfilerText[i]->canvas.anchorTop = true;
-        
-        mProfilerText[i]->canvas.x = 0;
-        mProfilerText[i]->canvas.y = (2 * i + 4);
-        
-    }
     
     return;
 }

@@ -41,10 +41,14 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
         
         unsigned int numberOfRenderers = mStreamBuffer[index].actor->genetics.GetNumberOfMeshRenderers();
         for (unsigned int i=0; i < numberOfRenderers; i++) {
+            MeshRenderer* geneRenderer = mStreamBuffer[index].actor->genetics.GetMeshRendererAtIndex(i);
+            if (geneRenderer == nullptr) 
+                continue;
             
-            Material* actorMaterial = mStreamBuffer[index].actor->genetics.GetMeshRendererAtIndex(i)->material;
+            Material* actorMaterial = geneRenderer->material;
+            if (actorMaterial !=nullptr) 
+                actorMaterial->ambient = Colors.white;
             
-            actorMaterial->ambient = Colors.white;
         }
         
         
@@ -60,10 +64,13 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
         
         unsigned int numberOfRenderers = mStreamBuffer[index].actor->genetics.GetNumberOfMeshRenderers();
         for (unsigned int i=0; i < numberOfRenderers; i++) {
+            MeshRenderer* geneRenderer = mStreamBuffer[index].actor->genetics.GetMeshRendererAtIndex(i);
+            if (geneRenderer == nullptr) 
+                continue;
             
-            Material* actorMaterial = mStreamBuffer[index].actor->genetics.GetMeshRendererAtIndex(i)->material;
-            
-            actorMaterial->ambient = Colors.black;
+            Material* actorMaterial = geneRenderer->material;
+            if (actorMaterial !=nullptr) 
+                actorMaterial->ambient = Colors.black;
             
         }
         

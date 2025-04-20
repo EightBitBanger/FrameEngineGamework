@@ -1,3 +1,4 @@
+#include <GameEngineFramework/Engine/Engine.h>
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateComponentStream(void) {
@@ -36,9 +37,6 @@ void EngineSystemManager::UpdateComponentStream(void) {
             mDataStreamIndex = 0;
         }
         
-        // UI elements should always be added to the stream buffer
-        bool isUIElement = gameObject->mTextCache != nullptr || gameObject->mPanelCache != nullptr;
-        
         // Check garbage objects
         if (gameObject->isGarbage) {
             
@@ -64,7 +62,7 @@ void EngineSystemManager::UpdateComponentStream(void) {
             continue;
         }
         
-        if ((!gameObject->isActive || !shouldRender) && !isUIElement) 
+        if (!gameObject->isActive || !shouldRender) 
             continue;
         
         //
@@ -77,8 +75,6 @@ void EngineSystemManager::UpdateComponentStream(void) {
         mStreamBuffer[mDataStreamIndex].camera        = gameObject->mCameraCache;
         mStreamBuffer[mDataStreamIndex].rigidBody     = gameObject->mRigidBodyCache;
         mStreamBuffer[mDataStreamIndex].meshRenderer  = gameObject->mMeshRendererCache;
-        mStreamBuffer[mDataStreamIndex].text          = gameObject->mTextCache;
-        mStreamBuffer[mDataStreamIndex].panel         = gameObject->mPanelCache;
         mStreamBuffer[mDataStreamIndex].sound         = gameObject->mSoundCache;
         
         mDataStreamIndex++;
