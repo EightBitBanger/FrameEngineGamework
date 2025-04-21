@@ -134,7 +134,7 @@ void UserInterfaceSystem::UpdateTextElements(void) {
         
         // Fade out
         if (text->doFadeout) {
-            text->color.a -= 0.003f;
+            text->color.a -= 0.004f;
             
             if (text->color.a < 0.0f) {
                 text->color.a = 0.0f;
