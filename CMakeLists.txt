@@ -125,6 +125,7 @@ if(BUILD_APPLICATION_LIBRARY)
         "src/plugins/ChunkSpawner/ChunkCreate.cpp"
         "src/plugins/ChunkSpawner/ChunkDestroy.cpp"
         "src/plugins/ChunkSpawner/ChunkManager.cpp"
+        "src/plugins/ChunkSpawner/ChunkGeneration.cpp"
         "src/plugins/ChunkSpawner/ChunkManagerUpdate.cpp"
         "src/plugins/ChunkSpawner/ChunkManagerDecorate.cpp"
         "src/plugins/ChunkSpawner/Chunk.cpp"
@@ -186,7 +187,7 @@ if(BUILD_CORE_LIBRARY)
     "src/Engine/Engine.cpp"
     "src/Engine/EngineSystems.cpp"
     "src/Engine/EngineUpdate.cpp"
-    "src/Engine/EngineConsole.cpp"
+    "src/Engine/EngineUpdateConsole.cpp"
     "src/Engine/EngineGameObjects.cpp"
     "src/Engine/EngineUpdateStream.cpp"
     
@@ -198,8 +199,6 @@ if(BUILD_CORE_LIBRARY)
     "src/Engine/componentUpdate/EngineUpdateAIPhysics.cpp"
     "src/Engine/componentUpdate/EngineUpdateAudio.cpp"
     "src/Engine/componentUpdate/EngineUpdateCamera.cpp"
-    "src/Engine/componentUpdate/EngineUpdatePanel.cpp"
-    "src/Engine/componentUpdate/EngineUpdateText.cpp"
     "src/Engine/componentUpdate/EngineUpdateRigidBody.cpp"
     "src/Engine/componentUpdate/EngineUpdateTransforms.cpp"
     "src/Engine/componentUpdate/EngineUpdateLight.cpp"
@@ -217,6 +216,8 @@ if(BUILD_CORE_LIBRARY)
     "src/ActorAI/ActorUpdate.cpp"
     "src/ActorAI/NeuralNetwork.cpp"
     "src/ActorAI/GeneticPresets.cpp"
+    "src/ActorAI/GeneticEffectors.cpp"
+    
     "src/ActorAI/genetics/gene.cpp"
     "src/ActorAI/genetics/codon.cpp"
     "src/ActorAI/genetics/phen.cpp"
@@ -274,6 +275,11 @@ if(BUILD_CORE_LIBRARY)
     "src/Resources/assets/meshTag.cpp"
     "src/Resources/assets/shaderTag.cpp"
     "src/Resources/assets/textureTag.cpp"
+    
+    "src/UI/components/textField.cpp"
+    "src/UI/components/text.cpp"
+    "src/UI/components/panel.cpp"
+    "src/UI/UserInterfaceSystem.cpp"
     
     "src/Scripting/ScriptSystem.cpp"
     "src/Scripting/components/script.cpp"
