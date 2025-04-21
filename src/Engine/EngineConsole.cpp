@@ -9,22 +9,31 @@ void ConsoleReturnCallback(std::string& console_text) {
     
     // Provide blanks to prevent access crashes 
     // by the clients functions
-    if (arguments.size() < 100) 
-        for (unsigned int i=0; i < 100; i++) 
+    if (arguments.size() < 32) 
+        for (unsigned int i=0; i < 32; i++) 
             arguments.push_back("");
     
     std::string command = arguments[0];
+    
+    // Check blank function name
+    if (command == "") 
+        return;
+    
     // Remove the first element (it is the function name)
     arguments.erase( arguments.begin() );
     
     std::map<std::string, void(*)(std::vector<std::string>)>::iterator it = functionList.find( command );
     extern EngineSystemManager Engine;
     
+    // Check command exists
     if (it == functionList.end()) {
-        
-        Engine.console.Print("FUCK");
+        std::string commandNotFound = "Unknown command '" + command + "'";
+        Engine.console.Print(commandNotFound);
+        Engine.console.Clear();
         return;
     }
+    
+    // Run the command
     functionList[command](arguments);
     
     // Close the command console
@@ -63,10 +72,10 @@ void EngineSystemManager::CommandConsole::Disable(void) {
 }
 
 void EngineSystemManager::CommandConsole::ShiftUp(void) {
-    for (unsigned int i=30; i != 0; i--) {
-        textElements[i]->text = textElements[i + 1]->text;
-        textElements[i]->color = textElements[i + 1]->color;
-        
+    for (unsigned int i=31; i > 0; i--) {
+        textElements[i]->text = textElements[i - 1]->text;
+        textElements[i]->color = textElements[i - 1]->color;
+        textElements[i]->isActive = textElements[i - 1]->isActive;
     }
 }
 

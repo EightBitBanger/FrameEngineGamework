@@ -16,424 +16,253 @@ extern RenderSystem      Renderer;
 extern ActorSystem       AI;
 
 
-std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
-    std::string genetics;
+void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     
-    unsigned int numberOfGenes = sourceActor->genetics.GetNumberOfGenes();
+    AI.genomes.ClearGenes(targetActor);
     
-    genetics += sourceActor->GetName() + ":";
+    targetActor->SetName("Human");
     
-    genetics += Float.ToString( sourceActor->physical.GetSpeed() ) + ":";
-    genetics += Float.ToString( sourceActor->physical.GetSpeedMultiplier() ) + ":";
-    genetics += Float.ToString( sourceActor->physical.GetSpeedYouth() ) + ":";
+    targetActor->physical.SetAge( 0 );
+    targetActor->physical.SetAdultAge( 1000 );
+    targetActor->physical.SetSeniorAge( 40000 );
     
-    genetics += Float.ToString( sourceActor->physical.GetAdultAge() ) + ":";
-    genetics += Float.ToString( sourceActor->physical.GetSeniorAge() ) + ":";
+    targetActor->physical.SetSpeed(1.2f);
+    targetActor->physical.SetSpeedYouth(1.4f);
+    targetActor->physical.SetSpeedMultiplier(1.24f);
     
-    genetics += Float.ToString( sourceActor->physical.GetYouthScale() ) + ":";
-    genetics += Float.ToString( sourceActor->physical.GetAdultScale() ) + ":";
+    targetActor->physical.SetYouthScale(0.3f);
+    targetActor->physical.SetAdultScale(1.0f);
     
-    // Personality
-    genetics += Float.ToString( sourceActor->behavior.GetDistanceToFocus() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetDistanceToWalk() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetDistanceToAttack() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetDistanceToFlee() ) + ":";
+    targetActor->behavior.SetHeightPreferenceMax(20.0f);
     
-    genetics += Float.ToString( sourceActor->behavior.GetHeightPreferenceMin() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetHeightPreferenceMax() ) + ":";
+    targetActor->biological.health = 1;
     
-    // Characteristics
-    genetics += UInt.ToString( (unsigned int)sourceActor->genetics.GetGeneration() ) + ":";
+    AI.genomes.mental.PreyBase(targetActor);
     
-    if (sourceActor->physical.GetSexualOrientation() == true) 
-        {genetics += "0:";} else {genetics += "1:";}
+    if (Random.Range(0, 100) > 55) 
+    {targetActor->physical.SetSexualOrientation(true);} else  // Male
+    {targetActor->physical.SetSexualOrientation(false);}      // Female
     
-    genetics += Float.ToString( sourceActor->physical.GetAdultAge() ) + ":";
+    // Color variants
+    Color headColor = Colors.Lerp(Colors.white, Colors.yellow, 0.3);
+    Color limbColor = Colors.Lerp(Colors.white, Colors.yellow, 0.3);
+    Color bodyColor = Colors.Lerp(Colors.white, Colors.yellow, 0.3);
     
-    for (unsigned int i=0; i < numberOfGenes; i++) {
-        
-        Gene gene = sourceActor->genetics.GetGeneFromGenome( i );
-        
-        // Check invalid gene
-        if (gene.color.x == -1.0f) 
-            continue;
-        
-        Phen phen = sourceActor->genetics.GetPhenFromPhenotype( i );
-        
-        // Check invalid phen
-        if (phen.color.x == -1.0f) 
-            continue;
-        
-        genetics += "#";
-        
-        genetics += Float.ToString( gene.position.x ) + ",";
-        genetics += Float.ToString( gene.position.y ) + ",";
-        genetics += Float.ToString( gene.position.z ) + "|";
-        
-        genetics += Float.ToString( gene.rotation.x ) + ",";
-        genetics += Float.ToString( gene.rotation.y ) + ",";
-        genetics += Float.ToString( gene.rotation.z ) + "|";
-        
-        genetics += Float.ToString( gene.scale.x ) + ",";
-        genetics += Float.ToString( gene.scale.y ) + ",";
-        genetics += Float.ToString( gene.scale.z ) + "|";
-        
-        genetics += Float.ToString( gene.offset.x ) + ",";
-        genetics += Float.ToString( gene.offset.y ) + ",";
-        genetics += Float.ToString( gene.offset.z ) + "|";
-        
-        genetics += Float.ToString( gene.color.x ) + ",";
-        genetics += Float.ToString( gene.color.y ) + ",";
-        genetics += Float.ToString( gene.color.z ) + "|";
-        
-        genetics += Float.ToString( phen.scale.x ) + ",";
-        genetics += Float.ToString( phen.scale.y ) + ",";
-        genetics += Float.ToString( phen.scale.z ) + "|";
-        
-        genetics += Float.ToString( phen.color.x ) + ",";
-        genetics += Float.ToString( phen.color.y ) + ",";
-        genetics += Float.ToString( phen.color.z ) + "|";
-        
-        genetics += Float.ToString( gene.expressionFactor ) + ",";
-        genetics += Float.ToString( gene.expressionMax ) + ",";
-        genetics += UInt.ToString( gene.expressionBegin ) + ",";
-        genetics += UInt.ToString( gene.expressionEnd ) + "|";
-        
-        genetics += Float.ToString( gene.doExpress ) + ",";
-        genetics += Float.ToString( gene.doInverseAnimation ) + ",";
-        genetics += Float.ToString( gene.doAnimationCycle ) + ",";
-        genetics += UInt.ToString( gene.type ) + "|";
-        
-        continue;
+    bodyColor = Colors.Lerp(bodyColor, Colors.red, 0.5);
+    bodyColor = Colors.Lerp(bodyColor, Colors.brown, 0.9);
+    bodyColor = Colors.Lerp(bodyColor, Colors.black, 0.5);
+    bodyColor *= Colors.MakeRandomGrayScale() * 0.8f;
+    
+    // Limb colors
+    
+    // Red tint
+    int race = Random.Range(0, 100);
+    
+    if (race >= 0 && race < 5) {
+        headColor *= Colors.Lerp(headColor, Colors.orange, 0.6);
+        limbColor *= Colors.Lerp(limbColor, Colors.orange, 0.6);
+        race = -1;
     }
     
-    return genetics;
-}
-
-bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
-    std::vector<std::string> traits = String.Explode( genome, ':' );
-    unsigned int numberOfTraits = traits.size();
-    
-    if (numberOfTraits > 7) {
-        targetActor->SetName(traits[0]);
-        
-        targetActor->physical.SetSpeed(            String.ToFloat(traits[1]) );
-        targetActor->physical.SetSpeedMultiplier(  String.ToFloat(traits[2]) );
-        targetActor->physical.SetSpeedYouth(       String.ToFloat(traits[3]) );
-        
-        targetActor->physical.SetAdultAge(   String.ToFloat(traits[4]) );
-        targetActor->physical.SetSeniorAge(  String.ToFloat(traits[5]) );
-        
-        targetActor->physical.SetYouthScale( String.ToFloat(traits[6]) );
-        targetActor->physical.SetAdultScale( String.ToFloat(traits[7]) );
+    // Brown tint
+    if (race >= 5 && race < 10) {
+        headColor = Colors.Lerp(headColor, Colors.brown, 0.4);
+        limbColor = Colors.Lerp(limbColor, Colors.brown, 0.4);
+        headColor = Colors.Lerp(headColor, Colors.red, 0.087);
+        limbColor = Colors.Lerp(limbColor, Colors.red, 0.087);
+        headColor = Colors.Lerp(headColor, Colors.black, 0.87);
+        limbColor = Colors.Lerp(limbColor, Colors.black, 0.87);
+        race = -1;
     }
     
-    // Personality
-    if (numberOfTraits > 13) {
-        targetActor->behavior.SetDistanceToFocus(  String.ToFloat(traits[8]) );
-        targetActor->behavior.SetDistanceToWalk(   String.ToFloat(traits[9]) );
-        targetActor->behavior.SetDistanceToAttack( String.ToFloat(traits[10]) );
-        targetActor->behavior.SetDistanceToFlee(   String.ToFloat(traits[11]) );
-        
-        targetActor->behavior.SetHeightPreferenceMin( String.ToFloat(traits[12]) );
-        targetActor->behavior.SetHeightPreferenceMax( String.ToFloat(traits[13]) );
+    // Dark tone
+    if (race >= 10 && race < 20) {
+        headColor = Colors.Lerp(headColor, Colors.black, 0.998);
+        limbColor = Colors.Lerp(limbColor, Colors.black, 0.998);
+        race = -1;
     }
     
-    // Characteristics
-    if (numberOfTraits > 16) {
-        
-        // Actor details
-        targetActor->genetics.SetGeneration( String.ToUint(traits[14]) );
-        
-        // Sexuality
-        if (String.ToUint(traits[15]) == 0) {
-            targetActor->physical.SetSexualOrientation( true );  // Male
-        } else {
-            targetActor->physical.SetSexualOrientation( false ); // Female
-        }
-        
-        // Adult age
-        targetActor->physical.mAgeAdult = String.ToFloat(traits[16]);
-        
-    }
+    float headSize   = (Random.Range(0, 99) * 0.0001f);
+    float breastSize = (Random.Range(0, 99) * 0.00054f);
     
-    // Extract genes from the genome string
-    std::vector<std::string> genes = String.Explode( genome, '#' );
+    // Body
+    Gene geneBody;
+    geneBody.offset    = Codon(0, 0, 0);
+    geneBody.position  = Codon(0, 0.9, 0);
+    geneBody.rotation  = Codon(0, 0, 0);
+    geneBody.scale     = Codon(0.37, 0.5, 0.24);
+    geneBody.color.x   = bodyColor.r;
+    geneBody.color.y   = bodyColor.g;
+    geneBody.color.z   = bodyColor.b;
     
-    unsigned int numberOfGenes = genes.size();
-    for (unsigned int i=1; i < numberOfGenes; i++) {
-        
-        // Extract sub genes
-        std::vector<std::string> subGenes = String.Explode( (genes[i]), '|' );
-        std::vector<std::string> Codon;
-        
-        Gene gene;
-        Phen phenotype;
-        Bio biotype;
-        
-        Codon = String.Explode( subGenes[0], ',' );
-        if (Codon.size() == 3) {
-            gene.position.x = String.ToFloat( Codon[0] );
-            gene.position.y = String.ToFloat( Codon[1] );
-            gene.position.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[1], ',' );
-        if (Codon.size() == 3) {
-            gene.rotation.x = String.ToFloat( Codon[0] );
-            gene.rotation.y = String.ToFloat( Codon[1] );
-            gene.rotation.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[2], ',' );
-        if (Codon.size() == 3) {
-            gene.scale.x = String.ToFloat( Codon[0] );
-            gene.scale.y = String.ToFloat( Codon[1] );
-            gene.scale.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[3], ',' );
-        if (Codon.size() == 3) {
-            gene.offset.x = String.ToFloat( Codon[0] );
-            gene.offset.y = String.ToFloat( Codon[1] );
-            gene.offset.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[4], ',' );
-        if (Codon.size() == 3) {
-            gene.color.x = String.ToFloat( Codon[0] );
-            gene.color.y = String.ToFloat( Codon[1] );
-            gene.color.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[5], ',' );
-        if (Codon.size() == 3) {
-            phenotype.scale.x = String.ToFloat( Codon[0] );
-            phenotype.scale.y = String.ToFloat( Codon[1] );
-            phenotype.scale.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[6], ',' );
-        if (Codon.size() == 3) {
-            phenotype.color.x = String.ToFloat( Codon[0] );
-            phenotype.color.y = String.ToFloat( Codon[1] );
-            phenotype.color.z = String.ToFloat( Codon[2] );
-        }
-        
-        Codon = String.Explode( subGenes[7], ',' );
-        if (Codon.size() == 4) {
-            gene.expressionFactor = String.ToFloat( Codon[0] );
-            gene.expressionMax    = String.ToFloat( Codon[1] );
-            gene.expressionBegin  = String.ToUint( Codon[2] );
-            gene.expressionEnd    = String.ToUint( Codon[3] );
-        }
-        Codon = String.Explode( subGenes[8], ',' );
-        if (Codon.size() == 4) {
-            if (Codon[0] == "0") {gene.doExpress          = false;}
-            if (Codon[1] == "1") {gene.doInverseAnimation = true;}
-            if (Codon[2] == "1") {gene.doAnimationCycle   = true;}
-            
-            gene.type = String.ToUint( Codon[3] );
-            
-        }
-        
-        targetActor->genetics.mPhen.push_back(phenotype);
-        targetActor->biological.mBiologics.push_back(biotype);
-        targetActor->genetics.AddGene( gene );
-    }
+    // Head
+    Gene geneHead;
+    geneHead.offset    = Codon(0, 0, 0);
+    geneHead.position  = Codon(0, 1.36, 0);
+    geneHead.rotation  = Codon(0, 0, 0);
+    geneHead.scale     = Codon(headSize + 0.3, 0.3, headSize + 0.3);
+    geneHead.color.x   = headColor.r;
+    geneHead.color.y   = headColor.g;
+    geneHead.color.z   = headColor.b;
     
-    return true;
-}
-
-bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspring) {
-    unsigned int numberOfGenesA = parentA->genetics.mGenes.size();
-    unsigned int numberOfGenesB = parentB->genetics.mGenes.size();
+    // Neck
+    Gene geneNeck;
+    geneNeck.offset    = Codon(0, 0, 0);
+    geneNeck.position  = Codon(0, 1.2, 0);
+    geneNeck.rotation  = Codon(0, 0, 0);
+    geneNeck.scale     = Codon(0.18, 0.1, 0.18);
+    geneNeck.color.x   = bodyColor.r;
+    geneNeck.color.y   = bodyColor.g;
+    geneNeck.color.z   = bodyColor.b;
+    geneNeck.colorIndex = 1;
     
-    // Check genetic incompatibility
-    if (numberOfGenesA != numberOfGenesB) 
-        return false;
+    // Left breast
+    Gene geneBreastLeft;
+    geneBreastLeft.offset    = Codon(0.112, 1.03, breastSize + 0.06f);
+    geneBreastLeft.position  = Codon(0, 0, 0);
+    geneBreastLeft.rotation  = Codon(0, 0, 0);
+    geneBreastLeft.scale     = Codon(0.14, 0.14, 0.14);
+    geneBreastLeft.color.x   = bodyColor.r;
+    geneBreastLeft.color.y   = bodyColor.g;
+    geneBreastLeft.color.z   = bodyColor.b;
+    geneBreastLeft.type = EXPRESSION_TYPE_FEMALE;
+    geneBreastLeft.colorIndex       = 1;
+    geneBreastLeft.expressionFactor = 0.004;
+    geneBreastLeft.expressionMax    = 1.4;
+    geneBreastLeft.expressionBegin  = 900;
+    geneBreastLeft.expressionEnd    = 1400;
     
-    offspring->genetics.mGenes.clear();
+    // Right breast
+    Gene geneBreastRight;
+    geneBreastRight.offset    = Codon(-0.112, 1.03, breastSize + 0.06f);
+    geneBreastRight.position  = Codon(0, 0, 0);
+    geneBreastRight.rotation  = Codon(0, 0, 0);
+    geneBreastRight.scale     = Codon(0.14, 0.14, 0.14);
+    geneBreastRight.color.x   = bodyColor.r;
+    geneBreastRight.color.y   = bodyColor.g;
+    geneBreastRight.color.z   = bodyColor.b;
+    geneBreastRight.type = EXPRESSION_TYPE_FEMALE;
+    geneBreastRight.scaleIndex       = 4;
+    geneBreastRight.colorIndex       = 1;
+    geneBreastRight.expressionFactor = 0.004;
+    geneBreastRight.expressionMax    = 1.4;
+    geneBreastRight.expressionBegin  = 900;
+    geneBreastRight.expressionEnd    = 1400;
     
-    for (unsigned int i=0; i < numberOfGenesA; i++) {
-        
-        float gradient = 0.0f;
-        if (Random.Range(0, 100) > 50) 
-            gradient = 1.0f;
-        
-        // Interpolate the genetic values
-        Gene variant = Lerp(parentA->genetics.mGenes[i], parentB->genetics.mGenes[i], gradient);
-        offspring->genetics.mGenes.push_back(variant);
-        
-        // Distance parameters
-        
-        float DistanceToFocusA  = parentA->behavior.GetDistanceToFocus();
-        float DistanceToAttackA = parentA->behavior.GetDistanceToAttack();
-        float DistanceToFleeA   = parentA->behavior.GetDistanceToFlee();
-        float DistanceToWalkA   = parentA->behavior.GetDistanceToWalk();
-        
-        float DistanceToFocusB  = parentB->behavior.GetDistanceToFocus();
-        float DistanceToAttackB = parentB->behavior.GetDistanceToAttack();
-        float DistanceToFleeB   = parentB->behavior.GetDistanceToFlee();
-        float DistanceToWalkB   = parentB->behavior.GetDistanceToWalk();
-        
-        float DistanceToFocus   = Float.Lerp(DistanceToFocusA,  DistanceToFocusB,   gradient);
-        float DistanceToAttack  = Float.Lerp(DistanceToAttackA, DistanceToAttackB,  gradient);
-        float DistanceToFlee    = Float.Lerp(DistanceToFleeA,   DistanceToFleeB,    gradient);
-        float DistanceToWalk    = Float.Lerp(DistanceToWalkA,   DistanceToWalkB,    gradient);
-        
-        offspring->behavior.SetDistanceToFocus(DistanceToFocus);
-        offspring->behavior.SetDistanceToAttack(DistanceToAttack);
-        offspring->behavior.SetDistanceToFlee(DistanceToFlee);
-        offspring->behavior.SetDistanceToWalk(DistanceToWalk);
-        
-        offspring->physical.mAgeAdult = Float.Lerp(parentA->physical.mAgeAdult, parentB->physical.mAgeAdult, gradient);
-        
-        // Increment generation
-        unsigned int generation = parentA->genetics.GetGeneration();
-        
-        offspring->genetics.SetGeneration( generation );
-        
-        // Random new sexual orientation
-        if (Random.Range(0, 100) > 60) {
-            offspring->physical.SetSexualOrientation(true);  // Male
-        } else {
-            offspring->physical.SetSexualOrientation(false); // Female
-        }
-        
-        continue;
-    }
+    // Left shoulder
+    Gene geneShoulderLeft;
+    geneShoulderLeft.offset    = Codon(0, 1.09, 0);
+    geneShoulderLeft.position  = Codon(0.24, -0.0425, 0);
+    geneShoulderLeft.rotation  = Codon(0, 0, 0);
+    geneShoulderLeft.scale     = Codon(0.12, 0.24, 0.12);
+    geneShoulderLeft.color.x   = limbColor.r;
+    geneShoulderLeft.color.y   = limbColor.g;
+    geneShoulderLeft.color.z   = limbColor.b;
+    geneShoulderLeft.doAnimationCycle = true;
+    geneShoulderLeft.animationAxis    = Codon(1, 0, 0);
+    geneShoulderLeft.animationRange   = 13;
+    geneShoulderLeft.colorIndex       = 2;
+    geneShoulderLeft.type = EXPRESSION_TYPE_MALE;
+    geneShoulderLeft.expressionFactor = 0.004;
+    geneShoulderLeft.expressionMax    = 1.1;
+    geneShoulderLeft.expressionBegin  = 900;
+    geneShoulderLeft.expressionEnd    = 1400;
     
-    // Process genetic index colors
-    for (unsigned int w=0; w < numberOfGenesA; w++) {
-        for (unsigned int i=0; i < numberOfGenesA; i++) {
-            if (offspring->genetics.mGenes[i].colorIndex == 0) 
-                continue;
-            
-            // Color index
-            unsigned int geneParentIndex = offspring->genetics.mGenes[i].colorIndex - 1;
-            offspring->genetics.mGenes[i].color.x = offspring->genetics.mGenes[geneParentIndex].color.x;
-            offspring->genetics.mGenes[i].color.y = offspring->genetics.mGenes[geneParentIndex].color.y;
-            offspring->genetics.mGenes[i].color.z = offspring->genetics.mGenes[geneParentIndex].color.z;
-            
-            continue;
-        }
-    }
-    return true;
-}
-
-void GeneticPresets::ClearGenes(Actor* actorPtr) {
+    // Right shoulder
+    Gene geneShoulderRight;
+    geneShoulderRight.offset    = Codon(0, 1.09, 0);
+    geneShoulderRight.position  = Codon(-0.24, -0.0425, 0);
+    geneShoulderRight.rotation  = Codon(0, 0, 0);
+    geneShoulderRight.scale     = Codon(0.12, 0.24, 0.12);
+    geneShoulderRight.color.x   = limbColor.r;
+    geneShoulderRight.color.y   = limbColor.g;
+    geneShoulderRight.color.z   = limbColor.b;
+    geneShoulderRight.doAnimationCycle   = true;
+    geneShoulderRight.doInverseAnimation = true;
+    geneShoulderRight.animationAxis      = Codon(1, 0, 0);
+    geneShoulderRight.animationRange     = 13;
+    geneShoulderRight.colorIndex         = 2;
+    geneShoulderRight.type = EXPRESSION_TYPE_MALE;
+    geneShoulderRight.expressionFactor = 0.004;
+    geneShoulderRight.expressionMax    = 1.1;
+    geneShoulderRight.expressionBegin  = 900;
+    geneShoulderRight.expressionEnd    = 1400;
     
-    actorPtr->genetics.mGenes.clear();
+    // Left arm
+    Gene geneLimbFrontLeft;
+    geneLimbFrontLeft.offset    = Codon(0.24, 1.09, 0);
+    geneLimbFrontLeft.position  = Codon(0, -0.24, 0);
+    geneLimbFrontLeft.rotation  = Codon(0, 0, 0);
+    geneLimbFrontLeft.scale     = Codon(0.1, 0.55, 0.1);
+    geneLimbFrontLeft.color.x   = limbColor.r;
+    geneLimbFrontLeft.color.y   = limbColor.g;
+    geneLimbFrontLeft.color.z   = limbColor.b;
+    geneLimbFrontLeft.doAnimationCycle = true;
+    geneLimbFrontLeft.animationAxis    = Codon(1, 0, 0);
+    geneLimbFrontLeft.animationRange   = 13;
+    geneLimbFrontLeft.colorIndex       = 6;
     
-    return;
-}
-
-void GeneticPresets::ExposeToRadiation(Actor* actorPtr, float radiationAmount) {
+    // Right arm
+    Gene geneLimbFrontRight;
+    geneLimbFrontRight.offset    = Codon(-0.24, 1.09, 0);
+    geneLimbFrontRight.position  = Codon(0, -0.24, 0);
+    geneLimbFrontRight.rotation  = Codon(0, 0, 0);
+    geneLimbFrontRight.scale     = Codon(0.1, 0.55, 0.1);
+    geneLimbFrontRight.color.x   = limbColor.r;
+    geneLimbFrontRight.color.y   = limbColor.g;
+    geneLimbFrontRight.color.z   = limbColor.b;
+    geneLimbFrontRight.doAnimationCycle   = true;
+    geneLimbFrontRight.doInverseAnimation = true;
+    geneLimbFrontRight.animationAxis      = Codon(1, 0, 0);
+    geneLimbFrontRight.animationRange     = 13;
+    geneLimbFrontRight.colorIndex         = 7;
     
-    float radiation = Random.Range(0.0f, radiationAmount) - Random.Range(0.0f, radiationAmount);
+    // Left Leg
+    Gene geneLimbRearLeft;
+    geneLimbRearLeft.offset    = Codon(0.12, 0.6, 0);
+    geneLimbRearLeft.position  = Codon(0, -0.24, 0);
+    geneLimbRearLeft.rotation  = Codon(0, 0, 0);
+    geneLimbRearLeft.scale     = Codon(0.18, 0.61, 0.18);
+    geneLimbRearLeft.color.x   = limbColor.r;
+    geneLimbRearLeft.color.y   = limbColor.g;
+    geneLimbRearLeft.color.z   = limbColor.b;
+    geneLimbRearLeft.doAnimationCycle = true;
+    geneLimbRearLeft.doInverseAnimation = true;
+    geneLimbRearLeft.animationAxis    = Codon(1, 0, 0);
+    geneLimbRearLeft.animationRange   = 13;
+    //geneLimbRearLeft.colorIndex       = 2;
     
-    unsigned int numberOfGenes = actorPtr->genetics.mGenes.size();
+    // Right Leg
+    Gene geneLimbRearRight;
+    geneLimbRearRight.offset    = Codon(-0.12, 0.6, 0);
+    geneLimbRearRight.position  = Codon(0, -0.24 , 0);
+    geneLimbRearRight.rotation  = Codon(0, 0, 0);
+    geneLimbRearRight.scale     = Codon(0.18, 0.61, 0.18);
+    geneLimbRearRight.color.x   = limbColor.r;
+    geneLimbRearRight.color.y   = limbColor.g;
+    geneLimbRearRight.color.z   = limbColor.b;
+    geneLimbRearRight.doAnimationCycle   = true;
+    geneLimbRearRight.animationAxis      = Codon(1, 0, 0);
+    geneLimbRearRight.animationRange     = 13;
+    //geneLimbRearRight.colorIndex         = 2;
     
-    for (unsigned int i=0; i < numberOfGenes; i++) {
-        
-        Gene& gene = actorPtr->genetics.mGenes[i];
-        
-        gene.offset.x += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
-        gene.offset.y += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
-        gene.offset.z += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
-        
-        gene.position.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.position.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.position.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        
-        gene.rotation.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.rotation.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.rotation.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        
-        gene.scale.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.scale.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.scale.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        
-        gene.color.x += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
-        gene.color.y += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
-        gene.color.z += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
-        
-    }
-    
-    return;
-}
-
-Gene GeneticPresets::Lerp(Gene geneA, Gene geneB, float bias) {
-    Gene gene;
-    
-    gene.position.x = Float.Lerp(geneA.position.x, geneB.position.x, bias);
-    gene.position.y = Float.Lerp(geneA.position.y, geneB.position.y, bias);
-    gene.position.z = Float.Lerp(geneA.position.z, geneB.position.z, bias);
-    
-    gene.rotation.x = Float.Lerp(geneA.rotation.x, geneB.rotation.x, bias);
-    gene.rotation.y = Float.Lerp(geneA.rotation.y, geneB.rotation.y, bias);
-    gene.rotation.z = Float.Lerp(geneA.rotation.z, geneB.rotation.z, bias);
-    
-    gene.scale.x = Float.Lerp(geneA.scale.x, geneB.scale.x, bias);
-    gene.scale.y = Float.Lerp(geneA.scale.y, geneB.scale.y, bias);
-    gene.scale.z = Float.Lerp(geneA.scale.z, geneB.scale.z, bias);
-    
-    gene.offset.x = Float.Lerp(geneA.offset.x, geneB.offset.x, bias);
-    gene.offset.y = Float.Lerp(geneA.offset.y, geneB.offset.y, bias);
-    gene.offset.z = Float.Lerp(geneA.offset.z, geneB.offset.z, bias);
-    
-    gene.color.x = Float.Lerp(geneA.color.x, geneB.color.x, bias);
-    gene.color.y = Float.Lerp(geneA.color.y, geneB.color.y, bias);
-    gene.color.z = Float.Lerp(geneA.color.z, geneB.color.z, bias);
-    
-    gene.expressionFactor = Float.Lerp(geneA.expressionFactor, geneB.expressionFactor, bias);
-    gene.expressionMax    = Float.Lerp(geneA.expressionMax,    geneB.expressionMax, bias);
-    gene.expressionBegin  = Float.Lerp(geneA.expressionBegin,  geneB.expressionBegin, bias);
-    gene.expressionEnd    = Float.Lerp(geneA.expressionEnd,    geneB.expressionEnd, bias);
-    
-    gene.doInverseAnimation = geneA.doInverseAnimation || geneB.doInverseAnimation;
-    gene.doAnimationCycle = geneA.doAnimationCycle || geneB.doAnimationCycle;
-    gene.animationRange = Float.Lerp(geneA.animationRange, geneB.animationRange, bias);
-    
-    // Random attachment index
-    if (Random.Range(0, 100) > 50) 
-        {gene.attachmentIndex = geneA.attachmentIndex;} else 
-        {gene.attachmentIndex = geneB.attachmentIndex;}
-    
-    if (Random.Range(0, 100) > 50) 
-        {gene.colorIndex = geneA.colorIndex;} else 
-        {gene.colorIndex = geneB.colorIndex;}
-    if (Random.Range(0, 100) > 50) 
-        {gene.scaleIndex = geneA.scaleIndex;} else 
-        {gene.scaleIndex = geneB.scaleIndex;}
-    if (Random.Range(0, 100) > 50) 
-        {gene.type = geneA.type;} else 
-        {gene.type = geneB.type;}
-    
-    gene.animationAxis.x = Float.Lerp(geneA.animationAxis.x, geneB.animationAxis.x, bias);
-    gene.animationAxis.y = Float.Lerp(geneA.animationAxis.y, geneB.animationAxis.y, bias);
-    gene.animationAxis.z = Float.Lerp(geneA.animationAxis.z, geneB.animationAxis.z, bias);
-    
-    gene.doExpress = geneA.doExpress || geneB.doExpress;
-    
-    return gene;
-}
-
-// Mental models
-//
-
-void GeneticPresets::PsychologicalPresets::PreyBase(Actor* targetActor) {
-    
-    
-    
-    return;
-}
-
-void GeneticPresets::PsychologicalPresets::PredatorBase(Actor* targetActor) {
-    
-    
+    // Apply genes to the actor
+    targetActor->genetics.AddGene(geneBody);
+    targetActor->genetics.AddGene(geneHead);
+    targetActor->genetics.AddGene(geneNeck);
+    targetActor->genetics.AddGene(geneBreastLeft);
+    targetActor->genetics.AddGene(geneBreastRight);
+    targetActor->genetics.AddGene(geneShoulderLeft);
+    targetActor->genetics.AddGene(geneShoulderRight);
+    targetActor->genetics.AddGene(geneLimbFrontLeft);
+    targetActor->genetics.AddGene(geneLimbFrontRight);
+    targetActor->genetics.AddGene(geneLimbRearLeft);
+    targetActor->genetics.AddGene(geneLimbRearRight);
     
     return;
 }
 
 
-// Genomes
-//
 
 void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     
@@ -445,8 +274,9 @@ void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     targetActor->physical.SetAdultAge( 400 );
     targetActor->physical.SetSeniorAge( 4000 );
     
-    targetActor->physical.SetSpeed(1.3);
-    targetActor->physical.SetSpeedYouth(0.8);
+    targetActor->physical.SetSpeed(1.2);
+    targetActor->physical.SetSpeedYouth(1.1);
+    targetActor->physical.SetSpeedMultiplier(1.3f);
     
     targetActor->physical.SetYouthScale(0.2f);
     targetActor->physical.SetAdultScale(0.8f);
@@ -575,17 +405,24 @@ void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     return;
 }
 
+
+
 void GeneticPresets::ActorPresets::Bovine(Actor* targetActor) {
     
     AI.genomes.ClearGenes(targetActor);
     
     targetActor->SetName("Ox");
     
+    targetActor->physical.SetAge(0);
+    targetActor->physical.SetAdultAge(800);
+    targetActor->physical.SetSeniorAge(5000);
+    
     targetActor->physical.SetSpeed(1.0);
-    targetActor->physical.SetSpeedYouth(0.8);
+    targetActor->physical.SetSpeedYouth(0.9);
+    targetActor->physical.SetSpeedMultiplier(1.2f);
     
     targetActor->physical.SetYouthScale(0.3f);
-    targetActor->physical.SetAdultScale(1.0f);
+    targetActor->physical.SetAdultScale(1.1f);
     
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
     
@@ -774,14 +611,20 @@ void GeneticPresets::ActorPresets::Bovine(Actor* targetActor) {
 }
 
 
+
 void GeneticPresets::ActorPresets::Horse(Actor* targetActor) {
     
     AI.genomes.ClearGenes(targetActor);
     
     targetActor->SetName("Horse");
     
+    targetActor->physical.SetAge(0);
+    targetActor->physical.SetAdultAge(800);
+    targetActor->physical.SetSeniorAge(10000);
+    
     targetActor->physical.SetSpeed(1.5);
-    targetActor->physical.SetSpeedYouth(0.9);
+    targetActor->physical.SetSpeedYouth(1.4);
+    targetActor->physical.SetSpeedMultiplier(1.5f);
     
     targetActor->physical.SetYouthScale(0.4f);
     targetActor->physical.SetAdultScale(1.2f);
@@ -1002,8 +845,13 @@ void GeneticPresets::ActorPresets::Bear(Actor* targetActor) {
     
     targetActor->SetName("Bear");
     
-    targetActor->physical.SetSpeed(1.1f);
-    targetActor->physical.SetSpeedYouth(0.9f);
+    targetActor->physical.SetAge(0);
+    targetActor->physical.SetAdultAge(800);
+    targetActor->physical.SetSeniorAge(10000);
+    
+    targetActor->physical.SetSpeed(1.5f);
+    targetActor->physical.SetSpeedYouth(1.4f);
+    targetActor->physical.SetSpeedMultiplier(1.2f);
     
     targetActor->physical.SetYouthScale(0.4f);
     targetActor->physical.SetAdultScale(1.3f);
@@ -1185,14 +1033,20 @@ void GeneticPresets::ActorPresets::Bear(Actor* targetActor) {
 }
 
 
+
 void GeneticPresets::ActorPresets::Dog(Actor* targetActor) {
     
     AI.genomes.ClearGenes(targetActor);
     
     targetActor->SetName("Dog");
     
-    targetActor->physical.SetSpeed(1.0f);
-    targetActor->physical.SetSpeedYouth(0.8f);
+    targetActor->physical.SetAge(0);
+    targetActor->physical.SetAdultAge(750);
+    targetActor->physical.SetSeniorAge(10000);
+    
+    targetActor->physical.SetSpeed(1.5f);
+    targetActor->physical.SetSpeedYouth(1.4f);
+    targetActor->physical.SetSpeedMultiplier(1.2f);
     
     targetActor->physical.SetYouthScale(0.3f);
     targetActor->physical.SetAdultScale(1.0f);
@@ -1349,16 +1203,22 @@ void GeneticPresets::ActorPresets::Dog(Actor* targetActor) {
 }
 
 
+
 void GeneticPresets::ActorPresets::Creepy(Actor* targetActor) {
     
     AI.genomes.ClearGenes(targetActor);
     
     targetActor->SetName("Creepy");
     
-    targetActor->physical.SetSpeed(1.0);
-    targetActor->physical.SetSpeedYouth(0.8);
+    targetActor->physical.SetAge(0);
+    targetActor->physical.SetAdultAge(0);
+    targetActor->physical.SetSeniorAge(1000000);
     
-    targetActor->physical.SetYouthScale(0.3f);
+    targetActor->physical.SetSpeed(1.0);
+    targetActor->physical.SetSpeedYouth(1.0);
+    targetActor->physical.SetSpeedMultiplier(1.0f);
+    
+    targetActor->physical.SetYouthScale(0.4f);
     targetActor->physical.SetAdultScale(1.0f);
     
     targetActor->behavior.SetHeightPreferenceMax(20.0f);

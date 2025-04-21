@@ -110,7 +110,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     GenerateColorFieldFromHeightField(colorField, heightField, chunkSZ, chunkSZ, colorLow, colorHigh, 0.024f);
     
-    AddColorFieldSnowCap(colorField, heightField, chunkSZ, chunkSZ, Colors.white, 80.0f, 2.0f);
+    AddColorFieldSnowCap(colorField, heightField, chunkSZ, chunkSZ, world.snowCapColor, 80.0f, 2.0f);
     
     GenerateWaterTableFromHeightField(heightField, chunkSZ, chunkSZ, 0);
     
