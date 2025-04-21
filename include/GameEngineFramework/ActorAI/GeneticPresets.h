@@ -44,6 +44,8 @@ public:
         
     public:
         
+        void Human(Actor* targetActor);
+        
         void Sheep(Actor* targetActor);
         
         void Bear(Actor* targetActor);

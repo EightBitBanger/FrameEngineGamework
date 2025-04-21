@@ -20,6 +20,7 @@ public:
     
     float snowCapHeight;
     
+    Color snowCapColor;
     Color waterColorLow;
     Color waterColorHigh;
     
@@ -68,6 +69,7 @@ public:
         doAutoBreeding(true),
         
         snowCapHeight(60.0f),
+        snowCapColor(0.8f, 0.8f, 1.0f, 1.0f),
         
         waterColorLow(Colors.black),
         waterColorHigh(Colors.blue),
