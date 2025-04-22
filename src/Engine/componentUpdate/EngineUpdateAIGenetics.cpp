@@ -15,7 +15,9 @@ void EngineSystemManager::ClearOldGeneticRenderers(unsigned int index) {
     }
     
     mStreamBuffer[index].actor->genetics.mGeneticRenderers.clear();
+    mStreamBuffer[index].actor->genetics.mPhen.clear();
     mStreamBuffer[index].actor->state.mAnimation.clear();
+    return;
 }
 
 // Function to generate collider
@@ -50,7 +52,7 @@ MeshRenderer* EngineSystemManager::CreateMeshRendererForGene(unsigned int index,
     
     MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
     newRenderer->isActive = false;
-    newRenderer->EnableFrustumCulling();
+    //newRenderer->EnableFrustumCulling();
     
     newRenderer->mesh = sourceMesh;
     newRenderer->material = Renderer.CreateMaterial();

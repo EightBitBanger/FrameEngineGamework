@@ -5,9 +5,12 @@
 
 void DecodeGenome(DecorationSpecifier& decor, Actor* actorPtr) {
     
+    if (decor.name == "Human")  {AI.genomes.presets.Human( actorPtr );}
     if (decor.name == "Sheep")  {AI.genomes.presets.Sheep( actorPtr );}
     if (decor.name == "Bear")   {AI.genomes.presets.Bear( actorPtr );}
     if (decor.name == "Dog")    {AI.genomes.presets.Dog( actorPtr );}
+    if (decor.name == "Bovine") {AI.genomes.presets.Bovine( actorPtr );}
+    if (decor.name == "Horse")  {AI.genomes.presets.Horse( actorPtr );}
     
     return;
 }
@@ -444,9 +447,9 @@ void ChunkManager::Decorate(Chunk& chunk) {
                     
                     actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
                     
-                    if (Random.Range(0, 100) > 92) {
+                    if (Random.Range(0, 100) > 89) {
                         
-                        unsigned int numberOfChildren = Random.Range(0, 4);
+                        unsigned int numberOfChildren = Random.Range(0, 5);
                         
                         for (unsigned int c=0; c < numberOfChildren; c++) {
                             
@@ -454,13 +457,13 @@ void ChunkManager::Decorate(Chunk& chunk) {
                             actorPosition.x += Random.Range(0, 3) - Random.Range(0, 3);
                             actorPosition.z += Random.Range(0, 3) - Random.Range(0, 3);
                             
-                            GameObject* actorObject = SpawnActor(actorPosition.x, 0, actorPosition.z);
+                            GameObject* offspringActorObject = SpawnActor(actorPosition.x, 0, actorPosition.z);
                             
-                            Actor* actor = actorObject->GetComponent<Actor>();
+                            Actor* offspringActor = offspringActorObject->GetComponent<Actor>();
                             
-                            DecodeGenome(decor, actor);
+                            DecodeGenome(decor, offspringActor);
                             
-                            actor->physical.SetAge( 100 + Random.Range(0, 200) );
+                            offspringActor->physical.SetAge( 100 + Random.Range(0, 200) );
                             
                         }
                         

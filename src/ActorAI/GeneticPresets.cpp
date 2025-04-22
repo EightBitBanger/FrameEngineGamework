@@ -35,7 +35,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
     
-    targetActor->biological.health = 1;
+    targetActor->biological.health = 200;
     
     AI.genomes.mental.PreyBase(targetActor);
     
@@ -283,6 +283,8 @@ void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
     
+    targetActor->biological.health = 40;
+    
     AI.genomes.mental.PreyBase(targetActor);
     
     if (Random.Range(0, 100) > 55) 
@@ -425,6 +427,8 @@ void GeneticPresets::ActorPresets::Bovine(Actor* targetActor) {
     targetActor->physical.SetAdultScale(1.1f);
     
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
+    
+    targetActor->biological.health = 170;
     
     AI.genomes.mental.PreyBase(targetActor);
     
@@ -630,6 +634,8 @@ void GeneticPresets::ActorPresets::Horse(Actor* targetActor) {
     targetActor->physical.SetAdultScale(1.2f);
     
     targetActor->behavior.SetHeightPreferenceMax(50.0f);
+    
+    targetActor->biological.health = 240;
     
     AI.genomes.mental.PreyBase(targetActor);
     
@@ -859,6 +865,8 @@ void GeneticPresets::ActorPresets::Bear(Actor* targetActor) {
     targetActor->behavior.SetHeightPreferenceMax(50.0f);
     targetActor->behavior.SetHeightPreferenceMin(20.0f);
     
+    targetActor->biological.health = 280;
+    
     AI.genomes.mental.PredatorBase(targetActor);
     
     if (Random.Range(0, 100) > 55) 
@@ -1054,6 +1062,8 @@ void GeneticPresets::ActorPresets::Dog(Actor* targetActor) {
     targetActor->behavior.SetHeightPreferenceMax(30.0f);
     targetActor->behavior.SetHeightPreferenceMin(10.0f);
     
+    targetActor->biological.health = 100;
+    
     AI.genomes.mental.PredatorBase(targetActor);
     
     if (Random.Range(0, 100) > 55) 
@@ -1222,6 +1232,8 @@ void GeneticPresets::ActorPresets::Creepy(Actor* targetActor) {
     targetActor->physical.SetAdultScale(1.0f);
     
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
+    
+    targetActor->biological.health = 50;
     
     AI.genomes.mental.PreyBase(targetActor);
     

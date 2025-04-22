@@ -1,5 +1,8 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
+// Terminal velocity -9.81 * 2.0 * 2.0
+#define TERMINAL_VELOCITY  39.24f
+
 void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     
     if (mStreamBuffer[index].rigidBody == nullptr) 
@@ -25,11 +28,9 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
             // Apply some falling action
             actorVelocity.y -= 1.3f;
             
-            // Terminal velocity
-            float terminalVelocity = -9.81f * 2.0f;
-            
-            if (actorVelocity.y < terminalVelocity) 
-                actorVelocity.y = terminalVelocity;
+            // Check terminal velocity
+            if (actorVelocity.y < -TERMINAL_VELOCITY) 
+                actorVelocity.y = -TERMINAL_VELOCITY;
             
         } else {
             
@@ -96,6 +97,11 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     // Factor in youth speed multiplier
     if (mStreamBuffer[index].actor->physical.mAge < 1000) 
         actorVelocity *= mStreamBuffer[index].actor->physical.mSpeedYouth;
+    
+    // Check max velocity
+    actorVelocity.x = glm::clamp(actorVelocity.x, -1.0f, 1.0f);
+    actorVelocity.y = glm::clamp(actorVelocity.y, -1.0f, 1.0f);
+    actorVelocity.z = glm::clamp(actorVelocity.z, -1.0f, 1.0f);
     
     // Apply force velocity
     mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, 
