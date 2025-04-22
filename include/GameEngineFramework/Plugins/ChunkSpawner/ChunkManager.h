@@ -69,7 +69,7 @@ public:
         doAutoBreeding(true),
         
         snowCapHeight(60.0f),
-        snowCapColor(0.8f, 0.8f, 1.0f, 1.0f),
+        snowCapColor(0.7f, 0.85f, 1.1f, 1.0f),
         
         waterColorLow(Colors.black),
         waterColorHigh(Colors.blue),
