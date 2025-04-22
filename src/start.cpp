@@ -269,13 +269,23 @@ void Start() {
     // Chunk generation
     //
     
+    DecorationSpecifier decorGrassBase;
+    decorGrassBase.type = DECORATION_GRASS;
+    decorGrassBase.density = 2000;
+    decorGrassBase.spawnHeightMaximum = 35;
+    decorGrassBase.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorGrassBase.spawnStackHeightMin = 1;
+    decorGrassBase.spawnStackHeightMax = 2;
+    decorGrassBase.threshold = 0.0f;
+    decorGrassBase.noise = 0.04f;
+    
     DecorationSpecifier decorGrass;
     decorGrass.type = DECORATION_GRASS;
     decorGrass.density = 2000;
     decorGrass.spawnHeightMaximum = 35;
     decorGrass.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
-    decorGrass.spawnStackHeightMax = 2;
+    decorGrass.spawnStackHeightMax = 3;
     decorGrass.threshold = 0.2f;
     decorGrass.noise = 0.04f;
     
@@ -314,29 +324,50 @@ void Start() {
     DecorationSpecifier decorSheep;
     decorSheep.type = DECORATION_ACTOR;
     decorSheep.name = "Sheep";
-    decorSheep.density = 13;
+    decorSheep.density = 10;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorSheep.threshold = 0.1f;
     decorSheep.noise = 0.4f;
     
+    DecorationSpecifier decorHorse;
+    decorHorse.type = DECORATION_ACTOR;
+    decorHorse.name = "Horse";
+    decorHorse.density = 4;
+    decorHorse.spawnHeightMaximum = 10;
+    decorHorse.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorHorse.threshold = 0.1f;
+    decorHorse.noise = 0.4f;
+    
+    DecorationSpecifier decorBovine;
+    decorBovine.type = DECORATION_ACTOR;
+    decorBovine.name = "Bovine";
+    decorBovine.density = 4;
+    decorBovine.spawnHeightMaximum = 10;
+    decorBovine.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorBovine.threshold = 0.1f;
+    decorBovine.noise = 0.4f;
+    
     DecorationSpecifier decorBear;
     decorBear.type = DECORATION_ACTOR;
     decorBear.name = "Bear";
-    decorBear.density = 5;
+    decorBear.density = 4;
     decorBear.spawnHeightMaximum = 40;
     decorBear.spawnHeightMinimum = 5;
     decorBear.threshold = 0.1f;
     decorBear.noise = 0.4f;
     
-    
     GameWorld.world.mDecorations.push_back(decorGrass);
+    GameWorld.world.mDecorations.push_back(decorGrassBase);
+    
     GameWorld.world.mDecorations.push_back(decorTrees);
     GameWorld.world.mDecorations.push_back(decorTreeHights);
     
     GameWorld.world.mDecorations.push_back(decorWaterPlants);
     
     GameWorld.world.mDecorations.push_back(decorSheep);
+    GameWorld.world.mDecorations.push_back(decorBovine);
+    GameWorld.world.mDecorations.push_back(decorHorse);
     GameWorld.world.mDecorations.push_back(decorBear);
     
     

@@ -7,22 +7,22 @@
 
 
 void ApplyGene(Actor* targetActor) {
-    /*
-    unsigned int chance = Random.Range(0, 100);
     
-    targetActor->physical.SetAge( 0 );
+    targetActor->physical.SetAge( 1000 );
     targetActor->ReexpressPhenotype();
+    //targetActor->RebuildPhenotype();
     
-    //if (chance >  0 && chance < 40) {AI.genomes.presets.Bovine(targetActor); return;}
-    //if (chance > 40 && chance < 80) {AI.genomes.presets.Bear(targetActor); return;}
-    //if (chance > 20 && chance < 30) {AI.genomes.presets.Dog(targetActor); return;}
-    //if (chance > 80 && chance < 100) {AI.genomes.presets.Horse(targetActor); return;}
-    
-    AI.genomes.presets.Bovine(targetActor);
+    while (1) {
+        
+        if (Random.Range(0, 100) > 70) {AI.genomes.presets.Human(targetActor); return;}
+        
+        if (Random.Range(0, 100) > 70) {AI.genomes.presets.Bovine(targetActor); return;}
+        if (Random.Range(0, 100) > 70) {AI.genomes.presets.Horse(targetActor); return;}
+        if (Random.Range(0, 100) > 70) {AI.genomes.presets.Dog(targetActor); return;}
+        if (Random.Range(0, 100) > 70) {AI.genomes.presets.Bear(targetActor); return;}
+    }
     
     return;
-    */
-    
 }
 
 
@@ -61,15 +61,6 @@ void Run() {
         isTrigger = true;
         sample = Audio.CreateAudioSample();
         Audio.Presets.RenderWhiteNoise(sample, 0.1f);
-        
-    }
-    
-    if (Input.CheckKeyCurrent(VK_P)) {
-        
-        Playback* samplePlayer = Audio.Play(sound);
-        samplePlayer->SetVolume(0.01);
-        samplePlayer->doRepeat = true;
-        samplePlayer->isGarbage = true;
         
     }
     
@@ -279,159 +270,24 @@ void Run() {
         
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             
-            for (unsigned int retry=0; retry < 24; retry++) {
-                float randomX = Random.Range(0, 30) - Random.Range(0, 30);
-                float randomZ = Random.Range(0, 30) - Random.Range(0, 30);
+            for (unsigned int retry=0; retry < 8; retry++) {
+                
+                float randomX = Random.Range(0, 10) - Random.Range(0, 10);
+                float randomZ = Random.Range(0, 10) - Random.Range(0, 10);
+                
                 GameObject* actorObject = GameWorld.SpawnActor( hit.point.x + randomX, hit.point.y, hit.point.z + randomZ);
                 Actor* actor = actorObject->GetComponent<Actor>();
                 
-                actor->physical.SetAge(400 + Random.Range(0, 100));
-                
-                AI.genomes.mental.PreyBase( actor );
                 ApplyGene(actor);
                 
-                
-                
-                // TEST sound attachment test
-                
-                /*
-                Sound* sound = Audio.CreateSound();
-                sound->sample = sample;
-                sound->isSample3D = true;
-                
-                Playback* samplePlayer = Audio.Play(sound);
-                samplePlayer->SetVolume(1.0);
-                samplePlayer->doRepeat = true;
-                */
-                
-                
-                
-                
-                
-                
-                /*
-                actorObject->AddComponent( Engine.CreateComponent<Sound>() );
-                Sound* soundPtr = actorObject->GetComponent<Sound>();
-                
-                AudioSample* samplePtr = Audio.CreateAudioSample();
-                
-                float low  = Random.Range(500, 1000);
-                float high = Random.Range(500, 1000);
-                
-                Audio.Presets.RenderSweepingSineWave(samplePtr, low, high, 0.2);
-                
-                soundPtr->isSample3D = true;
-                soundPtr->sample = samplePtr;
-                soundPtr->SetMaximumFalloff(30.0f);
-                soundPtr->SetMinimumFalloff(0.0f);
-                soundPtr->SetFalloffMultiplier(8.0f);
-                
-                Playback* playback = Audio.Play(soundPtr);
-                playback->doRepeat = true;
-                playback->SetVolume(0.1f);
-                */
-            }
-            
-            
-            //AI.genomes.presets.Horse(actor);
-            //actor->SetAge( 700 + Random.Range(0, 500) );
-            
-            
-            //Playback* samplePlayer = Audio.Play(sound);
-            //samplePlayer->SetVolume(0.01);
-            //samplePlayer->isGarbage = true;
-            
-            
-            
-            
-            /*
-            std::string sourceGene = Platform.GetClipboardText();
-            
-            if (sourceGene.size() == 0) 
-                return;
-            
-            // Remove end character
-            //size_t pos = sourceGene.find(">");
-            
-            //if (pos != std::string::npos) 
-            //    sourceGene.erase(pos, 1);
-            
-            std::vector<std::string> sourceArray = String.Explode(sourceGene, '<');
-            
-            if ((sourceArray[0][0] == 'g') & 
-                (sourceArray[0][1] == 'e') & 
-                (sourceArray[0][2] == 'n') & 
-                (sourceArray[0][3] == 'e')) {
-                
-                GameObject* newActorObject = GameWorld.SpawnActor( hit.point.x, hit.point.y, hit.point.z );
-                
-                GameObject* hitObject = (GameObject*)hit.gameObject;
-                Actor* newActor = newActorObject->GetComponent<Actor>();
-                
-                AI.genomes.mental.PreyBase( newActor );
-                
-                AI.genomes.InjectGenome(newActor, sourceArray[1]);
-                
-                newActor->SetAge( 900 + Random.Range(100, 800) );
-                
-                newActor->SetGeneticUpdateFlag();
-                
-            }
-            */
-            
-            
-        }
-        
-    }
-    
-    /*
-    // Pick an actors genome
-    
-    if (Input.CheckMouseMiddlePressed()) {
-        
-        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
-            
-            GameObject* hitObject = (GameObject*)hit.gameObject;
-            Actor* hitActor = hitObject->GetComponent<Actor>();
-            
-            actorSelected = hitActor;
-            
-            targetGene = AI.genomes.ExtractGenome(hitActor);
-            
-            std::string destGene = "gene<" + targetGene;
-            
-            Platform.SetClipboardText( destGene );
-            
-            unsigned int numberOfGenes = hitActor->genetics.GetNumberOfGenes();
-            
-            for (unsigned int i=0 ; i < numberOfGenes; i++) {
-                
-                MeshRenderer* geneRenderer = hitActor->genetics.GetMeshRendererAtIndex(i);
-                
-                std::string geneDataString = "";
-                
-                float xPos = geneRenderer->transform.position.x;
-                float yPos = geneRenderer->transform.position.y;
-                float zPos = geneRenderer->transform.position.z;
-                
-                float xScale = geneRenderer->transform.scale.x;
-                float yScale = geneRenderer->transform.scale.y;
-                float zScale = geneRenderer->transform.scale.z;
-                
-                geneDataString += Float.ToString(xPos) + ", " + Float.ToString(yPos) + ", " + Float.ToString(zPos) + "    ";
-                geneDataString += Float.ToString(xScale) + ", " + Float.ToString(yScale) + ", " + Float.ToString(zScale);
-                
-                Engine.Print( geneDataString );
+                actor->physical.SetAge(400 + Random.Range(0, 100));
+                AI.genomes.mental.PreyBase( actor );
                 
             }
             
         }
         
     }
-    */
-    
-    
-    /*
     
     // Plant tree (testing)
     if (Input.CheckKeyPressed(VK_P)) {
@@ -470,7 +326,7 @@ void Run() {
         
     }
     
-    */
+    
     
     // Kill actor test
     if (Input.CheckMouseRightPressed()) {
