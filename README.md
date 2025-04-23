@@ -10,7 +10,7 @@
 - Rendering
   - Simple textured mesh renderer
   - Point and directional lights
-  - Text rendering via sprite sheet
+  - ImGUI for IU rendering
   - Fog effects
 
 - Physics support by <a href="https://github.com/DanielChappuis/reactphysics3d">ReactPhysics3D</a>⁭
