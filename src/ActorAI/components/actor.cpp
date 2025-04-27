@@ -65,9 +65,9 @@ void Actor::Reset(void) {
     physical.mAgeAdult       = 1000.0f;
     physical.mAgeSenior      = 50000.0f;
     physical.mSpeed          = 1.5f;
-    physical.mSpeedYouth     = 0.3f;
+    physical.mSpeedYouth     = 0.8f;
     physical.mSpeedMul       = 1.3f;
-    physical.mSnapSpeed      = 0.24f;
+    physical.mSnapSpeed      = 0.1f;
     physical.mYouthScale     = 0.3f;
     physical.mAdultScale     = 1.3f;
     physical.mSexualOrientation = false;
@@ -133,7 +133,7 @@ Actor::PhysicalAttributes::PhysicalAttributes() :
     mSpeed(1.5f),
     mSpeedYouth(0.3f),
     mSpeedMul(1.3f),
-    mSnapSpeed(0.24f),
+    mSnapSpeed(0.1f),
     mYouthScale(0.3f),
     mAdultScale(1.3f),
     mSexualOrientation(false),

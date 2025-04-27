@@ -6,11 +6,8 @@
 void EngineSystemManager::ClearOldGeneticRenderers(unsigned int index) {
     
     for (unsigned int a = 0; a < mStreamBuffer[index].actor->genetics.mGeneticRenderers.size(); a++) {
-        
         MeshRenderer* geneRenderer = mStreamBuffer[index].actor->genetics.mGeneticRenderers[a];
-        
         sceneMain->RemoveMeshRendererFromSceneRoot(geneRenderer, RENDER_QUEUE_GEOMETRY);
-        
         Renderer.DestroyMeshRenderer(geneRenderer);
     }
     
@@ -187,8 +184,7 @@ void EngineSystemManager::ExpressActorGenetics(unsigned int index) {
             }
             
             // Process age dependent genes
-            if (mStreamBuffer[index].actor->physical.mAge > mStreamBuffer[index].actor->genetics.mGenes[a].expressionBegin && 
-                mStreamBuffer[index].actor->physical.mAge < mStreamBuffer[index].actor->genetics.mGenes[a].expressionEnd) {
+            if (mStreamBuffer[index].actor->physical.mAge > mStreamBuffer[index].actor->genetics.mGenes[a].expressionAge) {
                 
                 // Express only genes that apply to this actor
                 if ((mStreamBuffer[index].actor->genetics.mGenes[a].type == EXPRESSION_TYPE_MALE && sexualOrientation == true) || 

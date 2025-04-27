@@ -25,6 +25,9 @@ ActorSystem::ActorSystem() :
 
 void ActorSystem::Initiate(void) {
     
+    mMainTimer.SetRefreshRate(20);
+    mAnimationTimer.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
+    
     mActorSystemThread = new std::thread( actorThreadMain );
     
     Log.Write( " >> Starting thread AI" );
@@ -124,13 +127,10 @@ void ActorSystem::SetActorUpdateDistance(float distance) {
 void actorThreadMain() {
     
     while (isActorThreadActive) {
+        std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
         
-        if (!doUpdate) {
-            std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
-            continue;
-        }
-        
-        AI.Update();
+        if (doUpdate) 
+            AI.Update();
         
         continue;
     }

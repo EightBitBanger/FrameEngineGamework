@@ -15,11 +15,9 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
     
     rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
     rp3d::Vector3 currentPosition = transform.getPosition();
-    mStreamBuffer[index].rigidBody->setTransform(transform);
     
     // Check not on ground
     Hit hit;
-    
     if (Physics.Raycast(actorPosition, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Ground)) {
         
         // Standing on ground
@@ -36,33 +34,28 @@ void EngineSystemManager::UpdateActorPhysics(unsigned int index) {
             
             actorPosition.y = hit.point.y;
             currentPosition.y = hit.point.y;
-            
         }
         
-        
+        // Ground detected under actor - Clear color indicator
         unsigned int numberOfRenderers = mStreamBuffer[index].actor->genetics.GetNumberOfMeshRenderers();
         for (unsigned int i=0; i < numberOfRenderers; i++) {
             MeshRenderer* geneRenderer = mStreamBuffer[index].actor->genetics.GetMeshRendererAtIndex(i);
-            if (geneRenderer == nullptr) 
-                continue;
-            
-            Material* actorMaterial = geneRenderer->material;
-            if (actorMaterial !=nullptr) 
-                actorMaterial->ambient = Colors.white;
-            
+            if (geneRenderer != nullptr) {
+                Material* actorMaterial = geneRenderer->material;
+                if (actorMaterial !=nullptr) 
+                    actorMaterial->ambient = Colors.white;
+            }
         }
         
-        
         // Set associated game object reference
+        // TODO This does not belong here
         GameObject* gameObject = (GameObject*)hit.gameObject;
         mStreamBuffer[index].actor->user.mUserDataA = gameObject->GetUserData();
         
     } else {
         
-        // No ground detected under actor
-        
+        // No ground detected under actor - Apply dark color indicator
         actorVelocity = glm::vec3(0, 0, 0);
-        
         unsigned int numberOfRenderers = mStreamBuffer[index].actor->genetics.GetNumberOfMeshRenderers();
         for (unsigned int i=0; i < numberOfRenderers; i++) {
             MeshRenderer* geneRenderer = mStreamBuffer[index].actor->genetics.GetMeshRendererAtIndex(i);

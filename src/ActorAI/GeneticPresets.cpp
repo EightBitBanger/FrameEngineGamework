@@ -22,11 +22,10 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     
     targetActor->SetName("Human");
     
-    targetActor->physical.SetAge( 0 );
     targetActor->physical.SetAdultAge( 1000 );
     targetActor->physical.SetSeniorAge( 40000 );
     
-    targetActor->physical.SetSpeed(1.2f);
+    targetActor->physical.SetSpeed(1.0f);
     targetActor->physical.SetSpeedYouth(1.4f);
     targetActor->physical.SetSpeedMultiplier(1.24f);
     
@@ -129,8 +128,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     geneBreastLeft.colorIndex       = 1;
     geneBreastLeft.expressionFactor = 0.004;
     geneBreastLeft.expressionMax    = 1.4;
-    geneBreastLeft.expressionBegin  = 900;
-    geneBreastLeft.expressionEnd    = 1400;
+    geneBreastLeft.expressionAge    = 900;
     
     // Right breast
     Gene geneBreastRight;
@@ -146,8 +144,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     geneBreastRight.colorIndex       = 1;
     geneBreastRight.expressionFactor = 0.004;
     geneBreastRight.expressionMax    = 1.4;
-    geneBreastRight.expressionBegin  = 900;
-    geneBreastRight.expressionEnd    = 1400;
+    geneBreastRight.expressionAge    = 900;
     
     // Left shoulder
     Gene geneShoulderLeft;
@@ -165,8 +162,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     geneShoulderLeft.type = EXPRESSION_TYPE_MALE;
     geneShoulderLeft.expressionFactor = 0.004;
     geneShoulderLeft.expressionMax    = 1.1;
-    geneShoulderLeft.expressionBegin  = 900;
-    geneShoulderLeft.expressionEnd    = 1400;
+    geneShoulderLeft.expressionAge    = 900;
     
     // Right shoulder
     Gene geneShoulderRight;
@@ -185,8 +181,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     geneShoulderRight.type = EXPRESSION_TYPE_MALE;
     geneShoulderRight.expressionFactor = 0.004;
     geneShoulderRight.expressionMax    = 1.1;
-    geneShoulderRight.expressionBegin  = 900;
-    geneShoulderRight.expressionEnd    = 1400;
+    geneShoulderRight.expressionAge    = 900;
     
     // Left arm
     Gene geneLimbFrontLeft;
@@ -1044,172 +1039,6 @@ void GeneticPresets::ActorPresets::Bear(Actor* targetActor) {
 
 void GeneticPresets::ActorPresets::Dog(Actor* targetActor) {
     
-    AI.genomes.ClearGenes(targetActor);
-    
-    targetActor->SetName("Dog");
-    
-    targetActor->physical.SetAge(0);
-    targetActor->physical.SetAdultAge(750);
-    targetActor->physical.SetSeniorAge(10000);
-    
-    targetActor->physical.SetSpeed(1.5f);
-    targetActor->physical.SetSpeedYouth(1.4f);
-    targetActor->physical.SetSpeedMultiplier(1.2f);
-    
-    targetActor->physical.SetYouthScale(0.3f);
-    targetActor->physical.SetAdultScale(1.0f);
-    
-    targetActor->behavior.SetHeightPreferenceMax(30.0f);
-    targetActor->behavior.SetHeightPreferenceMin(10.0f);
-    
-    targetActor->biological.health = 100;
-    
-    AI.genomes.mental.PredatorBase(targetActor);
-    
-    if (Random.Range(0, 100) > 55) 
-    {targetActor->physical.SetSexualOrientation(true);} else  // Male
-    {targetActor->physical.SetSexualOrientation(false);}      // Female
-    
-    // Color variants
-    Color headColor = Colors.gray;
-    Color bodyColor = Colors.gray;
-    Color limbColor = Colors.gray;
-    Color collarColor = Colors.red;
-    
-    // Body gene
-    Gene geneBody;
-    geneBody.offset    = Codon(0, 0, 0);
-    geneBody.position  = Codon(0, 0.8, 0);
-    geneBody.rotation  = Codon(0, 0, 0);
-    geneBody.scale     = Codon(0.6, 0.6, 1.2);
-    geneBody.color.x   = bodyColor.r;
-    geneBody.color.y   = bodyColor.g;
-    geneBody.color.z   = bodyColor.b;
-    
-    // Head gene
-    Gene geneHead;
-    geneHead.offset    = Codon(0, 1.0, 0.4);
-    geneHead.position  = Codon(0, -0.1, 0.5);
-    geneHead.rotation  = Codon(0, 0, 0);
-    geneHead.scale     = Codon(0.3, 0.3, 0.3);
-    geneHead.color.x   = headColor.r;
-    geneHead.color.y   = headColor.g;
-    geneHead.color.z   = headColor.b;
-    
-    // Muzzle gene
-    Gene geneMuzzle;
-    geneMuzzle.attachmentIndex = 2;
-    geneMuzzle.offset    = Codon(0.0, 0.0, 0.0);
-    geneMuzzle.position  = Codon(0.0, -0.1, 0.5);
-    geneMuzzle.rotation  = Codon(0, 0, 0);
-    geneMuzzle.scale     = Codon(0.2, 0.2, 0.2);
-    geneMuzzle.color.x   = headColor.r;
-    geneMuzzle.color.y   = headColor.g;
-    geneMuzzle.color.z   = headColor.b;
-    
-    // Ear left gene
-    Gene geneEarLeft;
-    geneEarLeft.attachmentIndex = 2;
-    geneEarLeft.offset    = Codon(0.0, 0.0, 0.0);
-    geneEarLeft.position  = Codon(0.1, 0.2, 0.3);
-    geneEarLeft.rotation  = Codon(0, 0, 0);
-    geneEarLeft.scale     = Codon(0.1, 0.1, 0.1);
-    geneEarLeft.color.x   = headColor.r;
-    geneEarLeft.color.y   = headColor.g;
-    geneEarLeft.color.z   = headColor.b;
-    
-    // Ear right gene
-    Gene geneEarRight;
-    geneEarRight.attachmentIndex = 2;
-    geneEarRight.offset    = Codon(0.0, 0.0, 0.0);
-    geneEarRight.position  = Codon(-0.1, 0.2, 0.3);
-    geneEarRight.rotation  = Codon(0, 0, 0);
-    geneEarRight.scale     = Codon(0.1, 0.1, 0.1);
-    geneEarRight.color.x   = headColor.r;
-    geneEarRight.color.y   = headColor.g;
-    geneEarRight.color.z   = headColor.b;
-    
-    // Limb FL gene
-    Gene geneLimbFrontLeft;
-    geneLimbFrontLeft.offset    = Codon(0.2, 0.6, 0.5);
-    geneLimbFrontLeft.position  = Codon(0.02, -0.4, 0);
-    geneLimbFrontLeft.rotation  = Codon(0, 0, 0);
-    geneLimbFrontLeft.scale     = Codon(0.2, 0.6, 0.2);
-    geneLimbFrontLeft.color.x   = limbColor.r;
-    geneLimbFrontLeft.color.y   = limbColor.g;
-    geneLimbFrontLeft.color.z   = limbColor.b;
-    
-    geneLimbFrontLeft.doAnimationCycle = true;
-    geneLimbFrontLeft.animationAxis    = Codon(1, 0, 0);
-    geneLimbFrontLeft.animationRange   = 15;
-    
-    // Limb FR gene
-    Gene geneLimbFrontRight;
-    geneLimbFrontRight.offset    = Codon(-0.2, 0.6, 0.5);
-    geneLimbFrontRight.position  = Codon(-0.02, -0.4, 0);
-    geneLimbFrontRight.rotation  = Codon(0, 0, 0);
-    geneLimbFrontRight.scale     = Codon(0.2, 0.6, 0.2);
-    geneLimbFrontRight.color.x   = limbColor.r;
-    geneLimbFrontRight.color.y   = limbColor.g;
-    geneLimbFrontRight.color.z   = limbColor.b;
-    
-    geneLimbFrontRight.doAnimationCycle   = true;
-    geneLimbFrontRight.doInverseAnimation = true;
-    geneLimbFrontRight.animationAxis      = Codon(1, 0, 0);
-    geneLimbFrontRight.animationRange     = 15;
-    
-    // Limb RL gene
-    Gene geneLimbRearLeft;
-    geneLimbRearLeft.offset    = Codon(0.2, 0.6, -0.4);
-    geneLimbRearLeft.position  = Codon(0.07, -0.4, -0.04);
-    geneLimbRearLeft.rotation  = Codon(0, 0, 0);
-    geneLimbRearLeft.scale     = Codon(0.2, 0.6, 0.2);
-    geneLimbRearLeft.color.x   = limbColor.r;
-    geneLimbRearLeft.color.y   = limbColor.g;
-    geneLimbRearLeft.color.z   = limbColor.b;
-    
-    geneLimbRearLeft.doAnimationCycle = true;
-    geneLimbRearLeft.animationAxis    = Codon(1, 0, 0);
-    geneLimbRearLeft.animationRange   = 15;
-    
-    // Limb RR gene
-    Gene geneLimbRearRight;
-    geneLimbRearRight.offset    = Codon(-0.2, 0.6, -0.4);
-    geneLimbRearRight.position  = Codon(-0.07, -0.4, -0.04);
-    geneLimbRearRight.rotation  = Codon(0, 0, 0);
-    geneLimbRearRight.scale     = Codon(0.2, 0.6, 0.2);
-    geneLimbRearRight.color.x   = limbColor.r;
-    geneLimbRearRight.color.y   = limbColor.g;
-    geneLimbRearRight.color.z   = limbColor.b;
-    
-    geneLimbRearRight.doAnimationCycle   = true;
-    geneLimbRearRight.doInverseAnimation = true;
-    geneLimbRearRight.animationAxis      = Codon(1, 0, 0);
-    geneLimbRearRight.animationRange     = 15;
-    
-    // Collar gene
-    Gene geneCollar;
-    geneCollar.offset    = Codon(0, 1.0, 0);
-    geneCollar.position  = Codon(0, 0, 0);
-    geneCollar.rotation  = Codon(0, 0, 0);
-    geneCollar.scale     = Codon(0.65, 0.1, 0.65);
-    geneCollar.color.x   = collarColor.r;
-    geneCollar.color.y   = collarColor.g;
-    geneCollar.color.z   = collarColor.b;
-    
-    // Apply genes to the actor
-    targetActor->genetics.AddGene(geneBody);
-    targetActor->genetics.AddGene(geneHead);
-    targetActor->genetics.AddGene(geneMuzzle);
-    targetActor->genetics.AddGene(geneEarLeft);
-    targetActor->genetics.AddGene(geneEarRight);
-    targetActor->genetics.AddGene(geneLimbFrontLeft);
-    targetActor->genetics.AddGene(geneLimbFrontRight);
-    targetActor->genetics.AddGene(geneLimbRearLeft);
-    targetActor->genetics.AddGene(geneLimbRearRight);
-    targetActor->genetics.AddGene(geneCollar);
-    
-    return;
 }
 
 

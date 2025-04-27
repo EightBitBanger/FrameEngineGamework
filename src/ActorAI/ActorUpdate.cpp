@@ -15,8 +15,6 @@ extern bool doUpdate;
 extern int actorCounter;
 extern int tickCounter;
 
-#define NUMBER_OF_TICKS  10000000
-
 #define DECISION_CHANCE_TO_WALK                  1000
 #define DECISION_CHANCE_TO_CHANGE_DIRECTION      1000
 #define DECISION_CHANCE_TO_FOCUS_NEARBY          10000
@@ -27,41 +25,96 @@ extern int tickCounter;
 #define DISTANCE_MINIMUM_TARGET_REACHED          1.5f
 #define DISTANCE_MINIMUM_TARGET_BREEDING         1.0f
 
+
 void ActorSystem::Update(void) {
     
-    // Tick counter
-    tickCounter++;
-    if (tickCounter < NUMBER_OF_TICKS) 
-        return;
+    // Update animation states
+    if (mAnimationTimer.Update()) {
+        int numberOfActors = mActors.Size();
+        for (int i = 0; i < numberOfActors; i++) {
+            Actor* actor = mActors[i];
+            
+            // Cycle the animation states
+            UpdateAnimationState(actor);
+            
+            // Target tracking rotation
+            UpdateTargetRotation(actor);
+            
+        }
+    }
     
-    tickCounter = 0;
-    int numberOfActors = mActors.Size();
-    int numberOfActorsPerCycle = (numberOfActors > 10) ? (numberOfActors / 10) : 1;
-    
-    for (int i = 0; i < numberOfActorsPerCycle; i++) {
+    // Update AI states
+    if (mMainTimer.Update()) {
+        int numberOfActors = mActors.Size();
+        int numberOfActorsPerCycle = (numberOfActors > 10) ? (numberOfActors / 10) : 1;
         
-        if (actorCounter >= numberOfActors) {
-            actorCounter = 0;
-            doUpdate = false;
-            break;
+        for (int i = 0; i < numberOfActorsPerCycle; i++) {
+            
+            if (actorCounter >= numberOfActors) {
+                actorCounter = 0;
+                doUpdate = false;
+                break;
+            }
+            
+            Actor* actor = mActors[actorCounter++];
+            if (!actor->state.mIsActive) 
+                continue;
+            
+            actor->navigation.mDistance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
+            if (actor->navigation.mDistance > mActorUpdateDistance) 
+                continue;
+            
+            UpdateActorState(actor);
+            
         }
         
-        Actor* actor = mActors[actorCounter++];
-        if (!actor->state.mIsActive) 
-            continue;
+    }
+    
+    return;
+}
+
+void ActorSystem::UpdateTargetRotation(Actor* actor) {
+    
+    // Face toward target point
+    glm::vec3 position = actor->navigation.mPosition;
+    
+    float xx = position.x - actor->navigation.mTargetPoint.x;
+    float zz = position.z - actor->navigation.mTargetPoint.z;
+    
+    actor->navigation.mRotateTo.y = glm::degrees( glm::atan(xx, zz) ) + 180;
+    
+    // Check to invert facing direction
+    if (!actor->state.mIsFacing) {
         
-        actor->navigation.mux.lock();
+        actor->navigation.mRotateTo.y += 180;
         
-        actor->navigation.mDistance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
+        if (actor->navigation.mRotateTo.y > 360) 
+            actor->navigation.mRotateTo.y -= 360;
+    }
+    
+    // Check actor target direction
+    
+    // Wrap euler rotations
+    if (actor->navigation.mRotation.y < 90) 
+        if (actor->navigation.mRotateTo.y > 270) 
+            actor->navigation.mRotation.y += 360;
+    
+    if (actor->navigation.mRotation.y > 270) 
+        if (actor->navigation.mRotateTo.y < 90) 
+            actor->navigation.mRotation.y -= 360;
+    
+    // Rotate actor toward the focal point
+    if (actor->navigation.mRotation != actor->navigation.mRotateTo) {
         
-        if (actor->navigation.mDistance > mActorUpdateDistance) {
-            actor->navigation.mux.unlock();
-            continue;
-        }
+        glm::vec3 fadeFrom( actor->navigation.mRotation );
+        glm::vec3 fadeTo( actor->navigation.mRotateTo );
         
-        UpdateActorState(actor);
+        glm::vec3 fadeValue;
+        fadeValue.x = Math.Lerp(fadeFrom.x, fadeTo.x, actor->physical.mSnapSpeed);
+        fadeValue.y = Math.Lerp(fadeFrom.y, fadeTo.y, actor->physical.mSnapSpeed);
+        fadeValue.z = Math.Lerp(fadeFrom.z, fadeTo.z, actor->physical.mSnapSpeed);
         
-        actor->navigation.mux.unlock();
+        actor->navigation.mRotation = fadeValue;
     }
     
     return;
@@ -120,6 +173,29 @@ void ActorSystem::UpdateActorState(Actor* actor) {
             
             actor->navigation.mTargetBreeding = nullptr;
         }
+    }
+    
+    // Check walking state
+    if (actor->state.mIsWalking) {
+        glm::vec3 forward;
+        
+        // Calculate forward velocity
+        forward.x = cos( glm::radians( -(actor->navigation.mRotation.y - 90.0f) ) );
+        // TODO: Should actors fly???
+        //forward.y = tan( glm::radians( -(actor->mRotation.x - 90) ) );
+        forward.z = sin( glm::radians( -(actor->navigation.mRotation.y - 90) ) );
+        
+        float actorSpeed = actor->physical.mSpeed;
+        
+        glm::vec3 actorVelocity = forward * (actorSpeed * 0.1f) * 0.1f;
+        
+        actor->navigation.mVelocity.x = actorVelocity.x;
+        actor->navigation.mVelocity.z = actorVelocity.z;
+        
+    } else {
+        
+        // Stop moving but keep falling
+        actor->navigation.mVelocity *= glm::vec3(0, 1, 0);
     }
     
     return;

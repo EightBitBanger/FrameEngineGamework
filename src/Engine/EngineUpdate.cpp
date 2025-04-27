@@ -14,36 +14,31 @@ void EngineSystemManager::Update(void) {
     
     // Update command console
     if (console.input != nullptr) {
-        
         if (console.input->isActive) {
             console.input->x = 0;
             console.input->y = Platform.windowArea.h - 65;
             console.input->w = Platform.windowArea.w;
             console.input->h = 20;
         }
-        
     }
     
     for (unsigned int i=0; i < 32; i++) {
-        
         Text* text = console.textElements[i];
-        
         text->x = 5;
         text->y = Platform.windowArea.h - (90 + (16 * i));
-        
     }
     
-    // Update player/camera position in the AI simulation
+    // Update player/camera position in the simulation
     if (sceneMain != nullptr) {
         
         if (sceneMain->camera != nullptr) {
             
             Camera* activeCamera = sceneMain->camera;
             
-            if (activeCamera != nullptr) 
-                AI.SetPlayerWorldPosition( activeCamera->transform.position );
+            // Update player position in the AI simulation
+            AI.SetPlayerWorldPosition( activeCamera->transform.position );
             
-            // Update audio listener world position and orientation
+            // Update audio listener
             Audio.listenerPosition = activeCamera->transform.position;
             Audio.listenerDirection = activeCamera->forward;
         }
@@ -53,7 +48,7 @@ void EngineSystemManager::Update(void) {
     // Update component stream buffer
     UpdateComponentStream();
     
-    // Run through the parent matrix transform chains and apply the matrices therein
+    // Run through the parent matrix transform chains
     UpdateTransformationChains();
     
     //

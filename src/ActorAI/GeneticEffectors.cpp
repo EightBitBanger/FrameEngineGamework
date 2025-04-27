@@ -96,8 +96,7 @@ std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
         
         genetics += Float.ToString( gene.expressionFactor ) + ",";
         genetics += Float.ToString( gene.expressionMax ) + ",";
-        genetics += UInt.ToString( gene.expressionBegin ) + ",";
-        genetics += UInt.ToString( gene.expressionEnd ) + "|";
+        genetics += UInt.ToString( gene.expressionAge ) + "|";
         
         genetics += Float.ToString( gene.doExpress ) + ",";
         genetics += Float.ToString( gene.doInverseAnimation ) + ",";
@@ -165,6 +164,11 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
         
         // Extract sub genes
         std::vector<std::string> subGenes = String.Explode( (genes[i]), '|' );
+        
+        // Check invalid gene
+        if (subGenes.size() != 9) 
+            continue;
+        
         std::vector<std::string> Codon;
         
         Gene gene;
@@ -215,11 +219,10 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
         }
         
         Codon = String.Explode( subGenes[7], ',' );
-        if (Codon.size() == 4) {
+        if (Codon.size() == 3) {
             gene.expressionFactor = String.ToFloat( Codon[0] );
             gene.expressionMax    = String.ToFloat( Codon[1] );
-            gene.expressionBegin  = String.ToUint( Codon[2] );
-            gene.expressionEnd    = String.ToUint( Codon[3] );
+            gene.expressionAge    = String.ToUint(  Codon[2] );
         }
         Codon = String.Explode( subGenes[8], ',' );
         if (Codon.size() == 4) {
@@ -383,8 +386,7 @@ Gene GeneticPresets::Lerp(Gene geneA, Gene geneB, float bias) {
     
     gene.expressionFactor = Float.Lerp(geneA.expressionFactor, geneB.expressionFactor, bias);
     gene.expressionMax    = Float.Lerp(geneA.expressionMax,    geneB.expressionMax, bias);
-    gene.expressionBegin  = Float.Lerp(geneA.expressionBegin,  geneB.expressionBegin, bias);
-    gene.expressionEnd    = Float.Lerp(geneA.expressionEnd,    geneB.expressionEnd, bias);
+    gene.expressionAge    = Float.Lerp(geneA.expressionAge,    geneB.expressionAge, bias);
     
     gene.doInverseAnimation = geneA.doInverseAnimation || geneB.doInverseAnimation;
     gene.doAnimationCycle = geneA.doAnimationCycle || geneB.doAnimationCycle;
