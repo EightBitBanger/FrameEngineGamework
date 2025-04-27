@@ -48,9 +48,8 @@ public:
     /// Maximum scale to which the gene will express.
     float expressionMax;
     
-    /// Age range within which this gene will be expressed.
-    unsigned int expressionBegin;
-    unsigned int expressionEnd;
+    /// Age at which this gene will be expressed.
+    unsigned int expressionAge;
     
     /// Should this gene be expressed.
     bool doExpress;

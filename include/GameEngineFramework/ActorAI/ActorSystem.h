@@ -15,6 +15,8 @@
 
 #include <GameEngineFramework/ActorAI/components/actor.h>
 
+#include <GameEngineFramework/Timer/Timer.h>
+
 #include <thread>
 #include <mutex>
 #include <chrono>
@@ -96,6 +98,12 @@ public:
     
 private:
     
+    // Master update timer
+    Timer mMainTimer;
+    // Animation update timer
+    Timer mAnimationTimer;
+    
+    //
     // Behavioral state update
     void UpdateActorState(Actor* actor);
     
@@ -109,6 +117,21 @@ private:
     void UpdateTargetPoint(Actor* actor);
     
     void CheckTargetReached(Actor* actor);
+    
+    //
+    // Animations
+    void UpdateAnimationState(Actor* actor);
+    void EnsureNonZeroAnimationState(Actor* actor, unsigned int a);
+    void ApplyAnimationRotation(glm::mat4& matrix, Actor* actor, unsigned int a);
+    void HandleAnimationSwingBackward(Actor* actor, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange);
+    void HandleAnimationSwingForward(Actor* actor, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange);
+    void UpdateAnimation(glm::mat4& matrix, Actor* actor, unsigned int a);
+    void ApplyOffsetFromCenter(glm::mat4& matrix, Actor* actor, unsigned int a);
+    void ApplyRotation(glm::mat4& matrix, Actor* actor, unsigned int a);
+    void ApplyScaleByAge(glm::mat4& matrix, Actor* actor, unsigned int a);
+    
+    // Target rotation animation
+    void UpdateTargetRotation(Actor* actor);
     
     
     // Neural network encoding
