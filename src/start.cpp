@@ -458,7 +458,7 @@ void Start() {
     GameWorld.staticDistance = GameWorld.renderDistance * 0.7f;
     GameWorld.actorDistance  = GameWorld.renderDistance * 0.8f;
     
-    
+    GameWorld.LoadWorld();
     
     
     
