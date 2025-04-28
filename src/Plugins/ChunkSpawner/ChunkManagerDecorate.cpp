@@ -439,35 +439,16 @@ void ChunkManager::Decorate(Chunk& chunk) {
                 
                 if ((unsigned int)Random.Range(0, 10000) < decor.density) {
                     
-                    GameObject* actorObject = SpawnActor(from.x, 0, from.z);
+                    Actor* actor = AI.SpawnActor();
+                    AI.AddActorToSimulation(actor);
+                    actor->navigation.SetTargetPoint(from);
                     
-                    Actor* actor = actorObject->GetComponent<Actor>();
+                    GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
+                    actorObject->SetPosition(from.x, 0, from.z);
                     
                     DecodeGenome(decor, actor);
                     
                     actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
-                    
-                    if (Random.Range(0, 100) > 89) {
-                        
-                        unsigned int numberOfChildren = Random.Range(0, 5);
-                        
-                        for (unsigned int c=0; c < numberOfChildren; c++) {
-                            
-                            glm::vec3 actorPosition = from;
-                            actorPosition.x += Random.Range(0, 3) - Random.Range(0, 3);
-                            actorPosition.z += Random.Range(0, 3) - Random.Range(0, 3);
-                            
-                            GameObject* offspringActorObject = SpawnActor(actorPosition.x, 0, actorPosition.z);
-                            
-                            Actor* offspringActor = offspringActorObject->GetComponent<Actor>();
-                            
-                            DecodeGenome(decor, offspringActor);
-                            
-                            offspringActor->physical.SetAge( 100 + Random.Range(0, 200) );
-                            
-                        }
-                        
-                    }
                     
                 }
                 

@@ -83,11 +83,13 @@ unsigned int GameObject::GetComponentCount(void) {
 // Physics functions
 //
 glm::vec3 GameObject::GetPosition(void) {
+    if (mTransformCache == nullptr) return glm::vec3(0);
     return mTransformCache->position;
 }
 
 void GameObject::SetPosition(float x, float y, float z) {
-    mTransformCache->position = glm::vec3(x, y, z);
+    if (mTransformCache != nullptr) 
+        mTransformCache->position = glm::vec3(x, y, z);
     if (mRigidBodyCache != nullptr) {
         rp3d::Vector3 position(x, y, z);
         rp3d::Transform bodyTransform = mRigidBodyCache->getTransform();

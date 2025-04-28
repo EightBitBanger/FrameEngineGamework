@@ -14,34 +14,21 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
     
     // Save actors within chunk range
     
-    unsigned int numberOfActors = actors.size();
+    unsigned int numberOfActors = AI.GetNumberOfActors();
     if (numberOfActors > 0) {
         for (unsigned int a=0; a < numberOfActors; a++) {
             
-            GameObject* actorObject = actors[a];
+            Actor* actor = AI.GetActorFromSimulation(a);
+            //GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
             
-            glm::vec3 actorPos = actorObject->GetPosition();
+            glm::vec3 actorPos = actor->navigation.GetPosition();
             glm::vec3 chunkPos(chunk.x, 0, chunk.y);
             
             float chunkSz = chunkSize * 0.5f;
             
-            Actor* actorPtr = actorObject->GetComponent<Actor>();
-            
             // Check actor within chunk bounds
             if (((actorPos.x < (chunkPos.x - chunkSz)) | actorPos.x > (chunkPos.x + chunkSz)) | 
                 ((actorPos.z < (chunkPos.z - chunkSz)) | actorPos.z > (chunkPos.z + chunkSz)))
-                continue;
-            
-            // Check mark as saved
-            if (actorPtr->user.GetUserBitmask() == 'S') 
-                continue;
-            
-            actorPtr->user.SetUserBitmask('S');
-            
-            if (actorPtr->GetName() == "") 
-                continue;
-            
-            if (!actorPtr->GetActive()) 
                 continue;
             
             // Position
@@ -50,18 +37,17 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
                                       Float.ToString(actorPos.z) + "~";
             
             // Current actor age
-            std::string actorAge = IntLong.ToString( actorPtr->physical.GetAge() ) + "~";
+            std::string actorAge = IntLong.ToString( actor->physical.GetAge() ) + "~";
             
             // Genome
-            std::string actorGenome = AI.genomes.ExtractGenome(actorPtr);
+            std::string actorGenome = AI.genomes.ExtractGenome(actor);
             buffer += actorPosStr + actorAge + actorGenome + '\n';
             
             if (!doClearActors) 
                 continue;
             
-            actorPtr->user.SetUserBitmask(0);
-            
-            KillActor( actorObject );
+            actor->user.SetUserBitmask(0);
+            AI.KillActor( actor );
             
             continue;
         }

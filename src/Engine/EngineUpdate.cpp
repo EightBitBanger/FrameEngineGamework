@@ -59,7 +59,7 @@ void EngineSystemManager::Update(void) {
         if (mStreamBuffer[i].rigidBody != nullptr)     UpdateRigidBody(i);
         if (mStreamBuffer[i].meshRenderer != nullptr)  UpdateMeshRenderer(i);
         if (mStreamBuffer[i].camera != nullptr)        UpdateCamera(i);
-        if (mStreamBuffer[i].actor != nullptr)         UpdateActor(i);
+        if (mStreamBuffer[i].actor != nullptr)         UpdateKinematics(i);
         if (mStreamBuffer[i].light != nullptr)         UpdateLight(i);
         if (mStreamBuffer[i].sound != nullptr)         UpdateAudio(i);
         continue;

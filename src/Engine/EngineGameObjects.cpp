@@ -4,23 +4,17 @@
 
 GameObject* EngineSystemManager::CreateGameObject(void) {
     GameObject* newGameObject = mGameObjects.Create();
-    
     mGameObjectActive.push_back(newGameObject);
-    
     newGameObject->AddComponent( CreateComponent<Transform>() );
-    
     return newGameObject;
 }
 
 bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
-    
     gameObjectPtr->isGarbage = true;
-    
     return false;
 }
 
 unsigned int EngineSystemManager::GetNumberOfGameObjects(void) {
-    
     return mGameObjects.Size();
 }
 
@@ -119,31 +113,5 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     skyObject->mTransformCache->SetScale(10000, 2000, 10000);
     
     return skyObject;
-}
-
-GameObject* EngineSystemManager::CreateAIActor(glm::vec3 position) {
-    
-    GameObject* newGameObject = CreateGameObject();
-    
-    Component* actorComponent = CreateComponent<Actor>();
-    Component* rigidBodyComponent = CreateComponent<RigidBody>();
-    newGameObject->AddComponent( actorComponent );
-    newGameObject->AddComponent( rigidBodyComponent );
-    
-    newGameObject->renderDistance = -1;
-    
-    newGameObject->SetPosition(position);
-    
-    // Actor controllers do not use conventional physics gravity
-    newGameObject->DisableGravity();
-    newGameObject->SetDynamic();
-    
-    newGameObject->SetLinearDamping(30);
-    newGameObject->SetAngularDamping(100);
-    
-    newGameObject->SetLinearAxisLockFactor(1, 1, 1);
-    newGameObject->SetAngularAxisLockFactor(0, 0, 0);
-    
-    return newGameObject;
 }
 

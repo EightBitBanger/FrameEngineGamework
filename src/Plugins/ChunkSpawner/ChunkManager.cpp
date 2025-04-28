@@ -129,8 +129,10 @@ void ChunkManager::ClearWorld(void) {
     for (unsigned int c=0; c < chunks.size(); c++) 
         DestroyChunk( chunks[c] );
     
-    for (unsigned int a=0; a < actors.size(); a++) 
-        KillActor(actors[a]);
+    unsigned int numberOfActors = AI.GetNumberOfActors();
+    
+    for (unsigned int a=0; a < numberOfActors; a++) 
+        AI.KillActor(AI.GetActorFromSimulation(a));
     
     mChunkCounterX = 0;
     mChunkCounterZ = 0;
@@ -156,92 +158,6 @@ bool ChunkManager::DestroyWorld(std::string worldname) {
     
     fs.DirectoryDelete( worldPath );
     
-    return true;
-}
-
-
-// TESTING TODO Save and load the neural network states
-std::vector<float> states;
-
-
-GameObject* ChunkManager::SpawnActor(float x, float y, float z) {
-    
-    GameObject* actorObject = nullptr;
-    
-    // Check for a free actor
-    unsigned int numberOfActors = actorFreelist.size();
-    if (numberOfActors > 0) {
-        actorObject = actorFreelist.back();
-        
-        actorFreelist.erase( actorFreelist.end() - 1 );
-    }
-    
-    // Create a new actor
-    if (actorObject == nullptr) {
-        actorObject = Engine.CreateAIActor( glm::vec3(x, y, z) );
-        actorObject->renderDistance = staticDistance * chunkSize * 0.8f;
-    }
-    
-    actorObject->Activate();
-    
-    actors.push_back( actorObject );
-    Actor* actorPtr = actorObject->GetComponent<Actor>();
-    
-    // Reset to default some important values
-    actorPtr->Reset();
-    actorObject->SetPosition(x, y, z);
-    
-    // This prevents the actors from initially navigating to world point 0,0,0
-    actorPtr->navigation.SetTargetPoint( glm::vec3(x, y, z) );
-    
-    if (actorPtr->behavior.GetHeightPreferenceMin() == 0.0f) 
-        actorPtr->behavior.SetHeightPreferenceMin(world.waterLevel);
-    
-    // Initiate neural network
-    if (states.size() == 0) {
-        
-        std::string buffer;
-        
-        unsigned int fileSz = Serializer.GetFileSize("neuralstates.dat");
-        
-        buffer.resize(fileSz);
-        Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
-        
-        std::vector<std::string> stringstates = String.Explode(buffer, '\n');
-        
-        NeuralNetwork dummyNetwork;
-        dummyNetwork.LoadState( stringstates );
-        states = dummyNetwork.SaveStateBin();
-    }
-    
-    actorPtr->idiosyncrasies.LoadNeuralStates( states );
-    
-    return actorObject;
-}
-
-bool ChunkManager::KillActor(GameObject* actorObject) {
-    
-    Actor* actorPtr = actorObject->GetComponent<Actor>();
-    
-    actorObject->Deactivate();
-    
-    actorPtr->genetics.ClearGenome();
-    actorPtr->genetics.ClearPhenome();
-    actorPtr->idiosyncrasies.ClearMemories();
-    
-    actorPtr->ReexpressPhenotype();
-    
-    // Remove from the active actor list
-    unsigned int numberOfActors = actors.size();
-    for (unsigned int i=0; i < numberOfActors; i++) {
-        if (actors[i] != actorObject) 
-            continue;
-        
-        actors.erase( actors.begin() + i );
-        break;
-    }
-    
-    actorFreelist.push_back(actorObject);
     return true;
 }
 

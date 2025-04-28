@@ -5,7 +5,9 @@
 #include <GameEngineFramework/Math/Random.h>
 #include <GameEngineFramework/Engine/types/color.h>
 #include <GameEngineFramework/Types/Types.h>
+#include <GameEngineFramework/Serialization/Serialization.h>
 
+extern Serialization     Serializer;
 extern NumberGeneration  Random;
 extern ColorPreset       Colors;
 extern FloatType         Float;
@@ -419,16 +421,50 @@ Gene GeneticPresets::Lerp(Gene geneA, Gene geneB, float bias) {
 // Mental models
 //
 
+std::vector<float> states;
+
 void GeneticPresets::PsychologicalPresets::PreyBase(Actor* targetActor) {
     
+    if (states.size() == 0) {
+        
+        std::string buffer;
+        
+        unsigned int fileSz = Serializer.GetFileSize("neuralstates.dat");
+        
+        buffer.resize(fileSz);
+        Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
+        
+        std::vector<std::string> stringstates = String.Explode(buffer, '\n');
+        
+        NeuralNetwork dummyNetwork;
+        dummyNetwork.LoadState( stringstates );
+        states = dummyNetwork.SaveStateBin();
+    }
     
+    targetActor->idiosyncrasies.LoadNeuralStates( states );
     
     return;
 }
 
 void GeneticPresets::PsychologicalPresets::PredatorBase(Actor* targetActor) {
     
+    if (states.size() == 0) {
+        
+        std::string buffer;
+        
+        unsigned int fileSz = Serializer.GetFileSize("neuralstates.dat");
+        
+        buffer.resize(fileSz);
+        Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
+        
+        std::vector<std::string> stringstates = String.Explode(buffer, '\n');
+        
+        NeuralNetwork dummyNetwork;
+        dummyNetwork.LoadState( stringstates );
+        states = dummyNetwork.SaveStateBin();
+    }
     
+    targetActor->idiosyncrasies.LoadNeuralStates( states );
     
     return;
 }

@@ -4,17 +4,6 @@
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Math/Random.h>
 
-extern Logger Log;
-extern ActorSystem AI;
-extern NumberGeneration Random;
-extern MathCore Math;
-
-extern bool isActorThreadActive;
-extern bool doUpdate;
-
-extern int actorCounter;
-extern int tickCounter;
-
 
 void ActorSystem::UpdateAnimationState(Actor* actor) {
     
@@ -36,9 +25,6 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
     
     return;
 }
-
-
-
 
 void ActorSystem::ApplyScaleByAge(glm::mat4& matrix, Actor* actor, unsigned int a) {
     

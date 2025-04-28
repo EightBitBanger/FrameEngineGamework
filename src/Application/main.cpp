@@ -65,7 +65,10 @@ int main(int argc, char* argv[]) {
     Network.Initiate();
     Engine.Initiate();
     
-    // Initiate 
+    AI.sceneMain = Engine.sceneMain;
+    AI.shader = Engine.shaders.color;
+    AI.baseMesh = Engine.meshes.cube;
+    
     Log.WriteLn();
     Log.Write("<MainScene>");
     

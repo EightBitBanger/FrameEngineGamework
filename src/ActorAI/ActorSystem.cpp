@@ -17,6 +17,11 @@ int tickCounter=0;
 
 
 ActorSystem::ActorSystem() : 
+    sceneMain(nullptr),
+    shader(nullptr),
+    baseMesh(nullptr),
+    SpawnActor(nullptr),
+    KillActor(nullptr),
     mPlayerPosition(0),
     mActorUpdateDistance(300),
     mWorldWaterLevel(0.0f)
@@ -36,85 +41,91 @@ void ActorSystem::Initiate(void) {
 }
 
 void ActorSystem::Shutdown(void) {
-    
-    mux.lock();
+    std::lock_guard<std::mutex> lock(mux);
     isActorThreadActive = false;
-    mux.unlock();
-    
     mActorSystemThread->join();
-    
     return;
 }
 
 void ActorSystem::SetWaterLevel(float waterLevel) {
-    mux.lock();
+    std::lock_guard<std::mutex> lock(mux);
     mWorldWaterLevel = waterLevel;
-    mux.unlock();
     return;
 }
 
 float ActorSystem::GetWaterLevel(void) {
-    mux.lock();
+    std::lock_guard<std::mutex> lock(mux);
     float waterLevel = mWorldWaterLevel;
-    mux.unlock();
     return waterLevel;
 }
 
 void ActorSystem::SetPlayerWorldPosition(glm::vec3 position) {
-    mux.lock();
+    std::lock_guard<std::mutex> lock(mux);
     mPlayerPosition = position;
-    mux.unlock();
     return;
 }
 
 glm::vec3 ActorSystem::GetPlayerWorldPosition(void) {
-    mux.lock();
-    glm::vec3 position(mPlayerPosition);
-    mux.unlock();
-    return position;
+    std::lock_guard<std::mutex> lock(mux);
+    return mPlayerPosition;
 }
 
 void ActorSystem::UpdateSendSignal(void) {
-    mux.lock();
+    std::lock_guard<std::mutex> lock(mux);
     doUpdate = true;
-    mux.unlock();
     return;
 }
 
 Actor* ActorSystem::CreateActor(void) {
-    mux.lock();
-    Actor* newActor = mActors.Create();
-    mux.unlock();
-    return newActor;
+    return mActors.Create();
 }
 
 bool ActorSystem::DestroyActor(Actor* actorPtr) {
-    mux.lock();
-    bool state = mActors.Destroy(actorPtr);
-    mux.unlock();
-    return state;
+    std::lock_guard<std::mutex> lock(mux);
+    return mActors.Destroy(actorPtr);
 }
 
+bool ActorSystem::AddActorToSimulation(Actor* actorPtr) {
+    // Check already exists in the simulation
+    for (unsigned int i=0; i < mActiveActors.size(); i++) {
+        Actor* actor = mActiveActors[i];
+        if (actor == actorPtr) 
+            return false;
+    }
+    mActiveActors.push_back( actorPtr );
+    return true;
+}
+
+bool ActorSystem::RemoveActorFromSimulation(Actor* actorPtr) {
+    for (unsigned int i=0; i < mActiveActors.size(); i++) {
+        Actor* actor = mActiveActors[i];
+        if (actor != actorPtr) 
+            continue;
+        mActiveActors.erase( mActiveActors.begin() + i);
+        return true;
+    }
+    return false;
+}
+
+Actor* ActorSystem::GetActorFromSimulation(unsigned int index) {
+    if (index < mActiveActors.size()) 
+        return mActiveActors[index];
+    return nullptr;
+}
 
 unsigned int ActorSystem::GetNumberOfActors(void) {
-    mux.lock();
-    unsigned int value = mActors.GetObjectCount();
-    mux.unlock();
-    return value;
+    return mActiveActors.size();
 }
 
 Actor* ActorSystem::GetActor(unsigned int index) {
-    mux.lock();
-    Actor* actorPtr = mActors[index];
-    mux.unlock();
-    return actorPtr;
+    std::lock_guard<std::mutex> lock(mux);
+    return mActors[index];
 }
 
 
 void ActorSystem::SetActorUpdateDistance(float distance) {
-    mux.lock();
+    std::lock_guard<std::mutex> lock(mux);
     mActorUpdateDistance = distance;
-    mux.unlock();
     return;
 }
 

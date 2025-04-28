@@ -30,9 +30,9 @@ void ActorSystem::Update(void) {
     
     // Update animation states
     if (mAnimationTimer.Update()) {
-        int numberOfActors = mActors.Size();
-        for (int i = 0; i < numberOfActors; i++) {
-            Actor* actor = mActors[i];
+        unsigned int numberOfActors = mActiveActors.size();
+        for (unsigned int i = 0; i < numberOfActors; i++) {
+            Actor* actor = mActiveActors[i];
             
             // Cycle the animation states
             UpdateAnimationState(actor);
@@ -40,15 +40,21 @@ void ActorSystem::Update(void) {
             // Target tracking rotation
             UpdateTargetRotation(actor);
             
+            // Express genetic phenotypes
+            ExpressActorGenetics(actor);
+            
         }
     }
     
     // Update AI states
     if (mMainTimer.Update()) {
-        int numberOfActors = mActors.Size();
-        int numberOfActorsPerCycle = (numberOfActors > 10) ? (numberOfActors / 10) : 1;
+        unsigned int numberOfActors = mActiveActors.size();
+        if (numberOfActors == 0) 
+            return;
         
-        for (int i = 0; i < numberOfActorsPerCycle; i++) {
+        unsigned int numberOfActorsPerCycle = (numberOfActors > 10) ? (numberOfActors / 10) : 1;
+        
+        for (unsigned int i = 0; i < numberOfActorsPerCycle; i++) {
             
             if (actorCounter >= numberOfActors) {
                 actorCounter = 0;
@@ -56,15 +62,20 @@ void ActorSystem::Update(void) {
                 break;
             }
             
-            Actor* actor = mActors[actorCounter++];
+            Actor* actor = mActiveActors[actorCounter++];
             if (!actor->state.mIsActive) 
                 continue;
+            
             
             actor->navigation.mDistance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
             if (actor->navigation.mDistance > mActorUpdateDistance) 
                 continue;
             
+            // Update AI states
             UpdateActorState(actor);
+            
+            // Update genetics if requested
+            UpdateActorGenetics(actor);
             
         }
         
@@ -133,21 +144,40 @@ void ActorSystem::UpdateActorState(Actor* actor) {
         actor->navigation.mVelocity.z *= actor->physical.mSpeedMul;
     }
     
+    // Check old age
+    if (actor->physical.mAge > actor->physical.mAgeSenior) 
+        if (actor->biological.health > 1.0f) 
+            actor->biological.health -= 1.0f;
+    
+    // Count down breeding counter
+    if (actor->counters.mBreedingCoolDownCounter != 0) 
+        actor->counters.mBreedingCoolDownCounter--;
+    
     // Check arrived at target point
     if (glm::distance( actor->navigation.mTargetPoint, actor->navigation.mPosition ) < 1.5f) {
-        
         actor->state.mIsWalking = false;
-        
         actor->navigation.mTargetPoint = actor->navigation.mPosition;
     }
+    
+    
+    // Check focus on nearby actors
+    /*
+    if (mActiveActors.size() > 0) {
+        Actor* actorTarget = mActiveActors[Random.Range(0, mActiveActors.size() - 1)];
+        
+        glm::vec3 posA = actor->navigation.mPosition;
+        glm::vec3 posB = actorTarget->navigation.mPosition;
+        
+        if (glm::distance(posA, posB) < actor->behavior.mDistanceToFocus) 
+            actor->navigation.SetTargetActor( actorTarget->navigation.GetTargetActor() );
+    }
+    */
     
     // Check arrived at target actor
     if (actor->navigation.mTargetActor != nullptr) {
         
         if (glm::distance( actor->navigation.mTargetActor->navigation.mPosition, actor->navigation.mPosition ) < 1.5f) {
-            
             actor->state.mIsWalking = false;
-            
             actor->navigation.mTargetPoint = actor->navigation.mPosition;
             
             // Null the target if we are the target
@@ -162,9 +192,7 @@ void ActorSystem::UpdateActorState(Actor* actor) {
     if (actor->navigation.mTargetBreeding != nullptr) {
         
         if (glm::distance( actor->navigation.mTargetBreeding->navigation.mPosition, actor->navigation.mPosition ) < 1.0f) {
-            
             actor->state.mIsWalking = false;
-            
             actor->navigation.mTargetPoint = actor->navigation.mPosition;
             
             // Null the target if we arrived
@@ -223,7 +251,6 @@ void ActorSystem::HandleNeuralNetwork(Actor* actor) {
     float decisionChanceToFocus  = focusChance  * 100.0f;
     float decisionChanceToAttack = attackChance * 100.0f;
     float decisionChanceToFlee   = fleeChance   * 100.0f;
-    
     
     // Decrement cool down counter
     if (actor->counters.mBreedingCoolDownCounter > 0) 
@@ -302,8 +329,8 @@ bool ActorSystem::HandleBreedingState(Actor* actor) {
     actor->navigation.mTargetPoint.z = actor->navigation.mTargetBreeding->navigation.mPosition.z;
     
     // Walk the male towards the female target actor
-    //if (actor->physical.GetSexualOrientation() == true) 
-    //    actor->state.mIsWalking = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetBreeding->navigation.mPosition) > DISTANCE_MINIMUM_TARGET_BREEDING;
+    if (actor->physical.GetSexualOrientation() == true) 
+        actor->state.mIsWalking = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetBreeding->navigation.mPosition) > DISTANCE_MINIMUM_TARGET_BREEDING;
     
     return true;
 }
