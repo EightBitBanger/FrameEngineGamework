@@ -429,10 +429,10 @@ void GeneticPresets::PsychologicalPresets::PreyBase(Actor* targetActor) {
         
         std::string buffer;
         
-        unsigned int fileSz = Serializer.GetFileSize("neuralstates.dat");
+        unsigned int fileSz = Serializer.GetFileSize("prey.dat");
         
         buffer.resize(fileSz);
-        Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
+        Serializer.Deserialize("prey.dat", (void*)buffer.data(), fileSz);
         
         std::vector<std::string> stringstates = String.Explode(buffer, '\n');
         
@@ -452,10 +452,10 @@ void GeneticPresets::PsychologicalPresets::PredatorBase(Actor* targetActor) {
         
         std::string buffer;
         
-        unsigned int fileSz = Serializer.GetFileSize("neuralstates.dat");
+        unsigned int fileSz = Serializer.GetFileSize("prey.dat");
         
         buffer.resize(fileSz);
-        Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
+        Serializer.Deserialize("prey.dat", (void*)buffer.data(), fileSz);
         
         std::vector<std::string> stringstates = String.Explode(buffer, '\n');
         

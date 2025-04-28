@@ -43,11 +43,8 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
             std::string actorGenome = AI.genomes.ExtractGenome(actor);
             buffer += actorPosStr + actorAge + actorGenome + '\n';
             
-            if (!doClearActors) 
-                continue;
-            
-            actor->user.SetUserBitmask(0);
-            AI.KillActor( actor );
+            if (doClearActors) 
+                AI.KillActor( actor );
             
             continue;
         }
