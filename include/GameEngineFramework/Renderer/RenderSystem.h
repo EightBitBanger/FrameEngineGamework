@@ -261,6 +261,7 @@ private:
     
     // Render support thread
     std::thread* renderThreadMain;
+    std::mutex mux;
     
     
     //

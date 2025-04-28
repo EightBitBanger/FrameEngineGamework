@@ -3,6 +3,7 @@
 
 #include <GameEngineFramework/configuration.h>
 #include <glm/glm.hpp>
+#include <random>
 
 class ENGINE_API NumberGeneration {
     
@@ -34,6 +35,9 @@ public:
 private:
     
     int mSeed;
+    
+    std::mt19937 mGenerator;
+    
 };
 
 #endif

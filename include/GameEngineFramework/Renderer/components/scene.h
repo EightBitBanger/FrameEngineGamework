@@ -61,6 +61,8 @@ private:
     // Fog layers to blend into this scene
     std::vector<Fog*> mFogLayers;
     
+    std::mutex mux;
+    
 };
 
 #endif

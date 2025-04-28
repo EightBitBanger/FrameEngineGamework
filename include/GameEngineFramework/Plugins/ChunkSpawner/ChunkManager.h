@@ -151,12 +151,6 @@ public:
     
     bool DestroyChunk(Chunk& chunk);
     
-    // Actors
-    
-    GameObject* SpawnActor(float x, float y, float z);
-    
-    bool KillActor(GameObject* actorObject);
-    
     // World rules
     
     void AddWorldRule(std::string key, std::string value);
@@ -242,9 +236,6 @@ public:
     
     std::vector<Chunk> chunks;
     
-    std::vector<GameObject*> actors;
-    std::vector<GameObject*> actorFreelist;
-    
     // World material batches
     
     Material* waterMaterial;
@@ -265,9 +256,6 @@ private:
     void UpdateActors(const glm::vec3 &playerPosition);
     
     void HandleActorLifeCycle(GameObject* actorObject);
-    void UpdateActorPosition(Actor* actorPtr, const glm::vec3 &playerPosition);
-    
-    void HandleActorInteraction(Actor* actorPtr, unsigned int numberOfActors);
     
     void HandleAutoBreeding(Actor* actorPtr, unsigned int numberOfActors);
     bool AttemptBreeding(unsigned int numberOfActors);

@@ -53,12 +53,21 @@ public:
     bool DestroyActor(Actor* actorPtr);
     
     
+    /// Add an actor to the simulation.
+    bool AddActorToSimulation(Actor* actorPtr);
+    
+    /// Remove an actor from the simulation.
+    bool RemoveActorFromSimulation(Actor* actorPtr);
+    
+    /// Return an actor from the simulation.
+    Actor* GetActorFromSimulation(unsigned int index);
+    
+    
     /// Set the player position in the simulation.
     void SetPlayerWorldPosition(glm::vec3 position);
     
     /// Get the player position in the simulation.
     glm::vec3 GetPlayerWorldPosition(void);
-    
     
     /// Get the number of actors in the AI simulation.
     unsigned int GetNumberOfActors(void);
@@ -95,6 +104,21 @@ public:
     
     /// Genetic entity definitions.
     GeneticPresets genomes;
+    
+    /// Scene where the actors should exist.
+    Scene* sceneMain;
+    
+    /// Shader to render the actors.
+    Shader* shader;
+    
+    /// Base mesh for genetic rendering.
+    Mesh* baseMesh;
+    
+    /// Actor object spawner callback
+    Actor* (*SpawnActor)(void);
+    
+    /// Actor object destroyer callback
+    void (*KillActor)(Actor*);
     
 private:
     
@@ -133,6 +157,12 @@ private:
     // Target rotation animation
     void UpdateTargetRotation(Actor* actor);
     
+    // Genetics
+    void UpdateActorGenetics(Actor* actor);
+    void ClearOldGeneticRenderers(Actor* actor);
+    MeshRenderer* CreateMeshRendererForGene(Actor* actor, unsigned int geneIndex, Mesh* sourceMesh);
+    void ExpressActorGenetics(Actor* actor);
+    
     
     // Neural network encoding
     std::vector<float> Encode(const NeuralState neuralState);
@@ -154,6 +184,9 @@ private:
     
     // Object pools
     PoolAllocator<Actor> mActors;
+    
+    // List of active actors in the world
+    std::vector<Actor*> mActiveActors;
     
 };
 

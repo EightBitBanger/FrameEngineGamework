@@ -72,9 +72,6 @@ public:
     /// Generate a sky object and return its pointer.
     GameObject* CreateSky(std::string meshTagName, Color colorLow, Color colorHigh, float biasMul);
     
-    /// Create an AI actor component and return its pointer.
-    GameObject* CreateAIActor(glm::vec3 position);
-    
     
     // Lower level UI sprite rendering
     
@@ -98,7 +95,7 @@ public:
     
     /// Create an object of the type specified.
     template <typename T> T* Create(void) {
-        
+        std::lock_guard<std::mutex> lock(mux);
         extern ActorSystem AI;
         
         // Engine
@@ -120,7 +117,7 @@ public:
     
     /// Destroy an object of the type specified.
     template <typename T> bool Destroy(T* objectPtr) {
-        
+        std::lock_guard<std::mutex> lock(mux);
         extern ActorSystem AI;
         
         if (std::is_same<T, GameObject>::value)    return DestroyGameObject( (GameObject*)objectPtr );
@@ -265,11 +262,8 @@ private:
     void UpdateLight(unsigned int index);
     void UpdateAudio(unsigned int index);
     
-    // AI update functions
-    void UpdateActor(unsigned int index);
-    void UpdateActorGenetics(unsigned int index);
-    void UpdateActorAnimation(unsigned int index);
-    void UpdateActorPhysics(unsigned int index);
+    // Update actor kinematic motion
+    void UpdateKinematics(unsigned int index);
     
     // Actor genetics update
     void ClearOldGeneticRenderers(unsigned int index);
@@ -355,6 +349,7 @@ private:
     // Debug rendering
     bool usePhysicsDebugRenderer;
     
+    std::mutex mux;
     
 public:
     
