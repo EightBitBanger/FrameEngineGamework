@@ -24,7 +24,7 @@
 enum class NeuralState {
     
     idle,
-    move_to,
+    walk,
     
     avoid,
     dodge,
@@ -32,8 +32,8 @@ enum class NeuralState {
     attack,
     follow,
     
-    defend,
     flee,
+    defend,
     
     interact,
     
