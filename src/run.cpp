@@ -254,8 +254,6 @@ void Run() {
     }
     
     
-    /*
-    
     // Create a neural network
     NeuralNetwork nnet;
     
@@ -273,32 +271,47 @@ void Run() {
         
         
         // Train the model
+        //
+        //
+        // target 0 - Walk  
+        // target 1 - Focus 
+        // target 2 - Attack
+        // target 3 - Flee  
         
         std::vector<TrainingSet> trainingBook;
         
-        TrainingSet ts[5];
+        unsigned int bookSz = 4;
+        
+        TrainingSet ts[bookSz];
+        
         
         // Idle state
         ts[0].input  = {0.5f, 0.5f};
         ts[0].target = {0.06f, 0.4f, 0.01f, 0.9f,    0.1f, 0.1f, 0.1f, 0.1f};
         
+        // Moving state
+        ts[1].input  = {0.8f, 0.3f};
+        ts[1].target = {0.06f, 0.4f, 0.01f, 0.9f,    0.1f, 0.1f, 0.1f, 0.1f};
+        
         // Attack state
-        ts[1].input  = {0.5f, 0.3f};
-        ts[1].target = {0.5f, 0.5f, 0.5f, 0.5f,    0.3f, 0.2f, 0.3f, 0.3f};
+        ts[2].input  = {0.5f, 0.3f};
+        ts[2].target = {0.5f, 0.5f, 0.5f, 0.5f,    0.3f, 0.2f, 0.3f, 0.3f};
         
         // Flee state
-        ts[2].input  = {0.3f, 0.5f};
-        ts[2].target = {0.8f, 0.8f, 0.8f, 0.8f,    0.6f, 0.2f, 0.5f, 0.5f};
+        ts[3].input  = {0.3f, 0.5f};
+        ts[3].target = {0.8f, 0.8f, 0.8f, 0.8f,    0.6f, 0.2f, 0.5f, 0.5f};
         
+        // Add layers to the training book
+        for (unsigned int i=0; i < bookSz; i++) 
+            trainingBook.push_back(ts[i]);
         
-        trainingBook.push_back(ts[0]);
-        trainingBook.push_back(ts[1]);
-        trainingBook.push_back(ts[2]);
+        float learningRate = 0.4f;
+        int epochCycles = 300000;
         
-        for (int epoch = 0; epoch < 300000; epoch++) {
+        for (int epoch = 0; epoch < epochCycles; epoch++) {
             
             for (std::vector<TrainingSet>::iterator it = trainingBook.begin(); it != trainingBook.end(); ++it) {
-                nnet.Train(*it, 0.4f);
+                nnet.Train(*it, learningRate);
             }
             
         }
@@ -323,8 +336,6 @@ void Run() {
                              Float.ToString( results[6] ) + " " + 
                              Float.ToString( results[7] );
         
-        Engine.WriteDialog(1, output);
-        
         
         // Save the state
         
@@ -337,7 +348,7 @@ void Run() {
         for (unsigned int i=0; i < numberOfStates; i++) 
             saveString += states[i] + "\n";
         
-        Serializer.Serialize("neuralstates.dat", (void*)saveString.data(), saveString.size());
+        Serializer.Serialize("prey.dat", (void*)saveString.data(), saveString.size());
         
         std::vector<float> saveState = nnet.SaveStateBin();
         
@@ -345,14 +356,14 @@ void Run() {
         
         
         // Load the neural state
-        /
+        
         NeuralNetwork newnet;
         
         std::string buffer;
-        unsigned int fileSz = Serializer.GetFileSize("neuralstates.dat");
+        unsigned int fileSz = Serializer.GetFileSize("prey.dat");
         
         buffer.resize(fileSz);
-        Serializer.Deserialize("neuralstates.dat", (void*)buffer.data(), fileSz);
+        Serializer.Deserialize("prey.dat", (void*)buffer.data(), fileSz);
         
         std::vector<std::string> loadStates = String.Explode(buffer, '\n');
         
@@ -374,12 +385,9 @@ void Run() {
                                  Float.ToString( testresults[2] ) + " " + 
                                  Float.ToString( testresults[3] );
         
-        Engine.WriteDialog(1, testoutput);
-        /
-        
         
     }
-    */
+    
     
     
     
