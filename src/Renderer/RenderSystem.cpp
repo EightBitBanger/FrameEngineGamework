@@ -42,12 +42,12 @@ RenderSystem::RenderSystem() :
 }
 
 MeshRenderer* RenderSystem::CreateMeshRenderer(void) {
-    MeshRenderer* meshRendererPtr = mEntity.Create();
-    return meshRendererPtr;
+    std::lock_guard<std::mutex> lock(mux);
+    return mEntity.Create();
 }
 
 bool RenderSystem::DestroyMeshRenderer(MeshRenderer* meshRendererPtr) {
-    
+    std::lock_guard<std::mutex> lock(mux);
     if (meshRendererPtr->mesh != nullptr) 
         if (meshRendererPtr->mesh->isShared == false) 
             mMesh.Destroy(meshRendererPtr->mesh);
@@ -73,8 +73,7 @@ unsigned int RenderSystem::GetNumberOfMeshRenderers(void) {
 }
 
 Mesh* RenderSystem::CreateMesh(void) {
-    Mesh* meshPtr = mMesh.Create();
-    return meshPtr;
+    return mMesh.Create();
 }
 bool RenderSystem::DestroyMesh(Mesh* meshPtr) {
     return mMesh.Destroy(meshPtr);
@@ -84,8 +83,7 @@ unsigned int RenderSystem::GetNumberOfMeshes(void) {
 }
 
 Shader* RenderSystem::CreateShader(void) {
-    Shader* shaderPtr = mShader.Create();
-    return shaderPtr;
+    return mShader.Create();
 }
 bool RenderSystem::DestroyShader(Shader* shaderPtr) {
     return mShader.Destroy(shaderPtr);
@@ -107,8 +105,7 @@ unsigned int RenderSystem::GetNumberOfCameras(void) {
 }
 
 Material* RenderSystem::CreateMaterial(void) {
-    Material* materialPtr = mMaterial.Create();
-    return materialPtr;
+    return mMaterial.Create();
 }
 bool RenderSystem::DestroyMaterial(Material* materialPtr) {
     return mMaterial.Destroy(materialPtr);
@@ -118,8 +115,7 @@ unsigned int RenderSystem::GetNumberOfMaterials(void) {
 }
 
 Light* RenderSystem::CreateLight(void) {
-    Light* lightPtr = mLight.Create();
-    return lightPtr;
+    return mLight.Create();
 }
 bool RenderSystem::DestroyLight(Light* lightPtr) {
     return mLight.Destroy(lightPtr);
@@ -129,8 +125,7 @@ unsigned int RenderSystem::GetNumberOfLights(void) {
 }
 
 Scene* RenderSystem::CreateScene(void) {
-    Scene* scenePtr = mScene.Create();
-    return scenePtr;
+    return mScene.Create();
 }
 bool RenderSystem::DestroyScene(Scene* scenePtr) {
     return mScene.Destroy(scenePtr);
@@ -140,8 +135,7 @@ unsigned int RenderSystem::GetNumberOfScenes(void) {
 }
 
 Texture* RenderSystem::CreateTexture(void) {
-    Texture* texturePtr = mTexture.Create();
-    return texturePtr;
+    return mTexture.Create();
 }
 bool RenderSystem::DestroyTexture(Texture* texturePtr) {
     return mTexture.Destroy(texturePtr);
@@ -151,8 +145,7 @@ unsigned int RenderSystem::GetNumberOfTextures(void) {
 }
 
 FrameBuffer* RenderSystem::CreateFrameBuffer(void) {
-    FrameBuffer* frameBufferPtr = mFrameBuffer.Create();
-    return frameBufferPtr;
+    return mFrameBuffer.Create();
 }
 bool RenderSystem::DestroyFrameBuffer(FrameBuffer* frameBufferPtr) {
     return mFrameBuffer.Destroy(frameBufferPtr);
@@ -162,8 +155,7 @@ unsigned int RenderSystem::GetNumberOfFrameBuffers(void) {
 }
 
 Fog* RenderSystem::CreateFog(void) {
-    Fog* fogLayer = mFog.Create();
-    return fogLayer;
+    return mFog.Create();
 }
 
 bool RenderSystem::DestroyFog(Fog* fogLayer) {
@@ -199,12 +191,13 @@ void RenderSystem::Shutdown(void) {
 
 
 void RenderSystem::AddSceneToRenderQueue(Scene* scenePtr) {
-    assert(scenePtr != nullptr);
-    mActiveScenes.push_back( scenePtr );
+    std::lock_guard<std::mutex> lock(mux);
+    mActiveScenes.push_back(scenePtr);
     return;
 }
 
 bool RenderSystem::RemoveSceneFromRenderQueue(Scene* scenePtr) {
+    std::lock_guard<std::mutex> lock(mux);
     for (std::vector<Scene*>::iterator it = mActiveScenes.begin(); it != mActiveScenes.end(); ++it) {
         Scene* thisScenePtr = *it;
         if (scenePtr == thisScenePtr) {
@@ -320,6 +313,7 @@ bool RenderSystem::FrustumCheckAABB(Frustum& frustum, glm::vec3& min, glm::vec3&
 }
 
 std::vector<std::string> RenderSystem::GetGLErrorCodes(std::string errorLocationString) {
+    std::lock_guard<std::mutex> lock(mux);
     
     GLenum glError;
     std::string ErrorMsg = errorLocationString;
@@ -363,12 +357,14 @@ unsigned int RenderSystem::GetNumberOfDrawCalls(void) {
 //
 // Render thread
 //
+extern RenderSystem Renderer;
 
 void RenderThreadMain(void) {
     
     while (isThreadActive) {
         
-        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
+        std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
+        
         
         continue;
     }

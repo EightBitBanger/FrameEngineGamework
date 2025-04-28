@@ -24,11 +24,15 @@ void RenderSystem::RenderFrame(void) {
     GetGLErrorCodes("OnRender::BeginFrame::");
 #endif
     
+    std::lock_guard<std::mutex> lock(mux);
+    
     // Run the scene list
     for (Scene* scenePtr : mActiveScenes) {
         
         if (!scenePtr->isActive) 
             continue;
+        
+        std::lock_guard<std::mutex> lock(scenePtr->mux);
         
         // Set the camera projection angle
         setTargetCamera(scenePtr->camera, eye, viewProjection);

@@ -159,21 +159,24 @@ void FuncSummon(std::vector<std::string> args) {
         randomOffset.x += Random.Range(0, 20) - Random.Range(0, 20);
         randomOffset.z += Random.Range(0, 20) - Random.Range(0, 20);
         
-        GameObject* newActorObject = GameWorld.SpawnActor( randomOffset.x, randomOffset.y, randomOffset.z );
+        Actor* actor = AI.SpawnActor();
+        AI.AddActorToSimulation(actor);
+        actor->navigation.SetTargetPoint(glm::vec3(randomOffset.x, randomOffset.y, randomOffset.z));
         
-        Actor* newActor = newActorObject->GetComponent<Actor>();
+        GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
+        actorObject->SetPosition(randomOffset.x, randomOffset.y, randomOffset.z);
         
         unsigned long int actorAge = 900 + (Random.Range(0, 500) - Random.Range(0, 500));
         
-        newActor->physical.SetAge( actorAge );
+        actor->physical.SetAge( actorAge );
         
         switch (entityType) {
             
             default:
-            case 1: AI.genomes.presets.Sheep( newActor ); break;
-            case 2: AI.genomes.presets.Bear( newActor ); break;
-            case 3: AI.genomes.presets.Horse( newActor ); break;
-            case 4: AI.genomes.presets.Bovine( newActor ); break;
+            case 1: AI.genomes.presets.Sheep( actor ); break;
+            case 2: AI.genomes.presets.Bear( actor ); break;
+            case 3: AI.genomes.presets.Horse( actor ); break;
+            case 4: AI.genomes.presets.Bovine( actor ); break;
             
         }
         

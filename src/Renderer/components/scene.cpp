@@ -9,6 +9,7 @@ Scene::Scene() :
 }
 
 void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup) {
+    std::lock_guard<std::mutex> lock(mux);
     switch (renderQueueGroup) {
         
         case RENDER_QUEUE_OVERLAY:      mRenderQueueOverlay.emplace( mRenderQueueOverlay.begin(), meshRenderer ); break;
@@ -25,7 +26,7 @@ void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQue
 }
 
 bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup) {
-    
+    std::lock_guard<std::mutex> lock(mux);
     std::vector<MeshRenderer*>* renderQueue;
     
     switch (renderQueueGroup) {
@@ -50,11 +51,13 @@ bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int rend
 }
 
 void Scene::AddLightToSceneRoot(Light* light) {
+    std::lock_guard<std::mutex> lock(mux);
     mLightList.push_back( light );
     return;
 }
 
 bool Scene::RemoveLightFromSceneRoot(Light* light) {
+    std::lock_guard<std::mutex> lock(mux);
     for (std::vector<Light*>::iterator it = mLightList.begin(); it != mLightList.end(); ++it) {
         Light* lightPtr = *it;
         if (light == lightPtr) {
@@ -68,11 +71,13 @@ bool Scene::RemoveLightFromSceneRoot(Light* light) {
 unsigned int GetNumberOfFogLayers(void);
 
 void Scene::AddFogLayerToScene(Fog* fogLayer) {
+    std::lock_guard<std::mutex> lock(mux);
     mFogLayers.push_back( fogLayer );
     return;
 }
 
 bool Scene::RemoveFogLayer(Fog* fogLayer) {
+    std::lock_guard<std::mutex> lock(mux);
     for (std::vector<Fog*>::iterator it = mFogLayers.begin(); it != mFogLayers.end(); ++it) {
         Fog* fogLayerCheck = *it;
         if (fogLayer == fogLayerCheck) {

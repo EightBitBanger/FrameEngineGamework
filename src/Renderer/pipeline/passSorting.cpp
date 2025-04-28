@@ -9,6 +9,7 @@ bool RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* rende
     std::vector< std::pair<float, MeshRenderer*> > sortList;
     sortList.reserve(renderQueueGroup->size());
     
+    // Accumulate renderer list
     std::transform(renderQueueGroup->begin(), renderQueueGroup->end(), std::back_inserter(sortList),
                    [&eye](MeshRenderer* renderer) {
                        return std::make_pair(glm::distance(eye, renderer->transform.position), renderer);
@@ -21,6 +22,7 @@ bool RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* rende
     renderQueueGroup->clear();
     renderQueueGroup->reserve(sortList.size());
     
+    // Replace renderers with sorted renderers
     std::transform(sortList.begin(), sortList.end(), std::back_inserter(*renderQueueGroup),
                    [](const std::pair<float, MeshRenderer*>& pair) {
                        return pair.second;

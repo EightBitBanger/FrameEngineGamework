@@ -114,6 +114,48 @@ std::vector<int32_t> GenerateCreatureVoice(const AudioGene& gene, int sampleRate
 
 
 
+Actor* SpawnActorCallback(void) {
+    
+    GameObject* actorObject = Engine.Create<GameObject>();
+    actorObject->AddComponent( Engine.CreateComponent<Actor>() );
+    actorObject->AddComponent( Engine.CreateComponent<RigidBody>() );
+    
+    actorObject->renderDistance = -1;
+    
+    actorObject->SetPosition(0, 0, 0);
+    
+    // Set up for kinematic control from the AI system
+    actorObject->DisableGravity();
+    actorObject->SetDynamic();
+    
+    actorObject->SetLinearDamping(30);
+    actorObject->SetAngularDamping(100);
+    
+    actorObject->SetLinearAxisLockFactor(1, 1, 1);
+    actorObject->SetAngularAxisLockFactor(0, 0, 0);
+    
+    // Finalize actor
+    Actor* actor = actorObject->GetComponent<Actor>();
+    AI.AddActorToSimulation(actor);
+    
+    // Reference to associated game object
+    actor->user.SetUserDataA( (void*)actorObject );
+    
+    return actor;
+}
+
+void KillActorCallback(Actor* actor) {
+    GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
+    
+    Engine.Destroy(actorObject);
+    
+    AI.RemoveActorFromSimulation(actor);
+    
+    return;
+}
+
+
+
 void Start() {
     
     // Initiate the command console and 
@@ -151,7 +193,8 @@ void Start() {
     Particle.Initiate();
     
     
-    
+    AI.SpawnActor = SpawnActorCallback;
+    AI.KillActor  = KillActorCallback;
     
     
     // Event callbacks
@@ -365,10 +408,10 @@ void Start() {
     
     GameWorld.world.mDecorations.push_back(decorWaterPlants);
     
-    GameWorld.world.mDecorations.push_back(decorSheep);
-    GameWorld.world.mDecorations.push_back(decorBovine);
-    GameWorld.world.mDecorations.push_back(decorHorse);
-    GameWorld.world.mDecorations.push_back(decorBear);
+    //GameWorld.world.mDecorations.push_back(decorSheep);
+    //GameWorld.world.mDecorations.push_back(decorBovine);
+    //GameWorld.world.mDecorations.push_back(decorHorse);
+    //GameWorld.world.mDecorations.push_back(decorBear);
     
     
     // Perlin layers
@@ -458,8 +501,13 @@ void Start() {
     GameWorld.staticDistance = GameWorld.renderDistance * 0.7f;
     GameWorld.actorDistance  = GameWorld.renderDistance * 0.8f;
     
-    GameWorld.LoadWorld();
-    
+    // Load world
+    if (!GameWorld.LoadWorld()) {
+        GameWorld.worldSeed = Random.Range(100, 10000000) - Random.Range(100, 10000000);
+        Weather.SetTime(9000);
+        Weather.SetWeather(WeatherType::Clear);
+        GameWorld.SaveWorld();
+    }
     
     
     
