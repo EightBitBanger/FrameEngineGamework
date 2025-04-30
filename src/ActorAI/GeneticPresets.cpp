@@ -36,8 +36,6 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     
     targetActor->biological.health = 200;
     
-    AI.genomes.mental.PreyBase(targetActor);
-    
     if (Random.Range(0, 100) > 55) 
     {targetActor->physical.SetSexualOrientation(true);} else  // Male
     {targetActor->physical.SetSexualOrientation(false);}      // Female
@@ -280,8 +278,6 @@ void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     
     targetActor->biological.health = 40;
     
-    AI.genomes.mental.PreyBase(targetActor);
-    
     if (Random.Range(0, 100) > 55) 
     {targetActor->physical.SetSexualOrientation(true);} else  // Male
     {targetActor->physical.SetSexualOrientation(false);}      // Female
@@ -424,8 +420,6 @@ void GeneticPresets::ActorPresets::Bovine(Actor* targetActor) {
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
     
     targetActor->biological.health = 170;
-    
-    AI.genomes.mental.PreyBase(targetActor);
     
     if (Random.Range(0, 100) > 55) 
     {targetActor->physical.SetSexualOrientation(true);} else  // Male
@@ -631,8 +625,6 @@ void GeneticPresets::ActorPresets::Horse(Actor* targetActor) {
     targetActor->behavior.SetHeightPreferenceMax(50.0f);
     
     targetActor->biological.health = 240;
-    
-    AI.genomes.mental.PreyBase(targetActor);
     
     if (Random.Range(0, 100) > 55) 
     {targetActor->physical.SetSexualOrientation(true);} else  // Male
@@ -862,8 +854,6 @@ void GeneticPresets::ActorPresets::Bear(Actor* targetActor) {
     
     targetActor->biological.health = 280;
     
-    AI.genomes.mental.PredatorBase(targetActor);
-    
     if (Random.Range(0, 100) > 55) 
     {targetActor->physical.SetSexualOrientation(true);} else  // Male
     {targetActor->physical.SetSexualOrientation(false);}      // Female
@@ -887,8 +877,6 @@ void GeneticPresets::ActorPresets::Bear(Actor* targetActor) {
         bodyColor = Colors.brown * Colors.MakeGrayScale(0.02);
         limbColor = Colors.brown * Colors.MakeGrayScale(0.03);
         
-        AI.genomes.mental.PredatorBase(targetActor);
-        
         selected = true;
     }
     
@@ -897,8 +885,6 @@ void GeneticPresets::ActorPresets::Bear(Actor* targetActor) {
         
         headColor = Colors.dkgray * Colors.dkgray * Colors.MakeGrayScale(0.01);
         bodyColor = Colors.dkgray * Colors.dkgray * Colors.MakeGrayScale(0.001);
-        
-        AI.genomes.mental.PredatorBase(targetActor);
         
         selected = true;
     }
@@ -1063,8 +1049,6 @@ void GeneticPresets::ActorPresets::Creepy(Actor* targetActor) {
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
     
     targetActor->biological.health = 50;
-    
-    AI.genomes.mental.PreyBase(targetActor);
     
     if (Random.Range(0, 100) > 55) 
     {targetActor->physical.SetSexualOrientation(true);} else  // Male

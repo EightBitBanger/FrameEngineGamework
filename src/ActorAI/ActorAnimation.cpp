@@ -168,3 +168,50 @@ void ActorSystem::EnsureNonZeroAnimationState(Actor* actor, unsigned int a) {
         actor->state.mAnimation[a].z += 0.0001f;
 }
 
+
+void ActorSystem::UpdateTargetRotation(Actor* actor) {
+    
+    // Face toward target point
+    glm::vec3 position = actor->navigation.mPosition;
+    
+    float xx = position.x - actor->navigation.mTargetPoint.x;
+    float zz = position.z - actor->navigation.mTargetPoint.z;
+    
+    actor->navigation.mRotateTo.y = glm::degrees( glm::atan(xx, zz) ) + 180;
+    
+    // Check to invert facing direction
+    if (!actor->state.mIsFacing) {
+        
+        actor->navigation.mRotateTo.y += 180;
+        
+        if (actor->navigation.mRotateTo.y > 360) 
+            actor->navigation.mRotateTo.y -= 360;
+    }
+    
+    // Check actor target direction
+    
+    // Wrap euler rotations
+    if (actor->navigation.mRotation.y < 90) 
+        if (actor->navigation.mRotateTo.y > 270) 
+            actor->navigation.mRotation.y += 360;
+    
+    if (actor->navigation.mRotation.y > 270) 
+        if (actor->navigation.mRotateTo.y < 90) 
+            actor->navigation.mRotation.y -= 360;
+    
+    // Rotate actor toward the focal point
+    if (actor->navigation.mRotation != actor->navigation.mRotateTo) {
+        
+        glm::vec3 fadeFrom( actor->navigation.mRotation );
+        glm::vec3 fadeTo( actor->navigation.mRotateTo );
+        
+        glm::vec3 fadeValue;
+        fadeValue.x = Math.Lerp(fadeFrom.x, fadeTo.x, actor->physical.mSnapSpeed);
+        fadeValue.y = Math.Lerp(fadeFrom.y, fadeTo.y, actor->physical.mSnapSpeed);
+        fadeValue.z = Math.Lerp(fadeFrom.z, fadeTo.z, actor->physical.mSnapSpeed);
+        
+        actor->navigation.mRotation = fadeValue;
+    }
+    
+    return;
+}

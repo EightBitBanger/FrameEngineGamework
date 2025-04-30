@@ -53,8 +53,6 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 AI.genomes.InjectGenome(actor, lineArray[4]);
                 actor->ReexpressPhenotype();
                 
-                AI.genomes.mental.PreyBase(actor);
-                
                 actor->physical.SetAge(age);
                 
                 continue;

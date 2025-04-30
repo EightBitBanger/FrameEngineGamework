@@ -36,6 +36,11 @@ std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
     genetics += Float.ToString( sourceActor->physical.GetAdultScale() ) + ":";
     
     // Personality
+    genetics += Float.ToString( sourceActor->behavior.GetChanceToFocus() ) + ":";
+    genetics += Float.ToString( sourceActor->behavior.GetChanceToWalk() ) + ":";
+    genetics += Float.ToString( sourceActor->behavior.GetChanceToAttack() ) + ":";
+    genetics += Float.ToString( sourceActor->behavior.GetChanceToFlee() ) + ":";
+    
     genetics += Float.ToString( sourceActor->behavior.GetDistanceToFocus() ) + ":";
     genetics += Float.ToString( sourceActor->behavior.GetDistanceToWalk() ) + ":";
     genetics += Float.ToString( sourceActor->behavior.GetDistanceToAttack() ) + ":";
@@ -130,31 +135,36 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
     }
     
     // Personality
-    if (numberOfTraits > 13) {
-        targetActor->behavior.SetDistanceToFocus(  String.ToFloat(traits[8]) );
-        targetActor->behavior.SetDistanceToWalk(   String.ToFloat(traits[9]) );
-        targetActor->behavior.SetDistanceToAttack( String.ToFloat(traits[10]) );
-        targetActor->behavior.SetDistanceToFlee(   String.ToFloat(traits[11]) );
+    if (numberOfTraits > 17) {
+        targetActor->behavior.SetChanceToFocus(  String.ToFloat(traits[8]) );
+        targetActor->behavior.SetChanceToWalk(   String.ToFloat(traits[9]) );
+        targetActor->behavior.SetChanceToAttack( String.ToFloat(traits[10]) );
+        targetActor->behavior.SetChanceToFlee(   String.ToFloat(traits[11]) );
         
-        targetActor->behavior.SetHeightPreferenceMin( String.ToFloat(traits[12]) );
-        targetActor->behavior.SetHeightPreferenceMax( String.ToFloat(traits[13]) );
+        targetActor->behavior.SetDistanceToFocus(  String.ToFloat(traits[12]) );
+        targetActor->behavior.SetDistanceToWalk(   String.ToFloat(traits[13]) );
+        targetActor->behavior.SetDistanceToAttack( String.ToFloat(traits[14]) );
+        targetActor->behavior.SetDistanceToFlee(   String.ToFloat(traits[15]) );
+        
+        targetActor->behavior.SetHeightPreferenceMin( String.ToFloat(traits[16]) );
+        targetActor->behavior.SetHeightPreferenceMax( String.ToFloat(traits[17]) );
     }
     
     // Characteristics
-    if (numberOfTraits > 16) {
+    if (numberOfTraits > 20) {
         
         // Actor details
-        targetActor->genetics.SetGeneration( String.ToUint(traits[14]) );
+        targetActor->genetics.SetGeneration( String.ToUint(traits[18]) );
         
         // Sexuality
-        if (String.ToUint(traits[15]) == 0) {
+        if (String.ToUint(traits[19]) == 0) {
             targetActor->physical.SetSexualOrientation( true );  // Male
         } else {
             targetActor->physical.SetSexualOrientation( false ); // Female
         }
         
         // Adult age
-        targetActor->physical.mAgeAdult = String.ToFloat(traits[16]);
+        targetActor->physical.mAgeAdult = String.ToFloat(traits[20]);
         
     }
     
@@ -416,56 +426,5 @@ Gene GeneticPresets::Lerp(Gene geneA, Gene geneB, float bias) {
     gene.doExpress = geneA.doExpress || geneB.doExpress;
     
     return gene;
-}
-
-// Mental models
-//
-
-std::vector<float> states;
-
-void GeneticPresets::PsychologicalPresets::PreyBase(Actor* targetActor) {
-    
-    if (states.size() == 0) {
-        
-        std::string buffer;
-        
-        unsigned int fileSz = Serializer.GetFileSize("prey.dat");
-        
-        buffer.resize(fileSz);
-        Serializer.Deserialize("prey.dat", (void*)buffer.data(), fileSz);
-        
-        std::vector<std::string> stringstates = String.Explode(buffer, '\n');
-        
-        NeuralNetwork dummyNetwork;
-        dummyNetwork.LoadState( stringstates );
-        states = dummyNetwork.SaveStateBin();
-    }
-    
-    targetActor->idiosyncrasies.LoadNeuralStates( states );
-    
-    return;
-}
-
-void GeneticPresets::PsychologicalPresets::PredatorBase(Actor* targetActor) {
-    
-    if (states.size() == 0) {
-        
-        std::string buffer;
-        
-        unsigned int fileSz = Serializer.GetFileSize("prey.dat");
-        
-        buffer.resize(fileSz);
-        Serializer.Deserialize("prey.dat", (void*)buffer.data(), fileSz);
-        
-        std::vector<std::string> stringstates = String.Explode(buffer, '\n');
-        
-        NeuralNetwork dummyNetwork;
-        dummyNetwork.LoadState( stringstates );
-        states = dummyNetwork.SaveStateBin();
-    }
-    
-    targetActor->idiosyncrasies.LoadNeuralStates( states );
-    
-    return;
 }
 

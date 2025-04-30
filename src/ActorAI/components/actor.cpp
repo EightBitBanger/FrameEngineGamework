@@ -23,6 +23,10 @@ void Actor::Reset(void) {
     navigation.mTargetBreeding= nullptr;
     
     // Behavior
+    behavior.mChanceToFocus        =  8.0f;
+    behavior.mChanceToWalk         =  8.0f;
+    behavior.mChanceToAttack       = 30.0f;
+    behavior.mChanceToFlee         = 80.0f;
     behavior.mDistanceToFocus      = 10.0f;
     behavior.mDistanceToWalk       = 30.0f;
     behavior.mDistanceToAttack     = 30.0f;
@@ -31,17 +35,16 @@ void Actor::Reset(void) {
     behavior.mHeightPreferenceMax  = 1000.0f;
     
     // State
+    state.current       = NeuralState::idle;
     state.mIsActive     = true;
     state.mIsWalking    = false;
     state.mIsRunning    = false;
     state.mIsAttacking  = false;
     state.mIsFleeing    = false;
-    state.mIsConsuming  = false;
     state.mIsFacing     = true;
     //state.mAnimation.clear();
     
     // Idiosyncrasies
-    idiosyncrasies.mNeuralNetwork.ClearTopology();
     idiosyncrasies.mMemories.clear();
     
     // Genetics
@@ -101,6 +104,10 @@ Actor::NavigationSystem::NavigationSystem() :
 }
 
 Actor::Behavior::Behavior() : 
+    mChanceToFocus    (8),
+    mChanceToWalk     (8),
+    mChanceToAttack   (30),
+    mChanceToFlee     (80),
     mDistanceToFocus  (10),
     mDistanceToWalk   (30),
     mDistanceToAttack (30),
@@ -112,12 +119,12 @@ Actor::Behavior::Behavior() :
 }
 
 Actor::State::State() : 
+    current(NeuralState::idle),
     mIsActive(true),
     mIsWalking(false),
     mIsRunning(false),
     mIsAttacking(false),
 	mIsFleeing(false),
-	mIsConsuming(false),
 	mIsFacing(true)
 {
 }
@@ -211,6 +218,7 @@ std::string Actor::GetName(void) {
 void Actor::NavigationSystem::SetPosition(glm::vec3 position) {
     std::lock_guard<std::mutex> lock(mux);
     mPosition = position;
+    mTargetPoint = position;
     return;
 }
 
@@ -255,6 +263,51 @@ void Actor::NavigationSystem::SetTargetActor(Actor* actorPtr) {
 
 //
 // AI state behavioral hardwiring
+
+void Actor::Behavior::SetChanceToFocus(float chance) {
+    std::lock_guard<std::mutex> lock(mux);
+    mChanceToFocus = chance;
+    return;
+}
+
+float Actor::Behavior::GetChanceToFocus(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    return mChanceToFocus;
+}
+
+void Actor::Behavior::SetChanceToWalk(float chance) {
+    std::lock_guard<std::mutex> lock(mux);
+    mChanceToWalk = chance;
+    return;
+}
+
+float Actor::Behavior::GetChanceToWalk(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    return mChanceToWalk;
+}
+
+void Actor::Behavior::SetChanceToAttack(float chance) {
+    std::lock_guard<std::mutex> lock(mux);
+    mChanceToAttack = chance;
+    return;
+}
+
+float Actor::Behavior::GetChanceToAttack(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    return mChanceToAttack;
+}
+
+void Actor::Behavior::SetChanceToFlee(float chance) {
+    std::lock_guard<std::mutex> lock(mux);
+    mChanceToFlee = chance;
+    return;
+}
+
+float Actor::Behavior::GetChanceToFlee(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    return mChanceToFlee;
+}
+
 
 void Actor::Behavior::SetDistanceToFocus(float distance) {
     std::lock_guard<std::mutex> lock(mux);
@@ -324,33 +377,7 @@ float Actor::Behavior::GetHeightPreferenceMax(void) {
 
 
 //
-// Neural network
-
-void Actor::IdiosyncraticCharacteristics::SetNeuralTopology(std::vector<NeuralLayer>& layers) {
-    std::lock_guard<std::mutex> lock(mux);
-    
-    mNeuralNetwork.ClearTopology();
-    
-    unsigned int numberOfLayers = layers.size();
-    
-    for (unsigned int i=0; i < numberOfLayers; i++) {
-        NeuralLayer& layer = layers[i];
-        mNeuralNetwork.AddNeuralLayer(layer.numberOfNeurons, layer.numberOfInputs);
-    }
-    return;
-}
-
-std::vector<float> Actor::IdiosyncraticCharacteristics::SaveNeuralStates(void) {
-    std::lock_guard<std::mutex> lock(mux);
-    return mNeuralNetwork.SaveStateBin();
-}
-
-void Actor::IdiosyncraticCharacteristics::LoadNeuralStates(std::vector<float>& states) {
-    std::lock_guard<std::mutex> lock(mux);
-    mNeuralNetwork.LoadStateBin( states );
-    return;
-}
-
+// Memories
 
 void Actor::IdiosyncraticCharacteristics::AddMemory(std::string name, std::string memory) {
     std::lock_guard<std::mutex> lock(mux);
