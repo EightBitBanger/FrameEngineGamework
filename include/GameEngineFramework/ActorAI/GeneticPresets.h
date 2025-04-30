@@ -27,18 +27,6 @@ public:
     Gene Lerp(Gene geneA, Gene geneB, float bias);
     
     
-    /// Preset mental states.
-    class ENGINE_API PsychologicalPresets {
-        
-    public:
-        
-        void PreyBase(Actor* targetActor);
-        
-        void PredatorBase(Actor* targetActor);
-        
-    } mental;
-    
-    
     /// Preset actor definitions.
     class ENGINE_API ActorPresets {
         

@@ -1,8 +1,6 @@
 #ifndef _ACTOR_AI_SYSTEM__
 #define _ACTOR_AI_SYSTEM__
 
-#include <GameEngineFramework/ActorAI/NeuralNetwork.h>
-
 #include <GameEngineFramework/ActorAI/ActorStates.h>
 #include <GameEngineFramework/ActorAI/GeneticPresets.h>
 
@@ -20,24 +18,6 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
-
-enum class NeuralState {
-    
-    idle,
-    walk,
-    
-    avoid,
-    dodge,
-    
-    attack,
-    follow,
-    
-    flee,
-    defend,
-    
-    interact,
-    
-};
 
 
 class ENGINE_API ActorSystem {
@@ -105,6 +85,8 @@ public:
     /// Genetic entity definitions.
     GeneticPresets genomes;
     
+    // Render components
+    
     /// Scene where the actors should exist.
     Scene* sceneMain;
     
@@ -113,6 +95,8 @@ public:
     
     /// Base mesh for genetic rendering.
     Mesh* baseMesh;
+    
+    // Object generation and deletion callbacks
     
     /// Actor object spawner callback
     Actor* (*SpawnActor)(void);
@@ -127,22 +111,28 @@ private:
     // Animation update timer
     Timer mAnimationTimer;
     
-    //
-    // Behavioral state update
+    // Behavioral
     void UpdateActorState(Actor* actor);
+    void SwitchActorState(Actor* actor, NeuralState state);
     
-    void HandleWalkingChance(Actor* actor, bool isAquatic);
-    void HandleFocusOnNearbyActor(Actor* actor);
-    bool HandleBreedingState(Actor* actor);
-    void HandleNeuralNetwork(Actor* actor);
+    void HandleIdleState(Actor* actor);
+    void HandleWalkState(Actor* actor);
+    void HandleFocusState(Actor* actor);
+    void HandleAttackState(Actor* actor);
+    void HandleFleeState(Actor* actor);
+    void HandleDefendState(Actor* actor);
     
-    void HandleMovementHeight(Actor* actor, bool isAquatic);
+    // Mechanical
+    void UpdateActorMechanics(Actor* actor);
     
-    void UpdateTargetPoint(Actor* actor);
+    void HandleWalkingMechanics(Actor* actor);
+    void HandleTargettingMechanics(Actor* actor);
+    void HandleBreedingMechanics(Actor* actor);
     
-    void CheckTargetReached(Actor* actor);
+    void HandleMovementMechanics(Actor* actor);
+    void HandleTargetRandomPoint(Actor* actor);
     
-    //
+    
     // Animations
     void UpdateAnimationState(Actor* actor);
     void EnsureNonZeroAnimationState(Actor* actor, unsigned int a);
@@ -153,8 +143,6 @@ private:
     void ApplyOffsetFromCenter(glm::mat4& matrix, Actor* actor, unsigned int a);
     void ApplyRotation(glm::mat4& matrix, Actor* actor, unsigned int a);
     void ApplyScaleByAge(glm::mat4& matrix, Actor* actor, unsigned int a);
-    
-    // Target rotation animation
     void UpdateTargetRotation(Actor* actor);
     
     // Genetics
@@ -162,11 +150,6 @@ private:
     void ClearOldGeneticRenderers(Actor* actor);
     MeshRenderer* CreateMeshRendererForGene(Actor* actor, unsigned int geneIndex, Mesh* sourceMesh);
     void ExpressActorGenetics(Actor* actor);
-    
-    
-    // Neural network encoding
-    std::vector<float> Encode(const NeuralState neuralState);
-    
     
     // Current position of the player in the world
     glm::vec3 mPlayerPosition;

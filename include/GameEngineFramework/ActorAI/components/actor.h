@@ -7,7 +7,6 @@
 #include <GameEngineFramework/ActorAI/Genetics/Codon.h>
 #include <GameEngineFramework/ActorAI/Genetics/Phen.h>
 #include <GameEngineFramework/ActorAI/Genetics/Bio.h>
-#include <GameEngineFramework/ActorAI/NeuralNetwork.h>
 
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
 #include <GameEngineFramework/Renderer/RenderSystem.h>
@@ -129,6 +128,26 @@ public:
         
     public:
         
+        /// Set the chance that this actor will focus on a nearby actor.
+        void SetChanceToFocus(float distance);
+        /// Get the chance that this actor will focus on a nearby actor.
+        float GetChanceToFocus(void);
+        
+        /// Set the chance to begin walking.
+        void SetChanceToWalk(float distance);
+        /// Get the chance to begin walking.
+        float GetChanceToWalk(void);
+        
+        /// Set the chance to attack a nearby actor.
+        void SetChanceToAttack(float distance);
+        /// Get the chance to attack a nearby actor.
+        float GetChanceToAttack(void);
+        
+        /// Set the chance to flee from a nearby predator.
+        void SetChanceToFlee(float distance);
+        /// Get the chance to flee from a nearby predator.
+        float GetChanceToFlee(void);
+        
         /// Set the distance to which the actor can focus on another actor or player.
         void SetDistanceToFocus(float distance);
         /// Get the distance to which the actor can focus on another actor or player.
@@ -163,23 +182,18 @@ public:
         
     private:
         
-        // Distance to focus on a near by actor
-        float mDistanceToFocus;
+        float mChanceToFocus;    // Chance to switch focus to a different nearby actor
+        float mChanceToWalk;     // Chance to begin walking
+        float mChanceToAttack;   // Chance to begin attacking a nearby prey
+        float mChanceToFlee;     // Chance to begin fleeing from a nearby predator
         
-        // Distance to travel when moving to a random target position
-        float mDistanceToWalk;
+        float mDistanceToFocus;  // Distance to focus on a near by actor
+        float mDistanceToWalk;   // Distance to travel when moving to a random target position
+        float mDistanceToAttack; // Distance to begin attacking a pray actor
+        float mDistanceToFlee;   // Distance to begin fleeing from a predator actor
         
-        // Distance to begin attacking a pray actor
-        float mDistanceToAttack;
-        
-        // Distance to begin fleeing from a predator actor
-        float mDistanceToFlee;
-        
-        // Minimum world height this actor prefers to inhabit
-        float mHeightPreferenceMin;
-        
-        // Maximum world height this actor prefers to inhabit
-        float mHeightPreferenceMax;
+        float mHeightPreferenceMin; // Minimum world height this actor prefers to inhabit
+        float mHeightPreferenceMax; // Maximum world height this actor prefers to inhabit
         
         std::mutex mux;
         
@@ -197,26 +211,16 @@ public:
         
     public:
         
-        // Is this actor active in the simulation
+        // The current state the actor is in
+        NeuralState current;
+        
         bool mIsActive;
-        
-        // Is the actor walking
         bool mIsWalking;
-        
-        // Is the actor running
         bool mIsRunning;
         
-        // Is the actor attacking another actor
-        bool mIsAttacking;
-        
-        // Is the actor fleeing from a predator
-        bool mIsFleeing;
-        
-        // Is the actor consuming a food source
-        bool mIsConsuming;
-        
-        // Should the actor face toward or away from the target point
-        bool mIsFacing;
+        bool mIsAttacking; // Is the actor attacking another actor
+        bool mIsFleeing;   // Is the actor fleeing from another actor
+        bool mIsFacing;    // Should the actor face toward or away from the target actor
         
         // List of animation states for each genetic component
         std::vector<glm::vec4> mAnimation;
@@ -239,17 +243,6 @@ public:
         
     public:
         
-        // Neural network
-        
-        /// Assign a set of neural layers to the neural network.
-        void SetNeuralTopology(std::vector<NeuralLayer>& layers);
-        /// Load a vector of strings defining the neural network weight parameters.
-        void LoadNeuralStates(std::vector<float>& states);
-        /// Save the weight parameters to a vector of strings defining the neural network.
-        std::vector<float> SaveNeuralStates(void);
-        
-        // Memories
-        
         /// Add a memory to this actor.
         void AddMemory(std::string name, std::string memory);
         /// Remove a memory from this actor.
@@ -264,9 +257,6 @@ public:
         IdiosyncraticCharacteristics();
         
     private:
-        
-        // Local actor neural network
-        NeuralNetwork mNeuralNetwork;
         
         // List of memories collected by this entity
         std::unordered_map<std::string, std::string> mMemories;
