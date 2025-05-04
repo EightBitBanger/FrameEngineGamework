@@ -191,7 +191,7 @@ public:
                 for (unsigned int i=0; i < actorPtr->genetics.mGeneticRenderers.size(); i++) 
                     Destroy<MeshRenderer>( actorPtr->genetics.mGeneticRenderers[i] );
                 actorPtr->genetics.mGeneticRenderers.clear();
-                AI.DestroyActor( actorPtr );
+                actorPtr->isGarbage = true;
                 break;
             }
             

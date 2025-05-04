@@ -57,6 +57,9 @@ public:
     /// Should this gene be animated.
     bool doAnimationCycle;
     
+    /// Is this gene a part of the head.
+    bool doAnimateAsHead;
+    
     /// Should the animation cycle be inverted.
     bool doInverseAnimation;
     

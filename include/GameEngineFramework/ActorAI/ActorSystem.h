@@ -113,14 +113,13 @@ private:
     
     // Behavioral
     void UpdateActorState(Actor* actor);
-    void SwitchActorState(Actor* actor, NeuralState state);
+    void UpdateProximityList(Actor* actor);
     
     void HandleIdleState(Actor* actor);
     void HandleWalkState(Actor* actor);
-    void HandleFocusState(Actor* actor);
-    void HandleAttackState(Actor* actor);
-    void HandleFleeState(Actor* actor);
-    void HandleDefendState(Actor* actor);
+    void HandleAttackState(Actor* actor, Actor* target, float distance);
+    void HandleFleeState(Actor* actor, Actor* target, float distance);
+    void HandleFocusState(Actor* actor, Actor* target, float distance);
     
     // Mechanical
     void UpdateActorMechanics(Actor* actor);
@@ -130,7 +129,6 @@ private:
     void HandleBreedingMechanics(Actor* actor);
     
     void HandleMovementMechanics(Actor* actor);
-    void HandleTargetRandomPoint(Actor* actor);
     
     
     // Animations
@@ -144,6 +142,7 @@ private:
     void ApplyRotation(glm::mat4& matrix, Actor* actor, unsigned int a);
     void ApplyScaleByAge(glm::mat4& matrix, Actor* actor, unsigned int a);
     void UpdateTargetRotation(Actor* actor);
+    void UpdateLookingRotation(Actor* actor);
     
     // Genetics
     void UpdateActorGenetics(Actor* actor);

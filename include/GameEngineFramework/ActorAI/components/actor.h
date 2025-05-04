@@ -28,6 +28,9 @@ public:
     friend class EngineSystemManager;
     friend class GeneticPresets;
     
+    // Flags
+    bool isGarbage;     // Mark for internal destruction and garbage collection
+    
     // Name
     
     /// Set the name of the actor.
@@ -88,29 +91,16 @@ public:
         
     private:
         
-        // Movement vector
-        glm::vec3 mVelocity;
+        glm::vec3 mVelocity;     // Movement vector
+        glm::vec3 mPosition;     // Position of the actor in the world
+        glm::vec3 mRotation;     // Direction the actor is facing
+        glm::vec3 mLookAt;       // Direction the head is facing
         
-        // Position of the actor in the world
-        glm::vec3 mPosition;
+        glm::vec3 mRotateTo;     // Target direction toward which the actor should rotate
+        glm::vec3 mTargetPoint;  // Point toward which the actor body should face
+        glm::vec3 mTargetLook;   // Point toward which the head should look
         
-        // Forward facing direction of the actor in the world
-        glm::vec3 mRotation;
-        
-        // Direction toward which the actor should face
-        glm::vec3 mRotateTo;
-        
-        // World target point toward which the actor should face
-        glm::vec3 mTargetPoint;
-        
-        // Distance to the player
-        float mDistance;
-        
-        // Target actor in focus
-        Actor* mTargetActor;
-        
-        // Breeding target actor
-        Actor* mTargetBreeding;
+        Actor* mTargetActor;     // Target actor in focus
         
         std::mutex mux;
         
@@ -127,26 +117,6 @@ public:
         friend class GeneticPresets;
         
     public:
-        
-        /// Set the chance that this actor will focus on a nearby actor.
-        void SetChanceToFocus(float distance);
-        /// Get the chance that this actor will focus on a nearby actor.
-        float GetChanceToFocus(void);
-        
-        /// Set the chance to begin walking.
-        void SetChanceToWalk(float distance);
-        /// Get the chance to begin walking.
-        float GetChanceToWalk(void);
-        
-        /// Set the chance to attack a nearby actor.
-        void SetChanceToAttack(float distance);
-        /// Get the chance to attack a nearby actor.
-        float GetChanceToAttack(void);
-        
-        /// Set the chance to flee from a nearby predator.
-        void SetChanceToFlee(float distance);
-        /// Get the chance to flee from a nearby predator.
-        float GetChanceToFlee(void);
         
         /// Set the distance to which the actor can focus on another actor or player.
         void SetDistanceToFocus(float distance);
@@ -178,22 +148,33 @@ public:
         /// Get the maximum height preference when traveling.
         float GetHeightPreferenceMax(void);
         
+        /// Set the attack state.
+        void SetPredatorState(bool state);
+        /// Get the attack state.
+        bool GetPredatorState(void);
+        
+        /// Set the prey state.
+        void SetPreyState(bool state);
+        /// Get the prey state.
+        bool GetPreyState(void);
+        
         Behavior();
         
     private:
         
-        float mChanceToFocus;    // Chance to switch focus to a different nearby actor
-        float mChanceToWalk;     // Chance to begin walking
-        float mChanceToAttack;   // Chance to begin attacking a nearby prey
-        float mChanceToFlee;     // Chance to begin fleeing from a nearby predator
+        bool mIsPredator;           // True = can attack prey   False = herbivore
+        bool mIsPrey;               // True = can be attacked   False = docile
         
-        float mDistanceToFocus;  // Distance to focus on a near by actor
-        float mDistanceToWalk;   // Distance to travel when moving to a random target position
-        float mDistanceToAttack; // Distance to begin attacking a pray actor
-        float mDistanceToFlee;   // Distance to begin fleeing from a predator actor
+        float mDistanceToFocus;     // Distance to focus on a near by actor
+        float mDistanceToWalk;      // Distance to travel when moving to a random position
+        float mDistanceToAttack;    // Distance to begin attacking a pray actor
+        float mDistanceToFlee;      // Distance to begin fleeing from a predator actor
         
         float mHeightPreferenceMin; // Minimum world height this actor prefers to inhabit
         float mHeightPreferenceMax; // Maximum world height this actor prefers to inhabit
+        
+        // List of near by actors that are within focal range
+        std::vector<Actor*> mProximityList;
         
         std::mutex mux;
         
@@ -212,15 +193,15 @@ public:
     public:
         
         // The current state the actor is in
-        NeuralState current;
+        ActorState::Mode    mode;
+        ActorState::State   current;
+        
+    private:
         
         bool mIsActive;
         bool mIsWalking;
         bool mIsRunning;
-        
-        bool mIsAttacking; // Is the actor attacking another actor
-        bool mIsFleeing;   // Is the actor fleeing from another actor
-        bool mIsFacing;    // Should the actor face toward or away from the target actor
+        bool mIsFacing;
         
         // List of animation states for each genetic component
         std::vector<glm::vec4> mAnimation;
@@ -244,15 +225,15 @@ public:
     public:
         
         /// Add a memory to this actor.
-        void AddMemory(std::string name, std::string memory);
+        void Add(std::string name, std::string memory);
         /// Remove a memory from this actor.
-        bool RemoveMemory(std::string name);
+        bool Remove(std::string name);
         
         /// Clear all the actor memories.
-        void ClearMemories(void);
+        void Clear(void);
         
         /// Check if a memory exists in this actor.
-        bool CheckMemoryExists(std::string memory);
+        bool CheckExists(std::string memory);
         
         IdiosyncraticCharacteristics();
         
@@ -263,7 +244,7 @@ public:
         
         std::mutex mux;
         
-    } idiosyncrasies;
+    } memories;
     
     
     
