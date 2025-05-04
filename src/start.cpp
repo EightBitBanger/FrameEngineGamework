@@ -145,11 +145,10 @@ Actor* SpawnActorCallback(void) {
 }
 
 void KillActorCallback(Actor* actor) {
-    GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
-    
-    Engine.Destroy(actorObject);
     
     AI.RemoveActorFromSimulation(actor);
+    
+    Engine.Destroy<GameObject>( (GameObject*)actor->user.GetUserDataA() );
     
     return;
 }

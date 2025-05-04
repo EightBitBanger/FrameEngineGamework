@@ -25,11 +25,7 @@ void ApplyGene(Actor* targetActor) {
     targetActor->physical.SetAge( Random.Range(1000, 1100) );
     targetActor->ReexpressPhenotype();
     
-    if (Random.Range(0, 100) > 70) {
-        
-        AI.genomes.presets.Human(targetActor);
-        return;
-    }
+    if (Random.Range(0, 100) > 70) {AI.genomes.presets.Sheep(targetActor); return;}
     
     AI.genomes.ClearGenes(targetActor);
     
@@ -48,8 +44,13 @@ void ApplyGene(Actor* targetActor) {
     targetActor->behavior.SetHeightPreferenceMax(30.0f);
     targetActor->behavior.SetHeightPreferenceMin(10.0f);
     
+    targetActor->behavior.SetDistanceToAttack(8.0f);
+    targetActor->behavior.SetDistanceToFlee(10.0f);
+    targetActor->behavior.SetDistanceToFocus(20.0f);
+    
+    targetActor->behavior.SetPredatorState(true);
+    
     targetActor->biological.health = 100;
-    targetActor->state.current = NeuralState::walk;
     
     if (Random.Range(0, 100) > 55) 
     {targetActor->physical.SetSexualOrientation(true);} else  // Male
@@ -76,58 +77,63 @@ void ApplyGene(Actor* targetActor) {
     geneBody.color.y   = bodyColor.g;
     geneBody.color.z   = bodyColor.b;
     
+    // Head gene
+    Gene geneHead;
+    geneHead.offset    = Codon(0.0, 0, 0.1);
+    geneHead.position  = Codon(0, 0.43, 0.11);
+    geneHead.rotation  = Codon(0, 0, 0);
+    geneHead.scale     = Codon(0.23, 0.23, 0.18);
+    geneHead.color.x   = headColor.r;
+    geneHead.color.y   = headColor.g;
+    geneHead.color.z   = headColor.b;
+    geneHead.doAnimateAsHead = true;
+    
     // Upper body gene
     Gene geneBodyUpper;
-    geneBodyUpper.offset    = Codon(0, 0, 0.2);
-    geneBodyUpper.position  = Codon(0, 0.35, 0);
+    geneBodyUpper.attachmentIndex = 1;
+    geneBodyUpper.offset    = Codon(0, 0, 0);
+    geneBodyUpper.position  = Codon(0, 0.35, 0.3);
     geneBodyUpper.rotation  = Codon(0, 0, 0);
     geneBodyUpper.scale     = Codon(0.29, 0.29, 0.22);
     geneBodyUpper.color.x   = bodyColor.r;
     geneBodyUpper.color.y   = bodyColor.g;
     geneBodyUpper.color.z   = bodyColor.b;
     
-    // Head gene
-    Gene geneHead;
-    geneHead.offset    = Codon(0, 0, 0);
-    geneHead.position  = Codon(0, 0.43, 0.33);
-    geneHead.rotation  = Codon(0, 0, 0);
-    geneHead.scale     = Codon(0.23, 0.23, 0.18);
-    geneHead.color.x   = headColor.r;
-    geneHead.color.y   = headColor.g;
-    geneHead.color.z   = headColor.b;
-    
     // Muzzle gene
     Gene geneMuzzle;
-    geneMuzzle.attachmentIndex = 3;
+    geneMuzzle.attachmentIndex = 2;
     geneMuzzle.offset    = Codon(0, 0, 0);
-    geneMuzzle.position  = Codon(0, 0.4, 0.45);
+    geneMuzzle.position  = Codon(0, 0.4, 0.25);
     geneMuzzle.rotation  = Codon(0, 0, 0);
     geneMuzzle.scale     = Codon(0.15, 0.15, 0.14);
     geneMuzzle.color.x   = headColor.r;
     geneMuzzle.color.y   = headColor.g;
     geneMuzzle.color.z   = headColor.b;
+    geneMuzzle.doAnimateAsHead = true;
     
     // Ear left gene
     Gene geneEarLeft;
-    geneEarLeft.attachmentIndex = 3;
+    geneEarLeft.attachmentIndex = 2;
     geneEarLeft.offset    = Codon(0.0, 0.0, 0.0);
-    geneEarLeft.position  = Codon(0.07, 0.555, 0.27);
+    geneEarLeft.position  = Codon(0.07, 0.555, 0.17);
     geneEarLeft.rotation  = Codon(0.1, 0, -0.01);
     geneEarLeft.scale     = Codon(0.07, 0.1, 0.04);
     geneEarLeft.color.x   = headColor.r;
     geneEarLeft.color.y   = headColor.g;
     geneEarLeft.color.z   = headColor.b;
+    geneEarLeft.doAnimateAsHead = true;
     
     // Ear right gene
     Gene geneEarRight;
-    geneEarRight.attachmentIndex = 3;
+    geneEarRight.attachmentIndex = 2;
     geneEarRight.offset    = Codon(0.0, 0.0, 0.0);
-    geneEarRight.position  = Codon(-0.07, 0.555, 0.27);
+    geneEarRight.position  = Codon(-0.07, 0.555, 0.17);
     geneEarRight.rotation  = Codon(0.1, 0, 0.01);
     geneEarRight.scale     = Codon(0.07, 0.1, 0.04);
     geneEarRight.color.x   = headColor.r;
     geneEarRight.color.y   = headColor.g;
     geneEarRight.color.z   = headColor.b;
+    geneEarRight.doAnimateAsHead = true;
     
     // Limb FL gene
     Gene geneLimbFrontLeft;
@@ -199,8 +205,8 @@ void ApplyGene(Actor* targetActor) {
     
     // Apply genes to the actor
     targetActor->genetics.AddGene(geneBody);
-    targetActor->genetics.AddGene(geneBodyUpper);
     targetActor->genetics.AddGene(geneHead);
+    targetActor->genetics.AddGene(geneBodyUpper);
     targetActor->genetics.AddGene(geneMuzzle);
     targetActor->genetics.AddGene(geneEarLeft);
     targetActor->genetics.AddGene(geneEarRight);
@@ -322,14 +328,14 @@ void Run() {
         
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             
-            for (unsigned int retry=0; retry < 4; retry++) {
+            for (unsigned int retry=0; retry < 2; retry++) {
                 glm::vec3 position = Engine.cameraController->GetPosition();
                 float xx = Random.Range(0, 10) - Random.Range(0, 10);
                 float zz = Random.Range(0, 10) - Random.Range(0, 10);
                 
                 Actor* actor = AI.SpawnActor();
-                AI.AddActorToSimulation(actor);
                 ApplyGene(actor);
+                
                 actor->navigation.SetTargetPoint(glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz));
                 
                 GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
@@ -385,10 +391,12 @@ void Run() {
         
         if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
             
-            GameObject* actorObject = (GameObject*)hit.gameObject;
-            Actor* actor = actorObject->GetComponent<Actor>();
+            Engine.Destroy( (GameObject*)hit.gameObject );
             
-            AI.KillActor( actor );
+            //GameObject* actorObject = (GameObject*)hit.gameObject;
+            //Actor* actor = actorObject->GetComponent<Actor>();
+            
+            //AI.KillActor( actor );
             
         }
         
