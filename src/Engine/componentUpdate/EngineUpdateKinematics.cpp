@@ -50,11 +50,6 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
             }
         }
         
-        // Set associated game object reference
-        // TODO This does not belong here
-        GameObject* gameObject = (GameObject*)hit.gameObject;
-        mStreamBuffer[index].actor->user.mUserDataA = gameObject->GetUserData();
-        
     } else {
         
         // No ground detected under actor - Apply dark color indicator

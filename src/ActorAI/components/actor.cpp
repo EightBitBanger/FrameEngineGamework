@@ -5,6 +5,7 @@ extern RenderSystem   Renderer;
 
 
 Actor::Actor() : 
+    isGarbage(false),
     mName("")
 {
 }
@@ -16,44 +17,39 @@ void Actor::Reset(void) {
     navigation.mVelocity      = glm::vec3(0);
     navigation.mPosition      = glm::vec3(0);
     navigation.mRotation      = glm::vec3(0);
+    navigation.mLookAt        = glm::vec3(0, 0, 0);
+    
     navigation.mRotateTo      = glm::vec3(0);
-    navigation.mTargetPoint   = glm::vec3(0, 0, 0);
-    navigation.mDistance      = 0.0f;
+    navigation.mTargetPoint   = glm::vec3(0);
+    navigation.mTargetLook    = glm::vec3(0);
     navigation.mTargetActor   = nullptr;
-    navigation.mTargetBreeding= nullptr;
     
     // Behavior
-    behavior.mChanceToFocus        =  8.0f;
-    behavior.mChanceToWalk         =  8.0f;
-    behavior.mChanceToAttack       = 30.0f;
-    behavior.mChanceToFlee         = 80.0f;
     behavior.mDistanceToFocus      = 10.0f;
     behavior.mDistanceToWalk       = 30.0f;
     behavior.mDistanceToAttack     = 30.0f;
     behavior.mDistanceToFlee       = 20.0f;
     behavior.mHeightPreferenceMin  = 0.0f;
     behavior.mHeightPreferenceMax  = 1000.0f;
+    behavior.mProximityList.clear();
     
     // State
-    state.current       = NeuralState::idle;
+    state.mode          = ActorState::Mode::Idle;
     state.mIsActive     = true;
     state.mIsWalking    = false;
     state.mIsRunning    = false;
-    state.mIsAttacking  = false;
-    state.mIsFleeing    = false;
     state.mIsFacing     = true;
-    //state.mAnimation.clear();
+    state.mAnimation.clear();
     
     // Idiosyncrasies
-    idiosyncrasies.mMemories.clear();
+    memories.Clear();
     
     // Genetics
     genetics.mDoUpdateGenetics     = false;
     genetics.mDoReexpressGenetics  = false;
     genetics.mGeneration           = 0;
-    //genetics.mGenes.clear();
-    //genetics.mPhen.clear();
-    //genetics.mGeneticRenderers.clear();
+    genetics.mGenes.clear();
+    genetics.mPhen.clear();
     
     // Biological
     biological.health    = 100.0f;
@@ -61,7 +57,7 @@ void Actor::Reset(void) {
     biological.immunity  = 0.0f;
     biological.energy    = 0.0f;
     biological.stress    = 0.0f;
-    //biological.mBiologics.clear();
+    biological.mBiologics.clear();
     
     // Physical
     physical.mAge            = 0;
@@ -77,7 +73,7 @@ void Actor::Reset(void) {
     physical.mColliderOffset = glm::vec3(0);
     physical.mColliderScale  = glm::vec3(1);
     
-    // Cooldowns
+    // Cool-down timers
     counters.mObservationCoolDownCounter = 0;
     counters.mMovementCoolDownCounter    = 0;
     counters.mBreedingCoolDownCounter    = 0;
@@ -95,19 +91,17 @@ Actor::NavigationSystem::NavigationSystem() :
     mVelocity(glm::vec3(0)),
     mPosition(glm::vec3(0)),
     mRotation(glm::vec3(0)),
+    mLookAt(glm::vec3(0, 0, 0)),
     mRotateTo(glm::vec3(0)),
-    mTargetPoint(glm::vec3(0, 0, 0)),
-    mDistance(0),
-    mTargetActor(nullptr),
-    mTargetBreeding(nullptr)
+    mTargetPoint(glm::vec3(0)),
+    mTargetLook(glm::vec3(0, 0, 0)),
+    mTargetActor(nullptr)
 {
 }
 
 Actor::Behavior::Behavior() : 
-    mChanceToFocus    (8),
-    mChanceToWalk     (8),
-    mChanceToAttack   (30),
-    mChanceToFlee     (80),
+    mIsPredator       (false),
+    mIsPrey           (false),
     mDistanceToFocus  (10),
     mDistanceToWalk   (30),
     mDistanceToAttack (30),
@@ -119,13 +113,11 @@ Actor::Behavior::Behavior() :
 }
 
 Actor::State::State() : 
-    current(NeuralState::idle),
+    mode(ActorState::Mode::Idle),
     mIsActive(true),
     mIsWalking(false),
     mIsRunning(false),
-    mIsAttacking(false),
-	mIsFleeing(false),
-	mIsFacing(true)
+    mIsFacing(true)
 {
 }
 
@@ -238,17 +230,6 @@ glm::vec3 Actor::NavigationSystem::GetTargetPoint(void) {
     return mTargetPoint;
 }
 
-Actor* Actor::NavigationSystem::GetBreedWithActor(void) {
-    std::lock_guard<std::mutex> lock(mux);
-    return mTargetBreeding;
-}
-
-void Actor::NavigationSystem::SetBreedWithActor(Actor* actorPtr) {
-    std::lock_guard<std::mutex> lock(mux);
-    mTargetBreeding = actorPtr;
-    return;
-}
-
 Actor* Actor::NavigationSystem::GetTargetActor(void) {
     std::lock_guard<std::mutex> lock(mux);
     return mTargetActor;
@@ -263,51 +244,6 @@ void Actor::NavigationSystem::SetTargetActor(Actor* actorPtr) {
 
 //
 // AI state behavioral hardwiring
-
-void Actor::Behavior::SetChanceToFocus(float chance) {
-    std::lock_guard<std::mutex> lock(mux);
-    mChanceToFocus = chance;
-    return;
-}
-
-float Actor::Behavior::GetChanceToFocus(void) {
-    std::lock_guard<std::mutex> lock(mux);
-    return mChanceToFocus;
-}
-
-void Actor::Behavior::SetChanceToWalk(float chance) {
-    std::lock_guard<std::mutex> lock(mux);
-    mChanceToWalk = chance;
-    return;
-}
-
-float Actor::Behavior::GetChanceToWalk(void) {
-    std::lock_guard<std::mutex> lock(mux);
-    return mChanceToWalk;
-}
-
-void Actor::Behavior::SetChanceToAttack(float chance) {
-    std::lock_guard<std::mutex> lock(mux);
-    mChanceToAttack = chance;
-    return;
-}
-
-float Actor::Behavior::GetChanceToAttack(void) {
-    std::lock_guard<std::mutex> lock(mux);
-    return mChanceToAttack;
-}
-
-void Actor::Behavior::SetChanceToFlee(float chance) {
-    std::lock_guard<std::mutex> lock(mux);
-    mChanceToFlee = chance;
-    return;
-}
-
-float Actor::Behavior::GetChanceToFlee(void) {
-    std::lock_guard<std::mutex> lock(mux);
-    return mChanceToFlee;
-}
-
 
 void Actor::Behavior::SetDistanceToFocus(float distance) {
     std::lock_guard<std::mutex> lock(mux);
@@ -375,29 +311,51 @@ float Actor::Behavior::GetHeightPreferenceMax(void) {
     return mHeightPreferenceMax;
 }
 
+void Actor::Behavior::SetPredatorState(bool state) {
+    std::lock_guard<std::mutex> lock(mux);
+    mIsPredator = state;
+    return;
+}
+
+bool Actor::Behavior::GetPredatorState(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    return mIsPredator;
+}
+
+void Actor::Behavior::SetPreyState(bool state) {
+    std::lock_guard<std::mutex> lock(mux);
+    mIsPrey = state;
+    return;
+}
+
+bool Actor::Behavior::GetPreyState(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    return mIsPrey;
+}
+
 
 //
 // Memories
 
-void Actor::IdiosyncraticCharacteristics::AddMemory(std::string name, std::string memory) {
+void Actor::IdiosyncraticCharacteristics::Add(std::string name, std::string memory) {
     std::lock_guard<std::mutex> lock(mux);
     mMemories[name] = memory;
     return;
 }
 
-bool Actor::IdiosyncraticCharacteristics::RemoveMemory(std::string name) {
+bool Actor::IdiosyncraticCharacteristics::Remove(std::string name) {
     std::lock_guard<std::mutex> lock(mux);
     mMemories.erase(name);
     return false;
 }
 
-void Actor::IdiosyncraticCharacteristics::ClearMemories(void) {
+void Actor::IdiosyncraticCharacteristics::Clear(void) {
     std::lock_guard<std::mutex> lock(mux);
     mMemories.clear();
     return;
 }
 
-bool Actor::IdiosyncraticCharacteristics::CheckMemoryExists(std::string name) {
+bool Actor::IdiosyncraticCharacteristics::CheckExists(std::string name) {
     std::lock_guard<std::mutex> lock(mux);
     std::unordered_map<std::string, std::string>::iterator it = mMemories.find(name);
     if (it != mMemories.end()) 

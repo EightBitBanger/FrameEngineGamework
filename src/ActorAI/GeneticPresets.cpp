@@ -271,10 +271,12 @@ void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     targetActor->physical.SetSpeedYouth(1.1);
     targetActor->physical.SetSpeedMultiplier(1.3f);
     
-    targetActor->physical.SetYouthScale(0.2f);
-    targetActor->physical.SetAdultScale(0.8f);
+    targetActor->physical.SetYouthScale(0.5f);
+    targetActor->physical.SetAdultScale(0.9f);
     
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
+    
+    targetActor->behavior.SetPreyState(true);
     
     targetActor->biological.health = 40;
     
@@ -852,6 +854,8 @@ void GeneticPresets::ActorPresets::Bear(Actor* targetActor) {
     targetActor->behavior.SetHeightPreferenceMax(50.0f);
     targetActor->behavior.SetHeightPreferenceMin(20.0f);
     
+    targetActor->behavior.SetPredatorState(true);
+    
     targetActor->biological.health = 280;
     
     if (Random.Range(0, 100) > 55) 
@@ -1047,6 +1051,8 @@ void GeneticPresets::ActorPresets::Creepy(Actor* targetActor) {
     targetActor->physical.SetAdultScale(1.0f);
     
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
+    
+    targetActor->behavior.SetPredatorState(true);
     
     targetActor->biological.health = 50;
     

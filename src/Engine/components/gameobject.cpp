@@ -189,10 +189,8 @@ void GameObject::Deactivate(void) {
             Sound* sound = (Sound*)componentPtr->GetComponent();
             sound->isActive = false;
         }
-        
         continue;
     }
-    
     return;
 }
 
@@ -273,10 +271,8 @@ void GameObject::SetAngularAxisLockFactor(float x, float y, float z) {
 
 void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z, LayerMask layer) {
     if (mRigidBodyCache == nullptr) return;
-    
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
-    
     rp3d::Collider* collider = mRigidBodyCache->addCollider(boxShape, offsetTransform);
     collider->setCollideWithMaskBits( (unsigned short)layer );
     
@@ -285,10 +281,8 @@ void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, floa
 
 void GameObject::AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z, LayerMask layer) {
     if (mRigidBodyCache == nullptr) return;
-    
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
-    
     rp3d::Collider* collider = mRigidBodyCache->addCollider(capsuleShape, offsetTransform);
     collider->setCollideWithMaskBits( (unsigned short)layer );
     
@@ -325,16 +319,11 @@ void GameObject::AddCollider(ColliderTag* colliderTag, float x, float y, float z
 }
 
 void GameObject::AddCollider(MeshCollider* meshCollider, float x, float y, float z, LayerMask layer) {
-    
     if (mRigidBodyCache == nullptr) return;
-    
     rp3d::Transform offsetTransform;
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
-    
     rp3d::Collider* collider = mRigidBodyCache->addCollider( meshCollider->heightFieldShape, offsetTransform );
-    
     collider->setCollideWithMaskBits( (unsigned short)layer );
-    
     return;
 }
 

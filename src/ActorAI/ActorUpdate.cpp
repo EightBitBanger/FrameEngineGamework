@@ -27,8 +27,9 @@ void ActorSystem::Update(void) {
             // Cycle the animation states
             UpdateAnimationState(actor);
             
-            // Target tracking rotation
+            // Target tracking orientations
             UpdateTargetRotation(actor);
+            UpdateLookingRotation(actor);
             
             // Update mechanical / locomotion state
             UpdateActorMechanics(actor);
@@ -56,9 +57,9 @@ void ActorSystem::Update(void) {
             if (!actor->state.mIsActive) 
                 continue;
             
-            
-            actor->navigation.mDistance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
-            if (actor->navigation.mDistance > mActorUpdateDistance) 
+            // Cull updates for far away actors
+            float distance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
+            if (distance > mActorUpdateDistance) 
                 continue;
             
             // Update states

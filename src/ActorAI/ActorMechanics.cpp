@@ -12,7 +12,7 @@
 #define COOLDOWN_OBSERVATION_MAX                 100
 #define COOLDOWN_MOVEMENT_MAX                    100
 
-#define DISTANCE_MINIMUM_TARGET_REACHED          1.5f
+#define DISTANCE_MINIMUM_TARGET_REACHED          1.0f
 #define DISTANCE_MINIMUM_TARGET_BREEDING         1.0f
 
 
@@ -26,54 +26,37 @@ void ActorSystem::UpdateActorMechanics(Actor* actor) {
 }
 
 void ActorSystem::HandleWalkingMechanics(Actor* actor) {
-    //if (mMovementCoolDownCounter != 0) 
-    //    return;
     
-    // Stop moving but keep falling
-    if (!actor->state.mIsWalking) {
-        actor->navigation.mVelocity *= glm::vec3(0, 1, 0);
-        return;
-    }
-    
-    // Calculate forward velocity
-    glm::vec3 forward;
-    forward.x = cos( glm::radians( -(actor->navigation.mRotation.y - 90.0f) ) );
-    // TODO: Should actors fly???
-    //forward.y = tan( glm::radians( -(actor->mRotation.x - 90) ) );
-    forward.z = sin( glm::radians( -(actor->navigation.mRotation.y - 90) ) );
-    
-    float actorSpeed = actor->physical.mSpeed;
-    
-    glm::vec3 actorVelocity = forward * (actorSpeed * 0.1f) * 0.1f;
-    
-    // Check running speed multiplier
-    if (actor->state.mIsRunning) 
-        actorVelocity *= actor->physical.mSpeedMul;
-    
-    actor->navigation.mVelocity.x = actorVelocity.x;
-    actor->navigation.mVelocity.z = actorVelocity.z;
-    
-    // Check walking state
-    if (actor->state.current == NeuralState::flee) {
-        if (!actor->state.mIsWalking) {
+    switch (actor->state.mode) {
+        
+        case ActorState::Mode::Idle:
+            actor->state.mIsWalking = false;
+            actor->state.mIsRunning = false;
+            
+            // Cancel movement ignoring falling
+            actor->navigation.mVelocity *= glm::vec3(0, 1, 0);
+            break;
+            
+        case ActorState::Mode::MoveTo:
             actor->state.mIsWalking = true;
             
-            // Select a random destination if a target was not set
-            if (actor->navigation.mTargetActor == nullptr && 
-                actor->navigation.mTargetBreeding == nullptr) {
-                
-                actor->navigation.mTargetPoint.x = (Random.Range(0.0f, actor->behavior.mDistanceToWalk) - 
-                                                    Random.Range(0.0f, actor->behavior.mDistanceToWalk)) + 
-                                                    actor->navigation.mPosition.x;
-                
-                actor->navigation.mTargetPoint.z = (Random.Range(0.0f, actor->behavior.mDistanceToWalk) - 
-                                                    Random.Range(0.0f, actor->behavior.mDistanceToWalk)) + 
-                                                    actor->navigation.mPosition.z;
-            }
+            glm::vec3 forward(0);
+            forward.x = cos( glm::radians( -(actor->navigation.mRotation.y - 90.0f) ) );
+            forward.z = sin( glm::radians( -(actor->navigation.mRotation.y - 90) ) );
+            // TODO: Should actors fly???
+            //forward.y = tan( glm::radians( -(actor->mRotation.x - 90) ) );
             
-            // The physics system will update this position to the actors current height
-            actor->navigation.mTargetPoint.y = -100000.0f;
-        }
+            forward *= actor->physical.mSpeed * 0.01f;
+            
+            // Check running speed
+            if (actor->state.mIsRunning) 
+                forward *= actor->physical.mSpeedMul;
+            
+            // Apply directional velocity
+            actor->navigation.mVelocity.x = forward.x;
+            actor->navigation.mVelocity.z = forward.z;
+            break;
+            
     }
     
     return;
@@ -82,80 +65,60 @@ void ActorSystem::HandleWalkingMechanics(Actor* actor) {
 
 void ActorSystem::HandleTargettingMechanics(Actor* actor) {
     
-    // Check arrived at target point
-    if (glm::distance(actor->navigation.mTargetPoint, actor->navigation.mPosition) < DISTANCE_MINIMUM_TARGET_REACHED) {
-        actor->counters.mMovementCoolDownCounter = 0;
-        actor->state.mIsWalking = false;
-        actor->navigation.mTargetPoint = actor->navigation.mPosition;
-    }
-    
-    if (actor->navigation.mTargetActor != nullptr) {
-        
-        // Attack state
-        if (actor->state.current == NeuralState::attack) {
-            actor->state.mIsWalking = true;
+    switch (actor->state.current) {
             
-            // Track the target
-            actor->navigation.mTargetPoint.x = actor->navigation.mTargetActor->navigation.mPosition.x;
-            actor->navigation.mTargetPoint.z = actor->navigation.mTargetActor->navigation.mPosition.z;
+        case ActorState::State::Attack:
+            if (actor->navigation.mTargetActor == nullptr) 
+                break;
             
-            // Face away from the target
+            actor->navigation.mTargetPoint = actor->navigation.mTargetActor->navigation.mPosition;
+            actor->navigation.mTargetLook  = actor->navigation.mTargetActor->navigation.mPosition;
             actor->state.mIsFacing = true;
+            break;
             
-        }
-        
-        // Flee state
-        if (actor->state.current == NeuralState::flee) {
-            actor->state.mIsWalking = true;
-            
-            // Track the target
-            actor->navigation.mTargetPoint.x = actor->navigation.mTargetActor->navigation.mPosition.x;
-            actor->navigation.mTargetPoint.z = actor->navigation.mTargetActor->navigation.mPosition.z;
-            
-            // Face away from the target
+        case ActorState::State::Flee:
+            if (actor->navigation.mTargetActor == nullptr) 
+                break;
+            actor->navigation.mTargetPoint = actor->navigation.mTargetActor->navigation.mPosition;
+            actor->navigation.mTargetLook  = actor->navigation.mTargetActor->navigation.mPosition;
             actor->state.mIsFacing = false;
+            break;
             
-        }
-        
-        // Check arrived at target actor
-        if (glm::distance(actor->navigation.mTargetActor->navigation.mPosition, actor->navigation.mPosition) < DISTANCE_MINIMUM_TARGET_REACHED) {
-            actor->counters.mMovementCoolDownCounter = 0;
-            actor->state.mIsWalking = false;
-            actor->navigation.mTargetPoint = actor->navigation.mPosition;
-        }
-        
+        case ActorState::State::Focus:
+            if (actor->navigation.mTargetActor == nullptr) 
+                break;
+            actor->navigation.mTargetPoint = actor->navigation.mTargetActor->navigation.mPosition;
+            actor->navigation.mTargetLook  = actor->navigation.mTargetActor->navigation.mPosition;
+            actor->state.mIsFacing = true;
+            break;
+            
+        case ActorState::State::Look:
+            if (actor->navigation.mTargetActor == nullptr) 
+                break;
+            actor->navigation.mTargetLook = actor->navigation.mTargetActor->navigation.mPosition;
+            actor->state.mIsFacing = true;
+            break;
+            
     }
     
+    // Check destination was reached
+    if (glm::distance(actor->navigation.mTargetPoint, actor->navigation.mPosition) < DISTANCE_MINIMUM_TARGET_REACHED) 
+        actor->state.mode = ActorState::Mode::Idle;
     
+    
+    
+    // Check focal range
     /*
-    // Check target reached
-    if (glm::distance(actor->navigation.mTargetPoint, actor->navigation.mPosition) < DISTANCE_MINIMUM_TARGET_REACHED) {
-        actor->counters.mMovementCoolDownCounter = 0;
-        actor->state.mIsWalking = false;
-        actor->navigation.mTargetPoint = actor->navigation.mPosition;
-        
-        actor->state.current = NeuralState::idle;
+    if (actor->state.attack == ActorState::State::Focusing) {
+    if (glm::distance(actor->navigation.mPosition, mPlayerPosition) < actor->behavior.mDistanceToFocus) {
+        // Focus on player
+        actor->navigation.mTargetPoint.x = mPlayerPosition.x;
+        actor->navigation.mTargetPoint.z = mPlayerPosition.z;
+        actor->counters.mObservationCoolDownCounter = 10;
     }
-    
-    // Check arrived at target actor
-    if (actor->navigation.mTargetActor != nullptr) {
-        
-        if (glm::distance( actor->navigation.mTargetActor->navigation.mPosition, actor->navigation.mPosition ) < 1.5f) {
-            actor->state.mIsWalking = false;
-            actor->navigation.mTargetPoint = actor->navigation.mPosition;
-            
-            // Null the target if we are the target
-            if (actor->navigation.mTargetActor->navigation.mTargetActor == actor) 
-                actor->navigation.mTargetActor->navigation.mTargetActor = nullptr;
-            
-            actor->navigation.mTargetActor = nullptr;
-            
-            
-            
-        }
-    }
-    
     */
+    
+    
     return;
 }
 
@@ -201,12 +164,14 @@ void ActorSystem::HandleBreedingMechanics(Actor* actor) {
     return;
 }
 
+/*
+
 void ActorSystem::HandleTargetRandomPoint(Actor* actor) {
     
     if (actor->counters.mObservationCoolDownCounter > 0) 
         actor->counters.mObservationCoolDownCounter--;
     
-    /*
+    
     float randA = Random.Range(0.0f, actor->behavior.mDistanceToWalk);
     float randB = Random.Range(0.0f, actor->behavior.mDistanceToWalk);
     randA -= Random.Range(0.0f, actor->behavior.mDistanceToWalk);
@@ -216,11 +181,15 @@ void ActorSystem::HandleTargetRandomPoint(Actor* actor) {
     // The physics system will update this position to the actors current height
     actor->navigation.mTargetPoint.y = -100000.0f;
     actor->navigation.mTargetPoint.z = randB + actor->navigation.mPosition.z;
-    */
+    
     return;
 }
+*/
 
 void ActorSystem::HandleMovementMechanics(Actor* actor) {
+    
+    
+    
     /*
     // Height preference max below water suggests
     // the actor is an aquatic actor

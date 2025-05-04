@@ -36,10 +36,8 @@ std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
     genetics += Float.ToString( sourceActor->physical.GetAdultScale() ) + ":";
     
     // Personality
-    genetics += Float.ToString( sourceActor->behavior.GetChanceToFocus() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetChanceToWalk() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetChanceToAttack() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetChanceToFlee() ) + ":";
+    genetics += Float.ToString( sourceActor->behavior.GetPredatorState() ) + ":";
+    genetics += Float.ToString( sourceActor->behavior.GetPreyState() ) + ":";
     
     genetics += Float.ToString( sourceActor->behavior.GetDistanceToFocus() ) + ":";
     genetics += Float.ToString( sourceActor->behavior.GetDistanceToWalk() ) + ":";
@@ -108,6 +106,8 @@ std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
         genetics += Float.ToString( gene.doExpress ) + ",";
         genetics += Float.ToString( gene.doInverseAnimation ) + ",";
         genetics += Float.ToString( gene.doAnimationCycle ) + ",";
+        genetics += Float.ToString( gene.doAnimateAsHead ) + ",";
+        
         genetics += UInt.ToString( gene.type ) + "|";
         
         continue;
@@ -135,36 +135,35 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
     }
     
     // Personality
-    if (numberOfTraits > 17) {
-        targetActor->behavior.SetChanceToFocus(  String.ToFloat(traits[8]) );
-        targetActor->behavior.SetChanceToWalk(   String.ToFloat(traits[9]) );
-        targetActor->behavior.SetChanceToAttack( String.ToFloat(traits[10]) );
-        targetActor->behavior.SetChanceToFlee(   String.ToFloat(traits[11]) );
+    if (numberOfTraits > 15) {
         
-        targetActor->behavior.SetDistanceToFocus(  String.ToFloat(traits[12]) );
-        targetActor->behavior.SetDistanceToWalk(   String.ToFloat(traits[13]) );
-        targetActor->behavior.SetDistanceToAttack( String.ToFloat(traits[14]) );
-        targetActor->behavior.SetDistanceToFlee(   String.ToFloat(traits[15]) );
+        targetActor->behavior.SetPredatorState(       String.ToFloat(traits[8]) );
+        targetActor->behavior.SetPreyState(           String.ToFloat(traits[9]) );
         
-        targetActor->behavior.SetHeightPreferenceMin( String.ToFloat(traits[16]) );
-        targetActor->behavior.SetHeightPreferenceMax( String.ToFloat(traits[17]) );
+        targetActor->behavior.SetDistanceToFocus(     String.ToFloat(traits[10]) );
+        targetActor->behavior.SetDistanceToWalk(      String.ToFloat(traits[11]) );
+        targetActor->behavior.SetDistanceToAttack(    String.ToFloat(traits[12]) );
+        targetActor->behavior.SetDistanceToFlee(      String.ToFloat(traits[13]) );
+        
+        targetActor->behavior.SetHeightPreferenceMin( String.ToFloat(traits[14]) );
+        targetActor->behavior.SetHeightPreferenceMax( String.ToFloat(traits[15]) );
     }
     
     // Characteristics
-    if (numberOfTraits > 20) {
+    if (numberOfTraits > 18) {
         
         // Actor details
-        targetActor->genetics.SetGeneration( String.ToUint(traits[18]) );
+        targetActor->genetics.SetGeneration( String.ToUint(traits[16]) );
         
         // Sexuality
-        if (String.ToUint(traits[19]) == 0) {
+        if (String.ToUint(traits[17]) == 0) {
             targetActor->physical.SetSexualOrientation( true );  // Male
         } else {
             targetActor->physical.SetSexualOrientation( false ); // Female
         }
         
         // Adult age
-        targetActor->physical.mAgeAdult = String.ToFloat(traits[20]);
+        targetActor->physical.mAgeAdult = String.ToFloat(traits[18]);
         
     }
     
@@ -237,12 +236,13 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
             gene.expressionAge    = String.ToUint(  Codon[2] );
         }
         Codon = String.Explode( subGenes[8], ',' );
-        if (Codon.size() == 4) {
+        if (Codon.size() == 5) {
             if (Codon[0] == "0") {gene.doExpress          = false;}
             if (Codon[1] == "1") {gene.doInverseAnimation = true;}
             if (Codon[2] == "1") {gene.doAnimationCycle   = true;}
+            if (Codon[3] == "1") {gene.doAnimateAsHead    = true;}
             
-            gene.type = String.ToUint( Codon[3] );
+            gene.type = String.ToUint( Codon[4] );
             
         }
         

@@ -104,6 +104,7 @@ bool ActorSystem::RemoveActorFromSimulation(Actor* actorPtr) {
         mActiveActors.erase( mActiveActors.begin() + i);
         return true;
     }
+    
     return false;
 }
 

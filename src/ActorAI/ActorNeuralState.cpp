@@ -5,143 +5,125 @@
 #include <GameEngineFramework/Math/Random.h>
 
 void ActorSystem::UpdateActorState(Actor* actor) {
-    
+    // Tick up the actor age
     actor->physical.mAge++;
     
-    // Chance to select a random action
-    if (actor->state.current == NeuralState::idle) {
-        
-        //if (Random.Range(0.0f, 100.0f) < actor->behavior.mChanceToWalk)    actor->state.current = NeuralState::walk;
-        //if (Random.Range(0.0f, 100.0f) < actor->behavior.mChanceToFocus)   actor->state.current = NeuralState::focus;
-        
-        //if (Random.Range(0.0f, 100.0f) < actor->behavior.mChanceToAttack)  actor->state.current = NeuralState::attack;
-        //if (Random.Range(0.0f, 100.0f) < actor->behavior.mChanceToFlee)    actor->state.current = NeuralState::flee;
-        
-        
-        // TEST
-        if (mActors.Size() > 0) {
-            
-            unsigned int index = Random.Range(0, mActors.Size()-1);
-            Actor* targetActor = mActors[ index ];
-            
-            if (actor->navigation.mTargetActor == targetActor) 
-                return;
-            
-            actor->state.current = NeuralState::flee;
-            actor->navigation.mTargetActor = targetActor;
-            
-            targetActor->navigation.mTargetActor = actor;
-            targetActor->state.current = NeuralState::attack;
-            
-        }
-        
-    }
+    UpdateProximityList(actor);
     
-    
-    
-    switch (actor->state.current) {
+    if (actor->state.mode == ActorState::Mode::Idle) {
         
-        case NeuralState::idle:     HandleIdleState(actor); break;
-        case NeuralState::walk:     HandleWalkState(actor); break;
-        case NeuralState::focus:    HandleFocusState(actor); break;
-        case NeuralState::attack:   HandleAttackState(actor); break;
-        case NeuralState::flee:     HandleFleeState(actor); break;
-        
+        HandleIdleState(actor);
+        return;
     }
     
     return;
 }
 
-void ActorSystem::SwitchActorState(Actor* actor, NeuralState state) {
-    actor->state.current = state;
+void ActorSystem::UpdateProximityList(Actor* actor) {
+    // Select a random actor
+    Actor* targetActor = mActors[ Random.Range(0, mActors.Size()-1) ];
+    
+    // Actor cannot target itself
+    if (actor == targetActor) 
+        return;
+    
+    // Check actor focal range
+    if (glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition) > actor->behavior.mDistanceToFocus) 
+        return;
+    
+    // Check if the actor is already on the list
+    for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
+        if (actor->behavior.mProximityList[i] == targetActor) 
+            return;
+    }
+    
+    // Add the target to the list
+    actor->behavior.mProximityList.push_back(targetActor);
+    
     return;
 }
-
 
 void ActorSystem::HandleIdleState(Actor* actor) {
+    
+    HandleWalkState(actor);
+    
+    // Get a random target actor
+    for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
+        Actor* targetActor = actor->behavior.mProximityList[i];
+        
+        float distanceToTarget = glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition);
+        
+        HandleAttackState(actor, targetActor, distanceToTarget);
+        HandleFleeState(actor, targetActor, distanceToTarget);
+        
+        HandleFocusState(actor, targetActor, distanceToTarget);
+    }
+    
     
     return;
 }
 
 void ActorSystem::HandleWalkState(Actor* actor) {
     
-    //SwitchActorState(actor, NeuralState::idle);
-    
-    
-    /*
-    if (actor->navigation.mTargetPoint == actor->navigation.mPosition) 
-        HandleTargetRandomPoint(actor);
-    
-    if (actor->state.mIsWalking) 
+    return;
+}
+
+void ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance) {
+    // Actor must be a predator
+    if (!actor->behavior.mIsPredator) 
         return;
     
-    // Target height will be updated by the physics system.
-    // When this occurs, the height will be changed, triggering the
-    // actor to begin walking
-    if (actor->navigation.mTargetPoint.y != -100000.0f) {
-        
-        // Check outside prefered area to find the correct height range
-        if (actor->navigation.mTargetPoint.y > actor->behavior.mHeightPreferenceMax || 
-            actor->navigation.mTargetPoint.y < actor->behavior.mHeightPreferenceMin) {
-            
-            // Increment distance expansion
-            if (actor->counters.mMovementCoolDownCounter < 100) 
-                actor->counters.mMovementCoolDownCounter++;
-            actor->counters.mObservationCoolDownCounter++;
-            
-            if (actor->counters.mObservationCoolDownCounter == 10) {
-                actor->counters.mObservationCoolDownCounter = 0;
-                HandleTargetRandomPoint(actor);
-            }
-        }
-        
-        // Check within prefered range
-        HandleMovementMechanics(actor);
-    }
-    */
-    return;
-}
-
-void ActorSystem::HandleFocusState(Actor* actor) {
-    if (actor->counters.mObservationCoolDownCounter > 0) {
-        SwitchActorState(actor, NeuralState::idle);
+    // Target must be prey
+    if (!target->behavior.mIsPrey) 
         return;
-    }
     
-    // Check focal range
-    if (actor->navigation.mDistance < actor->behavior.mDistanceToFocus) {
-        // Focus on player
-        actor->navigation.mTargetPoint.x = mPlayerPosition.x;
-        actor->navigation.mTargetPoint.z = mPlayerPosition.z;
-        actor->counters.mObservationCoolDownCounter = 10;
-    } else {
-        // Focus on nearby actor
-        //if (actor->navigation.mTargetActor != nullptr) {
-        //    actor->navigation.mTargetPoint.x = actor->navigation.mTargetActor->navigation.mPosition.x;
-        //    actor->navigation.mTargetPoint.z = actor->navigation.mTargetActor->navigation.mPosition.z;
-        //}
-    }
+    // Check attack distance
+    if (distance > actor->behavior.GetDistanceToAttack()) 
+        return;
     
-    SwitchActorState(actor, NeuralState::idle);
-    return;
-}
-
-void ActorSystem::HandleAttackState(Actor* actor) {
+    // Attack the target
+    actor->state.mode    = ActorState::Mode::MoveTo;
+    actor->state.current = ActorState::State::Attack;
+    actor->navigation.mTargetActor = target;
     
     return;
 }
 
-void ActorSystem::HandleFleeState(Actor* actor) {
-    //if (actor->navigation.mTargetActor == nullptr) 
-    //    return;
+
+void ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
+    // Actor must be prey
+    if (!actor->behavior.mIsPrey) 
+        return;
     
-    //SwitchActorState(actor, NeuralState::walk);
+    // Target must be a predator
+    if (!target->behavior.mIsPredator) 
+        return;
+    
+    // Check flee distance
+    if (distance > actor->behavior.GetDistanceToFlee()) 
+        return;
+    
+    // Target should flee
+    actor->state.mode    = ActorState::Mode::MoveTo;
+    actor->state.current = ActorState::State::Flee;
+    actor->navigation.mTargetActor = target;
     
     return;
 }
 
-void ActorSystem::HandleDefendState(Actor* actor) {
+
+void ActorSystem::HandleFocusState(Actor* actor, Actor* target, float distance) {
+    return;
+    if (actor->state.current == ActorState::State::Attack || actor->state.current == ActorState::State::Flee) 
+        return;
+    
+    if (distance > actor->behavior.GetDistanceToFocus()) 
+        return;
+    
+    // Focus on the selected target
+    actor->state.mode    = ActorState::Mode::Idle;
+    actor->state.current = ActorState::State::Look;
+    actor->navigation.mTargetActor = target;
     
     return;
 }
-

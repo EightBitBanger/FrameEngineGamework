@@ -14,6 +14,7 @@ Gene::Gene() :
     expressionMax(1.0f),
     expressionAge(0),
     doExpress(true),
+    doAnimateAsHead(false),
     doAnimationCycle(false),
     doInverseAnimation(false),
     animationRange(15),

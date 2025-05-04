@@ -66,6 +66,18 @@ void ActorSystem::UpdateAnimation(glm::mat4& matrix, Actor* actor, unsigned int 
     
     float rotationLength = glm::length(baseRotation);
     
+    // Check head animation rotation
+    if (actor->genetics.mGenes[a].doAnimateAsHead) {
+        
+        matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].offset.x,
+                                                  actor->genetics.mGenes[a].offset.y,
+                                                  actor->genetics.mGenes[a].offset.z));
+        
+        float lookRotationLength = glm::length(actor->navigation.mLookAt);
+        if (lookRotationLength != 0.0f) 
+            matrix = glm::rotate(matrix, lookRotationLength, glm::normalize(actor->navigation.mLookAt));
+    }
+    
     // Check skip animation for this renderer
     if (!actor->genetics.mGenes[a].doAnimationCycle || !actor->state.mIsWalking) {
         
@@ -79,25 +91,19 @@ void ActorSystem::UpdateAnimation(glm::mat4& matrix, Actor* actor, unsigned int 
         return;
     }
     
-    // Rotate then translate for proper limb animations
-    
+    // Translate then rotate for proper limb animations
     if (rotationLength != 0.0f) {
-        
         matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x,
                                               actor->genetics.mGenes[a].position.y,
                                               actor->genetics.mGenes[a].position.z));
-        
         matrix = glm::rotate(matrix, rotationLength, glm::normalize(baseRotation));
         
         return;
     } else {
-        
         ApplyAnimationRotation(matrix, actor, a);
-        
         matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x,
-                                                actor->genetics.mGenes[a].position.y,
-                                                actor->genetics.mGenes[a].position.z));
-        
+                                                  actor->genetics.mGenes[a].position.y,
+                                                  actor->genetics.mGenes[a].position.z));
     }
     
     glm::vec4 animationFactor = glm::normalize(glm::vec4(actor->genetics.mGenes[a].animationAxis.x, 
@@ -105,13 +111,9 @@ void ActorSystem::UpdateAnimation(glm::mat4& matrix, Actor* actor, unsigned int 
                                                          actor->genetics.mGenes[a].animationAxis.z, 0));
     
     float animationMaxSwingRange = actor->genetics.mGenes[a].animationRange;
-    
     if (actor->state.mAnimation[a].w < 0) {
-        
         HandleAnimationSwingForward(actor, a, animationFactor, animationMaxSwingRange);
-        
     } else {
-        
         HandleAnimationSwingBackward(actor, a, animationFactor, animationMaxSwingRange);
     }
     
@@ -151,12 +153,15 @@ void ActorSystem::ApplyAnimationRotation(glm::mat4& matrix, Actor* actor, unsign
     glm::vec3 baseRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, 
                                        actor->genetics.mGenes[a].rotation.y, 
                                        actor->genetics.mGenes[a].rotation.z) + 0.0001f;
+    
     float rotationLength = glm::length(baseRotation);
     matrix = glm::rotate(matrix, rotationLength, glm::normalize(baseRotation));
-
+    
     float animationLength = glm::length(actor->state.mAnimation[a]);
     matrix = glm::rotate(matrix, glm::radians(animationLength), 
                          glm::normalize(glm::vec3(actor->state.mAnimation[a])));
+    
+    return;
 }
 
 void ActorSystem::EnsureNonZeroAnimationState(Actor* actor, unsigned int a) {
@@ -213,5 +218,18 @@ void ActorSystem::UpdateTargetRotation(Actor* actor) {
         actor->navigation.mRotation = fadeValue;
     }
     
+    return;
+}
+
+
+void ActorSystem::UpdateLookingRotation(Actor* actor) {
+    if (actor->navigation.mTargetLook == glm::vec3(0)) 
+        return;
+    
+    glm::vec3 position = actor->navigation.mPosition;
+    
+    float xx = position.x - actor->navigation.mTargetLook.x;
+    float zz = position.z - actor->navigation.mTargetLook.z;
+    actor->navigation.mLookAt.y = glm::degrees( glm::atan(xx, zz) ) + 180;
     return;
 }
