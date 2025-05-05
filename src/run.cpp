@@ -34,9 +34,9 @@ void ApplyGene(Actor* targetActor) {
     targetActor->physical.SetAdultAge(750);
     targetActor->physical.SetSeniorAge(10000);
     
-    targetActor->physical.SetSpeed(0.9f);
-    targetActor->physical.SetSpeedYouth(1.2f);
-    targetActor->physical.SetSpeedMultiplier(1.4f);
+    targetActor->physical.SetSpeed(1.3f);
+    targetActor->physical.SetSpeedYouth(1.1f);
+    targetActor->physical.SetSpeedMultiplier(1.15f);
     
     targetActor->physical.SetYouthScale(0.3f);
     targetActor->physical.SetAdultScale(1.0f);
