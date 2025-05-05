@@ -5,7 +5,9 @@ namespace ActorState {
 
 enum class Mode {
     Idle,
-    MoveTo
+    MoveTo,
+    WalkTo,
+    RunTo
 };
 
 enum class State {

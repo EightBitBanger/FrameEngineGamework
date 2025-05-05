@@ -142,7 +142,6 @@ private:
     void ApplyRotation(glm::mat4& matrix, Actor* actor, unsigned int a);
     void ApplyScaleByAge(glm::mat4& matrix, Actor* actor, unsigned int a);
     void UpdateTargetRotation(Actor* actor);
-    void UpdateLookingRotation(Actor* actor);
     
     // Genetics
     void UpdateActorGenetics(Actor* actor);

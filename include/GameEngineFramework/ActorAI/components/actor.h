@@ -96,11 +96,11 @@ public:
         glm::vec3 mRotation;     // Direction the actor is facing
         glm::vec3 mLookAt;       // Direction the head is facing
         
-        glm::vec3 mRotateTo;     // Target direction toward which the actor should rotate
-        glm::vec3 mTargetPoint;  // Point toward which the actor body should face
-        glm::vec3 mTargetLook;   // Point toward which the head should look
+        glm::vec3 mRotateTo;     // Where to rotate to
+        glm::vec3 mTargetPoint;  // Point to face
+        glm::vec3 mTargetLook;   // Point to look at
         
-        Actor* mTargetActor;     // Target actor in focus
+        Actor* mTargetActor;     // Target actor currently in focus
         
         std::mutex mux;
         
