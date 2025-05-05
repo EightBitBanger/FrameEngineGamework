@@ -211,6 +211,8 @@ if(BUILD_CORE_LIBRARY)
     "src/ActorAI/ActorSystem.cpp"
     "src/ActorAI/ActorUpdate.cpp"
     "src/ActorAI/ActorAnimation.cpp"
+    "src/ActorAI/ActorNeuralState.cpp"
+    "src/ActorAI/ActorMechanics.cpp"
     "src/ActorAI/ActorGenetics.cpp"
     "src/ActorAI/NeuralNetwork.cpp"
     "src/ActorAI/GeneticPresets.cpp"
