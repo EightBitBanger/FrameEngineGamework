@@ -45,7 +45,7 @@ void ActorSystem::UpdateProximityList(Actor* actor) {
 
 void ActorSystem::HandleIdleState(Actor* actor) {
     
-    HandleWalkState(actor);
+    //HandleWalkState(actor);
     
     // Get a random target actor
     for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
@@ -82,7 +82,7 @@ void ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance)
         return;
     
     // Attack the target
-    actor->state.mode    = ActorState::Mode::MoveTo;
+    actor->state.mode    = ActorState::Mode::RunTo;
     actor->state.current = ActorState::State::Attack;
     actor->navigation.mTargetActor = target;
     
@@ -104,7 +104,7 @@ void ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
         return;
     
     // Target should flee
-    actor->state.mode    = ActorState::Mode::MoveTo;
+    actor->state.mode    = ActorState::Mode::RunTo;
     actor->state.current = ActorState::State::Flee;
     actor->navigation.mTargetActor = target;
     
@@ -113,11 +113,7 @@ void ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
 
 
 void ActorSystem::HandleFocusState(Actor* actor, Actor* target, float distance) {
-    return;
     if (actor->state.current == ActorState::State::Attack || actor->state.current == ActorState::State::Flee) 
-        return;
-    
-    if (distance > actor->behavior.GetDistanceToFocus()) 
         return;
     
     // Focus on the selected target

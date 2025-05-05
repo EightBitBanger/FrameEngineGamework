@@ -29,7 +29,6 @@ void ActorSystem::Update(void) {
             
             // Target tracking orientations
             UpdateTargetRotation(actor);
-            UpdateLookingRotation(actor);
             
             // Update mechanical / locomotion state
             UpdateActorMechanics(actor);

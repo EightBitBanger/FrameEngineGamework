@@ -37,9 +37,14 @@ void ActorSystem::HandleWalkingMechanics(Actor* actor) {
             actor->navigation.mVelocity *= glm::vec3(0, 1, 0);
             break;
             
-        case ActorState::Mode::MoveTo:
+        case ActorState::Mode::RunTo:
+            actor->state.mIsWalking = true;
+            actor->state.mIsRunning = true;
+            
+        case ActorState::Mode::WalkTo:
             actor->state.mIsWalking = true;
             
+        case ActorState::Mode::MoveTo:
             glm::vec3 forward(0);
             forward.x = cos( glm::radians( -(actor->navigation.mRotation.y - 90.0f) ) );
             forward.z = sin( glm::radians( -(actor->navigation.mRotation.y - 90) ) );
@@ -64,46 +69,40 @@ void ActorSystem::HandleWalkingMechanics(Actor* actor) {
 
 
 void ActorSystem::HandleTargettingMechanics(Actor* actor) {
+    glm::vec3 position(0);
+    if (actor->navigation.mTargetActor != nullptr) 
+        position = actor->navigation.mTargetActor->navigation.mPosition;
     
     switch (actor->state.current) {
             
         case ActorState::State::Attack:
-            if (actor->navigation.mTargetActor == nullptr) 
-                break;
-            
-            actor->navigation.mTargetPoint = actor->navigation.mTargetActor->navigation.mPosition;
-            actor->navigation.mTargetLook  = actor->navigation.mTargetActor->navigation.mPosition;
+            actor->navigation.mTargetPoint = position;
+            actor->navigation.mTargetLook  = position;
             actor->state.mIsFacing = true;
             break;
             
         case ActorState::State::Flee:
-            if (actor->navigation.mTargetActor == nullptr) 
-                break;
-            actor->navigation.mTargetPoint = actor->navigation.mTargetActor->navigation.mPosition;
-            actor->navigation.mTargetLook  = actor->navigation.mTargetActor->navigation.mPosition;
+            actor->navigation.mTargetPoint = position;
+            actor->navigation.mTargetLook  = position;
             actor->state.mIsFacing = false;
             break;
             
         case ActorState::State::Focus:
-            if (actor->navigation.mTargetActor == nullptr) 
-                break;
-            actor->navigation.mTargetPoint = actor->navigation.mTargetActor->navigation.mPosition;
-            actor->navigation.mTargetLook  = actor->navigation.mTargetActor->navigation.mPosition;
+            actor->navigation.mTargetPoint = position;
+            actor->navigation.mTargetLook  = position;
             actor->state.mIsFacing = true;
             break;
             
         case ActorState::State::Look:
-            if (actor->navigation.mTargetActor == nullptr) 
-                break;
-            actor->navigation.mTargetLook = actor->navigation.mTargetActor->navigation.mPosition;
+            actor->navigation.mTargetLook = position;
             actor->state.mIsFacing = true;
             break;
             
     }
     
     // Check destination was reached
-    if (glm::distance(actor->navigation.mTargetPoint, actor->navigation.mPosition) < DISTANCE_MINIMUM_TARGET_REACHED) 
-        actor->state.mode = ActorState::Mode::Idle;
+    //if (glm::distance(actor->navigation.mTargetPoint, actor->navigation.mPosition) < DISTANCE_MINIMUM_TARGET_REACHED) 
+    //    actor->state.mode = ActorState::Mode::Idle;
     
     
     
