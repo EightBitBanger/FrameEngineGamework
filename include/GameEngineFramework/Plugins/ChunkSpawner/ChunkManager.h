@@ -247,19 +247,12 @@ private:
     // World generation functions
     
     void GenerateChunks(const glm::vec3 &playerPosition);
-    
     bool IsChunkFound(const glm::vec2 &chunkPosition);
     
     void GenerateChunk(const glm::vec2 &chunkPosition);
-    
     void DestroyChunks(const glm::vec3 &playerPosition);
-    void UpdateActors(const glm::vec3 &playerPosition);
     
     void HandleActorLifeCycle(GameObject* actorObject);
-    
-    void HandleAutoBreeding(Actor* actorPtr, unsigned int numberOfActors);
-    bool AttemptBreeding(unsigned int numberOfActors);
-    void CheckActorBreeding(Actor* actorPtr);
     
     void UpdateFogSettings(const glm::vec3 &playerPosition);
     

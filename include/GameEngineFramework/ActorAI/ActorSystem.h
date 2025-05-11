@@ -32,16 +32,8 @@ public:
     /// Destroy an actor.
     bool DestroyActor(Actor* actorPtr);
     
-    
-    /// Add an actor to the simulation.
-    bool AddActorToSimulation(Actor* actorPtr);
-    
-    /// Remove an actor from the simulation.
-    bool RemoveActorFromSimulation(Actor* actorPtr);
-    
     /// Return an actor from the simulation.
     Actor* GetActorFromSimulation(unsigned int index);
-    
     
     /// Set the player position in the simulation.
     void SetPlayerWorldPosition(glm::vec3 position);
@@ -104,6 +96,7 @@ public:
     /// Actor object destroyer callback
     void (*KillActor)(Actor*);
     
+    
 private:
     
     // Master update timer
@@ -115,39 +108,44 @@ private:
     void UpdateActorState(Actor* actor);
     void UpdateProximityList(Actor* actor);
     
-    void HandleIdleState(Actor* actor);
-    void HandleWalkState(Actor* actor);
-    void HandleAttackState(Actor* actor, Actor* target, float distance);
-    void HandleFleeState(Actor* actor, Actor* target, float distance);
-    void HandleFocusState(Actor* actor, Actor* target, float distance);
+    bool HandleIdleState(Actor* actor);
+    bool HandleWalkState(Actor* actor);
+    bool HandleAttackState(Actor* actor, Actor* target, float distance);
+    bool HandleFleeState(Actor* actor, Actor* target, float distance);
+    bool HandleFocusState(Actor* actor, Actor* target, float distance);
     
     // Mechanical
     void UpdateActorMechanics(Actor* actor);
     
-    void HandleWalkingMechanics(Actor* actor);
+    void HandleMovementMechanics(Actor* actor);
     void HandleTargettingMechanics(Actor* actor);
     void HandleBreedingMechanics(Actor* actor);
     
-    void HandleMovementMechanics(Actor* actor);
+    void HandleInflictDamage(Actor* actor, Actor* target);
+    void HandleVitality(Actor* actor);
+    void HandleCooldownCounters(Actor* actor);
+    glm::vec3 CalculateForwardVelocity(Actor* actor);
     
-    
-    // Animations
+    // Animation
     void UpdateAnimationState(Actor* actor);
+    
+    void UpdateAnimationBody(glm::mat4& matrix, Actor* actor, MeshRenderer* geneRenderer, unsigned int a);
+    void UpdateAnimationHead(glm::mat4& matrix, Actor* actor, MeshRenderer* geneRenderer, unsigned int a);
+    void UpdateAnimationGenetics(glm::mat4& matrix, Actor* actor, unsigned int a);
+    
     void EnsureNonZeroAnimationState(Actor* actor, unsigned int a);
     void ApplyAnimationRotation(glm::mat4& matrix, Actor* actor, unsigned int a);
-    void HandleAnimationSwingBackward(Actor* actor, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange);
-    void HandleAnimationSwingForward(Actor* actor, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange);
-    void UpdateAnimation(glm::mat4& matrix, Actor* actor, unsigned int a);
-    void ApplyOffsetFromCenter(glm::mat4& matrix, Actor* actor, unsigned int a);
-    void ApplyRotation(glm::mat4& matrix, Actor* actor, unsigned int a);
-    void ApplyScaleByAge(glm::mat4& matrix, Actor* actor, unsigned int a);
+    void UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned int a);
+    void HandleAnimationSwing(Actor* actor, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange, bool animationDirection);
     void UpdateTargetRotation(Actor* actor);
+    
     
     // Genetics
     void UpdateActorGenetics(Actor* actor);
     void ClearOldGeneticRenderers(Actor* actor);
     MeshRenderer* CreateMeshRendererForGene(Actor* actor, unsigned int geneIndex, Mesh* sourceMesh);
     void ExpressActorGenetics(Actor* actor);
+    void UpdateGarbageCollection(Actor* actor);
     
     // Current position of the player in the world
     glm::vec3 mPlayerPosition;
@@ -158,16 +156,12 @@ private:
     // Maximum world water level
     float mWorldWaterLevel;
     
-    
     // Threading
     std::thread* mActorSystemThread;
     std::mutex mux;
     
     // Object pools
     PoolAllocator<Actor> mActors;
-    
-    // List of active actors in the world
-    std::vector<Actor*> mActiveActors;
     
 };
 

@@ -18,31 +18,20 @@ class ENGINE_API Transform {
     
 public:
     
-    /// Position in world space.
-    glm::vec3 position;
-    /// Rotation in world space.
-    glm::quat rotation;
-    /// Scale in world space.
-    glm::vec3 scale;
+    glm::mat4 matrix;            // Transform matrix
+    glm::quat rotation;          // Rotation in world space.
+    glm::quat localRotation;     // Local rotation relative to the parent rotation.
     
-    /// Local translation relative to the parent translation.
-    glm::vec3 localPosition;
-    /// Local rotation relative to the parent rotation.
-    glm::quat localRotation;
-    /// Local scale relative to the parent scale.
-    glm::vec3 localScale;
+    glm::vec3 position;          // Position in world space.
+    glm::vec3 scale;             // Scale in world space.
     
-    /// Transform matrix
-    glm::mat4 matrix;
+    glm::vec3 localPosition;     // Local translation relative to the parent translation.
+    glm::vec3 localScale;        // Local scale relative to the parent scale.
     
-    /// Pointer to a parent transform.
-    Transform* parent;
+    Transform* parent;           // Pointer to a parent transform.
     
-    /// Should the rotation inherit from the parent transform
-    bool inheritParentRotation;
-    
-    /// Should the scale inherit from the parent transform
-    bool inheritParentScale;
+    bool inheritParentRotation;  // Should the rotation inherit from the parent transform
+    bool inheritParentScale;     // Should the scale inherit from the parent transform
     
     Transform();
     Transform(glm::vec3 init_position);

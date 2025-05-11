@@ -9,6 +9,7 @@
 
 
 class ENGINE_API MeshRenderer {
+    friend class RenderSystem;
     
 public:
     
@@ -50,6 +51,7 @@ public:
     
     MeshRenderer();
     
+    std::mutex mux;
 private:
     
     // Is this renderer being culled
@@ -58,9 +60,6 @@ private:
     // Bounding box area
     glm::vec3 mBoundingBoxMin;
     glm::vec3 mBoundingBoxMax;
-    
-    friend class RenderSystem;
-    
 };
 
 #endif

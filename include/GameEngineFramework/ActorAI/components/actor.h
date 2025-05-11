@@ -25,11 +25,12 @@ class ENGINE_API Actor {
 public:
     
     friend class ActorSystem;
-    friend class EngineSystemManager;
     friend class GeneticPresets;
+    friend class EngineSystemManager;
     
     // Flags
     bool isGarbage;     // Mark for internal destruction and garbage collection
+    bool isActive;      // Update the actor in the world
     
     // Name
     
@@ -39,13 +40,6 @@ public:
     std::string GetName(void);
     
     // State
-    
-    /// Set the active state of the actor.
-    void SetActive(bool active);
-    /// Get the active state of the actor.
-    bool GetActive(void);
-    
-    // Flags
     
     /// Set the flag to update the actors genetics.
     void RebuildPhenotype(void);
@@ -62,8 +56,8 @@ public:
         
         friend class Actor;
         friend class ActorSystem;
-        friend class EngineSystemManager;
         friend class GeneticPresets;
+        friend class EngineSystemManager;
         
     public:
         
@@ -94,7 +88,8 @@ public:
         glm::vec3 mVelocity;     // Movement vector
         glm::vec3 mPosition;     // Position of the actor in the world
         glm::vec3 mRotation;     // Direction the actor is facing
-        glm::vec3 mLookAt;       // Direction the head is facing
+        glm::vec3 mFacing;       // Direction the head is looking
+        glm::vec3 mLookAt;       // Direction the head should facing
         
         glm::vec3 mRotateTo;     // Where to rotate to
         glm::vec3 mTargetPoint;  // Point to face
@@ -113,8 +108,8 @@ public:
         
         friend class Actor;
         friend class ActorSystem;
-        friend class EngineSystemManager;
         friend class GeneticPresets;
+        friend class EngineSystemManager;
         
     public:
         
@@ -137,6 +132,26 @@ public:
         void SetDistanceToFlee(float distance);
         /// Get the distance to begin running from a predator actor if any are nearby.
         float GetDistanceToFlee(void);
+        
+        /// Distance to inflict damage on a target actors health.
+        void SetDistanceToInflict(float distance);
+        /// Distance to inflict damage on a target actors health.
+        float GetDistanceToInflict(void);
+        
+        /// Set the idle timeout after a successful attack.
+        void SetCooldownAttack(unsigned int ticks);
+        /// Get the attack cool down timeout.
+        unsigned int GetCooldownAttack(void);
+        
+        /// Set the focus state timeout before changing state.
+        void SetCooldownObserve(unsigned int ticks);
+        /// Get the observation cool down timeout.
+        unsigned int GetCooldownObserve(void);
+        
+        /// Set the movement state timeout before changing state.
+        void SetCooldownMove(unsigned int ticks);
+        /// Get the movement cool down timeout.
+        unsigned int GetCooldownMove(void);
         
         /// Set the minimum height preference when traveling.
         void SetHeightPreferenceMin(float height);
@@ -162,18 +177,23 @@ public:
         
     private:
         
-        bool mIsPredator;           // True = can attack prey   False = herbivore
-        bool mIsPrey;               // True = can be attacked   False = docile
+        bool mIsPredator;               // True = can attack prey   False = herbivore
+        bool mIsPrey;                   // True = can be attacked   False = docile
         
-        float mDistanceToFocus;     // Distance to focus on a near by actor
-        float mDistanceToWalk;      // Distance to travel when moving to a random position
-        float mDistanceToAttack;    // Distance to begin attacking a pray actor
-        float mDistanceToFlee;      // Distance to begin fleeing from a predator actor
+        float mDistanceToFocus;         // Distance to focus on a near by actor
+        float mDistanceToWalk;          // Distance to travel when moving to a random position
+        float mDistanceToAttack;        // Distance to begin attacking a pray actor
+        float mDistanceToFlee;          // Distance to begin fleeing from a predator actor
+        float mDistanceToInflict;       // Distance to register an attack on a target
         
-        float mHeightPreferenceMin; // Minimum world height this actor prefers to inhabit
-        float mHeightPreferenceMax; // Maximum world height this actor prefers to inhabit
+        unsigned int mCooldownAttack;   // Ticks to idle after a successful attack
+        unsigned int mCooldownObserve;  // Ticks to focus on a target before switching states
+        unsigned int mCooldownMove;     // Ticks to idle before moving randomly again
         
-        // List of near by actors that are within focal range
+        float mHeightPreferenceMin;     // Minimum world height this actor prefers to inhabit
+        float mHeightPreferenceMax;     // Maximum world height this actor prefers to inhabit
+        
+        // List of near by actors
         std::vector<Actor*> mProximityList;
         
         std::mutex mux;
@@ -187,8 +207,8 @@ public:
         
         friend class Actor;
         friend class ActorSystem;
-        friend class EngineSystemManager;
         friend class GeneticPresets;
+        friend class EngineSystemManager;
         
     public:
         
@@ -198,7 +218,6 @@ public:
         
     private:
         
-        bool mIsActive;
         bool mIsWalking;
         bool mIsRunning;
         bool mIsFacing;
@@ -219,8 +238,8 @@ public:
         
         friend class Actor;
         friend class ActorSystem;
-        friend class EngineSystemManager;
         friend class GeneticPresets;
+        friend class EngineSystemManager;
         
     public:
         
@@ -253,8 +272,8 @@ public:
         
         friend class Actor;
         friend class ActorSystem;
-        friend class EngineSystemManager;
         friend class GeneticPresets;
+        friend class EngineSystemManager;
         
     public:
         
@@ -293,20 +312,13 @@ public:
         
     private:
         
-        // Should the genetics be re constructed
-        bool mDoUpdateGenetics;
         
-        // Should the genetics be re-expressed
-        bool mDoReexpressGenetics;
+        bool mDoUpdateGenetics;       // Should the genetics be re constructed
+        bool mDoReexpressGenetics;    // Should the genetics be re-expressed
+        unsigned int mGeneration;     // Current position in the generational sequence over time
         
-        // Current position in the generational sequence over time
-        unsigned int mGeneration;
-        
-        // Genetic blueprints
-        std::vector<Gene> mGenes;
-        
-        // Phonetic expression
-        std::vector<Phen> mPhen;
+        std::vector<Gene> mGenes;     // Genetic blueprints
+        std::vector<Phen> mPhen;      // Phonetic expression
         
         // List of render components representing genetic expression
         std::vector<MeshRenderer*> mGeneticRenderers;
@@ -322,16 +334,20 @@ public:
         
         friend class Actor;
         friend class ActorSystem;
-        friend class EngineSystemManager;
         friend class GeneticPresets;
+        friend class EngineSystemManager;
         
     public:
         
+        /// Amount of health the actor currently has.
         float health;
+        /// How hungry the actor is 0-100.
         float hunger;
-        float immunity;
-        float energy;
-        float stress;
+        
+        /// Attack damage ability.
+        float strength;
+        /// Resistance to attack damage.
+        float defense;
         
         BiologicalSystem();
         
@@ -351,8 +367,8 @@ public:
         
         friend class Actor;
         friend class ActorSystem;
-        friend class EngineSystemManager;
         friend class GeneticPresets;
+        friend class EngineSystemManager;
         
     public:
         
@@ -396,8 +412,6 @@ public:
         /// Get the max adult scale from the actor.
         float GetAdultScale(void);
         
-        // Sexual orientation
-        
         /// Set the sexual orientation for reproduction.
         void SetSexualOrientation(bool orientation);
         
@@ -408,41 +422,20 @@ public:
         
     private:
         
-        // Number of ticks this actor has accumulated in its lifetime
-        unsigned long int mAge;
+        unsigned long int mAge;      // Number of ticks this actor has accumulated in its lifetime
+        float mAgeAdult;             // Age at which the actor is able to reproduce.
+        float mAgeSenior;            // Maximum Age at which the actor is considered a senior.
+        float mSpeed;                // Maximum speed this actor can travel
+        float mSpeedYouth;           // Maximum speed this actor can travel as a youth
+        float mSpeedMul;             // Running speed multiplier
+        float mSnapSpeed;            // Rotation speed when changing directions
+        float mYouthScale;           // Initial scale for this actor
+        float mAdultScale;           // Max scale for adult actor
         
-        // Age at which the actor is able to reproduce.
-        float mAgeAdult;
+        bool mSexualOrientation;     // Reproductive orientation  1=Male 0=Female
         
-        // Maximum Age at which the actor is considered a senior.
-        float mAgeSenior;
-        
-        // Maximum speed this actor can travel
-        float mSpeed;
-        
-        // Maximum speed this actor can travel as a youth
-        float mSpeedYouth;
-        
-        // Running speed multiplier
-        float mSpeedMul;
-        
-        // Rotation speed when changing directions
-        float mSnapSpeed;
-        
-        // Initial scale for this actor
-        float mYouthScale;
-        
-        // Max scale for adult actor
-        float mAdultScale;
-        
-        // Reproductive orientation  1=Male 0=Female
-        bool mSexualOrientation;
-        
-        // Collider position offset
-        glm::vec3 mColliderOffset;
-        
-        // Collider scale
-        glm::vec3 mColliderScale;
+        glm::vec3 mColliderOffset;   // Collider position offset
+        glm::vec3 mColliderScale;    // Collider scale
         
         std::mutex mux;
         
@@ -455,8 +448,8 @@ public:
         
         friend class Actor;
         friend class ActorSystem;
-        friend class EngineSystemManager;
         friend class GeneticPresets;
+        friend class EngineSystemManager;
         
     public:
         
@@ -472,15 +465,10 @@ public:
         
     private:
         
-        // Prevents actor from hyper focusing on its surroundings
-        // This will stop the actor from acting spastic
-        unsigned int mObservationCoolDownCounter;
-        
-        // Prevents actor movement lock when outside the prefered height range
-        unsigned int mMovementCoolDownCounter;
-        
-        // Prevents over breeding
-        unsigned int mBreedingCoolDownCounter;
+        unsigned int mObservationCoolDownCounter; // Prevents over focusing
+        unsigned int mMovementCoolDownCounter;    // Movement time out counter
+        unsigned int mAttackCoolDownCounter;      // Attacking time out counter
+        unsigned int mBreedingCoolDownCounter;    // Prevents over breeding
         
         std::mutex mux;
         
@@ -493,8 +481,8 @@ public:
         
         friend class Actor;
         friend class ActorSystem;
-        friend class EngineSystemManager;
         friend class GeneticPresets;
+        friend class EngineSystemManager;
         
     public:
         
@@ -520,10 +508,8 @@ public:
         
     private:
         
-        // User bit mask byte
         uint8_t mBitmask;
         
-        // User data pointers
         void* mUserDataA;
         void* mUserDataB;
         

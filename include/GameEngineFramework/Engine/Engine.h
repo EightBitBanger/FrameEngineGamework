@@ -228,17 +228,17 @@ public:
         
         void Enable(void);
         void Disable(void);
-        
         void Clear(void);
+        
         void Print(std::string text);
+        void WriteDialog(unsigned int index, std::string text);
         
         void ShiftUp(void);
-        
         bool RegisterCommand(std::string name, void(*function_ptr)(std::vector<std::string>));
-        
         void ConsoleReturnCallback(std::string& console_text);
         
         std::vector<Text*> textElements;
+        std::vector<Text*> textDialog;
         
     } console;
     
@@ -318,10 +318,6 @@ private:
         rp3d::BoxShape*  box = nullptr;
         
     };
-    
-    //
-    // Component stream
-    //
     
     void UpdateComponentStream(void);
     
