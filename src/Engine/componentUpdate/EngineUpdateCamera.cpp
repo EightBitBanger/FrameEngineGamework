@@ -1,7 +1,6 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateCamera(unsigned int index) {
-    
     // Update mouse looking
     if (mStreamBuffer[index].camera->useMouseLook) {
         

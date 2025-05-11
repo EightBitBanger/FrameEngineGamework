@@ -77,7 +77,9 @@ void ActorSystem::UpdateSendSignal(void) {
 }
 
 Actor* ActorSystem::CreateActor(void) {
-    return mActors.Create();
+    Actor* actorPtr = mActors.Create();
+    actorPtr->Reset();
+    return actorPtr;
 }
 
 bool ActorSystem::DestroyActor(Actor* actorPtr) {
@@ -85,37 +87,14 @@ bool ActorSystem::DestroyActor(Actor* actorPtr) {
     return mActors.Destroy(actorPtr);
 }
 
-bool ActorSystem::AddActorToSimulation(Actor* actorPtr) {
-    // Check already exists in the simulation
-    for (unsigned int i=0; i < mActiveActors.size(); i++) {
-        Actor* actor = mActiveActors[i];
-        if (actor == actorPtr) 
-            return false;
-    }
-    mActiveActors.push_back( actorPtr );
-    return true;
-}
-
-bool ActorSystem::RemoveActorFromSimulation(Actor* actorPtr) {
-    for (unsigned int i=0; i < mActiveActors.size(); i++) {
-        Actor* actor = mActiveActors[i];
-        if (actor != actorPtr) 
-            continue;
-        mActiveActors.erase( mActiveActors.begin() + i);
-        return true;
-    }
-    
-    return false;
-}
-
 Actor* ActorSystem::GetActorFromSimulation(unsigned int index) {
-    if (index < mActiveActors.size()) 
-        return mActiveActors[index];
+    if (index < mActors.Size()) 
+        return mActors[index];
     return nullptr;
 }
 
 unsigned int ActorSystem::GetNumberOfActors(void) {
-    return mActiveActors.size();
+    return mActors.Size();
 }
 
 Actor* ActorSystem::GetActor(unsigned int index) {
@@ -127,6 +106,18 @@ Actor* ActorSystem::GetActor(unsigned int index) {
 void ActorSystem::SetActorUpdateDistance(float distance) {
     std::lock_guard<std::mutex> lock(mux);
     mActorUpdateDistance = distance;
+    return;
+}
+
+
+void ActorSystem::UpdateGarbageCollection(Actor* actor) {
+    if (!actor->isGarbage) 
+        return;
+    
+    // Destroy the renderers
+    ClearOldGeneticRenderers(actor);
+    
+    actor->Reset();
     return;
 }
 

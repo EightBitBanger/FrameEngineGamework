@@ -140,10 +140,6 @@ void GameObject::Activate(void) {
             Light* light = (Light*)componentPtr->GetComponent();
             light->isActive = true;
         }
-        if (type == Components.Actor) {
-            Actor* actor = (Actor*)componentPtr->GetComponent();
-            actor->SetActive(true);
-        }
         if (type == Components.Sound) {
             Sound* sound = (Sound*)componentPtr->GetComponent();
             sound->isActive = true;
@@ -180,10 +176,6 @@ void GameObject::Deactivate(void) {
         if (type == Components.Light) {
             Light* light = (Light*)componentPtr->GetComponent();
             light->isActive = false;
-        }
-        if (type == Components.Actor) {
-            Actor* actor = (Actor*)componentPtr->GetComponent();
-            actor->SetActive(false);
         }
         if (type == Components.Sound) {
             Sound* sound = (Sound*)componentPtr->GetComponent();

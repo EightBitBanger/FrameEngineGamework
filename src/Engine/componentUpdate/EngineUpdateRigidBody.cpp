@@ -2,7 +2,6 @@
 
 void EngineSystemManager::UpdateRigidBody(unsigned int index) {
     
-    // Get the rigid body transform
     rp3d::Transform bodyTransform = mStreamBuffer[index].rigidBody->getTransform();
     rp3d::Vector3 bodyPosition = bodyTransform.getPosition();
     rp3d::Quaternion quaterion = bodyTransform.getOrientation();

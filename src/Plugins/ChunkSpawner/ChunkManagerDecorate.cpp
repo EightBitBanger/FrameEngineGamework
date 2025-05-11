@@ -440,7 +440,6 @@ void ChunkManager::Decorate(Chunk& chunk) {
                 if ((unsigned int)Random.Range(0, 10000) < decor.density) {
                     
                     Actor* actor = AI.SpawnActor();
-                    AI.AddActorToSimulation(actor);
                     actor->navigation.SetTargetPoint(from);
                     
                     GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();

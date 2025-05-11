@@ -11,8 +11,6 @@ void ChunkManager::Update(void) {
     
     UpdateFogSettings(playerPosition);
     
-    UpdateActors(playerPosition);
-    
     DestroyChunks(playerPosition);
     
     GenerateChunks(playerPosition);
@@ -81,6 +79,7 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
             GenerateChunk(chunkPos);
         }
     }
+    return;
 }
 
 bool ChunkManager::IsChunkFound(const glm::vec2 &chunkPosition) {
@@ -115,6 +114,7 @@ void ChunkManager::GenerateChunk(const glm::vec2 &chunkPosition) {
     
     staticRenderer->mesh->Load();
     chunks.push_back(chunk);
+    return;
 }
 
 void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
@@ -150,163 +150,6 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
             continue;
         }
     }
-}
-
-
-void ChunkManager::UpdateActors(const glm::vec3 &playerPosition) {
-    /*
-    unsigned int numberOfActors = AI.GetNumberOfActiveActors();
-    
-    if (numberOfActors == 0) 
-        return;
-    
-    GameObject* actorObject = actors[mActorIndex];
-    Actor* actorPtr = actorObject->GetComponent<Actor>();
-    
-    if (actorObject->isActive) {
-        
-        HandleActorLifeCycle(actorObject);
-        
-        HandleAutoBreeding(actorPtr, numberOfActors);
-        
-        CheckActorBreeding(actorPtr);
-        
-    }
-    
-    mActorIndex = (mActorIndex + 1) % numberOfActors;
-    */
-    return;
-}
-
-
-
-void ChunkManager::HandleActorLifeCycle(GameObject* actorObject) {
-    /*
-    Actor* actorPtr = actorObject->GetComponent<Actor>();
-    
-    // Check actor death
-    if (actorPtr->biological.health < 0) 
-        AI.KillActor(actorPtr);
-    */
-    return;
-}
-
-// Check actor interaction
-
-// Breeding
-
-void ChunkManager::HandleAutoBreeding(Actor* actorPtr, unsigned int numberOfActors) {
-    /*
-    if (world.doAutoBreeding && actors.size() < 2000 && actors.size() > 1) {
-        
-        if (mBreedingCoolDown > 0) 
-            mBreedingCoolDown--;
-        
-        if (mBreedingCoolDown == 0) {
-            
-            mBreedingCoolDown = 20;
-            
-            for (unsigned int i=0; i < 8; i++) 
-                AttemptBreeding(numberOfActors);
-        }
-    }
-    */
-    return;
-}
-
-bool ChunkManager::AttemptBreeding(unsigned int numberOfActors) {
-    /*
-    GameObject* actorObjectA = actors[Random.Range(0, numberOfActors)];
-    GameObject* actorObjectB = actors[Random.Range(0, numberOfActors)];
-    
-    Actor* actorA = actorObjectA->GetComponent<Actor>();
-    Actor* actorB = actorObjectB->GetComponent<Actor>();
-    
-    // Check must be active
-    if (!actorObjectA->isActive || !actorObjectB->isActive) 
-        return false;
-    
-    // Check actors cannot be the same
-    if (actorObjectA == actorObjectB) 
-        return false;
-    
-    // Name must match
-    if (actorA->GetName() != actorB->GetName()) 
-        return false;
-    
-    // Check breeding cool down counter
-    if (actorA->counters.GetCoolDownBreeding() > 0 || actorB->counters.GetCoolDownBreeding() > 0) 
-        return false;
-    
-    // Check avoid homosexual pair
-    if (actorA->physical.GetSexualOrientation() == actorB->physical.GetSexualOrientation()) 
-        return false;
-    
-    glm::vec3 posA = actorObjectA->GetPosition();
-    glm::vec3 posB = actorObjectB->GetPosition();
-    
-    // Check maximum distance
-    if (glm::distance(posA, posB) > 80.0f) 
-        return false;
-    
-    // Check age is adult
-    if (actorA->physical.GetAge() < actorA->physical.GetAdultAge() || 
-        actorB->physical.GetAge() < actorB->physical.GetAdultAge()) 
-        return false;
-    
-    // Finally, select the pair for breeding
-    actorA->navigation.SetBreedWithActor(actorB);
-    actorB->navigation.SetBreedWithActor(actorA);
-    
-    // Allow some cool down time, allow extra cool down time
-    // for females, pregnancy time out
-    if (actorA->physical.GetSexualOrientation() == false) 
-    {actorA->counters.SetCoolDownBreeding(400);} else 
-    {actorA->counters.SetCoolDownBreeding(50);}
-    
-    if (actorB->physical.GetSexualOrientation() == false) 
-    {actorB->counters.SetCoolDownBreeding(400);} else 
-    {actorB->counters.SetCoolDownBreeding(50);}
-    */
-    return true;
-}
-
-
-void ChunkManager::CheckActorBreeding(Actor* actorPtr) {
-    
-    /*
-    
-    Actor* breedTarget = actorPtr->navigation.GetBreedWithActor();
-    
-    if (breedTarget != nullptr) {
-        glm::vec3 posA = actorPtr->navigation.GetPosition();
-        glm::vec3 posB = breedTarget->navigation.GetPosition();
-        
-        if (glm::distance(posA, posB) < 1.5f) {
-            
-            glm::vec3 spawnPoint;
-            
-            // Spawn next to the female
-            if (actorPtr->physical.GetSexualOrientation() == false) spawnPoint = posA;
-            if (breedTarget->physical.GetSexualOrientation() == false) spawnPoint = posB;
-            
-            GameObject* newChild = SpawnActor(spawnPoint.x, spawnPoint.y, spawnPoint.z);
-            Actor* newChildActor = newChild->GetComponent<Actor>();
-            
-            unsigned long int newAge = Random.Range(0, 100);
-            
-            newChildActor->physical.SetAge(newAge);
-            
-            newChildActor->SetName(actorPtr->GetName());
-            AI.genomes.BlendGenomes(actorPtr, breedTarget, newChildActor);
-            
-            newChildActor->ReexpressPhenotype();
-            
-            actorPtr->navigation.SetBreedWithActor(nullptr);
-            breedTarget->navigation.SetBreedWithActor(nullptr);
-        }
-    }
-    */
     return;
 }
 
@@ -331,6 +174,7 @@ void ChunkManager::UpdateFogSettings(const glm::vec3 &playerPosition) {
         fogWater->fogColorEnd = Colors.blue;
         
     }
+    return;
 }
 
 

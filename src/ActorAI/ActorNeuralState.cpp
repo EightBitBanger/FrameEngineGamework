@@ -8,118 +8,125 @@ void ActorSystem::UpdateActorState(Actor* actor) {
     // Tick up the actor age
     actor->physical.mAge++;
     
-    UpdateProximityList(actor);
-    
-    if (actor->state.mode == ActorState::Mode::Idle) {
-        
+    if (actor->state.mode == ActorState::Mode::Idle) 
         HandleIdleState(actor);
-        return;
-    }
     
     return;
 }
 
-void ActorSystem::UpdateProximityList(Actor* actor) {
-    // Select a random actor
-    Actor* targetActor = mActors[ Random.Range(0, mActors.Size()-1) ];
-    
-    // Actor cannot target itself
-    if (actor == targetActor) 
-        return;
-    
-    // Check actor focal range
-    if (glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition) > actor->behavior.mDistanceToFocus) 
-        return;
-    
-    // Check if the actor is already on the list
-    for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
-        if (actor->behavior.mProximityList[i] == targetActor) 
-            return;
-    }
-    
-    // Add the target to the list
-    actor->behavior.mProximityList.push_back(targetActor);
-    
-    return;
-}
-
-void ActorSystem::HandleIdleState(Actor* actor) {
-    
-    //HandleWalkState(actor);
-    
-    // Get a random target actor
+bool ActorSystem::HandleIdleState(Actor* actor) {
+    // Check proximity list for near by actors to interact with
     for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
         Actor* targetActor = actor->behavior.mProximityList[i];
         
+        // Check to remove the actor from the list
+        if (targetActor->isGarbage || !targetActor->isActive) {
+            actor->behavior.mProximityList.erase( actor->behavior.mProximityList.begin() + i );
+            break;
+        }
+        
+        // Check for interaction with near by actors
         float distanceToTarget = glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition);
         
-        HandleAttackState(actor, targetActor, distanceToTarget);
-        HandleFleeState(actor, targetActor, distanceToTarget);
+        if (HandleAttackState(actor, targetActor, distanceToTarget)) 
+            return true;
         
-        HandleFocusState(actor, targetActor, distanceToTarget);
+        if (HandleFleeState(actor, targetActor, distanceToTarget)) 
+            return true;
+        
+        if (Random.Range(0, 100) > 50) {
+            if (HandleFocusState(actor, targetActor, distanceToTarget)) 
+                return true;
+        }
+        
+        if (actor->counters.mMovementCoolDownCounter == 0) 
+            if (Random.Range(0, 100) > 50) 
+                if (HandleWalkState(actor)) 
+                    return true;
+        
     }
     
-    
-    return;
+    return true;
 }
 
-void ActorSystem::HandleWalkState(Actor* actor) {
+bool ActorSystem::HandleWalkState(Actor* actor) {
+    if (actor->state.current == ActorState::State::Attack || 
+        actor->state.current == ActorState::State::Flee) 
+        return false;
     
-    return;
+    actor->navigation.mTargetActor = nullptr;
+    
+    actor->state.current = ActorState::State::None;
+    actor->state.mode    = ActorState::Mode::MoveRandom;
+    
+    return true;
 }
 
-void ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance) {
+bool ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance) {
+    // Attack cool down
+    if (actor->counters.mAttackCoolDownCounter > 0) 
+        return false;
+    
+    // Ignore if currently observing
+    if (actor->counters.mObservationCoolDownCounter > 0) 
+        return false;
+    
     // Actor must be a predator
     if (!actor->behavior.mIsPredator) 
-        return;
+        return false;
     
     // Target must be prey
     if (!target->behavior.mIsPrey) 
-        return;
+        return false;
     
     // Check attack distance
     if (distance > actor->behavior.GetDistanceToAttack()) 
-        return;
+        return false;
     
     // Attack the target
     actor->state.mode    = ActorState::Mode::RunTo;
     actor->state.current = ActorState::State::Attack;
     actor->navigation.mTargetActor = target;
     
-    return;
+    return true;
 }
 
 
-void ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
+bool ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
     // Actor must be prey
     if (!actor->behavior.mIsPrey) 
-        return;
+        return false;
     
     // Target must be a predator
     if (!target->behavior.mIsPredator) 
-        return;
+        return false;
     
     // Check flee distance
     if (distance > actor->behavior.GetDistanceToFlee()) 
-        return;
+        return false;
     
     // Target should flee
     actor->state.mode    = ActorState::Mode::RunTo;
     actor->state.current = ActorState::State::Flee;
     actor->navigation.mTargetActor = target;
     
-    return;
+    return true;
 }
 
 
-void ActorSystem::HandleFocusState(Actor* actor, Actor* target, float distance) {
+bool ActorSystem::HandleFocusState(Actor* actor, Actor* target, float distance) {
     if (actor->state.current == ActorState::State::Attack || actor->state.current == ActorState::State::Flee) 
-        return;
+        return false;
+    
+    // Observation cool down
+    if (actor->counters.mObservationCoolDownCounter > 0) 
+        return false;
     
     // Focus on the selected target
     actor->state.mode    = ActorState::Mode::Idle;
     actor->state.current = ActorState::State::Look;
     actor->navigation.mTargetActor = target;
     
-    return;
+    actor->counters.mObservationCoolDownCounter = actor->behavior.GetCooldownObserve();
+    return true;
 }

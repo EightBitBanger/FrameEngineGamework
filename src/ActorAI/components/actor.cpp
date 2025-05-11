@@ -6,18 +6,22 @@ extern RenderSystem   Renderer;
 
 Actor::Actor() : 
     isGarbage(false),
+    isActive(false),
     mName("")
 {
 }
 
 void Actor::Reset(void) {
+    isGarbage = false;
+    isActive = false;
     mName = "";
     
     // Navigation
     navigation.mVelocity      = glm::vec3(0);
     navigation.mPosition      = glm::vec3(0);
     navigation.mRotation      = glm::vec3(0);
-    navigation.mLookAt        = glm::vec3(0, 0, 0);
+    navigation.mFacing        = glm::vec3(0);
+    navigation.mLookAt        = glm::vec3(0);
     
     navigation.mRotateTo      = glm::vec3(0);
     navigation.mTargetPoint   = glm::vec3(0);
@@ -26,20 +30,24 @@ void Actor::Reset(void) {
     
     // Behavior
     behavior.mDistanceToFocus      = 10.0f;
-    behavior.mDistanceToWalk       = 30.0f;
-    behavior.mDistanceToAttack     = 30.0f;
-    behavior.mDistanceToFlee       = 20.0f;
+    behavior.mDistanceToWalk       = 20.0f;
+    behavior.mDistanceToAttack     = 10.0f;
+    behavior.mDistanceToFlee       = 8.0f;
+    behavior.mDistanceToInflict    = 1.0f;
+    
+    behavior.mCooldownAttack       = 8;
+    behavior.mCooldownObserve      = 20;
+    behavior.mCooldownMove         = 20;
+    
     behavior.mHeightPreferenceMin  = 0.0f;
     behavior.mHeightPreferenceMax  = 1000.0f;
     behavior.mProximityList.clear();
     
     // State
     state.mode          = ActorState::Mode::Idle;
-    state.mIsActive     = true;
     state.mIsWalking    = false;
     state.mIsRunning    = false;
     state.mIsFacing     = true;
-    state.mAnimation.clear();
     
     // Idiosyncrasies
     memories.Clear();
@@ -48,16 +56,12 @@ void Actor::Reset(void) {
     genetics.mDoUpdateGenetics     = false;
     genetics.mDoReexpressGenetics  = false;
     genetics.mGeneration           = 0;
-    genetics.mGenes.clear();
-    genetics.mPhen.clear();
     
     // Biological
-    biological.health    = 100.0f;
+    biological.health    = 10.0f;
     biological.hunger    = 0.0f;
-    biological.immunity  = 0.0f;
-    biological.energy    = 0.0f;
-    biological.stress    = 0.0f;
-    biological.mBiologics.clear();
+    biological.defense   = 0.0f;
+    biological.strength  = 1.0f;
     
     // Physical
     physical.mAge            = 0;
@@ -67,8 +71,8 @@ void Actor::Reset(void) {
     physical.mSpeedYouth     = 0.8f;
     physical.mSpeedMul       = 1.3f;
     physical.mSnapSpeed      = 0.1f;
-    physical.mYouthScale     = 0.3f;
-    physical.mAdultScale     = 1.3f;
+    physical.mYouthScale     = 0.5f;
+    physical.mAdultScale     = 1.0f;
     physical.mSexualOrientation = false;
     physical.mColliderOffset = glm::vec3(0);
     physical.mColliderScale  = glm::vec3(1);
@@ -91,33 +95,38 @@ Actor::NavigationSystem::NavigationSystem() :
     mVelocity(glm::vec3(0)),
     mPosition(glm::vec3(0)),
     mRotation(glm::vec3(0)),
-    mLookAt(glm::vec3(0, 0, 0)),
+    mFacing(glm::vec3(0)),
+    mLookAt(glm::vec3(0)),
     mRotateTo(glm::vec3(0)),
     mTargetPoint(glm::vec3(0)),
-    mTargetLook(glm::vec3(0, 0, 0)),
+    mTargetLook(glm::vec3(0)),
     mTargetActor(nullptr)
 {
 }
 
 Actor::Behavior::Behavior() : 
-    mIsPredator       (false),
-    mIsPrey           (false),
-    mDistanceToFocus  (10),
-    mDistanceToWalk   (30),
-    mDistanceToAttack (30),
-	mDistanceToFlee   (20),
+    mIsPredator(false),
+    mIsPrey(false),
+    mDistanceToFocus(0),
+    mDistanceToWalk(0),
+    mDistanceToAttack(0),
+	mDistanceToFlee(0),
+    mDistanceToInflict(0),
     
-    mHeightPreferenceMin(0.0f),
-	mHeightPreferenceMax(1000)
+    mCooldownAttack(0),
+    mCooldownObserve(0),
+    mCooldownMove(0),
+    
+    mHeightPreferenceMin(0),
+	mHeightPreferenceMax(0)
 {
 }
 
 Actor::State::State() : 
     mode(ActorState::Mode::Idle),
-    mIsActive(true),
     mIsWalking(false),
     mIsRunning(false),
-    mIsFacing(true)
+    mIsFacing(false)
 {
 }
 
@@ -127,17 +136,17 @@ Actor::IdiosyncraticCharacteristics::IdiosyncraticCharacteristics()
 
 Actor::PhysicalAttributes::PhysicalAttributes() : 
     mAge(0),
-    mAgeAdult(1000),
-    mAgeSenior(50000),
-    mSpeed(1.5f),
-    mSpeedYouth(0.3f),
-    mSpeedMul(1.3f),
-    mSnapSpeed(0.1f),
-    mYouthScale(0.3f),
-    mAdultScale(1.3f),
+    mAgeAdult(0),
+    mAgeSenior(0),
+    mSpeed(0),
+    mSpeedYouth(0),
+    mSpeedMul(0),
+    mSnapSpeed(0),
+    mYouthScale(1),
+    mAdultScale(1),
     mSexualOrientation(false),
     mColliderOffset(glm::vec3(0)),
-    mColliderScale(glm::vec3(1))
+    mColliderScale(glm::vec3(0))
 {
 }
 
@@ -149,17 +158,17 @@ Actor::GeneticsSystem::GeneticsSystem() :
 }
 
 Actor::BiologicalSystem::BiologicalSystem() : 
-    health(100.0f),
+    health(0),
     hunger(0),
-    immunity(0),
-    energy(0),
-    stress(0)
+    strength(0),
+    defense(0)
 {
 }
 
 Actor::CooldownCounters::CooldownCounters() : 
     mObservationCoolDownCounter(0),
     mMovementCoolDownCounter(0),
+    mAttackCoolDownCounter(0),
     mBreedingCoolDownCounter(0)
 {
 }
@@ -175,18 +184,6 @@ Actor::UserVariables::UserVariables() :
 void Actor::SetName(std::string newName) {
     mName = newName;
     return;
-}
-
-void Actor::SetActive(bool active) {
-    state.mIsActive = active;
-    
-    for (unsigned int i=0; i < genetics.mGeneticRenderers.size(); i++) 
-        genetics.mGeneticRenderers[i]->isActive = active;
-    return;
-}
-
-bool Actor::GetActive(void) {
-    return state.mIsActive;
 }
 
 void Actor::RebuildPhenotype(void) {
@@ -287,6 +284,42 @@ void Actor::Behavior::SetDistanceToFlee(float distance) {
 float Actor::Behavior::GetDistanceToFlee(void) {
     std::lock_guard<std::mutex> lock(mux);
     return mDistanceToFlee;
+}
+
+void Actor::Behavior::SetDistanceToInflict(float distance) {
+    mDistanceToInflict = distance;
+    return;
+}
+
+float Actor::Behavior::GetDistanceToInflict(void) {
+    return mDistanceToInflict;
+}
+
+void Actor::Behavior::SetCooldownAttack(unsigned int ticks) {
+    mCooldownAttack = ticks;
+    return;
+}
+
+void Actor::Behavior::SetCooldownObserve(unsigned int ticks) {
+    mCooldownObserve = ticks;
+    return;
+}
+
+void Actor::Behavior::SetCooldownMove(unsigned int ticks) {
+    mCooldownMove = ticks;
+    return;
+}
+
+unsigned int Actor::Behavior::GetCooldownAttack(void) {
+    return mCooldownAttack;
+}
+
+unsigned int Actor::Behavior::GetCooldownObserve(void) {
+    return mCooldownObserve;
+}
+
+unsigned int Actor::Behavior::GetCooldownMove(void) {
+    return mCooldownMove;
 }
 
 void Actor::Behavior::SetHeightPreferenceMin(float height) {

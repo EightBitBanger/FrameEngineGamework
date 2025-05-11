@@ -5,68 +5,85 @@
 #include <GameEngineFramework/Math/Random.h>
 
 
-#define DECISION_CHANCE_TO_WALK                  1000
-#define DECISION_CHANCE_TO_CHANGE_DIRECTION      1000
-#define DECISION_CHANCE_TO_FOCUS_NEARBY          10000
-#define DECISION_CHANCE_TO_STOP_MOVING           10000
-#define COOLDOWN_OBSERVATION_MAX                 100
-#define COOLDOWN_MOVEMENT_MAX                    100
-
-#define DISTANCE_MINIMUM_TARGET_REACHED          1.0f
-#define DISTANCE_MINIMUM_TARGET_BREEDING         1.0f
-
-
 void ActorSystem::UpdateActorMechanics(Actor* actor) {
     
-    HandleWalkingMechanics(actor);
+    HandleMovementMechanics(actor);
     HandleTargettingMechanics(actor);
     HandleBreedingMechanics(actor);
+    
+    HandleVitality(actor);
+    
+    HandleCooldownCounters(actor);
     
     return;
 }
 
-void ActorSystem::HandleWalkingMechanics(Actor* actor) {
+void ActorSystem::HandleMovementMechanics(Actor* actor) {
+    glm::vec3 forward(0);
+    glm::vec3 position(0);
     
     switch (actor->state.mode) {
         
+        case ActorState::Mode::Sleeping:
         case ActorState::Mode::Idle:
             actor->state.mIsWalking = false;
             actor->state.mIsRunning = false;
             
-            // Cancel movement ignoring falling
+            // Cancel movement & ignore falling
             actor->navigation.mVelocity *= glm::vec3(0, 1, 0);
             break;
             
-        case ActorState::Mode::RunTo:
-            actor->state.mIsWalking = true;
-            actor->state.mIsRunning = true;
+        case ActorState::Mode::MoveRandom:
+            // Calculate random near by point
+            position.x = actor->navigation.mPosition.x;
+            position.z = actor->navigation.mPosition.z;
+            position.x += Random.Range(0.0f, actor->behavior.GetDistanceToWalk()) - Random.Range(0.0f, actor->behavior.GetDistanceToWalk());
+            position.z += Random.Range(0.0f, actor->behavior.GetDistanceToWalk()) - Random.Range(0.0f, actor->behavior.GetDistanceToWalk());
+            actor->navigation.mTargetPoint.x = position.x;
+            actor->navigation.mTargetPoint.y = 1000.0f;
+            actor->navigation.mTargetPoint.z = position.z;
             
-        case ActorState::Mode::WalkTo:
-            actor->state.mIsWalking = true;
+            actor->state.mIsWalking = false;
+            actor->state.mIsRunning = false;
+            
+            actor->navigation.mTargetLook  = position;
+            actor->state.mIsFacing = true;
+            // Shift mode to move to point
+            actor->state.mode = ActorState::Mode::MoveTo;
             
         case ActorState::Mode::MoveTo:
-            glm::vec3 forward(0);
-            forward.x = cos( glm::radians( -(actor->navigation.mRotation.y - 90.0f) ) );
-            forward.z = sin( glm::radians( -(actor->navigation.mRotation.y - 90) ) );
-            // TODO: Should actors fly???
-            //forward.y = tan( glm::radians( -(actor->mRotation.x - 90) ) );
-            
+            if (actor->navigation.mTargetPoint.y == 1000.0f) 
+                break;
+            forward = CalculateForwardVelocity(actor);
             forward *= actor->physical.mSpeed * 0.01f;
+            actor->state.mIsWalking = true;
+            actor->state.mode = ActorState::Mode::WalkTo;
+            break;
             
-            // Check running speed
-            if (actor->state.mIsRunning) 
-                forward *= actor->physical.mSpeedMul;
+        case ActorState::Mode::WalkTo:
+            if (actor->navigation.mTargetPoint.y == -1000.0f) 
+                break;
+            forward = CalculateForwardVelocity(actor);
+            forward *= actor->physical.mSpeed * 0.01f;
+            actor->state.mIsWalking = true;
+            actor->state.mIsRunning = false;
+            break;
             
-            // Apply directional velocity
-            actor->navigation.mVelocity.x = forward.x;
-            actor->navigation.mVelocity.z = forward.z;
+        case ActorState::Mode::RunTo:
+            if (actor->navigation.mTargetPoint.y == -1000.0f) 
+                break;
+            forward = CalculateForwardVelocity(actor);
+            forward *= actor->physical.mSpeed * 0.01f;
+            forward *= actor->physical.mSpeedMul;
+            actor->state.mIsWalking = true;
+            actor->state.mIsRunning = true;
             break;
             
     }
     
+    actor->navigation.mVelocity = forward;
     return;
 }
-
 
 void ActorSystem::HandleTargettingMechanics(Actor* actor) {
     glm::vec3 position(0);
@@ -76,20 +93,27 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
     switch (actor->state.current) {
             
         case ActorState::State::Attack:
-            actor->navigation.mTargetPoint = position;
+            actor->navigation.mTargetPoint.x = position.x;
+            actor->navigation.mTargetPoint.z = position.z;
             actor->navigation.mTargetLook  = position;
             actor->state.mIsFacing = true;
+            
+            // Inflict attack damage
+            if (actor->navigation.mTargetActor) 
+                HandleInflictDamage(actor, actor->navigation.mTargetActor);
             break;
             
         case ActorState::State::Flee:
-            actor->navigation.mTargetPoint = position;
-            actor->navigation.mTargetLook  = position;
+            actor->navigation.mTargetPoint.x = position.x;
+            actor->navigation.mTargetPoint.z = position.z;
+            actor->navigation.mTargetLook = position;
             actor->state.mIsFacing = false;
             break;
             
         case ActorState::State::Focus:
-            actor->navigation.mTargetPoint = position;
-            actor->navigation.mTargetLook  = position;
+            actor->navigation.mTargetPoint.x = position.x;
+            actor->navigation.mTargetPoint.z = position.z;
+            actor->navigation.mTargetLook = position;
             actor->state.mIsFacing = true;
             break;
             
@@ -100,23 +124,56 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
             
     }
     
-    // Check destination was reached
-    //if (glm::distance(actor->navigation.mTargetPoint, actor->navigation.mPosition) < DISTANCE_MINIMUM_TARGET_REACHED) 
-    //    actor->state.mode = ActorState::Mode::Idle;
-    
-    
-    
-    // Check focal range
-    /*
-    if (actor->state.attack == ActorState::State::Focusing) {
-    if (glm::distance(actor->navigation.mPosition, mPlayerPosition) < actor->behavior.mDistanceToFocus) {
-        // Focus on player
-        actor->navigation.mTargetPoint.x = mPlayerPosition.x;
-        actor->navigation.mTargetPoint.z = mPlayerPosition.z;
-        actor->counters.mObservationCoolDownCounter = 10;
+    // Check position arrived
+    if (actor->navigation.mTargetActor == nullptr) {
+        
+        if (glm::distance(actor->navigation.mPosition, actor->navigation.mTargetPoint) < actor->behavior.GetDistanceToInflict()) {
+            actor->state.mode = ActorState::Mode::Idle;
+            actor->state.current = ActorState::State::None;
+            
+            actor->counters.mMovementCoolDownCounter = actor->behavior.mCooldownMove;
+        }
     }
-    */
     
+    return;
+}
+
+void ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
+    if (glm::distance(actor->navigation.mTargetPoint, actor->navigation.mPosition) > actor->behavior.mDistanceToInflict) 
+        return;
+    
+    actor->state.mode = ActorState::Mode::Idle;
+    actor->counters.mAttackCoolDownCounter = actor->behavior.GetCooldownAttack();
+    
+    // Check if the target defense is greater them my strength
+    if (target->biological.defense >= actor->biological.strength) 
+        return;
+    
+    target->biological.health -= actor->biological.strength - target->biological.defense;
+    
+    return;
+}
+
+void ActorSystem::HandleVitality(Actor* actor) {
+    
+    // Check death
+    if (actor->biological.health <= 0.0f) {
+        actor->isActive = false;
+        actor->isGarbage = true;
+    }
+    
+    return;
+}
+
+void ActorSystem::HandleCooldownCounters(Actor* actor) {
+    if (actor->counters.mMovementCoolDownCounter > 0) 
+        actor->counters.mMovementCoolDownCounter--;
+    
+    if (actor->counters.mAttackCoolDownCounter > 0) 
+        actor->counters.mAttackCoolDownCounter--;
+    
+    if (actor->counters.mObservationCoolDownCounter > 0) 
+        actor->counters.mObservationCoolDownCounter--;
     
     return;
 }
@@ -163,71 +220,71 @@ void ActorSystem::HandleBreedingMechanics(Actor* actor) {
     return;
 }
 
-/*
 
-void ActorSystem::HandleTargetRandomPoint(Actor* actor) {
-    
-    if (actor->counters.mObservationCoolDownCounter > 0) 
-        actor->counters.mObservationCoolDownCounter--;
-    
-    
-    float randA = Random.Range(0.0f, actor->behavior.mDistanceToWalk);
-    float randB = Random.Range(0.0f, actor->behavior.mDistanceToWalk);
-    randA -= Random.Range(0.0f, actor->behavior.mDistanceToWalk);
-    randB -= Random.Range(0.0f, actor->behavior.mDistanceToWalk);
-    
-    actor->navigation.mTargetPoint.x = randA + actor->navigation.mPosition.x;
-    // The physics system will update this position to the actors current height
-    actor->navigation.mTargetPoint.y = -100000.0f;
-    actor->navigation.mTargetPoint.z = randB + actor->navigation.mPosition.z;
-    
-    return;
+
+glm::vec3 ActorSystem::CalculateForwardVelocity(Actor* actor) {
+    glm::vec3 forward(0);
+    forward.x = cos( glm::radians( -(actor->navigation.mRotation.y - 90.0f) ) );
+    forward.z = sin( glm::radians( -(actor->navigation.mRotation.y - 90.0f) ) );
+    // TODO: Should actors fly???
+    //forward.y = tan( glm::radians( -(actor->mRotation.x - 90) ) );
+    return forward;
 }
-*/
 
-void ActorSystem::HandleMovementMechanics(Actor* actor) {
+
+
+void ActorSystem::UpdateProximityList(Actor* actor) {
     
-    
-    
-    /*
-    // Height preference max below water suggests
-    // the actor is an aquatic actor
-    bool isAquatic = actor->behavior.mHeightPreferenceMax < mWorldWaterLevel;
-    
-    if (actor->navigation.mTargetPoint.y > actor->behavior.mHeightPreferenceMax && 
-        actor->navigation.mTargetPoint.y < actor->behavior.mHeightPreferenceMin) 
-        return;
-    
-    if (!isAquatic) {
+    // Check if any actor should be dropped from the list
+    for (int i = actor->behavior.mProximityList.size() - 1; i >= 0; --i) {
+        Actor* actorPtr = actor->behavior.mProximityList[i];
         
-        // Terrestrial
-        if (actor->navigation.mTargetPoint.y > mWorldWaterLevel) {
-            actor->state.mIsWalking = true;
-            actor->counters.mMovementCoolDownCounter = 0;
+        // Check actor focal range
+        if (glm::distance(actor->navigation.mPosition, actorPtr->navigation.mPosition) > actor->behavior.mDistanceToFocus) {
+            actor->behavior.mProximityList.erase(actor->behavior.mProximityList.begin() + i);
+            continue;
         }
         
-        // Check under water, navigate to higher ground
-        if (actor->navigation.mPosition.y < mWorldWaterLevel && 
-            actor->navigation.mTargetPoint.y > actor->navigation.mPosition.y) {
-            actor->state.mIsWalking = true;
-            actor->counters.mMovementCoolDownCounter = 0;
-        }
-        
-    } else {
-        
-        // Aquatic
-        if (actor->navigation.mTargetPoint.y < mWorldWaterLevel) {
-            actor->state.mIsWalking = true;
-            actor->counters.mMovementCoolDownCounter = 0;
-        }
-        
-        // Check above water, navigate to lower ground
-        if (actor->navigation.mPosition.y > mWorldWaterLevel && actor->navigation.mTargetPoint.y < actor->navigation.mPosition.y) {
-            actor->state.mIsWalking = true;
-            actor->counters.mMovementCoolDownCounter = 0;
+        // Check actor has been disabled or destroyed
+        if (actorPtr->isGarbage) {
+            actor->behavior.mProximityList.erase(actor->behavior.mProximityList.begin() + i);
+            continue;
         }
     }
-    */
+    
+    // Limit list size
+    if (actor->behavior.mProximityList.size() > 10) 
+        return;
+    
+    unsigned int index = Random.Range(0, mActors.Size()-1);
+    if (index >= mActors.Size()) 
+        return;
+    
+    // Select a random actor
+    Actor* targetActor = mActors[ index ];
+    if (targetActor == nullptr) 
+        return;
+    
+    // Check bad actor
+    if (targetActor->isGarbage) 
+        return;
+    
+    // Actor cannot target itself
+    if (targetActor == actor) 
+        return;
+    
+    // Check actor focal range
+    if (glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition) > actor->behavior.mDistanceToFocus) 
+        return;
+    
+    // Check if the actor is already on the list
+    for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
+        if (actor->behavior.mProximityList[i] == targetActor) 
+            return;
+    }
+    
+    // Add the target to the list
+    actor->behavior.mProximityList.push_back(targetActor);
+    
     return;
 }
-

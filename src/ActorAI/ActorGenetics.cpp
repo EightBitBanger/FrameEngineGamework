@@ -5,7 +5,6 @@
 #include <GameEngineFramework/Math/Random.h>
 
 void ActorSystem::UpdateActorGenetics(Actor* actor) {
-    
     if (!actor->genetics.mDoUpdateGenetics)
         return;
     actor->genetics.mDoUpdateGenetics = false;
@@ -16,18 +15,18 @@ void ActorSystem::UpdateActorGenetics(Actor* actor) {
     bool sexualOrientation = actor->physical.GetSexualOrientation();
     
     for (unsigned int a = 0; a < numberOfGenes; a++) {
-        
         // Check should express
         if (!actor->genetics.mGenes[a].doExpress)
             continue;
-        
-        MeshRenderer* newRenderer = CreateMeshRendererForGene(actor, a, baseMesh);
         
         // Check offset attachment
         if (actor->genetics.mGenes[a].attachmentIndex != 0) {
             unsigned int attachmentIndex = actor->genetics.mGenes[a].attachmentIndex - 1;
             actor->genetics.mGenes[a].offset = actor->genetics.mGenes[attachmentIndex].offset;
         }
+        
+        MeshRenderer* newRenderer = CreateMeshRendererForGene(actor, a, baseMesh);
+        newRenderer->isActive = true;
         
         glm::vec4 orientation = glm::vec4(Transform().rotation.w, Transform().rotation.x, Transform().rotation.y, Transform().rotation.z);
         actor->genetics.mGeneticRenderers.push_back(newRenderer);
@@ -47,7 +46,6 @@ void ActorSystem::UpdateActorGenetics(Actor* actor) {
 }
 
 MeshRenderer* ActorSystem::CreateMeshRendererForGene(Actor* actor, unsigned int geneIndex, Mesh* sourceMesh) {
-    
     MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
     newRenderer->isActive = false;
     
@@ -73,7 +71,6 @@ MeshRenderer* ActorSystem::CreateMeshRendererForGene(Actor* actor, unsigned int 
 }
 
 void ActorSystem::ClearOldGeneticRenderers(Actor* actor) {
-    
     for (unsigned int a = 0; a < actor->genetics.mGeneticRenderers.size(); a++) {
         MeshRenderer* geneRenderer = actor->genetics.mGeneticRenderers[a];
         sceneMain->RemoveMeshRendererFromSceneRoot(geneRenderer, RENDER_QUEUE_GEOMETRY);
@@ -83,13 +80,13 @@ void ActorSystem::ClearOldGeneticRenderers(Actor* actor) {
     actor->genetics.mGeneticRenderers.clear();
     actor->genetics.mPhen.clear();
     actor->state.mAnimation.clear();
+    actor->biological.mBiologics.clear();
     return;
 }
 
 
 // Express an actors genetics by calculating the phenotypic expression from its genome as well as its environment and state
 void ActorSystem::ExpressActorGenetics(Actor* actor) {
-    
     if (!actor->genetics.mDoReexpressGenetics)
         return;
     actor->genetics.mDoReexpressGenetics = false;

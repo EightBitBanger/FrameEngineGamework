@@ -7,6 +7,7 @@
 extern Logger Log;
 extern ActorSystem AI;
 extern NumberGeneration Random;
+extern EngineSystemManager Engine;
 extern MathCore Math;
 
 extern bool isActorThreadActive;
@@ -17,12 +18,16 @@ extern int tickCounter;
 
 
 void ActorSystem::Update(void) {
+    std::lock_guard<std::mutex> (Engine.sceneMain->mux);
     
     // Update animation states (Runs hot!)
     if (mAnimationTimer.Update()) {
-        unsigned int numberOfActors = mActiveActors.size();
+        unsigned int numberOfActors = mActors.Size();
         for (unsigned int i = 0; i < numberOfActors; i++) {
-            Actor* actor = mActiveActors[i];
+            Actor* actor = mActors[i];
+            
+            if (actor->isGarbage || !actor->isActive) 
+                continue;
             
             // Cycle the animation states
             UpdateAnimationState(actor);
@@ -38,7 +43,7 @@ void ActorSystem::Update(void) {
     
     // Update AI states
     if (mMainTimer.Update()) {
-        unsigned int numberOfActors = mActiveActors.size();
+        unsigned int numberOfActors = mActors.Size();
         if (numberOfActors == 0) 
             return;
         
@@ -52,8 +57,15 @@ void ActorSystem::Update(void) {
                 break;
             }
             
-            Actor* actor = mActiveActors[actorCounter++];
-            if (!actor->state.mIsActive) 
+            Actor* actor = mActors[actorCounter];
+            actorCounter++;
+            
+            // Check garbage actors
+            UpdateGarbageCollection(actor);
+            
+            UpdateProximityList(actor);
+            
+            if (actor->isGarbage || !actor->isActive) 
                 continue;
             
             // Cull updates for far away actors

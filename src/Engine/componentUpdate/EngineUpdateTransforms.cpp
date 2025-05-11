@@ -1,7 +1,6 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateTransformationChains(void) {
-    
     for (unsigned int i = 0; i < mStreamSize; i++) {
         
         Transform* current = mStreamBuffer[i].transform;
@@ -30,6 +29,5 @@ void EngineSystemManager::UpdateTransformationChains(void) {
                           glm::toMat4(currentRotation) *
                           glm::scale(glm::mat4(1), currentScale);
     }
-    
     return;
 }

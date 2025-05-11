@@ -92,7 +92,6 @@ void WeatherSystem::Initiate(void) {
     mSkyMaterial->diffuse = Colors.dkgray;
     mSkyMaterial->ambient = Colors.black;
     
-    
     // World fog
     
     mFogWorld = Renderer.CreateFog();

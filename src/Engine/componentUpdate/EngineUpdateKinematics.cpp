@@ -17,7 +17,7 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
     glm::vec3 actorTarget = mStreamBuffer[index].actor->navigation.mTargetPoint;
     
     rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
-    rp3d::Vector3 currentPosition = transform.getPosition();
+    rp3d::Vector3 physicsPosition = transform.getPosition();
     
     // Check not on ground
     Hit hit;
@@ -36,63 +36,24 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
         } else {
             
             actorPosition.y = hit.point.y;
-            currentPosition.y = hit.point.y;
+            physicsPosition.y = hit.point.y;
         }
-        
-        // Ground detected under actor - Clear color indicator
-        unsigned int numberOfRenderers = mStreamBuffer[index].actor->genetics.GetNumberOfMeshRenderers();
-        for (unsigned int i=0; i < numberOfRenderers; i++) {
-            MeshRenderer* geneRenderer = mStreamBuffer[index].actor->genetics.GetMeshRendererAtIndex(i);
-            if (geneRenderer != nullptr) {
-                Material* actorMaterial = geneRenderer->material;
-                if (actorMaterial !=nullptr) 
-                    actorMaterial->ambient = Colors.white;
-            }
-        }
-        
-    } else {
-        
-        // No ground detected under actor - Apply dark color indicator
-        actorVelocity = glm::vec3(0, 0, 0);
-        unsigned int numberOfRenderers = mStreamBuffer[index].actor->genetics.GetNumberOfMeshRenderers();
-        for (unsigned int i=0; i < numberOfRenderers; i++) {
-            MeshRenderer* geneRenderer = mStreamBuffer[index].actor->genetics.GetMeshRendererAtIndex(i);
-            if (geneRenderer == nullptr) 
-                continue;
-            
-            Material* actorMaterial = geneRenderer->material;
-            if (actorMaterial !=nullptr) 
-                actorMaterial->ambient = Colors.black;
-            
-        }
-        
         
     }
     
-    // Get actor target height
-    actorTarget.y = 1000;
-    
-    if (Physics.Raycast(actorTarget, glm::vec3(0, -1, 0), 2000, hit, LayerMask::Ground)) {
-        
-        actorTarget.y = hit.point.y;
-        
-    } else {
-        
-        actorTarget.y = 0.0f;
+    // Get height at the target point
+    if (actorTarget.y == 1000.0f) {
+        actorTarget.y = 1000;
+        if (Physics.Raycast(actorTarget, glm::vec3(0, -1, 0), 2000, hit, LayerMask::Ground)) 
+            actorTarget.y = hit.point.y;
     }
     
     // Move the actor into position
-    transform.setPosition(currentPosition);
+    transform.setPosition(physicsPosition);
     mStreamBuffer[index].rigidBody->setTransform(transform);
     
-    // Factor in youth speed multiplier
-    if (mStreamBuffer[index].actor->physical.mAge < 1000) 
-        actorVelocity *= mStreamBuffer[index].actor->physical.mSpeedYouth;
-    
     // Check max velocity
-    actorVelocity.x = glm::clamp(actorVelocity.x, -1.0f, 1.0f);
-    actorVelocity.y = glm::clamp(actorVelocity.y, -1.0f, 1.0f);
-    actorVelocity.z = glm::clamp(actorVelocity.z, -1.0f, 1.0f);
+    actorVelocity = glm::clamp(actorVelocity, -1.0f, 1.0f);
     
     // Apply force velocity
     mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, 

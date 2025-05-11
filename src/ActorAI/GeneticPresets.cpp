@@ -52,12 +52,14 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     
     // Limb colors
     
-    // Red tint
+    // Yellow/reddish tint
     int race = Random.Range(0, 100);
     
     if (race >= 0 && race < 5) {
-        headColor *= Colors.Lerp(headColor, Colors.orange, 0.6);
-        limbColor *= Colors.Lerp(limbColor, Colors.orange, 0.6);
+        headColor *= Colors.Lerp(headColor, Colors.orange, 0.3);
+        limbColor *= Colors.Lerp(limbColor, Colors.orange, 0.3);
+        headColor *= Colors.Lerp(headColor, Colors.red, 0.1);
+        limbColor *= Colors.Lerp(limbColor, Colors.red, 0.1);
         race = -1;
     }
     
@@ -267,9 +269,9 @@ void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     targetActor->physical.SetAdultAge( 400 );
     targetActor->physical.SetSeniorAge( 4000 );
     
-    targetActor->physical.SetSpeed(1.2);
-    targetActor->physical.SetSpeedYouth(1.1);
-    targetActor->physical.SetSpeedMultiplier(1.3f);
+    targetActor->physical.SetSpeed(1.0);
+    targetActor->physical.SetSpeedYouth(0.9);
+    targetActor->physical.SetSpeedMultiplier(1.2f);
     
     targetActor->physical.SetYouthScale(0.5f);
     targetActor->physical.SetAdultScale(0.9f);

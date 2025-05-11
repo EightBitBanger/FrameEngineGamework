@@ -43,7 +43,6 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 unsigned long long int age = String.ToLongUint( lineArray[3] );
                 
                 Actor* actor = AI.SpawnActor();
-                AI.AddActorToSimulation(actor);
                 actor->navigation.SetTargetPoint(pos);
                 
                 GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();

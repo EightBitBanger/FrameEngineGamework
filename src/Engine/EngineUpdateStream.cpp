@@ -1,6 +1,7 @@
 #include <GameEngineFramework/Engine/Engine.h>
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
+
 void EngineSystemManager::UpdateComponentStream(void) {
     
     unsigned int numberOfGameObjects = mGameObjects.Size();
@@ -26,7 +27,6 @@ void EngineSystemManager::UpdateComponentStream(void) {
         
         // Update the active state of associated components
         bool activeState = gameObject->isActive && shouldRender;
-        if (gameObject->mActorCache != nullptr)          gameObject->mActorCache->SetActive(activeState);
         if (gameObject->mMeshRendererCache != nullptr)   gameObject->mMeshRendererCache->isActive = activeState;
         if (gameObject->mLightCache != nullptr)          gameObject->mLightCache->isActive = activeState;
         if (gameObject->mRigidBodyCache != nullptr)      gameObject->mRigidBodyCache->setIsActive(activeState);
@@ -80,4 +80,6 @@ void EngineSystemManager::UpdateComponentStream(void) {
         mDataStreamIndex++;
         mStreamSize = std::max(mStreamSize, mDataStreamIndex);
     }
+    
 }
+

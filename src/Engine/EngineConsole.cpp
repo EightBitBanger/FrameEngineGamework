@@ -87,6 +87,13 @@ void EngineSystemManager::CommandConsole::Print(std::string text) {
     return;
 }
 
+void EngineSystemManager::CommandConsole::WriteDialog(unsigned int index, std::string text) {
+    textDialog[index]->isActive = true;
+    textDialog[index]->color.a = 3.0f;
+    textDialog[index]->text = text;
+    return;
+}
+
 void EngineSystemManager::CommandConsole::Clear(void) {
     input->text = '\0';
     return;

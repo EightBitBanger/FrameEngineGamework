@@ -37,7 +37,6 @@ void EngineSystemManager::Initiate() {
     
     // Initiate console 
     for (unsigned int i=0; i < 32; i++) {
-        
         Text* text = UI.CreateText();
         text->x = 5;
         text->y = Platform.windowArea.h - (90 + (16 * i));
@@ -48,6 +47,19 @@ void EngineSystemManager::Initiate() {
         
         console.textElements.push_back(text);
         
+    }
+    
+    // Initiate dialog
+    for (unsigned int i=0; i < 20; i++) {
+        Text* text = UI.CreateText();
+        text->x = 5;
+        text->y = 16 * i;
+        
+        text->text = "";
+        text->color.a = 3.0f;
+        text->doFadeout = true;
+        
+        console.textDialog.push_back(text);
     }
     
     // Return callback

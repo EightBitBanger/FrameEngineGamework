@@ -52,7 +52,7 @@ void EngineSystemManager::Update(void) {
     UpdateTransformationChains();
     
     // Update attached components
-    
+    std::lock_guard<std::mutex>(sceneMain->mux);
     for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].rigidBody    != nullptr)  UpdateRigidBody(i);
     for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].meshRenderer != nullptr)  UpdateMeshRenderer(i);
     for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].camera       != nullptr)  UpdateCamera(i);
@@ -62,8 +62,4 @@ void EngineSystemManager::Update(void) {
     
     return;
 }
-
-
-
-
 
