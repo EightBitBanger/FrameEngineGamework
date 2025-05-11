@@ -136,7 +136,6 @@ Actor* SpawnActorCallback(void) {
     
     // Finalize actor
     Actor* actor = actorObject->GetComponent<Actor>();
-    AI.AddActorToSimulation(actor);
     
     // Reference to associated game object
     actor->user.SetUserDataA( (void*)actorObject );
@@ -145,11 +144,8 @@ Actor* SpawnActorCallback(void) {
 }
 
 void KillActorCallback(Actor* actor) {
-    
-    AI.RemoveActorFromSimulation(actor);
-    
-    Engine.Destroy<GameObject>( (GameObject*)actor->user.GetUserDataA() );
-    
+    actor->isGarbage = true;
+    actor->isActive = false;
     return;
 }
 
@@ -183,14 +179,12 @@ void Start() {
     //Engine.EnableConsole();
     //Engine.EnableConsoleFadeOutTextElements();
     
-    
     // User plug-in initiation
     GameWorld.Initiate();
     
     Weather.Initiate();
     
     Particle.Initiate();
-    
     
     AI.SpawnActor = SpawnActorCallback;
     AI.KillActor  = KillActorCallback;
@@ -203,7 +197,6 @@ void Start() {
     //Engine.EnableProfiler();
     
     //Engine.EnablePhysicsDebugRenderer();
-    
     
     
     

@@ -2,10 +2,9 @@
 
 
 MeshRenderer::MeshRenderer() : 
-    isActive(true),
+    isActive(false),
     mesh(nullptr),
     material(nullptr),
-    transform(Transform()),
     distance(0),
     mDoCulling(false),
     mBoundingBoxMin(glm::vec3(-1.0f, -1.0f, -1.0f)),

@@ -15,6 +15,8 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
     if (!currentEntity->material->mDoShadowPass)
         return false;
     
+    std::lock_guard<std::mutex>(currentEntity->mux);
+    
     // Calculate shadow distance
     float shadowDistance = glm::distance( eye, currentEntity->transform.position );
     

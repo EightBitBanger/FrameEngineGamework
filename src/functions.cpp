@@ -160,7 +160,6 @@ void FuncSummon(std::vector<std::string> args) {
         randomOffset.z += Random.Range(0, 20) - Random.Range(0, 20);
         
         Actor* actor = AI.SpawnActor();
-        AI.AddActorToSimulation(actor);
         actor->navigation.SetTargetPoint(glm::vec3(randomOffset.x, randomOffset.y, randomOffset.z));
         
         GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();

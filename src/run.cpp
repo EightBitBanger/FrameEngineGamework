@@ -7,6 +7,15 @@
 
 
 void ApplyGene(Actor* targetActor) {
+    
+    targetActor->physical.SetAge( Random.Range(900, 1000) );
+    AI.genomes.presets.Human(targetActor);
+    
+    targetActor->RebuildPhenotype();
+    targetActor->ReexpressPhenotype();
+    
+    return;
+    
     /*
     targetActor->physical.SetAge( 100 + Random.Range(0, 400) );
     targetActor->RebuildPhenotype();
@@ -34,9 +43,9 @@ void ApplyGene(Actor* targetActor) {
     targetActor->physical.SetAdultAge(750);
     targetActor->physical.SetSeniorAge(10000);
     
-    targetActor->physical.SetSpeed(1.3f);
-    targetActor->physical.SetSpeedYouth(1.1f);
-    targetActor->physical.SetSpeedMultiplier(1.15f);
+    targetActor->physical.SetSpeed(1.2f);
+    targetActor->physical.SetSpeedYouth(0.9f);
+    targetActor->physical.SetSpeedMultiplier(1.2f);
     
     targetActor->physical.SetYouthScale(0.3f);
     targetActor->physical.SetAdultScale(1.0f);
@@ -79,8 +88,8 @@ void ApplyGene(Actor* targetActor) {
     
     // Head gene
     Gene geneHead;
-    geneHead.offset    = Codon(0.0, 0, 0.1);
-    geneHead.position  = Codon(0, 0.43, 0.11);
+    geneHead.offset    = Codon(0.0, 0, 0.3);
+    geneHead.position  = Codon(0, 0.43, 0.08);
     geneHead.rotation  = Codon(0, 0, 0);
     geneHead.scale     = Codon(0.23, 0.23, 0.18);
     geneHead.color.x   = headColor.r;
@@ -101,9 +110,8 @@ void ApplyGene(Actor* targetActor) {
     
     // Muzzle gene
     Gene geneMuzzle;
-    geneMuzzle.attachmentIndex = 2;
-    geneMuzzle.offset    = Codon(0, 0, 0);
-    geneMuzzle.position  = Codon(0, 0.4, 0.25);
+    geneMuzzle.offset    = Codon(0, 0, 0.3);
+    geneMuzzle.position  = Codon(0, 0.4, 0.18);
     geneMuzzle.rotation  = Codon(0, 0, 0);
     geneMuzzle.scale     = Codon(0.15, 0.15, 0.14);
     geneMuzzle.color.x   = headColor.r;
@@ -113,9 +121,8 @@ void ApplyGene(Actor* targetActor) {
     
     // Ear left gene
     Gene geneEarLeft;
-    geneEarLeft.attachmentIndex = 2;
-    geneEarLeft.offset    = Codon(0.0, 0.0, 0.0);
-    geneEarLeft.position  = Codon(0.07, 0.555, 0.17);
+    geneEarLeft.offset    = Codon(0, 0, 0.3);
+    geneEarLeft.position  = Codon(0.07, 0.555, 0.13);
     geneEarLeft.rotation  = Codon(0.1, 0, -0.01);
     geneEarLeft.scale     = Codon(0.07, 0.1, 0.04);
     geneEarLeft.color.x   = headColor.r;
@@ -125,9 +132,8 @@ void ApplyGene(Actor* targetActor) {
     
     // Ear right gene
     Gene geneEarRight;
-    geneEarRight.attachmentIndex = 2;
-    geneEarRight.offset    = Codon(0.0, 0.0, 0.0);
-    geneEarRight.position  = Codon(-0.07, 0.555, 0.17);
+    geneEarRight.offset    = Codon(0, 0, 0.3);
+    geneEarRight.position  = Codon(-0.07, 0.555, 0.13);
     geneEarRight.rotation  = Codon(0.1, 0, 0.01);
     geneEarRight.scale     = Codon(0.07, 0.1, 0.04);
     geneEarRight.color.x   = headColor.r;
@@ -287,7 +293,6 @@ void Run() {
     
     // DEBUG - Show data on the aimed actor
     
-    /*
     glm::vec3 fromHigh = from;
     
     if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
@@ -295,57 +300,59 @@ void Run() {
         GameObject* hitObject = (GameObject*)hit.gameObject;
         Actor* hitActor = hitObject->GetComponent<Actor>();
         
-        Engine.WriteDialog( 2, hitActor->GetName() );
-        Engine.WriteDialog( 3, Int.ToString( hitActor->physical.GetAge() ) );
+        Engine.console.WriteDialog( 1, hitActor->GetName() );
+        Engine.console.WriteDialog( 2, Int.ToString( hitActor->physical.GetAge() ) );
+        
+        Engine.console.WriteDialog( 4, "Active   " + Int.ToString( hitActor->isActive ) );
+        Engine.console.WriteDialog( 5, "Garbage  " + Int.ToString( hitActor->isGarbage ) );
+        
+        Engine.console.WriteDialog( 7, "Genes    " + Int.ToString( hitActor->genetics.GetNumberOfGenes() ) );
+        Engine.console.WriteDialog( 8, "Renderer " + Int.ToString( hitActor->genetics.GetNumberOfMeshRenderers() ) );
+        
+        for (unsigned int i=0; i < hitActor->genetics.GetNumberOfMeshRenderers(); i++) {
+            MeshRenderer* renderer = hitActor->genetics.GetMeshRendererAtIndex(i);
+            
+            Engine.console.WriteDialog( 10 + i, "Renderer state " + Int.ToString( renderer->isActive ) );
+            
+            if (i > 4) break;
+        }
         
         unsigned int numberOfGenes = hitActor->genetics.GetNumberOfGenes();
         
     } else {
         
-        for (unsigned int i=0; i < 2; i++) 
-            Engine.WriteDialog(i + 2, "");
+        //for (unsigned int i=0; i < 20; i++) 
+        //    Engine.console.WriteDialog(i, "");
         
     }
     
     
-    if (Physics.Raycast(from, forward, 100, hit, LayerMask::Static)) {
-        
-        GameObject* hitObject = (GameObject*)hit.gameObject;
-        
-        Engine.WriteDialog( 2, "OBJECT DETECTED" );
-        
-    } else {
-        
-        for (unsigned int i=0; i < 1; i++) 
-            Engine.WriteDialog(i + 2, "");
-        
-    }
-    */
     
     // Spawn an actor with the picked genome
     
     if (Input.CheckMouseLeftPressed()) {
         
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
+            float xx = Random.Range(0, 10) - Random.Range(0, 10);
+            float zz = Random.Range(0, 10) - Random.Range(0, 10);
             
-            for (unsigned int retry=0; retry < 2; retry++) {
-                glm::vec3 position = Engine.cameraController->GetPosition();
-                float xx = Random.Range(0, 10) - Random.Range(0, 10);
-                float zz = Random.Range(0, 10) - Random.Range(0, 10);
-                
-                Actor* actor = AI.SpawnActor();
-                ApplyGene(actor);
-                
-                actor->navigation.SetTargetPoint(glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz));
-                
-                GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
-                actorObject->SetPosition(hit.point.x + xx, hit.point.y+5, hit.point.z + zz);
-                
-            }
+            Actor* actor = AI.SpawnActor();
+            ApplyGene(actor);
+            
+            actor->navigation.SetTargetPoint(glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz));
+            
+            GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
+            actorObject->SetPosition(hit.point.x + xx, hit.point.y+5, hit.point.z + zz);
+            
+            actor->isActive = true;
             
         }
         
     }
+    
+    
+    
+    
     
     // Plant tree (testing)
     if (Input.CheckKeyPressed(VK_P)) {
@@ -391,12 +398,10 @@ void Run() {
         
         if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
             
-            Engine.Destroy( (GameObject*)hit.gameObject );
+            GameObject* actorObject = (GameObject*)hit.gameObject;
+            Actor* actor = actorObject->GetComponent<Actor>();
             
-            //GameObject* actorObject = (GameObject*)hit.gameObject;
-            //Actor* actor = actorObject->GetComponent<Actor>();
-            
-            //AI.KillActor( actor );
+            AI.KillActor( actor );
             
         }
         

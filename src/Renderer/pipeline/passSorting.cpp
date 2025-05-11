@@ -12,6 +12,7 @@ bool RenderSystem::SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* rende
     // Accumulate renderer list
     std::transform(renderQueueGroup->begin(), renderQueueGroup->end(), std::back_inserter(sortList),
                    [&eye](MeshRenderer* renderer) {
+                       std::lock_guard<std::mutex>(renderer->mux);
                        return std::make_pair(glm::distance(eye, renderer->transform.position), renderer);
                    });
     

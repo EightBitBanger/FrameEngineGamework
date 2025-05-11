@@ -77,6 +77,7 @@ void RenderSystem::RenderFrame(void) {
             
             // Geometry pass
             for (MeshRenderer* currentEntity : *renderQueueGroup) {
+                std::lock_guard<std::mutex>(currentEntity->mux);
                 
                 if (currentEntity->mDoCulling && CullingPass(currentEntity, scenePtr->camera, viewProjection, frustum))
                     continue;
@@ -93,7 +94,8 @@ void RenderSystem::RenderFrame(void) {
                     ShadowVolumePass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
                 }
                 
-                mCurrentShader->Bind();
+                if (mCurrentShader) 
+                    mCurrentShader->Bind();
             }
         }
     }
