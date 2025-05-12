@@ -4,17 +4,18 @@
 #include <GameEngineFramework/plugins.h>
 
 
+Actor* actorInSights = nullptr;
 
 
 void ApplyGene(Actor* targetActor) {
     
-    targetActor->physical.SetAge( Random.Range(900, 1000) );
-    AI.genomes.presets.Human(targetActor);
-    
-    targetActor->RebuildPhenotype();
-    targetActor->ReexpressPhenotype();
-    
-    return;
+    if (Random.Range(0, 100) > 80) {
+        AI.genomes.presets.Human(targetActor);
+        
+        targetActor->physical.SetAge( Random.Range(0.0f, targetActor->physical.GetAdultAge()) );
+        targetActor->RebuildGeneticExpression();
+        return;
+    }
     
     /*
     targetActor->physical.SetAge( 100 + Random.Range(0, 400) );
@@ -32,7 +33,7 @@ void ApplyGene(Actor* targetActor) {
     */
     
     targetActor->physical.SetAge( Random.Range(1000, 1100) );
-    targetActor->ReexpressPhenotype();
+    targetActor->RebuildGeneticExpression();
     
     if (Random.Range(0, 100) > 70) {AI.genomes.presets.Sheep(targetActor); return;}
     
@@ -45,7 +46,7 @@ void ApplyGene(Actor* targetActor) {
     
     targetActor->physical.SetSpeed(1.2f);
     targetActor->physical.SetSpeedYouth(0.9f);
-    targetActor->physical.SetSpeedMultiplier(1.2f);
+    targetActor->physical.SetSpeedMultiplier(2.0f);
     
     targetActor->physical.SetYouthScale(0.3f);
     targetActor->physical.SetAdultScale(1.0f);
@@ -293,44 +294,71 @@ void Run() {
     
     // DEBUG - Show data on the aimed actor
     
-    glm::vec3 fromHigh = from;
-    
-    if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
+    if (actorInSights != nullptr) {
+        Engine.console.WriteDialog( 1, actorInSights->GetName() );
+        Engine.console.WriteDialog( 2, Int.ToString( actorInSights->physical.GetAge() ) );
         
-        GameObject* hitObject = (GameObject*)hit.gameObject;
-        Actor* hitActor = hitObject->GetComponent<Actor>();
+        Engine.console.WriteDialog( 4, "Active   " + Int.ToString( actorInSights->isActive ) );
+        Engine.console.WriteDialog( 5, "Garbage  " + Int.ToString( actorInSights->isGarbage ) );
         
-        Engine.console.WriteDialog( 1, hitActor->GetName() );
-        Engine.console.WriteDialog( 2, Int.ToString( hitActor->physical.GetAge() ) );
+        Engine.console.WriteDialog( 7, "[ States ]" );
         
-        Engine.console.WriteDialog( 4, "Active   " + Int.ToString( hitActor->isActive ) );
-        Engine.console.WriteDialog( 5, "Garbage  " + Int.ToString( hitActor->isGarbage ) );
-        
-        Engine.console.WriteDialog( 7, "Genes    " + Int.ToString( hitActor->genetics.GetNumberOfGenes() ) );
-        Engine.console.WriteDialog( 8, "Renderer " + Int.ToString( hitActor->genetics.GetNumberOfMeshRenderers() ) );
-        
-        for (unsigned int i=0; i < hitActor->genetics.GetNumberOfMeshRenderers(); i++) {
-            MeshRenderer* renderer = hitActor->genetics.GetMeshRendererAtIndex(i);
-            
-            Engine.console.WriteDialog( 10 + i, "Renderer state " + Int.ToString( renderer->isActive ) );
-            
-            if (i > 4) break;
+        switch (actorInSights->state.current) {
+            case ActorState::State::None:    Engine.console.WriteDialog(8, "State  None"); break;
+            case ActorState::State::Attack:  Engine.console.WriteDialog(8, "State  Attack"); break;
+            case ActorState::State::Flee:    Engine.console.WriteDialog(8, "State  Flee"); break;
+            case ActorState::State::Defend:  Engine.console.WriteDialog(8, "State  Defend"); break;
+            case ActorState::State::Focus:   Engine.console.WriteDialog(8, "State  Focus"); break;
+            case ActorState::State::Look:    Engine.console.WriteDialog(8, "State  Look"); break;
         }
         
-        unsigned int numberOfGenes = hitActor->genetics.GetNumberOfGenes();
+        switch (actorInSights->state.mode) {
+            case ActorState::Mode::Idle:        Engine.console.WriteDialog(9, "Mode   Idle"); break;
+            case ActorState::Mode::Sleeping:    Engine.console.WriteDialog(9, "Mode   Sleeping"); break;
+            case ActorState::Mode::MoveRandom:  Engine.console.WriteDialog(9, "Mode   MoveRandom"); break;
+            case ActorState::Mode::MoveTo:      Engine.console.WriteDialog(9, "Mode   MoveTo"); break;
+            case ActorState::Mode::WalkTo:      Engine.console.WriteDialog(9, "Mode   WalkTo"); break;
+            case ActorState::Mode::RunTo:       Engine.console.WriteDialog(9, "Mode   RunTo"); break;
+            
+        }
+        
+        Engine.console.WriteDialog( 11, "[ Counters ]" );
+        
+        Engine.console.WriteDialog( 12, "Attack    " + Int.ToString( actorInSights->counters.GetCoolDownAttack() ) );
+        Engine.console.WriteDialog( 13, "Movement  " + Int.ToString( actorInSights->counters.GetCoolDownMovement() ) );
+        Engine.console.WriteDialog( 14, "Observe   " + Int.ToString( actorInSights->counters.GetCoolDownObservation() ) );
+        Engine.console.WriteDialog( 15, "Breeding  " + Int.ToString( actorInSights->counters.GetCoolDownBreeding() ) );
         
     } else {
         
-        //for (unsigned int i=0; i < 20; i++) 
-        //    Engine.console.WriteDialog(i, "");
+        for (unsigned int i=0; i < 20; i++) 
+            Engine.console.WriteDialog(i, "");
+    }
+    
+    
+    
+    // Pick an actor
+    
+    if (Input.CheckMouseLeftPressed()) {
+        
+        glm::vec3 fromHigh = from;
+        if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
+            GameObject* hitObject = (GameObject*)hit.gameObject;
+            
+            if (hitObject != nullptr) {
+                Actor* hitActor = hitObject->GetComponent<Actor>();
+                actorInSights = hitActor;
+            }
+        }
         
     }
     
     
     
-    // Spawn an actor with the picked genome
     
-    if (Input.CheckMouseLeftPressed()) {
+    
+    // Plant tree (testing)
+    if (Input.CheckMouseMiddlePressed()) {
         
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             float xx = Random.Range(0, 10) - Random.Range(0, 10);
@@ -348,15 +376,8 @@ void Run() {
             
         }
         
-    }
-    
-    
-    
-    
-    
-    // Plant tree (testing)
-    if (Input.CheckKeyPressed(VK_P)) {
-        
+        /*
+        // Spawn a tree example
         if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Ground)) {
             
             GameObject* gameObject = (GameObject*)hit.gameObject;
@@ -388,7 +409,7 @@ void Run() {
             }
             
         }
-        
+        */
     }
     
     
