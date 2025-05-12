@@ -26,7 +26,9 @@ void Actor::Reset(void) {
     navigation.mRotateTo      = glm::vec3(0);
     navigation.mTargetPoint   = glm::vec3(0);
     navigation.mTargetLook    = glm::vec3(0);
+    navigation.mDistanceToTarget = 0;
     navigation.mTargetActor   = nullptr;
+    navigation.mQueryPoints.clear();
     
     // Behavior
     behavior.mDistanceToFocus      = 10.0f;
@@ -78,9 +80,10 @@ void Actor::Reset(void) {
     physical.mColliderScale  = glm::vec3(1);
     
     // Cool-down timers
-    counters.mObservationCoolDownCounter = 0;
-    counters.mMovementCoolDownCounter    = 0;
-    counters.mBreedingCoolDownCounter    = 0;
+    counters.mObservationCoolDownCounter = 10;
+    counters.mAttackCoolDownCounter      = 5;
+    counters.mMovementCoolDownCounter    = 8;
+    counters.mBreedingCoolDownCounter    = 120;
     
     // User variables
     user.mBitmask    = 0;
@@ -100,6 +103,7 @@ Actor::NavigationSystem::NavigationSystem() :
     mRotateTo(glm::vec3(0)),
     mTargetPoint(glm::vec3(0)),
     mTargetLook(glm::vec3(0)),
+    mDistanceToTarget(0),
     mTargetActor(nullptr)
 {
 }
@@ -186,12 +190,7 @@ void Actor::SetName(std::string newName) {
     return;
 }
 
-void Actor::RebuildPhenotype(void) {
-    genetics.mDoUpdateGenetics = true;
-    return;
-}
-
-void Actor::ReexpressPhenotype(void) {
+void Actor::RebuildGeneticExpression(void) {
     genetics.mDoReexpressGenetics = true;
     return;
 }
@@ -549,11 +548,34 @@ bool Actor::PhysicalAttributes::GetSexualOrientation(void) {
 //
 // Cool down counters
 
+void Actor::CooldownCounters::SetCoolDownObservation(unsigned int counter) {
+    mObservationCoolDownCounter = counter;
+    return;
+}
+unsigned int Actor::CooldownCounters::GetCoolDownObservation(void) {
+    return mObservationCoolDownCounter;
+}
+
+void Actor::CooldownCounters::SetCoolDownMovement(unsigned int counter) {
+    mMovementCoolDownCounter = counter;
+    return;
+}
+unsigned int Actor::CooldownCounters::GetCoolDownMovement(void) {
+    return mMovementCoolDownCounter;
+}
+
+void Actor::CooldownCounters::SetCoolDownAttack(unsigned int counter) {
+    mAttackCoolDownCounter = counter;
+    return;
+}
+unsigned int Actor::CooldownCounters::GetCoolDownAttack(void) {
+    return mAttackCoolDownCounter;
+}
+
 void Actor::CooldownCounters::SetCoolDownBreeding(unsigned int counter) {
     mBreedingCoolDownCounter = counter;
     return;
 }
-
 unsigned int Actor::CooldownCounters::GetCoolDownBreeding(void) {
     return mBreedingCoolDownCounter;
 }

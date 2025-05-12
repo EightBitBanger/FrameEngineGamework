@@ -126,7 +126,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     geneBreastLeft.color.z   = bodyColor.b;
     geneBreastLeft.type = EXPRESSION_TYPE_FEMALE;
     geneBreastLeft.colorIndex       = 1;
-    geneBreastLeft.expressionFactor = 0.004;
+    geneBreastLeft.expressionFactor = 1.5;
     geneBreastLeft.expressionMax    = 1.4;
     geneBreastLeft.expressionAge    = 900;
     
@@ -142,7 +142,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     geneBreastRight.type = EXPRESSION_TYPE_FEMALE;
     geneBreastRight.scaleIndex       = 4;
     geneBreastRight.colorIndex       = 1;
-    geneBreastRight.expressionFactor = 0.004;
+    geneBreastRight.expressionFactor = 1.5;
     geneBreastRight.expressionMax    = 1.4;
     geneBreastRight.expressionAge    = 900;
     
@@ -160,7 +160,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     geneShoulderLeft.animationRange   = 13;
     geneShoulderLeft.colorIndex       = 2;
     geneShoulderLeft.type = EXPRESSION_TYPE_MALE;
-    geneShoulderLeft.expressionFactor = 0.004;
+    geneShoulderLeft.expressionFactor = 1.5;
     geneShoulderLeft.expressionMax    = 1.1;
     geneShoulderLeft.expressionAge    = 900;
     
@@ -179,7 +179,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     geneShoulderRight.animationRange     = 13;
     geneShoulderRight.colorIndex         = 2;
     geneShoulderRight.type = EXPRESSION_TYPE_MALE;
-    geneShoulderRight.expressionFactor = 0.004;
+    geneShoulderRight.expressionFactor = 1.5;
     geneShoulderRight.expressionMax    = 1.1;
     geneShoulderRight.expressionAge    = 900;
     

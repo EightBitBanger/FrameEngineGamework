@@ -11,9 +11,8 @@ void ActorSystem::UpdateActorMechanics(Actor* actor) {
     HandleTargettingMechanics(actor);
     HandleBreedingMechanics(actor);
     
+    // Check actor vital state
     HandleVitality(actor);
-    
-    HandleCooldownCounters(actor);
     
     return;
 }
@@ -35,13 +34,7 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             
         case ActorState::Mode::MoveRandom:
             // Calculate random near by point
-            position.x = actor->navigation.mPosition.x;
-            position.z = actor->navigation.mPosition.z;
-            position.x += Random.Range(0.0f, actor->behavior.GetDistanceToWalk()) - Random.Range(0.0f, actor->behavior.GetDistanceToWalk());
-            position.z += Random.Range(0.0f, actor->behavior.GetDistanceToWalk()) - Random.Range(0.0f, actor->behavior.GetDistanceToWalk());
-            actor->navigation.mTargetPoint.x = position.x;
-            actor->navigation.mTargetPoint.y = 1000.0f;
-            actor->navigation.mTargetPoint.z = position.z;
+            position = CalculateRandomLocalPoint(actor);
             
             actor->state.mIsWalking = false;
             actor->state.mIsRunning = false;
@@ -52,17 +45,17 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             actor->state.mode = ActorState::Mode::MoveTo;
             
         case ActorState::Mode::MoveTo:
+            // Hold until the physics system tells us how high this point is
             if (actor->navigation.mTargetPoint.y == 1000.0f) 
                 break;
             forward = CalculateForwardVelocity(actor);
             forward *= actor->physical.mSpeed * 0.01f;
+            
             actor->state.mIsWalking = true;
             actor->state.mode = ActorState::Mode::WalkTo;
             break;
             
         case ActorState::Mode::WalkTo:
-            if (actor->navigation.mTargetPoint.y == -1000.0f) 
-                break;
             forward = CalculateForwardVelocity(actor);
             forward *= actor->physical.mSpeed * 0.01f;
             actor->state.mIsWalking = true;
@@ -70,8 +63,6 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             break;
             
         case ActorState::Mode::RunTo:
-            if (actor->navigation.mTargetPoint.y == -1000.0f) 
-                break;
             forward = CalculateForwardVelocity(actor);
             forward *= actor->physical.mSpeed * 0.01f;
             forward *= actor->physical.mSpeedMul;
@@ -98,8 +89,10 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
             actor->navigation.mTargetLook  = position;
             actor->state.mIsFacing = true;
             
+            if (actor->counters.mAttackCoolDownCounter > 0) 
+                break;
             // Inflict attack damage
-            if (actor->navigation.mTargetActor) 
+            if (actor->navigation.mTargetActor == nullptr) 
                 HandleInflictDamage(actor, actor->navigation.mTargetActor);
             break;
             
@@ -124,33 +117,35 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
             
     }
     
-    // Check position arrived
-    if (actor->navigation.mTargetActor == nullptr) {
+    // Check arrived at target actor
+    actor->navigation.mDistanceToTarget = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetPoint);
+    if (actor->navigation.mDistanceToTarget < actor->behavior.GetDistanceToInflict()) {
         
-        if (glm::distance(actor->navigation.mPosition, actor->navigation.mTargetPoint) < actor->behavior.GetDistanceToInflict()) {
-            actor->state.mode = ActorState::Mode::Idle;
-            actor->state.current = ActorState::State::None;
-            
-            actor->counters.mMovementCoolDownCounter = actor->behavior.mCooldownMove;
-        }
+        actor->state.mode = ActorState::Mode::Idle;
     }
     
+    // Check dead target
+    if (actor->navigation.mTargetActor != nullptr) {
+        
+        if (!actor->navigation.mTargetActor->isActive) 
+            actor->navigation.mTargetActor = nullptr;
+        
+    }
     return;
 }
 
 void ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
-    if (glm::distance(actor->navigation.mTargetPoint, actor->navigation.mPosition) > actor->behavior.mDistanceToInflict) 
+    if (glm::distance(actor->navigation.mPosition, target->navigation.mPosition) > actor->behavior.mDistanceToInflict) 
         return;
     
-    actor->state.mode = ActorState::Mode::Idle;
     actor->counters.mAttackCoolDownCounter = actor->behavior.GetCooldownAttack();
+    actor->state.mode = ActorState::Mode::Idle;
     
     // Check if the target defense is greater them my strength
     if (target->biological.defense >= actor->biological.strength) 
         return;
     
     target->biological.health -= actor->biological.strength - target->biological.defense;
-    
     return;
 }
 
@@ -231,6 +226,20 @@ glm::vec3 ActorSystem::CalculateForwardVelocity(Actor* actor) {
     return forward;
 }
 
+
+glm::vec3 ActorSystem::CalculateRandomLocalPoint(Actor* actor) {
+    glm::vec3 position(0);
+    position.x = actor->navigation.mPosition.x;
+    position.z = actor->navigation.mPosition.z;
+    
+    position.x += Random.Range(0.0f, actor->behavior.GetDistanceToWalk()) - Random.Range(0.0f, actor->behavior.GetDistanceToWalk());
+    position.z += Random.Range(0.0f, actor->behavior.GetDistanceToWalk()) - Random.Range(0.0f, actor->behavior.GetDistanceToWalk());
+    
+    actor->navigation.mTargetPoint.x = position.x;
+    actor->navigation.mTargetPoint.y = 1000.0f; // Hold until the physics system updates this
+    actor->navigation.mTargetPoint.z = position.z;
+    return position;
+}
 
 
 void ActorSystem::UpdateProximityList(Actor* actor) {

@@ -7,10 +7,15 @@
 
 void ActorSystem::UpdateAnimationState(Actor* actor) {
     for (unsigned int a = 0; a < actor->genetics.mGeneticRenderers.size(); a++) {
-        
         // Update the renderers position
         MeshRenderer* geneRenderer = actor->genetics.mGeneticRenderers[a];
         std::lock_guard<std::mutex> (geneRenderer->mux);
+        
+        //  Skip genes that do not express
+        if (!actor->genetics.mGenes[a].doExpress) {
+            geneRenderer->isActive = false;
+            continue;
+        }
         
         geneRenderer->transform.position = actor->navigation.mPosition;
         geneRenderer->transform.matrix = glm::translate(glm::mat4(1), geneRenderer->transform.position);
@@ -30,7 +35,6 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
 
 
 void ActorSystem::UpdateAnimationHead(glm::mat4& matrix, Actor* actor, MeshRenderer* geneRenderer, unsigned int a) {
-    
     // Rotate to body orientation
     float bodyRotationLength = glm::length(actor->navigation.mRotation);
     if (bodyRotationLength != 0.0f) 
@@ -53,7 +57,6 @@ void ActorSystem::UpdateAnimationHead(glm::mat4& matrix, Actor* actor, MeshRende
 }
 
 void ActorSystem::UpdateAnimationBody(glm::mat4& matrix, Actor* actor, MeshRenderer* geneRenderer, unsigned int a) {
-    
     // Scale body by age
     float ageScalerValue = glm::clamp((float)actor->physical.mAge * 0.001f, 0.0f, 1.0f);
     float ageScale = Math.Lerp(actor->physical.mYouthScale, actor->physical.mAdultScale, ageScalerValue);
@@ -102,46 +105,6 @@ void ActorSystem::UpdateAnimationGenetics(glm::mat4& matrix, Actor* actor, unsig
     }
     return;
 }
-
-void ActorSystem::HandleAnimationSwing(Actor* actor, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange, bool animationDirection) {
-    bool doInverseAnimation = actor->genetics.mGenes[a].doInverseAnimation ^ animationDirection;
-    if (doInverseAnimation) {
-        actor->state.mAnimation[a] += animationFactor;
-        if (glm::any(glm::greaterThan(actor->state.mAnimation[a], glm::vec4(animationMaxSwingRange)))) 
-            actor->state.mAnimation[a].w = actor->genetics.mGenes[a].doInverseAnimation ? 1 : -1;
-    } else {
-        actor->state.mAnimation[a] -= animationFactor;
-        if (glm::any(glm::lessThan(actor->state.mAnimation[a], glm::vec4(-animationMaxSwingRange)))) 
-            actor->state.mAnimation[a].w = actor->genetics.mGenes[a].doInverseAnimation ? -1 : 1;
-    }
-}
-
-void ActorSystem::ApplyAnimationRotation(glm::mat4& matrix, Actor* actor, unsigned int a) {
-    EnsureNonZeroAnimationState(actor, a);
-    glm::vec3 geneRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, 
-                                       actor->genetics.mGenes[a].rotation.y, 
-                                       actor->genetics.mGenes[a].rotation.z) + 0.0001f;
-    // Apply genetic orientation
-    float geneRotationLength = glm::length(geneRotation);
-    matrix = glm::rotate(matrix, geneRotationLength, glm::normalize(geneRotation));
-    
-    // Apply animation rotation
-    float animationLength = glm::length(actor->state.mAnimation[a]);
-    matrix = glm::rotate(matrix, glm::radians(animationLength), 
-                         glm::normalize(glm::vec3(actor->state.mAnimation[a])));
-    return;
-}
-
-void ActorSystem::EnsureNonZeroAnimationState(Actor* actor, unsigned int a) {
-    if (actor->state.mAnimation[a].x == 0.0f) 
-        actor->state.mAnimation[a].x += 0.0001f;
-    if (actor->state.mAnimation[a].y == 0.0f) 
-        actor->state.mAnimation[a].y += 0.0001f;
-    if (actor->state.mAnimation[a].z == 0.0f) 
-        actor->state.mAnimation[a].z += 0.0001f;
-    return;
-}
-
 
 void ActorSystem::UpdateTargetRotation(Actor* actor) {
     // Get target direction angle
@@ -229,5 +192,44 @@ void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned i
         actor->navigation.mFacing = fadeValue;
     }
     return;
+}
+
+
+void ActorSystem::ApplyAnimationRotation(glm::mat4& matrix, Actor* actor, unsigned int a) {
+    EnsureNonZeroAnimationState(actor, a);
+    glm::vec3 geneRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, 
+                                       actor->genetics.mGenes[a].rotation.y, 
+                                       actor->genetics.mGenes[a].rotation.z) + 0.0001f;
+    // Apply genetic orientation
+    float geneRotationLength = glm::length(geneRotation);
+    matrix = glm::rotate(matrix, geneRotationLength, glm::normalize(geneRotation));
+    
+    // Apply animation rotation
+    float animationLength = glm::length(actor->state.mAnimation[a]);
+    matrix = glm::rotate(matrix, glm::radians(animationLength), 
+                         glm::normalize(glm::vec3(actor->state.mAnimation[a])));
+    return;
+}
+
+void ActorSystem::HandleAnimationSwing(Actor* actor, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange, bool animationDirection) {
+    bool doInverseAnimation = actor->genetics.mGenes[a].doInverseAnimation ^ animationDirection;
+    if (doInverseAnimation) {
+        actor->state.mAnimation[a] += animationFactor;
+        if (glm::any(glm::greaterThan(actor->state.mAnimation[a], glm::vec4(animationMaxSwingRange)))) 
+            actor->state.mAnimation[a].w = actor->genetics.mGenes[a].doInverseAnimation ? 1 : -1;
+    } else {
+        actor->state.mAnimation[a] -= animationFactor;
+        if (glm::any(glm::lessThan(actor->state.mAnimation[a], glm::vec4(-animationMaxSwingRange)))) 
+            actor->state.mAnimation[a].w = actor->genetics.mGenes[a].doInverseAnimation ? -1 : 1;
+    }
+}
+
+void ActorSystem::EnsureNonZeroAnimationState(Actor* actor, unsigned int a) {
+    if (actor->state.mAnimation[a].x == 0.0f) 
+        actor->state.mAnimation[a].x += 0.0001f;
+    if (actor->state.mAnimation[a].y == 0.0f) 
+        actor->state.mAnimation[a].y += 0.0001f;
+    if (actor->state.mAnimation[a].z == 0.0f) 
+        actor->state.mAnimation[a].z += 0.0001f;
 }
 

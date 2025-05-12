@@ -8,53 +8,40 @@ void ActorSystem::UpdateActorState(Actor* actor) {
     // Tick up the actor age
     actor->physical.mAge++;
     
-    if (actor->state.mode == ActorState::Mode::Idle) 
-        HandleIdleState(actor);
+    if (actor->state.mode != ActorState::Mode::Idle) 
+        return;
     
-    return;
-}
-
-bool ActorSystem::HandleIdleState(Actor* actor) {
     // Check proximity list for near by actors to interact with
+    if (actor->behavior.mProximityList.size() != 0) 
     for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
         Actor* targetActor = actor->behavior.mProximityList[i];
-        
-        // Check to remove the actor from the list
-        if (targetActor->isGarbage || !targetActor->isActive) {
-            actor->behavior.mProximityList.erase( actor->behavior.mProximityList.begin() + i );
-            break;
-        }
         
         // Check for interaction with near by actors
         float distanceToTarget = glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition);
         
         if (HandleAttackState(actor, targetActor, distanceToTarget)) 
-            return true;
+            continue;
         
         if (HandleFleeState(actor, targetActor, distanceToTarget)) 
-            return true;
+            continue;
         
-        if (Random.Range(0, 100) > 50) {
-            if (HandleFocusState(actor, targetActor, distanceToTarget)) 
-                return true;
-        }
+        //if (Random.Range(0, 100) > 80) {
+        //    if (HandleFocusState(actor, targetActor, distanceToTarget)) 
+        //        continue;
+        //}
         
-        if (actor->counters.mMovementCoolDownCounter == 0) 
-            if (Random.Range(0, 100) > 50) 
-                if (HandleWalkState(actor)) 
-                    return true;
-        
+        //if (Random.Range(0, 100) > 80) {
+        //    if (HandleWalkState(actor)) 
+        //        continue;
+        //}
     }
-    
-    return true;
+    return;
 }
 
 bool ActorSystem::HandleWalkState(Actor* actor) {
     if (actor->state.current == ActorState::State::Attack || 
         actor->state.current == ActorState::State::Flee) 
         return false;
-    
-    actor->navigation.mTargetActor = nullptr;
     
     actor->state.current = ActorState::State::None;
     actor->state.mode    = ActorState::Mode::MoveRandom;
@@ -65,10 +52,6 @@ bool ActorSystem::HandleWalkState(Actor* actor) {
 bool ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance) {
     // Attack cool down
     if (actor->counters.mAttackCoolDownCounter > 0) 
-        return false;
-    
-    // Ignore if currently observing
-    if (actor->counters.mObservationCoolDownCounter > 0) 
         return false;
     
     // Actor must be a predator
@@ -115,7 +98,8 @@ bool ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
 
 
 bool ActorSystem::HandleFocusState(Actor* actor, Actor* target, float distance) {
-    if (actor->state.current == ActorState::State::Attack || actor->state.current == ActorState::State::Flee) 
+    if (actor->state.current == ActorState::State::Attack || 
+        actor->state.current == ActorState::State::Flee) 
         return false;
     
     // Observation cool down

@@ -50,7 +50,7 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 
                 // Set genome
                 AI.genomes.InjectGenome(actor, lineArray[4]);
-                actor->ReexpressPhenotype();
+                actor->RebuildGeneticExpression();
                 
                 actor->physical.SetAge(age);
                 

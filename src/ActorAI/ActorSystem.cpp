@@ -110,15 +110,18 @@ void ActorSystem::SetActorUpdateDistance(float distance) {
 }
 
 
-void ActorSystem::UpdateGarbageCollection(Actor* actor) {
+bool ActorSystem::UpdateGarbageCollection(Actor* actor) {
     if (!actor->isGarbage) 
-        return;
+        return false;
     
     // Destroy the renderers
     ClearOldGeneticRenderers(actor);
     
+    // Add to the garbage pile
+    mGarbageActors.push_back(actor);
+    
     actor->Reset();
-    return;
+    return true;
 }
 
 

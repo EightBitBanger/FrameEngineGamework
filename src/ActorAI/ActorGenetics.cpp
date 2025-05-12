@@ -158,9 +158,9 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
                     float expressionFactor = actor->genetics.mGenes[a].expressionFactor;
                     
                     // Modify phenotypic expression
-                    actor->genetics.mPhen[a].scale.x += expressionFactor;
-                    actor->genetics.mPhen[a].scale.y += expressionFactor;
-                    actor->genetics.mPhen[a].scale.z += expressionFactor;
+                    actor->genetics.mPhen[a].scale.x = expressionFactor;
+                    actor->genetics.mPhen[a].scale.y = expressionFactor;
+                    actor->genetics.mPhen[a].scale.z = expressionFactor;
                     
                 }
                 

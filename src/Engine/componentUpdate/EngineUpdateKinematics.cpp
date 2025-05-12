@@ -1,4 +1,5 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
+#include <mutex>
 
 // Terminal velocity -9.81 * 2.0 * 2.0
 #define TERMINAL_VELOCITY  39.24f
@@ -7,9 +8,22 @@
 void EngineSystemManager::UpdateKinematics(unsigned int index) {
     if (mStreamBuffer[index].rigidBody == nullptr) 
         return;
+    std::lock_guard<std::mutex> (mStreamBuffer[index].actor->navigation.mux);
     
     // Check if the actor needs a collider generated on thread main
     GenerateCollider(index);
+    
+    // Check query points
+    Hit hit;
+    unsigned int numberOfPoints = mStreamBuffer[index].actor->navigation.mQueryPoints.size();
+    for (unsigned int i=0; i < numberOfPoints; i++) {
+        glm::vec3 queryPoint = mStreamBuffer[index].actor->navigation.mQueryPoints[i];
+        
+        // Get point height
+        if (queryPoint.y == 1000.0f) 
+            if (Physics.Raycast(queryPoint, glm::vec3(0, -1, 0), 2000, hit, LayerMask::Ground)) 
+                mStreamBuffer[index].actor->navigation.mQueryPoints[i].y = hit.point.y;
+    }
     
     glm::vec3 actorPosition = mStreamBuffer[index].transform->position;
     glm::vec3 actorRotation = mStreamBuffer[index].actor->navigation.mRotation;
@@ -20,7 +34,6 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
     rp3d::Vector3 physicsPosition = transform.getPosition();
     
     // Check not on ground
-    Hit hit;
     if (Physics.Raycast(actorPosition, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Ground)) {
         
         // Standing on ground
@@ -43,7 +56,6 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
     
     // Get height at the target point
     if (actorTarget.y == 1000.0f) {
-        actorTarget.y = 1000;
         if (Physics.Raycast(actorTarget, glm::vec3(0, -1, 0), 2000, hit, LayerMask::Ground)) 
             actorTarget.y = hit.point.y;
     }
@@ -51,9 +63,6 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
     // Move the actor into position
     transform.setPosition(physicsPosition);
     mStreamBuffer[index].rigidBody->setTransform(transform);
-    
-    // Check max velocity
-    actorVelocity = glm::clamp(actorVelocity, -1.0f, 1.0f);
     
     // Apply force velocity
     mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, 

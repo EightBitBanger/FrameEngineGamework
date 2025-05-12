@@ -40,14 +40,12 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     Transform* chunkTransform = chunk.gameObject->GetComponent<Transform>();
     
-    chunkTransform->position = glm::vec3( x, 0, y);
+    chunkTransform->SetPosition( x, 0, y);
     chunkTransform->scale = glm::vec3( 1, 1, 1 );
     
     chunkRenderer->mesh = Engine.Create<Mesh>();
     chunkRenderer->mesh->isShared = false;
-    
     chunkRenderer->EnableFrustumCulling();
-    
     chunkRenderer->material = worldMaterial;
     
     // Level of detail
@@ -65,13 +63,12 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     Transform* staticTransform = chunk.staticObject->GetComponent<Transform>();
     
-    staticTransform->position = glm::vec3( x, 0, y);
+    staticTransform->SetPosition( x, 0, y);
     staticTransform->scale = glm::vec3( 1, 1, 1 );
     
     staticRenderer->mesh = Engine.Create<Mesh>();
     staticRenderer->mesh->isShared = false;
     staticRenderer->EnableFrustumCulling();
-    
     staticRenderer->material = staticMaterial;
     
     

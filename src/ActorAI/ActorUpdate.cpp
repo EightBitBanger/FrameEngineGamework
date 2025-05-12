@@ -50,7 +50,6 @@ void ActorSystem::Update(void) {
         unsigned int numberOfActorsPerCycle = (numberOfActors > 10) ? (numberOfActors / 10) : 1;
         
         for (unsigned int i = 0; i < numberOfActorsPerCycle; i++) {
-            
             if (actorCounter >= numberOfActors) {
                 actorCounter = 0;
                 doUpdate = false;
@@ -61,7 +60,8 @@ void ActorSystem::Update(void) {
             actorCounter++;
             
             // Check garbage actors
-            UpdateGarbageCollection(actor);
+            if (UpdateGarbageCollection(actor)) 
+                break;
             
             UpdateProximityList(actor);
             
@@ -82,6 +82,8 @@ void ActorSystem::Update(void) {
             // Express genetic phenotypes
             ExpressActorGenetics(actor);
             
+            // Count down any active cool downs
+            HandleCooldownCounters(actor);
         }
         
     }
