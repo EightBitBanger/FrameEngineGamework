@@ -21,6 +21,10 @@ enum class State {
     Defend        // Defend from the target actor
 };
 
+enum class Action {
+    Purge         // Remove the actor ref from all lists
+};
+
 }
 
 #endif

@@ -42,14 +42,12 @@ public:
     // State
     
     /// Set the flag to update the actors genetics.
-    void RebuildPhenotype(void);
-    
-    /// Set the flag to re-express the genome.
-    void ReexpressPhenotype(void);
+    void RebuildGeneticExpression(void);
     
     /// Re-initiate the state of the actor. The mesh renderers will not be
     /// reset as they are owned and must be reset by the engine system.
     void Reset(void);
+    
     
     
     class ENGINE_API NavigationSystem {
@@ -95,7 +93,13 @@ public:
         glm::vec3 mTargetPoint;  // Point to face
         glm::vec3 mTargetLook;   // Point to look at
         
+        float mDistanceToTarget; // Distance to the target actor object
+        
         Actor* mTargetActor;     // Target actor currently in focus
+        
+        // List of points to determine height
+        // Height is updated on another thread
+        std::vector<glm::vec3> mQueryPoints;
         
         std::mutex mux;
         
@@ -312,7 +316,6 @@ public:
         
     private:
         
-        
         bool mDoUpdateGenetics;       // Should the genetics be re constructed
         bool mDoReexpressGenetics;    // Should the genetics be re-expressed
         unsigned int mGeneration;     // Current position in the generational sequence over time
@@ -456,8 +459,22 @@ public:
         // Cool down counters
         
         /// Set the current cool down counter for actor breeding.
-        void SetCoolDownBreeding(unsigned int counter);
+        void SetCoolDownObservation(unsigned int counter);
+        /// Get the current cool down counter for actor breeding.
+        unsigned int GetCoolDownObservation(void);
         
+        /// Set the current cool down counter for actor breeding.
+        void SetCoolDownMovement(unsigned int counter);
+        /// Get the current cool down counter for actor breeding.
+        unsigned int GetCoolDownMovement(void);
+        
+        /// Set the current cool down counter for actor breeding.
+        void SetCoolDownAttack(unsigned int counter);
+        /// Get the current cool down counter for actor breeding.
+        unsigned int GetCoolDownAttack(void);
+        
+        /// Set the current cool down counter for actor breeding.
+        void SetCoolDownBreeding(unsigned int counter);
         /// Get the current cool down counter for actor breeding.
         unsigned int GetCoolDownBreeding(void);
         

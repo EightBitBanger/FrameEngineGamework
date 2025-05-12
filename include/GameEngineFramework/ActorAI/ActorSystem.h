@@ -108,7 +108,6 @@ private:
     void UpdateActorState(Actor* actor);
     void UpdateProximityList(Actor* actor);
     
-    bool HandleIdleState(Actor* actor);
     bool HandleWalkState(Actor* actor);
     bool HandleAttackState(Actor* actor, Actor* target, float distance);
     bool HandleFleeState(Actor* actor, Actor* target, float distance);
@@ -124,7 +123,9 @@ private:
     void HandleInflictDamage(Actor* actor, Actor* target);
     void HandleVitality(Actor* actor);
     void HandleCooldownCounters(Actor* actor);
+    
     glm::vec3 CalculateForwardVelocity(Actor* actor);
+    glm::vec3 CalculateRandomLocalPoint(Actor* actor);
     
     // Animation
     void UpdateAnimationState(Actor* actor);
@@ -145,7 +146,7 @@ private:
     void ClearOldGeneticRenderers(Actor* actor);
     MeshRenderer* CreateMeshRendererForGene(Actor* actor, unsigned int geneIndex, Mesh* sourceMesh);
     void ExpressActorGenetics(Actor* actor);
-    void UpdateGarbageCollection(Actor* actor);
+    bool UpdateGarbageCollection(Actor* actor);
     
     // Current position of the player in the world
     glm::vec3 mPlayerPosition;
@@ -159,6 +160,9 @@ private:
     // Threading
     std::thread* mActorSystemThread;
     std::mutex mux;
+    
+    // Garbage collection
+    std::vector<Actor*> mGarbageActors;
     
     // Object pools
     PoolAllocator<Actor> mActors;
