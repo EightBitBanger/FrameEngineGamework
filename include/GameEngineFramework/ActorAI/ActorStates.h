@@ -21,6 +21,12 @@ enum class State {
     Defend        // Defend from the target actor
 };
 
+enum class Animation {
+    Body,         // Static, no animation
+    Head,         // Animate as part of the head
+    Limb          // Animate as a limb
+};
+
 enum class Action {
     Purge         // Remove the actor ref from all lists
 };

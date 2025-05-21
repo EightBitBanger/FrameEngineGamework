@@ -6,10 +6,10 @@
 #ifndef _POOL_ALLOCATOR_SUPPORT__
 #define _POOL_ALLOCATOR_SUPPORT__
 
-#include <GameEngineFramework/configuration.h>
-
 #include <cstdlib>
 #include <vector>
+#include <mutex>
+
 
 //
 // Configuration
@@ -46,57 +46,12 @@ struct CustomAllocator {
 
 template<typename T> class PoolAllocator {
     
-    std::vector< std::pair<T*, std::vector<bool>> > m_pool;
-    std::vector< T* > m_activeList;
-    
-    int m_poolSz;
-    int m_poolCount;
-    
-    void construct(T& objectRef) {new (&objectRef) T();}
-    void destruct(T& objectRef) {
-        
-        objectRef.~T();
-        
-    }
-    
-    std::pair<T*, std::vector<bool>> allocate(void) {
-        
-        // Allocate a pool and a state list pair
-        T* poolPtr = (T*) malloc(m_poolSz * sizeof(T));
-        std::vector<bool> boolList;
-        
-        // Check the pool allocation
-        if (poolPtr == nullptr) return std::make_pair(nullptr, boolList);
-        
-        // Initiate all objects as inactive
-        boolList.resize(m_poolSz, false);
-        
-        // Add the pair to the list
-        std::pair<T*, std::vector<bool>> poolPair = std::make_pair(poolPtr, boolList);
-        m_pool.push_back( poolPair );
-        
-        m_poolCount++;
-        
-        return poolPair;
-    }
-    void deallocate(void) {
-        
-        // Deallocate the last pool pair
-        std::pair<T*, std::vector<bool>>& lastPoolPair = m_pool.back();
-        std::free(lastPoolPair.first);
-        
-        // Remove the pair from the list
-        m_pool.erase( m_pool.end() );
-        
-        m_poolCount--;
-    }
-    
 public:
     
     T* operator[] (unsigned int const i) {return m_activeList[i];}
     
     PoolAllocator() :
-        m_poolSz(24),
+        m_poolSz(80),
         m_poolCount(1)
     {
         this->allocate();
@@ -150,6 +105,7 @@ public:
     
     /** Reserves an object and returns its pointer.*/
     T* Create(void) {
+        std::lock_guard<std::mutex> lock(mux);
         
         T* objectPtr = nullptr;
         
@@ -228,6 +184,7 @@ public:
     
     /** Frees an object.*/
     bool Destroy(T* objectPtr) {
+        std::lock_guard<std::mutex> lock(mux);
         
         // Iterate the list of pools
         int poolListSz = m_pool.size();
@@ -285,12 +242,14 @@ public:
     
     /** Returns the number of active objects.*/
     unsigned int Size(void) {
+        std::lock_guard<std::mutex> lock(mux);
         return m_activeList.size();
     }
     
     
     /** Returns the number of used memory locations.*/
     int GetObjectCount(void) {
+        std::lock_guard<std::mutex> lock(mux);
         
         int ObjectCount = 0;
         
@@ -316,6 +275,7 @@ public:
     }
     /** Returns the number of unused memory locations.*/
     int GetFreeCount(void) {
+        std::lock_guard<std::mutex> lock(mux);
         
         int FreeCount = 0;
         
@@ -342,6 +302,7 @@ public:
     
     /** Debug output to console. Must #define ENABLE_CONSOLE_DEBUG__ */
     void Debug(void) {
+        std::lock_guard<std::mutex> lock(mux);
         
 #ifdef  ENABLE_CONSOLE_DEBUG__
         
@@ -399,6 +360,7 @@ public:
     
     /** Forces a memory dump. Must #define ENABLE_CRASH_DUMP__. */
     void ForceCrashDump(const char* FileName) {
+        std::lock_guard<std::mutex> lock(mux);
         
 #ifdef  ENABLE_CRASH_DUMP__
         
@@ -444,6 +406,52 @@ public:
         
 #endif
         
+    }
+    
+private:
+    
+    std::mutex mux;
+    
+    std::vector< std::pair<T*, std::vector<bool>> > m_pool;
+    std::vector< T* > m_activeList;
+    
+    int m_poolSz;
+    int m_poolCount;
+    
+    void construct(T& objectRef) {new (&objectRef) T();}
+    void destruct(T& objectRef) {objectRef.~T();}
+    
+    std::pair<T*, std::vector<bool>> allocate(void) {
+        
+        // Allocate a pool and a state list pair
+        T* poolPtr = (T*) malloc(m_poolSz * sizeof(T));
+        std::vector<bool> boolList;
+        
+        // Check the pool allocation
+        if (poolPtr == nullptr) return std::make_pair(nullptr, boolList);
+        
+        // Initiate all objects as inactive
+        boolList.resize(m_poolSz, false);
+        
+        // Add the pair to the list
+        std::pair<T*, std::vector<bool>> poolPair = std::make_pair(poolPtr, boolList);
+        m_pool.push_back( poolPair );
+        
+        m_poolCount++;
+        
+        return poolPair;
+    }
+    
+    void deallocate(void) {
+        
+        // Deallocate the last pool pair
+        std::pair<T*, std::vector<bool>>& lastPoolPair = m_pool.back();
+        std::free(lastPoolPair.first);
+        
+        // Remove the pair from the list
+        m_pool.erase( m_pool.end() );
+        
+        m_poolCount--;
     }
     
 };

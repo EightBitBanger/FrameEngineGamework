@@ -18,6 +18,8 @@
 #include <GameEngineFramework/Renderer/components/fog.h>
 
 #include <GameEngineFramework/Engine/types/viewport.h>
+#include <GameEngineFramework/Renderer/types/frustum.h>
+#include <GameEngineFramework/Renderer/types/levelofdetail.h>
 
 #include <GameEngineFramework/Logging/Logging.h>
 
@@ -30,15 +32,6 @@
 
 #define GLEW_STATIC
 #include "../../../vendor/gl/glew.h"
-
-
-struct Frustum {
-    
-    // Left, Right, Bottom, Top, Near, Far
-    glm::vec4 planes[6];
-    
-};
-
 
 
 class ENGINE_API RenderSystem {

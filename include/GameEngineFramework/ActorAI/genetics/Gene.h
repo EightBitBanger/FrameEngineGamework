@@ -3,6 +3,7 @@
 
 #include <GameEngineFramework/configuration.h>
 #include <GameEngineFramework/ActorAI/Genetics/Codon.h>
+#include <GameEngineFramework/ActorAI/ActorStates.h>
 
 #define EXPRESSION_TYPE_BASE    0
 #define EXPRESSION_TYPE_MALE    1
@@ -26,21 +27,21 @@ public:
     
     /// Offset gene index to which this gene will attach and generate.
     /// Zero will cause the gene to inherit from no gene effectively making it a base gene.
-    unsigned int attachmentIndex;
+    unsigned short attachmentIndex;
     
     /// Color index from which this gene should inherit.
-    /// Zero will use the genes current color value.
-    unsigned int  colorIndex;
+    /// Zero will ignore inheritance.
+    unsigned short colorIndex;
     
     /// Scale index from which this gene should inherit.
-    /// Zero will use the genes current scale values.
-    unsigned int  scaleIndex;
+    /// Zero will ignore inheritance.
+    unsigned short scaleIndex;
     
     /// When this gene should be expressed.
     /// 0 = Base gene, always expressed
-    /// 1 = Male gene
-    /// 2 = Female gene
-    unsigned int type;
+    /// 1 = Male expression
+    /// 2 = Female expression
+    unsigned short type;
     
     /// Rate to which this gene will express.
     float expressionFactor;
@@ -54,11 +55,11 @@ public:
     /// Should this gene be expressed.
     bool doExpress;
     
-    /// Should this gene be animated.
-    bool doAnimationCycle;
-    
-    /// Is this gene a part of the head.
-    bool doAnimateAsHead;
+    /// How should this gene be animated.
+    /// 0 No animation, static
+    /// 1 Animate as part of the head
+    /// 2 Animate as a limb
+    ActorState::Animation animationType;
     
     /// Should the animation cycle be inverted.
     bool doInverseAnimation;

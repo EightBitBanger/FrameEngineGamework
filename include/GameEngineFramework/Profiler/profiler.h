@@ -25,9 +25,21 @@ public:
     /// Check the elapse time since begin.
     float Query(void);
     
+    /// Check if the profiler is active.
+    bool CheckIsProfilerActive(void);
+    
+    /// Start the profiler.
+    void Activate(void);
+    
+    /// Stop the profiler.
+    void Deactivate(void);
+    
     ProfilerTimer();
     
 private:
+    
+    // Should the profiler profile the system update functions
+    bool isActive;
     
     Timer timer;
     

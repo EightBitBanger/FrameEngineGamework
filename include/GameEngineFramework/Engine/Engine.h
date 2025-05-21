@@ -48,10 +48,8 @@ public:
     
     /// Main active rendering scene.
     Scene* sceneMain;
-    
-    /// Overlay rendering scene. (For UI elements)
+    /// Overlay rendering scene.
     Scene* sceneOverlay;
-    
     /// Assigned game object acting as a camera controller object.
     GameObject* cameraController;
     
@@ -59,25 +57,20 @@ public:
     
     /// Get the number of game objects.
     unsigned int GetNumberOfGameObjects(void);
-    
     /// Return a pointer to a game object at the index position.
     GameObject* GetGameObject(unsigned int index);
-    
     
     // Special components and game objects
     
     /// Create a camera controller game object and return its pointer.
     GameObject* CreateCameraController(glm::vec3 position);
-    
     /// Generate a sky object and return its pointer.
     GameObject* CreateSky(std::string meshTagName, Color colorLow, Color colorHigh, float biasMul);
-    
     
     // Lower level UI sprite rendering
     
     /// Add a string of sprite quads to a mesh.
     void AddMeshText(GameObject* overlayObject, float xPos, float yPos, float width, float height, std::string text, Color textColor);
-    
     /// Add a quad to a mesh mapping to a sub sprite from a sprite sheet texture.
     void AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float width, float height, int index, Color meshColor);
     
@@ -86,10 +79,8 @@ public:
     
     /// Initiate the engine.
     void Initiate(void);
-    
     /// Call update on engine components.
     void Update(void);
-    
     /// Shutdown the engine.
     void Shutdown(void);
     
@@ -98,20 +89,19 @@ public:
         std::lock_guard<std::mutex> lock(mux);
         extern ActorSystem AI;
         
-        // Engine
         if (std::is_same<T, GameObject>::value)    return (T*)CreateGameObject();
         
-        // Renderer
         if (std::is_same<T, Mesh>::value)          return (T*)Renderer.CreateMesh();
         if (std::is_same<T, Material>::value)      return (T*)Renderer.CreateMaterial();
         if (std::is_same<T, Shader>::value)        return (T*)Renderer.CreateShader();
         if (std::is_same<T, Scene>::value)         return (T*)Renderer.CreateScene();
         if (std::is_same<T, Camera>::value)        return (T*)Renderer.CreateCamera();
+        if (std::is_same<T, Light>::value)         return (T*)Renderer.CreateLight();
         if (std::is_same<T, MeshRenderer>::value)  return (T*)Renderer.CreateMeshRenderer();
         
-        // AI
         if (std::is_same<T, Actor>::value)         return (T*)AI.CreateActor();
         
+        Log.Write("!! Creating invalid object");
         return nullptr;
     }
     
@@ -128,17 +118,21 @@ public:
         if (std::is_same<T, Shader>::value)        return Renderer.DestroyShader( (Shader*)objectPtr );
         if (std::is_same<T, Scene>::value)         return Renderer.DestroyScene( (Scene*)objectPtr );
         if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera( (Camera*)objectPtr );
+        if (std::is_same<T, Light>::value)         return Renderer.DestroyLight( (Light*)objectPtr );
         if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer( (MeshRenderer*)objectPtr );
         
+        if (std::is_same<T, Script>::value)        return Scripting.DestroyScript((Script*)objectPtr);
+        if (std::is_same<T, RigidBody>::value)     return Physics.DestroyRigidBody((RigidBody*)objectPtr);
         if (std::is_same<T, Actor>::value)         return AI.DestroyActor( (Actor*)objectPtr );
+        if (std::is_same<T, Sound>::value)         return Audio.DestroySound((Sound*)objectPtr);
         
+        Log.Write("!! Destroying invalid object");
         return false;
     }
     
     /// Create a component object containing the type specified.
     template <typename T> Component* CreateComponent(void) {
         void* componentObjectPtr = nullptr;
-        
         ComponentType type = EngineComponents::Undefined;
         
         if (std::is_same<T, Transform>::value)    {type = EngineComponents::Transform;     componentObjectPtr = (void*)mTransforms.Create();}
@@ -150,7 +144,6 @@ public:
         if (std::is_same<T, Actor>::value)        {type = EngineComponents::Actor;         componentObjectPtr = (void*)AI.CreateActor();}
         if (std::is_same<T, Sound>::value)        {type = EngineComponents::Sound;         componentObjectPtr = (void*)Audio.CreateSound();}
         
-        // Check bad type
         if (type == EngineComponents::Undefined || componentObjectPtr == nullptr) {
             Log.Write("!! Created invalid component");
             return nullptr;
@@ -159,51 +152,28 @@ public:
         // Assemble the component
         Component* newComponent = mComponents.Create();
         newComponent->SetComponent(type, componentObjectPtr);
-        
         return newComponent;
     }
     
     
     /// Destroy a component object.
     bool DestroyComponent(Component* componentPtr) {
-        
         ComponentType componentType = componentPtr->GetType();
-        
         switch (componentType) {
+            case Components.RigidBody:    {Physics.DestroyRigidBody( (RigidBody*)componentPtr->GetComponent() ); break;}
+            case Components.Actor:        {((Actor*)componentPtr->GetComponent())->isGarbage = true; break;}
+            case Components.Transform:    {mTransforms.Destroy( (Transform*)componentPtr->GetComponent() ); break;}
+            case Components.Camera:       {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
+            case Components.Light:        {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
+            case Components.MeshRenderer: {Renderer.DestroyMeshRenderer((MeshRenderer*)componentPtr->GetComponent()); break;}
+            case Components.Script:       {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
+            case Components.Sound:        {Audio.DestroySound( (Sound*)componentPtr->GetComponent() ); break;}
             
-            case Components.MeshRenderer: {
-                MeshRenderer* meshRenderer = (MeshRenderer*)componentPtr->GetComponent();
-                Renderer.DestroyMeshRenderer(meshRenderer);
-                break;
-            }
-            
-            case Components.RigidBody: {
-                rp3d::RigidBody* bodyPtr = (RigidBody*)componentPtr->GetComponent();
-                bodyPtr->setIsActive( false );
-                Physics.DestroyRigidBody( bodyPtr );
-                break;
-            }
-            
-            case Components.Actor: {
-                Actor* actorPtr = (Actor*)componentPtr->GetComponent();
-                for (unsigned int i=0; i < actorPtr->genetics.mGeneticRenderers.size(); i++) 
-                    sceneMain->RemoveMeshRendererFromSceneRoot( actorPtr->genetics.mGeneticRenderers[i], RENDER_QUEUE_GEOMETRY );
-                for (unsigned int i=0; i < actorPtr->genetics.mGeneticRenderers.size(); i++) 
-                    Destroy<MeshRenderer>( actorPtr->genetics.mGeneticRenderers[i] );
-                actorPtr->genetics.mGeneticRenderers.clear();
-                actorPtr->isGarbage = true;
-                break;
-            }
-            
-            case Components.Transform: {mTransforms.Destroy( (Transform*)componentPtr->GetComponent() ); break;}
-            case Components.Camera:    {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
-            case Components.Light:     {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
-            case Components.Script:    {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
-            case Components.Sound:     {Audio.DestroySound( (Sound*)componentPtr->GetComponent() ); break;}
-            
-            default: break;
+        default: 
+            Log.Write("!! Destroying invalid component");
+            return false;
+            break;
         }
-        
         return true;
     }
     
@@ -263,11 +233,11 @@ private:
     void UpdateAudio(unsigned int index);
     
     // Update actor kinematic motion
-    void UpdateKinematics(unsigned int index);
+    void UpdateKinematics(void);
     
     // Actor genetics update
     void ClearOldGeneticRenderers(unsigned int index);
-    void GenerateCollider(unsigned int index);
+    void GenerateCollider(Actor* actor);
     MeshRenderer* CreateMeshRendererForGene(unsigned int index, unsigned int geneIndex, Mesh* sourceMesh);
     void ExpressActorGenetics(unsigned int index);
     

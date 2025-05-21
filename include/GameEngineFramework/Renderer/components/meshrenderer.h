@@ -3,6 +3,7 @@
 
 #include <GameEngineFramework/Transform/Transform.h>
 
+#include <GameEngineFramework/Renderer/types/levelofdetail.h>
 #include <GameEngineFramework/Renderer/components/material.h>
 #include <GameEngineFramework/Renderer/components/mesh.h>
 
@@ -25,12 +26,6 @@ public:
     /// Transformation element.
     Transform transform;
     
-    /// Level of detail distance to switch models
-    float distance;
-    
-    /// Levels of detail.
-    std::vector<Mesh*> lods;
-    
     /// Enable culling for this entity
     void EnableFrustumCulling(void);
     
@@ -49,6 +44,16 @@ public:
     /// Get the frustum culling bounding box max corner.
     glm::vec3 GetBoundingBoxMax(void);
     
+    /// Add a level to the level of detail list.
+    void AddLevelOfDetail(LevelOfDetail lod);
+    
+    /// Remove a level to the level of detail list.
+    bool RemoveLevelOfDetail(unsigned int index);
+    
+    /// Get the number of levels of detail.
+    bool GetNumberOfLevelsOfDetail(unsigned int index);
+    
+    
     MeshRenderer();
     
     std::mutex mux;
@@ -60,6 +65,9 @@ private:
     // Bounding box area
     glm::vec3 mBoundingBoxMin;
     glm::vec3 mBoundingBoxMax;
+    
+    // Levels of detail
+    std::vector<LevelOfDetail> mLods;
 };
 
 #endif

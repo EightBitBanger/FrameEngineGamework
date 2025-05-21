@@ -88,15 +88,6 @@ public:
     /// Base mesh for genetic rendering.
     Mesh* baseMesh;
     
-    // Object generation and deletion callbacks
-    
-    /// Actor object spawner callback
-    Actor* (*SpawnActor)(void);
-    
-    /// Actor object destroyer callback
-    void (*KillActor)(Actor*);
-    
-    
 private:
     
     // Master update timer
@@ -132,7 +123,7 @@ private:
     
     void UpdateAnimationBody(glm::mat4& matrix, Actor* actor, MeshRenderer* geneRenderer, unsigned int a);
     void UpdateAnimationHead(glm::mat4& matrix, Actor* actor, MeshRenderer* geneRenderer, unsigned int a);
-    void UpdateAnimationGenetics(glm::mat4& matrix, Actor* actor, unsigned int a);
+    void UpdateAnimationLimb(glm::mat4& matrix, Actor* actor, unsigned int a);
     
     void EnsureNonZeroAnimationState(Actor* actor, unsigned int a);
     void ApplyAnimationRotation(glm::mat4& matrix, Actor* actor, unsigned int a);
@@ -161,7 +152,7 @@ private:
     std::thread* mActorSystemThread;
     std::mutex mux;
     
-    // Garbage collection
+    // Garbage actor list
     std::vector<Actor*> mGarbageActors;
     
     // Object pools

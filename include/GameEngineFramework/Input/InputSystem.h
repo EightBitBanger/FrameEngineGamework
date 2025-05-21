@@ -73,6 +73,8 @@ public:
     void ClearMouseLeft(void);
     /// Clear the state of the right mouse button.
     void ClearMouseRight(void);
+    /// Clear the state of the middle mouse button.
+    void ClearMouseMiddle(void);
     
     /// Clear the key state of the key index ID.
     void ClearKey(int keyid);

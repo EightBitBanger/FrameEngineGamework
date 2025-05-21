@@ -79,6 +79,9 @@ public:
         /// Get the target actor with which this actor should interact.
         void SetTargetActor(Actor* actorPtr);
         
+        /// Get the distance to the currently focused actor.
+        float GetDistanceToTarget(void);
+        
         NavigationSystem();
         
     private:
@@ -176,6 +179,9 @@ public:
         void SetPreyState(bool state);
         /// Get the prey state.
         bool GetPreyState(void);
+        
+        /// Get the number of near by actors
+        unsigned int GetNumberOfTargets(void);
         
         Behavior();
         
@@ -458,19 +464,19 @@ public:
         
         // Cool down counters
         
-        /// Set the current cool down counter for actor breeding.
+        /// Set the current cool down counter for actor observation.
         void SetCoolDownObservation(unsigned int counter);
-        /// Get the current cool down counter for actor breeding.
+        /// Get the current cool down counter for actor observation.
         unsigned int GetCoolDownObservation(void);
         
-        /// Set the current cool down counter for actor breeding.
+        /// Set the current cool down counter for actor movement.
         void SetCoolDownMovement(unsigned int counter);
-        /// Get the current cool down counter for actor breeding.
+        /// Get the current cool down counter for actor movement.
         unsigned int GetCoolDownMovement(void);
         
-        /// Set the current cool down counter for actor breeding.
+        /// Set the current cool down counter for actor attacking.
         void SetCoolDownAttack(unsigned int counter);
-        /// Get the current cool down counter for actor breeding.
+        /// Get the current cool down counter for actor attacking.
         unsigned int GetCoolDownAttack(void);
         
         /// Set the current cool down counter for actor breeding.
