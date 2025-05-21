@@ -114,40 +114,6 @@ std::vector<int32_t> GenerateCreatureVoice(const AudioGene& gene, int sampleRate
 
 
 
-Actor* SpawnActorCallback(void) {
-    
-    GameObject* actorObject = Engine.Create<GameObject>();
-    actorObject->AddComponent( Engine.CreateComponent<Actor>() );
-    actorObject->AddComponent( Engine.CreateComponent<RigidBody>() );
-    
-    actorObject->renderDistance = -1;
-    
-    actorObject->SetPosition(0, 0, 0);
-    
-    // Set up for kinematic control from the AI system
-    actorObject->DisableGravity();
-    actorObject->SetDynamic();
-    
-    actorObject->SetLinearDamping(30);
-    actorObject->SetAngularDamping(100);
-    
-    actorObject->SetLinearAxisLockFactor(1, 1, 1);
-    actorObject->SetAngularAxisLockFactor(0, 0, 0);
-    
-    // Finalize actor
-    Actor* actor = actorObject->GetComponent<Actor>();
-    
-    // Reference to associated game object
-    actor->user.SetUserDataA( (void*)actorObject );
-    
-    return actor;
-}
-
-void KillActorCallback(Actor* actor) {
-    actor->isGarbage = true;
-    actor->isActive = false;
-    return;
-}
 
 
 
@@ -185,10 +151,6 @@ void Start() {
     Weather.Initiate();
     
     Particle.Initiate();
-    
-    AI.SpawnActor = SpawnActorCallback;
-    AI.KillActor  = KillActorCallback;
-    
     
     // Event callbacks
     Platform.EventCallbackLoseFocus = EventLostFocus;
@@ -306,54 +268,73 @@ void Start() {
     
     DecorationSpecifier decorGrassBase;
     decorGrassBase.type = DECORATION_GRASS;
-    decorGrassBase.density = 2000;
-    decorGrassBase.spawnHeightMaximum = 35;
+    decorGrassBase.density = 50;
+    decorGrassBase.spawnHeightMaximum = -7;
     decorGrassBase.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrassBase.spawnStackHeightMin = 1;
     decorGrassBase.spawnStackHeightMax = 2;
-    decorGrassBase.threshold = 0.0f;
-    decorGrassBase.noise = 0.04f;
+    decorGrassBase.threshold = 0.08f;
+    decorGrassBase.noise = 0.2f;
     
     DecorationSpecifier decorGrass;
     decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 2000;
-    decorGrass.spawnHeightMaximum = 35;
-    decorGrass.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorGrass.density = 1000;
+    decorGrass.spawnHeightMaximum = 20;
+    decorGrass.spawnHeightMinimum = -7;
     decorGrass.spawnStackHeightMin = 1;
     decorGrass.spawnStackHeightMax = 3;
-    decorGrass.threshold = 0.2f;
-    decorGrass.noise = 0.04f;
-    
-    DecorationSpecifier decorTrees;
-    decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 8;
-    decorTrees.spawnHeightMaximum = 20;
-    decorTrees.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorTrees.spawnStackHeightMin = 4;
-    decorTrees.spawnStackHeightMax = 8;
-    decorTrees.threshold = 0.08f;
-    decorTrees.noise = 0.3f;
-    
-    DecorationSpecifier decorTreeHights;
-    decorTreeHights.type = DECORATION_TREE;
-    decorTreeHights.density = 40;
-    decorTreeHights.spawnHeightMaximum = 40;
-    decorTreeHights.spawnHeightMinimum = 10;
-    decorTreeHights.spawnStackHeightMin = 4;
-    decorTreeHights.spawnStackHeightMax = 8;
-    decorTreeHights.threshold = 0.8f;
-    decorTreeHights.noise = 0.3f;
+    decorGrass.threshold = -0.4f;
+    decorGrass.noise = 3.001f;
     
     DecorationSpecifier decorWaterPlants;
     decorWaterPlants.type = DECORATION_GRASS_THIN;
-    decorWaterPlants.density = 40;
+    decorWaterPlants.density = 200;
     decorWaterPlants.spawnHeightMaximum = GameWorld.world.waterLevel;
     decorWaterPlants.spawnHeightMinimum = -100;
     decorWaterPlants.spawnStackHeightMax = 4;
     decorWaterPlants.spawnStackHeightMin = 2;
     decorWaterPlants.threshold = 0.1f;
-    decorWaterPlants.noise = 0.4f;
+    decorWaterPlants.noise     = 0.4f;
     
+    DecorationSpecifier decorTrees;
+    decorTrees.type = DECORATION_TREE;
+    decorTrees.density = 4;
+    decorTrees.spawnHeightMaximum = 30;
+    decorTrees.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorTrees.spawnStackHeightMin = 4;
+    decorTrees.spawnStackHeightMax = 8;
+    decorTrees.threshold = -0.04f;
+    decorTrees.noise     = 0.013f;
+    
+    DecorationSpecifier decorTreeHeights;
+    decorTreeHeights.type = DECORATION_TREE;
+    decorTreeHeights.density = 20;
+    decorTreeHeights.spawnHeightMaximum = 40;
+    decorTreeHeights.spawnHeightMinimum = -10;
+    decorTreeHeights.spawnStackHeightMin = 4;
+    decorTreeHeights.spawnStackHeightMax = 8;
+    decorTreeHeights.threshold = -0.07f;
+    decorTreeHeights.noise     = 0.04f;
+    
+    DecorationSpecifier decorTreeHeightsThick;
+    decorTreeHeightsThick.type = DECORATION_TREE;
+    decorTreeHeightsThick.density = 30;
+    decorTreeHeightsThick.spawnHeightMaximum = 35;
+    decorTreeHeightsThick.spawnHeightMinimum = -5;
+    decorTreeHeightsThick.spawnStackHeightMin = 4;
+    decorTreeHeightsThick.spawnStackHeightMax = 8;
+    decorTreeHeightsThick.threshold = -0.002f;
+    decorTreeHeightsThick.noise     = 0.0001f;
+    
+    //GameWorld.world.mDecorations.push_back(decorGrassBase);
+    //GameWorld.world.mDecorations.push_back(decorGrass);
+    //GameWorld.world.mDecorations.push_back(decorWaterPlants);
+    //GameWorld.world.mDecorations.push_back(decorTrees);
+    //GameWorld.world.mDecorations.push_back(decorTreeHeights);
+    //GameWorld.world.mDecorations.push_back(decorTreeHeightsThick);
+    
+    
+    //
     // Actors
     
     DecorationSpecifier decorSheep;
@@ -362,26 +343,26 @@ void Start() {
     decorSheep.density = 10;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorSheep.threshold = 0.1f;
-    decorSheep.noise = 0.4f;
+    decorSheep.threshold = 0.0f;
+    decorSheep.noise     = 0.3f;
     
     DecorationSpecifier decorHorse;
     decorHorse.type = DECORATION_ACTOR;
     decorHorse.name = "Horse";
-    decorHorse.density = 4;
+    decorHorse.density = 8;
     decorHorse.spawnHeightMaximum = 10;
     decorHorse.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorHorse.threshold = 0.1f;
-    decorHorse.noise = 0.4f;
+    decorHorse.threshold = 0.0f;
+    decorHorse.noise     = 0.5;;
     
     DecorationSpecifier decorBovine;
     decorBovine.type = DECORATION_ACTOR;
     decorBovine.name = "Bovine";
-    decorBovine.density = 4;
+    decorBovine.density = 10;
     decorBovine.spawnHeightMaximum = 10;
     decorBovine.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorBovine.threshold = 0.1f;
-    decorBovine.noise = 0.4f;
+    decorBovine.threshold = 0.0f;
+    decorBovine.noise     = 0.5f;
     
     DecorationSpecifier decorBear;
     decorBear.type = DECORATION_ACTOR;
@@ -389,21 +370,23 @@ void Start() {
     decorBear.density = 4;
     decorBear.spawnHeightMaximum = 40;
     decorBear.spawnHeightMinimum = 5;
-    decorBear.threshold = 0.1f;
-    decorBear.noise = 0.4f;
+    decorBear.threshold = 0.0f;
+    decorBear.noise     = 0.5f;
     
-    GameWorld.world.mDecorations.push_back(decorGrass);
-    GameWorld.world.mDecorations.push_back(decorGrassBase);
-    
-    GameWorld.world.mDecorations.push_back(decorTrees);
-    GameWorld.world.mDecorations.push_back(decorTreeHights);
-    
-    GameWorld.world.mDecorations.push_back(decorWaterPlants);
+    DecorationSpecifier decorDog;
+    decorDog.type = DECORATION_ACTOR;
+    decorDog.name = "Dog";
+    decorDog.density = 8;
+    decorDog.spawnHeightMaximum = 40;
+    decorDog.spawnHeightMinimum = 5;
+    decorDog.threshold = 0.0f;
+    decorDog.noise     = 0.5f;
     
     //GameWorld.world.mDecorations.push_back(decorSheep);
     //GameWorld.world.mDecorations.push_back(decorBovine);
     //GameWorld.world.mDecorations.push_back(decorHorse);
     //GameWorld.world.mDecorations.push_back(decorBear);
+    //GameWorld.world.mDecorations.push_back(decorDog);
     
     
     // Perlin layers
@@ -453,26 +436,6 @@ void Start() {
     GameWorld.perlin.push_back(perlinFlatland);
     
     
-    // Structure test
-    Structure structure;
-    structure.name = "";
-    structure.rarity = 300000;
-    
-    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 0, 0)) );
-    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 1, 0)) );
-    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 2, 0)) );
-    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 3, 0)) );
-    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 4, 0)) );
-    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 5, 0)) );
-    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 6, 0)) );
-    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 7, 0)) );
-    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 8, 0)) );
-    structure.elements.push_back( DecorationElement(DECORATION_TREE, glm::vec3(0, 9, 0)) );
-    
-    GameWorld.world.mStructures.push_back(structure);
-    
-    
-    
     // Lighting levels
     
     GameWorld.world.chunkColorLow   = Colors.MakeGrayScale(0.3f);
@@ -487,11 +450,11 @@ void Start() {
     
     
     // World rendering
-    GameWorld.chunkSize = 50;
+    GameWorld.chunkSize = 64;
     
-    GameWorld.renderDistance = 16;
-    GameWorld.staticDistance = GameWorld.renderDistance * 0.7f;
-    GameWorld.actorDistance  = GameWorld.renderDistance * 0.8f;
+    GameWorld.renderDistance = 13;
+    GameWorld.staticDistance = 0.3f;
+    GameWorld.actorDistance  = 0.3f;
     
     // Load world
     if (!GameWorld.LoadWorld()) {
@@ -502,26 +465,10 @@ void Start() {
     }
     
     
-    
-    
-    //Text* text = UI.CreateText();
-    //text->x = 0;
-    //text->y = 0;
-    //text->text = "test string of text";
-    
-    //Panel* panel = UI.CreatePanel();
-    //panel->x = 10;
-    //panel->y = 10;
-    //panel->w = 100;
-    //panel->h = 100;
-    
-    
-    
-    
-    
-    
-    
     return;
+    
+    
+    
     
     // Initiate UI
     

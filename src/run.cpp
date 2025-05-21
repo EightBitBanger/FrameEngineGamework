@@ -3,234 +3,257 @@
 
 #include <GameEngineFramework/plugins.h>
 
-
-Actor* actorInSights = nullptr;
-
-
 void ApplyGene(Actor* targetActor) {
-    
-    if (Random.Range(0, 100) > 80) {
-        AI.genomes.presets.Human(targetActor);
-        
-        targetActor->physical.SetAge( Random.Range(0.0f, targetActor->physical.GetAdultAge()) );
-        targetActor->RebuildGeneticExpression();
-        return;
-    }
-    
-    /*
-    targetActor->physical.SetAge( 100 + Random.Range(0, 400) );
-    targetActor->RebuildPhenotype();
-    
-    while (1) {
-        
-        if (Random.Range(0, 100) > 70) {AI.genomes.presets.Human(targetActor); return;}
-        
-        if (Random.Range(0, 100) > 70) {AI.genomes.presets.Bovine(targetActor); return;}
-        if (Random.Range(0, 100) > 70) {AI.genomes.presets.Horse(targetActor); return;}
-        if (Random.Range(0, 100) > 70) {AI.genomes.presets.Dog(targetActor); return;}
-        if (Random.Range(0, 100) > 70) {AI.genomes.presets.Bear(targetActor); return;}
-    }
-    */
-    
-    targetActor->physical.SetAge( Random.Range(1000, 1100) );
-    targetActor->RebuildGeneticExpression();
-    
-    if (Random.Range(0, 100) > 70) {AI.genomes.presets.Sheep(targetActor); return;}
     
     AI.genomes.ClearGenes(targetActor);
     
-    targetActor->SetName("Dog");
+    targetActor->SetName("Human");
     
-    targetActor->physical.SetAdultAge(750);
-    targetActor->physical.SetSeniorAge(10000);
+    targetActor->physical.SetAdultAge( 1000 );
+    targetActor->physical.SetSeniorAge( 40000 );
     
-    targetActor->physical.SetSpeed(1.2f);
-    targetActor->physical.SetSpeedYouth(0.9f);
-    targetActor->physical.SetSpeedMultiplier(2.0f);
+    targetActor->physical.SetSpeed(1.0f);
+    targetActor->physical.SetSpeedYouth(1.4f);
+    targetActor->physical.SetSpeedMultiplier(1.24f);
     
     targetActor->physical.SetYouthScale(0.3f);
     targetActor->physical.SetAdultScale(1.0f);
     
-    targetActor->behavior.SetHeightPreferenceMax(30.0f);
-    targetActor->behavior.SetHeightPreferenceMin(10.0f);
+    targetActor->behavior.SetHeightPreferenceMax(20.0f);
     
-    targetActor->behavior.SetDistanceToAttack(8.0f);
-    targetActor->behavior.SetDistanceToFlee(10.0f);
-    targetActor->behavior.SetDistanceToFocus(20.0f);
-    
-    targetActor->behavior.SetPredatorState(true);
-    
-    targetActor->biological.health = 100;
+    targetActor->biological.health = 200;
     
     if (Random.Range(0, 100) > 55) 
     {targetActor->physical.SetSexualOrientation(true);} else  // Male
     {targetActor->physical.SetSexualOrientation(false);}      // Female
     
     // Color variants
-    Color headColor = Colors.MakeRandomGrayScale();
-    Color bodyColor = Colors.MakeRandomGrayScale();
-    Color limbColor = Colors.MakeRandomGrayScale();
-    Color tailColor = Colors.MakeRandomGrayScale();
+    Color headColor = Colors.Lerp(Colors.white, Colors.yellow, 0.3);
+    Color limbColor = Colors.Lerp(Colors.white, Colors.yellow, 0.3);
+    Color bodyColor = Colors.Lerp(Colors.white, Colors.yellow, 0.3);
     
-    headColor *= 0.7f;
-    bodyColor *= 0.5f;
-    limbColor *= 0.3f;
-    tailColor *= 0.2f;
+    bodyColor = Colors.Lerp(bodyColor, Colors.red, 0.5);
+    bodyColor = Colors.Lerp(bodyColor, Colors.brown, 0.9);
+    bodyColor = Colors.Lerp(bodyColor, Colors.black, 0.5);
+    bodyColor *= Colors.MakeRandomGrayScale() * 0.8f;
     
-    // Body gene
+    // Limb colors
+    
+    // Yellow/reddish tint
+    int race = Random.Range(0, 100);
+    
+    if (race >= 0 && race < 5) {
+        headColor *= Colors.Lerp(headColor, Colors.orange, 0.3);
+        limbColor *= Colors.Lerp(limbColor, Colors.orange, 0.3);
+        headColor *= Colors.Lerp(headColor, Colors.red, 0.1);
+        limbColor *= Colors.Lerp(limbColor, Colors.red, 0.1);
+        race = -1;
+    }
+    
+    // Brown tint
+    if (race >= 5 && race < 10) {
+        headColor = Colors.Lerp(headColor, Colors.brown, 0.4);
+        limbColor = Colors.Lerp(limbColor, Colors.brown, 0.4);
+        headColor = Colors.Lerp(headColor, Colors.red, 0.087);
+        limbColor = Colors.Lerp(limbColor, Colors.red, 0.087);
+        headColor = Colors.Lerp(headColor, Colors.black, 0.87);
+        limbColor = Colors.Lerp(limbColor, Colors.black, 0.87);
+        race = -1;
+    }
+    
+    // Dark tone
+    if (race >= 10 && race < 20) {
+        headColor = Colors.Lerp(headColor, Colors.black, 0.998);
+        limbColor = Colors.Lerp(limbColor, Colors.black, 0.998);
+        race = -1;
+    }
+    
+    float headSize   = (Random.Range(0, 99) * 0.0001f);
+    float breastSize = (Random.Range(0, 99) * 0.00054f);
+    
+    // Body
     Gene geneBody;
-    geneBody.offset    = Codon(0, 0, -0.1);
-    geneBody.position  = Codon(0, 0.34, 0);
+    geneBody.offset    = Codon(0, 0, 0);
+    geneBody.position  = Codon(0, 0.9, 0);
     geneBody.rotation  = Codon(0, 0, 0);
-    geneBody.scale     = Codon(0.25, 0.25, 0.4);
+    geneBody.scale     = Codon(0.37, 0.5, 0.24);
     geneBody.color.x   = bodyColor.r;
     geneBody.color.y   = bodyColor.g;
     geneBody.color.z   = bodyColor.b;
+    geneBody.animationType = ActorState::Animation::Body;
     
-    // Head gene
+    // Head
     Gene geneHead;
-    geneHead.offset    = Codon(0.0, 0, 0.3);
-    geneHead.position  = Codon(0, 0.43, 0.08);
+    geneHead.offset    = Codon(0, 0, 0);
+    geneHead.position  = Codon(0, 1.36, 0);
     geneHead.rotation  = Codon(0, 0, 0);
-    geneHead.scale     = Codon(0.23, 0.23, 0.18);
+    geneHead.scale     = Codon(headSize + 0.3, 0.3, headSize + 0.3);
     geneHead.color.x   = headColor.r;
     geneHead.color.y   = headColor.g;
     geneHead.color.z   = headColor.b;
-    geneHead.doAnimateAsHead = true;
+    geneHead.animationType = ActorState::Animation::Head;
     
-    // Upper body gene
-    Gene geneBodyUpper;
-    geneBodyUpper.attachmentIndex = 1;
-    geneBodyUpper.offset    = Codon(0, 0, 0);
-    geneBodyUpper.position  = Codon(0, 0.35, 0.3);
-    geneBodyUpper.rotation  = Codon(0, 0, 0);
-    geneBodyUpper.scale     = Codon(0.29, 0.29, 0.22);
-    geneBodyUpper.color.x   = bodyColor.r;
-    geneBodyUpper.color.y   = bodyColor.g;
-    geneBodyUpper.color.z   = bodyColor.b;
+    // Neck
+    Gene geneNeck;
+    geneNeck.offset    = Codon(0, 0, 0);
+    geneNeck.position  = Codon(0, 1.2, 0);
+    geneNeck.rotation  = Codon(0, 0, 0);
+    geneNeck.scale     = Codon(0.18, 0.1, 0.18);
+    geneNeck.color.x   = bodyColor.r;
+    geneNeck.color.y   = bodyColor.g;
+    geneNeck.color.z   = bodyColor.b;
+    geneNeck.colorIndex = 1;
+    geneNeck.animationType = ActorState::Animation::Head;
     
-    // Muzzle gene
-    Gene geneMuzzle;
-    geneMuzzle.offset    = Codon(0, 0, 0.3);
-    geneMuzzle.position  = Codon(0, 0.4, 0.18);
-    geneMuzzle.rotation  = Codon(0, 0, 0);
-    geneMuzzle.scale     = Codon(0.15, 0.15, 0.14);
-    geneMuzzle.color.x   = headColor.r;
-    geneMuzzle.color.y   = headColor.g;
-    geneMuzzle.color.z   = headColor.b;
-    geneMuzzle.doAnimateAsHead = true;
+    // Left breast
+    Gene geneBreastLeft;
+    geneBreastLeft.offset    = Codon(0.112, 1.03, breastSize + 0.06f);
+    geneBreastLeft.position  = Codon(0, 0, 0);
+    geneBreastLeft.rotation  = Codon(0, 0, 0);
+    geneBreastLeft.scale     = Codon(0.14, 0.14, 0.14);
+    geneBreastLeft.color.x   = bodyColor.r;
+    geneBreastLeft.color.y   = bodyColor.g;
+    geneBreastLeft.color.z   = bodyColor.b;
+    geneBreastLeft.type = EXPRESSION_TYPE_FEMALE;
+    geneBreastLeft.colorIndex       = 1;
+    geneBreastLeft.expressionFactor = 1.5;
+    geneBreastLeft.expressionMax    = 1.4;
+    geneBreastLeft.expressionAge    = 900;
     
-    // Ear left gene
-    Gene geneEarLeft;
-    geneEarLeft.offset    = Codon(0, 0, 0.3);
-    geneEarLeft.position  = Codon(0.07, 0.555, 0.13);
-    geneEarLeft.rotation  = Codon(0.1, 0, -0.01);
-    geneEarLeft.scale     = Codon(0.07, 0.1, 0.04);
-    geneEarLeft.color.x   = headColor.r;
-    geneEarLeft.color.y   = headColor.g;
-    geneEarLeft.color.z   = headColor.b;
-    geneEarLeft.doAnimateAsHead = true;
+    // Right breast
+    Gene geneBreastRight;
+    geneBreastRight.offset    = Codon(-0.112, 1.03, breastSize + 0.06f);
+    geneBreastRight.position  = Codon(0, 0, 0);
+    geneBreastRight.rotation  = Codon(0, 0, 0);
+    geneBreastRight.scale     = Codon(0.14, 0.14, 0.14);
+    geneBreastRight.color.x   = bodyColor.r;
+    geneBreastRight.color.y   = bodyColor.g;
+    geneBreastRight.color.z   = bodyColor.b;
+    geneBreastRight.type = EXPRESSION_TYPE_FEMALE;
+    geneBreastRight.scaleIndex       = 4;
+    geneBreastRight.colorIndex       = 1;
+    geneBreastRight.expressionFactor = 1.5;
+    geneBreastRight.expressionMax    = 1.4;
+    geneBreastRight.expressionAge    = 900;
     
-    // Ear right gene
-    Gene geneEarRight;
-    geneEarRight.offset    = Codon(0, 0, 0.3);
-    geneEarRight.position  = Codon(-0.07, 0.555, 0.13);
-    geneEarRight.rotation  = Codon(0.1, 0, 0.01);
-    geneEarRight.scale     = Codon(0.07, 0.1, 0.04);
-    geneEarRight.color.x   = headColor.r;
-    geneEarRight.color.y   = headColor.g;
-    geneEarRight.color.z   = headColor.b;
-    geneEarRight.doAnimateAsHead = true;
+    // Left shoulder
+    Gene geneShoulderLeft;
+    geneShoulderLeft.offset    = Codon(0, 1.09, 0);
+    geneShoulderLeft.position  = Codon(0.24, -0.0425, 0);
+    geneShoulderLeft.rotation  = Codon(0, 0, 0);
+    geneShoulderLeft.scale     = Codon(0.12, 0.24, 0.12);
+    geneShoulderLeft.color.x   = limbColor.r;
+    geneShoulderLeft.color.y   = limbColor.g;
+    geneShoulderLeft.color.z   = limbColor.b;
+    geneShoulderLeft.animationAxis    = Codon(1, 0, 0);
+    geneShoulderLeft.animationRange   = 13;
+    geneShoulderLeft.colorIndex       = 2;
+    geneShoulderLeft.type = EXPRESSION_TYPE_MALE;
+    geneShoulderLeft.expressionFactor = 1.5;
+    geneShoulderLeft.expressionMax    = 1.1;
+    geneShoulderLeft.expressionAge    = 900;
+    geneShoulderLeft.animationType = ActorState::Animation::Limb;
     
-    // Limb FL gene
+    // Right shoulder
+    Gene geneShoulderRight;
+    geneShoulderRight.offset    = Codon(0, 1.09, 0);
+    geneShoulderRight.position  = Codon(-0.24, -0.0425, 0);
+    geneShoulderRight.rotation  = Codon(0, 0, 0);
+    geneShoulderRight.scale     = Codon(0.12, 0.24, 0.12);
+    geneShoulderRight.color.x   = limbColor.r;
+    geneShoulderRight.color.y   = limbColor.g;
+    geneShoulderRight.color.z   = limbColor.b;
+    geneShoulderRight.doInverseAnimation = true;
+    geneShoulderRight.animationAxis      = Codon(1, 0, 0);
+    geneShoulderRight.animationRange     = 13;
+    geneShoulderRight.colorIndex         = 2;
+    geneShoulderRight.type = EXPRESSION_TYPE_MALE;
+    geneShoulderRight.expressionFactor = 1.5;
+    geneShoulderRight.expressionMax    = 1.1;
+    geneShoulderRight.expressionAge    = 900;
+    geneShoulderRight.animationType = ActorState::Animation::Limb;
+    
+    // Left arm
     Gene geneLimbFrontLeft;
-    geneLimbFrontLeft.offset    = Codon(0.11, 0.35, 0.21);
-    geneLimbFrontLeft.position  = Codon(0.0, -0.2, 0);
+    geneLimbFrontLeft.offset    = Codon(0.24, 1.09, 0);
+    geneLimbFrontLeft.position  = Codon(0, -0.24, 0);
     geneLimbFrontLeft.rotation  = Codon(0, 0, 0);
-    geneLimbFrontLeft.scale     = Codon(0.13, 0.4, 0.13);
+    geneLimbFrontLeft.scale     = Codon(0.1, 0.55, 0.1);
     geneLimbFrontLeft.color.x   = limbColor.r;
     geneLimbFrontLeft.color.y   = limbColor.g;
     geneLimbFrontLeft.color.z   = limbColor.b;
-    
-    geneLimbFrontLeft.doAnimationCycle = true;
     geneLimbFrontLeft.animationAxis    = Codon(1, 0, 0);
-    geneLimbFrontLeft.animationRange   = 15;
+    geneLimbFrontLeft.animationRange   = 13;
+    geneLimbFrontLeft.colorIndex       = 6;
+    geneLimbFrontLeft.animationType = ActorState::Animation::Limb;
     
-    // Limb FR gene
+    // Right arm
     Gene geneLimbFrontRight;
-    geneLimbFrontRight.offset    = Codon(-0.11, 0.35, 0.21);
-    geneLimbFrontRight.position  = Codon(0.0, -0.2, 0);
+    geneLimbFrontRight.offset    = Codon(-0.24, 1.09, 0);
+    geneLimbFrontRight.position  = Codon(0, -0.24, 0);
     geneLimbFrontRight.rotation  = Codon(0, 0, 0);
-    geneLimbFrontRight.scale     = Codon(0.13, 0.4, 0.13);
+    geneLimbFrontRight.scale     = Codon(0.1, 0.55, 0.1);
     geneLimbFrontRight.color.x   = limbColor.r;
     geneLimbFrontRight.color.y   = limbColor.g;
     geneLimbFrontRight.color.z   = limbColor.b;
-    
-    geneLimbFrontRight.doAnimationCycle   = true;
     geneLimbFrontRight.doInverseAnimation = true;
     geneLimbFrontRight.animationAxis      = Codon(1, 0, 0);
-    geneLimbFrontRight.animationRange     = 15;
+    geneLimbFrontRight.animationRange     = 13;
+    geneLimbFrontRight.colorIndex         = 7;
+    geneLimbFrontRight.animationType = ActorState::Animation::Limb;
     
-    // Limb RL gene
+    // Left Leg
     Gene geneLimbRearLeft;
-    geneLimbRearLeft.offset    = Codon(0.08, 0.3, -0.18);
-    geneLimbRearLeft.position  = Codon(0.0, -0.2, -0.04);
+    geneLimbRearLeft.offset    = Codon(0.12, 0.6, 0);
+    geneLimbRearLeft.position  = Codon(0, -0.24, 0);
     geneLimbRearLeft.rotation  = Codon(0, 0, 0);
-    geneLimbRearLeft.scale     = Codon(0.13, 0.35, 0.13);
+    geneLimbRearLeft.scale     = Codon(0.18, 0.61, 0.18);
     geneLimbRearLeft.color.x   = limbColor.r;
     geneLimbRearLeft.color.y   = limbColor.g;
     geneLimbRearLeft.color.z   = limbColor.b;
-    
-    geneLimbRearLeft.doAnimationCycle = true;
+    geneLimbRearLeft.doInverseAnimation = true;
     geneLimbRearLeft.animationAxis    = Codon(1, 0, 0);
-    geneLimbRearLeft.animationRange   = 15;
+    geneLimbRearLeft.animationRange   = 13;
+    geneLimbRearLeft.animationType = ActorState::Animation::Limb;
     
-    // Limb RR gene
+    // Right Leg
     Gene geneLimbRearRight;
-    geneLimbRearRight.offset    = Codon(-0.08, 0.3, -0.18);
-    geneLimbRearRight.position  = Codon(-0.01, -0.2, -0.04);
+    geneLimbRearRight.offset    = Codon(-0.12, 0.6, 0);
+    geneLimbRearRight.position  = Codon(0, -0.24 , 0);
     geneLimbRearRight.rotation  = Codon(0, 0, 0);
-    geneLimbRearRight.scale     = Codon(0.13, 0.35, 0.13);
+    geneLimbRearRight.scale     = Codon(0.18, 0.61, 0.18);
     geneLimbRearRight.color.x   = limbColor.r;
     geneLimbRearRight.color.y   = limbColor.g;
     geneLimbRearRight.color.z   = limbColor.b;
-    
-    geneLimbRearRight.doAnimationCycle   = true;
-    geneLimbRearRight.doInverseAnimation = true;
     geneLimbRearRight.animationAxis      = Codon(1, 0, 0);
-    geneLimbRearRight.animationRange     = 15;
-    
-    // Tail gene
-    Gene geneTail;
-    geneTail.offset    = Codon(0.0, 0.0, 0.0);
-    geneTail.position  = Codon(0.0, 0.32, -0.33);
-    geneTail.rotation  = Codon(-1.2, 0, 0);
-    geneTail.scale     = Codon(0.07, 0.07, 0.3);
-    geneTail.color.x   = tailColor.r;
-    geneTail.color.y   = tailColor.g;
-    geneTail.color.z   = tailColor.b;
+    geneLimbRearRight.animationRange     = 13;
+    geneLimbRearRight.animationType = ActorState::Animation::Limb;
     
     // Apply genes to the actor
     targetActor->genetics.AddGene(geneBody);
     targetActor->genetics.AddGene(geneHead);
-    targetActor->genetics.AddGene(geneBodyUpper);
-    targetActor->genetics.AddGene(geneMuzzle);
-    targetActor->genetics.AddGene(geneEarLeft);
-    targetActor->genetics.AddGene(geneEarRight);
+    targetActor->genetics.AddGene(geneNeck);
+    targetActor->genetics.AddGene(geneBreastLeft);
+    targetActor->genetics.AddGene(geneBreastRight);
+    targetActor->genetics.AddGene(geneShoulderLeft);
+    targetActor->genetics.AddGene(geneShoulderRight);
     targetActor->genetics.AddGene(geneLimbFrontLeft);
     targetActor->genetics.AddGene(geneLimbFrontRight);
     targetActor->genetics.AddGene(geneLimbRearLeft);
     targetActor->genetics.AddGene(geneLimbRearRight);
-    targetActor->genetics.AddGene(geneTail);
     
-    return;
+    
 }
 
 
+Actor* actorInSights = nullptr;
 
 
 
 
+
+
+bool isProfilerEnabled = false;
 
 glm::vec3 force(0);
 float forceDblTime=0;
@@ -292,7 +315,8 @@ void Run() {
     
     
     
-    // DEBUG - Show data on the aimed actor
+    //
+    // DEBUG - Show actor stats
     
     if (actorInSights != nullptr) {
         Engine.console.WriteDialog( 1, actorInSights->GetName() );
@@ -329,6 +353,14 @@ void Run() {
         Engine.console.WriteDialog( 14, "Observe   " + Int.ToString( actorInSights->counters.GetCoolDownObservation() ) );
         Engine.console.WriteDialog( 15, "Breeding  " + Int.ToString( actorInSights->counters.GetCoolDownBreeding() ) );
         
+        Engine.console.WriteDialog( 17, "Distance to target   " + Int.ToString( actorInSights->navigation.GetDistanceToTarget() ) );
+        
+        Engine.console.WriteDialog( 19, "[ Vitality ]" );
+        Engine.console.WriteDialog( 20, "Health   " + Int.ToString( actorInSights->biological.health ) );
+        
+        Engine.console.WriteDialog( 22, "Target list    " + Int.ToString( actorInSights->behavior.GetNumberOfTargets() ) );
+        
+        
     } else {
         
         for (unsigned int i=0; i < 20; i++) 
@@ -357,23 +389,25 @@ void Run() {
     
     
     
-    // Plant tree (testing)
     if (Input.CheckMouseMiddlePressed()) {
-        
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             float xx = Random.Range(0, 10) - Random.Range(0, 10);
             float zz = Random.Range(0, 10) - Random.Range(0, 10);
             
-            Actor* actor = AI.SpawnActor();
-            ApplyGene(actor);
+            Actor* actor = AI.CreateActor();
             
+            actor->navigation.SetPosition(glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz));
             actor->navigation.SetTargetPoint(glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz));
             
-            GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
-            actorObject->SetPosition(hit.point.x + xx, hit.point.y+5, hit.point.z + zz);
+            //AI.genomes.presets.Human(actor);
+            ApplyGene(actor);
+            
+            actor->physical.SetAge( Random.Range(0.0f, actor->physical.GetAdultAge()) );
+            actor->RebuildGeneticExpression();
             
             actor->isActive = true;
             
+            actorInSights = actor;
         }
         
         /*
@@ -410,153 +444,55 @@ void Run() {
             
         }
         */
-    }
-    
-    
-    
-    // Kill actor test
-    if (Input.CheckMouseRightPressed()) {
-        
-        if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
-            
-            GameObject* actorObject = (GameObject*)hit.gameObject;
-            Actor* actor = actorObject->GetComponent<Actor>();
-            
-            AI.KillActor( actor );
-            
-        }
         
     }
+    
     
     
     //
     // Profiling
     //
     
-    /*
+    
     if (Input.CheckKeyPressed(VK_F4)) {
+        isProfilerEnabled = !isProfilerEnabled;
         
-        if (Engine.CheckIsProfilerActive()) {
-            Engine.DisableProfiler();
-            
+        if (!isProfilerEnabled) 
             for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
-                Engine.WriteDialog(i, "");
-            
-        } else {
-            
-            Engine.EnableProfiler();
-        }
-        
-    }
-    */
-    
-    
-    if (Input.CheckKeyPressed(VK_F3)) {
-        
-        isDebugReportActive = !isDebugReportActive;
-        
-        if (!isDebugReportActive) {
-            //for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
-            //    Engine.WriteDialog(i, "");
-        }
-        
+                Engine.console.WriteDialog(i, "");
     }
     
+    if (isProfilerEnabled) {
+        
+        Engine.console.WriteDialog( 0, "[Profiler]" );
+        Engine.console.WriteDialog( 1, "AI          " + Float.ToString( Profiler.profileActorAI ) );
+        Engine.console.WriteDialog( 2, "Engine      " + Float.ToString( Profiler.profileGameEngineUpdate ) );
+        Engine.console.WriteDialog( 3, "Renderer    " + Float.ToString( Profiler.profileRenderSystem ) );
+        
+        
+        Engine.console.WriteDialog( 5, "Draw calls      " + Int.ToString(Renderer.GetNumberOfDrawCalls()) );
+        
+        Engine.console.WriteDialog( 7, "GameObjects     " + Int.ToString(Engine.GetNumberOfGameObjects()) );
+        Engine.console.WriteDialog( 8, "Components      " + Int.ToString(Engine.GetNumberOfComponents()) );
+        
+        Engine.console.WriteDialog( 9, "MeshRenderers   " + Int.ToString(Renderer.GetNumberOfMeshRenderers()) );
+        Engine.console.WriteDialog(10, "Meshes          " + Int.ToString(Renderer.GetNumberOfMeshes()) );
+        Engine.console.WriteDialog(11, "Materials       " + Int.ToString(Renderer.GetNumberOfMaterials()) );
+        Engine.console.WriteDialog(12, "RigidBodies     " + Int.ToString(Physics.world->getNbRigidBodies()) );
+        Engine.console.WriteDialog(13, "Actors          " + Int.ToString(AI.GetNumberOfActors()) );
+        
+    }
     
+    
+    
+    // Full screen switching
     if (Input.CheckKeyPressed(VK_F11)) {
-        
         isFullScreen = !isFullScreen;
-        
         if (isFullScreen) {
-            
             Platform.WindowEnableFullscreen();
-            
         } else {
-            
             Platform.WindowDisableFullscreen();
-            
         }
-        
-    }
-    
-    // Debug report
-    
-    
-    
-    if (isDebugReportActive) {
-        
-        // Print current chunk details
-        
-        if (Physics.Raycast(from, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Ground)) {
-            
-            GameObject* hitObject = (GameObject*)hit.gameObject;
-            MeshRenderer* chunkRenderer = hitObject->GetComponent<MeshRenderer>();
-            
-            Chunk* hitChunk = (Chunk*)hitObject->GetUserData();
-            
-            if (hitObject != nullptr) {
-                
-                std::string chunkPosition = "Chunk ";
-                
-                chunkPosition += Float.ToString( hitObject->GetPosition().x );
-                chunkPosition += ", ";
-                chunkPosition += Float.ToString( hitObject->GetPosition().z );
-                
-                //Engine.WriteDialog(0, chunkPosition);
-                
-            }
-            
-        }
-        
-        // Print player position
-        glm::vec3 cameraPosition = Engine.cameraController->GetPosition();
-        
-        std::string playerPosition = "x ";
-        playerPosition += Int.ToString( cameraPosition.x );
-        playerPosition += "  y ";
-        playerPosition += Int.ToString( cameraPosition.y );
-        playerPosition += "  z ";
-        playerPosition += Int.ToString( cameraPosition.z );
-        
-        //Engine.WriteDialog(3, playerPosition);
-        
-        // Check object in front of camera
-        
-        /*
-        
-        if (Physics.Raycast(from, direction, distance, hit, LayerMask::Actor)) {
-            
-            GameObject* hitObject = (GameObject*)hit.gameObject;
-            Actor* hitActor = hitObject->GetComponent<Actor>();
-            
-            Engine.WriteDialog(4, hitActor->GetName());
-            Engine.WriteDialog(5, "Age: " + Int.ToString(hitActor->GetAge()));
-            
-            float actorChunkX = Math.Round( hitObject->GetPosition().x / GameWorld.chunkSize ) * GameWorld.chunkSize;
-            float actorChunkZ = Math.Round( hitObject->GetPosition().z / GameWorld.chunkSize ) * GameWorld.chunkSize;
-            
-            // Set actor chunk to the current chunk
-            Chunk* chunkPtr = GameWorld.CheckChunk( glm::vec2(actorChunkX, actorChunkZ) );
-            if (chunkPtr != nullptr) {
-                
-                Engine.WriteDialog(6, Float.ToString(chunkPtr->position.x / GameWorld.chunkSize) + 
-                                      ", " + 
-                                      Float.ToString(chunkPtr->position.y / GameWorld.chunkSize));
-                
-            }
-            
-            Engine.WriteDialog(7, Float.ToString(actorChunkX) + ", " + Float.ToString(actorChunkZ));
-            
-            Engine.WriteDialog(8, "Genes         " + Int.ToString( hitActor->GetNumberOfGenes() ));
-            
-        } else {
-            
-            for (unsigned int i=0; i < 10-4; i++) 
-                Engine.WriteDialog(4 + i, "");
-            
-        }
-        */
-        
     }
     
     
@@ -609,35 +545,26 @@ void Run() {
         
         Engine.cameraController->AddForce(forceTotal.x, forceTotal.y, forceTotal.z);
         
-        
-        // Field of view effect
+        // Field of view zoom effect
         float fovPullback = glm::length(forceTotal) * 40.0f;
-        
         if (fovPullback > 4.0f) 
             fovPullback = 4.0f;
-        
         Engine.sceneMain->camera->fov = 60 + fovPullback;
         
     }
     
     
     //
-    // Pausing
+    // Escape key pausing
     if (Input.CheckKeyPressed(VK_ESCAPE)) {
-        
         Platform.Pause();
-        
         if (Platform.isPaused) {
-            
             MainMenuEnable();
-            
         } else {
-            
             MainMenuDisable();
-            
         }
-        
     }
+    
     
     return;
 }

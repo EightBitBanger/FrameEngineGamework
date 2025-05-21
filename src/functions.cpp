@@ -159,11 +159,11 @@ void FuncSummon(std::vector<std::string> args) {
         randomOffset.x += Random.Range(0, 20) - Random.Range(0, 20);
         randomOffset.z += Random.Range(0, 20) - Random.Range(0, 20);
         
-        Actor* actor = AI.SpawnActor();
+        Actor* actor = AI.CreateActor();
         actor->navigation.SetTargetPoint(glm::vec3(randomOffset.x, randomOffset.y, randomOffset.z));
         
-        GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
-        actorObject->SetPosition(randomOffset.x, randomOffset.y, randomOffset.z);
+        //GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
+        //actorObject->SetPosition(randomOffset.x, randomOffset.y, randomOffset.z);
         
         unsigned long int actorAge = 900 + (Random.Range(0, 500) - Random.Range(0, 500));
         
