@@ -45,9 +45,6 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             actor->state.mode = ActorState::Mode::MoveTo;
             
         case ActorState::Mode::MoveTo:
-            // Hold until the physics system tells us how high this point is
-            if (actor->navigation.mTargetPoint.y == 1000.0f) 
-                break;
             forward = CalculateForwardVelocity(actor);
             forward *= actor->physical.mSpeed * 0.01f;
             
@@ -84,16 +81,15 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
     switch (actor->state.current) {
             
         case ActorState::State::Attack:
+            if (actor->counters.mAttackCoolDownCounter > 0) 
+                break;
             actor->navigation.mTargetPoint.x = position.x;
             actor->navigation.mTargetPoint.z = position.z;
             actor->navigation.mTargetLook  = position;
             actor->state.mIsFacing = true;
             
-            if (actor->counters.mAttackCoolDownCounter > 0) 
-                break;
             // Inflict attack damage
-            if (actor->navigation.mTargetActor == nullptr) 
-                HandleInflictDamage(actor, actor->navigation.mTargetActor);
+            HandleInflictDamage(actor, actor->navigation.mTargetActor);
             break;
             
         case ActorState::State::Flee:
@@ -117,8 +113,13 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
             
     }
     
+    glm::vec3 posA = actor->navigation.mPosition;
+    glm::vec3 posB = actor->navigation.mTargetPoint;
+    posA.y = 0.0f;
+    posB.y = 0.0f;
+    
     // Check arrived at target actor
-    actor->navigation.mDistanceToTarget = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetPoint);
+    actor->navigation.mDistanceToTarget = glm::distance(posA, posB);
     if (actor->navigation.mDistanceToTarget < actor->behavior.GetDistanceToInflict()) {
         
         actor->state.mode = ActorState::Mode::Idle;
@@ -236,7 +237,7 @@ glm::vec3 ActorSystem::CalculateRandomLocalPoint(Actor* actor) {
     position.z += Random.Range(0.0f, actor->behavior.GetDistanceToWalk()) - Random.Range(0.0f, actor->behavior.GetDistanceToWalk());
     
     actor->navigation.mTargetPoint.x = position.x;
-    actor->navigation.mTargetPoint.y = 1000.0f; // Hold until the physics system updates this
+    actor->navigation.mTargetPoint.y = 0.0f;
     actor->navigation.mTargetPoint.z = position.z;
     return position;
 }
@@ -249,7 +250,7 @@ void ActorSystem::UpdateProximityList(Actor* actor) {
         Actor* actorPtr = actor->behavior.mProximityList[i];
         
         // Check actor focal range
-        if (glm::distance(actor->navigation.mPosition, actorPtr->navigation.mPosition) > actor->behavior.mDistanceToFocus) {
+        if (glm::distance(actor->navigation.mPosition, actorPtr->navigation.mPosition) > actor->behavior.mDistanceToFocus * 2.0f) {
             actor->behavior.mProximityList.erase(actor->behavior.mProximityList.begin() + i);
             continue;
         }
@@ -262,7 +263,7 @@ void ActorSystem::UpdateProximityList(Actor* actor) {
     }
     
     // Limit list size
-    if (actor->behavior.mProximityList.size() > 10) 
+    if (actor->behavior.mProximityList.size() > 8) 
         return;
     
     unsigned int index = Random.Range(0, mActors.Size()-1);
@@ -271,8 +272,6 @@ void ActorSystem::UpdateProximityList(Actor* actor) {
     
     // Select a random actor
     Actor* targetActor = mActors[ index ];
-    if (targetActor == nullptr) 
-        return;
     
     // Check bad actor
     if (targetActor->isGarbage) 

@@ -1,7 +1,9 @@
 #include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
 #include <GameEngineFramework/Engine/Engine.h>
+CustomAllocator particlePools{1000, 1};
 
-ParticleSystem::ParticleSystem() 
+ParticleSystem::ParticleSystem() : 
+    mEmitters(particlePools)
 {
 }
 

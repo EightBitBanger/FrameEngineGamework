@@ -295,7 +295,6 @@ void GameObject::AddColliderSphere(rp3d::SphereShape* sphereShape, float x, floa
 
 void GameObject::AddCollider(ColliderTag* colliderTag, float x, float y, float z, LayerMask layer) {
     if (mRigidBodyCache == nullptr) return;
-    assert(colliderTag != nullptr);
     if (colliderTag->isStatic) {
         mRigidBodyCache->setType(rp3d::BodyType::STATIC);
     } else {

@@ -113,12 +113,13 @@ std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
         
         genetics += Float.ToString( gene.expressionFactor ) + ",";
         genetics += Float.ToString( gene.expressionMax ) + ",";
-        genetics += UInt.ToString( gene.expressionAge ) + "|";
+        genetics += UInt.ToString(  gene.expressionAge ) + "|";
         
         genetics += Float.ToString( gene.doExpress ) + ",";
+        if (gene.animationType == ActorState::Animation::Body) genetics += "0,";
+        if (gene.animationType == ActorState::Animation::Head) genetics += "1,";
+        if (gene.animationType == ActorState::Animation::Limb) genetics += "2,";
         genetics += Float.ToString( gene.doInverseAnimation ) + ",";
-        genetics += Float.ToString( gene.doAnimationCycle ) + ",";
-        genetics += Float.ToString( gene.doAnimateAsHead ) + ",";
         
         genetics += UInt.ToString( gene.type ) + "|";
         
@@ -263,14 +264,13 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
             gene.expressionAge    = String.ToUint(  Codon[2] );
         }
         Codon = String.Explode( subGenes[8], ',' );
-        if (Codon.size() == 5) {
-            if (Codon[0] == "0") {gene.doExpress          = false;}
-            if (Codon[1] == "1") {gene.doInverseAnimation = true;}
-            if (Codon[2] == "1") {gene.doAnimationCycle   = true;}
-            if (Codon[3] == "1") {gene.doAnimateAsHead    = true;}
-            
-            gene.type = String.ToUint( Codon[4] );
-            
+        if (Codon.size() == 4) {
+            if (Codon[0] == "0") {gene.doExpress = false;}
+            if (Codon[1] == "0") {gene.animationType = ActorState::Animation::Body;}
+            if (Codon[1] == "1") {gene.animationType = ActorState::Animation::Head;}
+            if (Codon[1] == "2") {gene.animationType = ActorState::Animation::Limb;}
+            if (Codon[2] == "1") {gene.doInverseAnimation = true;}
+            gene.type = String.ToUint( Codon[3] );
         }
         
         targetActor->genetics.mPhen.push_back(phenotype);
@@ -428,7 +428,6 @@ Gene GeneticPresets::Lerp(Gene geneA, Gene geneB, float bias) {
     gene.expressionAge    = Float.Lerp(geneA.expressionAge,    geneB.expressionAge, bias);
     
     gene.doInverseAnimation = geneA.doInverseAnimation || geneB.doInverseAnimation;
-    gene.doAnimationCycle = geneA.doAnimationCycle || geneB.doAnimationCycle;
     gene.animationRange = Float.Lerp(geneA.animationRange, geneB.animationRange, bias);
     
     // Random attachment index

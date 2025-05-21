@@ -76,7 +76,6 @@ void ActorSystem::ClearOldGeneticRenderers(Actor* actor) {
         sceneMain->RemoveMeshRendererFromSceneRoot(geneRenderer, RENDER_QUEUE_GEOMETRY);
         Renderer.DestroyMeshRenderer(geneRenderer);
     }
-    
     actor->genetics.mGeneticRenderers.clear();
     actor->genetics.mPhen.clear();
     actor->state.mAnimation.clear();

@@ -6,6 +6,11 @@
 
 #include <iostream>
 
+CustomAllocator EntityPool   {1000, 1};
+CustomAllocator MaterialPool {1000, 1};
+CustomAllocator MeshPool     {500, 1};
+CustomAllocator LightPool    {500, 1};
+
 extern Logger Log;
 
 extern IntType Int;
@@ -37,7 +42,12 @@ RenderSystem::RenderSystem() :
     mNumberOfLights(0),
     mNumberOfShadows(0),
     
-    mShadowDistance(300)
+    mShadowDistance(300),
+    
+    mEntity(EntityPool),
+    mMesh(MeshPool),
+    mMaterial(MaterialPool),
+    mLight(LightPool)
 {
 }
 
@@ -52,14 +62,13 @@ bool RenderSystem::DestroyMeshRenderer(MeshRenderer* meshRendererPtr) {
         if (meshRendererPtr->mesh->isShared == false) 
             mMesh.Destroy(meshRendererPtr->mesh);
     
-    for (unsigned int i=0; i < meshRendererPtr->lods.size(); i++) {
-        Mesh* meshPtr = meshRendererPtr->lods[i];
-        
+    for (unsigned int i=0; i < meshRendererPtr->mLods.size(); i++) {
+        LevelOfDetail& lod = meshRendererPtr->mLods[i];
+        Mesh* meshPtr = lod.mesh;
         if (meshPtr->isShared == false) 
             mMesh.Destroy(meshPtr);
-        
     }
-    meshRendererPtr->lods.clear();
+    meshRendererPtr->mLods.clear();
     
     if (meshRendererPtr->material != nullptr) 
         if (meshRendererPtr->material->isShared == false) 

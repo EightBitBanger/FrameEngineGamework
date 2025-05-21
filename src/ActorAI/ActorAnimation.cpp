@@ -17,15 +17,31 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
             continue;
         }
         
+        // Initial position
         geneRenderer->transform.position = actor->navigation.mPosition;
         geneRenderer->transform.matrix = glm::translate(glm::mat4(1), geneRenderer->transform.position);
         
-        if (actor->genetics.mGenes[a].doAnimateAsHead) {
-            UpdateAnimationHead(geneRenderer->transform.matrix, actor, geneRenderer, a);
-        } else {
+        // Scale body by age
+        float ageScalerValue = glm::clamp((float)actor->physical.mAge * 0.001f, 0.0f, 1.0f);
+        float ageScale = Math.Lerp(actor->physical.mYouthScale, actor->physical.mAdultScale, ageScalerValue);
+        geneRenderer->transform.matrix = glm::scale(geneRenderer->transform.matrix, glm::vec3(ageScale));
+        
+        // Determine animation
+        switch (actor->genetics.mGenes[a].animationType) {
+            
+        case ActorState::Animation::Body:
             UpdateAnimationBody(geneRenderer->transform.matrix, actor, geneRenderer, a);
+            break;
+            
+        case ActorState::Animation::Head:
+            UpdateAnimationHead(geneRenderer->transform.matrix, actor, geneRenderer, a);
+            break;
+            
+        case ActorState::Animation::Limb:
+            UpdateAnimationLimb(geneRenderer->transform.matrix, actor, a);
+            break;
+            
         }
-        UpdateAnimationGenetics(geneRenderer->transform.matrix, actor, a);
         
         // Final render scale
         geneRenderer->transform.matrix = glm::scale(geneRenderer->transform.matrix, geneRenderer->transform.scale);
@@ -53,15 +69,18 @@ void ActorSystem::UpdateAnimationHead(glm::mat4& matrix, Actor* actor, MeshRende
     if (headRotationLength != 0.0f) 
         matrix = glm::rotate(matrix, glm::radians(headRotationLength), glm::normalize(actor->navigation.mFacing));
     
+    // Genetic translation
+    matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
+    
+    // Rotate gene
+    glm::vec3 baseRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, actor->genetics.mGenes[a].rotation.y, actor->genetics.mGenes[a].rotation.z);
+    float geneRotationLength = glm::length(baseRotation);
+    if (geneRotationLength != 0.0f) 
+        matrix = glm::rotate(matrix, geneRotationLength, glm::normalize(baseRotation));
     return;
 }
 
 void ActorSystem::UpdateAnimationBody(glm::mat4& matrix, Actor* actor, MeshRenderer* geneRenderer, unsigned int a) {
-    // Scale body by age
-    float ageScalerValue = glm::clamp((float)actor->physical.mAge * 0.001f, 0.0f, 1.0f);
-    float ageScale = Math.Lerp(actor->physical.mYouthScale, actor->physical.mAdultScale, ageScalerValue);
-    matrix = glm::scale(matrix, glm::vec3(ageScale));
-    
     // Rotate body
     float bodyRotationLength = glm::length(actor->navigation.mRotation);
     if (bodyRotationLength != 0.0f) 
@@ -70,12 +89,27 @@ void ActorSystem::UpdateAnimationBody(glm::mat4& matrix, Actor* actor, MeshRende
     // Translate body
     matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].offset.x, actor->genetics.mGenes[a].offset.y, actor->genetics.mGenes[a].offset.z));
     
+    // Genetic translation
+    matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
+    
+    // Rotate gene
+    glm::vec3 baseRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, actor->genetics.mGenes[a].rotation.y, actor->genetics.mGenes[a].rotation.z);
+    float geneRotationLength = glm::length(baseRotation);
+    if (geneRotationLength != 0.0f) 
+        matrix = glm::rotate(matrix, geneRotationLength, glm::normalize(baseRotation));
     return;
 }
 
-void ActorSystem::UpdateAnimationGenetics(glm::mat4& matrix, Actor* actor, unsigned int a) {
-    if (!actor->genetics.mGenes[a].doAnimationCycle || !actor->state.mIsWalking) {
-        
+void ActorSystem::UpdateAnimationLimb(glm::mat4& matrix, Actor* actor, unsigned int a) {
+    // Rotate body
+    float bodyRotationLength = glm::length(actor->navigation.mRotation);
+    if (bodyRotationLength != 0.0f) 
+        matrix = glm::rotate(matrix, glm::radians(bodyRotationLength), glm::normalize(actor->navigation.mRotation));
+    
+    // Translate body
+    matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].offset.x, actor->genetics.mGenes[a].offset.y, actor->genetics.mGenes[a].offset.z));
+    
+    if (actor->genetics.mGenes[a].animationType != ActorState::Animation::Limb || !actor->state.mIsWalking) {
         // Genetic translation
         matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
         
@@ -84,24 +118,24 @@ void ActorSystem::UpdateAnimationGenetics(glm::mat4& matrix, Actor* actor, unsig
         float geneRotationLength = glm::length(baseRotation);
         if (geneRotationLength != 0.0f) 
             matrix = glm::rotate(matrix, geneRotationLength, glm::normalize(baseRotation));
-        
+        return;
+    }
+    
+    // Apply animation
+    ApplyAnimationRotation(matrix, actor, a);
+    
+    matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
+    
+    // Update animation state
+    glm::vec4 animationFactor = glm::normalize(glm::vec4(actor->genetics.mGenes[a].animationAxis.x, 
+    actor->genetics.mGenes[a].animationAxis.y, actor->genetics.mGenes[a].animationAxis.z, 0));
+    
+    // Calculate limb swing
+    float animationMaxSwingRange = actor->genetics.mGenes[a].animationRange;
+    if (actor->state.mAnimation[a].w < 0) {
+        HandleAnimationSwing(actor, a, animationFactor, animationMaxSwingRange, false);
     } else {
-        
-        // Apply animation
-        ApplyAnimationRotation(matrix, actor, a);
-        matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
-        
-        // Update animation state
-        glm::vec4 animationFactor = glm::normalize(glm::vec4(actor->genetics.mGenes[a].animationAxis.x, 
-        actor->genetics.mGenes[a].animationAxis.y, actor->genetics.mGenes[a].animationAxis.z, 0));
-        
-        float animationMaxSwingRange = actor->genetics.mGenes[a].animationRange;
-        if (actor->state.mAnimation[a].w < 0) {
-            HandleAnimationSwing(actor, a, animationFactor, animationMaxSwingRange, false);
-        } else {
-            HandleAnimationSwing(actor, a, animationFactor, animationMaxSwingRange, true);
-        }
-        
+        HandleAnimationSwing(actor, a, animationFactor, animationMaxSwingRange, true);
     }
     return;
 }

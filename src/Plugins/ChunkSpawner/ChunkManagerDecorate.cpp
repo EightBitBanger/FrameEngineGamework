@@ -311,7 +311,7 @@ void ChunkManager::Decorate(Chunk& chunk) {
             staticObj.z = zp;
             
             // Structures
-            
+            /*
             for (unsigned int s=0; s < world.mStructures.size(); s++) {
                 
                 float xCoord = (float)xx * 0.9f;
@@ -351,13 +351,12 @@ void ChunkManager::Decorate(Chunk& chunk) {
                 
                 continue;
             }
-            
+            */
             
             // Grass
             if (decor.type == DECORATION_GRASS) {
                 
                 if ((unsigned int)Random.Range(0, 100) < decor.density) {
-                    
                     
                     Color finalColor;
                     finalColor = Colors.green * 0.04f;
@@ -388,8 +387,8 @@ void ChunkManager::Decorate(Chunk& chunk) {
                         finalColor = (Colors.green * 0.018f) + (s * 0.001f);
                         
                         finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                                Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                                Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
+                                                  Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
+                                                  Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
                         
                         staticObj.r = finalColor.r;
                         staticObj.g = finalColor.g;
@@ -411,15 +410,14 @@ void ChunkManager::Decorate(Chunk& chunk) {
                     finalColor = Colors.green * 0.05f;
                     
                     finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                            Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                            Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
+                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
+                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
                     
                     staticObj.r = finalColor.r;
                     staticObj.g = finalColor.g;
                     staticObj.b = finalColor.b;
                     
                     AddDecorGrassThick(chunk, staticObj, staticMesh, -xp, height, -zp);
-                    
                 }
                 
             }
@@ -438,17 +436,19 @@ void ChunkManager::Decorate(Chunk& chunk) {
             if (decor.type == DECORATION_ACTOR) {
                 
                 if ((unsigned int)Random.Range(0, 10000) < decor.density) {
-                    
-                    Actor* actor = AI.SpawnActor();
-                    actor->navigation.SetTargetPoint(from);
-                    
-                    GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
-                    actorObject->SetPosition(from.x, 0, from.z);
+                    Actor* actor = AI.CreateActor();
+                    actor->navigation.SetPosition( glm::vec3(from.x, 0, from.z) );
+                    actor->navigation.SetTargetPoint( glm::vec3(from.x, 0, from.z) );
                     
                     DecodeGenome(decor, actor);
                     
-                    actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
+                    actor->isActive = true;
+                    actor->RebuildGeneticExpression();
                     
+                    actor->state.current = ActorState::State::None;
+                    actor->state.mode = ActorState::Mode::Idle;
+                    
+                    actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
                 }
                 
             }
@@ -458,6 +458,7 @@ void ChunkManager::Decorate(Chunk& chunk) {
         
     }
     
+    staticMesh->Load();
     return;
 }
 

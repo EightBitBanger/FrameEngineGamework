@@ -12,9 +12,6 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     chunk.gameObject->name = Float.ToString(x) + "_" + Float.ToString(y);
     
-    chunk.gameObject->renderDistance   = renderDistance * chunkSize * 0.5f;
-    chunk.staticObject->renderDistance = staticDistance * chunkSize * 0.45f;
-    
     // Add renderers
     chunk.gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     chunk.staticObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
@@ -22,19 +19,18 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
     MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
     
-    // Level of detail
-    //chunkRenderer->distance = renderDistance * chunkSize * 0.18f;
-    
+    chunk.gameObject->renderDistance   = (renderDistance * chunkSize) * 0.5f;
+    chunk.staticObject->renderDistance = (renderDistance * chunkSize) * 0.5f * staticDistance;
     
     // Bounding box area
-    //glm::vec3 boundMin(-chunkSize, -10, -chunkSize);
-    //glm::vec3 boundMax(chunkSize, 10, chunkSize);
+    glm::vec3 boundMin(-1, -1, -1);
+    glm::vec3 boundMax(1, 1, 1);
     
-    //chunkRenderer->SetBoundingBoxMin(boundMin);
-    //chunkRenderer->SetBoundingBoxMax(boundMax);
+    chunkRenderer->SetBoundingBoxMin(boundMin);
+    chunkRenderer->SetBoundingBoxMax(boundMax);
     
-    //staticRenderer->SetBoundingBoxMin(boundMin);
-    //staticRenderer->SetBoundingBoxMax(boundMax);
+    staticRenderer->SetBoundingBoxMin(boundMin);
+    staticRenderer->SetBoundingBoxMax(boundMax);
     
     // Chunk renderer
     
@@ -47,17 +43,6 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     chunkRenderer->mesh->isShared = false;
     chunkRenderer->EnableFrustumCulling();
     chunkRenderer->material = worldMaterial;
-    
-    // Level of detail
-    //Mesh* lodMeshA = Engine.Create<Mesh>();
-    //Mesh* lodMeshB = Engine.Create<Mesh>();
-    
-    //lodMeshA->isShared = false;
-    //lodMeshB->isShared = false;
-    
-    //chunkRenderer->lods.push_back( lodMeshA );
-    //chunkRenderer->lods.push_back( lodMeshB );
-    
     
     // Static renderer
     
@@ -111,23 +96,37 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     GenerateWaterTableFromHeightField(heightField, chunkSZ, chunkSZ, 0);
     
-    
-    // Finalize chunk
-    
     AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSZ, chunkSZ, 0, 0, 1, 1);
     chunkRenderer->mesh->Load();
     
-    //AddHeightFieldToMeshHalfSize(chunkRenderer->lods[0], heightField, colorField, chunkSZ, chunkSZ, 0, 0);
-    //AddHeightFieldToMeshHalfSize(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0);
     
-    //AddHeightFieldToMeshLOD(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 2);
-    //AddHeightFieldToMeshReduced(chunkRenderer->lods[1], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 2);
-    //AddHeightFieldToMeshReduced(chunkRenderer->lods[2], heightField, colorField, chunkSZ, chunkSZ, 0, 0, 20);
+    // Level of detail
+    Mesh* lodMeshA = Engine.Create<Mesh>();
+    Mesh* lodMeshB = Engine.Create<Mesh>();
+    lodMeshA->isShared = false;
+    lodMeshB->isShared = false;
     
-    //chunkRenderer->lods[0]->Load();
-    //chunkRenderer->lods[1]->Load();
-    //chunkRenderer->lods[2]->Load();
+    LevelOfDetail lodA;
+    LevelOfDetail lodB;
+    LevelOfDetail lodC;
+    lodA.mesh = chunkRenderer->mesh;
+    lodB.mesh = lodMeshA;
+    lodC.mesh = lodMeshB;
+    //lodB.offset.y = -2.0f;
+    //lodC.offset.y = -4.0f;
+    lodA.distance = chunk.staticObject->renderDistance;
+    lodB.distance = chunk.staticObject->renderDistance + 200;
+    lodC.distance = chunk.staticObject->renderDistance + 300;
     
+    chunkRenderer->AddLevelOfDetail(lodA);
+    chunkRenderer->AddLevelOfDetail(lodB);
+    chunkRenderer->AddLevelOfDetail(lodC);
+    
+    // Generate detail meshes
+    AddHeightFieldToMeshSimplified(lodMeshA, heightField, colorField, chunkSZ, chunkSZ, 0, 0, 8);
+    AddHeightFieldToMeshSimplified(lodMeshB, heightField, colorField, chunkSZ, chunkSZ, 0, 0, 32);
+    lodMeshA->Load();
+    lodMeshB->Load();
     
     // Physics
     

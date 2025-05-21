@@ -5,7 +5,6 @@ MeshRenderer::MeshRenderer() :
     isActive(false),
     mesh(nullptr),
     material(nullptr),
-    distance(0),
     mDoCulling(false),
     mBoundingBoxMin(glm::vec3(-1.0f, -1.0f, -1.0f)),
     mBoundingBoxMax(glm::vec3(1.0f, 1.0f, 1.0f))
@@ -33,12 +32,25 @@ void MeshRenderer::SetBoundingBoxMax(glm::vec3 max) {
 }
 
 glm::vec3 MeshRenderer::GetBoundingBoxMin(void) {
-    
     return mBoundingBoxMin;
 }
 
 glm::vec3 MeshRenderer::GetBoundingBoxMax(void) {
-    
     return mBoundingBoxMax;
 }
 
+void MeshRenderer::AddLevelOfDetail(LevelOfDetail lod) {
+    mLods.push_back( lod );
+    return;
+}
+
+bool MeshRenderer::RemoveLevelOfDetail(unsigned int index) {
+    if (index >= mLods.size()) 
+        return false;
+    mLods.erase(mLods.begin() + index);
+    return true;
+}
+
+bool MeshRenderer::GetNumberOfLevelsOfDetail(unsigned int index) {
+    return mLods.size();
+}

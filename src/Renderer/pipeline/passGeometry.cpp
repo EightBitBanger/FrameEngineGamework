@@ -12,41 +12,32 @@ bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     // Mesh binding
     
     // Level of detail shift selection
-    Mesh* meshLOD = LevelOfDetailPass(currentEntity, eye);
+    Mesh* mesh = LevelOfDetailPass(currentEntity, eye);
     
-    if (meshLOD == nullptr) 
+    if (mesh == nullptr) 
         return false;
     
-    BindMesh( meshLOD );
+    BindMesh( mesh );
     
     // Material binding
-    
     Material* materialPtr = currentEntity->material;
-    
     if (materialPtr == nullptr) 
         return false;
-    
     BindMaterial( materialPtr );
     
     // Shader binding
-    
     Shader* shaderPtr = materialPtr->shader;
-    
     if (shaderPtr == nullptr) 
         return false;
-    
     BindShader( shaderPtr );
     
     // Set the projection
-    
     mCurrentShader->SetProjectionMatrix( viewProjection );
     mCurrentShader->SetModelMatrix( currentEntity->transform.matrix );
     
     // Inverse transpose model matrix for lighting with non linear scaling
     glm::mat3 invTransposeMatrix = glm::transpose( glm::inverse( currentEntity->transform.matrix ) );
-    
     mCurrentShader->SetInverseModelMatrix( invTransposeMatrix );
-    
     mCurrentShader->SetCameraPosition(eye);
     mCurrentShader->SetCameraAngle(cameraAngle);
     
@@ -56,7 +47,7 @@ bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     mCurrentShader->SetMaterialSpecular(mCurrentMaterial->specular);
     
     // Render the geometry
-    currentEntity->mesh->DrawIndexArray();
+    mesh->DrawIndexArray();
     mNumberOfDrawCalls++;
     
     return true;

@@ -5,82 +5,61 @@
 #define TERMINAL_VELOCITY  39.24f
 
 
-void EngineSystemManager::UpdateKinematics(unsigned int index) {
-    if (mStreamBuffer[index].rigidBody == nullptr) 
-        return;
-    std::lock_guard<std::mutex> (mStreamBuffer[index].actor->navigation.mux);
+void EngineSystemManager::UpdateKinematics(void) {
+    unsigned int numberOfActors = AI.GetNumberOfActors();
     
-    // Check if the actor needs a collider generated on thread main
-    GenerateCollider(index);
-    
-    // Check query points
-    Hit hit;
-    unsigned int numberOfPoints = mStreamBuffer[index].actor->navigation.mQueryPoints.size();
-    for (unsigned int i=0; i < numberOfPoints; i++) {
-        glm::vec3 queryPoint = mStreamBuffer[index].actor->navigation.mQueryPoints[i];
+    for (unsigned int i=0; i < numberOfActors; i++) {
+        Actor* actor = AI.GetActorFromSimulation(i);
+        std::lock_guard<std::mutex> (actor->navigation.mux);
         
-        // Get point height
-        if (queryPoint.y == 1000.0f) 
+        // Check if the actor needs a collider generated on thread main
+        //GenerateCollider(actor);
+        
+        // Check query points
+        Hit hit;
+        unsigned int numberOfPoints = actor->navigation.mQueryPoints.size();
+        for (unsigned int i=0; i < numberOfPoints; i++) {
+            glm::vec3 queryPoint = actor->navigation.mQueryPoints[i];
+            
+            // Get point height
             if (Physics.Raycast(queryPoint, glm::vec3(0, -1, 0), 2000, hit, LayerMask::Ground)) 
-                mStreamBuffer[index].actor->navigation.mQueryPoints[i].y = hit.point.y;
-    }
-    
-    glm::vec3 actorPosition = mStreamBuffer[index].transform->position;
-    glm::vec3 actorRotation = mStreamBuffer[index].actor->navigation.mRotation;
-    glm::vec3 actorVelocity = mStreamBuffer[index].actor->navigation.mVelocity;
-    glm::vec3 actorTarget = mStreamBuffer[index].actor->navigation.mTargetPoint;
-    
-    rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
-    rp3d::Vector3 physicsPosition = transform.getPosition();
-    
-    // Check not on ground
-    if (Physics.Raycast(actorPosition, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Ground)) {
-        
-        // Standing on ground
-        if (actorPosition.y > hit.point.y) {
-            
-            // Apply some falling action
-            actorVelocity.y -= 1.3f;
-            
-            // Check terminal velocity
-            if (actorVelocity.y < -TERMINAL_VELOCITY) 
-                actorVelocity.y = -TERMINAL_VELOCITY;
-            
-        } else {
-            
-            actorPosition.y = hit.point.y;
-            physicsPosition.y = hit.point.y;
+                actor->navigation.mQueryPoints[i].y = hit.point.y;
         }
         
-    }
-    
-    // Get height at the target point
-    if (actorTarget.y == 1000.0f) {
+        
+        glm::vec3 actorPosition = actor->navigation.mPosition;
+        glm::vec3 actorRotation = actor->navigation.mRotation;
+        glm::vec3 actorVelocity = actor->navigation.mVelocity;
+        glm::vec3 actorTarget   = actor->navigation.mTargetPoint;
+        
+        //rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
+        //rp3d::Vector3 physicsPosition = transform.getPosition();
+        
+        // Check not on ground
+        if (Physics.Raycast(actorPosition, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Ground)) 
+            actorPosition.y = hit.point.y;
+        
+        // Get height at the target point
         if (Physics.Raycast(actorTarget, glm::vec3(0, -1, 0), 2000, hit, LayerMask::Ground)) 
             actorTarget.y = hit.point.y;
+        
+        // Resolve velocity
+        actorPosition += (actorVelocity * 2.0f);
+        
+        // Sync actor position
+        actor->navigation.mPosition = actorPosition;
+        actor->navigation.mRotation = actorRotation;
+        actor->navigation.mVelocity = actorVelocity;
+        actor->navigation.mTargetPoint = actorTarget;
     }
-    
-    // Move the actor into position
-    transform.setPosition(physicsPosition);
-    mStreamBuffer[index].rigidBody->setTransform(transform);
-    
-    // Apply force velocity
-    mStreamBuffer[index].rigidBody->applyLocalForceAtCenterOfMass( rp3d::Vector3(actorVelocity.x, 
-                                                                                 actorVelocity.y, 
-                                                                                 actorVelocity.z) );
-    
-    // Sync actor position
-    mStreamBuffer[index].actor->navigation.mPosition = actorPosition;
-    mStreamBuffer[index].actor->navigation.mRotation = actorRotation;
-    mStreamBuffer[index].actor->navigation.mVelocity = actorVelocity;
-    mStreamBuffer[index].actor->navigation.mTargetPoint = actorTarget;
     
     return;
 }
 
+
 // Function to generate collider
-void EngineSystemManager::GenerateCollider(unsigned int index) {
-    
+void EngineSystemManager::GenerateCollider(Actor* actor) {
+    /*
     rp3d::RigidBody* rigidBody = mStreamBuffer[index].rigidBody;
     
     unsigned int numberOfColliders = rigidBody->getNbColliders();
@@ -98,7 +77,7 @@ void EngineSystemManager::GenerateCollider(unsigned int index) {
         collider->setUserData(static_cast<void*>(mStreamBuffer[index].gameObject));
         rigidBody->setUserData(static_cast<void*>(mStreamBuffer[index].gameObject));
     }
-    
+    */
     return;
 }
 

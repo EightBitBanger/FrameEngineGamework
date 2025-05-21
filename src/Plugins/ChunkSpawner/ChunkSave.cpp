@@ -1,7 +1,6 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
 bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
-    
     std::string chunkPosStr = Float.ToString( chunk.x ) + "_" + Float.ToString( chunk.y );
     std::string worldChunks = "worlds/" + world.name + "/chunks/";
     std::string worldStatic = "worlds/" + world.name + "/static/";
@@ -11,15 +10,16 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
     
     std::string buffer = "";
     
-    
     // Save actors within chunk range
     
     unsigned int numberOfActors = AI.GetNumberOfActors();
     if (numberOfActors > 0) {
+        std::vector<Actor*> terminationList;
+        
         for (unsigned int a=0; a < numberOfActors; a++) {
-            
             Actor* actor = AI.GetActorFromSimulation(a);
-            //GameObject* actorObject = (GameObject*)actor->user.GetUserDataA();
+            if (!actor->isActive || actor->isGarbage) 
+                continue;
             
             glm::vec3 actorPos = actor->navigation.GetPosition();
             glm::vec3 chunkPos(chunk.x, 0, chunk.y);
@@ -44,16 +44,18 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
             buffer += actorPosStr + actorAge + actorGenome + '\n';
             
             if (doClearActors) 
-                AI.KillActor( actor );
-            
+                terminationList.push_back(actor);
             continue;
         }
+        
+        // Delete the actors
+        for (unsigned int a=0; a < terminationList.size(); a++) 
+            AI.DestroyActor( terminationList[a] );
         
         unsigned int bufferSz = buffer.size();
         
         if (bufferSz != 0) 
             Serializer.Serialize(chunkName, (void*)buffer.data(), bufferSz);
-        
     }
     
     
@@ -68,13 +70,13 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
         
         for (unsigned int s=0; s < numberOfStatics; s++) {
             
-            staticElements[s].position = glm::vec3(chunk.statics[s].x, 
-                                                   chunk.statics[s].y, 
-                                                   chunk.statics[s].z);
+            staticElements[s].position.x = chunk.statics[s].x;
+            staticElements[s].position.y = chunk.statics[s].y;
+            staticElements[s].position.z = chunk.statics[s].z;
             
-            staticElements[s].color = glm::vec3(chunk.statics[s].r, 
-                                                chunk.statics[s].g, 
-                                                chunk.statics[s].b);
+            staticElements[s].color.x = chunk.statics[s].r;
+            staticElements[s].color.y = chunk.statics[s].g;
+            staticElements[s].color.z = chunk.statics[s].b;
             
             staticElements[s].type = chunk.statics[s].type;
             

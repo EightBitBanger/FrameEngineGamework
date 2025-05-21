@@ -20,8 +20,6 @@ ActorSystem::ActorSystem() :
     sceneMain(nullptr),
     shader(nullptr),
     baseMesh(nullptr),
-    SpawnActor(nullptr),
-    KillActor(nullptr),
     mPlayerPosition(0),
     mActorUpdateDistance(300),
     mWorldWaterLevel(0.0f)
@@ -77,6 +75,13 @@ void ActorSystem::UpdateSendSignal(void) {
 }
 
 Actor* ActorSystem::CreateActor(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    if (!mGarbageActors.empty()) {
+        Actor* actor = mGarbageActors[0];
+        mGarbageActors.erase(mGarbageActors.begin());
+        actor->Reset();
+        return actor;
+    }
     Actor* actorPtr = mActors.Create();
     actorPtr->Reset();
     return actorPtr;
@@ -84,7 +89,9 @@ Actor* ActorSystem::CreateActor(void) {
 
 bool ActorSystem::DestroyActor(Actor* actorPtr) {
     std::lock_guard<std::mutex> lock(mux);
-    return mActors.Destroy(actorPtr);
+    actorPtr->isGarbage = true;
+    actorPtr->isActive = false;
+    return true;
 }
 
 Actor* ActorSystem::GetActorFromSimulation(unsigned int index) {
@@ -117,10 +124,10 @@ bool ActorSystem::UpdateGarbageCollection(Actor* actor) {
     // Destroy the renderers
     ClearOldGeneticRenderers(actor);
     
-    // Add to the garbage pile
-    mGarbageActors.push_back(actor);
-    
     actor->Reset();
+    
+    mGarbageActors.push_back(actor);
+    //mActors.Destroy(actor);
     return true;
 }
 

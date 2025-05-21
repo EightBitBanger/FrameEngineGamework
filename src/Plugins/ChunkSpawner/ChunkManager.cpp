@@ -132,7 +132,7 @@ void ChunkManager::ClearWorld(void) {
     unsigned int numberOfActors = AI.GetNumberOfActors();
     
     for (unsigned int a=0; a < numberOfActors; a++) 
-        AI.KillActor(AI.GetActorFromSimulation(a));
+        AI.DestroyActor( AI.GetActorFromSimulation(a) );
     
     mChunkCounterX = 0;
     mChunkCounterZ = 0;

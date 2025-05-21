@@ -74,6 +74,9 @@ int main(int argc, char* argv[]) {
     
     Start();
     
+    // Fire up the profiler
+    Profiler.Activate();
+    
     // Initiate timers
     Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     Time.Update();
@@ -354,22 +357,21 @@ int main(int argc, char* argv[]) {
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
                 
-                // --- Profiling ---
-                //if (Engine.CheckIsProfilerActive()) 
-                //    Profiler.Begin();
-                
                 Run();
                 
                 Scripting.Update();
                 
-                Engine.Update();
-                
                 Network.Update();
                 
                 // --- Profiling ---
-                //if (Engine.CheckIsProfilerActive()) 
-                //    Profiler.profileGameEngineUpdate = Profiler.Query();
+                if (Profiler.CheckIsProfilerActive()) 
+                    Profiler.Begin();
                 
+                Engine.Update();
+                
+                // --- Profiling ---
+                if (Profiler.CheckIsProfilerActive()) 
+                    Profiler.profileGameEngineUpdate = Profiler.Query();
                 
                 fixedAccumulator -= fixedUpdateTimeout;
                 
@@ -389,8 +391,8 @@ int main(int argc, char* argv[]) {
         if (Time.Update()) {
             
             // --- Profiling ---
-            //if (Engine.CheckIsProfilerActive()) 
-            //    Profiler.Begin();
+            if (Profiler.CheckIsProfilerActive()) 
+                Profiler.Begin();
             
             // Draw the current frame state
             Renderer.RenderFrame();
@@ -409,8 +411,8 @@ int main(int argc, char* argv[]) {
 #endif
             
             // --- Profiling ---
-            //if (Engine.CheckIsProfilerActive()) 
-            //    Profiler.profileRenderSystem = Profiler.Query();
+            if (Profiler.CheckIsProfilerActive()) 
+                Profiler.profileRenderSystem = Profiler.Query();
             
         }
         
@@ -422,8 +424,8 @@ int main(int argc, char* argv[]) {
         if (PhysicsTime.Update()) {
             
             // --- Profiling ---
-            //if (Engine.CheckIsProfilerActive()) 
-            //    Profiler.Begin();
+            if (Profiler.CheckIsProfilerActive()) 
+                Profiler.Begin();
             
             Physics.world->update( PHYSICS_UPDATES_PER_SECOND );
             
@@ -432,8 +434,8 @@ int main(int argc, char* argv[]) {
             
             
             // --- Profiling ---
-            //if (Engine.CheckIsProfilerActive()) 
-            //    Profiler.profilePhysicsSystem = Profiler.Query();
+            if (Profiler.CheckIsProfilerActive()) 
+                Profiler.profilePhysicsSystem = Profiler.Query();
             
         }
         

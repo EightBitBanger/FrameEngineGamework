@@ -31,10 +31,10 @@ void Actor::Reset(void) {
     navigation.mQueryPoints.clear();
     
     // Behavior
-    behavior.mDistanceToFocus      = 10.0f;
-    behavior.mDistanceToWalk       = 20.0f;
-    behavior.mDistanceToAttack     = 10.0f;
-    behavior.mDistanceToFlee       = 8.0f;
+    behavior.mDistanceToFocus      = 50.0f;
+    behavior.mDistanceToWalk       = 30.0f;
+    behavior.mDistanceToAttack     = 30.0f;
+    behavior.mDistanceToFlee       = 20.0f;
     behavior.mDistanceToInflict    = 1.0f;
     
     behavior.mCooldownAttack       = 8;
@@ -47,6 +47,7 @@ void Actor::Reset(void) {
     
     // State
     state.mode          = ActorState::Mode::Idle;
+    state.current       = ActorState::State::None;
     state.mIsWalking    = false;
     state.mIsRunning    = false;
     state.mIsFacing     = true;
@@ -128,6 +129,7 @@ Actor::Behavior::Behavior() :
 
 Actor::State::State() : 
     mode(ActorState::Mode::Idle),
+    current(ActorState::State::None),
     mIsWalking(false),
     mIsRunning(false),
     mIsFacing(false)
@@ -235,6 +237,11 @@ void Actor::NavigationSystem::SetTargetActor(Actor* actorPtr) {
     std::lock_guard<std::mutex> lock(mux);
     mTargetActor = actorPtr;
     return;
+}
+
+float Actor::NavigationSystem::GetDistanceToTarget(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    return mDistanceToTarget;
 }
 
 
@@ -363,6 +370,10 @@ void Actor::Behavior::SetPreyState(bool state) {
 bool Actor::Behavior::GetPreyState(void) {
     std::lock_guard<std::mutex> lock(mux);
     return mIsPrey;
+}
+
+unsigned int Actor::Behavior::GetNumberOfTargets(void) {
+    return mProximityList.size();
 }
 
 

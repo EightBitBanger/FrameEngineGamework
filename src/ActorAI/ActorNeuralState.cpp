@@ -5,35 +5,43 @@
 #include <GameEngineFramework/Math/Random.h>
 
 void ActorSystem::UpdateActorState(Actor* actor) {
+    
     // Tick up the actor age
     actor->physical.mAge++;
     
     if (actor->state.mode != ActorState::Mode::Idle) 
         return;
     
-    // Check proximity list for near by actors to interact with
-    if (actor->behavior.mProximityList.size() != 0) 
-    for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
-        Actor* targetActor = actor->behavior.mProximityList[i];
+    if (actor->behavior.mProximityList.empty()) {
         
-        // Check for interaction with near by actors
-        float distanceToTarget = glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition);
+        // No actor in the proximity list, select a random point
+        if (Random.Range(0, 100) > 80) 
+            HandleWalkState(actor);
         
-        if (HandleAttackState(actor, targetActor, distanceToTarget)) 
-            continue;
+    } else {
         
-        if (HandleFleeState(actor, targetActor, distanceToTarget)) 
-            continue;
-        
-        //if (Random.Range(0, 100) > 80) {
-        //    if (HandleFocusState(actor, targetActor, distanceToTarget)) 
-        //        continue;
-        //}
-        
-        //if (Random.Range(0, 100) > 80) {
-        //    if (HandleWalkState(actor)) 
-        //        continue;
-        //}
+        // Check proximity list for near by actors to interact with
+        for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
+            Actor* targetActor = actor->behavior.mProximityList[i];
+            
+            // Check for interaction with near by actors
+            float distanceToProximityTarget = glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition);
+            
+            if (HandleAttackState(actor, targetActor, distanceToProximityTarget)) 
+                continue;
+            
+            if (HandleFleeState(actor, targetActor, distanceToProximityTarget)) 
+                continue;
+            
+            if (Random.Range(0, 100) > 80) 
+                if (HandleFocusState(actor, targetActor, distanceToProximityTarget)) 
+                    continue;
+            
+            if (Random.Range(0, 100) > 80) 
+                if (HandleWalkState(actor)) 
+                    continue;
+            
+        }
     }
     return;
 }
@@ -50,21 +58,17 @@ bool ActorSystem::HandleWalkState(Actor* actor) {
 }
 
 bool ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance) {
-    // Attack cool down
     if (actor->counters.mAttackCoolDownCounter > 0) 
         return false;
     
     // Actor must be a predator
-    if (!actor->behavior.mIsPredator) 
-        return false;
+    if (!actor->behavior.mIsPredator) return false;
     
     // Target must be prey
-    if (!target->behavior.mIsPrey) 
-        return false;
+    if (!target->behavior.mIsPrey) return false;
     
     // Check attack distance
-    if (distance > actor->behavior.GetDistanceToAttack()) 
-        return false;
+    if (distance > actor->behavior.GetDistanceToAttack()) return false;
     
     // Attack the target
     actor->state.mode    = ActorState::Mode::RunTo;
@@ -77,16 +81,13 @@ bool ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance)
 
 bool ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
     // Actor must be prey
-    if (!actor->behavior.mIsPrey) 
-        return false;
+    if (!actor->behavior.mIsPrey) return false;
     
     // Target must be a predator
-    if (!target->behavior.mIsPredator) 
-        return false;
+    if (!target->behavior.mIsPredator) return false;
     
     // Check flee distance
-    if (distance > actor->behavior.GetDistanceToFlee()) 
-        return false;
+    if (distance > actor->behavior.GetDistanceToFlee()) return false;
     
     // Target should flee
     actor->state.mode    = ActorState::Mode::RunTo;
@@ -103,8 +104,7 @@ bool ActorSystem::HandleFocusState(Actor* actor, Actor* target, float distance) 
         return false;
     
     // Observation cool down
-    if (actor->counters.mObservationCoolDownCounter > 0) 
-        return false;
+    if (actor->counters.mObservationCoolDownCounter > 0) return false;
     
     // Focus on the selected target
     actor->state.mode    = ActorState::Mode::Idle;

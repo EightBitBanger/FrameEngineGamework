@@ -50,7 +50,7 @@ void EngineSystemManager::Initiate() {
     }
     
     // Initiate dialog
-    for (unsigned int i=0; i < 20; i++) {
+    for (unsigned int i=0; i < 32; i++) {
         Text* text = UI.CreateText();
         text->x = 5;
         text->y = 16 * i;

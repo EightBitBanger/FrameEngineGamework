@@ -51,12 +51,14 @@ void EngineSystemManager::Update(void) {
     // Run through the parent matrix transform chains
     UpdateTransformationChains();
     
+    // Update actor kinematic movement
+    UpdateKinematics();
+    
     // Update attached components
     std::lock_guard<std::mutex>(sceneMain->mux);
     for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].rigidBody    != nullptr)  UpdateRigidBody(i);
     for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].meshRenderer != nullptr)  UpdateMeshRenderer(i);
     for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].camera       != nullptr)  UpdateCamera(i);
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].actor        != nullptr)  UpdateKinematics(i);
     for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].light        != nullptr)  UpdateLight(i);
     for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].sound        != nullptr)  UpdateAudio(i);
     

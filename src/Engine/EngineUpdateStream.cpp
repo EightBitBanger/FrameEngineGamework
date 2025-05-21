@@ -3,27 +3,22 @@
 
 
 void EngineSystemManager::UpdateComponentStream(void) {
-    
     unsigned int numberOfGameObjects = mGameObjects.Size();
-    
     if (numberOfGameObjects == 0) 
         return;
     
     unsigned int objectsPerTick = glm::max((unsigned int)1, numberOfGameObjects / 8);
-
+    
     for (unsigned int i = 0; i < objectsPerTick; i++) {
-        
         mObjectIndex = (mObjectIndex + 1) % numberOfGameObjects;
-        
         GameObject* gameObject = mGameObjects[mObjectIndex];
         
         // Check game object render distance
         bool shouldRender = true;
         
-        if (gameObject->renderDistance > 0) {
+        if (gameObject->renderDistance > 0) 
             if (glm::distance(gameObject->mTransformCache->position, sceneMain->camera->transform.position) > gameObject->renderDistance) 
                 shouldRender = false;
-        }
         
         // Update the active state of associated components
         bool activeState = gameObject->isActive && shouldRender;
@@ -51,11 +46,12 @@ void EngineSystemManager::UpdateComponentStream(void) {
             
             gameObject->Deactivate();
             
-            // Destroy the components
+            // Destroy the component objects
             unsigned int numberOfComponents = gameObject->GetComponentCount();
-            for (unsigned int i = 0; i < numberOfComponents; i++) {
-                DestroyComponent(gameObject->GetComponentIndex(i));
-                mComponents.Destroy(gameObject->GetComponentIndex(i));
+            for (unsigned int i=0; i < numberOfComponents; i++) {
+                Component* componentPtr = gameObject->GetComponentIndex(i);
+                DestroyComponent( componentPtr );
+                mComponents.Destroy( componentPtr );
             }
             
             mGameObjects.Destroy(gameObject);

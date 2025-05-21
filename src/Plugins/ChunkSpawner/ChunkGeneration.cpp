@@ -233,34 +233,33 @@ void ChunkManager::AddHeightFieldToMesh(Mesh* mesh,
     return;
 }
 
-
-
-void ChunkManager::AddHeightFieldToMeshLOD(Mesh* mesh, 
-                                           float* heightField, glm::vec3* colorField, 
-                                           unsigned int width, unsigned int height, 
-                                           float offsetX, float offsetZ, 
-                                           unsigned int lodFactor) {
+void ChunkManager::AddHeightFieldToMeshSimplified(Mesh* mesh, 
+                                                  float* heightField, glm::vec3* colorField, 
+                                                  unsigned int width, unsigned int height, 
+                                                  float offsetX, float offsetZ, 
+                                                  unsigned int simplifyFactor) {
+    unsigned int sx = simplifyFactor;
+    unsigned int sz = simplifyFactor;
     
-    unsigned int fieldWidth = (width / lodFactor) - 1;
-    unsigned int fieldHeight = (height / lodFactor) - 1;
+    unsigned int fieldWidth = (width / 1) - sx;
+    unsigned int fieldHeight = (height / 1) - sz;
     
-    float sx = (lodFactor > 1) ? lodFactor * 4.0f : 1.0f;
-    float sz = (lodFactor > 1) ? lodFactor * 4.0f : 1.0f;
-    
-    for (unsigned int x = 0; x < fieldWidth; x++) {
-        for (unsigned int z = 0; z < fieldHeight; z++) {
-            unsigned int xa = x * lodFactor;
-            unsigned int za = z * lodFactor;
+    for (unsigned int x = 0; x < fieldWidth; x+=sx) {
+        
+        for (unsigned int z = 0; z < fieldHeight; z+=sz) {
+            
+            unsigned int xa = x * 1;
+            unsigned int za = z * 1;
             
             float yyA = heightField[za * width + xa];
-            float yyB = heightField[za * width + (xa + lodFactor)];
-            float yyC = heightField[(za + lodFactor) * width + (xa + lodFactor)];
-            float yyD = heightField[(za + lodFactor) * width + xa];
+            float yyB = heightField[za * width + (xa + sx)];
+            float yyC = heightField[(za + sz) * width + (xa + sx)];
+            float yyD = heightField[(za + sz) * width + xa];
             
             glm::vec3 cA = colorField[za * width + xa];
-            glm::vec3 cB = colorField[za * width + (xa + lodFactor)];
-            glm::vec3 cC = colorField[(za + lodFactor) * width + (xa + lodFactor)];
-            glm::vec3 cD = colorField[(za + lodFactor) * width + xa];
+            glm::vec3 cB = colorField[za * width + xa];
+            glm::vec3 cC = colorField[za * width + xa];
+            glm::vec3 cD = colorField[za * width + xa];
             
             float xx = (((float)x + offsetX - (float)width / 2) / 2) + 0.25;
             float zz = (((float)z + offsetZ - (float)height / 2) / 2) + 0.25;
@@ -270,65 +269,6 @@ void ChunkManager::AddHeightFieldToMeshLOD(Mesh* mesh,
                 Vertex(xx + sx, yyB, zz, cB.x, cB.y, cB.z, 0, 1, 0, 1, 0),
                 Vertex(xx + sx, yyC, zz + sz, cC.x, cC.y, cC.z, 0, 1, 0, 1, 1),
                 Vertex(xx, yyD, zz + sz, cD.x, cD.y, cD.z, 0, 1, 0, 0, 1)
-            };
-            
-            glm::vec3 U = glm::vec3(vertex[2].x, vertex[2].y, vertex[2].z) - glm::vec3(vertex[0].x, vertex[0].y, vertex[0].z);
-            glm::vec3 V = glm::vec3(vertex[1].x, vertex[1].y, vertex[1].z) - glm::vec3(vertex[0].x, vertex[0].y, vertex[0].z);
-            glm::vec3 normal = glm::cross(U, V);
-            
-            for (int i = 0; i < 4; i++) {
-                vertex[i].nx = normal.x;
-                vertex[i].ny = normal.y;
-                vertex[i].nz = normal.z;
-            }
-            
-            SubMesh subBuffer;
-            subBuffer.vertexBuffer.assign(vertex, vertex + 4);
-            subBuffer.indexBuffer = {0, 2, 1, 0, 3, 2};
-            
-            mesh->AddSubMesh(xx, 0, zz, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
-        }
-    }
-    
-    return;
-}
-
-
-void ChunkManager::AddHeightFieldToMeshHalfSize(Mesh* mesh, 
-                                                float* heightField, glm::vec3* colorField, 
-                                                unsigned int width, unsigned int height, 
-                                                float offsetX, float offsetZ) {
-    
-    unsigned int halfWidth = width / 2.0f;
-    unsigned int halfHeight = height / 2.0f;
-    
-    unsigned int fieldWidth = halfWidth;
-    unsigned int fieldHeight = halfHeight;
-    
-    for (unsigned int x = 0; x < fieldWidth; x++) {
-        
-        for (unsigned int z = 0; z < fieldHeight; z++) {
-            unsigned int xa = x * 2;
-            unsigned int za = z * 2;
-            
-            float yyA = heightField[za * width + xa] - 0.25f;
-            float yyB = heightField[za * width + (xa + 2)] - 0.25f;
-            float yyC = heightField[(za + 2) * width + (xa + 2)] - 0.25f;
-            float yyD = heightField[(za + 2) * width + xa] - 0.25f;
-            
-            glm::vec3 cA = colorField[za * width + xa];
-            glm::vec3 cB = colorField[za * width + (xa + 2)];
-            glm::vec3 cC = colorField[(za + 2) * width + (xa + 2)];
-            glm::vec3 cD = colorField[(za + 2) * width + xa];
-            
-            float xx = (((float)x * 2.5f + offsetX - (float)halfWidth)  / 2.5f) - 2.5f;
-            float zz = (((float)z * 2.5f + offsetZ - (float)halfHeight) / 2.5f) - 2.5f;
-            
-            Vertex vertex[4] = {
-                Vertex(xx, yyA, zz, cA.x, cA.y, cA.z, 0, 1, 0, 0, 0),
-                Vertex(xx + 2.0f, yyB, zz, cB.x, cB.y, cB.z, 0, 1, 0, 1, 0),
-                Vertex(xx + 2.0f, yyC, zz + 2.0f, cC.x, cC.y, cC.z, 0, 1, 0, 1, 1),
-                Vertex(xx, yyD, zz + 2.0f, cD.x, cD.y, cD.z, 0, 1, 0, 0, 1)
             };
             
             glm::vec3 U = glm::vec3(vertex[2].x, vertex[2].y, vertex[2].z) - glm::vec3(vertex[0].x, vertex[0].y, vertex[0].z);

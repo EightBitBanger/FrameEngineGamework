@@ -1,18 +1,14 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
 void ChunkManager::Update(void) {
-    
     if (Engine.cameraController == nullptr || !world.doGenerateChunks)
         return;
     
     glm::vec3 playerPosition = Engine.cameraController->GetPosition();
     
     InitializePlayerHeight(playerPosition);
-    
     UpdateFogSettings(playerPosition);
-    
     DestroyChunks(playerPosition);
-    
     GenerateChunks(playerPosition);
     
     return;
@@ -97,7 +93,6 @@ void ChunkManager::GenerateChunk(const glm::vec2 &chunkPosition) {
     std::string staticFilename = "worlds/" + world.name + "/static/" + filename;
     
     Chunk chunk = CreateChunk(chunkPosition.x, chunkPosition.y);
-    MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
     
     if (Serializer.CheckExists(chunkFilename) || Serializer.CheckExists(staticFilename)) {
         
@@ -112,43 +107,37 @@ void ChunkManager::GenerateChunk(const glm::vec2 &chunkPosition) {
         Decorate(chunk);
     }
     
-    staticRenderer->mesh->Load();
     chunks.push_back(chunk);
     return;
 }
 
 void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
-    
     unsigned int numberOfChunks = chunks.size();
     
-    if (numberOfChunks > 0) {
-        //unsigned int numberOfCycles = numberOfChunks / 3;
-        
-        for (unsigned int c = 0; c < numberOfChunks; c++) {
-            
-            Chunk& chunk = chunks[mChunkIndex];
-            
-            if (chunk.gameObject == nullptr) 
-                continue;
-            
-            glm::vec3 chunkPos(chunk.x, 0, chunk.y);
-            glm::vec3 playerPos(playerPosition.x, 0, playerPosition.z);
-            
-            if (glm::distance(chunkPos, playerPos) > (renderDistance * chunkSize) * 1.5f) {
-                
-                SaveChunk(chunk, true);
-                
-                DestroyChunk(chunk);
-                
-                chunks.erase(chunks.begin() + mChunkIndex);
-            }
-            
-            mChunkIndex++;
-            if (mChunkIndex >= numberOfChunks) 
-                mChunkIndex = 0;
-            
+    if (numberOfChunks == 0) 
+        return;
+    
+    for (unsigned int c = 0; c < numberOfChunks; c++) {
+        Chunk& chunk = chunks[mChunkIndex];
+        if (chunk.gameObject == nullptr) 
             continue;
+        
+        glm::vec3 chunkPos(chunk.x, 0, chunk.y);
+        glm::vec3 playerPos(playerPosition.x, 0, playerPosition.z);
+        
+        if (glm::distance(chunkPos, playerPos) > (renderDistance * chunkSize) * 1.5f) {
+            
+            SaveChunk(chunk, true);
+            
+            DestroyChunk(chunk);
+            
+            chunks.erase(chunks.begin() + mChunkIndex);
+            
         }
+        
+        mChunkIndex++;
+        if (mChunkIndex >= numberOfChunks) 
+            mChunkIndex = 0;
     }
     return;
 }

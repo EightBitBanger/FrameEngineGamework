@@ -4,32 +4,31 @@
 #include <GameEngineFramework/Types/types.h>
 #include <algorithm>
 
+
 Mesh* RenderSystem::LevelOfDetailPass(MeshRenderer* currentEntity, glm::vec3& eye) {
-    
-    if (currentEntity->distance == 0.0f) 
-        return currentEntity->mesh;
-    
-    std::vector<Mesh*>& levelOfDetailList = currentEntity->lods;
-    
-    // Check no lods
-    if (levelOfDetailList.size() == 0) 
+    if (currentEntity->mLods.size() == 0)
         return currentEntity->mesh;
     
     float distanceToEye = glm::distance(currentEntity->transform.position, eye);
     
-    // Array of distance levels
-    float lodDistances[] = { currentEntity->distance, currentEntity->distance * 1.3f, currentEntity->distance * 1.8f };
+    for (unsigned int i = 0; i < currentEntity->mLods.size(); i++) {
+        LevelOfDetail& lod = currentEntity->mLods[i];
+        
+        if (distanceToEye > lod.distance) 
+            continue;
+        
+        //currentEntity->transform.position += lod.offset;
+        
+        //currentEntity->transform.matrix = glm::translate(currentEntity->transform.matrix, lod.offset);
+        
+        return lod.mesh;
+    }
     
-    if (distanceToEye < currentEntity->distance * 0.7f) 
-        return currentEntity->mesh;
+    // If we’re further than all distances, use the last LOD
     
-    // Find the appropriate level of detail using binary search
-    size_t lodIndex = std::lower_bound(std::begin(lodDistances), std::end(lodDistances), distanceToEye) - std::begin(lodDistances);
+    //currentEntity->transform.position += currentEntity->mLods.back().offset;
     
-    if (lodIndex < levelOfDetailList.size()) 
-        return levelOfDetailList[lodIndex];
+    //currentEntity->transform.matrix = glm::translate(currentEntity->transform.matrix, currentEntity->mLods.back().offset);
     
-    // Return full quality mesh if within the closest level of detail range
-    return levelOfDetailList[ levelOfDetailList.size()-1 ];
+    return currentEntity->mLods.back().mesh;
 }
-

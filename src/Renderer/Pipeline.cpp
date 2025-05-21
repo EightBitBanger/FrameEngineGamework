@@ -37,7 +37,7 @@ void RenderSystem::RenderFrame(void) {
         // Set the camera projection angle
         setTargetCamera(scenePtr->camera, eye, viewProjection);
         
-        // Extract camera project edges for clipping
+        // Extract camera projection edges for clipping
         glm::mat4 inverseViewProjMatrix = glm::inverse( viewProjection );
         Frustum frustum = FrustumExtractPlanes(inverseViewProjMatrix);
         
