@@ -11,7 +11,7 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
         MeshRenderer* geneRenderer = actor->genetics.mGeneticRenderers[a];
         std::lock_guard<std::mutex> (geneRenderer->mux);
         
-        //  Skip genes that do not express
+        //  Skip genes that should not express
         if (!actor->genetics.mGenes[a].doExpress) {
             geneRenderer->isActive = false;
             continue;

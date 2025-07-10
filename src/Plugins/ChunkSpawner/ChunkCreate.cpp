@@ -101,6 +101,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     
     // Level of detail
+    
     Mesh* lodMeshA = Engine.Create<Mesh>();
     Mesh* lodMeshB = Engine.Create<Mesh>();
     lodMeshA->isShared = false;
@@ -109,14 +110,18 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     LevelOfDetail lodA;
     LevelOfDetail lodB;
     LevelOfDetail lodC;
+    
     lodA.mesh = chunkRenderer->mesh;
     lodB.mesh = lodMeshA;
     lodC.mesh = lodMeshB;
-    //lodB.offset.y = -2.0f;
-    //lodC.offset.y = -4.0f;
+    
+    // offset to height border
+    lodB.offset.y = -200.0f; // NOTE this might not work
+    lodC.offset.y = -300.0f;
+    
     lodA.distance = chunk.staticObject->renderDistance;
-    lodB.distance = chunk.staticObject->renderDistance + 200;
-    lodC.distance = chunk.staticObject->renderDistance + 300;
+    lodB.distance = chunk.staticObject->renderDistance * 0.3f;
+    lodC.distance = chunk.staticObject->renderDistance * 0.1f;
     
     chunkRenderer->AddLevelOfDetail(lodA);
     chunkRenderer->AddLevelOfDetail(lodB);
@@ -127,6 +132,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     AddHeightFieldToMeshSimplified(lodMeshB, heightField, colorField, chunkSZ, chunkSZ, 0, 0, 32);
     lodMeshA->Load();
     lodMeshB->Load();
+    
     
     // Physics
     

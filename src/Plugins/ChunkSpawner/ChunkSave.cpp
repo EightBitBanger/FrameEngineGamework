@@ -18,8 +18,6 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
         
         for (unsigned int a=0; a < numberOfActors; a++) {
             Actor* actor = AI.GetActorFromSimulation(a);
-            if (!actor->isActive || actor->isGarbage) 
-                continue;
             
             glm::vec3 actorPos = actor->navigation.GetPosition();
             glm::vec3 chunkPos(chunk.x, 0, chunk.y);
@@ -27,38 +25,57 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
             float chunkSz = chunkSize * 0.5f;
             
             // Check actor within chunk bounds
-            if (((actorPos.x < (chunkPos.x - chunkSz)) | actorPos.x > (chunkPos.x + chunkSz)) | 
-                ((actorPos.z < (chunkPos.z - chunkSz)) | actorPos.z > (chunkPos.z + chunkSz)))
-                continue;
+            if ((actorPos.x >= (chunkPos.x - chunkSz) && actorPos.x <= (chunkPos.x + chunkSz)) && 
+                (actorPos.z >= (chunkPos.z - chunkSz) && actorPos.z <= (chunkPos.z + chunkSz))) {
+                
+                if (!actor->isActive || actor->isGarbage) 
+                    continue;
+                
+                // Position
+                std::string actorPosStr = Float.ToString(actorPos.x) + "~" + 
+                                        Float.ToString(actorPos.y) + "~" + 
+                                        Float.ToString(actorPos.z) + "~";
+                
+                // Current actor age
+                std::string actorAge = IntLong.ToString( actor->physical.GetAge() ) + "~";
+                
+                // Genome
+                std::string actorGenome = AI.genomes.ExtractGenome(actor);
+                buffer += actorPosStr + actorAge + actorGenome + '\n';
+                
+                if (doClearActors) 
+                    terminationList.push_back(actor);
+            }
             
-            // Position
-            std::string actorPosStr = Float.ToString(actorPos.x) + "~" + 
-                                      Float.ToString(actorPos.y) + "~" + 
-                                      Float.ToString(actorPos.z) + "~";
             
-            // Current actor age
-            std::string actorAge = IntLong.ToString( actor->physical.GetAge() ) + "~";
-            
-            // Genome
-            std::string actorGenome = AI.genomes.ExtractGenome(actor);
-            buffer += actorPosStr + actorAge + actorGenome + '\n';
-            
-            if (doClearActors) 
-                terminationList.push_back(actor);
             continue;
         }
         
         // Delete the actors
-        for (unsigned int a=0; a < terminationList.size(); a++) 
+        for (unsigned int a=0; a < terminationList.size(); a++) {
+            Actor* actor = terminationList[a];
+            actor->isActive = false;
+            
+            unsigned int numberOfActors = terminationList[a]->genetics.GetNumberOfMeshRenderers();
+            for (unsigned int i=0; i < numberOfActors; i++) {
+                MeshRenderer*  meshRenderer = actor->genetics.GetMeshRendererAtIndex(i);
+                meshRenderer->isActive = false;
+                
+                //Renderer.DestroyMeshRenderer(meshRenderer);
+            }
+            
+            actor->genetics.ClearGenome();
+            actor->genetics.ClearPhenome();
+            actor->RebuildGeneticExpression();
+            
+            actor->Reset();
             AI.DestroyActor( terminationList[a] );
+        }
         
         unsigned int bufferSz = buffer.size();
-        
         if (bufferSz != 0) 
             Serializer.Serialize(chunkName, (void*)buffer.data(), bufferSz);
     }
-    
-    
     
     // Save static objects
     
