@@ -326,12 +326,12 @@ void Start() {
     decorTreeHeightsThick.threshold = -0.002f;
     decorTreeHeightsThick.noise     = 0.0001f;
     
-    //GameWorld.world.mDecorations.push_back(decorGrassBase);
-    //GameWorld.world.mDecorations.push_back(decorGrass);
-    //GameWorld.world.mDecorations.push_back(decorWaterPlants);
-    //GameWorld.world.mDecorations.push_back(decorTrees);
-    //GameWorld.world.mDecorations.push_back(decorTreeHeights);
-    //GameWorld.world.mDecorations.push_back(decorTreeHeightsThick);
+    GameWorld.world.mDecorations.push_back(decorGrassBase);
+    GameWorld.world.mDecorations.push_back(decorGrass);
+    GameWorld.world.mDecorations.push_back(decorWaterPlants);
+    GameWorld.world.mDecorations.push_back(decorTrees);
+    GameWorld.world.mDecorations.push_back(decorTreeHeights);
+    GameWorld.world.mDecorations.push_back(decorTreeHeightsThick);
     
     
     //
@@ -382,11 +382,11 @@ void Start() {
     decorDog.threshold = 0.0f;
     decorDog.noise     = 0.5f;
     
-    //GameWorld.world.mDecorations.push_back(decorSheep);
-    //GameWorld.world.mDecorations.push_back(decorBovine);
-    //GameWorld.world.mDecorations.push_back(decorHorse);
-    //GameWorld.world.mDecorations.push_back(decorBear);
-    //GameWorld.world.mDecorations.push_back(decorDog);
+    GameWorld.world.mDecorations.push_back(decorSheep);
+    GameWorld.world.mDecorations.push_back(decorBovine);
+    GameWorld.world.mDecorations.push_back(decorHorse);
+    GameWorld.world.mDecorations.push_back(decorBear);
+    GameWorld.world.mDecorations.push_back(decorDog);
     
     
     // Perlin layers
@@ -452,8 +452,8 @@ void Start() {
     // World rendering
     GameWorld.chunkSize = 64;
     
-    GameWorld.renderDistance = 13;
-    GameWorld.staticDistance = 0.3f;
+    GameWorld.renderDistance = 18;
+    GameWorld.staticDistance = 0.5f;
     GameWorld.actorDistance  = 0.3f;
     
     // Load world
@@ -465,63 +465,10 @@ void Start() {
     }
     
     
+    
+    
+    
     return;
-    
-    
-    
-    
-    // Initiate UI
-    
-    /*
-    
-    // Menu overlay
-    menuPanelObject = Engine.CreateOverlayPanelRenderer(0, 300, 230, 150, "panel_menu");
-    Panel* panel = menuPanelObject->GetComponent<Panel>();
-    panel->canvas.anchorCenterHorz = true;
-    
-    MeshRenderer* menuPanelRenderer = menuPanelObject->GetComponent<MeshRenderer>();
-    Engine.sceneOverlay->AddMeshRendererToSceneRoot(menuPanelRenderer);
-    menuPanelRenderer->material->ambient = Colors.MakeGrayScale(0.7f);
-    
-    // Version text
-    Color versionColor = Colors.Lerp(Colors.black, Colors.green, 0.37f);
-    versionTextObject = Engine.CreateOverlayTextRenderer(-15, -1, "0.1.0", 9, versionColor, "font");
-    MeshRenderer* versionTextRenderer = versionTextObject->GetComponent<MeshRenderer>();
-    Engine.sceneOverlay->AddMeshRendererToSceneRoot(versionTextRenderer);
-    
-    versionTextRenderer->material->diffuse = Colors.MakeGrayScale(0.24f);
-    
-    Text* versionText = versionTextObject->GetComponent<Text>();
-    versionText->canvas.anchorTop = false;
-    versionText->canvas.anchorRight = true;
-    
-    // Menu buttons
-    loadWorldButton  = Engine.CreateButtonUI(0, 260, 115, 24,-4.1f, 1.25f, "Load world",  "button_blue", ButtonLoadWorld);
-    saveWorldButton  = Engine.CreateButtonUI(0, 300, 115, 24,-4.1f, 1.25f, "Save world",  "button_blue", ButtonSaveWorld);
-    clearWorldButton = Engine.CreateButtonUI(0, 340, 115, 24,-4.4f, 1.25f, "Clear world", "button_blue", ButtonClearWorld);
-    quitButton       = Engine.CreateButtonUI(0, 380, 115, 24,-5.4f, 1.25f, "    Quit",    "button_blue", ButtonQuitApplication);
-    
-    loadWorldButton->panel->canvas.anchorCenterHorz = true;
-    saveWorldButton->panel->canvas.anchorCenterHorz = true;
-    clearWorldButton->panel->canvas.anchorCenterHorz = true;
-    quitButton->panel->canvas.anchorCenterHorz = true;
-    
-    Text* loadWorldText = loadWorldButton->textObject->GetComponent<Text>();
-    Text* saveWorldText = saveWorldButton->textObject->GetComponent<Text>();
-    Text* clearWorldText = clearWorldButton->textObject->GetComponent<Text>();
-    Text* quitWorldText = quitButton->textObject->GetComponent<Text>();
-    
-    loadWorldText->canvas.anchorCenterHorz = true;
-    saveWorldText->canvas.anchorCenterHorz = true;
-    clearWorldText->canvas.anchorCenterHorz = true;
-    quitWorldText->canvas.anchorCenterHorz = true;
-    
-    //MainMenuDisable();
-    */
-    
-    
-    
-    
     
     
     
