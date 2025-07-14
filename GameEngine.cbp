@@ -1,0 +1,1256 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="GameEngineFramework" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="root/;root/Logging/;root/Application/;root/Renderer/;root/ActorAI/;root/Audio/;root/Engine/;root/Engine/components/;root/Input/;root/Math/;root/Physics/;root/Profiler/;root/Resources/;root/Scripting/;root/Serialization/;root/tests/;root/ActorAI/components/;root/Engine/types/;root/Physics/components/;root/Resources/assets/;root/Scripting/components/;root/tests/units/;root/Types/;root/Timer/;root/MemoryAllocators/;root/Networking/;root/Transform/;root/ActorAI/genetics/;root/Engine/componentUpdate/;root/Renderer/components/;root/Renderer/pipeline/;root/Plugins/;root/Plugins/ChunkSpawner/;root/Plugins/ParticleSystem/;root/Plugins/WeatherSystem/;root/Audio/components/;root/Renderer/types/;root/UI/;root/UI/components/" />
+		<Build>
+			<Target title="Runtime">
+				<Option output="bin/runtime.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option host_application="runtime.exe" />
+				<Option run_host_application_in_terminal="0" />
+				<Compiler>
+					<Add option="-flto" />
+					<Add option="-O2" />
+					<Add option="-DBUILD_RUNTIME" />
+				</Compiler>
+				<Linker>
+					<Add option="-O2" />
+					<Add option="-flto" />
+					<Add option="-s" />
+					<Add library="core.dll" />
+					<Add library="game.dll" />
+				</Linker>
+			</Target>
+			<Target title="Game">
+				<Option output="bin/game.dll" imp_lib="vendor/libgame.dll.a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option host_application="runtime.exe" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-flto" />
+					<Add option="-O2" />
+					<Add option="-DBUILD_APPLICATION" />
+				</Compiler>
+				<Linker>
+					<Add option="-O2" />
+					<Add option="-flto" />
+					<Add option="-s" />
+					<Add library="core.dll" />
+					<Add library="plugins.dll" />
+				</Linker>
+			</Target>
+			<Target title="Plugins">
+				<Option output="bin/plugins.dll" imp_lib="vendor/libplugins.dll.a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option host_application="runtime.exe" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-DBUILD_PLUGINS" />
+				</Compiler>
+				<Linker>
+					<Add library="core.dll" />
+				</Linker>
+			</Target>
+			<Target title="Core">
+				<Option output="bin/core.dll" imp_lib="vendor/libcore.dll.a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option host_application="runtime.exe" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-flto" />
+					<Add option="-O2" />
+					<Add option="-DBUILD_CORE" />
+				</Compiler>
+				<Linker>
+					<Add option="-O2" />
+					<Add option="-flto" />
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Runtime-debug">
+				<Option output="bin/runtime.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-pedantic" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DBUILD_RUNTIME" />
+				</Compiler>
+				<Linker>
+					<Add library="core.dll" />
+					<Add library="game.dll" />
+				</Linker>
+			</Target>
+			<Target title="Game-debug">
+				<Option output="bin/game.dll" imp_lib="vendor/libgame.dll.a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option host_application="runtime.exe" />
+				<Option run_host_application_in_terminal="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-pedantic" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DBUILD_APPLICATION" />
+				</Compiler>
+				<Linker>
+					<Add library="core.dll" />
+				</Linker>
+			</Target>
+			<Target title="Plugins-debug">
+				<Option output="bin/plugins.dll" imp_lib="vendor/libplugins.dll.a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option host_application="runtime.exe" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-pedantic" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DBUILD_PLUGINS" />
+				</Compiler>
+				<Linker>
+					<Add library="core.dll" />
+				</Linker>
+			</Target>
+			<Target title="Core-debug">
+				<Option output="bin/core.dll" imp_lib="vendor/libcore.dll.a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option host_application="runtime.exe" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-pedantic" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DBUILD_CORE" />
+				</Compiler>
+			</Target>
+			<Target title="Runtime-profile">
+				<Option output="bin/runtime.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-flto" />
+					<Add option="-O2" />
+					<Add option="-pg" />
+					<Add option="-DBUILD_RUNTIME" />
+				</Compiler>
+				<Linker>
+					<Add option="-O2" />
+					<Add option="-flto" />
+					<Add option="-pg -lgmon" />
+					<Add library="core.dll" />
+					<Add library="game.dll" />
+				</Linker>
+			</Target>
+			<Target title="Game-profile">
+				<Option output="bin/game.dll" imp_lib="vendor/libgame.dll.a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option host_application="runtime.exe" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-flto" />
+					<Add option="-O2" />
+					<Add option="-pg" />
+					<Add option="-DBUILD_APPLICATION" />
+				</Compiler>
+				<Linker>
+					<Add option="-O2" />
+					<Add option="-flto" />
+					<Add option="-pg -lgmon" />
+					<Add library="core.dll" />
+				</Linker>
+			</Target>
+			<Target title="Core-profile">
+				<Option output="bin/core.dll" imp_lib="vendor/libcore.dll.a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="bin/" />
+				<Option object_output="obj/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option host_application="runtime.exe" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-flto" />
+					<Add option="-O2" />
+					<Add option="-pg" />
+					<Add option="-DBUILD_CORE" />
+				</Compiler>
+				<Linker>
+					<Add option="-O2" />
+					<Add option="-flto" />
+					<Add option="-pg -lgmon" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-std=c++11" />
+			<Add option="-std=c++0x" />
+			<Add directory="src" />
+			<Add directory="include" />
+			<Add directory="vendor" />
+			<Add directory="vendor/ImGUI" />
+		</Compiler>
+		<Linker>
+			<Add library="kernel32" />
+			<Add library="user32" />
+			<Add library="gdi32" />
+			<Add library="Ws2_32" />
+			<Add library="glew32s" />
+			<Add library="opengl32" />
+			<Add library="rp3d" />
+			<Add library="imgui" />
+			<Add library="sdl3" />
+			<Add directory="vendor" />
+		</Linker>
+		<Unit filename="include/GameEngineFramework/ActorAI/ActorStates.h">
+			<Option virtualFolder="root/ActorAI/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/ActorAI/ActorSystem.h">
+			<Option virtualFolder="root/ActorAI/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/ActorAI/GeneticPresets.h">
+			<Option virtualFolder="root/ActorAI/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/ActorAI/NeuralNetwork.h">
+			<Option virtualFolder="root/ActorAI/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/ActorAI/components/actor.h">
+			<Option virtualFolder="root/ActorAI/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/ActorAI/genetics/Base.h">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/ActorAI/genetics/Bio.h">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/ActorAI/genetics/Codon.h">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/ActorAI/genetics/Disease.h">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/ActorAI/genetics/Gene.h">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/ActorAI/genetics/Phen.h">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Application/Platform.h">
+			<Option virtualFolder="root/Application/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Application/main.h">
+			<Option virtualFolder="root/Application/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Application/procedure.h">
+			<Option virtualFolder="root/Application/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Audio/AudioSystem.h">
+			<Option virtualFolder="root/Audio/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Audio/SamplePresets.h">
+			<Option virtualFolder="root/Audio/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Audio/components/playback.h">
+			<Option virtualFolder="root/Audio/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Audio/components/samplebuffer.h">
+			<Option virtualFolder="root/Audio/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Audio/components/sound.h">
+			<Option virtualFolder="root/Audio/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Engine/ComponentTypes.h">
+			<Option virtualFolder="root/Engine/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Engine/Engine.h">
+			<Option virtualFolder="root/Engine/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Engine/EngineSystems.h">
+			<Option virtualFolder="root/Engine/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Engine/components/component.h">
+			<Option virtualFolder="root/Engine/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Engine/components/gameobject.h">
+			<Option virtualFolder="root/Engine/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Engine/types/bufferlayout.h">
+			<Option virtualFolder="root/Engine/types/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Engine/types/color.h">
+			<Option virtualFolder="root/Engine/types/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Engine/types/nulltype.h">
+			<Option virtualFolder="root/Engine/types/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Engine/types/transform.h">
+			<Option virtualFolder="root/Engine/types/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Engine/types/viewport.h">
+			<Option virtualFolder="root/Engine/types/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Input/InputSystem.h">
+			<Option virtualFolder="root/Input/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Input/keys.h">
+			<Option virtualFolder="root/Input/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Logging/Logging.h">
+			<Option virtualFolder="root/Logging/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Math/Math.h">
+			<Option virtualFolder="root/Math/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Math/Random.h">
+			<Option virtualFolder="root/Math/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/MemoryAllocation/poolallocator.h">
+			<Option virtualFolder="root/MemoryAllocators/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Networking/NetworkSystem.h">
+			<Option virtualFolder="root/Networking/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Physics/Masks.h">
+			<Option virtualFolder="root/Physics/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Physics/PhysicsSystem.h">
+			<Option virtualFolder="root/Physics/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Physics/Raycast.h">
+			<Option virtualFolder="root/Physics/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Physics/components/meshcollider.h">
+			<Option virtualFolder="root/Physics/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ChunkSpawner/Biome.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ChunkSpawner/Chunk.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ChunkSpawner/Decor.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ChunkSpawner/Perlin.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ChunkSpawner/Structure.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ParticleSystem/Emitter.h">
+			<Option virtualFolder="root/Plugins/ParticleSystem/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h">
+			<Option virtualFolder="root/Plugins/ParticleSystem/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h">
+			<Option virtualFolder="root/Plugins/WeatherSystem/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Profiler/profiler.h">
+			<Option virtualFolder="root/Profiler/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/RenderSystem.h">
+			<Option virtualFolder="root/Renderer/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/camera.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/fog.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/framebuffer.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/light.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/material.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/mesh.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/meshrenderer.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/scene.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/shader.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/submesh.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/components/texture.h">
+			<Option virtualFolder="root/Renderer/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/enumerators.h">
+			<Option virtualFolder="root/Renderer/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/types/frustum.h">
+			<Option virtualFolder="root/Renderer/types/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Renderer/types/levelofdetail.h">
+			<Option virtualFolder="root/Renderer/types/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Resources/FileLoader.h">
+			<Option virtualFolder="root/Resources/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Resources/FileSystem.h">
+			<Option virtualFolder="root/Resources/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Resources/ResourceManager.h">
+			<Option virtualFolder="root/Resources/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Resources/assets/colliderTag.h">
+			<Option virtualFolder="root/Resources/assets/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Resources/assets/meshTag.h">
+			<Option virtualFolder="root/Resources/assets/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Resources/assets/shaderTag.h">
+			<Option virtualFolder="root/Resources/assets/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Resources/assets/textureTag.h">
+			<Option virtualFolder="root/Resources/assets/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Scripting/ScriptSystem.h">
+			<Option virtualFolder="root/Scripting/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Scripting/components/script.h">
+			<Option virtualFolder="root/Scripting/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Serialization/Serialization.h">
+			<Option virtualFolder="root/Serialization/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Timer/Timer.h">
+			<Option virtualFolder="root/Timer/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Transform/Transform.h">
+			<Option virtualFolder="root/Transform/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Types/Types.h">
+			<Option virtualFolder="root/Types/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/UI/UserInterfaceSystem.h">
+			<Option virtualFolder="root/UI/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/UI/components/panel.h">
+			<Option virtualFolder="root/UI/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/UI/components/text.h">
+			<Option virtualFolder="root/UI/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/UI/components/textField.h">
+			<Option virtualFolder="root/UI/components/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/configuration.h">
+			<Option virtualFolder="root/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/functions.h">
+			<Option virtualFolder="root/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/plugins.h">
+			<Option virtualFolder="root/" />
+		</Unit>
+		<Unit filename="src/ActorAI/ActorAnimation.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/ActorGenetics.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/ActorMechanics.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/ActorNeuralNetwork.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/ActorNeuralState.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/ActorSystem.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/ActorUpdate.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/GeneticEffectors.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/GeneticPresets.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/NeuralNetwork.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/components/actor.cpp">
+			<Option virtualFolder="root/ActorAI/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/genetics/Base.cpp">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/genetics/Bio.cpp">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/genetics/Codon.cpp">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/genetics/Disease.cpp">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/genetics/Gene.cpp">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/ActorAI/genetics/Phen.cpp">
+			<Option virtualFolder="root/ActorAI/genetics/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Application/Platform.cpp">
+			<Option virtualFolder="root/Application/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Application/main.cpp">
+			<Option virtualFolder="root/Application/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="src/Application/procedure.cpp">
+			<Option virtualFolder="root/Application/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Application/properties.rc">
+			<Option compilerVar="WINDRES" />
+			<Option virtualFolder="root/Application/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="src/Audio/AudioSystem.cpp">
+			<Option virtualFolder="root/Audio/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Audio/SamplePresets.cpp">
+			<Option virtualFolder="root/Audio/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Audio/components/playback.cpp">
+			<Option virtualFolder="root/Audio/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Audio/components/samplebuffer.cpp">
+			<Option virtualFolder="root/Audio/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Audio/components/sound.cpp">
+			<Option virtualFolder="root/Audio/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/Engine.cpp">
+			<Option virtualFolder="root/Engine/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/EngineConsole.cpp">
+			<Option virtualFolder="root/Engine/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/EngineGameObjects.cpp">
+			<Option virtualFolder="root/Engine/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/EngineSystems.cpp">
+			<Option virtualFolder="root/Engine/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/EngineUpdate.cpp">
+			<Option virtualFolder="root/Engine/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/EngineUpdateStream.cpp">
+			<Option virtualFolder="root/Engine/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/componentUpdate/EngineUpdateAudio.cpp">
+			<Option virtualFolder="root/Engine/componentUpdate/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/componentUpdate/EngineUpdateCamera.cpp">
+			<Option virtualFolder="root/Engine/componentUpdate/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/componentUpdate/EngineUpdateKinematics.cpp">
+			<Option virtualFolder="root/Engine/componentUpdate/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/componentUpdate/EngineUpdateLight.cpp">
+			<Option virtualFolder="root/Engine/componentUpdate/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/componentUpdate/EngineUpdateMeshRenderer.cpp">
+			<Option virtualFolder="root/Engine/componentUpdate/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/componentUpdate/EngineUpdateRigidBody.cpp">
+			<Option virtualFolder="root/Engine/componentUpdate/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/componentUpdate/EngineUpdateTransforms.cpp">
+			<Option virtualFolder="root/Engine/componentUpdate/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/components/component.cpp">
+			<Option virtualFolder="root/Engine/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/components/gameobject.cpp">
+			<Option virtualFolder="root/Engine/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/types/bufferlayout.cpp">
+			<Option virtualFolder="root/Engine/types/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/types/color.cpp">
+			<Option virtualFolder="root/Engine/types/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/types/nulltype.cpp">
+			<Option virtualFolder="root/Engine/types/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/types/viewport.cpp">
+			<Option virtualFolder="root/Engine/types/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Input/InputSystem.cpp">
+			<Option virtualFolder="root/Input/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Logging/Logging.cpp">
+			<Option virtualFolder="root/Logging/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Math/Math.cpp">
+			<Option virtualFolder="root/Math/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Math/Random.cpp">
+			<Option virtualFolder="root/Math/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Networking/NetworkSystem.cpp">
+			<Option virtualFolder="root/Networking/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Physics/PhysicsSystem.cpp">
+			<Option virtualFolder="root/Physics/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Physics/components/meshcollider.cpp">
+			<Option virtualFolder="root/Physics/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/Chunk.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/ChunkCreate.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/ChunkDestroy.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/ChunkGeneration.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/ChunkLoad.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/ChunkManager.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/ChunkManagerDecorate.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/ChunkManagerUpdate.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/ChunkSave.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/WorldLoad.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/WorldSave.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ParticleSystem/Emitter.cpp">
+			<Option virtualFolder="root/Plugins/ParticleSystem/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ParticleSystem/ParticleSystem.cpp">
+			<Option virtualFolder="root/Plugins/ParticleSystem/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/WeatherSystem/WeatherSystem.cpp">
+			<Option virtualFolder="root/Plugins/WeatherSystem/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Profiler/profiler.cpp">
+			<Option virtualFolder="root/Profiler/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/Pipeline.cpp">
+			<Option virtualFolder="root/Renderer/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/RenderSystem.cpp">
+			<Option virtualFolder="root/Renderer/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/components/camera.cpp">
+			<Option virtualFolder="root/Renderer/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/components/fog.cpp">
+			<Option virtualFolder="root/Renderer/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/components/framebuffer.cpp">
+			<Option virtualFolder="root/Renderer/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/components/light.cpp">
+			<Option virtualFolder="root/Renderer/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/components/material.cpp">
+			<Option virtualFolder="root/Renderer/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/components/mesh.cpp">
+			<Option virtualFolder="root/Renderer/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/components/meshrenderer.cpp">
+			<Option virtualFolder="root/Renderer/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/components/scene.cpp">
+			<Option virtualFolder="root/Renderer/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/components/shader.cpp">
+			<Option virtualFolder="root/Renderer/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/components/texture.cpp">
+			<Option virtualFolder="root/Renderer/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/accumulateFogLayers.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/accumulateLights.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/materialBinding.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/meshBinding.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/passCulling.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/passGeometry.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/passLevelOfDetail.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/passShadowVolume.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/passSorting.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/setCamera.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Renderer/pipeline/shaderBinding.cpp">
+			<Option virtualFolder="root/Renderer/pipeline/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Resources/FileLoader.cpp">
+			<Option virtualFolder="root/Resources/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Resources/FileSystem.cpp">
+			<Option virtualFolder="root/Resources/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Resources/ResourceManager.cpp">
+			<Option virtualFolder="root/Resources/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Resources/assets/colliderTag.cpp">
+			<Option virtualFolder="root/Resources/assets/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Resources/assets/meshTag.cpp">
+			<Option virtualFolder="root/Resources/assets/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Resources/assets/shaderTag.cpp">
+			<Option virtualFolder="root/Resources/assets/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Resources/assets/textureTag.cpp">
+			<Option virtualFolder="root/Resources/assets/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Scripting/ScriptSystem.cpp">
+			<Option virtualFolder="root/Scripting/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Scripting/components/script.cpp">
+			<Option virtualFolder="root/Scripting/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Serialization/Serialization.cpp">
+			<Option virtualFolder="root/Serialization/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Timer/Timer.cpp">
+			<Option virtualFolder="root/Timer/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Transform/Transform.cpp">
+			<Option virtualFolder="root/Transform/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Types/Types.cpp">
+			<Option virtualFolder="root/Types/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/UI/UserInterfaceSystem.cpp">
+			<Option virtualFolder="root/UI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/UI/components/panel.cpp">
+			<Option virtualFolder="root/UI/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/UI/components/text.cpp">
+			<Option virtualFolder="root/UI/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/UI/components/textField.cpp">
+			<Option virtualFolder="root/UI/components/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/functions.cpp">
+			<Option virtualFolder="root/" />
+			<Option target="Game" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+		</Unit>
+		<Unit filename="src/plugins.cpp">
+			<Option virtualFolder="root/" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/run.cpp">
+			<Option virtualFolder="root/" />
+			<Option target="Game" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+		</Unit>
+		<Unit filename="src/shutdown.cpp">
+			<Option virtualFolder="root/" />
+			<Option target="Game" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+		</Unit>
+		<Unit filename="src/start.cpp">
+			<Option virtualFolder="root/" />
+			<Option target="Game" />
+			<Option target="Game-debug" />
+			<Option target="Game-profile" />
+		</Unit>
+		<Unit filename="tests/framework.cpp">
+			<Option virtualFolder="root/tests/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="tests/framework.h">
+			<Option virtualFolder="root/tests/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Game-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="tests/units/testComponents.cpp">
+			<Option virtualFolder="root/tests/units/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="tests/units/testEngineFunctionality.cpp">
+			<Option virtualFolder="root/tests/units/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="tests/units/testGameObjects.cpp">
+			<Option virtualFolder="root/tests/units/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="tests/units/testPhysicsSystem.cpp">
+			<Option virtualFolder="root/tests/units/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="tests/units/testRenderSystem.cpp">
+			<Option virtualFolder="root/tests/units/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="tests/units/testScriptSystem.cpp">
+			<Option virtualFolder="root/tests/units/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="tests/units/testSerializer.cpp">
+			<Option virtualFolder="root/tests/units/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Unit filename="tests/units/testTransform.cpp">
+			<Option virtualFolder="root/tests/units/" />
+			<Option target="Runtime" />
+			<Option target="Runtime-debug" />
+			<Option target="Runtime-profile" />
+		</Unit>
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>

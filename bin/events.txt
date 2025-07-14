@@ -1,0 +1,58 @@
+== Hardware details ==
+Intel(R) HD Graphics 4400
+
+ Device
+  - Name    = Intel
+  - Version = 4.3.0 - Build 20.19.15.5126
+
+ Colors
+  - Color = 32 bit
+  - Depth = 32 bit
+
+
+
+Resource definitions
+
+  + color  core/shaders/color.shader
+  + colorUnlit  core/shaders/colorUnlit.shader
+  + shadowCaster  core/shaders/shadowCaster.shader
+  + sky  core/shaders/sky.shader
+  + surface  core/shaders/surface.shader
+  + texture  core/shaders/texture.shader
+  + textureUnlit  core/shaders/textureUnlit.shader
+  + UI  core/shaders/UI.shader
+  + water  core/shaders/water.shader
+  + barrel  core/models/barrel.obj
+  + chunk  core/models/chunk.obj
+  + cube  core/models/cube.obj
+  + grass  core/models/grass.obj
+  + grassHorz  core/models/grassHorz.obj
+  + grassVert  core/models/grassVert.obj
+  + leaf  core/models/leaf.obj
+  + log  core/models/log.obj
+  + plain  core/models/plain.obj
+  + sky  core/models/sky.obj
+  + sphere  core/models/sphere.obj
+  + stemHorz  core/models/stemHorz.obj
+  + stemVert  core/models/stemVert.obj
+  + treebase  core/models/treebase.obj
+  + wall  core/models/wall.obj
+  + wallh  core/models/wallh.obj
+  + wallv  core/models/wallv.obj
+  + barrel  core/materials/barrel.png
+  + button_blue  core/materials/button_blue.png
+  + chunk  core/materials/chunk.png
+  + cross  core/materials/cross.png_
+  + cross_black  core/materials/cross_black.png
+  + cross_white  core/materials/cross_white.png
+  + font  core/materials/font.png
+  + grassy  core/materials/grassy.png
+  + panel_blue  core/materials/panel_blue.png
+  + panel_dark  core/materials/panel_dark.png
+  + panel_gray  core/materials/panel_gray.png
+  + panel_menu  core/materials/panel_menu.png
+ >> Starting thread AI
+ >> Starting thread renderer
+ >> Starting thread audio
+
+<MainScene>

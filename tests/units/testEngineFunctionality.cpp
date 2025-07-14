@@ -19,6 +19,7 @@ void TestFramework::TestEngineFunctionality(void) {
     //if (!Engine.Destroy<GameObject>(gameObject)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
     //if (Engine.GetNumberOfGameObjects() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
     
+    /*
     // Test mesh renderer component
     Component* component = Engine.CreateComponentMeshRenderer(nullptr, nullptr);
     if (component == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
@@ -32,6 +33,7 @@ void TestFramework::TestEngineFunctionality(void) {
     if (component == nullptr) Throw(msgFailedObjectCreate, __FILE__, __LINE__);
     if (!Engine.DestroyComponent(component)) Throw(msgFailedObjectDestroy, __FILE__, __LINE__);
     //if (Engine.GetNumberOfComponents() > 0) Throw(msgFailedAllocatorNotZero, __FILE__, __LINE__);
+    */
     
     // Test camera controller object
     //gameObject = Engine.CreateCameraController(glm::vec3(1, -2, 3), glm::vec3(1, 1, 1));

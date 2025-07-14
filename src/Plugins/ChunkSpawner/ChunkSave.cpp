@@ -18,23 +18,24 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
         
         for (unsigned int a=0; a < numberOfActors; a++) {
             Actor* actor = AI.GetActorFromSimulation(a);
+            if (actor->isSaved) 
+                continue;
             
+            if (!actor->isActive || actor->isGarbage) 
+                continue;
+            
+            float chunkSz = chunkSize / 1.5f;
             glm::vec3 actorPos = actor->navigation.GetPosition();
             glm::vec3 chunkPos(chunk.x, 0, chunk.y);
             
-            float chunkSz = chunkSize * 0.5f;
-            
             // Check actor within chunk bounds
-            if ((actorPos.x >= (chunkPos.x - chunkSz) && actorPos.x <= (chunkPos.x + chunkSz)) && 
-                (actorPos.z >= (chunkPos.z - chunkSz) && actorPos.z <= (chunkPos.z + chunkSz))) {
-                
-                if (!actor->isActive || actor->isGarbage) 
-                    continue;
+            if (actorPos.x >= (chunkPos.x - chunkSz) && actorPos.x <= (chunkPos.x + chunkSz) && 
+                actorPos.z >= (chunkPos.z - chunkSz) && actorPos.z <= (chunkPos.z + chunkSz)) {
                 
                 // Position
                 std::string actorPosStr = Float.ToString(actorPos.x) + "~" + 
-                                        Float.ToString(actorPos.y) + "~" + 
-                                        Float.ToString(actorPos.z) + "~";
+                                          Float.ToString(actorPos.y) + "~" + 
+                                          Float.ToString(actorPos.z) + "~";
                 
                 // Current actor age
                 std::string actorAge = IntLong.ToString( actor->physical.GetAge() ) + "~";
@@ -45,31 +46,17 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
                 
                 if (doClearActors) 
                     terminationList.push_back(actor);
+                
+                actor->isSaved = true;
             }
             
-            
-            continue;
         }
         
         // Delete the actors
         for (unsigned int a=0; a < terminationList.size(); a++) {
             Actor* actor = terminationList[a];
-            actor->isActive = false;
             
-            unsigned int numberOfActors = terminationList[a]->genetics.GetNumberOfMeshRenderers();
-            for (unsigned int i=0; i < numberOfActors; i++) {
-                MeshRenderer*  meshRenderer = actor->genetics.GetMeshRendererAtIndex(i);
-                meshRenderer->isActive = false;
-                
-                //Renderer.DestroyMeshRenderer(meshRenderer);
-            }
-            
-            actor->genetics.ClearGenome();
-            actor->genetics.ClearPhenome();
-            actor->RebuildGeneticExpression();
-            
-            actor->Reset();
-            AI.DestroyActor( terminationList[a] );
+            KillActor( terminationList[a] );
         }
         
         unsigned int bufferSz = buffer.size();
@@ -78,11 +65,8 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
     }
     
     // Save static objects
-    
     unsigned int numberOfStatics = chunk.statics.size();
-    
     StaticElement staticElements[numberOfStatics];
-    
     if (numberOfStatics > 0) {
         
         for (unsigned int s=0; s < numberOfStatics; s++) {

@@ -115,9 +115,46 @@ std::vector<int32_t> GenerateCreatureVoice(const AudioGene& gene, int sampleRate
 
 
 
+// Key binding callbacks
+
+bool isFullScreen = false;
+void keyBindFullscreen(void) {
+    isFullScreen = !isFullScreen;
+    if (isFullScreen) {
+        Platform.WindowEnableFullscreen();
+    } else {
+        Platform.WindowDisableFullscreen();
+    }
+}
+
+void keyBindEscape(void) {
+    Platform.Pause();
+    if (Platform.isPaused == true) {
+        MainMenuEnable();
+        return;
+    }
+    MainMenuDisable();
+}
+
+void keyBindF4() {
+    extern bool isProfilerEnabled;
+    isProfilerEnabled = !isProfilerEnabled;
+    
+    if (!isProfilerEnabled) 
+        for (unsigned int i=0; i < PROFILER_NUMBER_OF_ELEMENTS; i++) 
+            Engine.console.WriteDialog(i, "");
+    for (unsigned int i=0; i < 20; i++) 
+        Engine.console.WriteDialog(i, "");
+}
+
 
 
 void Start() {
+    
+    // Key bindings
+    Input.BindKeyPressToFunction(VK_F4, keyBindF4);
+    Input.BindKeyPressToFunction(VK_F11, keyBindFullscreen);
+    Input.BindKeyPressToFunction(VK_ESCAPE, keyBindEscape);
     
     // Initiate the command console and 
     // load the required command functions
@@ -159,7 +196,6 @@ void Start() {
     //Engine.EnableProfiler();
     
     //Engine.EnablePhysicsDebugRenderer();
-    
     
     
     
@@ -231,11 +267,11 @@ void Start() {
     // Create a camera controller
     //
     
-    // The position of the player in the world.
+    // Initial player position in the world.
     Vector3 playerPosition;
-    playerPosition.x = Random.Range(-10, 10);
-    playerPosition.y = Random.Range(-10, 10);
-    playerPosition.z = Random.Range(-10, 10);
+    playerPosition.x = Random.Range(-120, 120);
+    playerPosition.y = Random.Range(-120, 120);
+    playerPosition.z = Random.Range(-120, 120);
     
     // Create a new camera controller object
     Engine.cameraController = Engine.CreateCameraController(playerPosition);
@@ -266,25 +302,15 @@ void Start() {
     // Chunk generation
     //
     
-    DecorationSpecifier decorGrassBase;
-    decorGrassBase.type = DECORATION_GRASS;
-    decorGrassBase.density = 50;
-    decorGrassBase.spawnHeightMaximum = -7;
-    decorGrassBase.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorGrassBase.spawnStackHeightMin = 1;
-    decorGrassBase.spawnStackHeightMax = 2;
-    decorGrassBase.threshold = 0.08f;
-    decorGrassBase.noise = 0.2f;
-    
     DecorationSpecifier decorGrass;
     decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 1000;
-    decorGrass.spawnHeightMaximum = 20;
-    decorGrass.spawnHeightMinimum = -7;
+    decorGrass.density = 20;
+    decorGrass.spawnHeightMaximum = 7;
+    decorGrass.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
-    decorGrass.spawnStackHeightMax = 3;
-    decorGrass.threshold = -0.4f;
-    decorGrass.noise = 3.001f;
+    decorGrass.spawnStackHeightMax = 8;
+    decorGrass.threshold = -0.07f;
+    decorGrass.noise = 0.073f;
     
     DecorationSpecifier decorWaterPlants;
     decorWaterPlants.type = DECORATION_GRASS_THIN;
@@ -298,11 +324,11 @@ void Start() {
     
     DecorationSpecifier decorTrees;
     decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 4;
-    decorTrees.spawnHeightMaximum = 30;
+    decorTrees.density = 3;
+    decorTrees.spawnHeightMaximum = 10;
     decorTrees.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
-    decorTrees.spawnStackHeightMax = 8;
+    decorTrees.spawnStackHeightMax = 24;
     decorTrees.threshold = -0.04f;
     decorTrees.noise     = 0.013f;
     
@@ -310,28 +336,27 @@ void Start() {
     decorTreeHeights.type = DECORATION_TREE;
     decorTreeHeights.density = 20;
     decorTreeHeights.spawnHeightMaximum = 40;
-    decorTreeHeights.spawnHeightMinimum = -10;
+    decorTreeHeights.spawnHeightMinimum = GameWorld.world.waterLevel + 10;
     decorTreeHeights.spawnStackHeightMin = 4;
-    decorTreeHeights.spawnStackHeightMax = 8;
+    decorTreeHeights.spawnStackHeightMax = 80;
     decorTreeHeights.threshold = -0.07f;
     decorTreeHeights.noise     = 0.04f;
     
     DecorationSpecifier decorTreeHeightsThick;
     decorTreeHeightsThick.type = DECORATION_TREE;
-    decorTreeHeightsThick.density = 30;
+    decorTreeHeightsThick.density = 10;
     decorTreeHeightsThick.spawnHeightMaximum = 35;
     decorTreeHeightsThick.spawnHeightMinimum = -5;
-    decorTreeHeightsThick.spawnStackHeightMin = 4;
-    decorTreeHeightsThick.spawnStackHeightMax = 8;
-    decorTreeHeightsThick.threshold = -0.002f;
-    decorTreeHeightsThick.noise     = 0.0001f;
+    decorTreeHeightsThick.spawnStackHeightMin = 6;
+    decorTreeHeightsThick.spawnStackHeightMax = 24;
+    decorTreeHeightsThick.threshold = -0.07f;
+    decorTreeHeightsThick.noise     = 0.04f;
     
-    GameWorld.world.mDecorations.push_back(decorGrassBase);
     GameWorld.world.mDecorations.push_back(decorGrass);
     GameWorld.world.mDecorations.push_back(decorWaterPlants);
     GameWorld.world.mDecorations.push_back(decorTrees);
-    GameWorld.world.mDecorations.push_back(decorTreeHeights);
-    GameWorld.world.mDecorations.push_back(decorTreeHeightsThick);
+    //GameWorld.world.mDecorations.push_back(decorTreeHeights);
+    //GameWorld.world.mDecorations.push_back(decorTreeHeightsThick);
     
     
     //
@@ -353,7 +378,7 @@ void Start() {
     decorHorse.spawnHeightMaximum = 10;
     decorHorse.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorHorse.threshold = 0.0f;
-    decorHorse.noise     = 0.5;;
+    decorHorse.noise     = 0.5;
     
     DecorationSpecifier decorBovine;
     decorBovine.type = DECORATION_ACTOR;
@@ -382,58 +407,72 @@ void Start() {
     decorDog.threshold = 0.0f;
     decorDog.noise     = 0.5f;
     
-    GameWorld.world.mDecorations.push_back(decorSheep);
-    GameWorld.world.mDecorations.push_back(decorBovine);
-    GameWorld.world.mDecorations.push_back(decorHorse);
-    GameWorld.world.mDecorations.push_back(decorBear);
-    GameWorld.world.mDecorations.push_back(decorDog);
+    //GameWorld.world.mDecorations.push_back(decorSheep);
+    //GameWorld.world.mDecorations.push_back(decorBovine);
+    //GameWorld.world.mDecorations.push_back(decorHorse);
+    //GameWorld.world.mDecorations.push_back(decorBear);
+    //GameWorld.world.mDecorations.push_back(decorDog);
     
     
     // Perlin layers
     
-    Perlin perlinBase;
-    perlinBase.equation = 0;
-    perlinBase.heightMultuplier = 8;
-    perlinBase.noiseWidth  = 0.07;
-    perlinBase.noiseHeight = 0.07;
+    // Mountain base ripple formation
+    Perlin perlinMountainA;
+    perlinMountainA.heightMultuplier = 20;
+    perlinMountainA.heightThreshold = 10.0f;
+    perlinMountainA.noiseWidth  = 0.02;
+    perlinMountainA.noiseHeight = 0.02;
     
+    // Macro scale world formation
+    Perlin perlinMountainB;
+    perlinMountainB.heightMultuplier = 20;
+    perlinMountainB.heightThreshold = 20.0f;
+    perlinMountainB.noiseWidth  = 0.014;
+    perlinMountainB.noiseHeight = 0.014;
+    perlinMountainB.offsetX = 100.0f;
+    perlinMountainB.offsetY = 100.0f;
+
+    // Macro scale world formation
+    Perlin perlinMountainC;
+    perlinMountainC.heightMultuplier = 100;
+    perlinMountainC.heightThreshold = 20.0f;
+    perlinMountainC.noiseWidth  = 0.014;
+    perlinMountainC.noiseHeight = 0.014;
+    perlinMountainC.offsetX = 100.0f;
+    perlinMountainC.offsetY = 100.0f;
+    
+    // Low level ripple layers
     Perlin perlinLayerA;
-    perlinLayerA.equation = 0;
-    perlinLayerA.heightMultuplier = 5;
-    perlinLayerA.noiseWidth  = 0.03;
-    perlinLayerA.noiseHeight = 0.03;
+    perlinLayerA.heightMultuplier = 20;
+    perlinLayerA.heightThreshold = 1.0f;
+    perlinLayerA.noiseWidth  = 0.02;
+    perlinLayerA.noiseHeight = 0.02;
     
     Perlin perlinLayerB;
-    perlinLayerB.equation = 0;
-    perlinLayerB.heightMultuplier = 20;
-    perlinLayerB.noiseWidth  = 0.02;
-    perlinLayerB.noiseHeight = 0.02;
+    perlinLayerB.heightMultuplier = 1.7;
+    //perlinLayerB.heightThreshold = 0.1f;
+    perlinLayerB.noiseWidth  = 0.1;
+    perlinLayerB.noiseHeight = 0.1;
     
-    Perlin perlinMountainA;
-    perlinMountainA.equation = 0;
-    perlinMountainA.heightMultuplier = 100;
-    perlinMountainA.noiseWidth  = 0.009;
-    perlinMountainA.noiseHeight = 0.009;
-    
-    Perlin perlinMountainB;
-    perlinMountainB.equation = 0;
-    perlinMountainB.heightMultuplier = 300;
-    perlinMountainB.noiseWidth  = 0.0007;
-    perlinMountainB.noiseHeight = 0.0007;
-    
+    // Flat world base layer
     Perlin perlinFlatland;
-    perlinFlatland.equation = 0;
-    perlinFlatland.heightMultuplier = 10;
-    perlinFlatland.noiseWidth  = 0.007;
-    perlinFlatland.noiseHeight = 0.007;
+    perlinFlatland.heightMultuplier = 0.4;
+    perlinFlatland.noiseWidth  = 0.5;
+    perlinFlatland.noiseHeight = 0.5;
     
     
-    GameWorld.perlin.push_back(perlinMountainB);
-    GameWorld.perlin.push_back(perlinMountainA);
-    GameWorld.perlin.push_back(perlinBase);
-    GameWorld.perlin.push_back(perlinLayerA);
-    GameWorld.perlin.push_back(perlinLayerB);
-    GameWorld.perlin.push_back(perlinFlatland);
+    GameWorld.world.mPerlin.push_back(perlinMountainA);
+    GameWorld.world.mPerlin.push_back(perlinMountainB);
+    GameWorld.world.mPerlin.push_back(perlinMountainC);
+    GameWorld.world.mPerlin.push_back(perlinLayerA);
+    GameWorld.world.mPerlin.push_back(perlinLayerB);
+    GameWorld.world.mPerlin.push_back(perlinFlatland);
+    
+    
+    // Biome layers
+    Biome biomeDesart;
+    biomeDesart.color = {1, 0, 0};
+    GameWorld.world.mBiomes.push_back(biomeDesart);
     
     
     // Lighting levels
@@ -451,10 +490,18 @@ void Start() {
     
     // World rendering
     GameWorld.chunkSize = 64;
-    
-    GameWorld.renderDistance = 18;
+    GameWorld.renderDistance = 8;
     GameWorld.staticDistance = 0.5f;
     GameWorld.actorDistance  = 0.3f;
+    
+    GameWorld.world.snowCapHeight = 20.0f;
+    GameWorld.world.snowCapBias = 8.0f;
+    GameWorld.world.waterLevel = -8.0f;
+    
+    GameWorld.world.chunkColorLow  = Colors.brown * Colors.green * Colors.MakeGrayScale(0.4f);
+    GameWorld.world.chunkColorHigh = Colors.brown * Colors.MakeGrayScale(0.2f);
+    GameWorld.world.chunkColorBias = 0.087f;
+    
     
     // Load world
     if (!GameWorld.LoadWorld()) {
@@ -465,8 +512,8 @@ void Start() {
     }
     
     
-    
-    
+    Weather.SetTime(9000);
+    Weather.SetWeather(WeatherType::Clear);
     
     return;
     

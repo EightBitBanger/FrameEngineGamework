@@ -41,8 +41,11 @@ public:
     /// Get the player position in the simulation.
     glm::vec3 GetPlayerWorldPosition(void);
     
-    /// Get the number of actors in the AI simulation.
+    /// Get the number of all the actors in the simulation including actors recycled though garbage collection.
     unsigned int GetNumberOfActors(void);
+    
+    /// Get the number of actors that are currently active in the simulation.
+    unsigned int GetNumberOfActiveActors(void);
     
     /// Get an actor from the simulation by its index.
     Actor* GetActor(unsigned int index);
@@ -103,6 +106,7 @@ private:
     bool HandleAttackState(Actor* actor, Actor* target, float distance);
     bool HandleFleeState(Actor* actor, Actor* target, float distance);
     bool HandleFocusState(Actor* actor, Actor* target, float distance);
+    void HandleNeuralNetwork(Actor* actor);
     
     // Mechanical
     void UpdateActorMechanics(Actor* actor);
@@ -131,7 +135,6 @@ private:
     void HandleAnimationSwing(Actor* actor, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange, bool animationDirection);
     void UpdateTargetRotation(Actor* actor);
     
-    
     // Genetics
     void UpdateActorGenetics(Actor* actor);
     void ClearOldGeneticRenderers(Actor* actor);
@@ -148,15 +151,14 @@ private:
     // Maximum world water level
     float mWorldWaterLevel;
     
-    // Threading
     std::thread* mActorSystemThread;
     std::mutex mux;
     
-    // Garbage actor list
     std::vector<Actor*> mGarbageActors;
     
-    // Object pools
     PoolAllocator<Actor> mActors;
+    
+    unsigned int mNumberOfActors;
     
 };
 

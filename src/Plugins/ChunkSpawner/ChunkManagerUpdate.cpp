@@ -34,14 +34,13 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
             
             int zz = mChunkCounterZ;
             
-            float chunkX = Math.Round(playerPosition.x / chunkSize + xx);
-            float chunkZ = Math.Round(playerPosition.z / chunkSize + zz);
+            int chunkSizeSub = chunkSize;
             
-            glm::vec2 chunkPos((chunkX * chunkSize) - (renderDistance * (chunkSize / 2)), 
-                               (chunkZ * chunkSize) - (renderDistance * (chunkSize / 2)));
+            float chunkX = Math.Round((playerPosition.x + (chunkSizeSub / 2)) / chunkSizeSub + xx);
+            float chunkZ = Math.Round((playerPosition.z + (chunkSizeSub / 2)) / chunkSizeSub + zz);
             
-            glm::vec2 playerPos(playerPosition.x, playerPosition.z);
-            
+            glm::vec2 chunkPos((chunkX * chunkSizeSub) - (renderDistance * (chunkSizeSub / 2)), 
+                               (chunkZ * chunkSizeSub) - (renderDistance * (chunkSizeSub / 2)));
             
             if (IsChunkFound(chunkPos)) {
                 
@@ -69,45 +68,29 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
                 continue;
             }
             
-            if (glm::distance(chunkPos, playerPos) > (renderDistance * (chunkSize / 2))) 
+            glm::vec2 playerPos(playerPosition.x, playerPosition.z);
+            if (glm::distance(chunkPos, playerPos) > (renderDistance * (chunkSizeSub / 2))) 
                 continue;
             
-            GenerateChunk(chunkPos);
+            // Generate the chunk
+            std::string filename = Int.ToString(chunkPos.x) + "_" + Int.ToString(chunkPos.y);
+            std::string chunkFilename = "worlds/" + world.name + "/chunks/" + filename;
+            std::string staticFilename = "worlds/" + world.name + "/static/" + filename;
+            
+            Chunk chunk = CreateChunk(chunkPos.x, chunkPos.y);
+            
+            if (Serializer.CheckExists(chunkFilename) || Serializer.CheckExists(staticFilename)) {
+                LoadChunk(chunk);
+                
+            } else {
+                chunk.seed = worldSeed + ((chunkPos.x * 2) + (chunkPos.y * 4) / 2);
+                
+                Random.SetSeed(chunk.seed);
+                Decorate(chunk);
+            }
+            chunks.push_back(chunk);
         }
     }
-    return;
-}
-
-bool ChunkManager::IsChunkFound(const glm::vec2 &chunkPosition) {
-    for (const auto& chunkPtr : chunks) {
-        if (glm::vec3(chunkPtr.x, 0, chunkPtr.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void ChunkManager::GenerateChunk(const glm::vec2 &chunkPosition) {
-    std::string filename = Int.ToString(chunkPosition.x) + "_" + Int.ToString(chunkPosition.y);
-    std::string chunkFilename = "worlds/" + world.name + "/chunks/" + filename;
-    std::string staticFilename = "worlds/" + world.name + "/static/" + filename;
-    
-    Chunk chunk = CreateChunk(chunkPosition.x, chunkPosition.y);
-    
-    if (Serializer.CheckExists(chunkFilename) || Serializer.CheckExists(staticFilename)) {
-        
-        LoadChunk(chunk);
-        
-    } else {
-        
-        chunk.seed = worldSeed + ((chunkPosition.x * 2) + (chunkPosition.y * 4) / 2);
-        
-        Random.SetSeed(chunk.seed);
-        
-        Decorate(chunk);
-    }
-    
-    chunks.push_back(chunk);
     return;
 }
 
@@ -128,11 +111,8 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
         if (glm::distance(chunkPos, playerPos) > (renderDistance * chunkSize) * 1.5f) {
             
             SaveChunk(chunk, true);
-            
             DestroyChunk(chunk);
-            
             chunks.erase(chunks.begin() + mChunkIndex);
-            
         }
         
         mChunkIndex++;
@@ -140,6 +120,15 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
             mChunkIndex = 0;
     }
     return;
+}
+
+bool ChunkManager::IsChunkFound(const glm::vec2 &chunkPosition) {
+    for (const auto& chunkPtr : chunks) {
+        if (glm::vec3(chunkPtr.x, 0, chunkPtr.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 

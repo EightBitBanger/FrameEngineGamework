@@ -304,10 +304,6 @@ int main(int argc, char* argv[]) {
         
 #endif
         
-        // Reset mouse scroll wheel state
-        Input.mouseWheelDelta = 0;
-        
-        
         //
         // Tick update timer (background update)
         //
@@ -358,6 +354,13 @@ int main(int argc, char* argv[]) {
             for (int i=0; i < 2; i++) {
                 
                 Run();
+                
+                // Run key bindings
+                Input.UpdateKeyBindings();
+                
+                // Reset mouse scroll wheel state
+                Input.mouseWheelDelta = 0;
+                
                 
                 Scripting.Update();
                 

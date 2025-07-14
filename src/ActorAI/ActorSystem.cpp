@@ -22,7 +22,8 @@ ActorSystem::ActorSystem() :
     baseMesh(nullptr),
     mPlayerPosition(0),
     mActorUpdateDistance(300),
-    mWorldWaterLevel(0.0f)
+    mWorldWaterLevel(0.0f),
+    mNumberOfActors(0)
 {
 }
 
@@ -79,16 +80,22 @@ Actor* ActorSystem::CreateActor(void) {
     if (!mGarbageActors.empty()) {
         Actor* actor = mGarbageActors[0];
         mGarbageActors.erase(mGarbageActors.begin());
-        actor->Reset();
+        mNumberOfActors++;
         return actor;
     }
     Actor* actorPtr = mActors.Create();
     actorPtr->Reset();
+    mNumberOfActors++;
     return actorPtr;
 }
 
 bool ActorSystem::DestroyActor(Actor* actorPtr) {
     std::lock_guard<std::mutex> lock(mux);
+    if (actorPtr->colliderBody != nullptr) {
+        extern PhysicsSystem Physics;
+        Physics.DestroyCollisionBody(actorPtr->colliderBody);
+        actorPtr->colliderBody = nullptr;
+    }
     actorPtr->isGarbage = true;
     actorPtr->isActive = false;
     return true;
@@ -102,6 +109,10 @@ Actor* ActorSystem::GetActorFromSimulation(unsigned int index) {
 
 unsigned int ActorSystem::GetNumberOfActors(void) {
     return mActors.Size();
+}
+
+unsigned int ActorSystem::GetNumberOfActiveActors(void) {
+    return mNumberOfActors;
 }
 
 Actor* ActorSystem::GetActor(unsigned int index) {
@@ -127,6 +138,7 @@ bool ActorSystem::UpdateGarbageCollection(Actor* actor) {
     actor->Reset();
     
     mGarbageActors.push_back(actor);
+    mNumberOfActors--;
     //mActors.Destroy(actor);
     return true;
 }

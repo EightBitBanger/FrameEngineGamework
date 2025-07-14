@@ -12,8 +12,6 @@ void ActorSystem::UpdateActorGenetics(Actor* actor) {
     ClearOldGeneticRenderers(actor);
     
     unsigned int numberOfGenes = actor->genetics.mGenes.size();
-    bool sexualOrientation = actor->physical.GetSexualOrientation();
-    
     for (unsigned int a = 0; a < numberOfGenes; a++) {
         // Check should express
         if (!actor->genetics.mGenes[a].doExpress)

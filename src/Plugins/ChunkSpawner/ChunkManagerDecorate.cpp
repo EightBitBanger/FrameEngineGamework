@@ -261,9 +261,9 @@ void ChunkManager::Decorate(Chunk& chunk) {
     
     staticMesh->ClearSubMeshes();
     
-    for (int xx=0; xx < chunkSize-1; xx++) {
+    for (int xx=0; xx < chunkSize; xx++) {
         
-        for (int zz=0; zz < chunkSize-1; zz++) {
+        for (int zz=0; zz < chunkSize; zz++) {
             
             float xp = xx - (chunkSize / 2);
             float zp = zz - (chunkSize / 2);
@@ -436,9 +436,7 @@ void ChunkManager::Decorate(Chunk& chunk) {
             if (decor.type == DECORATION_ACTOR) {
                 
                 if ((unsigned int)Random.Range(0, 10000) < decor.density) {
-                    Actor* actor = AI.CreateActor();
-                    actor->navigation.SetPosition( glm::vec3(from.x, 0, from.z) );
-                    actor->navigation.SetTargetPoint( glm::vec3(from.x, 0, from.z) );
+                    Actor* actor = SummonActor(glm::vec3(from.x, 0, from.z));
                     
                     DecodeGenome(decor, actor);
                     

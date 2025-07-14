@@ -19,7 +19,7 @@ void ChunkManager::SetColorFieldValues(glm::vec3* colorField, unsigned int width
 
 float ChunkManager::AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
                                                   float noiseWidth, float noiseHeight, 
-                                                  float noiseMul, int offsetX, int offsetZ, int seed) {
+                                                  float noiseMul, int offsetX, int offsetZ, float heightThreshold, int seed) {
     float minimumHeight = 1000.0f;
     unsigned int size = width * height;
     
@@ -31,8 +31,13 @@ float ChunkManager::AddHeightFieldFromPerlinNoise(float* heightField, unsigned i
         float zCoord = ((float)z + offsetZ) * noiseHeight;
         
         float noise = Random.Perlin(xCoord, 0, zCoord, seed) * noiseMul;
+        if (heightThreshold != 0.0f) {
+            if (noise < heightThreshold) 
+                continue;
+            noise -= heightThreshold;
+        }
         
-        heightField[i] += Math.Round((noise * 10.0)) * 0.1;
+        heightField[i] += noise;//Math.Round((noise * 2.0)) * 0.5;
         
         if (heightField[i] < minimumHeight)
             minimumHeight = heightField[i];
@@ -45,9 +50,10 @@ void ChunkManager::GenerateWaterTableFromHeightField(float* heightField,
                                                      unsigned int width, unsigned int height, 
                                                      float tableHeight) {
     unsigned int size = width * height;
-    for (unsigned int i = 0; i < size; i++) {
-        if (heightField[i] < tableHeight) heightField[i] *= 0.3;
-    }
+    for (unsigned int i = 0; i < size; i++) 
+        if (heightField[i] < tableHeight) 
+            heightField[i] *= 0.9;
+    
     return;
 }
 

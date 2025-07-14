@@ -6,7 +6,7 @@
 
 
 void ActorSystem::HandleNeuralNetwork(Actor* actor) {
-    
+    /*
     // Height preference max below water suggests
     // the actor is an aquatic actor
     bool isAquatic = actor->behavior.mHeightPreferenceMax < mWorldWaterLevel;
@@ -68,11 +68,11 @@ void ActorSystem::HandleNeuralNetwork(Actor* actor) {
         }
         
     }
-    
+    */
     return;
 }
 
-
+/*
 std::vector<float> ActorSystem::Encode(const NeuralState neuralState) {
     
     switch (neuralState) {
@@ -95,4 +95,4 @@ std::vector<float> ActorSystem::Encode(const NeuralState neuralState) {
     
     return {0.5f, 0.5f};
 }
-
+*/

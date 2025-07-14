@@ -5,8 +5,10 @@
 
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Perlin.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/Biome.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Decor.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Structure.h>
+
 
 class ENGINE_API WorldGeneration {
     
@@ -19,8 +21,9 @@ public:
     bool doAutoBreeding;
     
     float snowCapHeight;
-    
+    float snowCapBias;
     Color snowCapColor;
+    
     Color waterColorLow;
     Color waterColorHigh;
     
@@ -29,17 +32,21 @@ public:
     float ambientLight;
     
     Color chunkColorLow;
-    Color staticColorLow;
-    Color actorColorLow;
-    
     Color chunkColorHigh;
+    float chunkColorBias;
+    
+    Color staticColorLow;
     Color staticColorHigh;
+    
+    Color actorColorLow;
     Color actorColorHigh;
     
     std::vector<DecorationSpecifier> mDecorations;
     
-    std::vector<Structure> mStructures;
+    std::vector<Perlin> mPerlin;
+    std::vector<Biome> mBiomes;
     
+    std::vector<Structure> mStructures;
     
     // Static plant generation
     
@@ -69,6 +76,7 @@ public:
         doAutoBreeding(true),
         
         snowCapHeight(60.0f),
+        snowCapBias(2.0f),
         snowCapColor(0.7f, 0.85f, 1.1f, 1.0f),
         
         waterColorLow(Colors.black),
@@ -79,11 +87,12 @@ public:
         ambientLight(1.0f),
         
         chunkColorLow(Colors.black),
-        staticColorLow(Colors.black),
-        actorColorLow(Colors.black),
-        
         chunkColorHigh(Colors.white),
+        
+        staticColorLow(Colors.black),
         staticColorHigh(Colors.white),
+        
+        actorColorLow(Colors.black),
         actorColorHigh(Colors.white),
         
         staticDensity(200),
@@ -107,7 +116,7 @@ public:
 
 
 
-class ChunkManager {
+class ENGINE_API ChunkManager {
     
 public:
     
@@ -125,6 +134,9 @@ public:
     
     ChunkManager();
     
+    Actor* SummonActor(glm::vec3 position);
+    void KillActor(Actor* actor);
+    
     Chunk* FindChunk(int x, int z);
     
     void WorldDirectoryInitiate(void);
@@ -132,35 +144,27 @@ public:
     // Save / load
     
     bool SaveChunk(Chunk& chunk, bool doClearActors);
-    
     bool LoadChunk(Chunk& chunk);
     
     bool SaveWorld(void);
-    
     bool LoadWorld(void);
     
     // Purge
     
     void ClearWorld(void);
-    
     bool DestroyWorld(std::string worldname);
     
     // Chunks
     
     Chunk CreateChunk(float x, float y);
-    
     bool DestroyChunk(Chunk& chunk);
     
     // World rules
     
     void AddWorldRule(std::string key, std::string value);
-    
     bool RemoveWorldRule(std::string key);
-    
     std::string GetWorldRule(std::string key);
-    
     bool SetWorldRule(std::string key, std::string value);
-    
     bool ApplyWorldRule(std::string key, std::string value);
     
     // World generation functions
@@ -170,7 +174,7 @@ public:
     
     /// Add a layer of perlin noise into a height field. The minimum 
     /// height value will be returned.
-    float AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ, int seed);
+    float AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ, float heightThreshold, int seed);
     
     // Color field
     
@@ -214,12 +218,9 @@ public:
     /// Apply a height stepping effect to the mesh.
     void AddHeightStepToMesh(float* heightField, unsigned int width, unsigned int height);
     
-    
-    
     void Initiate(void);
     
     void Update(void);
-    
     
     void AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
     void AddDecorGrassThin(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
@@ -230,9 +231,6 @@ public:
     void AddDecorTree(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz, Decoration treeType);
     
     void Decorate(Chunk& chunk);
-    
-    std::vector<Decoration> decoration;
-    std::vector<Perlin> perlin;
     
     std::vector<Chunk> chunks;
     
@@ -247,10 +245,8 @@ private:
     // World generation functions
     
     void GenerateChunks(const glm::vec3 &playerPosition);
-    bool IsChunkFound(const glm::vec2 &chunkPosition);
-    
-    void GenerateChunk(const glm::vec2 &chunkPosition);
     void DestroyChunks(const glm::vec3 &playerPosition);
+    bool IsChunkFound(const glm::vec2 &chunkPosition);
     
     void HandleActorLifeCycle(GameObject* actorObject);
     

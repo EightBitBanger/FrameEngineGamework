@@ -11,24 +11,30 @@ public:
     
     Perlin() : 
         heightMultuplier(0.2),
+        heightThreshold(0.0f),
+        offsetX(0),
+        offsetY(0),
         noiseWidth(0.2),
-        noiseHeight(0.2),
-        equation(0)
+        noiseHeight(0.2)
     {}
     
     /// Mountain height multiplier
     float heightMultuplier;
     
-    /// Perlin noise value horizontal
+    /// Height threshold.
+    float heightThreshold;
+    
+    /// Horizontal offset
+    float offsetX;
+    
+    /// Vertical offset
+    float offsetY;
+    
+    /// Horizontal noise
     float noiseWidth;
     
-    /// Perlin noise value vertical
+    /// Vertical noise
     float noiseHeight;
-    
-    /// Layer equation
-    /// 0 = Additive
-    /// 1 = Average
-    short int equation;
     
 };
 

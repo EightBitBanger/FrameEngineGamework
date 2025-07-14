@@ -99,6 +99,10 @@
     #define ENGINE_API  __declspec(dllexport)
 #endif
 
+#ifdef BUILD_PLUGINS
+    #define ENGINE_API  __declspec(dllexport)
+#endif
+
 #ifdef BUILD_APPLICATION
     #define ENGINE_API  __declspec(dllexport)
 #endif

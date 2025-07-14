@@ -42,9 +42,7 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 // Set current age
                 unsigned long long int age = String.ToLongUint( lineArray[3] );
                 
-                Actor* actor = AI.CreateActor();
-                actor->navigation.SetPosition(pos);
-                actor->navigation.SetTargetPoint(pos);
+                Actor* actor = SummonActor(pos);
                 
                 // Set genome
                 AI.genomes.InjectGenome(actor, lineArray[4]);

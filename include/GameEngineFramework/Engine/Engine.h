@@ -74,6 +74,10 @@ public:
     /// Add a quad to a mesh mapping to a sub sprite from a sprite sheet texture.
     void AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float width, float height, int index, Color meshColor);
     
+    /// Get a collider from the collider list. If one does not exist it will be generated.
+    rp3d::BoxShape* GetColliderBox(glm::vec3 extents);
+    
+    
     
     EngineSystemManager();
     
@@ -213,6 +217,9 @@ public:
     } console;
     
     
+    // List of box colliders
+    std::vector<rp3d::BoxShape*>  mBoxCollider;
+    
 private:
     
     
@@ -241,7 +248,6 @@ private:
     MeshRenderer* CreateMeshRendererForGene(unsigned int index, unsigned int geneIndex, Mesh* sourceMesh);
     void ExpressActorGenetics(unsigned int index);
     
-    
     // List of active game objects
     std::vector<GameObject*>  mGameObjectActive;
     
@@ -264,29 +270,18 @@ private:
     };
     
     struct DefaultMeshes {
-        
         Mesh* grassHorz = nullptr;
         Mesh* grassVert = nullptr;
-        
         Mesh* stemHorz = nullptr;
         Mesh* stemVert = nullptr;
-        
         Mesh* wallHorizontal = nullptr;
         Mesh* wallVertical = nullptr;
-        
         Mesh* log = nullptr;
         
         Mesh* cube = nullptr;
         Mesh* chunk = nullptr;
         Mesh* plain = nullptr;
         Mesh* sphere = nullptr;
-        
-    };
-    
-    struct DefaultColliders {
-        
-        rp3d::BoxShape*  box = nullptr;
-        
     };
     
     void UpdateComponentStream(void);
@@ -327,9 +322,6 @@ public:
     
     /// Default meshes provided by the engine.
     DefaultMeshes  meshes;
-    
-    /// Default collision shapes
-    DefaultColliders colliders;
     
 };
 

@@ -7,6 +7,8 @@ extern RenderSystem   Renderer;
 Actor::Actor() : 
     isGarbage(false),
     isActive(false),
+    isSaved(false),
+    colliderBody(nullptr),
     mName("")
 {
 }
@@ -14,7 +16,10 @@ Actor::Actor() :
 void Actor::Reset(void) {
     isGarbage = false;
     isActive = false;
+    isSaved = false;
     mName = "";
+    
+    colliderBody = nullptr;
     
     // Navigation
     navigation.mVelocity      = glm::vec3(0);

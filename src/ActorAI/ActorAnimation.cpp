@@ -127,9 +127,9 @@ void ActorSystem::UpdateAnimationLimb(glm::mat4& matrix, Actor* actor, unsigned 
     matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
     
     // Update animation state
-    glm::vec4 animationFactor = glm::normalize(glm::vec4(actor->genetics.mGenes[a].animationAxis.x, 
-    actor->genetics.mGenes[a].animationAxis.y, actor->genetics.mGenes[a].animationAxis.z, 0));
-    
+    glm::vec4 animationFactor = glm::vec4(actor->genetics.mGenes[a].animationAxis.x, 
+                                          actor->genetics.mGenes[a].animationAxis.y, 
+                                          actor->genetics.mGenes[a].animationAxis.z, 0);
     // Calculate limb swing
     float animationMaxSwingRange = actor->genetics.mGenes[a].animationRange;
     if (actor->state.mAnimation[a].w < 0) {

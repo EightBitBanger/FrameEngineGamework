@@ -58,7 +58,7 @@ public:
     
     rp3d::Collider* collider;
     
-    void* gameObject;
+    void* userData;
     
 };
 

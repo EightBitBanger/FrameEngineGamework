@@ -16,7 +16,6 @@ RaybackCastCaller::RaybackCastCaller() :
 }
 
 void PhysicsSystem::Initiate(void) {
-    
     rp3d::PhysicsWorld::WorldSettings worldSettings;
     //worldSettings.defaultBounciness            = 0.5;
     //worldSettings.defaultFrictionCoefficient   = 0.7;
@@ -37,7 +36,6 @@ void PhysicsSystem::Initiate(void) {
 }
 
 void PhysicsSystem::Shutdown(void) {
-    
     for (unsigned int i=0; i < mRigidBodyFreeList.size(); i++) 
         world->destroyRigidBody( mRigidBodyFreeList[i] );
     
@@ -202,7 +200,6 @@ bool PhysicsSystem::Raycast(glm::vec3 from, glm::vec3 direction, float distance,
     rp3d::Ray ray(fromVec, fromVec + toVec);
     
     mRaybackCastCaller.isHit = false;
-    
     world->raycast( ray, &mRaybackCastCaller, (unsigned short)layer );
     
     if (!mRaybackCastCaller.isHit) 
@@ -211,8 +208,8 @@ bool PhysicsSystem::Raycast(glm::vec3 from, glm::vec3 direction, float distance,
     hit.point  = mRaybackCastCaller.point;
     hit.normal = mRaybackCastCaller.normal;
     
-    hit.gameObject = mRaybackCastCaller.userData;
-    hit.collider   = mRaybackCastCaller.collider;
+    hit.userData  = mRaybackCastCaller.userData;
+    hit.collider  = mRaybackCastCaller.collider;
     
     return true;
 }

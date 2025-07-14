@@ -27,6 +27,21 @@ GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
     return nullptr;
 }
 
+rp3d::BoxShape* EngineSystemManager::GetColliderBox(glm::vec3 extents) {
+    for (unsigned int i=0; i < mBoxCollider.size(); i++) {
+        rp3d::BoxShape* colliderShape = mBoxCollider[i];
+        rp3d::Vector3 extentItem = colliderShape->getHalfExtents();
+        if (extentItem.x == extents.x && 
+            extentItem.y == extents.y && 
+            extentItem.z == extents.z) 
+            return colliderShape;
+    }
+    rp3d::Vector3 newExtent(extents.x, extents.y, extents.z);
+    rp3d::BoxShape* colliderShape = Physics.common.createBoxShape(newExtent);
+    
+    mBoxCollider.push_back( colliderShape );
+    return colliderShape;
+}
 
 
 void EngineSystemManager::Initiate() {
@@ -96,15 +111,18 @@ void EngineSystemManager::Initiate() {
     meshes.sphere          = Resources.CreateMeshFromTag("sphere");
     
     // Prevent the meshes from being garbage collected
-    meshes.cube->isShared            = true;
-    meshes.chunk->isShared           = true;
-    meshes.plain->isShared           = true;
-    meshes.sphere->isShared          = true;
-    meshes.wallHorizontal->isShared  = true;
-    meshes.wallVertical->isShared    = true;
+    meshes.grassHorz->isShared         = true;
+    meshes.grassVert->isShared         = true;
+    meshes.stemHorz->isShared          = true;
+    meshes.stemVert->isShared          = true;
+    meshes.wallHorizontal->isShared    = true;
+    meshes.wallVertical->isShared      = true;
+    meshes.log->isShared               = true;
     
-    // Generate default colliders
-    colliders.box = Physics.common.createBoxShape( rp3d::Vector3(0.5f, 0.5f, 0.5f) );
+    meshes.cube->isShared              = true;
+    meshes.chunk->isShared             = true;
+    meshes.plain->isShared             = true;
+    meshes.sphere->isShared            = true;
     
     // Main world scene
     sceneMain = Create<Scene>();

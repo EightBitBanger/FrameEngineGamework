@@ -6,7 +6,7 @@
 #include <GameEngineFramework/Input/keys.h>
 
 #include <glm/glm.hpp>
-
+#include <unordered_map>
 
 class ENGINE_API InputSystem {
     
@@ -94,7 +94,18 @@ public:
     /// Clear current key states.
     void ClearKeysCurrent(void);
     
+    /// Bind a key state to a function callback.
+    void BindKeyPressToFunction(int keyid, void(*function)());
+    void BindKeyCurrentToFunction(int keyid, void(*function)());
+    void BindKeyReleaseToFunction(int keyid, void(*function)());
+    
+    void UpdateKeyBindings(void);
+    
 private:
+    
+    std::unordered_map<int, void(*)()> mKeyCallbackPress;
+    std::unordered_map<int, void(*)()> mKeyCallbackCurrent;
+    std::unordered_map<int, void(*)()> mKeyCallbackRelease;
     
     bool mKeyPressed  [256];
     bool mKeyReleased [256];

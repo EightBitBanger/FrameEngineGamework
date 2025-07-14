@@ -29,8 +29,10 @@ public:
     friend class EngineSystemManager;
     
     // Flags
+    
     bool isGarbage;     // Mark for internal destruction and garbage collection
     bool isActive;      // Update the actor in the world
+    bool isSaved;       // Used to prevent saving issues
     
     // Name
     
@@ -48,6 +50,8 @@ public:
     /// reset as they are owned and must be reset by the engine system.
     void Reset(void);
     
+    /// Physics collider for ray casting
+    rp3d::CollisionBody* colliderBody;
     
     
     class ENGINE_API NavigationSystem {

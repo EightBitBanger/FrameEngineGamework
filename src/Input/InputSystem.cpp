@@ -47,13 +47,13 @@ void InputSystem::SetMousePosition(unsigned int x, unsigned int y) {
 }
 
 // Set key state
-void  InputSystem::SetKeyPressed(int keyid)  {mKeyPressed[keyid] = true;  mKeyReleased[keyid] = false; mKeyCurrent[keyid] = true;}
-void  InputSystem::SetKeyReleased(int keyid) {mKeyPressed[keyid] = false; mKeyReleased[keyid] = true;  mKeyCurrent[keyid] = false;}
+void InputSystem::SetKeyPressed(int keyid)  {mKeyPressed[keyid] = true;  mKeyReleased[keyid] = false; mKeyCurrent[keyid] = true;}
+void InputSystem::SetKeyReleased(int keyid) {mKeyPressed[keyid] = false; mKeyReleased[keyid] = true;  mKeyCurrent[keyid] = false;}
 
 // Check key state
-bool  InputSystem::CheckKeyPressed(int keyid)  {int currentKey = mKeyPressed[keyid];  mKeyPressed[keyid]  = false; return currentKey;}
-bool  InputSystem::CheckKeyReleased(int keyid) {int currentKey = mKeyReleased[keyid]; mKeyReleased[keyid] = false; return currentKey;}
-bool  InputSystem::CheckKeyCurrent(int keyid)  {return mKeyCurrent [keyid];}
+bool InputSystem::CheckKeyPressed(int keyid)  {int currentKey = mKeyPressed[keyid];  mKeyPressed[keyid]  = false; return currentKey;}
+bool InputSystem::CheckKeyReleased(int keyid) {int currentKey = mKeyReleased[keyid]; mKeyReleased[keyid] = false; return currentKey;}
+bool InputSystem::CheckKeyCurrent(int keyid)  {return mKeyCurrent [keyid];}
 
 // Set mouse state
 void InputSystem::SetMouseLeftPressed(bool State)   {mMouseLeftPressed = State;}
@@ -77,13 +77,46 @@ void InputSystem::ClearMouseRight(void)  {mMouseRightPressed = false; mMouseRigh
 void InputSystem::ClearMouseMiddle(void) {mMouseMiddlePressed = false; mMouseMiddleReleased = false;}
 
 // Clear key state
-void  InputSystem::ClearKey(int keyid)         {mKeyPressed[keyid] = false; mKeyReleased[keyid] = false; mKeyCurrent[keyid] = false;}
-void  InputSystem::ClearKeyPressed(int keyid)  {mKeyPressed[keyid] = false;}
-void  InputSystem::ClearKeyReleased(int keyid) {mKeyReleased[keyid] = false;}
-void  InputSystem::ClearKeyCurrent(int keyid)  {mKeyCurrent[keyid] = false;}
+void InputSystem::ClearKey(int keyid)         {mKeyPressed[keyid] = false; mKeyReleased[keyid] = false; mKeyCurrent[keyid] = false;}
+void InputSystem::ClearKeyPressed(int keyid)  {mKeyPressed[keyid] = false;}
+void InputSystem::ClearKeyReleased(int keyid) {mKeyReleased[keyid] = false;}
+void InputSystem::ClearKeyCurrent(int keyid)  {mKeyCurrent[keyid] = false;}
 
 // Clear all key states
-void  InputSystem::ClearKeys(void)         {for (int i=0; i <= 255; i++) {mKeyPressed[i] = 0; mKeyReleased[i] = 0; mKeyCurrent[i] = 0;}}
-void  InputSystem::ClearKeysPressed(void)  {for (int i=0; i <= 255; i++) {mKeyPressed[i] = 0;}}
-void  InputSystem::ClearKeysReleased(void) {for (int i=0; i <= 255; i++) {mKeyReleased[i] = 0;}}
-void  InputSystem::ClearKeysCurrent(void)  {for (int i=0; i <= 255; i++) {mKeyCurrent[i] = 0;}}
+void InputSystem::ClearKeys(void)         {for (int i=0; i <= 255; i++) {mKeyPressed[i] = 0; mKeyReleased[i] = 0; mKeyCurrent[i] = 0;}}
+void InputSystem::ClearKeysPressed(void)  {for (int i=0; i <= 255; i++) {mKeyPressed[i] = 0;}}
+void InputSystem::ClearKeysReleased(void) {for (int i=0; i <= 255; i++) {mKeyReleased[i] = 0;}}
+void InputSystem::ClearKeysCurrent(void)  {for (int i=0; i <= 255; i++) {mKeyCurrent[i] = 0;}}
+
+void InputSystem::BindKeyPressToFunction(int keyid, void(*function)()) {
+    mKeyCallbackPress[keyid] = function;
+}
+
+void InputSystem::BindKeyCurrentToFunction(int keyid, void(*function)()) {
+    mKeyCallbackCurrent[keyid] = function;
+}
+
+void InputSystem::BindKeyReleaseToFunction(int keyid, void(*function)()) {
+    mKeyCallbackRelease[keyid] = function;
+}
+
+void InputSystem::UpdateKeyBindings(void) {
+    for (std::unordered_map<int, void(*)()>::iterator it = mKeyCallbackPress.begin(); it != mKeyCallbackPress.end(); ++it) {
+        if (mKeyPressed[it->first]) {
+            mKeyPressed[it->first] = 0;
+            it->second();
+        }
+    }
+    for (std::unordered_map<int, void(*)()>::iterator it = mKeyCallbackCurrent.begin(); it != mKeyCallbackCurrent.end(); ++it) {
+        if (mKeyCurrent[it->first]) {
+            it->second();
+        }
+    }
+    for (std::unordered_map<int, void(*)()>::iterator it = mKeyCallbackRelease.begin(); it != mKeyCallbackRelease.end(); ++it) {
+        if (mKeyReleased[it->first]) {
+            mKeyReleased[it->first] = 0;
+            it->second();
+        }
+    }
+}
+

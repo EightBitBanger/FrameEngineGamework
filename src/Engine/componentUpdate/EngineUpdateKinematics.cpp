@@ -12,9 +12,6 @@ void EngineSystemManager::UpdateKinematics(void) {
         Actor* actor = AI.GetActorFromSimulation(i);
         std::lock_guard<std::mutex> (actor->navigation.mux);
         
-        // Check if the actor needs a collider generated on thread main
-        //GenerateCollider(actor);
-        
         // Check query points
         Hit hit;
         unsigned int numberOfPoints = actor->navigation.mQueryPoints.size();
@@ -26,14 +23,17 @@ void EngineSystemManager::UpdateKinematics(void) {
                 actor->navigation.mQueryPoints[i].y = hit.point.y;
         }
         
-        
         glm::vec3 actorPosition = actor->navigation.mPosition;
         glm::vec3 actorRotation = actor->navigation.mRotation;
         glm::vec3 actorVelocity = actor->navigation.mVelocity;
         glm::vec3 actorTarget   = actor->navigation.mTargetPoint;
         
-        //rp3d::Transform transform = mStreamBuffer[index].rigidBody->getTransform();
-        //rp3d::Vector3 physicsPosition = transform.getPosition();
+        // Update collision body
+        if (actor->colliderBody != nullptr) {
+            rp3d::Transform transform = actor->colliderBody->getTransform();
+            transform.setPosition(rp3d::Vector3(actorPosition.x, actorPosition.y, actorPosition.z));
+            actor->colliderBody->setTransform(transform);
+        }
         
         // Check not on ground
         if (Physics.Raycast(actorPosition, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Ground)) 
@@ -57,7 +57,6 @@ void EngineSystemManager::UpdateKinematics(void) {
 }
 
 
-// Function to generate collider
 void EngineSystemManager::GenerateCollider(Actor* actor) {
     /*
     rp3d::RigidBody* rigidBody = mStreamBuffer[index].rigidBody;

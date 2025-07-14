@@ -80,6 +80,12 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
     
     switch (actor->state.current) {
             
+        case ActorState::State::None: 
+            break;
+            
+        case ActorState::State::Defend: 
+            break;
+            
         case ActorState::State::Attack:
             if (actor->counters.mAttackCoolDownCounter > 0) 
                 break;
@@ -145,8 +151,18 @@ void ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
     // Check if the target defense is greater them my strength
     if (target->biological.defense >= actor->biological.strength) 
         return;
-    
+    // Inflict damage 
     target->biological.health -= actor->biological.strength - target->biological.defense;
+    
+    // Check if the target is.. no longer with us
+    if (target->biological.health) {
+        
+        Crash fuck, killing an actor seems to break something internally
+        Find the system thats crashing when an actor is destroyed
+        //actor->navigation.SetTargetActor(nullptr);
+        
+    }
+    
     return;
 }
 
@@ -154,8 +170,8 @@ void ActorSystem::HandleVitality(Actor* actor) {
     
     // Check death
     if (actor->biological.health <= 0.0f) {
-        actor->isActive = false;
-        actor->isGarbage = true;
+        //actor->isActive = false;
+        //actor->isGarbage = true;
     }
     
     return;
