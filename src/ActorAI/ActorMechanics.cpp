@@ -11,7 +11,6 @@ void ActorSystem::UpdateActorMechanics(Actor* actor) {
     HandleTargettingMechanics(actor);
     HandleBreedingMechanics(actor);
     
-    // Check actor vital state
     HandleVitality(actor);
     
     return;
@@ -74,7 +73,8 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
 }
 
 void ActorSystem::HandleTargettingMechanics(Actor* actor) {
-    glm::vec3 position(0);
+    glm::vec3 position(0.0f);
+    
     if (actor->navigation.mTargetActor != nullptr) 
         position = actor->navigation.mTargetActor->navigation.mPosition;
     
@@ -94,7 +94,6 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
             actor->navigation.mTargetLook  = position;
             actor->state.mIsFacing = true;
             
-            // Inflict attack damage
             HandleInflictDamage(actor, actor->navigation.mTargetActor);
             break;
             
@@ -128,15 +127,8 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
     actor->navigation.mDistanceToTarget = glm::distance(posA, posB);
     if (actor->navigation.mDistanceToTarget < actor->behavior.GetDistanceToInflict()) {
         
+        // Hold at idle until we repeat the attack
         actor->state.mode = ActorState::Mode::Idle;
-    }
-    
-    // Check dead target
-    if (actor->navigation.mTargetActor != nullptr) {
-        
-        if (!actor->navigation.mTargetActor->isActive) 
-            actor->navigation.mTargetActor = nullptr;
-        
     }
     return;
 }
@@ -148,32 +140,33 @@ void ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
     actor->counters.mAttackCoolDownCounter = actor->behavior.GetCooldownAttack();
     actor->state.mode = ActorState::Mode::Idle;
     
-    // Check if the target defense is greater them my strength
+    // No effect if the target defense is greater them my strength
     if (target->biological.defense >= actor->biological.strength) 
         return;
     // Inflict damage 
     target->biological.health -= actor->biological.strength - target->biological.defense;
     
-    // Check if the target is.. no longer with us
-    if (target->biological.health) {
-        
-        Crash fuck, killing an actor seems to break something internally
-        Find the system thats crashing when an actor is destroyed
-        //actor->navigation.SetTargetActor(nullptr);
-        
-    }
-    
     return;
 }
 
 void ActorSystem::HandleVitality(Actor* actor) {
+    // Check if the target is.. no longer with us
+    if (actor->biological.health > 0.0f) 
+        return;
     
-    // Check death
-    if (actor->biological.health <= 0.0f) {
-        //actor->isActive = false;
-        //actor->isGarbage = true;
+    for (unsigned int i=0; i < actor->genetics.mGeneticRenderers.size(); i++) {
+        MeshRenderer* actorRenderer = actor->genetics.mGeneticRenderers[i];
+        
+        actorRenderer->isActive = false;
     }
     
+    Fuckery...
+    //if (actor->navigation.mTargetActor != nullptr) 
+    //    actor->navigation.mTargetActor->navigation.mTargetActor = nullptr;
+    //actor->navigation.mTargetActor = nullptr;
+    
+    actor->isActive = false;
+    actor->isGarbage = true;
     return;
 }
 
@@ -264,15 +257,17 @@ void ActorSystem::UpdateProximityList(Actor* actor) {
     // Check if any actor should be dropped from the list
     for (int i = actor->behavior.mProximityList.size() - 1; i >= 0; --i) {
         Actor* actorPtr = actor->behavior.mProximityList[i];
+        if (!actorPtr->isActive) 
+            continue;
         
         // Check actor focal range
-        if (glm::distance(actor->navigation.mPosition, actorPtr->navigation.mPosition) > actor->behavior.mDistanceToFocus * 2.0f) {
+        if (glm::distance(actor->navigation.mPosition, actorPtr->navigation.mPosition) > actor->behavior.mDistanceToFocus * 1.5f) {
             actor->behavior.mProximityList.erase(actor->behavior.mProximityList.begin() + i);
             continue;
         }
         
         // Check actor has been disabled or destroyed
-        if (actorPtr->isGarbage) {
+        if (!actorPtr->isActive || actorPtr->isGarbage) {
             actor->behavior.mProximityList.erase(actor->behavior.mProximityList.begin() + i);
             continue;
         }
@@ -290,14 +285,14 @@ void ActorSystem::UpdateProximityList(Actor* actor) {
     Actor* targetActor = mActors[ index ];
     
     // Check bad actor
-    if (targetActor->isGarbage) 
+    if (!targetActor->isActive || targetActor->isGarbage) 
         return;
     
     // Actor cannot target itself
     if (targetActor == actor) 
         return;
     
-    // Check actor focal range
+    // Can the actor see the target
     if (glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition) > actor->behavior.mDistanceToFocus) 
         return;
     

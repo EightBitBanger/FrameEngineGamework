@@ -76,12 +76,14 @@ void Run() {
         if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
             Actor* hitActor = (Actor*)hit.userData;
             if (hitActor == actorInSights) {
-                actorInSights = nullptr;
+                //actorInSights = nullptr;
                 for (unsigned int i=0; i < 24; i++) 
                     Engine.console.WriteDialog(i, "");
             }
             
-            GameWorld.KillActor(hitActor);
+            hitActor->biological.health = 0.0f;
+            
+            //GameWorld.KillActor(hitActor);
         }
     }
     
@@ -99,15 +101,22 @@ void Run() {
             
             Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
             
+            if (Random.Range(0, 100) > 50)
+                AI.genomes.presets.Sheep(actor);
+            else 
+                AI.genomes.presets.Bear(actor);
+            
+            /*
             unsigned int randomActor = Random.Range(0, 5);
             switch (randomActor) {
                 default:
-                case 0: AI.genomes.presets.Human(actor); break;
-                case 1: AI.genomes.presets.Bovine(actor); break;
-                case 2: AI.genomes.presets.Horse(actor); break;
+                //case 0: AI.genomes.presets.Human(actor); break;
+                //case 1: AI.genomes.presets.Bovine(actor); break;
+                //case 2: AI.genomes.presets.Horse(actor); break;
                 case 3: AI.genomes.presets.Sheep(actor); break;
                 case 4: AI.genomes.presets.Bear(actor); break;
             }
+            */
             
             actor->physical.SetAge( Random.Range(0.0f, actor->physical.GetAdultAge()) );
             actor->RebuildGeneticExpression();

@@ -81,6 +81,7 @@ Actor* ActorSystem::CreateActor(void) {
         Actor* actor = mGarbageActors[0];
         mGarbageActors.erase(mGarbageActors.begin());
         mNumberOfActors++;
+        actor->Reset();
         return actor;
     }
     Actor* actorPtr = mActors.Create();
@@ -135,11 +136,11 @@ bool ActorSystem::UpdateGarbageCollection(Actor* actor) {
     // Destroy the renderers
     ClearOldGeneticRenderers(actor);
     
-    actor->Reset();
+    //actor->Reset();
+    actor->navigation.mVelocity = glm::vec3(0);
     
     mGarbageActors.push_back(actor);
     mNumberOfActors--;
-    //mActors.Destroy(actor);
     return true;
 }
 

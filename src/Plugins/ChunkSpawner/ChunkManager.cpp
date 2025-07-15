@@ -109,6 +109,9 @@ Actor* ChunkManager::SummonActor(glm::vec3 position) {
     actor->navigation.SetPosition(position);
     actor->navigation.SetTargetPoint(position);
     
+    if (actor->colliderBody != nullptr) 
+        Physics.DestroyCollisionBody(actor->colliderBody);
+    
     actor->colliderBody = Physics.CreateCollisionBody(position.x, position.y, position.z);
     
     rp3d::Transform colliderTransform;
@@ -124,19 +127,7 @@ Actor* ChunkManager::SummonActor(glm::vec3 position) {
 }
 
 void ChunkManager::KillActor(Actor* actor) {
-    unsigned int numberOfRenderers = actor->genetics.GetNumberOfMeshRenderers();
-    for (unsigned int i=0; i < numberOfRenderers; i++) {
-        MeshRenderer* meshRenderer = actor->genetics.GetMeshRendererAtIndex(i);
-        meshRenderer->isActive = false;
-        
-        Renderer.DestroyMeshRenderer(meshRenderer);
-    }
-    
-    actor->genetics.ClearGenome();
-    actor->genetics.ClearPhenome();
-    
-    Physics.DestroyCollisionBody(actor->colliderBody);
-    actor->colliderBody = nullptr;
+    actor->colliderBody->setIsActive(false);
     
     AI.DestroyActor( actor );
 }

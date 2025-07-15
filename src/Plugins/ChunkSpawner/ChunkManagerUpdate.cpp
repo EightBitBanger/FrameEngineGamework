@@ -96,7 +96,6 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
 
 void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
     unsigned int numberOfChunks = chunks.size();
-    
     if (numberOfChunks == 0) 
         return;
     
@@ -109,7 +108,6 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
         glm::vec3 playerPos(playerPosition.x, 0, playerPosition.z);
         
         if (glm::distance(chunkPos, playerPos) > (renderDistance * chunkSize) * 1.5f) {
-            
             SaveChunk(chunk, true);
             DestroyChunk(chunk);
             chunks.erase(chunks.begin() + mChunkIndex);
@@ -123,10 +121,11 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
 }
 
 bool ChunkManager::IsChunkFound(const glm::vec2 &chunkPosition) {
-    for (const auto& chunkPtr : chunks) {
-        if (glm::vec3(chunkPtr.x, 0, chunkPtr.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y)) {
+    unsigned int numberOfChunks = chunks.size();
+    for (unsigned int c = 0; c < numberOfChunks; c++) {
+        Chunk& chunk = chunks[c];
+        if (glm::vec3(chunk.x, 0, chunk.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y)) 
             return true;
-        }
     }
     return false;
 }

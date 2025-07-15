@@ -63,8 +63,6 @@ void ActorSystem::Update(void) {
             if (UpdateGarbageCollection(actor)) 
                 break;
             
-            UpdateProximityList(actor);
-            
             if (actor->isGarbage || !actor->isActive) 
                 continue;
             
@@ -72,6 +70,8 @@ void ActorSystem::Update(void) {
             float distance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
             if (distance > mActorUpdateDistance) 
                 continue;
+            
+            UpdateProximityList(actor);
             
             // Update states
             UpdateActorState(actor);

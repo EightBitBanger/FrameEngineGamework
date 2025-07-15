@@ -23,8 +23,11 @@ void ActorSystem::UpdateActorState(Actor* actor) {
         // Check proximity list for near by actors to interact with
         for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
             Actor* targetActor = actor->behavior.mProximityList[i];
+            if (!targetActor->isActive) {
+                actor->behavior.mProximityList.erase(actor->behavior.mProximityList.begin() + i);
+                return;
+            }
             
-            // Check for interaction with near by actors
             float distanceToProximityTarget = glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition);
             
             if (HandleAttackState(actor, targetActor, distanceToProximityTarget)) 
@@ -74,6 +77,7 @@ bool ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance)
     actor->state.mode    = ActorState::Mode::RunTo;
     actor->state.current = ActorState::State::Attack;
     actor->navigation.mTargetActor = target;
+    target->navigation.mTargetActor = actor;
     
     return true;
 }
@@ -93,6 +97,7 @@ bool ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
     actor->state.mode    = ActorState::Mode::RunTo;
     actor->state.current = ActorState::State::Flee;
     actor->navigation.mTargetActor = target;
+    target->navigation.mTargetActor = actor;
     
     return true;
 }
@@ -110,6 +115,7 @@ bool ActorSystem::HandleFocusState(Actor* actor, Actor* target, float distance) 
     actor->state.mode    = ActorState::Mode::Idle;
     actor->state.current = ActorState::State::Look;
     actor->navigation.mTargetActor = target;
+    target->navigation.mTargetActor = actor;
     
     actor->counters.mObservationCoolDownCounter = actor->behavior.GetCooldownObserve();
     return true;

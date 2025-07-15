@@ -19,7 +19,7 @@ void Actor::Reset(void) {
     isSaved = false;
     mName = "";
     
-    colliderBody = nullptr;
+    //colliderBody = nullptr;
     
     // Navigation
     navigation.mVelocity      = glm::vec3(0);
