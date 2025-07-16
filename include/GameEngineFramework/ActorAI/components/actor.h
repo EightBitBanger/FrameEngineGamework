@@ -184,9 +184,6 @@ public:
         /// Get the prey state.
         bool GetPreyState(void);
         
-        /// Get the number of near by actors
-        unsigned int GetNumberOfTargets(void);
-        
         Behavior();
         
     private:
@@ -206,9 +203,6 @@ public:
         
         float mHeightPreferenceMin;     // Minimum world height this actor prefers to inhabit
         float mHeightPreferenceMax;     // Maximum world height this actor prefers to inhabit
-        
-        // List of near by actors
-        std::vector<Actor*> mProximityList;
         
         std::mutex mux;
         

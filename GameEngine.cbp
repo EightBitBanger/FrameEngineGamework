@@ -538,6 +538,12 @@
 			<Option target="Core-debug" />
 			<Option target="Core-profile" />
 		</Unit>
+		<Unit filename="src/ActorAI/ActorTargeting.cpp">
+			<Option virtualFolder="root/ActorAI/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
 		<Unit filename="src/ActorAI/ActorUpdate.cpp">
 			<Option virtualFolder="root/ActorAI/" />
 			<Option target="Core" />

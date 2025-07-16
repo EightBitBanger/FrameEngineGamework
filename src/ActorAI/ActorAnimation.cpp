@@ -203,6 +203,7 @@ void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned i
     // Check actor target direction
     
     // Wrap euler rotations
+    /*
     if (actor->navigation.mFacing.y < 90.0f) 
         if (actor->navigation.mLookAt.y > 270.0f) 
             actor->navigation.mFacing.y += 360.0f;
@@ -210,6 +211,7 @@ void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned i
     if (actor->navigation.mFacing.y > 270.0f) 
         if (actor->navigation.mLookAt.y < 90.0f) 
             actor->navigation.mFacing.y -= 360.0f;
+    */
     
     // Check actor target direction
     

@@ -72,103 +72,6 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
     return;
 }
 
-void ActorSystem::HandleTargettingMechanics(Actor* actor) {
-    glm::vec3 position(0.0f);
-    
-    if (actor->navigation.mTargetActor != nullptr) 
-        position = actor->navigation.mTargetActor->navigation.mPosition;
-    
-    switch (actor->state.current) {
-            
-        case ActorState::State::None: 
-            break;
-            
-        case ActorState::State::Defend: 
-            break;
-            
-        case ActorState::State::Attack:
-            if (actor->counters.mAttackCoolDownCounter > 0) 
-                break;
-            actor->navigation.mTargetPoint.x = position.x;
-            actor->navigation.mTargetPoint.z = position.z;
-            actor->navigation.mTargetLook  = position;
-            actor->state.mIsFacing = true;
-            
-            HandleInflictDamage(actor, actor->navigation.mTargetActor);
-            break;
-            
-        case ActorState::State::Flee:
-            actor->navigation.mTargetPoint.x = position.x;
-            actor->navigation.mTargetPoint.z = position.z;
-            actor->navigation.mTargetLook = position;
-            actor->state.mIsFacing = false;
-            break;
-            
-        case ActorState::State::Focus:
-            actor->navigation.mTargetPoint.x = position.x;
-            actor->navigation.mTargetPoint.z = position.z;
-            actor->navigation.mTargetLook = position;
-            actor->state.mIsFacing = true;
-            break;
-            
-        case ActorState::State::Look:
-            actor->navigation.mTargetLook = position;
-            actor->state.mIsFacing = true;
-            break;
-            
-    }
-    
-    glm::vec3 posA = actor->navigation.mPosition;
-    glm::vec3 posB = actor->navigation.mTargetPoint;
-    posA.y = 0.0f;
-    posB.y = 0.0f;
-    
-    // Check arrived at target actor
-    actor->navigation.mDistanceToTarget = glm::distance(posA, posB);
-    if (actor->navigation.mDistanceToTarget < actor->behavior.GetDistanceToInflict()) {
-        
-        // Hold at idle until we repeat the attack
-        actor->state.mode = ActorState::Mode::Idle;
-    }
-    return;
-}
-
-void ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
-    if (glm::distance(actor->navigation.mPosition, target->navigation.mPosition) > actor->behavior.mDistanceToInflict) 
-        return;
-    
-    actor->counters.mAttackCoolDownCounter = actor->behavior.GetCooldownAttack();
-    actor->state.mode = ActorState::Mode::Idle;
-    
-    // No effect if the target defense is greater them my strength
-    if (target->biological.defense >= actor->biological.strength) 
-        return;
-    // Inflict damage 
-    target->biological.health -= actor->biological.strength - target->biological.defense;
-    
-    return;
-}
-
-void ActorSystem::HandleVitality(Actor* actor) {
-    // Check if the target is.. no longer with us
-    if (actor->biological.health > 0.0f) 
-        return;
-    
-    for (unsigned int i=0; i < actor->genetics.mGeneticRenderers.size(); i++) {
-        MeshRenderer* actorRenderer = actor->genetics.mGeneticRenderers[i];
-        
-        actorRenderer->isActive = false;
-    }
-    
-    Fuckery...
-    //if (actor->navigation.mTargetActor != nullptr) 
-    //    actor->navigation.mTargetActor->navigation.mTargetActor = nullptr;
-    //actor->navigation.mTargetActor = nullptr;
-    
-    actor->isActive = false;
-    actor->isGarbage = true;
-    return;
-}
 
 void ActorSystem::HandleCooldownCounters(Actor* actor) {
     if (actor->counters.mMovementCoolDownCounter > 0) 
@@ -179,6 +82,16 @@ void ActorSystem::HandleCooldownCounters(Actor* actor) {
     
     if (actor->counters.mObservationCoolDownCounter > 0) 
         actor->counters.mObservationCoolDownCounter--;
+    
+    // Reset actors that have lost the target
+    if (actor->counters.mAttackCoolDownCounter == 0 && 
+        actor->state.current == ActorState::State::Attack && 
+        actor->state.mode == ActorState::Mode::Idle) {
+        
+        actor->state.current = ActorState::State::None;
+        actor->state.mode = ActorState::Mode::Idle;
+    }
+        
     
     return;
 }
@@ -251,59 +164,3 @@ glm::vec3 ActorSystem::CalculateRandomLocalPoint(Actor* actor) {
     return position;
 }
 
-
-void ActorSystem::UpdateProximityList(Actor* actor) {
-    
-    // Check if any actor should be dropped from the list
-    for (int i = actor->behavior.mProximityList.size() - 1; i >= 0; --i) {
-        Actor* actorPtr = actor->behavior.mProximityList[i];
-        if (!actorPtr->isActive) 
-            continue;
-        
-        // Check actor focal range
-        if (glm::distance(actor->navigation.mPosition, actorPtr->navigation.mPosition) > actor->behavior.mDistanceToFocus * 1.5f) {
-            actor->behavior.mProximityList.erase(actor->behavior.mProximityList.begin() + i);
-            continue;
-        }
-        
-        // Check actor has been disabled or destroyed
-        if (!actorPtr->isActive || actorPtr->isGarbage) {
-            actor->behavior.mProximityList.erase(actor->behavior.mProximityList.begin() + i);
-            continue;
-        }
-    }
-    
-    // Limit list size
-    if (actor->behavior.mProximityList.size() > 8) 
-        return;
-    
-    unsigned int index = Random.Range(0, mActors.Size()-1);
-    if (index >= mActors.Size()) 
-        return;
-    
-    // Select a random actor
-    Actor* targetActor = mActors[ index ];
-    
-    // Check bad actor
-    if (!targetActor->isActive || targetActor->isGarbage) 
-        return;
-    
-    // Actor cannot target itself
-    if (targetActor == actor) 
-        return;
-    
-    // Can the actor see the target
-    if (glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition) > actor->behavior.mDistanceToFocus) 
-        return;
-    
-    // Check if the actor is already on the list
-    for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
-        if (actor->behavior.mProximityList[i] == targetActor) 
-            return;
-    }
-    
-    // Add the target to the list
-    actor->behavior.mProximityList.push_back(targetActor);
-    
-    return;
-}

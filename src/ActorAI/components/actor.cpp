@@ -40,15 +40,14 @@ void Actor::Reset(void) {
     behavior.mDistanceToWalk       = 30.0f;
     behavior.mDistanceToAttack     = 30.0f;
     behavior.mDistanceToFlee       = 20.0f;
-    behavior.mDistanceToInflict    = 1.0f;
+    behavior.mDistanceToInflict    = 1.5f;
     
-    behavior.mCooldownAttack       = 8;
-    behavior.mCooldownObserve      = 20;
-    behavior.mCooldownMove         = 20;
+    behavior.mCooldownAttack       = 2;
+    behavior.mCooldownObserve      = 16;
+    behavior.mCooldownMove         = 8;
     
     behavior.mHeightPreferenceMin  = 0.0f;
     behavior.mHeightPreferenceMax  = 1000.0f;
-    behavior.mProximityList.clear();
     
     // State
     state.mode          = ActorState::Mode::Idle;
@@ -86,9 +85,9 @@ void Actor::Reset(void) {
     physical.mColliderScale  = glm::vec3(1);
     
     // Cool-down timers
-    counters.mObservationCoolDownCounter = 10;
-    counters.mAttackCoolDownCounter      = 5;
-    counters.mMovementCoolDownCounter    = 8;
+    counters.mObservationCoolDownCounter = 0;
+    counters.mAttackCoolDownCounter      = 0;
+    counters.mMovementCoolDownCounter    = 0;
     counters.mBreedingCoolDownCounter    = 120;
     
     // User variables
@@ -375,10 +374,6 @@ void Actor::Behavior::SetPreyState(bool state) {
 bool Actor::Behavior::GetPreyState(void) {
     std::lock_guard<std::mutex> lock(mux);
     return mIsPrey;
-}
-
-unsigned int Actor::Behavior::GetNumberOfTargets(void) {
-    return mProximityList.size();
 }
 
 

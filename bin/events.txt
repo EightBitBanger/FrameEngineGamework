@@ -56,3 +56,7 @@ Resource definitions
  >> Starting thread audio
 
 <MainScene>
+
+ >> Shutting down on thread audio
+ >> Shutting down on thread renderer
+ >> Shutting down on thread AI

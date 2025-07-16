@@ -6,45 +6,35 @@
 
 void ActorSystem::UpdateActorState(Actor* actor) {
     
-    // Tick up the actor age
     actor->physical.mAge++;
     
     if (actor->state.mode != ActorState::Mode::Idle) 
         return;
     
-    if (actor->behavior.mProximityList.empty()) {
+    if (Random.Range(0, 100) > 80) 
+        HandleWalkState(actor);
+    
+    //if (actor->navigation.mTargetPoint == glm::vec3(0.0f)) 
+    //    return;
+    
+    if (actor->navigation.mTargetActor != nullptr) {
         
-        // No actor in the proximity list, select a random point
+        float distanceToProximityTarget = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition);
+        
+        if (HandleAttackState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
+            return;
+        
+        if (HandleFleeState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
+            return;
+        
         if (Random.Range(0, 100) > 80) 
-            HandleWalkState(actor);
-        
-    } else {
-        
-        // Check proximity list for near by actors to interact with
-        for (unsigned int i=0; i < actor->behavior.mProximityList.size(); i++) {
-            Actor* targetActor = actor->behavior.mProximityList[i];
-            if (!targetActor->isActive) {
-                actor->behavior.mProximityList.erase(actor->behavior.mProximityList.begin() + i);
+            if (HandleFocusState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
                 return;
-            }
-            
-            float distanceToProximityTarget = glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition);
-            
-            if (HandleAttackState(actor, targetActor, distanceToProximityTarget)) 
-                continue;
-            
-            if (HandleFleeState(actor, targetActor, distanceToProximityTarget)) 
-                continue;
-            
-            if (Random.Range(0, 100) > 80) 
-                if (HandleFocusState(actor, targetActor, distanceToProximityTarget)) 
-                    continue;
-            
-            if (Random.Range(0, 100) > 80) 
-                if (HandleWalkState(actor)) 
-                    continue;
-            
-        }
+        
+        if (Random.Range(0, 100) > 80) 
+            if (HandleWalkState(actor)) 
+                return;
+        
     }
     return;
 }
