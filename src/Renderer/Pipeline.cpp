@@ -28,7 +28,6 @@ void RenderSystem::RenderFrame(void) {
     
     // Run the scene list
     for (Scene* scenePtr : mActiveScenes) {
-        
         if (!scenePtr->isActive) 
             continue;
         

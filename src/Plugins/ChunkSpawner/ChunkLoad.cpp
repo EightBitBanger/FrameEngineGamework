@@ -1,10 +1,9 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
 bool ChunkManager::LoadChunk(Chunk& chunk) {
-    
     std::string chunkPosStr = Float.ToString( chunk.x ) + "_" + Float.ToString( chunk.y );
-    std::string worldChunks = "worlds/" + world.name + "/chunks/";
-    std::string worldStatic = "worlds/" + world.name + "/static/";
+    std::string worldChunks = "worlds\\" + world.name + "\\chunks\\";
+    std::string worldStatic = "worlds\\" + world.name + "\\static\\";
     
     std::string chunkName = worldChunks + chunkPosStr;
     std::string staticName = worldStatic + chunkPosStr;
@@ -14,22 +13,16 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
     if (Serializer.CheckExists( chunkName )) {
         
         unsigned int fileSize = Serializer.GetFileSize(chunkName);
-        
         if (fileSize != 0) {
-            
             std::string dataBuffer;
             dataBuffer.resize(fileSize);
             
             Serializer.Deserialize(chunkName, (void*)dataBuffer.data(), fileSize);
-            
             std::vector<std::string> bufferArray = String.Explode(dataBuffer, '\n');
             
             unsigned int numberOfLines = bufferArray.size();
-            
             for (unsigned int i=0; i < numberOfLines; i++) {
-                
                 std::string lineString = bufferArray[i];
-                
                 std::vector<std::string> lineArray = String.Explode(lineString, '~');
                 
                 // Position
@@ -50,6 +43,8 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 
                 actor->physical.SetAge(age);
                 actor->isActive = true;
+                
+                actor->physical.UpdatePhysicalCollider();
                 continue;
             }
             

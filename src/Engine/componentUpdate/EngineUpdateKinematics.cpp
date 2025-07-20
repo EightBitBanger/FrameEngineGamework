@@ -7,10 +7,37 @@
 
 void EngineSystemManager::UpdateKinematics(void) {
     unsigned int numberOfActors = AI.GetNumberOfActors();
-    
     for (unsigned int i=0; i < numberOfActors; i++) {
-        Actor* actor = AI.GetActorFromSimulation(i);
+        Actor* actor = AI.GetActor(i);
         std::lock_guard<std::mutex> (actor->navigation.mux);
+        
+        if (actor->physical.mColliderBody != nullptr && actor->isGarbage) {
+            if (actor->physical.mColliderBody != nullptr) 
+                Physics.DestroyCollisionBody(actor->physical.mColliderBody);
+            
+            actor->physical.mColliderBody = nullptr;
+        }
+        
+        // Check to generate a collider
+        if (actor->physical.mDoUpdateCollider) {
+            actor->physical.mDoUpdateCollider = false;
+            
+            if (actor->physical.mColliderBody != nullptr) 
+                Physics.DestroyCollisionBody(actor->physical.mColliderBody);
+            
+            actor->physical.mColliderBody = Physics.CreateCollisionBody(actor->navigation.mPosition.x, 
+                                                                        actor->navigation.mPosition.y, 
+                                                                        actor->navigation.mPosition.z);
+            
+            rp3d::Transform colliderTransform;
+            colliderTransform.setPosition( rp3d::Vector3(actor->physical.mColliderOffset.x, actor->physical.mColliderOffset.y, actor->physical.mColliderOffset.z) );
+            rp3d::Collider* coll = actor->physical.mColliderBody->addCollider( GetColliderBox(actor->physical.mColliderScale), colliderTransform );
+            
+            coll->setCollisionCategoryBits((unsigned short)LayerMask::Actor);
+            coll->setCollideWithMaskBits((unsigned short)CollisionMask::Entity);
+            
+            coll->setUserData( (void*)actor );
+        }
         
         // Check query points
         Hit hit;
@@ -29,14 +56,17 @@ void EngineSystemManager::UpdateKinematics(void) {
         glm::vec3 actorTarget   = actor->navigation.mTargetPoint;
         
         // Update collision body
-        if (actor->colliderBody != nullptr) {
-            rp3d::Transform transform = actor->colliderBody->getTransform();
+        if (actor->physical.mColliderBody != nullptr) {
+            rp3d::Transform transform = actor->physical.mColliderBody->getTransform();
             transform.setPosition(rp3d::Vector3(actorPosition.x, actorPosition.y, actorPosition.z));
-            actor->colliderBody->setTransform(transform);
+            actor->physical.mColliderBody->setTransform(transform);
         }
         
+        actorPosition.y += 500.0f;
+        actorTarget.y += 500.0f;
+        
         // Check not on ground
-        if (Physics.Raycast(actorPosition, glm::vec3(0, -1, 0), 1000, hit, LayerMask::Ground)) 
+        if (Physics.Raycast(actorPosition, glm::vec3(0, -1, 0), 2000, hit, LayerMask::Ground)) 
             actorPosition.y = hit.point.y;
         
         // Get height at the target point

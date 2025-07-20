@@ -32,20 +32,14 @@ public:
     /// Destroy an actor.
     bool DestroyActor(Actor* actorPtr);
     
-    /// Return an actor from the simulation.
-    Actor* GetActorFromSimulation(unsigned int index);
-    
     /// Set the player position in the simulation.
     void SetPlayerWorldPosition(glm::vec3 position);
     
     /// Get the player position in the simulation.
     glm::vec3 GetPlayerWorldPosition(void);
     
-    /// Get the number of all the actors in the simulation including actors recycled though garbage collection.
+    /// Get the number of actors in the simulation.
     unsigned int GetNumberOfActors(void);
-    
-    /// Get the number of actors that are currently active in the simulation.
-    unsigned int GetNumberOfActiveActors(void);
     
     /// Get an actor from the simulation by its index.
     Actor* GetActor(unsigned int index);
@@ -106,16 +100,16 @@ private:
     bool HandleAttackState(Actor* actor, Actor* target, float distance);
     bool HandleFleeState(Actor* actor, Actor* target, float distance);
     bool HandleFocusState(Actor* actor, Actor* target, float distance);
+    bool HandleBreedingState(Actor* actor, Actor* target, float distance);
     void HandleNeuralNetwork(Actor* actor);
     
     // Mechanical
-    void UpdateActorMechanics(Actor* actor);
-    
     void HandleMovementMechanics(Actor* actor);
     void HandleTargettingMechanics(Actor* actor);
-    void HandleBreedingMechanics(Actor* actor);
+    void HandleTargetDistance(Actor* actor);
     
     void HandleInflictDamage(Actor* actor, Actor* target);
+    void HandleBreedWith(Actor* actor, Actor* target);
     void HandleVitality(Actor* actor);
     void HandleCooldownCounters(Actor* actor);
     
@@ -154,9 +148,10 @@ private:
     std::thread* mActorSystemThread;
     std::mutex mux;
     
-    std::vector<Actor*> mGarbageActors;
-    
     PoolAllocator<Actor> mActors;
+    
+    std::vector<Actor*> mActiveActors;
+    std::vector<Actor*> mFreeActors;
     
     unsigned int mNumberOfActors;
     

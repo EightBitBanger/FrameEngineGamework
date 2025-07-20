@@ -26,13 +26,15 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     targetActor->physical.SetSeniorAge( 40000 );
     
     targetActor->physical.SetSpeed(0.5f);
-    targetActor->physical.SetSpeedYouth(0.5f);
+    targetActor->physical.SetSpeedYouth(0.3f);
     targetActor->physical.SetSpeedMultiplier(1.24f);
     
     targetActor->physical.SetYouthScale(0.1f);
     targetActor->physical.SetAdultScale(0.5f);
     
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
+    
+    targetActor->behavior.SetDistanceToInflict(0.3f);
     
     targetActor->biological.health = 200;
     
@@ -851,8 +853,8 @@ void GeneticPresets::ActorPresets::Bear(Actor* targetActor) {
     targetActor->physical.SetYouthScale(0.2f);
     targetActor->physical.SetAdultScale(0.7f);
     
-    targetActor->behavior.SetHeightPreferenceMax(50.0f);
-    targetActor->behavior.SetHeightPreferenceMin(20.0f);
+    targetActor->behavior.SetHeightPreferenceMax(30.0f);
+    targetActor->behavior.SetHeightPreferenceMin(10.0f);
     
     targetActor->behavior.SetPredatorState(true);
     

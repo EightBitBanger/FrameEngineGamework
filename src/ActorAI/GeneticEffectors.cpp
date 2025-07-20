@@ -282,62 +282,79 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
 }
 
 bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspring) {
+    // Check genetic incompatibility
     unsigned int numberOfGenesA = parentA->genetics.mGenes.size();
     unsigned int numberOfGenesB = parentB->genetics.mGenes.size();
-    
-    // Check genetic incompatibility
     if (numberOfGenesA != numberOfGenesB) 
         return false;
+    if (parentA->GetName() != parentB->GetName()) 
+        return false;
+    offspring->SetName(parentA->GetName());
+    
+    float gradient = 0.0f;
+    if (Random.Range(0, 100) > 50) 
+        gradient = 1.0f;
+    
+    // Distance parameters
+    float DistanceToFocusA  = parentA->behavior.GetDistanceToFocus();
+    float DistanceToAttackA = parentA->behavior.GetDistanceToAttack();
+    float DistanceToFleeA   = parentA->behavior.GetDistanceToFlee();
+    float DistanceToWalkA   = parentA->behavior.GetDistanceToWalk();
+    float HeightPrefMaxA    = parentA->behavior.GetHeightPreferenceMax();
+    float HeightPrefMinA    = parentA->behavior.GetHeightPreferenceMin();
+    
+    float DistanceToFocusB  = parentB->behavior.GetDistanceToFocus();
+    float DistanceToAttackB = parentB->behavior.GetDistanceToAttack();
+    float DistanceToFleeB   = parentB->behavior.GetDistanceToFlee();
+    float DistanceToWalkB   = parentB->behavior.GetDistanceToWalk();
+    float HeightPrefMaxB    = parentB->behavior.GetHeightPreferenceMax();
+    float HeightPrefMinB    = parentB->behavior.GetHeightPreferenceMin();
+    
+    float DistanceToFocus   = Float.Lerp(DistanceToFocusA,  DistanceToFocusB,   gradient);
+    float DistanceToAttack  = Float.Lerp(DistanceToAttackA, DistanceToAttackB,  gradient);
+    float DistanceToFlee    = Float.Lerp(DistanceToFleeA,   DistanceToFleeB,    gradient);
+    float DistanceToWalk    = Float.Lerp(DistanceToWalkA,   DistanceToWalkB,    gradient);
+    float HeightPrefMax     = Float.Lerp(HeightPrefMaxA,    HeightPrefMaxB,     gradient);
+    float HeightPrefMin     = Float.Lerp(HeightPrefMinA,    HeightPrefMinB,     gradient);
+    
+    offspring->behavior.SetDistanceToFocus(DistanceToFocus);
+    offspring->behavior.SetDistanceToAttack(DistanceToAttack);
+    offspring->behavior.SetDistanceToFlee(DistanceToFlee);
+    offspring->behavior.SetDistanceToWalk(DistanceToWalk);
+    offspring->behavior.SetHeightPreferenceMax(HeightPrefMax);
+    offspring->behavior.SetHeightPreferenceMin(HeightPrefMin);
+    
+    // Physical
+    offspring->physical.mAgeAdult    = Float.Lerp(parentA->physical.mAgeAdult,    parentB->physical.mAgeAdult, gradient);
+    offspring->physical.mAgeSenior   = Float.Lerp(parentA->physical.mAgeSenior,   parentB->physical.mAgeSenior, gradient);
+    
+    offspring->physical.mSpeed       = Float.Lerp(parentA->physical.mSpeed,       parentB->physical.mSpeed, gradient);
+    offspring->physical.mSnapSpeed   = Float.Lerp(parentA->physical.mSnapSpeed,   parentB->physical.mSnapSpeed, gradient);
+    offspring->physical.mSpeedMul    = Float.Lerp(parentA->physical.mSpeedMul,    parentB->physical.mSpeedMul, gradient);
+    offspring->physical.mSpeedYouth  = Float.Lerp(parentA->physical.mSpeedYouth,  parentB->physical.mSpeedYouth, gradient);
+    offspring->physical.mYouthScale  = Float.Lerp(parentA->physical.mYouthScale,  parentB->physical.mYouthScale, gradient);
+    offspring->physical.mAdultScale  = Float.Lerp(parentA->physical.mAdultScale,  parentB->physical.mAdultScale, gradient);
+    
+    
+    // Increment generation
+    unsigned int generation = parentA->genetics.GetGeneration();
+    
+    offspring->genetics.SetGeneration( generation );
+    
+    // Random new sexual orientation
+    if (Random.Range(0, 100) > 60) {
+        offspring->physical.SetSexualOrientation(true);  // Male
+    } else {
+        offspring->physical.SetSexualOrientation(false); // Female
+    }
     
     offspring->genetics.mGenes.clear();
-    
     for (unsigned int i=0; i < numberOfGenesA; i++) {
-        
-        float gradient = 0.0f;
         if (Random.Range(0, 100) > 50) 
-            gradient = 1.0f;
+        {gradient = 0.0f;} else {gradient = 1.0f;}
         
-        // Interpolate the genetic values
         Gene variant = Lerp(parentA->genetics.mGenes[i], parentB->genetics.mGenes[i], gradient);
         offspring->genetics.mGenes.push_back(variant);
-        
-        // Distance parameters
-        
-        float DistanceToFocusA  = parentA->behavior.GetDistanceToFocus();
-        float DistanceToAttackA = parentA->behavior.GetDistanceToAttack();
-        float DistanceToFleeA   = parentA->behavior.GetDistanceToFlee();
-        float DistanceToWalkA   = parentA->behavior.GetDistanceToWalk();
-        
-        float DistanceToFocusB  = parentB->behavior.GetDistanceToFocus();
-        float DistanceToAttackB = parentB->behavior.GetDistanceToAttack();
-        float DistanceToFleeB   = parentB->behavior.GetDistanceToFlee();
-        float DistanceToWalkB   = parentB->behavior.GetDistanceToWalk();
-        
-        float DistanceToFocus   = Float.Lerp(DistanceToFocusA,  DistanceToFocusB,   gradient);
-        float DistanceToAttack  = Float.Lerp(DistanceToAttackA, DistanceToAttackB,  gradient);
-        float DistanceToFlee    = Float.Lerp(DistanceToFleeA,   DistanceToFleeB,    gradient);
-        float DistanceToWalk    = Float.Lerp(DistanceToWalkA,   DistanceToWalkB,    gradient);
-        
-        offspring->behavior.SetDistanceToFocus(DistanceToFocus);
-        offspring->behavior.SetDistanceToAttack(DistanceToAttack);
-        offspring->behavior.SetDistanceToFlee(DistanceToFlee);
-        offspring->behavior.SetDistanceToWalk(DistanceToWalk);
-        
-        offspring->physical.mAgeAdult = Float.Lerp(parentA->physical.mAgeAdult, parentB->physical.mAgeAdult, gradient);
-        
-        // Increment generation
-        unsigned int generation = parentA->genetics.GetGeneration();
-        
-        offspring->genetics.SetGeneration( generation );
-        
-        // Random new sexual orientation
-        if (Random.Range(0, 100) > 60) {
-            offspring->physical.SetSexualOrientation(true);  // Male
-        } else {
-            offspring->physical.SetSexualOrientation(false); // Female
-        }
-        
-        continue;
     }
     
     // Process genetic index colors
@@ -351,8 +368,6 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
             offspring->genetics.mGenes[i].color.x = offspring->genetics.mGenes[geneParentIndex].color.x;
             offspring->genetics.mGenes[i].color.y = offspring->genetics.mGenes[geneParentIndex].color.y;
             offspring->genetics.mGenes[i].color.z = offspring->genetics.mGenes[geneParentIndex].color.z;
-            
-            continue;
         }
     }
     return true;
@@ -427,8 +442,14 @@ Gene GeneticPresets::Lerp(Gene geneA, Gene geneB, float bias) {
     gene.expressionMax    = Float.Lerp(geneA.expressionMax,    geneB.expressionMax, bias);
     gene.expressionAge    = Float.Lerp(geneA.expressionAge,    geneB.expressionAge, bias);
     
-    gene.doInverseAnimation = geneA.doInverseAnimation || geneB.doInverseAnimation;
+    if (geneA.doInverseAnimation || geneB.doInverseAnimation) 
+    {gene.doInverseAnimation = true;} else {gene.doInverseAnimation = false;}
+    
+    if (geneA.doExpress || geneB.doExpress) 
+    {gene.doExpress = true;} else {gene.doExpress = false;}
+    
     gene.animationRange = Float.Lerp(geneA.animationRange, geneB.animationRange, bias);
+    gene.animationType = (ActorState::Animation)Int.Lerp((int)geneA.animationType, (int)geneB.animationType, bias);
     
     // Random attachment index
     if (Random.Range(0, 100) > 50) 
@@ -448,8 +469,6 @@ Gene GeneticPresets::Lerp(Gene geneA, Gene geneB, float bias) {
     gene.animationAxis.x = Float.Lerp(geneA.animationAxis.x, geneB.animationAxis.x, bias);
     gene.animationAxis.y = Float.Lerp(geneA.animationAxis.y, geneB.animationAxis.y, bias);
     gene.animationAxis.z = Float.Lerp(geneA.animationAxis.z, geneB.animationAxis.z, bias);
-    
-    gene.doExpress = geneA.doExpress || geneB.doExpress;
     
     return gene;
 }

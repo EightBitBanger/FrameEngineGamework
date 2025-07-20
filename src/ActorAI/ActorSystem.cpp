@@ -29,7 +29,7 @@ ActorSystem::ActorSystem() :
 
 void ActorSystem::Initiate(void) {
     
-    mMainTimer.SetRefreshRate(20);
+    mMainTimer.SetRefreshRate(3);
     mAnimationTimer.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     
     mActorSystemThread = new std::thread( actorThreadMain );
@@ -77,48 +77,43 @@ void ActorSystem::UpdateSendSignal(void) {
 
 Actor* ActorSystem::CreateActor(void) {
     std::lock_guard<std::mutex> lock(mux);
-    if (!mGarbageActors.empty()) {
-        Actor* actor = mGarbageActors[0];
-        mGarbageActors.erase(mGarbageActors.begin());
+    if (!mFreeActors.empty()) {
+        Actor* actorPtr = mFreeActors[0];
+        mFreeActors.erase( mFreeActors.begin() );
+        actorPtr->Reset();
         mNumberOfActors++;
-        actor->Reset();
-        return actor;
+        mActiveActors.push_back(actorPtr);
+        return actorPtr;
     }
     Actor* actorPtr = mActors.Create();
     actorPtr->Reset();
     mNumberOfActors++;
+    mActiveActors.push_back(actorPtr);
     return actorPtr;
 }
 
 bool ActorSystem::DestroyActor(Actor* actorPtr) {
     std::lock_guard<std::mutex> lock(mux);
-    if (actorPtr->colliderBody != nullptr) {
-        extern PhysicsSystem Physics;
-        Physics.DestroyCollisionBody(actorPtr->colliderBody);
-        actorPtr->colliderBody = nullptr;
-    }
     actorPtr->isGarbage = true;
     actorPtr->isActive = false;
+    
+    unsigned int numberOfActiveActors = mActiveActors.size();
+    for (unsigned int i=0; i < numberOfActiveActors; i++) {
+        if (mActiveActors[i] != actorPtr) 
+            continue;
+        mActiveActors.erase(mActiveActors.begin() + i);
+        break;
+    }
     return true;
 }
 
-Actor* ActorSystem::GetActorFromSimulation(unsigned int index) {
-    if (index < mActors.Size()) 
-        return mActors[index];
-    return nullptr;
-}
-
 unsigned int ActorSystem::GetNumberOfActors(void) {
-    return mActors.Size();
-}
-
-unsigned int ActorSystem::GetNumberOfActiveActors(void) {
-    return mNumberOfActors;
+    return mActiveActors.size();
 }
 
 Actor* ActorSystem::GetActor(unsigned int index) {
     std::lock_guard<std::mutex> lock(mux);
-    return mActors[index];
+    return mActiveActors[index];
 }
 
 
@@ -132,15 +127,22 @@ void ActorSystem::SetActorUpdateDistance(float distance) {
 bool ActorSystem::UpdateGarbageCollection(Actor* actor) {
     if (!actor->isGarbage) 
         return false;
+    actor->isGarbage = false;
     
-    // Destroy the renderers
     ClearOldGeneticRenderers(actor);
     
-    //actor->Reset();
     actor->navigation.mVelocity = glm::vec3(0);
     
-    mGarbageActors.push_back(actor);
     mNumberOfActors--;
+    
+    unsigned int numberOfActiveActors = mActiveActors.size();
+    for (unsigned int i=0; i < numberOfActiveActors; i++) {
+        if (mActiveActors[i] != actor) 
+            continue;
+        mActiveActors.erase(mActiveActors.begin() + i);
+        break;
+    }
+    mFreeActors.push_back(actor);
     return true;
 }
 
@@ -153,11 +155,12 @@ bool ActorSystem::UpdateGarbageCollection(Actor* actor) {
 void actorThreadMain() {
     
     while (isActorThreadActive) {
-        std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
+        if (!doUpdate) {
+            std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
+            continue;
+        }
         
-        if (doUpdate) 
-            AI.Update();
-        
+        AI.Update();
         continue;
     }
     

@@ -5,17 +5,6 @@
 #include <GameEngineFramework/Math/Random.h>
 
 
-void ActorSystem::UpdateActorMechanics(Actor* actor) {
-    
-    HandleMovementMechanics(actor);
-    HandleTargettingMechanics(actor);
-    HandleBreedingMechanics(actor);
-    
-    HandleVitality(actor);
-    
-    return;
-}
-
 void ActorSystem::HandleMovementMechanics(Actor* actor) {
     glm::vec3 forward(0);
     glm::vec3 position(0);
@@ -32,12 +21,11 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             break;
             
         case ActorState::Mode::MoveRandom:
-            // Calculate random near by point
             position = CalculateRandomLocalPoint(actor);
-            
             actor->state.mIsWalking = false;
             actor->state.mIsRunning = false;
             
+            actor->navigation.mDistanceToTarget = 9999.0f;
             actor->navigation.mTargetLook  = position;
             actor->state.mIsFacing = true;
             // Shift mode to move to point
@@ -68,6 +56,9 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             
     }
     
+    if (actor->physical.GetAge() < actor->physical.GetAdultAge()) 
+        forward *= actor->physical.GetSpeedYouth();
+    
     actor->navigation.mVelocity = forward;
     return;
 }
@@ -83,6 +74,14 @@ void ActorSystem::HandleCooldownCounters(Actor* actor) {
     if (actor->counters.mObservationCoolDownCounter > 0) 
         actor->counters.mObservationCoolDownCounter--;
     
+    if (actor->counters.mBreedingCoolDownCounter > 0) {
+        actor->counters.mBreedingCoolDownCounter--;
+        if (actor->state.current == ActorState::State::Breed) {
+            actor->state.current = ActorState::State::None;
+            actor->state.mode = ActorState::Mode::Idle;
+        }
+    }
+    
     // Reset actors that have lost the target
     if (actor->counters.mAttackCoolDownCounter == 0 && 
         actor->state.current == ActorState::State::Attack && 
@@ -91,54 +90,7 @@ void ActorSystem::HandleCooldownCounters(Actor* actor) {
         actor->state.current = ActorState::State::None;
         actor->state.mode = ActorState::Mode::Idle;
     }
-        
-    
-    return;
 }
-
-
-void ActorSystem::HandleBreedingMechanics(Actor* actor) {
-    /*
-    // Count down breeding counter
-    if (actor->counters.mBreedingCoolDownCounter > 0) 
-        actor->counters.mBreedingCoolDownCounter--;
-    
-    if (actor->navigation.mTargetBreeding == nullptr) 
-        return;
-    
-    // Check breeding is withing the prefered range
-    if ((actor->navigation.mTargetPoint.y > actor->behavior.mHeightPreferenceMax) | 
-        (actor->navigation.mTargetPoint.y < actor->behavior.mHeightPreferenceMin)) 
-        return;
-    
-    actor->navigation.mTargetPoint = actor->navigation.mTargetBreeding->navigation.mPosition;
-    // The physics system will update this position, until then we
-    // ignore it. When it updates we will know the current height of the actor
-    actor->navigation.mTargetPoint.y = -100000.0f;
-    
-    // Walk the male towards the female target actor
-    if (actor->physical.GetSexualOrientation() == true) 
-        actor->state.mIsWalking = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetBreeding->navigation.mPosition) > DISTANCE_MINIMUM_TARGET_BREEDING;
-    
-    // Check arrived at breeding partner
-    if (actor->navigation.mTargetBreeding != nullptr) {
-        
-        if (glm::distance( actor->navigation.mTargetBreeding->navigation.mPosition, actor->navigation.mPosition ) < 1.0f) {
-            actor->state.mIsWalking = false;
-            actor->navigation.mTargetPoint = actor->navigation.mPosition;
-            
-            // Null the target if we arrived
-            if (actor->navigation.mTargetBreeding->navigation.mTargetBreeding == actor->navigation.mTargetBreeding) 
-                actor->navigation.mTargetBreeding->navigation.mTargetBreeding = nullptr;
-            
-            actor->navigation.mTargetBreeding = nullptr;
-        }
-    }
-    */
-    return;
-}
-
-
 
 glm::vec3 ActorSystem::CalculateForwardVelocity(Actor* actor) {
     glm::vec3 forward(0);

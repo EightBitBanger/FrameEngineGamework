@@ -108,39 +108,21 @@ Actor* ChunkManager::SummonActor(glm::vec3 position) {
     Actor* actor = AI.CreateActor();
     actor->navigation.SetPosition(position);
     actor->navigation.SetTargetPoint(position);
-    
-    if (actor->colliderBody != nullptr) 
-        Physics.DestroyCollisionBody(actor->colliderBody);
-    
-    actor->colliderBody = Physics.CreateCollisionBody(position.x, position.y, position.z);
-    
-    rp3d::Transform colliderTransform;
-    colliderTransform.setPosition( rp3d::Vector3(0.0f, 0.15f, 0.0f) );
-    rp3d::Collider* coll = actor->colliderBody->addCollider( Engine.GetColliderBox(glm::vec3(0.3f, 0.3f, 0.3f)), colliderTransform );
-    
-    coll->setCollisionCategoryBits((unsigned short)LayerMask::Actor);
-    coll->setCollideWithMaskBits((unsigned short)CollisionMask::Entity);
-    
-    coll->setUserData( (void*)actor );
-    
     return actor;
 }
 
 void ChunkManager::KillActor(Actor* actor) {
-    actor->colliderBody->setIsActive(false);
-    
     AI.DestroyActor( actor );
 }
 
 
-void ChunkManager::WorldDirectoryInitiate(void) {
-    std::string worldName   = "worlds/" + world.name;
-    std::string worldChunks = "worlds/" + world.name + "/chunks";
-    std::string worldStatic = "worlds/" + world.name + "/static";
+bool ChunkManager::WorldDirectoryInitiate(void) {
+    std::string worldName   = "worlds\\" + world.name;
+    std::string worldChunks = "worlds\\" + world.name + "\\chunks";
+    std::string worldStatic = "worlds\\" + world.name + "\\static";
     
     // Check world directory structure exists
     if (!fs.DirectoryExists(worldName)) {
-        
         fs.DirectoryCreate(worldName);
         
         if (!fs.DirectoryExists(worldChunks)) 
@@ -149,11 +131,9 @@ void ChunkManager::WorldDirectoryInitiate(void) {
         if (!fs.DirectoryExists(worldStatic)) 
             fs.DirectoryCreate(worldStatic);
         
-        // Default world rules
-        AddWorldRule("doAutoBreeding", "true");
-        
+        return false;
     }
-    return;
+    return true;
 }
 
 void ChunkManager::ClearWorld(void) {
@@ -164,9 +144,8 @@ void ChunkManager::ClearWorld(void) {
         DestroyChunk( chunks[c] );
     
     unsigned int numberOfActors = AI.GetNumberOfActors();
-    
     for (unsigned int a=0; a < numberOfActors; a++) 
-        KillActor( AI.GetActorFromSimulation(a) );
+        KillActor( AI.GetActor(a) );
     
     mChunkCounterX = 0;
     mChunkCounterZ = 0;
@@ -181,12 +160,12 @@ bool ChunkManager::DestroyWorld(std::string worldname) {
     if (worldname == "") 
         return false;
     
-    std::string worldPath = "worlds/" + worldname;
+    std::string worldPath = "worlds\\" + worldname;
     if (!fs.DirectoryExists(worldPath)) 
         return false;
     
-    fs.DirectoryDelete( worldPath + "/chunks" );
-    fs.DirectoryDelete( worldPath + "/static" );
+    fs.DirectoryDelete( worldPath + "\\chunks" );
+    fs.DirectoryDelete( worldPath + "\\static" );
     fs.DirectoryDelete( worldPath );
     return true;
 }

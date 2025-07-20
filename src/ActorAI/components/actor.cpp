@@ -8,7 +8,6 @@ Actor::Actor() :
     isGarbage(false),
     isActive(false),
     isSaved(false),
-    colliderBody(nullptr),
     mName("")
 {
 }
@@ -18,8 +17,6 @@ void Actor::Reset(void) {
     isActive = false;
     isSaved = false;
     mName = "";
-    
-    //colliderBody = nullptr;
     
     // Navigation
     navigation.mVelocity      = glm::vec3(0);
@@ -63,6 +60,8 @@ void Actor::Reset(void) {
     genetics.mDoUpdateGenetics     = false;
     genetics.mDoReexpressGenetics  = false;
     genetics.mGeneration           = 0;
+    genetics.ClearGenome();
+    genetics.ClearPhenome();
     
     // Biological
     biological.health    = 10.0f;
@@ -81,14 +80,16 @@ void Actor::Reset(void) {
     physical.mYouthScale     = 0.5f;
     physical.mAdultScale     = 1.0f;
     physical.mSexualOrientation = false;
-    physical.mColliderOffset = glm::vec3(0);
-    physical.mColliderScale  = glm::vec3(1);
+    physical.mDoUpdateCollider = false;
+    physical.mColliderOffset = glm::vec3(0, 0.5f, 0);
+    physical.mColliderScale  = glm::vec3(0.5f, 0.5f, 0.5f);
+    physical.mColliderBody = nullptr;
     
     // Cool-down timers
     counters.mObservationCoolDownCounter = 0;
     counters.mAttackCoolDownCounter      = 0;
     counters.mMovementCoolDownCounter    = 0;
-    counters.mBreedingCoolDownCounter    = 120;
+    counters.mBreedingCoolDownCounter    = 0;
     
     // User variables
     user.mBitmask    = 0;
@@ -155,8 +156,10 @@ Actor::PhysicalAttributes::PhysicalAttributes() :
     mYouthScale(1),
     mAdultScale(1),
     mSexualOrientation(false),
-    mColliderOffset(glm::vec3(0)),
-    mColliderScale(glm::vec3(0))
+    mDoUpdateCollider(false),
+    mColliderOffset(glm::vec3(0, 0.5f, 0)),
+    mColliderScale(glm::vec3(0.5f, 0.5f, 0.5f)),
+    mColliderBody(nullptr)
 {
 }
 
@@ -213,7 +216,6 @@ void Actor::NavigationSystem::SetPosition(glm::vec3 position) {
     std::lock_guard<std::mutex> lock(mux);
     mPosition = position;
     mTargetPoint = position;
-    return;
 }
 
 glm::vec3 Actor::NavigationSystem::GetPosition(void) {
@@ -240,7 +242,6 @@ Actor* Actor::NavigationSystem::GetTargetActor(void) {
 void Actor::NavigationSystem::SetTargetActor(Actor* actorPtr) {
     std::lock_guard<std::mutex> lock(mux);
     mTargetActor = actorPtr;
-    return;
 }
 
 float Actor::NavigationSystem::GetDistanceToTarget(void) {
@@ -255,7 +256,6 @@ float Actor::NavigationSystem::GetDistanceToTarget(void) {
 void Actor::Behavior::SetDistanceToFocus(float distance) {
     std::lock_guard<std::mutex> lock(mux);
     mDistanceToFocus = distance;
-    return;
 }
 
 float Actor::Behavior::GetDistanceToFocus(void) {
@@ -266,7 +266,6 @@ float Actor::Behavior::GetDistanceToFocus(void) {
 void Actor::Behavior::SetDistanceToWalk(float distance) {
     std::lock_guard<std::mutex> lock(mux);
     mDistanceToWalk = distance;
-    return;
 }
 
 float Actor::Behavior::GetDistanceToWalk(void) {
@@ -277,7 +276,6 @@ float Actor::Behavior::GetDistanceToWalk(void) {
 void Actor::Behavior::SetDistanceToAttack(float distance) {
     std::lock_guard<std::mutex> lock(mux);
     mDistanceToAttack = distance;
-    return;
 }
 
 float Actor::Behavior::GetDistanceToAttack(void) {
@@ -288,7 +286,6 @@ float Actor::Behavior::GetDistanceToAttack(void) {
 void Actor::Behavior::SetDistanceToFlee(float distance) {
     std::lock_guard<std::mutex> lock(mux);
     mDistanceToFlee = distance;
-    return;
 }
 
 float Actor::Behavior::GetDistanceToFlee(void) {
@@ -298,7 +295,6 @@ float Actor::Behavior::GetDistanceToFlee(void) {
 
 void Actor::Behavior::SetDistanceToInflict(float distance) {
     mDistanceToInflict = distance;
-    return;
 }
 
 float Actor::Behavior::GetDistanceToInflict(void) {
@@ -307,17 +303,14 @@ float Actor::Behavior::GetDistanceToInflict(void) {
 
 void Actor::Behavior::SetCooldownAttack(unsigned int ticks) {
     mCooldownAttack = ticks;
-    return;
 }
 
 void Actor::Behavior::SetCooldownObserve(unsigned int ticks) {
     mCooldownObserve = ticks;
-    return;
 }
 
 void Actor::Behavior::SetCooldownMove(unsigned int ticks) {
     mCooldownMove = ticks;
-    return;
 }
 
 unsigned int Actor::Behavior::GetCooldownAttack(void) {
@@ -335,7 +328,6 @@ unsigned int Actor::Behavior::GetCooldownMove(void) {
 void Actor::Behavior::SetHeightPreferenceMin(float height) {
     std::lock_guard<std::mutex> lock(mux);
     mHeightPreferenceMin = height;
-    return;
 }
 
 float Actor::Behavior::GetHeightPreferenceMin(void) {
@@ -346,7 +338,7 @@ float Actor::Behavior::GetHeightPreferenceMin(void) {
 void Actor::Behavior::SetHeightPreferenceMax(float height) {
     std::lock_guard<std::mutex> lock(mux);
     mHeightPreferenceMax = height;
-    return;
+
 }
 
 float Actor::Behavior::GetHeightPreferenceMax(void) {
@@ -357,7 +349,6 @@ float Actor::Behavior::GetHeightPreferenceMax(void) {
 void Actor::Behavior::SetPredatorState(bool state) {
     std::lock_guard<std::mutex> lock(mux);
     mIsPredator = state;
-    return;
 }
 
 bool Actor::Behavior::GetPredatorState(void) {
@@ -368,7 +359,6 @@ bool Actor::Behavior::GetPredatorState(void) {
 void Actor::Behavior::SetPreyState(bool state) {
     std::lock_guard<std::mutex> lock(mux);
     mIsPrey = state;
-    return;
 }
 
 bool Actor::Behavior::GetPreyState(void) {
@@ -383,7 +373,6 @@ bool Actor::Behavior::GetPreyState(void) {
 void Actor::IdiosyncraticCharacteristics::Add(std::string name, std::string memory) {
     std::lock_guard<std::mutex> lock(mux);
     mMemories[name] = memory;
-    return;
 }
 
 bool Actor::IdiosyncraticCharacteristics::Remove(std::string name) {
@@ -395,7 +384,6 @@ bool Actor::IdiosyncraticCharacteristics::Remove(std::string name) {
 void Actor::IdiosyncraticCharacteristics::Clear(void) {
     std::lock_guard<std::mutex> lock(mux);
     mMemories.clear();
-    return;
 }
 
 bool Actor::IdiosyncraticCharacteristics::CheckExists(std::string name) {
@@ -417,17 +405,14 @@ unsigned int Actor::GeneticsSystem::AddGene(Gene& newGene) {
 
 void Actor::GeneticsSystem::RemoveGene(unsigned int index) {
     mGenes.erase( mGenes.begin() + index );
-    return;
 }
 
 void Actor::GeneticsSystem::ClearGenome(void) {
     mGenes.clear();
-    return;
 }
 
 void Actor::GeneticsSystem::ClearPhenome(void) {
     mPhen.clear();
-    return;
 }
 
 unsigned int Actor::GeneticsSystem::GetNumberOfGenes(void) {
@@ -453,7 +438,6 @@ Phen Actor::GeneticsSystem::GetPhenFromPhenotype(unsigned int index) {
 
 void Actor::GeneticsSystem::SetGeneration(unsigned int newGeneration) {
     mGeneration = newGeneration;
-    return;
 }
 
 unsigned int Actor::GeneticsSystem::GetGeneration(void) {
@@ -476,7 +460,6 @@ MeshRenderer* Actor::GeneticsSystem::GetMeshRendererAtIndex(unsigned int index) 
 
 void Actor::PhysicalAttributes::SetAge(unsigned long int newAge) {
     mAge = newAge;
-    return;
 }
 
 unsigned long int Actor::PhysicalAttributes::GetAge(void) {
@@ -485,7 +468,6 @@ unsigned long int Actor::PhysicalAttributes::GetAge(void) {
 
 void Actor::PhysicalAttributes::SetSeniorAge(float oldAge) {
     mAgeSenior = oldAge;
-    return;
 }
 
 float Actor::PhysicalAttributes::GetSeniorAge(void) {
@@ -494,7 +476,6 @@ float Actor::PhysicalAttributes::GetSeniorAge(void) {
 
 void Actor::PhysicalAttributes::SetAdultAge(float age) {
     mAgeAdult = age;
-    return;
 }
 
 float Actor::PhysicalAttributes::GetAdultAge(void) {
@@ -503,7 +484,6 @@ float Actor::PhysicalAttributes::GetAdultAge(void) {
 
 void Actor::PhysicalAttributes::SetSpeed(float newSpeed) {
     mSpeed = newSpeed;
-    return;
 }
 
 float Actor::PhysicalAttributes::GetSpeed(void) {
@@ -512,7 +492,6 @@ float Actor::PhysicalAttributes::GetSpeed(void) {
 
 void Actor::PhysicalAttributes::SetSpeedYouth(float newSpeed) {
     mSpeedYouth = newSpeed;
-    return;
 }
 
 float Actor::PhysicalAttributes::GetSpeedYouth(void) {
@@ -521,7 +500,6 @@ float Actor::PhysicalAttributes::GetSpeedYouth(void) {
 
 void Actor::PhysicalAttributes::SetSpeedMultiplier(float newSpeedMul) {
     mSpeedMul = newSpeedMul;
-    return;
 }
 
 float Actor::PhysicalAttributes::GetSpeedMultiplier(void) {
@@ -530,7 +508,6 @@ float Actor::PhysicalAttributes::GetSpeedMultiplier(void) {
 
 void Actor::PhysicalAttributes::SetYouthScale(float scale) {
     mYouthScale = scale;
-    return;
 }
 
 float Actor::PhysicalAttributes::GetYouthScale(void) {
@@ -539,7 +516,6 @@ float Actor::PhysicalAttributes::GetYouthScale(void) {
 
 void Actor::PhysicalAttributes::SetAdultScale(float scale) {
     mAdultScale = scale;
-    return;
 }
 
 float Actor::PhysicalAttributes::GetAdultScale(void) {
@@ -548,11 +524,22 @@ float Actor::PhysicalAttributes::GetAdultScale(void) {
 
 void Actor::PhysicalAttributes::SetSexualOrientation(bool orientation) {
     mSexualOrientation = orientation;
-    return;
 }
 
 bool Actor::PhysicalAttributes::GetSexualOrientation(void) {
     return mSexualOrientation;
+}
+
+void Actor::PhysicalAttributes::UpdatePhysicalCollider(void) {
+    mDoUpdateCollider = true;
+}
+
+void Actor::PhysicalAttributes::SetColliderScale(glm::vec3 extents) {
+    mColliderScale = extents;
+}
+
+void Actor::PhysicalAttributes::SetColliderOffset(glm::vec3 offset) {
+    mColliderOffset = offset;
 }
 
 
@@ -561,7 +548,6 @@ bool Actor::PhysicalAttributes::GetSexualOrientation(void) {
 
 void Actor::CooldownCounters::SetCoolDownObservation(unsigned int counter) {
     mObservationCoolDownCounter = counter;
-    return;
 }
 unsigned int Actor::CooldownCounters::GetCoolDownObservation(void) {
     return mObservationCoolDownCounter;
@@ -569,7 +555,6 @@ unsigned int Actor::CooldownCounters::GetCoolDownObservation(void) {
 
 void Actor::CooldownCounters::SetCoolDownMovement(unsigned int counter) {
     mMovementCoolDownCounter = counter;
-    return;
 }
 unsigned int Actor::CooldownCounters::GetCoolDownMovement(void) {
     return mMovementCoolDownCounter;
@@ -577,7 +562,6 @@ unsigned int Actor::CooldownCounters::GetCoolDownMovement(void) {
 
 void Actor::CooldownCounters::SetCoolDownAttack(unsigned int counter) {
     mAttackCoolDownCounter = counter;
-    return;
 }
 unsigned int Actor::CooldownCounters::GetCoolDownAttack(void) {
     return mAttackCoolDownCounter;
@@ -585,7 +569,6 @@ unsigned int Actor::CooldownCounters::GetCoolDownAttack(void) {
 
 void Actor::CooldownCounters::SetCoolDownBreeding(unsigned int counter) {
     mBreedingCoolDownCounter = counter;
-    return;
 }
 unsigned int Actor::CooldownCounters::GetCoolDownBreeding(void) {
     return mBreedingCoolDownCounter;
@@ -597,7 +580,6 @@ unsigned int Actor::CooldownCounters::GetCoolDownBreeding(void) {
 
 void Actor::UserVariables::SetUserBitmask(uint8_t bitmask) {
     mBitmask = bitmask;
-    return;
 }
 
 uint8_t Actor::UserVariables::GetUserBitmask(void) {
@@ -606,7 +588,6 @@ uint8_t Actor::UserVariables::GetUserBitmask(void) {
 
 void Actor::UserVariables::SetUserDataA(void* ptr) {
     mUserDataA = ptr;
-    return;
 }
 
 void* Actor::UserVariables::GetUserDataA(void) {
@@ -615,7 +596,6 @@ void* Actor::UserVariables::GetUserDataA(void) {
 
 void Actor::UserVariables::SetUserDataB(void* ptr) {
     mUserDataB = ptr;
-    return;
 }
 
 void* Actor::UserVariables::GetUserDataB(void) {

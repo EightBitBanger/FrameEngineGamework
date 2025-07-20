@@ -26,6 +26,10 @@ void ActorSystem::UpdateActorGenetics(Actor* actor) {
         MeshRenderer* newRenderer = CreateMeshRendererForGene(actor, a, baseMesh);
         newRenderer->isActive = true;
         
+        newRenderer->EnableFrustumCulling();
+        newRenderer->SetBoundingBoxMin(glm::vec3(-1, -1, -1));
+        newRenderer->SetBoundingBoxMax(glm::vec3(1, 1, 1));
+        
         glm::vec4 orientation = glm::vec4(Transform().rotation.w, Transform().rotation.x, Transform().rotation.y, Transform().rotation.z);
         actor->genetics.mGeneticRenderers.push_back(newRenderer);
         actor->state.mAnimation.push_back(orientation);

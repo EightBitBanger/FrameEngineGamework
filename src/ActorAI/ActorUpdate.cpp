@@ -22,9 +22,9 @@ void ActorSystem::Update(void) {
     
     // Update animation states (Runs hot!)
     if (mAnimationTimer.Update()) {
-        unsigned int numberOfActors = mActors.Size();
+        unsigned int numberOfActors = mActiveActors.size();
         for (unsigned int i = 0; i < numberOfActors; i++) {
-            Actor* actor = mActors[i];
+            Actor* actor = mActiveActors[i];
             
             if (actor->isGarbage || !actor->isActive) 
                 continue;
@@ -35,8 +35,11 @@ void ActorSystem::Update(void) {
             // Target tracking orientations
             UpdateTargetRotation(actor);
             
-            // Update mechanical / locomotion state
-            UpdateActorMechanics(actor);
+            // Update actor mechanical / locomotion state
+            HandleMovementMechanics(actor);
+            HandleTargettingMechanics(actor);
+            
+            HandleVitality(actor);
             
         }
     }
@@ -47,9 +50,7 @@ void ActorSystem::Update(void) {
         if (numberOfActors == 0) 
             return;
         
-        unsigned int numberOfActorsPerCycle = (numberOfActors > 10) ? (numberOfActors / 10) : 1;
-        
-        for (unsigned int i = 0; i < numberOfActorsPerCycle; i++) {
+        for (unsigned int i = 0; i < numberOfActors; i++) {
             if (actorCounter >= numberOfActors) {
                 actorCounter = 0;
                 doUpdate = false;
@@ -61,7 +62,7 @@ void ActorSystem::Update(void) {
             
             // Check garbage actors
             if (UpdateGarbageCollection(actor)) 
-                break;
+                continue;
             
             if (actor->isGarbage || !actor->isActive) 
                 continue;
@@ -72,17 +73,11 @@ void ActorSystem::Update(void) {
                 continue;
             
             UpdateProximityList(actor);
-            
-            // Update states
             UpdateActorState(actor);
-            
-            // Update genetics if requested
             UpdateActorGenetics(actor);
             
-            // Express genetic phenotypes
             ExpressActorGenetics(actor);
             
-            // Count down any active cool downs
             HandleCooldownCounters(actor);
         }
         

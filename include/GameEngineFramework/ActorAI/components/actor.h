@@ -50,9 +50,6 @@ public:
     /// reset as they are owned and must be reset by the engine system.
     void Reset(void);
     
-    /// Physics collider for ray casting
-    rp3d::CollisionBody* colliderBody;
-    
     
     class ENGINE_API NavigationSystem {
         
@@ -425,6 +422,15 @@ public:
         /// Get the sexual orientation for reproduction.
         bool GetSexualOrientation(void);
         
+        /// Regenerate the physics collider.
+        void UpdatePhysicalCollider(void);
+        
+        /// Set the scale of the physical collider to be generated.
+        void SetColliderScale(glm::vec3 extents);
+        
+        /// Set the offset position of the physical relative to the position of the actor.
+        void SetColliderOffset(glm::vec3 offset);
+        
         PhysicalAttributes();
         
     private:
@@ -441,8 +447,10 @@ public:
         
         bool mSexualOrientation;     // Reproductive orientation  1=Male 0=Female
         
+        bool mDoUpdateCollider;      // Trigger an update of the collider
         glm::vec3 mColliderOffset;   // Collider position offset
         glm::vec3 mColliderScale;    // Collider scale
+        rp3d::CollisionBody* mColliderBody;
         
         std::mutex mux;
         

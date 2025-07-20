@@ -511,10 +511,6 @@ void Start() {
         GameWorld.SaveWorld();
     }
     
-    
-    Weather.SetTime(9000);
-    Weather.SetWeather(WeatherType::Clear);
-    
     return;
     
     

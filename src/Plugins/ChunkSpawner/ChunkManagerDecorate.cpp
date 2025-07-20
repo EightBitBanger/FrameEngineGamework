@@ -446,6 +446,7 @@ void ChunkManager::Decorate(Chunk& chunk) {
                     actor->state.current = ActorState::State::None;
                     actor->state.mode = ActorState::Mode::Idle;
                     
+                    actor->physical.UpdatePhysicalCollider();
                     actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
                 }
                 

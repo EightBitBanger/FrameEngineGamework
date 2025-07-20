@@ -51,10 +51,6 @@ void Run() {
         
     }
     
-    
-    
-    
-    
     // Pick an actor
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
@@ -70,30 +66,28 @@ void Run() {
         }
     }
     
+    // Murder an actor
     if (Input.CheckMouseRightPressed()) {
-        Input.SetMouseRightPressed(false);
+        //Input.SetMouseRightPressed(false);
         glm::vec3 fromHigh = from;
         if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
             Actor* hitActor = (Actor*)hit.userData;
             if (hitActor == actorInSights) {
-                //actorInSights = nullptr;
                 for (unsigned int i=0; i < 24; i++) 
                     Engine.console.WriteDialog(i, "");
             }
             
             hitActor->biological.health = 0.0f;
-            
-            //GameWorld.KillActor(hitActor);
         }
     }
     
     
     
     
-    
+    // Spawn actors
     if (Input.CheckMouseMiddlePressed()) {
-        //Input.SetMouseMiddlePressed(false);
-        float randAmount = 8.0f;
+        Input.SetMouseMiddlePressed(false);
+        float randAmount = 4.0f;
         float xx = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         float zz = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         
@@ -101,27 +95,32 @@ void Run() {
             
             Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
             
+            
             if (Random.Range(0, 100) > 50)
                 AI.genomes.presets.Sheep(actor);
             else 
                 AI.genomes.presets.Bear(actor);
             
+            
+            //AI.genomes.presets.Human(actor);
+            
             /*
             unsigned int randomActor = Random.Range(0, 5);
             switch (randomActor) {
                 default:
-                //case 0: AI.genomes.presets.Human(actor); break;
-                //case 1: AI.genomes.presets.Bovine(actor); break;
-                //case 2: AI.genomes.presets.Horse(actor); break;
+                case 0: AI.genomes.presets.Human(actor); break;
+                case 1: AI.genomes.presets.Bovine(actor); break;
+                case 2: AI.genomes.presets.Horse(actor); break;
                 case 3: AI.genomes.presets.Sheep(actor); break;
                 case 4: AI.genomes.presets.Bear(actor); break;
             }
             */
             
-            actor->physical.SetAge( Random.Range(0.0f, actor->physical.GetAdultAge()) );
+            actor->physical.SetAge( Random.Range(actor->physical.GetAdultAge(), actor->physical.GetAdultAge() * 2.0f) );
             actor->RebuildGeneticExpression();
             
             actor->isActive = true;
+            actor->physical.UpdatePhysicalCollider();
         }
         
         /*
@@ -174,7 +173,6 @@ void Run() {
         Engine.console.WriteDialog( 2, "Engine      " + Float.ToString( Profiler.profileGameEngineUpdate ) );
         Engine.console.WriteDialog( 3, "Renderer    " + Float.ToString( Profiler.profileRenderSystem ) );
         
-        
         Engine.console.WriteDialog( 5, "Draw calls      " + Int.ToString(Renderer.GetNumberOfDrawCalls()) );
         
         Engine.console.WriteDialog( 7, "GameObjects     " + Int.ToString(Engine.GetNumberOfGameObjects()) );
@@ -209,8 +207,10 @@ void Run() {
             case ActorState::State::Attack:  Engine.console.WriteDialog(8, "State  Attack"); break;
             case ActorState::State::Flee:    Engine.console.WriteDialog(8, "State  Flee"); break;
             case ActorState::State::Defend:  Engine.console.WriteDialog(8, "State  Defend"); break;
-            case ActorState::State::Focus:   Engine.console.WriteDialog(8, "State  Focus"); break;
+            case ActorState::State::Observe: Engine.console.WriteDialog(8, "State  Focus"); break;
             case ActorState::State::Look:    Engine.console.WriteDialog(8, "State  Look"); break;
+            case ActorState::State::Breed:   Engine.console.WriteDialog(8, "State  Breed"); break;
+            default: Engine.console.WriteDialog(8, "Mode   Unknown"); break;
         }
         
         switch (actorInSights->state.mode) {
@@ -220,6 +220,7 @@ void Run() {
             case ActorState::Mode::MoveTo:      Engine.console.WriteDialog(9, "Mode   MoveTo"); break;
             case ActorState::Mode::WalkTo:      Engine.console.WriteDialog(9, "Mode   WalkTo"); break;
             case ActorState::Mode::RunTo:       Engine.console.WriteDialog(9, "Mode   RunTo"); break;
+            default: Engine.console.WriteDialog(9, "Mode   Unknown"); break;
         }
         
         Engine.console.WriteDialog( 11, "[ Counters ]" );
@@ -230,7 +231,17 @@ void Run() {
         Engine.console.WriteDialog( 15, "Breeding  " + Int.ToString( actorInSights->counters.GetCoolDownBreeding() ) );
         
         Engine.console.WriteDialog( 17, "Distance to target   " + Int.ToString( actorInSights->navigation.GetDistanceToTarget() ) );
+        Engine.console.WriteDialog( 18, "TargetPoint          " + Int.ToString( actorInSights->navigation.GetTargetPoint().x ) + ", " 
+                                                                + Int.ToString( actorInSights->navigation.GetTargetPoint().y ) + ", "
+                                                                + Int.ToString( actorInSights->navigation.GetTargetPoint().z ) );
+        if (actorInSights->navigation.GetTargetActor() != nullptr) {
+            Engine.console.WriteDialog( 19, "TargetActor          " + actorInSights->navigation.GetTargetActor()->GetName());
+        } else {
+            Engine.console.WriteDialog( 19, "TargetActor          nullptr");
+        }
         
+        
+        /*
         Engine.console.WriteDialog( 19, "[ Vitality ]" );
         Engine.console.WriteDialog( 20, "Health   " + Int.ToString( actorInSights->biological.health ) );
         if (actorInSights->physical.GetSexualOrientation()) 
@@ -238,8 +249,8 @@ void Run() {
         else 
             Engine.console.WriteDialog( 21, "Female");
         
-        //Engine.console.WriteDialog( 22, "Target list    " + Int.ToString( actorInSights->behavior.GetNumberOfTargets() ) );
-        
+        Engine.console.WriteDialog( 22, "Mesh renderers   " + Int.ToString( actorInSights->genetics.GetNumberOfMeshRenderers() ) );
+        */
         
     }
     

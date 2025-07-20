@@ -15,10 +15,11 @@ enum class Mode {
 enum class State {
     None,         // No state
     Look,         // Look at an actor or point
-    Focus,        // Point towards an actor or point
+    Observe,      // Focus on an actor or point
     Attack,       // Attack the target actor
     Flee,         // Flee from the target actor
-    Defend        // Defend from the target actor
+    Defend,       // Defend from the target actor
+    Breed         // Reproduce with an actor of the opposite sex
 };
 
 enum class Animation {
