@@ -36,6 +36,8 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
             actor->navigation.mTargetPoint.z = position.z;
             actor->navigation.mTargetLook = position;
             actor->state.mIsFacing = false;
+            
+            HandleEscapeEvade(actor, actor->navigation.mTargetActor);
             break;
             
         case ActorState::State::Observe:
@@ -89,14 +91,23 @@ void ActorSystem::HandleTargetDistance(Actor* actor) {
         actor->state.mode = ActorState::Mode::Idle;
         
     }
+    
 }
 
 void ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
-    if (glm::distance(actor->navigation.mPosition, target->navigation.mPosition) > actor->behavior.mDistanceToInflict) 
+    float currentDist = glm::distance(actor->navigation.mPosition, target->navigation.mPosition);
+    if (currentDist > actor->navigation.mDistanceToTarget) {
+        actor->state.mode = ActorState::Mode::Idle;
+        actor->state.current = ActorState::State::None;
+        actor->navigation.mTargetActor = nullptr;
+        return;
+    }
+    actor->navigation.mDistanceToTarget = currentDist;
+    if (actor->navigation.mDistanceToTarget > actor->behavior.mDistanceToInflict) 
         return;
     
     actor->counters.mAttackCoolDownCounter = actor->behavior.GetCooldownAttack();
-    actor->state.mode = ActorState::Mode::Idle;
+    actor->state.mode = ActorState::Mode::MoveTo;
     
     // No effect if the target defense is greater them my strength
     if (target->biological.defense >= actor->biological.strength) 
@@ -111,6 +122,18 @@ void ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
         actor->state.current = ActorState::State::None;
         actor->navigation.mTargetActor = nullptr;
     }
+}
+
+void ActorSystem::HandleEscapeEvade(Actor* actor, Actor* target) {
+    float currentDist = glm::distance(actor->navigation.mPosition, target->navigation.mPosition);
+    if (currentDist > actor->navigation.mDistanceToTarget) {
+        actor->state.mode = ActorState::Mode::Idle;
+        actor->state.current = ActorState::State::None;
+        actor->navigation.mTargetActor = nullptr;
+        return;
+    }
+    actor->navigation.mDistanceToTarget = currentDist;
+    
 }
 
 
@@ -162,38 +185,4 @@ void ActorSystem::HandleVitality(Actor* actor) {
     actor->isActive = false;
     actor->isGarbage = true;
 }
-
-
-void ActorSystem::UpdateProximityList(Actor* actor) {
-    
-    // Is the actor engaging with its target
-    if (actor->state.current == ActorState::State::Attack || 
-        actor->state.current == ActorState::State::Flee || 
-        actor->state.current == ActorState::State::Observe || 
-        actor->state.current == ActorState::State::Breed || 
-        actor->navigation.mTargetActor != nullptr) 
-        return;
-    
-    // Select a random actor
-    unsigned int index = Random.Range(0, mActors.Size()-1);
-    if (index >= mActors.Size()) 
-        return;
-    Actor* targetActor = mActors[index];
-    
-    if (!targetActor->isActive || targetActor->isGarbage) 
-        return;
-    
-    // Actor cannot target itself
-    if (targetActor == actor) 
-        return;
-    
-    // Can the actor see the target
-    if (glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition) > actor->behavior.mDistanceToFocus) 
-        return;
-    
-    // Target the actor
-    actor->navigation.mTargetActor = targetActor;
-    actor->navigation.mDistanceToTarget = 9999.0f;
-}
-
 

@@ -16,7 +16,6 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             actor->state.mIsWalking = false;
             actor->state.mIsRunning = false;
             
-            // Cancel movement & ignore falling
             actor->navigation.mVelocity *= glm::vec3(0, 1, 0);
             break;
             
@@ -28,7 +27,7 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             actor->navigation.mDistanceToTarget = 9999.0f;
             actor->navigation.mTargetLook  = position;
             actor->state.mIsFacing = true;
-            // Shift mode to move to point
+            
             actor->state.mode = ActorState::Mode::MoveTo;
             
         case ActorState::Mode::MoveTo:
@@ -57,7 +56,7 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
     }
     
     if (actor->physical.GetAge() < actor->physical.GetAdultAge()) 
-        forward *= actor->physical.GetSpeedYouth();
+        forward *= actor->physical.mSpeedYouth;
     
     actor->navigation.mVelocity = forward;
     return;
@@ -68,27 +67,27 @@ void ActorSystem::HandleCooldownCounters(Actor* actor) {
     if (actor->counters.mMovementCoolDownCounter > 0) 
         actor->counters.mMovementCoolDownCounter--;
     
-    if (actor->counters.mAttackCoolDownCounter > 0) 
+    if (actor->counters.mAttackCoolDownCounter > 0) {
         actor->counters.mAttackCoolDownCounter--;
+        if (actor->counters.mAttackCoolDownCounter == 0) {
+            actor->state.mode = ActorState::Mode::RunTo;
+        }
+    }
     
-    if (actor->counters.mObservationCoolDownCounter > 0) 
+    if (actor->counters.mObservationCoolDownCounter > 0) {
         actor->counters.mObservationCoolDownCounter--;
-    
-    if (actor->counters.mBreedingCoolDownCounter > 0) {
-        actor->counters.mBreedingCoolDownCounter--;
-        if (actor->state.current == ActorState::State::Breed) {
+        if (actor->counters.mObservationCoolDownCounter == 0) {
             actor->state.current = ActorState::State::None;
             actor->state.mode = ActorState::Mode::Idle;
         }
     }
     
-    // Reset actors that have lost the target
-    if (actor->counters.mAttackCoolDownCounter == 0 && 
-        actor->state.current == ActorState::State::Attack && 
-        actor->state.mode == ActorState::Mode::Idle) {
-        
-        actor->state.current = ActorState::State::None;
-        actor->state.mode = ActorState::Mode::Idle;
+    if (actor->counters.mBreedingCoolDownCounter > 0) {
+        actor->counters.mBreedingCoolDownCounter--;
+        if (actor->counters.mBreedingCoolDownCounter == 0) {
+            actor->state.current = ActorState::State::None;
+            actor->state.mode = ActorState::Mode::Idle;
+        }
     }
 }
 

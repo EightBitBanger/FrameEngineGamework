@@ -366,7 +366,7 @@ void Start() {
     decorSheep.type = DECORATION_ACTOR;
     decorSheep.name = "Sheep";
     decorSheep.density = 10;
-    decorSheep.spawnHeightMaximum = 10;
+    decorSheep.spawnHeightMaximum = GameWorld.world.waterLevel + 10;
     decorSheep.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorSheep.threshold = 0.0f;
     decorSheep.noise     = 0.3f;
@@ -375,7 +375,7 @@ void Start() {
     decorHorse.type = DECORATION_ACTOR;
     decorHorse.name = "Horse";
     decorHorse.density = 8;
-    decorHorse.spawnHeightMaximum = 10;
+    decorHorse.spawnHeightMaximum = GameWorld.world.waterLevel + 10;
     decorHorse.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorHorse.threshold = 0.0f;
     decorHorse.noise     = 0.5;
@@ -384,7 +384,7 @@ void Start() {
     decorBovine.type = DECORATION_ACTOR;
     decorBovine.name = "Bovine";
     decorBovine.density = 10;
-    decorBovine.spawnHeightMaximum = 10;
+    decorBovine.spawnHeightMaximum = GameWorld.world.waterLevel + 10;
     decorBovine.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorBovine.threshold = 0.0f;
     decorBovine.noise     = 0.5f;
@@ -393,8 +393,8 @@ void Start() {
     decorBear.type = DECORATION_ACTOR;
     decorBear.name = "Bear";
     decorBear.density = 4;
-    decorBear.spawnHeightMaximum = 40;
-    decorBear.spawnHeightMinimum = 5;
+    decorBear.spawnHeightMaximum = 50;
+    decorBear.spawnHeightMinimum = 10;
     decorBear.threshold = 0.0f;
     decorBear.noise     = 0.5f;
     
@@ -402,7 +402,7 @@ void Start() {
     decorDog.type = DECORATION_ACTOR;
     decorDog.name = "Dog";
     decorDog.density = 8;
-    decorDog.spawnHeightMaximum = 40;
+    decorDog.spawnHeightMaximum = 50;
     decorDog.spawnHeightMinimum = 5;
     decorDog.threshold = 0.0f;
     decorDog.noise     = 0.5f;
@@ -490,7 +490,7 @@ void Start() {
     
     // World rendering
     GameWorld.chunkSize = 64;
-    GameWorld.renderDistance = 8;
+    GameWorld.renderDistance = 10;
     GameWorld.staticDistance = 0.5f;
     GameWorld.actorDistance  = 0.3f;
     

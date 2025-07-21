@@ -89,11 +89,11 @@ public:
         
         glm::vec3 mVelocity;     // Movement vector
         glm::vec3 mPosition;     // Position of the actor in the world
-        glm::vec3 mRotation;     // Direction the actor is facing
-        glm::vec3 mFacing;       // Direction the head is looking
-        glm::vec3 mLookAt;       // Direction the head should facing
+        glm::vec3 mRotation;     // Direction the actor is currently facing
+        glm::vec3 mFacing;       // Direction the head is currently facing
+        glm::vec3 mLookAt;       // Direction the head should be facing
+        glm::vec3 mRotateTo;     // Directory the actor should be facing
         
-        glm::vec3 mRotateTo;     // Where to rotate to
         glm::vec3 mTargetPoint;  // Point to face
         glm::vec3 mTargetLook;   // Point to look at
         

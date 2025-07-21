@@ -6,34 +6,29 @@
 
 void ActorSystem::UpdateActorState(Actor* actor) {
     actor->physical.mAge++;
-    
     if (actor->state.mode != ActorState::Mode::Idle) 
         return;
     
-    if (actor->navigation.mTargetPoint == glm::vec3(0.0f)) 
-        return;
+    if (Random.Range(0, 100) > 80) 
+        if (HandleWalkState(actor)) 
+            return;
     
     if (actor->navigation.mTargetActor == nullptr) 
         return;
-    
     float distanceToProximityTarget = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition);
-    // In order of priority
+    actor->navigation.mDistanceToTarget = distanceToProximityTarget;
     
     if (HandleAttackState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
         return;
     if (HandleFleeState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
         return;
     
-    //if (Random.Range(0, 100) > 80) 
-        if (HandleBreedingState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
-            return;
-    
     if (Random.Range(0, 100) > 80) 
         if (HandleFocusState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
             return;
     
     if (Random.Range(0, 100) > 80) 
-        if (HandleWalkState(actor)) 
+        if (HandleBreedingState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
             return;
     
     return;
@@ -41,7 +36,8 @@ void ActorSystem::UpdateActorState(Actor* actor) {
 
 bool ActorSystem::HandleWalkState(Actor* actor) {
     if (actor->state.current == ActorState::State::Attack || 
-        actor->state.current == ActorState::State::Flee) 
+        actor->state.current == ActorState::State::Flee || 
+        actor->state.mode != ActorState::Mode::Idle) 
         return false;
     
     actor->state.current = ActorState::State::None;
@@ -55,10 +51,16 @@ bool ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance)
         return false;
     
     // Actor must be a predator
-    if (!actor->behavior.mIsPredator) return false;
+    if (!actor->behavior.mIsPredator) {
+        actor->state.current = ActorState::State::None;
+        return false;
+    }
     
     // Target must be prey
-    if (!target->behavior.mIsPrey) return false;
+    if (!target->behavior.mIsPrey) {
+        actor->state.current = ActorState::State::None;
+        return false;
+    }
     
     // Check attack distance
     if (distance > actor->behavior.GetDistanceToAttack()) {
@@ -70,6 +72,10 @@ bool ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance)
     // Attack the target
     actor->state.mode    = ActorState::Mode::RunTo;
     actor->state.current = ActorState::State::Attack;
+    
+    target->state.mode    = ActorState::Mode::RunTo;
+    target->state.current = ActorState::State::Attack;
+    
     actor->navigation.mTargetActor = target;
     target->navigation.mTargetActor = actor;
     return true;
@@ -78,10 +84,16 @@ bool ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance)
 
 bool ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
     // Actor must be prey
-    if (!actor->behavior.mIsPrey) return false;
+    if (!actor->behavior.mIsPrey) {
+        actor->state.current = ActorState::State::None;
+        return false;
+    }
     
     // Target must be a predator
-    if (!target->behavior.mIsPredator) return false;
+    if (!target->behavior.mIsPredator) {
+        actor->state.current = ActorState::State::None;
+        return false;
+    }
     
     // Check flee distance
     if (distance > actor->behavior.GetDistanceToFlee()) {
@@ -93,8 +105,6 @@ bool ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
     // Target should flee
     actor->state.mode    = ActorState::Mode::RunTo;
     actor->state.current = ActorState::State::Flee;
-    actor->navigation.mTargetActor = target;
-    target->navigation.mTargetActor = actor;
     return true;
 }
 
@@ -125,10 +135,11 @@ bool ActorSystem::HandleBreedingState(Actor* actor, Actor* target, float distanc
         actor->navigation.mPosition.y < actor->behavior.mHeightPreferenceMin) 
         return false;
     
-    if (distance > actor->behavior.GetDistanceToAttack()) return false;
-    
-    if (actor->physical.GetSexualOrientation() == 
-        target->physical.GetSexualOrientation()) 
+    if (distance > actor->behavior.GetDistanceToAttack()) {
+        actor->state.current = ActorState::State::None;
+        return false;
+    }
+    if (actor->physical.GetSexualOrientation() == target->physical.GetSexualOrientation()) 
         return false;
     
     // Focus on the selected target
@@ -142,3 +153,40 @@ bool ActorSystem::HandleBreedingState(Actor* actor, Actor* target, float distanc
     target->navigation.mTargetActor = actor;
     return true;
 }
+
+
+void ActorSystem::UpdateProximityList(Actor* actor) {
+    // Is the actor engaging with its target
+    if (actor->state.current == ActorState::State::Attack || 
+        actor->state.current == ActorState::State::Flee || 
+        actor->state.current == ActorState::State::Observe) 
+        return;
+    
+    // Select a random actor
+    unsigned int index = Random.Range(0, mActors.Size()-1);
+    if (index >= mActors.Size()) 
+        return;
+    Actor* targetActor = mActors[index];
+    
+    if (!targetActor->isActive || targetActor->isGarbage) 
+        return;
+    
+    // Actor cannot target itself
+    if (targetActor == actor) 
+        return;
+    
+    // Can the actor see the target
+    if (glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition) > actor->behavior.mDistanceToFocus) 
+        return;
+    
+    // Target the actor
+    actor->navigation.mTargetActor = targetActor;
+}
+
+
+void ActorSystem::UpdateActorMemories(Actor* actor) {
+    
+    
+    
+}
+

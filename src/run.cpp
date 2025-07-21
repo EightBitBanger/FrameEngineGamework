@@ -86,8 +86,8 @@ void Run() {
     
     // Spawn actors
     if (Input.CheckMouseMiddlePressed()) {
-        Input.SetMouseMiddlePressed(false);
-        float randAmount = 4.0f;
+        //Input.SetMouseMiddlePressed(false);
+        float randAmount = 8.0f;
         float xx = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         float zz = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         
@@ -95,16 +95,16 @@ void Run() {
             
             Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
             
-            
+            /*
             if (Random.Range(0, 100) > 50)
                 AI.genomes.presets.Sheep(actor);
             else 
                 AI.genomes.presets.Bear(actor);
-            
+            */
             
             //AI.genomes.presets.Human(actor);
             
-            /*
+            
             unsigned int randomActor = Random.Range(0, 5);
             switch (randomActor) {
                 default:
@@ -114,7 +114,8 @@ void Run() {
                 case 3: AI.genomes.presets.Sheep(actor); break;
                 case 4: AI.genomes.presets.Bear(actor); break;
             }
-            */
+            
+            actor->memories.Add("home", "100,10,-430");
             
             actor->physical.SetAge( Random.Range(actor->physical.GetAdultAge(), actor->physical.GetAdultAge() * 2.0f) );
             actor->RebuildGeneticExpression();

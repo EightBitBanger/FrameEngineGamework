@@ -147,31 +147,8 @@ void ActorSystem::UpdateTargetRotation(Actor* actor) {
     
     actor->navigation.mRotateTo.y = glm::degrees( glm::atan(xx, zz) ) + 180.0f;
     
-    // Check to invert facing direction
-    if (!actor->state.mIsFacing) {
-        
-        actor->navigation.mRotateTo.y += 180.0f;
-        
-        if (actor->navigation.mRotateTo.y > 360.0f) 
-            actor->navigation.mRotateTo.y -= 360.0f;
-    }
-    
-    // Check actor target direction
-    
-    // Wrap euler rotations
-    if (actor->navigation.mRotation.y < 90.0f) 
-        if (actor->navigation.mRotateTo.y > 270.0f) 
-            actor->navigation.mRotation.y += 360.0f;
-    
-    if (actor->navigation.mRotation.y > 270.0f) 
-        if (actor->navigation.mRotateTo.y < 90.0f) 
-            actor->navigation.mRotation.y -= 360.0f;
-    
-    // Check actor target direction
-    
     // Rotate actor toward the focal point
-    if (actor->navigation.mRotation != actor->navigation.mRotateTo) {
-        
+    if (actor->navigation.mRotation.y != actor->navigation.mRotateTo.y) {
         glm::vec3 fadeFrom( actor->navigation.mRotation ); // Current rotation
         glm::vec3 fadeTo( actor->navigation.mRotateTo );   // Where we want to rotate towards
         
@@ -182,6 +159,7 @@ void ActorSystem::UpdateTargetRotation(Actor* actor) {
         
         actor->navigation.mRotation = fadeValue;
     }
+    
     return;
 }
 
@@ -190,30 +168,6 @@ void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned i
     float zz = actor->navigation.mPosition.z - actor->navigation.mTargetLook.z;
     
     actor->navigation.mLookAt.y = glm::degrees( glm::atan(xx, zz) ) + 180.0f;
-    
-    // Check to invert facing direction
-    if (!actor->state.mIsFacing) {
-        
-        actor->navigation.mLookAt.y += 180.0f;
-        
-        if (actor->navigation.mLookAt.y > 360.0f) 
-            actor->navigation.mLookAt.y -= 360.0f;
-    }
-    
-    // Check actor target direction
-    
-    // Wrap euler rotations
-    /*
-    if (actor->navigation.mFacing.y < 90.0f) 
-        if (actor->navigation.mLookAt.y > 270.0f) 
-            actor->navigation.mFacing.y += 360.0f;
-    
-    if (actor->navigation.mFacing.y > 270.0f) 
-        if (actor->navigation.mLookAt.y < 90.0f) 
-            actor->navigation.mFacing.y -= 360.0f;
-    */
-    
-    // Check actor target direction
     
     // Rotate actor toward the focal point
     if (actor->navigation.mRotation != actor->navigation.mRotateTo) {

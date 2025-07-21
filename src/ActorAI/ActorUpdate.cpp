@@ -76,6 +76,8 @@ void ActorSystem::Update(void) {
             UpdateActorState(actor);
             UpdateActorGenetics(actor);
             
+            UpdateActorMemories(actor);
+            
             ExpressActorGenetics(actor);
             
             HandleCooldownCounters(actor);

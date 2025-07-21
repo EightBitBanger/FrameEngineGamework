@@ -109,6 +109,7 @@ private:
     void HandleTargetDistance(Actor* actor);
     
     void HandleInflictDamage(Actor* actor, Actor* target);
+    void HandleEscapeEvade(Actor* actor, Actor* target);
     void HandleBreedWith(Actor* actor, Actor* target);
     void HandleVitality(Actor* actor);
     void HandleCooldownCounters(Actor* actor);
@@ -135,6 +136,9 @@ private:
     MeshRenderer* CreateMeshRendererForGene(Actor* actor, unsigned int geneIndex, Mesh* sourceMesh);
     void ExpressActorGenetics(Actor* actor);
     bool UpdateGarbageCollection(Actor* actor);
+    
+    // Memories
+    void UpdateActorMemories(Actor* actor);
     
     // Current position of the player in the world
     glm::vec3 mPlayerPosition;
