@@ -12,10 +12,14 @@ public:
     float y;
     float z;
     
+    /// Rotation
+    float yaw;
+    float pitch;
+    
     /// Color
-    float r;
-    float g;
-    float b;
+    float red;
+    float green;
+    float blue;
     
     /// Type of decoration
     uint8_t type;

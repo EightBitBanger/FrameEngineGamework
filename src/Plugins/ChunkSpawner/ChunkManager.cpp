@@ -43,16 +43,15 @@ void ChunkManager::Initiate(void) {
     
     Engine.meshes.wallHorizontal->SetNormals(normalUp);
     Engine.meshes.wallVertical->SetNormals(normalUp);
-    
     Engine.meshes.grassHorz->SetNormals(normalUp);
     Engine.meshes.grassVert->SetNormals(normalUp);
-    
-    Engine.meshes.grassHorz->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
-    Engine.meshes.grassVert->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
-    
     Engine.meshes.stemHorz->SetNormals(normalUp);
     Engine.meshes.stemVert->SetNormals(normalUp);
     
+    Engine.meshes.wallHorizontal->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
+    Engine.meshes.wallVertical->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
+    Engine.meshes.grassHorz->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
+    Engine.meshes.grassVert->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
     Engine.meshes.stemHorz->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
     Engine.meshes.stemVert->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
     
@@ -61,9 +60,6 @@ void ChunkManager::Initiate(void) {
     
     Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshWallHorz);
     Engine.meshes.wallVertical  ->GetSubMesh(0, subMeshWallVert);
-    
-    Engine.meshes.wallHorizontal->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
-    Engine.meshes.wallVertical->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
     
     Engine.meshes.grassHorz->GetSubMesh(0, subMeshGrassHorz);
     Engine.meshes.grassVert->GetSubMesh(0, subMeshGrassVert);
@@ -108,6 +104,13 @@ Actor* ChunkManager::SummonActor(glm::vec3 position) {
     Actor* actor = AI.CreateActor();
     actor->navigation.SetPosition(position);
     actor->navigation.SetTargetPoint(position);
+    
+    std::string homePosition = Float.ToString(position.x) + "," +
+                               Float.ToString(position.y) + "," +
+                               Float.ToString(position.z);
+    
+    actor->memories.Add("home", homePosition);
+    
     return actor;
 }
 

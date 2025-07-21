@@ -45,6 +45,13 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 actor->isActive = true;
                 
                 actor->physical.UpdatePhysicalCollider();
+                
+                // Memories
+                std::vector<std::string> memorySplit = String.Explode(lineArray[5], '=');
+                
+                if (memorySplit.size() == 2) 
+                    actor->memories.Add(memorySplit[0], memorySplit[1]);
+                
                 continue;
             }
             
@@ -74,6 +81,9 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
             float posY = staticElements[i].position.y;
             float posZ = staticElements[i].position.z;
             
+            float rotY = staticElements[i].rotation.x;
+            float rotP = staticElements[i].position.y;
+            
             float colR = staticElements[i].color.r;
             float colG = staticElements[i].color.g;
             float colB = staticElements[i].color.b;
@@ -86,51 +96,18 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
             staticObj.y = posY;
             staticObj.z = posZ;
             
-            staticObj.r = colR;
-            staticObj.g = colG;
-            staticObj.b = colB;
+            staticObj.yaw   = rotY;
+            staticObj.pitch = rotP;
+            
+            staticObj.red   = colR;
+            staticObj.green = colG;
+            staticObj.blue  = colB;
             
             staticObj.type = type;
             
-            
-            if (type == DECORATION_GRASS) {
+            switch (type) {
                 
-                chunk.statics.push_back(staticObj);
-                
-                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshGrassHorz, false);
-                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshGrassVert, false);
-                
-                unsigned int index = staticMesh->GetSubMeshCount() - 1;
-                
-                Color color;
-                color = Color(colR, colG, colB);
-                
-                staticMesh->ChangeSubMeshColor(index, color);
-                staticMesh->ChangeSubMeshColor(index-1, color);
-                
-                continue;
-            }
-            
-            if (type == DECORATION_GRASS_THICK) {
-                
-                chunk.statics.push_back(staticObj);
-                
-                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshWallHorz, false);
-                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshWallVert, false);
-                
-                unsigned int index = staticMesh->GetSubMeshCount() - 1;
-                
-                Color color;
-                color = Color(colR, colG, colB);
-                
-                staticMesh->ChangeSubMeshColor(index, color);
-                staticMesh->ChangeSubMeshColor(index-1, color);
-                
-                continue;
-            }
-            
-            if (type == DECORATION_GRASS_THIN) {
-                
+            case DECORATION_CUSTOM: {
                 chunk.statics.push_back(staticObj);
                 
                 staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshStemHorz, false);
@@ -144,14 +121,24 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 staticMesh->ChangeSubMeshColor(index, color);
                 staticMesh->ChangeSubMeshColor(index-1, color);
                 
-                continue;
+                float length = 15.0f;
+                staticMesh->ChangeSubMeshScale(index,   1.0f, length, 1.0f);
+                staticMesh->ChangeSubMeshScale(index-1, 1.0f, length, 1.0f);
+                
+                staticMesh->ChangeSubMeshRotation(index,   rotY, glm::vec3(0, 0, 1.0f));
+                staticMesh->ChangeSubMeshRotation(index-1, rotY, glm::vec3(0, 0, 1.0f));
+                staticMesh->ChangeSubMeshRotation(index,   rotP, glm::vec3(1.0f, 0, 0));
+                staticMesh->ChangeSubMeshRotation(index-1, rotP, glm::vec3(1.0f, 0, 0));
+                
+                break;
             }
             
-            if (type == DECORATION_TREE) {
+            case DECORATION_GRASS: {
                 
                 chunk.statics.push_back(staticObj);
                 
-                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshTree, false);
+                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshGrassHorz, false);
+                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshGrassVert, false);
                 
                 unsigned int index = staticMesh->GetSubMeshCount() - 1;
                 
@@ -159,13 +146,11 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 color = Color(colR, colG, colB);
                 
                 staticMesh->ChangeSubMeshColor(index, color);
-                
-                continue;
+                staticMesh->ChangeSubMeshColor(index-1, color);
+                break;
             }
             
-            
-            if (type == DECORATION_LEAVES) {
-                
+            case DECORATION_GRASS_THICK:{
                 chunk.statics.push_back(staticObj);
                 
                 staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshWallHorz, false);
@@ -178,8 +163,54 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 
                 staticMesh->ChangeSubMeshColor(index, color);
                 staticMesh->ChangeSubMeshColor(index-1, color);
+                break;
+            }
+            
+            case DECORATION_GRASS_THIN: {
+                chunk.statics.push_back(staticObj);
                 
-                continue;
+                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshStemHorz, false);
+                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshStemVert, false);
+                
+                unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                
+                Color color;
+                color = Color(colR, colG, colB);
+                
+                staticMesh->ChangeSubMeshColor(index, color);
+                staticMesh->ChangeSubMeshColor(index-1, color);
+                break;
+            }
+            
+            case DECORATION_TREE: {
+                chunk.statics.push_back(staticObj);
+                
+                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshTree, false);
+                
+                unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                
+                Color color;
+                color = Color(colR, colG, colB);
+                
+                staticMesh->ChangeSubMeshColor(index, color);
+                break;
+            }
+            
+            case DECORATION_LEAVES: {
+                chunk.statics.push_back(staticObj);
+                
+                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshWallHorz, false);
+                staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshWallVert, false);
+                
+                unsigned int index = staticMesh->GetSubMeshCount() - 1;
+                
+                Color color;
+                color = Color(colR, colG, colB);
+                
+                staticMesh->ChangeSubMeshColor(index, color);
+                staticMesh->ChangeSubMeshColor(index-1, color);
+                break;
+              }
             }
             
         }

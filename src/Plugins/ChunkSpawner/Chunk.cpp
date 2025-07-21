@@ -4,9 +4,13 @@ StaticObject::StaticObject() :
     x(0),
     y(0),
     z(0),
-    r(0),
-    g(0),
-    b(0),
+    
+    yaw(0),
+    pitch(0),
+    
+    red(0),
+    green(0),
+    blue(0),
     
     type(0),
     collisionBody(nullptr)

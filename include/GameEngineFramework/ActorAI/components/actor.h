@@ -252,6 +252,15 @@ public:
         void Add(std::string name, std::string memory);
         /// Remove a memory from this actor.
         bool Remove(std::string name);
+        /// Get a memory from this actor.
+        std::string Get(std::string name);
+        
+        /// Get the number of memories in this actor.
+        unsigned int GetNumberOfMemories(void);
+        /// Return the name of a memory by its index.
+        std::string GetMemoryNameByIndex(unsigned int index);
+        /// Return the value of a memory by its index.
+        std::string GetMemoryValueByIndex(unsigned int index);
         
         /// Clear all the actor memories.
         void Clear(void);

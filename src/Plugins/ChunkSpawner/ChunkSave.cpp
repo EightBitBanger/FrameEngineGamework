@@ -52,8 +52,21 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
             std::string actorAge = IntLong.ToString( actor->physical.GetAge() ) + "~";
             
             // Genome
-            std::string actorGenome = AI.genomes.ExtractGenome(actor);
-            buffer += actorPosStr + actorAge + actorGenome + '\n';
+            std::string actorGenome = AI.genomes.ExtractGenome(actor) + "~";
+            
+            // Memories
+            std::string actorMemories;
+            unsigned int numberOfMemories = actor->memories.GetNumberOfMemories();
+            for (unsigned int i=0; i < numberOfMemories; i++) {
+                
+                actorMemories += actor->memories.GetMemoryNameByIndex(i) + "=" + 
+                                 actor->memories.GetMemoryValueByIndex(i) + "|";
+                
+            }
+            if (numberOfMemories == 0) 
+                actorMemories = "none";
+            
+            buffer += actorPosStr + actorAge + actorGenome + actorMemories + '\n';
             
             if (doClearActors) 
                 terminationList.push_back(actor);
@@ -92,14 +105,16 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
     if (numberOfStatics > 0) {
         
         for (unsigned int s=0; s < numberOfStatics; s++) {
-            
             staticElements[s].position.x = chunk.statics[s].x;
             staticElements[s].position.y = chunk.statics[s].y;
             staticElements[s].position.z = chunk.statics[s].z;
             
-            staticElements[s].color.x = chunk.statics[s].r;
-            staticElements[s].color.y = chunk.statics[s].g;
-            staticElements[s].color.z = chunk.statics[s].b;
+            staticElements[s].rotation.x = chunk.statics[s].yaw;
+            staticElements[s].rotation.y = chunk.statics[s].pitch;
+            
+            staticElements[s].color.x = chunk.statics[s].red;
+            staticElements[s].color.y = chunk.statics[s].green;
+            staticElements[s].color.z = chunk.statics[s].blue;
             
             staticElements[s].type = chunk.statics[s].type;
             

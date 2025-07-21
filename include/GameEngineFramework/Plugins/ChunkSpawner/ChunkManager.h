@@ -222,6 +222,7 @@ public:
     
     void Update(void);
     
+    void AddDecor(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz, float yaw, float pitch, float roll);
     void AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
     void AddDecorGrassThin(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
     void AddDecorGrassThick(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
@@ -297,6 +298,7 @@ private:
 struct StaticElement {
     
     glm::vec3 position;
+    glm::vec2 rotation;
     
     glm::vec3 color;
     

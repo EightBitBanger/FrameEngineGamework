@@ -185,8 +185,34 @@ void ActorSystem::UpdateProximityList(Actor* actor) {
 
 
 void ActorSystem::UpdateActorMemories(Actor* actor) {
+    unsigned int numberOfMemores = actor->memories.GetNumberOfMemories();
     
-    
+    for (unsigned int i=0; i < numberOfMemores; i++) {
+        std::string name = actor->memories.GetMemoryNameByIndex(i);
+        
+        // Stay nearby a home position in the world
+        if (name == "home") {
+            std::string value = actor->memories.GetMemoryValueByIndex(i);
+            
+            std::vector<std::string> split = String.Explode(value, ',');
+            if (split.size() == 3) {
+                glm::vec3 homePosition;
+                homePosition.x = String.ToFloat(split[0]);
+                homePosition.y = String.ToFloat(split[1]);
+                homePosition.z = String.ToFloat(split[2]);
+                
+                if (glm::distance(actor->navigation.mPosition, homePosition) > actor->behavior.mDistanceToWalk) {
+                    actor->navigation.mTargetPoint = homePosition;
+                    
+                    actor->state.current = ActorState::State::None;
+                    actor->state.mode = ActorState::Mode::MoveTo;
+                }
+                
+                continue;
+            }
+        }
+        
+    }
     
 }
 

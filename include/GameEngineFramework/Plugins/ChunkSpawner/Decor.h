@@ -18,6 +18,7 @@ enum class Decoration {
 #define DECORATION_TREE         3
 #define DECORATION_LEAVES       4
 #define DECORATION_ACTOR        5
+#define DECORATION_CUSTOM       6
 
 
 class ENGINE_API DecorationSpecifier {

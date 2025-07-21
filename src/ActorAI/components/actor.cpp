@@ -381,6 +381,34 @@ bool Actor::IdiosyncraticCharacteristics::Remove(std::string name) {
     return false;
 }
 
+std::string Actor::IdiosyncraticCharacteristics::Get(std::string name) {
+    return mMemories[name];
+}
+
+std::string Actor::IdiosyncraticCharacteristics::GetMemoryNameByIndex(unsigned int index) {
+    unsigned int counter;
+    for (std::unordered_map<std::string, std::string>::iterator it = mMemories.begin(); it != mMemories.end(); ++it) {
+        if (counter == index) 
+            return it->first;
+        counter++;
+    }
+    return "";
+}
+
+std::string Actor::IdiosyncraticCharacteristics::GetMemoryValueByIndex(unsigned int index) {
+    unsigned int counter;
+    for (std::unordered_map<std::string, std::string>::iterator it = mMemories.begin(); it != mMemories.end(); ++it) {
+        if (counter == index) 
+            return it->second;
+        counter++;
+    }
+    return "";
+}
+
+unsigned int Actor::IdiosyncraticCharacteristics::GetNumberOfMemories(void) {
+    return mMemories.size();
+}
+
 void Actor::IdiosyncraticCharacteristics::Clear(void) {
     std::lock_guard<std::mutex> lock(mux);
     mMemories.clear();

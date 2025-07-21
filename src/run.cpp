@@ -94,17 +94,15 @@ void Run() {
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             
             Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
+            AI.genomes.presets.Human(actor);
+            
+            //float range = Random.Range(0, 100);
+            
+            //if (range >= 0  && range <  30)   {AI.genomes.presets.Sheep(actor);}
+            //if (range >= 30 && range <  60)   {AI.genomes.presets.Bear(actor);}
+            //if (range >= 60 && range <= 100)  {AI.genomes.presets.Human(actor);}
             
             /*
-            if (Random.Range(0, 100) > 50)
-                AI.genomes.presets.Sheep(actor);
-            else 
-                AI.genomes.presets.Bear(actor);
-            */
-            
-            //AI.genomes.presets.Human(actor);
-            
-            
             unsigned int randomActor = Random.Range(0, 5);
             switch (randomActor) {
                 default:
@@ -114,8 +112,7 @@ void Run() {
                 case 3: AI.genomes.presets.Sheep(actor); break;
                 case 4: AI.genomes.presets.Bear(actor); break;
             }
-            
-            actor->memories.Add("home", "100,10,-430");
+            */
             
             actor->physical.SetAge( Random.Range(actor->physical.GetAdultAge(), actor->physical.GetAdultAge() * 2.0f) );
             actor->RebuildGeneticExpression();
