@@ -1,18 +1,10 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
 StaticObject::StaticObject() : 
-    x(0),
-    y(0),
-    z(0),
-    
-    yaw(0),
-    pitch(0),
-    
-    red(0),
-    green(0),
-    blue(0),
-    
-    type(0),
+    position(glm::vec3(0)),
+    rotation(glm::vec3(0)),
+    scale(glm::vec3(1)),
+    color(glm::vec3(0)),
     collisionBody(nullptr)
 {
 }

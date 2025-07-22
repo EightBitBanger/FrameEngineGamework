@@ -7,22 +7,13 @@ class ENGINE_API StaticObject {
     
 public:
     
-    /// Position
-    float x;
-    float y;
-    float z;
+    glm::vec3 position;
     
-    /// Rotation
-    float yaw;
-    float pitch;
+    glm::vec3 rotation;
     
-    /// Color
-    float red;
-    float green;
-    float blue;
+    glm::vec3 scale;
     
-    /// Type of decoration
-    uint8_t type;
+    glm::vec3 color;
     
     /// Collision body representing the object in the world
     rp3d::CollisionBody* collisionBody;

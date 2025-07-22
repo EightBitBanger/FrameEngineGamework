@@ -148,6 +148,11 @@ void ActorSystem::HandleBreedWith(Actor* actor, Actor* target) {
     Actor* offspring = CreateActor();
     offspring->Reset();
     
+    std::string homePosition = Float.ToString(spawnPoint.x) + "," +
+                               Float.ToString(spawnPoint.y) + "," +
+                               Float.ToString(spawnPoint.z);
+    actor->memories.Add("home", homePosition);
+    
     offspring->navigation.SetPosition(spawnPoint);
     offspring->navigation.SetTargetPoint(spawnPoint);
     

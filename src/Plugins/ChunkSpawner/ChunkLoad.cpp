@@ -63,16 +63,13 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
     // Load static
     
     if (Serializer.CheckExists( staticName )) {
-        
         MeshRenderer* meshRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
         Mesh* staticMesh = meshRenderer->mesh;
         
         unsigned int fileSize = Serializer.GetFileSize(staticName);
-        
         unsigned int numberOfStaticElements = fileSize / sizeof(StaticElement);
         
         StaticElement staticElements[numberOfStaticElements];
-        
         Serializer.Deserialize(staticName, (void*)staticElements, fileSize);
         
         for (unsigned int i=0; i < numberOfStaticElements; i++) {
@@ -82,34 +79,51 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
             float posZ = staticElements[i].position.z;
             
             float rotY = staticElements[i].rotation.x;
-            float rotP = staticElements[i].position.y;
+            float rotP = staticElements[i].rotation.y;
+            float rotR = staticElements[i].rotation.z;
+            
+            float scaleX = staticElements[i].scale.x;
+            float scaleY = staticElements[i].scale.y;
+            float scaleZ = staticElements[i].scale.z;
             
             float colR = staticElements[i].color.r;
             float colG = staticElements[i].color.g;
             float colB = staticElements[i].color.b;
             
-            uint8_t type = staticElements[i].type;
-            
             StaticObject staticObj;
+            staticObj.position = staticElements[i].position;
+            staticObj.rotation = staticElements[i].rotation;
+            staticObj.scale    = staticElements[i].scale;
+            staticObj.color    = staticElements[i].color;
+            chunk.statics.push_back(staticObj);
             
-            staticObj.x = posX;
-            staticObj.y = posY;
-            staticObj.z = posZ;
+            staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshWallHorz, false);
+            staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshWallVert, false);
             
-            staticObj.yaw   = rotY;
-            staticObj.pitch = rotP;
+            unsigned int index = staticMesh->GetSubMeshCount() - 1;
             
-            staticObj.red   = colR;
-            staticObj.green = colG;
-            staticObj.blue  = colB;
+            Color color;
+            color = Color(colR, colG, colB);
             
-            staticObj.type = type;
+            staticMesh->ChangeSubMeshColor(index,   color);
+            staticMesh->ChangeSubMeshColor(index-1, color);
             
+            staticMesh->ChangeSubMeshScale(index,   scaleX, scaleY, scaleZ);
+            staticMesh->ChangeSubMeshScale(index-1, scaleX, scaleY, scaleZ);
+            
+            staticMesh->ChangeSubMeshRotation(index,   rotY, glm::vec3(0, 0, 1.0f));
+            staticMesh->ChangeSubMeshRotation(index-1, rotY, glm::vec3(0, 0, 1.0f));
+            staticMesh->ChangeSubMeshRotation(index,   rotP, glm::vec3(1.0f, 0, 0));
+            staticMesh->ChangeSubMeshRotation(index-1, rotP, glm::vec3(1.0f, 0, 0));
+            staticMesh->ChangeSubMeshRotation(index,   rotR, glm::vec3(0, 1.0f, 0));
+            staticMesh->ChangeSubMeshRotation(index-1, rotR, glm::vec3(0, 1.0f, 0));
+            
+            
+            /*
             switch (type) {
                 
             case DECORATION_CUSTOM: {
                 chunk.statics.push_back(staticObj);
-                
                 staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshStemHorz, false);
                 staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshStemVert, false);
                 
@@ -134,9 +148,7 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
             }
             
             case DECORATION_GRASS: {
-                
                 chunk.statics.push_back(staticObj);
-                
                 staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshGrassHorz, false);
                 staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshGrassVert, false);
                 
@@ -212,11 +224,12 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
                 break;
               }
             }
+            */
+            
             
         }
         
         staticMesh->Load();
-        
     }
     
     return 1;

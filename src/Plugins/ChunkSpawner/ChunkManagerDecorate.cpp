@@ -71,35 +71,40 @@ void ChunkManager::Decorate(Chunk& chunk) {
                 continue;
             
             StaticObject staticObj;
-            staticObj.x = xp;
-            staticObj.y = height;
-            staticObj.z = zp;
+            staticObj.position.x = xp;
+            staticObj.position.y = height;
+            staticObj.position.z = zp;
+            
+            //if ((unsigned int)Random.Range(0, 10) < decor.density) 
+                AddDecorGrass(chunk, staticObj, staticMesh, glm::vec3(-xp, height, -zp));
+            
             
             
             
             // Structures
-            
+            /*
             if ((unsigned int)Random.Range(0, 10000) < 7) {
                 float xCoord = (float)xp * 0.9f;
                 float zCoord = (float)zp * 0.9f;
                 
-                if ((Random.Perlin(xCoord, 0, zCoord, chunk.seed) * 4.0f) < 2.0f) 
-                    continue;
+                //if ((Random.Perlin(xCoord, 0, zCoord, chunk.seed) * 4.0f) < 2.0f) 
+                //    continue;
                 
                 float villageSpread = 8.0f;
-                float wikiupSpread = 4.0f;
+                float wikiupSpread = 0.0f;
                 
-                unsigned int numberOfWikiups = Random.Range(1, 3);
+                unsigned int numberOfWikiups = 1;//Random.Range(1, 3);
                 for (unsigned int i=0; i < numberOfWikiups; i++) {
                     float xx = Random.Range(0.0f, wikiupSpread) - Random.Range(0.0f, wikiupSpread);
                     float zz = Random.Range(0.0f, wikiupSpread) - Random.Range(0.0f, wikiupSpread);
                     
                     float wikiupHeight = height - Random.Range(0.0f, 1.0f);
                     
-                    AddDecor(chunk, staticObj, staticMesh, -xp + xx,      wikiupHeight + 2, -zp + zz,       20.0f, 0.0f, 0.0f);
-                    AddDecor(chunk, staticObj, staticMesh, -xp-1 + xx,    wikiupHeight + 2, -zp-1 + zz,      0.0f, 20.0f, 0.0f);
-                    AddDecor(chunk, staticObj, staticMesh, -xp-1.5f + xx, wikiupHeight + 2, -zp+0.5f + zz, -10.0f, -10.0f, 0.0f);
+                    AddDecor(chunk, staticObj, staticMesh, -xp + xx,      wikiupHeight + 2, -zp + zz,        0.0f, 0.0f);
+                    AddDecor(chunk, staticObj, staticMesh, -xp-1 + xx,    wikiupHeight + 2, -zp-1 + zz,      0.0f,  0.0f);
+                    AddDecor(chunk, staticObj, staticMesh, -xp-1.5f + xx, wikiupHeight + 2, -zp+0.5f + zz,   0.0f,   0.0f);
                 }
+                
                 
                 float spawnVillagerLow  = 4.0f;
                 float spawnVillagerHigh = 8.0f;
@@ -125,8 +130,9 @@ void ChunkManager::Decorate(Chunk& chunk) {
                     actor->physical.UpdatePhysicalCollider();
                 }
                 
+                
             }
-            
+            */
             
             
             
@@ -172,31 +178,9 @@ void ChunkManager::Decorate(Chunk& chunk) {
             }
             */
             
+            
+            /*
             switch (decor.type) {
-                
-                /*
-            case DECORATION_CUSTOM:
-                if ((unsigned int)Random.Range(0, 100) > decor.density) 
-                    break;
-                
-                Color finalColor;
-                finalColor = Colors.green * 0.04f;
-                
-                finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                          Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                          Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
-                
-                staticObj.red   = finalColor.r;
-                staticObj.green = finalColor.g;
-                staticObj.blue  = finalColor.b;
-                
-                staticObj.yaw   = ;
-                staticObj.pitch = ;
-                
-                AddDecor(chunk, staticObj, staticMesh, -xp, height, -zp);
-                
-                break;
-                */
                 
             case DECORATION_GRASS:
                 if ((unsigned int)Random.Range(0, 100) < decor.density) {
@@ -283,8 +267,9 @@ void ChunkManager::Decorate(Chunk& chunk) {
                 break;
                 
             }
+            */
             
-            continue;
+            
         }
         
     }
@@ -294,6 +279,99 @@ void ChunkManager::Decorate(Chunk& chunk) {
 }
 
 
+
+
+
+
+
+void ChunkManager::AddDecor(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
+    StaticObject newStaticObject = staticObject;
+    newStaticObject.position.y = position.y;
+    
+    staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshWallHorz, false);
+    staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshWallVert, false);
+    
+    unsigned int index = staticMesh->GetSubMeshCount() - 1;
+    
+    staticMesh->ChangeSubMeshScale(index,   scale.x, scale.y, scale.z);
+    staticMesh->ChangeSubMeshScale(index-1, scale.x, scale.y, scale.z);
+    
+    Color finalColor;
+    finalColor.r = staticObject.color.x;
+    finalColor.g = staticObject.color.y;
+    finalColor.b = staticObject.color.z;
+    
+    staticMesh->ChangeSubMeshColor(index,   finalColor);
+    staticMesh->ChangeSubMeshColor(index-1, finalColor);
+    
+    staticMesh->ChangeSubMeshRotation(index,   rotation.x, glm::vec3(0, 0, 1.0f));
+    staticMesh->ChangeSubMeshRotation(index-1, rotation.x, glm::vec3(0, 0, 1.0f));
+    staticMesh->ChangeSubMeshRotation(index,   rotation.y, glm::vec3(1.0f, 0, 0));
+    staticMesh->ChangeSubMeshRotation(index-1, rotation.y, glm::vec3(1.0f, 0, 0));
+    staticMesh->ChangeSubMeshRotation(index,   rotation.z, glm::vec3(0, 1.0f, 0));
+    staticMesh->ChangeSubMeshRotation(index-1, rotation.z, glm::vec3(0, 1.0f, 0));
+    
+    newStaticObject.rotation = rotation;
+    newStaticObject.rotation = rotation;
+    newStaticObject.scale    = scale;
+    newStaticObject.color    = staticObject.color;
+    
+    chunk.statics.push_back(newStaticObject);
+    
+    return;
+}
+
+
+void ChunkManager::AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position) {
+    Color finalColor;
+    finalColor = Colors.green * (0.04f + (Random.Range(0, 80) * 0.001f));
+    staticObject.color.x = finalColor.r;
+    staticObject.color.y = finalColor.g;
+    staticObject.color.z = finalColor.b;
+    
+    float height = 0.45f;
+    float width = 0.8f;
+    position.y += height * 0.25f;
+    
+    for (unsigned int i=0; i < 1; i++) {
+        glm::vec3 scale(width, height, width);
+        glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
+        
+        AddDecor(chunk, staticObject, staticMesh, position, rotation, scale);
+        
+        finalColor = Colors.green * (0.02f + (Random.Range(0, 80) * 0.001f));
+        staticObject.color.x = finalColor.r;
+        staticObject.color.y = finalColor.g;
+        staticObject.color.z = finalColor.b;
+        
+        position.y += height * 0.5f;
+        
+        width *= 0.87f;
+        
+    }
+    
+    // TODO Make static objects destructible
+    
+    //staticObject.collisionBody = Physics.CreateCollisionBody(staticObject.x, staticObject.y, staticObject.z);
+    //rp3d::Collider* collider = staticObject.rigidBody->addCollider(Engine.colliders.box, transform);
+    
+    //rp3d::Transform transform;
+    //staticObject.rigidBody->setType(rp3d::BodyType::STATIC);
+    
+    //collider->setCollisionCategoryBits((unsigned short)LayerMask::Object); // Ray cast as an "Object"
+    //collider->setCollideWithMaskBits((unsigned short)LayerMask::Ground);   // Collide as a solid object
+    
+    return;
+}
+
+
+
+
+
+
+
+
+/*
 void ChunkManager::AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz) {
     
     staticObject.type = DECORATION_GRASS;
@@ -389,60 +467,8 @@ void ChunkManager::AddDecorGrassThick(Chunk& chunk, StaticObject& staticObject, 
     return;
 }
 
-void ChunkManager::AddDecor(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz, float yaw, float pitch, float roll) {
-    
-    StaticObject newStaticObject = staticObject;
-    
-    newStaticObject.type = DECORATION_CUSTOM;
-    newStaticObject.y = yy;
-    
-    staticMesh->AddSubMesh(xx, yy, zz, subMeshStemHorz, false);
-    staticMesh->AddSubMesh(xx, yy, zz, subMeshStemVert, false);
-    
-    unsigned int index = staticMesh->GetSubMeshCount() - 1;
-    
-    Color lowTrunk;
-    Color highTrunk;
-    Color finalColor;
-    
-    lowTrunk  = (Colors.brown * 0.13f) + (Colors.green * 0.03);
-    highTrunk = (Colors.brown * 0.87f) + (Colors.green * 0.0087);
-    
-    finalColor = Colors.Lerp(lowTrunk, highTrunk, 0.3f);
-    
-    staticObject.red   = finalColor.r;
-    staticObject.green = finalColor.g;
-    staticObject.blue  = finalColor.b;
-    
-    staticMesh->ChangeSubMeshColor(index,   finalColor);
-    staticMesh->ChangeSubMeshColor(index-1, finalColor);
-    
-    float length = 15.0f;
-    staticMesh->ChangeSubMeshScale(index,   1.0f, length, 1.0f);
-    staticMesh->ChangeSubMeshScale(index-1, 1.0f, length, 1.0f);
-    
-    staticMesh->ChangeSubMeshRotation(index,   yaw,   glm::vec3(0, 0, 1.0f));
-    staticMesh->ChangeSubMeshRotation(index-1, yaw,   glm::vec3(0, 0, 1.0f));
-    staticMesh->ChangeSubMeshRotation(index,   pitch, glm::vec3(1.0f, 0, 0));
-    staticMesh->ChangeSubMeshRotation(index-1, pitch, glm::vec3(1.0f, 0, 0));
-    
-    newStaticObject.yaw   = yaw;
-    newStaticObject.pitch = pitch;
-    
-    newStaticObject.red   = finalColor.r;
-    newStaticObject.green = finalColor.g;
-    newStaticObject.blue  = finalColor.b;
-    
-    chunk.statics.push_back(newStaticObject);
-    
-    return;
-}
-
-
 void ChunkManager::AddDecorTreeLogs(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz) {
-    
     StaticObject newStaticObject = staticObject;
-    
     newStaticObject.type = DECORATION_TREE;
     newStaticObject.y = yy - 1.0f;
     
@@ -573,5 +599,5 @@ void ChunkManager::AddDecorTree(Chunk& chunk, StaticObject& staticObject, Mesh* 
     return;
 }
 
-
+*/
 

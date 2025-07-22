@@ -93,10 +93,8 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
     } else {
         
         // File should not exists as no actors exist in this chunk
-        if (fs.FileExists(chunkName)) {
+        if (fs.FileExists(chunkName)) 
             fs.FileDelete(chunkName);
-            Engine.console.Print("Deleted::" + chunkName);
-        }
     }
     
     // Save static objects
@@ -105,24 +103,14 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
     if (numberOfStatics > 0) {
         
         for (unsigned int s=0; s < numberOfStatics; s++) {
-            staticElements[s].position.x = chunk.statics[s].x;
-            staticElements[s].position.y = chunk.statics[s].y;
-            staticElements[s].position.z = chunk.statics[s].z;
-            
-            staticElements[s].rotation.x = chunk.statics[s].yaw;
-            staticElements[s].rotation.y = chunk.statics[s].pitch;
-            
-            staticElements[s].color.x = chunk.statics[s].red;
-            staticElements[s].color.y = chunk.statics[s].green;
-            staticElements[s].color.z = chunk.statics[s].blue;
-            
-            staticElements[s].type = chunk.statics[s].type;
-            
+            staticElements[s].position = chunk.statics[s].position;
+            staticElements[s].rotation = chunk.statics[s].rotation;
+            staticElements[s].scale    = chunk.statics[s].scale;
+            staticElements[s].color    = chunk.statics[s].color;
             continue;
         }
         
         Serializer.Serialize(staticName, (void*)staticElements, sizeof(StaticElement) * numberOfStatics);
-        
     }
     
     

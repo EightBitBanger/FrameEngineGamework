@@ -222,14 +222,11 @@ public:
     
     void Update(void);
     
-    void AddDecor(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz, float yaw, float pitch, float roll);
-    void AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
-    void AddDecorGrassThin(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
-    void AddDecorGrassThick(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
+    // Base decoration function
+    void AddDecor(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
     
-    void AddDecorTreeLogs(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
-    void AddDecorTreeLeaves(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz);
-    void AddDecorTree(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, float xx, float yy, float zz, Decoration treeType);
+    // Decoration functions
+    void AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position);
     
     void Decorate(Chunk& chunk);
     
@@ -298,12 +295,10 @@ private:
 struct StaticElement {
     
     glm::vec3 position;
-    glm::vec2 rotation;
+    glm::vec3 rotation;
+    glm::vec3 scale;
     
     glm::vec3 color;
-    
-    uint8_t type;
-    
 };
 
 
