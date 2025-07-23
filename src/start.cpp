@@ -304,7 +304,7 @@ void Start() {
     
     DecorationSpecifier decorGrass;
     decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 20;
+    decorGrass.density = 100;
     decorGrass.spawnHeightMaximum = 7;
     decorGrass.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrass.spawnStackHeightMin = 1;
@@ -314,7 +314,7 @@ void Start() {
     
     DecorationSpecifier decorWaterPlants;
     decorWaterPlants.type = DECORATION_GRASS_THIN;
-    decorWaterPlants.density = 200;
+    decorWaterPlants.density = 100;
     decorWaterPlants.spawnHeightMaximum = GameWorld.world.waterLevel;
     decorWaterPlants.spawnHeightMinimum = -100;
     decorWaterPlants.spawnStackHeightMax = 4;

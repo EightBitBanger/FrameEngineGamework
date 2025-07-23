@@ -3,6 +3,7 @@
 
 #include <GameEngineFramework/configuration.h>
 
+#include <glm/glm.hpp>
 #include <cstdlib>
 
 
@@ -47,6 +48,9 @@ public:
     Color(float grayScale);
     Color(float red, float green, float blue, float alpha);
     Color(float red, float green, float blue);
+    
+    Color(const glm::vec3& vec);
+    Color& operator=(const glm::vec3& vec);
     
 };
 

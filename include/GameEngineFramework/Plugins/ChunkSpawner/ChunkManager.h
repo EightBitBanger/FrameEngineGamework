@@ -227,6 +227,9 @@ public:
     
     // Decoration functions
     void AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position);
+    void AddDecorGrassThin(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position);
+    void AddDecorGrassThick(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position);
+    void AddDecorTree(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position, Decoration treeType);
     
     void Decorate(Chunk& chunk);
     

@@ -189,6 +189,16 @@ Color::Color() :
 {
 }
 
+Color::Color(const glm::vec3& vec) : r(vec.x), g(vec.y), b(vec.z) {}
+
+Color& Color::
+    operator=(const glm::vec3& vec) {
+    r = vec.x;
+    g = vec.y;
+    b = vec.z;
+    return *this;
+}
+
 Color::Color(Color& color) : 
     r(color.r),
     g(color.g),
