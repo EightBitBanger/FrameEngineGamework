@@ -3,21 +3,12 @@
 
 #include <GameEngineFramework/plugins.h>
 
-Actor* actorInSights = nullptr;
-
 bool isProfilerEnabled = false;
 
 glm::vec3 force(0);
 float forceDblTime=0;
 
-bool isDebugReportActive = false;
-
-std::string targetGene = "";
-
-Actor* actorSelected = nullptr;
-
-bool isNetInit = false;
-bool isTrigger = false;
+Actor* actorInSights = nullptr;
 
 void Run() {
     

@@ -324,7 +324,7 @@ void Start() {
     
     DecorationSpecifier decorTrees;
     decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 3;
+    decorTrees.density = 20;
     decorTrees.spawnHeightMaximum = 10;
     decorTrees.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;

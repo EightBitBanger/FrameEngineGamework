@@ -322,7 +322,7 @@ void ChunkManager::AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh*
         glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
         
         Color finalColor;
-        finalColor = Colors.green * (0.02f + (Random.Range(0, 80) * 0.001f));
+        finalColor = Colors.green * (0.024f + (Random.Range(0, 80) * 0.00087f));
         staticObject.color.x = finalColor.r;
         staticObject.color.y = finalColor.g;
         staticObject.color.z = finalColor.b;
@@ -350,8 +350,16 @@ void ChunkManager::AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh*
 
 
 void ChunkManager::AddDecorGrassThin(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position) {
+    glm::vec3 scale(0.1f, 1.0f, 0.1f);
+    glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
     
+    Color finalColor;
+    finalColor = Colors.green * (0.04f + (Random.Range(0, 80) * 0.001f));
+    staticObject.color.x = finalColor.r;
+    staticObject.color.y = finalColor.g;
+    staticObject.color.z = finalColor.b;
     
+    AddDecor(chunk, staticObject, staticMesh, position, rotation, scale);
 }
 
 
@@ -362,9 +370,48 @@ void ChunkManager::AddDecorGrassThick(Chunk& chunk, StaticObject& staticObject, 
 
 
 void ChunkManager::AddDecorTree(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position, Decoration treeType) {
+    float minimumHeight = 7.0f;
+    float maximumHeight = 14.0f;
     
+    int numberOfLeavesMin = 30;
+    int numberOfLeavesMax = 40;
+    float leafSpreadWidth  = 3.2f;
+    float leafSpreadHeight = 1.4f;
+    
+    float height = Random.Range(minimumHeight, maximumHeight);
+    
+    glm::vec3 scale(0.3f, height * 2.0f, 0.3f);
+    glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
+    
+    Color finalColor;
+    finalColor = Colors.brown * (0.02f + (Random.Range(0, 80) * 0.001f));
+    staticObject.color.x = finalColor.r;
+    staticObject.color.y = finalColor.g;
+    staticObject.color.z = finalColor.b;
+    
+    AddDecor(chunk, staticObject, staticMesh, position, rotation, scale);
+    
+    int numberOfLeaves = numberOfLeavesMin + (Random.Range(0, numberOfLeavesMax));
+    
+    for (int i=0; i < numberOfLeaves; i++) {
+        glm::vec3 scale(0.8f, 0.8f, 0.8f);
+        //glm::vec3 rotation(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+        
+        Color finalColor;
+        finalColor = Colors.green * (0.04f + (Random.Range(0, 80) * 0.001f));
+        staticObject.color.x = finalColor.r;
+        staticObject.color.y = finalColor.g;
+        staticObject.color.z = finalColor.b;
+        float xx = Random.Range(0.0f, leafSpreadWidth) - Random.Range(0.0f, leafSpreadWidth);
+        float yy = Random.Range(0.0f, leafSpreadHeight) - Random.Range(0.0f, leafSpreadHeight);
+        float zz = Random.Range(0.0f, leafSpreadWidth) - Random.Range(0.0f, leafSpreadWidth);
+        
+        glm::vec3 offsetPosition = position + glm::vec3(xx, yy + (height * 0.5f), zz);
+        AddDecor(chunk, staticObject, staticMesh, offsetPosition, rotation, scale);
+    }
     
 }
+
 
 
 
