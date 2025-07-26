@@ -22,14 +22,14 @@ void ChunkManager::Decorate(Chunk& chunk) {
             float staticZ = (chunk.y - zp);
             
             glm::vec3 from(staticX, 0, staticZ);
-            glm::vec3 direction(0, -1, 0);
+            
             
             // Pick a random decoration for this world
             unsigned int decorIndex = Random.Range(0, world.mDecorations.size());
             
             DecorationSpecifier decor = world.mDecorations[ decorIndex ];
             
-            if ((unsigned int)Random.Range(0, 100) > decor.density) 
+            if ((unsigned int)Random.Range(0, 10000) > decor.density) 
                 continue;
             
             // Perlin generation
@@ -44,7 +44,7 @@ void ChunkManager::Decorate(Chunk& chunk) {
             float distance = 2000.0f;
             float height = 0.0f;
             
-            if (Physics.Raycast(from, direction, distance, hit, LayerMask::Ground)) 
+            if (Physics.Raycast(from, glm::vec3(0, -1, 0), distance, hit, LayerMask::Ground)) 
                 height = hit.point.y;
             
             if (height > world.staticHeightCutoff) 
@@ -54,203 +54,23 @@ void ChunkManager::Decorate(Chunk& chunk) {
                 continue;
             
             // World spawn height range
-            if ((height > decor.spawnHeightMaximum) | 
-                (height < decor.spawnHeightMinimum)) 
+            if (height > decor.spawnHeightMaximum || height < decor.spawnHeightMinimum) 
                 continue;
             
-            StaticObject staticObj;
-            staticObj.position.x = xp;
-            staticObj.position.y = height;
-            staticObj.position.z = zp;
-            
             switch (decor.type) {
                 
-            case DECORATION_GRASS:        AddDecorGrass(chunk, staticObj, staticMesh, glm::vec3(-xp, height, -zp)); break;
-            case DECORATION_GRASS_THIN:   AddDecorGrassThin(chunk, staticObj, staticMesh, glm::vec3(-xp, height, -zp)); break;
-            case DECORATION_GRASS_THICK:  AddDecorGrassThick(chunk, staticObj, staticMesh, glm::vec3(-xp, height, -zp)); break;
-            case DECORATION_TREE:         AddDecorTree(chunk, staticObj, staticMesh, glm::vec3(-xp, height, -zp), Decoration::TreeOak); break;
-                
-                
-                /*
-            case DECORATION_TREE:
-                if ((unsigned int)Random.Range(0, 100) < decor.density) {
-                    
-                    AddDecorTree(chunk, staticObj, staticMesh, -xp, height, -zp, Decoration::TreeOak);
-                }
+            case DECORATION_GRASS: 
+                if (Random.Range(0, 100) > 50) 
+                    {AddDecorGrass(chunk, staticMesh, glm::vec3(-xp, height, -zp), Decoration::Grass::Short); break;}
+                else 
+                    {AddDecorGrass(chunk, staticMesh, glm::vec3(-xp, height, -zp), Decoration::Grass::Tall); break;}
                 break;
                 
-            case DECORATION_ACTOR:
-                
-                if ((unsigned int)Random.Range(0, 10000) < decor.density) {
-                    Actor* actor = SummonActor(glm::vec3(from.x, 0, from.z));
-                    
-                    DecodeGenome(decor, actor);
-                    
-                    actor->isActive = true;
-                    actor->RebuildGeneticExpression();
-                    
-                    actor->state.current = ActorState::State::None;
-                    actor->state.mode = ActorState::Mode::Idle;
-                    
-                    actor->physical.UpdatePhysicalCollider();
-                    actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
-                }
-                break;
-                */
-            }
-            
-            
-            
-            
-            
-            // Structures
-            /*
-            if ((unsigned int)Random.Range(0, 10000) < 7) {
-                float xCoord = (float)xp * 0.9f;
-                float zCoord = (float)zp * 0.9f;
-                
-                //if ((Random.Perlin(xCoord, 0, zCoord, chunk.seed) * 4.0f) < 2.0f) 
-                //    continue;
-                
-                float villageSpread = 8.0f;
-                float wikiupSpread = 0.0f;
-                
-                unsigned int numberOfWikiups = 1;//Random.Range(1, 3);
-                for (unsigned int i=0; i < numberOfWikiups; i++) {
-                    float xx = Random.Range(0.0f, wikiupSpread) - Random.Range(0.0f, wikiupSpread);
-                    float zz = Random.Range(0.0f, wikiupSpread) - Random.Range(0.0f, wikiupSpread);
-                    
-                    float wikiupHeight = height - Random.Range(0.0f, 1.0f);
-                    
-                    AddDecor(chunk, staticObj, staticMesh, -xp + xx,      wikiupHeight + 2, -zp + zz,        0.0f, 0.0f);
-                    AddDecor(chunk, staticObj, staticMesh, -xp-1 + xx,    wikiupHeight + 2, -zp-1 + zz,      0.0f,  0.0f);
-                    AddDecor(chunk, staticObj, staticMesh, -xp-1.5f + xx, wikiupHeight + 2, -zp+0.5f + zz,   0.0f,   0.0f);
-                }
-                
-                
-                float spawnVillagerLow  = 4.0f;
-                float spawnVillagerHigh = 8.0f;
-                
-                unsigned int numberOfVillagers = Random.Range(spawnVillagerLow, spawnVillagerHigh);
-                for (unsigned int i=0; i < numberOfVillagers; i++) {
-                    
-                    float xx = Random.Range(0.0f, villageSpread) - Random.Range(0.0f, villageSpread);
-                    float zz = Random.Range(0.0f, villageSpread) - Random.Range(0.0f, villageSpread);
-                    Actor* actor = SummonActor( glm::vec3(from.x + xx, 0.0f, from.z + zz) );
-                    AI.genomes.presets.Human(actor);
-                    
-                    if (i < (numberOfVillagers / 2)) {
-                        actor->physical.SetSexualOrientation(true);
-                    } else {
-                        actor->physical.SetSexualOrientation(false);
-                    }
-                    
-                    actor->physical.SetAge( Random.Range(actor->physical.GetAdultAge(), actor->physical.GetAdultAge() * 2.0f) );
-                    actor->RebuildGeneticExpression();
-                    
-                    actor->isActive = true;
-                    actor->physical.UpdatePhysicalCollider();
-                }
-                
+            case DECORATION_TREE:   AddDecorTree(chunk, staticMesh, glm::vec3(-xp, height, -zp), Decoration::Tree::Oak); break;
+            case DECORATION_ACTOR:  AddDecoreActor(decor.name, glm::vec3(from.x, height, from.z)); break;
+            case DECORATION_STRUCTURE:  AddDecorStructure(chunk, staticMesh, glm::vec3(-xp, height, -zp)); break;
                 
             }
-            */
-            
-            
-            
-            
-            
-            
-            /*
-            switch (decor.type) {
-                
-            case DECORATION_GRASS:
-                if ((unsigned int)Random.Range(0, 100) < decor.density) {
-                    
-                    Color finalColor;
-                    finalColor = Colors.green * 0.04f;
-                    
-                    finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
-                    
-                    staticObj.red   = finalColor.r;
-                    staticObj.green = finalColor.g;
-                    staticObj.blue  = finalColor.b;
-                    
-                    AddDecorGrass(chunk, staticObj, staticMesh, -xp, height, -zp);
-                }
-                break;
-                
-            case DECORATION_GRASS_THIN:
-                if ((unsigned int)Random.Range(0, 100) < decor.density) {
-                    
-                    unsigned int stackHeight = Random.Range((float)decor.spawnStackHeightMin, (float)decor.spawnStackHeightMax);
-                    
-                    for (unsigned int s=0; s < stackHeight; s++) {
-                        
-                        Color finalColor;
-                        finalColor = (Colors.green * 0.018f) + (s * 0.001f);
-                        
-                        finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                                  Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                                  Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
-                        
-                        staticObj.red    = finalColor.r;
-                        staticObj.green = finalColor.g;
-                        staticObj.blue  = finalColor.b;
-                        
-                        AddDecorGrassThin(chunk, staticObj, staticMesh, -xp, height + s, -zp);
-                    }
-                    
-                }
-                break;
-                
-            case DECORATION_GRASS_THICK:
-                if ((unsigned int)Random.Range(0, 100) < decor.density) {
-                    
-                    Color finalColor;
-                    finalColor = Colors.green * 0.05f;
-                    
-                    finalColor += Colors.Make(Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f, 
-                                              Random.Range(0, 10) * 0.001f - Random.Range(0, 10) * 0.001f);
-                    staticObj.red   = finalColor.r;
-                    staticObj.green = finalColor.g;
-                    staticObj.blue  = finalColor.b;
-                    
-                    AddDecorGrassThick(chunk, staticObj, staticMesh, -xp, height, -zp);
-                }
-                break;
-                
-            case DECORATION_TREE:
-                if ((unsigned int)Random.Range(0, 100) < decor.density) {
-                    
-                    AddDecorTree(chunk, staticObj, staticMesh, -xp, height, -zp, Decoration::TreeOak);
-                }
-                break;
-                
-            case DECORATION_ACTOR:
-                
-                if ((unsigned int)Random.Range(0, 10000) < decor.density) {
-                    Actor* actor = SummonActor(glm::vec3(from.x, 0, from.z));
-                    
-                    DecodeGenome(decor, actor);
-                    
-                    actor->isActive = true;
-                    actor->RebuildGeneticExpression();
-                    
-                    actor->state.current = ActorState::State::None;
-                    actor->state.mode = ActorState::Mode::Idle;
-                    
-                    actor->physical.UpdatePhysicalCollider();
-                    actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
-                }
-                break;
-                
-            }
-            */
-            
             
         }
         
@@ -261,79 +81,81 @@ void ChunkManager::Decorate(Chunk& chunk) {
 }
 
 
-void DecodeGenome(DecorationSpecifier& decor, Actor* actorPtr) {
-    
-    if (decor.name == "Human")  {AI.genomes.presets.Human( actorPtr );}
-    if (decor.name == "Sheep")  {AI.genomes.presets.Sheep( actorPtr );}
-    if (decor.name == "Bear")   {AI.genomes.presets.Bear( actorPtr );}
-    if (decor.name == "Dog")    {AI.genomes.presets.Dog( actorPtr );}
-    if (decor.name == "Bovine") {AI.genomes.presets.Bovine( actorPtr );}
-    if (decor.name == "Horse")  {AI.genomes.presets.Horse( actorPtr );}
-    
-    return;
-}
-
-
-void ChunkManager::AddDecor(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
-    StaticObject newStaticObject = staticObject;
-    newStaticObject.position.y = position.y;
-    
+void ChunkManager::AddDecor(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color) {
     staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshWallHorz, false);
     staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshWallVert, false);
     
     unsigned int index = staticMesh->GetSubMeshCount() - 1;
     
+    staticMesh->ChangeSubMeshColor(index,   color);
+    staticMesh->ChangeSubMeshColor(index-1, color);
+    
     staticMesh->ChangeSubMeshScale(index,   scale.x, scale.y, scale.z);
     staticMesh->ChangeSubMeshScale(index-1, scale.x, scale.y, scale.z);
     
-    Color finalColor;
-    finalColor = staticObject.color;
-    
-    staticMesh->ChangeSubMeshColor(index,   finalColor);
-    staticMesh->ChangeSubMeshColor(index-1, finalColor);
-    
-    staticMesh->ChangeSubMeshRotation(index,   rotation.x, glm::vec3(0, 0, 1.0f));
-    staticMesh->ChangeSubMeshRotation(index-1, rotation.x, glm::vec3(0, 0, 1.0f));
-    staticMesh->ChangeSubMeshRotation(index,   rotation.y, glm::vec3(1.0f, 0, 0));
-    staticMesh->ChangeSubMeshRotation(index-1, rotation.y, glm::vec3(1.0f, 0, 0));
+    staticMesh->ChangeSubMeshRotation(index,   rotation.x, glm::vec3(1.0f, 0, 0));
+    staticMesh->ChangeSubMeshRotation(index-1, rotation.x, glm::vec3(1.0f, 0, 0));
+    staticMesh->ChangeSubMeshRotation(index,   rotation.y, glm::vec3(0, 0, 1.0f));
+    staticMesh->ChangeSubMeshRotation(index-1, rotation.y, glm::vec3(0, 0, 1.0f));
     staticMesh->ChangeSubMeshRotation(index,   rotation.z, glm::vec3(0, 1.0f, 0));
     staticMesh->ChangeSubMeshRotation(index-1, rotation.z, glm::vec3(0, 1.0f, 0));
     
-    newStaticObject.rotation = rotation;
-    newStaticObject.rotation = rotation;
-    newStaticObject.scale    = scale;
-    newStaticObject.color    = staticObject.color;
+    //staticMesh->ChangeSubMeshRotation(index,   rotation.x, glm::vec3(0, 0, 1.0f));
+    //staticMesh->ChangeSubMeshRotation(index-1, rotation.x, glm::vec3(0, 0, 1.0f));
+    //staticMesh->ChangeSubMeshRotation(index,   rotation.y, glm::vec3(1.0f, 0, 0));
+    //staticMesh->ChangeSubMeshRotation(index-1, rotation.y, glm::vec3(1.0f, 0, 0));
+    //staticMesh->ChangeSubMeshRotation(index,   rotation.z, glm::vec3(0, 1.0f, 0));
+    //staticMesh->ChangeSubMeshRotation(index-1, rotation.z, glm::vec3(0, 1.0f, 0));
     
-    chunk.statics.push_back(newStaticObject);
+    StaticObject staticObject;
+    staticObject.position = position;
+    staticObject.rotation = rotation;
+    staticObject.scale    = scale;
+    staticObject.color    = glm::vec3(color.r, color.g, color.b);
     
+    /*
+    rp3d::CollisionBody* colliderBody = Physics.CreateCollisionBody(position.x, position.y, position.z);
+    colliderBody->setIsActive(false);
+    
+    rp3d::Transform transform;
+    transform.setToIdentity();
+    
+    BoxShape* boxColliderShape = Engine.GetColliderBox(glm::vec3(1.0f, 1.0f, 1.0f));
+    colliderBody->addCollider(boxColliderShape, transform);
+    */
+    chunk.statics.push_back(staticObject);
     return;
 }
 
 
-void ChunkManager::AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position) {
-    float height = 0.45f;
-    float width = 0.8f;
-    unsigned int layers = 1;
+
+void ChunkManager::AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, Decoration::Grass grassType) {
+    float grassWidth = 10.0f;
+    float grassHeight = 10.0f;
     
-    position.y += height * 0.25f;
-    
-    for (unsigned int i=0; i < layers; i++) {
-        glm::vec3 scale(width, height, width);
-        glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
+    switch (grassType) {
         
-        Color finalColor;
-        finalColor = Colors.green * (0.024f + (Random.Range(0, 80) * 0.00087f));
-        staticObject.color.x = finalColor.r;
-        staticObject.color.y = finalColor.g;
-        staticObject.color.z = finalColor.b;
+    case Decoration::Grass::Short:
+        grassWidth = 4.0f;
+        grassHeight = 0.5f;
+        break;
         
-        AddDecor(chunk, staticObject, staticMesh, position, rotation, scale);
+    case Decoration::Grass::Tall:
+        grassWidth = 0.7f;
+        grassHeight = 2.0f;
+        break;
         
-        position.y += height * 0.5f;
-        
-        width *= 0.87f;
         
     }
+    
+    glm::vec3 scale(grassWidth, grassHeight, grassWidth);
+    glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
+    
+    Color finalColor;
+    finalColor = Colors.green * (0.024f + (Random.Range(0, 80) * 0.00087f));
+    
+    AddDecor(chunk, staticMesh, position + glm::vec3(0.0f, grassHeight * 0.16f, 0.0f), rotation, scale, finalColor);
+    
     
     // TODO Make static objects destructible
     
@@ -347,6 +169,195 @@ void ChunkManager::AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh*
     //collider->setCollideWithMaskBits((unsigned short)LayerMask::Ground);   // Collide as a solid object
     
 }
+
+
+void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, Decoration::Tree treeType) {
+    float minimumHeight = 3.0f;
+    float maximumHeight = 5.0f;
+    
+    int numberOfLeavesMin = 4;
+    int numberOfLeavesMax = 8;
+    float leafSpreadWidth  = 0.8f;
+    float leafSpreadHeight = 0.5f;
+    float trunkSize = 0.3f;
+    float leafWidth = 1.0f;
+    float leafHeight = 0.7f;
+    
+    switch (treeType) {
+        
+    case Decoration::Tree::Oak:
+        minimumHeight = 10.0f;
+        maximumHeight = 15.0f;
+        
+        numberOfLeavesMin = 4;
+        numberOfLeavesMax = 8;
+        leafSpreadWidth  = 3.0f;
+        leafSpreadHeight = 2.0f;
+        trunkSize = 0.7f;
+        leafWidth = 7.0f;
+        leafHeight = 3.0f;
+        break;
+        
+    }
+    
+    float height = Random.Range(minimumHeight, maximumHeight);
+    
+    glm::vec3 scale(trunkSize, height, trunkSize);
+    glm::vec3 rotation(0.0f, 0.0f, 0.0f);
+    
+    Color finalColor;
+    finalColor = Colors.brown * (0.02f + (Random.Range(0, 80) * 0.001f));
+    
+    AddDecor(chunk, staticMesh, glm::vec3(position.x, position.y + (height * 0.25f), position.z), rotation, scale, finalColor);
+    
+    int numberOfLeaves = numberOfLeavesMin + (Random.Range(0, numberOfLeavesMax));
+    
+    for (int i=0; i < numberOfLeaves; i++) {
+        glm::vec3 scale(leafWidth, leafHeight, leafWidth);
+        glm::vec3 rotation(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+        
+        Color finalColor;
+        finalColor = Colors.green * (0.04f + (Random.Range(0, 80) * 0.001f));
+        
+        float xx = Random.Range(0.0f, leafSpreadWidth) - Random.Range(0.0f, leafSpreadWidth);
+        float yy = Random.Range(0.0f, leafSpreadHeight) - Random.Range(0.0f, leafSpreadHeight);
+        float zz = Random.Range(0.0f, leafSpreadWidth) - Random.Range(0.0f, leafSpreadWidth);
+        
+        glm::vec3 offsetPosition = position + glm::vec3(xx, yy + (height * 0.5f), zz);
+        
+        AddDecor(chunk, staticMesh, offsetPosition, rotation, scale, finalColor);
+    }
+}
+
+
+
+
+void ChunkManager::AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 position) {
+    //if ((unsigned int)Random.Range(0, 10000) < 7) 
+    //    return;
+    
+    //float xCoord = (float)position.x * 0.9f;
+    //float zCoord = (float)position.z * 0.9f;
+    
+    //if ((Random.Perlin(xCoord, 0, zCoord, chunk.seed) * 4.0f) < 2.0f) 
+    //    continue;
+    
+    {
+    glm::vec3 scale(10.3f, 20.0f, 10.3f);
+    glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
+    
+    Color finalColor;
+    finalColor = Colors.yellow;
+    
+    AddDecor(chunk, staticMesh, position + glm::vec3(0.0f, 30.0f, 0.0f), rotation, scale, finalColor);
+    }
+    
+    float wikiupHeight = 24.0f;
+    float wikiupSpread = 1.8f;
+    float wikiupSpreadExt = wikiupSpread * 0.7f;
+    
+    float stickThickness = 0.4f;
+    
+    
+    {
+    glm::vec3 pos(position.x - 3.0f, position.y + (wikiupHeight * 0.1f), position.z);
+    AddDecor(chunk, staticMesh, pos, glm::vec3(0.0f, 30.0f, 0.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
+    }
+    {
+    glm::vec3 pos(position.x - 1.0f, position.y + (wikiupHeight * 0.1f), position.z - 3.25f);
+    AddDecor(chunk, staticMesh, pos, glm::vec3(0.0f, 65.0f, 30.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
+    }
+    {
+    glm::vec3 pos(position.x + 3.0f, position.y + (wikiupHeight * 0.1f), position.z - 2.5f);
+    AddDecor(chunk, staticMesh, pos, glm::vec3(0.0f, 135.0f, 30.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
+    }
+    {
+    glm::vec3 pos(position.x + 3.0f, position.y + (wikiupHeight * 0.1f), position.z + 2.5f);
+    AddDecor(chunk, staticMesh, pos, glm::vec3(0.0f, -135.0f, 30.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
+    }
+    {
+    glm::vec3 pos(position.x - 1.0f, position.y + (wikiupHeight * 0.1f), position.z + 3.25f);
+    AddDecor(chunk, staticMesh, pos, glm::vec3(0.0f, -65.0f, 30.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
+    }
+    
+    
+    /*
+    {
+    glm::vec3 pos(position.x - wikiupSpreadExt, position.y + (wikiupHeight * 0.1f), position.z - wikiupSpreadExt);
+    AddDecor(chunk, staticMesh, pos, glm::vec3(0.0f, 20.0f, 45.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
+    }
+    {
+    glm::vec3 pos(position.x - wikiupSpreadExt, position.y + (wikiupHeight * 0.1f), position.z + wikiupSpreadExt);
+    AddDecor(chunk, staticMesh, pos, glm::vec3(0.0f, -20.0f, -45.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
+    }
+    {
+    glm::vec3 pos(position.x + wikiupSpread, position.y + (wikiupHeight * 0.1f), position.z);
+    AddDecor(chunk, staticMesh, pos, glm::vec3(20.0f, 0.0f, 0.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
+    }
+    
+    
+    {
+    glm::vec3 pos(position.x - wikiupSpreadExt, position.y + (wikiupHeight * 0.1f), position.z + wikiupSpreadExt);
+    AddDecor(chunk, staticMesh, pos, glm::vec3(0.0f, -20.0f, -70.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
+    }
+    */
+    
+    /*
+    float spawnVillagerLow  = 4.0f;
+    float spawnVillagerHigh = 8.0f;
+    
+    unsigned int numberOfVillagers = Random.Range(spawnVillagerLow, spawnVillagerHigh);
+    for (unsigned int i=0; i < numberOfVillagers; i++) {
+        
+        float xx = Random.Range(0.0f, villageSpread) - Random.Range(0.0f, villageSpread);
+        float zz = Random.Range(0.0f, villageSpread) - Random.Range(0.0f, villageSpread);
+        Actor* actor = SummonActor( glm::vec3(from.x + xx, 0.0f, from.z + zz) );
+        AI.genomes.presets.Human(actor);
+        
+        if (i < (numberOfVillagers / 2)) {
+            actor->physical.SetSexualOrientation(true);
+        } else {
+            actor->physical.SetSexualOrientation(false);
+        }
+        
+        actor->physical.SetAge( Random.Range(actor->physical.GetAdultAge(), actor->physical.GetAdultAge() * 2.0f) );
+        actor->RebuildGeneticExpression();
+        
+        actor->isActive = true;
+        actor->physical.UpdatePhysicalCollider();
+    }
+    */
+}
+
+
+void ChunkManager::DecodeGenome(std::string name, Actor* actorPtr) {
+    
+    if (name == "Human")  {AI.genomes.presets.Human( actorPtr );}
+    if (name == "Sheep")  {AI.genomes.presets.Sheep( actorPtr );}
+    if (name == "Bear")   {AI.genomes.presets.Bear( actorPtr );}
+    if (name == "Dog")    {AI.genomes.presets.Dog( actorPtr );}
+    if (name == "Bovine") {AI.genomes.presets.Bovine( actorPtr );}
+    if (name == "Horse")  {AI.genomes.presets.Horse( actorPtr );}
+    
+    return;
+}
+
+void ChunkManager::AddDecoreActor(std::string name, glm::vec3 position) {
+    Actor* actor = SummonActor(position);
+    DecodeGenome(name, actor);
+    
+    actor->isActive = true;
+    actor->RebuildGeneticExpression();
+    
+    actor->state.current = ActorState::State::None;
+    actor->state.mode = ActorState::Mode::Idle;
+    
+    actor->physical.UpdatePhysicalCollider();
+    actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
+}
+
+
+/*
 
 
 void ChunkManager::AddDecorGrassThin(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position) {
@@ -369,49 +380,7 @@ void ChunkManager::AddDecorGrassThick(Chunk& chunk, StaticObject& staticObject, 
 }
 
 
-void ChunkManager::AddDecorTree(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position, Decoration treeType) {
-    float minimumHeight = 7.0f;
-    float maximumHeight = 14.0f;
-    
-    int numberOfLeavesMin = 30;
-    int numberOfLeavesMax = 40;
-    float leafSpreadWidth  = 3.2f;
-    float leafSpreadHeight = 1.4f;
-    
-    float height = Random.Range(minimumHeight, maximumHeight);
-    
-    glm::vec3 scale(0.3f, height * 2.0f, 0.3f);
-    glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
-    
-    Color finalColor;
-    finalColor = Colors.brown * (0.02f + (Random.Range(0, 80) * 0.001f));
-    staticObject.color.x = finalColor.r;
-    staticObject.color.y = finalColor.g;
-    staticObject.color.z = finalColor.b;
-    
-    AddDecor(chunk, staticObject, staticMesh, position, rotation, scale);
-    
-    int numberOfLeaves = numberOfLeavesMin + (Random.Range(0, numberOfLeavesMax));
-    
-    for (int i=0; i < numberOfLeaves; i++) {
-        glm::vec3 scale(0.8f, 0.8f, 0.8f);
-        //glm::vec3 rotation(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-        
-        Color finalColor;
-        finalColor = Colors.green * (0.04f + (Random.Range(0, 80) * 0.001f));
-        staticObject.color.x = finalColor.r;
-        staticObject.color.y = finalColor.g;
-        staticObject.color.z = finalColor.b;
-        float xx = Random.Range(0.0f, leafSpreadWidth) - Random.Range(0.0f, leafSpreadWidth);
-        float yy = Random.Range(0.0f, leafSpreadHeight) - Random.Range(0.0f, leafSpreadHeight);
-        float zz = Random.Range(0.0f, leafSpreadWidth) - Random.Range(0.0f, leafSpreadWidth);
-        
-        glm::vec3 offsetPosition = position + glm::vec3(xx, yy + (height * 0.5f), zz);
-        AddDecor(chunk, staticObject, staticMesh, offsetPosition, rotation, scale);
-    }
-    
-}
-
+*/
 
 
 

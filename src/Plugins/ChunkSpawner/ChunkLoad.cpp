@@ -97,8 +97,8 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
             staticObj.color    = staticElements[i].color;
             chunk.statics.push_back(staticObj);
             
-            staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshWallHorz, false);
-            staticMesh->AddSubMesh(-posX, posY, -posZ, subMeshWallVert, false);
+            staticMesh->AddSubMesh(posX, posY, posZ, subMeshWallHorz, false);
+            staticMesh->AddSubMesh(posX, posY, posZ, subMeshWallVert, false);
             
             unsigned int index = staticMesh->GetSubMeshCount() - 1;
             

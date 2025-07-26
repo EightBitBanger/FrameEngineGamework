@@ -5,21 +5,50 @@
 #include <GameEngineFramework/Engine/types/color.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 
-enum class Decoration {
+struct Decoration {
     
-    TreeOak,
-    TreePine
+    enum class Grass {
+        Short,
+        Tall,
+        Dead,
+        Marsh,
+        Dry,
+        Crab,
+        Fern,
+        Flowers,
+        Clover
+    };
     
+    enum class Tree {
+        Oak,
+        Pine,
+        Spruce,
+        Birch,
+        Maple,
+        Palm,
+        Willow,
+        Cedar,
+        Redwood,
+        Dead,
+        Bonsai,
+        Baobab,
+        MushroomTree
+    };
+    
+    enum class Actor {
+        Human,
+        Sheep,
+        Bear,
+        Dog,
+        Bovine,
+        Horse
+    };
 };
 
-#define DECORATION_GRASS_THIN   0
 #define DECORATION_GRASS        1
-#define DECORATION_GRASS_THICK  2
 #define DECORATION_TREE         3
-#define DECORATION_LEAVES       4
 #define DECORATION_ACTOR        5
-#define DECORATION_CUSTOM       6
-
+#define DECORATION_STRUCTURE    7
 
 class ENGINE_API DecorationSpecifier {
     

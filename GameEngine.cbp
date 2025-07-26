@@ -225,6 +225,9 @@
 		<Compiler>
 			<Add option="-std=c++11" />
 			<Add option="-std=c++0x" />
+			<Add option="-static" />
+			<Add option="-static-libgcc" />
+			<Add option="-static-libstdc++" />
 			<Add directory="src" />
 			<Add directory="include" />
 			<Add directory="vendor" />

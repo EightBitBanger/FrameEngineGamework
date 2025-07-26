@@ -45,6 +45,13 @@ function(configure_target_common target)
     set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)
     target_compile_options(${target} PRIVATE -O2)
 
+    # Static link GCC runtime, libstdc++, and pthread
+    target_link_options(${target} PRIVATE
+        -static-libgcc
+        -static-libstdc++
+        -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic
+    )
+
     target_include_directories(${target} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>

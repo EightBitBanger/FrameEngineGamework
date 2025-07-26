@@ -223,13 +223,15 @@ public:
     void Update(void);
     
     // Base decoration function
-    void AddDecor(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+    void AddDecor(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
     
     // Decoration functions
-    void AddDecorGrass(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position);
-    void AddDecorGrassThin(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position);
-    void AddDecorGrassThick(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position);
-    void AddDecorTree(Chunk& chunk, StaticObject& staticObject, Mesh* staticMesh, glm::vec3 position, Decoration treeType);
+    void AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, Decoration::Grass grassType);
+    void AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, Decoration::Tree treeType);
+    void AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 position);
+    void AddDecoreActor(std::string name, glm::vec3 position);
+    
+    void DecodeGenome(std::string name, Actor* actorPtr);
     
     void Decorate(Chunk& chunk);
     

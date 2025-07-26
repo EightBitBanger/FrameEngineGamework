@@ -23,7 +23,7 @@ public:
     Color operator+ (const Color& color);
     Color operator* (const Color& color);
     Color operator- (const Color& color);
-    Color operator= (const Color& color);
+    Color& operator= (const Color& color);
     
     Color operator+ (const float& grayScale);
     Color operator* (const float& grayScale);
