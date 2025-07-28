@@ -8,6 +8,8 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/Biome.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Decor.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Structure.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/Scenery.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/StaticObject.h>
 
 
 class ENGINE_API WorldGeneration {
@@ -167,7 +169,10 @@ public:
     bool SetWorldRule(std::string key, std::string value);
     bool ApplyWorldRule(std::string key, std::string value);
     
-    // World generation functions
+    // Biome generation
+    void GenerateBiomeColorField(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseScaleX, float noiseScaleZ, int offsetX, int offsetZ, int seed);
+    
+    // World generation
     
     /// Initiates a height field grid array of points and set them to zero.
     void SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value);
@@ -189,7 +194,7 @@ public:
     void GenerateWaterTableFromHeightField(float* heightField, unsigned int width, unsigned int height, float tableHeight);
     
     /// Set a layer of perlin noise into a color field. The perlin noise is used to fade from the first color to the second.
-    void SetColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseThreshold, Color first, Color second, int offsetX, int offsetZ);
+    void AddColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, Color color, int offsetX, int offsetZ);
     
     /// Generate a snow cap effect of a given color capColor and starting at the height beginHeight.
     /// The bias will determine how much snow will be added.
@@ -223,7 +228,9 @@ public:
     void Update(void);
     
     // Base decoration function
-    void AddDecor(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
+    unsigned int AddDecor(Chunk& chunk, unsigned int index, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
+    
+    void RemoveDecor(glm::vec3 position, glm::vec3 direction);
     
     // Decoration functions
     void AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, Decoration::Grass grassType);
@@ -295,16 +302,5 @@ private:
     Fog* fogWater;
     
 };
-
-
-struct StaticElement {
-    
-    glm::vec3 position;
-    glm::vec3 rotation;
-    glm::vec3 scale;
-    
-    glm::vec3 color;
-};
-
 
 #endif

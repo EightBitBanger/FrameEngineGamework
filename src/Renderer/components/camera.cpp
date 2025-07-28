@@ -13,8 +13,8 @@ Camera::Camera() :
     useMouseLook(false),
     isFixedAspect(false),
     isOrthographic(false),
-    mouseLookAngle(glm::vec2(0, 0)),
-    lookAngle(glm::vec2(0, 0)),
+    yaw(0),
+    pitch(0),
     
     fov(60),
     aspect(1.33),
@@ -36,10 +36,10 @@ void Camera::EnableMouseLook(void)  {useMouseLook = true;}
 void Camera::DisableMouseLook(void) {useMouseLook = false;}
 
 float Camera::GetPitch(void) {
-    return lookAngle.y;
+    return pitch;
 }
 
 float Camera::GetYaw(void) {
-    return lookAngle.x;
+    return yaw;
 }
 

@@ -111,7 +111,8 @@ void FuncClear(std::vector<std::string> args) {
     Engine.cameraController->SetPosition(0, 0, 0);
     Camera* camera = Engine.cameraController->GetComponent<Camera>();
     
-    camera->mouseLookAngle = glm::vec2(0, 0);
+    camera->yaw = 0.0f;
+    camera->pitch = 0.0f;
     
     //Engine.Print("World cleared");
     

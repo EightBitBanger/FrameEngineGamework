@@ -2,25 +2,10 @@
 #define _CHUNK__
 
 #include <GameEngineFramework/Engine/Engine.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/Scenery.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/StaticObject.h>
 
-class ENGINE_API StaticObject {
-    
-public:
-    
-    glm::vec3 position;
-    
-    glm::vec3 rotation;
-    
-    glm::vec3 scale;
-    
-    glm::vec3 color;
-    
-    /// Collision body representing the object in the world
-    rp3d::CollisionBody* collisionBody;
-    
-    StaticObject();
-    
-};
+#include <deque>
 
 
 class ENGINE_API Chunk {
@@ -51,8 +36,8 @@ public:
     
     MeshCollider* meshCollider;
     
+    /// Base list of all static geometry in this chunk.
     std::vector<StaticObject> statics;
-    
 };
 
 

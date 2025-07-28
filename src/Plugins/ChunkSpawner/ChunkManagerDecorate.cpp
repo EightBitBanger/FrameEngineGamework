@@ -2,19 +2,17 @@
 
 
 void ChunkManager::Decorate(Chunk& chunk) {
-    
-    if (world.mDecorations.size() == 0) 
+    unsigned int numberOfDecorations = world.mDecorations.size();
+    if (numberOfDecorations == 0) 
         return;
     
     Mesh* staticMesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
-    
     chunk.statics.clear();
     
     staticMesh->ClearSubMeshes();
     
     for (int xx=0; xx < chunkSize; xx++) {
         for (int zz=0; zz < chunkSize; zz++) {
-            
             float xp = xx - (chunkSize / 2);
             float zp = zz - (chunkSize / 2);
             
@@ -23,27 +21,25 @@ void ChunkManager::Decorate(Chunk& chunk) {
             
             glm::vec3 from(staticX, 0, staticZ);
             
-            
             // Pick a random decoration for this world
-            unsigned int decorIndex = Random.Range(0, world.mDecorations.size());
+            DecorationSpecifier decor = world.mDecorations[Random.Range(0, world.mDecorations.size())];
             
-            DecorationSpecifier decor = world.mDecorations[ decorIndex ];
-            
-            if ((unsigned int)Random.Range(0, 10000) > decor.density) 
-                continue;
+            if (decor.type == DECORATION_ACTOR) {
+                if ((unsigned int)Random.Range(0, 10000) > decor.density) 
+                    continue;
+            } else {
+                if ((unsigned int)Random.Range(0, 1000) > decor.density) 
+                    continue;
+            }
             
             // Perlin generation
-            float xCoord = (float)xx * decor.noise;
-            float zCoord = (float)zz * decor.noise;
-            
-            if (Random.Perlin(xCoord, 0, zCoord, chunk.seed) < decor.threshold) 
+            if (Random.Perlin(xx * decor.noise, 0, zz * decor.noise, chunk.seed) < decor.threshold) 
                 continue;
-            
-            Hit hit;
             
             float distance = 2000.0f;
             float height = 0.0f;
             
+            Hit hit;
             if (Physics.Raycast(from, glm::vec3(0, -1, 0), distance, hit, LayerMask::Ground)) 
                 height = hit.point.y;
             
@@ -81,93 +77,165 @@ void ChunkManager::Decorate(Chunk& chunk) {
 }
 
 
-void ChunkManager::AddDecor(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color) {
+unsigned int ChunkManager::AddDecor(Chunk& chunk, unsigned int index, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color) {
     staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshWallHorz, false);
     staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshWallVert, false);
     
-    unsigned int index = staticMesh->GetSubMeshCount() - 1;
+    unsigned int indexMesh = staticMesh->GetSubMeshCount() - 1;
     
-    staticMesh->ChangeSubMeshColor(index,   color);
-    staticMesh->ChangeSubMeshColor(index-1, color);
+    staticMesh->ChangeSubMeshColor(indexMesh,   color);
+    staticMesh->ChangeSubMeshColor(indexMesh-1, color);
     
-    staticMesh->ChangeSubMeshScale(index,   scale.x, scale.y, scale.z);
-    staticMesh->ChangeSubMeshScale(index-1, scale.x, scale.y, scale.z);
+    staticMesh->ChangeSubMeshScale(indexMesh,   scale.x, scale.y, scale.z);
+    staticMesh->ChangeSubMeshScale(indexMesh-1, scale.x, scale.y, scale.z);
     
-    staticMesh->ChangeSubMeshRotation(index,   rotation.x, glm::vec3(1.0f, 0, 0));
-    staticMesh->ChangeSubMeshRotation(index-1, rotation.x, glm::vec3(1.0f, 0, 0));
-    staticMesh->ChangeSubMeshRotation(index,   rotation.y, glm::vec3(0, 0, 1.0f));
-    staticMesh->ChangeSubMeshRotation(index-1, rotation.y, glm::vec3(0, 0, 1.0f));
-    staticMesh->ChangeSubMeshRotation(index,   rotation.z, glm::vec3(0, 1.0f, 0));
-    staticMesh->ChangeSubMeshRotation(index-1, rotation.z, glm::vec3(0, 1.0f, 0));
-    
-    //staticMesh->ChangeSubMeshRotation(index,   rotation.x, glm::vec3(0, 0, 1.0f));
-    //staticMesh->ChangeSubMeshRotation(index-1, rotation.x, glm::vec3(0, 0, 1.0f));
-    //staticMesh->ChangeSubMeshRotation(index,   rotation.y, glm::vec3(1.0f, 0, 0));
-    //staticMesh->ChangeSubMeshRotation(index-1, rotation.y, glm::vec3(1.0f, 0, 0));
-    //staticMesh->ChangeSubMeshRotation(index,   rotation.z, glm::vec3(0, 1.0f, 0));
-    //staticMesh->ChangeSubMeshRotation(index-1, rotation.z, glm::vec3(0, 1.0f, 0));
+    staticMesh->ChangeSubMeshRotation(indexMesh,   rotation.x, glm::vec3(1.0f, 0, 0));
+    staticMesh->ChangeSubMeshRotation(indexMesh-1, rotation.x, glm::vec3(1.0f, 0, 0));
+    staticMesh->ChangeSubMeshRotation(indexMesh,   rotation.y, glm::vec3(0, 0, 1.0f));
+    staticMesh->ChangeSubMeshRotation(indexMesh-1, rotation.y, glm::vec3(0, 0, 1.0f));
+    staticMesh->ChangeSubMeshRotation(indexMesh,   rotation.z, glm::vec3(0, 1.0f, 0));
+    staticMesh->ChangeSubMeshRotation(indexMesh-1, rotation.z, glm::vec3(0, 1.0f, 0));
     
     StaticObject staticObject;
+    staticMesh->GetSubMesh(indexMesh, staticObject.subMesh);
     staticObject.position = position;
     staticObject.rotation = rotation;
     staticObject.scale    = scale;
     staticObject.color    = glm::vec3(color.r, color.g, color.b);
     
-    /*
-    rp3d::CollisionBody* colliderBody = Physics.CreateCollisionBody(position.x, position.y, position.z);
-    colliderBody->setIsActive(false);
-    
-    rp3d::Transform transform;
-    transform.setToIdentity();
-    
-    BoxShape* boxColliderShape = Engine.GetColliderBox(glm::vec3(1.0f, 1.0f, 1.0f));
-    colliderBody->addCollider(boxColliderShape, transform);
-    */
     chunk.statics.push_back(staticObject);
-    return;
+    return index;
 }
 
 
+bool RayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
+                       const glm::vec3& boxMin, const glm::vec3& boxMax,
+                       float& outDistance) {
+    float tMin = 0.0f;
+    float tMax = 10000.0f;
+    
+    for (int i = 0; i < 3; ++i) {
+        if (abs(rayDir[i]) < 0.0001f) {
+            if (rayOrigin[i] < boxMin[i] || rayOrigin[i] > boxMax[i])
+                return false;
+        } else {
+            float ood = 1.0f / rayDir[i];
+            float t1 = (boxMin[i] - rayOrigin[i]) * ood;
+            float t2 = (boxMax[i] - rayOrigin[i]) * ood;
+            if (t1 > t2) std::swap(t1, t2);
+
+            tMin = std::max(tMin, t1);
+            tMax = std::min(tMax, t2);
+            if (tMin > tMax)
+                return false;
+        }
+    }
+    
+    outDistance = tMin;
+    return true;
+}
+
+
+void ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction) {
+    float threshold   =   0.7f;   // Focal threshold for selection
+    float maxDistance =   10.0f;  // Max selection distance
+    
+    float closestDot = -1.0f;
+    int bestChunkIndex = -1;
+    int bestSubMeshIndex = -1;
+    glm::vec3 bestLocalPos;
+    
+    for (unsigned int i = 0; i < chunks.size(); i++) {
+        Chunk& chunk = chunks[i];
+        glm::vec3 chunkPos = glm::vec3(chunk.x, 0, chunk.y);
+        
+        if (glm::distance(chunkPos, position) > chunkSize) 
+            continue;
+        
+        Mesh* chunkMesh = chunks[i].staticObject->GetComponent<MeshRenderer>()->mesh;
+        
+        SubMesh subMesh;
+        for (unsigned int s = 0; s < chunkMesh->GetSubMeshCount(); s++) {
+            chunkMesh->GetSubMesh(s, subMesh);
+            
+            glm::vec3 worldPos = subMesh.position + glm::vec3(chunks[i].x, 0, chunks[i].y);
+            
+            if (glm::distance(worldPos, position) > maxDistance) 
+                continue;
+            
+            glm::vec3 scale = glm::vec3(2.0f);
+            glm::vec3 min = worldPos - (scale * 0.5f);
+            glm::vec3 max = worldPos + (scale * 0.5f);
+            
+            float hitDistance=0;
+            if (!RayIntersectsAABB(position, glm::normalize(direction), min, max, hitDistance)) 
+                continue;
+            
+            if (hitDistance > maxDistance) 
+                continue;
+            
+            glm::vec3 toObject = glm::normalize(worldPos - position);
+            float dot = glm::dot(toObject, glm::normalize(direction));
+            
+            if (dot < threshold) 
+                continue;
+            
+            if (dot > closestDot) {
+                closestDot = dot;
+                bestChunkIndex = i;
+                bestSubMeshIndex = s;
+                bestLocalPos = subMesh.position;
+            }
+        }
+    }
+    
+    // Remove the best candidate
+    if (bestChunkIndex != -1) {
+        Chunk& chunk = chunks[bestChunkIndex];
+        Mesh* mesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
+        
+        // Remove from statics
+        for (int i = 0; i < chunk.statics.size(); ++i) {
+            if (chunk.statics[i].position == bestLocalPos) {
+                chunk.statics.erase(chunk.statics.begin() + i);
+                
+                // Remove both sub meshes
+                mesh->RemoveSubMesh(bestSubMeshIndex);
+                mesh->RemoveSubMesh(bestSubMeshIndex);
+                break;
+            }
+        }
+        
+        mesh->Load();
+    }
+}
 
 void ChunkManager::AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, Decoration::Grass grassType) {
-    float grassWidth = 10.0f;
-    float grassHeight = 10.0f;
+    Color finalColor = Colors.white;
+    float grassWidth = 1.0f;
+    float grassHeight = 1.0f;
     
     switch (grassType) {
         
     case Decoration::Grass::Short:
-        grassWidth = 4.0f;
+        grassWidth = 1.2f;
         grassHeight = 0.5f;
+        finalColor = Colors.green * (0.024f + (Random.Range(0, 80) * 0.0007f));
         break;
         
     case Decoration::Grass::Tall:
         grassWidth = 0.7f;
         grassHeight = 2.0f;
+        finalColor = Colors.green * (0.024f + (Random.Range(0, 80) * 0.0007f));
         break;
-        
         
     }
     
     glm::vec3 scale(grassWidth, grassHeight, grassWidth);
     glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
     
-    Color finalColor;
-    finalColor = Colors.green * (0.024f + (Random.Range(0, 80) * 0.00087f));
-    
-    AddDecor(chunk, staticMesh, position + glm::vec3(0.0f, grassHeight * 0.16f, 0.0f), rotation, scale, finalColor);
-    
-    
-    // TODO Make static objects destructible
-    
-    //staticObject.collisionBody = Physics.CreateCollisionBody(staticObject.x, staticObject.y, staticObject.z);
-    //rp3d::Collider* collider = staticObject.rigidBody->addCollider(Engine.colliders.box, transform);
-    
-    //rp3d::Transform transform;
-    //staticObject.rigidBody->setType(rp3d::BodyType::STATIC);
-    
-    //collider->setCollisionCategoryBits((unsigned short)LayerMask::Object); // Ray cast as an "Object"
-    //collider->setCollideWithMaskBits((unsigned short)LayerMask::Ground);   // Collide as a solid object
-    
+    unsigned int beginningIndex = chunk.statics.size();
+    AddDecor(chunk, beginningIndex, staticMesh, position + glm::vec3(0.0f, grassHeight * 0.16f, 0.0f), rotation, scale, finalColor);
 }
 
 
@@ -208,7 +276,8 @@ void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 positi
     Color finalColor;
     finalColor = Colors.brown * (0.02f + (Random.Range(0, 80) * 0.001f));
     
-    AddDecor(chunk, staticMesh, glm::vec3(position.x, position.y + (height * 0.25f), position.z), rotation, scale, finalColor);
+    unsigned int beginningIndex = chunk.statics.size();
+    AddDecor(chunk, beginningIndex, staticMesh, glm::vec3(position.x, position.y + (height * 0.25f), position.z), rotation, scale, finalColor);
     
     int numberOfLeaves = numberOfLeavesMin + (Random.Range(0, numberOfLeavesMax));
     
@@ -225,7 +294,7 @@ void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 positi
         
         glm::vec3 offsetPosition = position + glm::vec3(xx, yy + (height * 0.5f), zz);
         
-        AddDecor(chunk, staticMesh, offsetPosition, rotation, scale, finalColor);
+        AddDecor(chunk, beginningIndex, staticMesh, offsetPosition, rotation, scale, finalColor);
     }
 }
 
@@ -233,6 +302,9 @@ void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 positi
 
 
 void ChunkManager::AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 position) {
+    
+    return;
+    
     //if ((unsigned int)Random.Range(0, 10000) < 7) 
     //    return;
     
@@ -243,13 +315,21 @@ void ChunkManager::AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 p
     //    continue;
     
     {
+    /*
     glm::vec3 scale(10.3f, 20.0f, 10.3f);
     glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
     
     Color finalColor;
     finalColor = Colors.yellow;
     
-    AddDecor(chunk, staticMesh, position + glm::vec3(0.0f, 30.0f, 0.0f), rotation, scale, finalColor);
+    StaticObject* staticObject = AddDecor(chunk, staticMesh, position + glm::vec3(0.0f, 30.0f, 0.0f), rotation, scale, finalColor);
+    
+    Scenery scenery;
+    scenery.grometry.push_back(staticObject);
+    
+    chunk.scenery.push_back(scenery);
+    */
+    
     }
     
     float wikiupHeight = 24.0f;
@@ -258,7 +338,7 @@ void ChunkManager::AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 p
     
     float stickThickness = 0.4f;
     
-    
+    /*
     {
     glm::vec3 pos(position.x - 3.0f, position.y + (wikiupHeight * 0.1f), position.z);
     AddDecor(chunk, staticMesh, pos, glm::vec3(0.0f, 30.0f, 0.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
@@ -279,7 +359,7 @@ void ChunkManager::AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 p
     glm::vec3 pos(position.x - 1.0f, position.y + (wikiupHeight * 0.1f), position.z + 3.25f);
     AddDecor(chunk, staticMesh, pos, glm::vec3(0.0f, -65.0f, 30.0f), glm::vec3(stickThickness, wikiupHeight, stickThickness), Colors.brown);
     }
-    
+    */
     
     /*
     {

@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.8)
 project(framework VERSION 0.1.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
+include_directories(vendor)
+include_directories(vendor/imgui)
+include_directories(vendor/imgui/backends)
 
 # Optional modules path, can be re-enabled later if needed
 # set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
@@ -198,7 +201,6 @@ if(BUILD_CORE_LIBRARY)
     "src/Engine/EngineGameObjects.cpp"
     "src/Engine/EngineUpdateStream.cpp"
     
-    "src/Engine/componentUpdate/EngineUpdateUI.cpp"
     "src/Engine/componentUpdate/EngineUpdateKinematics.cpp"
     "src/Engine/componentUpdate/EngineUpdateAudio.cpp"
     "src/Engine/componentUpdate/EngineUpdateCamera.cpp"
@@ -218,6 +220,7 @@ if(BUILD_CORE_LIBRARY)
     "src/ActorAI/ActorSystem.cpp"
     "src/ActorAI/ActorUpdate.cpp"
     "src/ActorAI/ActorAnimation.cpp"
+    "src/ActorAI/ActorTargeting.cpp"
     "src/ActorAI/ActorNeuralState.cpp"
     "src/ActorAI/ActorMechanics.cpp"
     "src/ActorAI/ActorGenetics.cpp"
@@ -287,6 +290,14 @@ if(BUILD_CORE_LIBRARY)
     "src/UI/components/text.cpp"
     "src/UI/components/panel.cpp"
     "src/UI/UserInterfaceSystem.cpp"
+    
+    "vendor/ImGUI/imgui.cpp"
+    "vendor/ImGUI/imgui_draw.cpp"
+    "vendor/ImGUI/imgui_tables.cpp"
+    "vendor/ImGUI/imgui_widgets.cpp"
+    "vendor/ImGUI/backends/imgui_impl_opengl3.cpp"
+    "vendor/ImGUI/backends/imgui_impl_sdl3.cpp"
+    "vendor/ImGUI/backends/imgui_impl_win32.cpp"
     
     "src/Scripting/ScriptSystem.cpp"
     "src/Scripting/components/script.cpp"

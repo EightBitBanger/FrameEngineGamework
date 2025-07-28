@@ -38,12 +38,9 @@ public:
     /// Should the camera be rendered orthographically or perspective.
     bool isOrthographic;
     
-    /// Camera mouse looking angle.
-    glm::vec2 mouseLookAngle;
-    
-    /// Current camera looking angles in degrees.
-    glm::vec2 lookAngle;
-    
+    /// Current camera looking angles.
+    float yaw;
+    float pitch;
     
     /// Field of view.
     float fov;

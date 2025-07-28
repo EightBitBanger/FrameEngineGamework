@@ -12,9 +12,9 @@
 
 #include <vector>
 #include <string>
+#include <deque>
 
 extern NumberGeneration Random;
-
 
 
 class ENGINE_API Mesh {
@@ -52,10 +52,10 @@ public:
     bool RemoveSubMesh(unsigned int index);
     
     /// Get the vertex and index buffer as a sub mesh.
-    bool GetSubMesh(unsigned int index, SubMesh& mesh);
+    bool GetSubMesh(unsigned int index, SubMesh& subMesh);
     
     /// Get the vertex and index buffer directly as arrays.
-    bool GetSubMesh(unsigned int index, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer);
+    bool GetSubMesh(unsigned int index, std::vector<Vertex>& vertexBuffer, std::vector<Index>& indexBuffer);
     
     
     /// Update the color of a sub mesh.

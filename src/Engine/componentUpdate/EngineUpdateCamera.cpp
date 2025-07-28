@@ -1,43 +1,41 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateCamera(unsigned int index) {
-    // Update mouse looking
-    if (mStreamBuffer[index].camera->useMouseLook) {
-        
+    Camera* cam = mStreamBuffer[index].camera;
+    
+    // Mouse look
+    if (cam->useMouseLook) {
+        // Get mouse delta
         double mouseDiffX = Input.mouseX - Renderer.displayCenter.x;
         double mouseDiffY = Input.mouseY - Renderer.displayCenter.y;
         
+        // Reset mouse to center
         Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
         
-        double lookAngleX = mouseDiffX * mStreamBuffer[index].camera->mouseSensitivityYaw * 0.002f;
-        double lookAngleY = mouseDiffY * mStreamBuffer[index].camera->mouseSensitivityPitch * 0.002f;
+        // Apply sensitivity and convert to radians
+        float sensitivityYaw   = cam->mouseSensitivityYaw   * 0.002f;
+        float sensitivityPitch = cam->mouseSensitivityPitch * 0.002f;
         
-        mStreamBuffer[index].camera->transform.RotateEuler(lookAngleX, -lookAngleY, 0);
+        cam->yaw   -= static_cast<float>(mouseDiffX) * sensitivityYaw;
+        cam->pitch += static_cast<float>(-mouseDiffY) * sensitivityPitch;
         
-        mStreamBuffer[index].camera->mouseLookAngle.x += lookAngleX / 128.0f;
-        mStreamBuffer[index].camera->mouseLookAngle.y -= lookAngleY / 128.0f;
-        
-        // Yaw limit
-        if (mStreamBuffer[index].camera->mouseLookAngle.x >= 0.109655) {mStreamBuffer[index].camera->mouseLookAngle.x -= 0.109655;}
-        if (mStreamBuffer[index].camera->mouseLookAngle.x <= 0.109655) {mStreamBuffer[index].camera->mouseLookAngle.x += 0.109655;}
-        
-        // Pitch limit
-        if (mStreamBuffer[index].camera->mouseLookAngle.y >  0.0274f) mStreamBuffer[index].camera->mouseLookAngle.y =  0.0274f;
-        if (mStreamBuffer[index].camera->mouseLookAngle.y < -0.0274f) mStreamBuffer[index].camera->mouseLookAngle.y = -0.0274f;
-        
+        // Clamp pitch to prevent flipping
+        float pitchLimit = glm::radians(89.0f);
+        if (cam->pitch >  pitchLimit) cam->pitch =  pitchLimit;
+        if (cam->pitch < -pitchLimit) cam->pitch = -pitchLimit;
     }
     
-    // Calculate degree angle from camera looking angle
-    // Yaw
-    mStreamBuffer[index].camera->lookAngle.x = (glm::degrees( mStreamBuffer[index].camera->transform.rotation.x ) - 6.28277f) * 1.907f * 30.0f;
-    mStreamBuffer[index].camera->lookAngle.x = Math.Round( +mStreamBuffer[index].camera->lookAngle.x );
-    mStreamBuffer[index].camera->transform.rotation.x = mStreamBuffer[index].camera->mouseLookAngle.x;
-    // Pitch
-    mStreamBuffer[index].camera->transform.rotation.y = mStreamBuffer[index].camera->mouseLookAngle.y;
-    mStreamBuffer[index].camera->lookAngle.y = (((glm::degrees( mStreamBuffer[index].camera->transform.rotation.y ) - 6.28277f) * 1.91f * 30.0f) + 360.0f);
-    mStreamBuffer[index].camera->lookAngle.y = Math.Round( +mStreamBuffer[index].camera->lookAngle.y );
+    // Update camera forward direction from yaw/pitch
+    cam->forward.x = cos(cam->pitch) * sin(cam->yaw);
+    cam->forward.y = sin(cam->pitch);
+    cam->forward.z = cos(cam->pitch) * cos(cam->yaw);
+    cam->forward = glm::normalize(cam->forward);
     
-    mStreamBuffer[index].camera->transform.position = mStreamBuffer[index].transform->position;
+    // Update transform rotation (stored as pitch, yaw, roll)
+    cam->transform.rotation = glm::vec3(cam->pitch, cam->yaw, 0.0f); // roll is zero for FPS
+    
+    // Sync camera position with player
+    cam->transform.position = mStreamBuffer[index].transform->position;
     
     return;
 }

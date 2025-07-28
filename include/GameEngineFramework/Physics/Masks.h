@@ -20,7 +20,8 @@ enum class LayerMask {
 enum class CollisionMask {
     Default,
     Ground,
-    Entity
+    Entity,
+    Static
 };
 
 #endif

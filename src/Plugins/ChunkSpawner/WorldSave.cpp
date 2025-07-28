@@ -37,8 +37,8 @@ bool ChunkManager::SaveWorld(void) {
     
     Camera* cameraPtr = Engine.cameraController->GetComponent<Camera>();
     
-    float playerYaw   = cameraPtr->mouseLookAngle.x;
-    float playerPitch = cameraPtr->mouseLookAngle.y;
+    float playerYaw   = cameraPtr->GetYaw();
+    float playerPitch = cameraPtr->GetPitch();
     
     std::string worldDataBuffer = "";
     worldDataBuffer += "player_position=" + Float.ToString(playerPosition.x) + "," + Float.ToString(playerPosition.y) + "," + Float.ToString(playerPosition.z) + "\n";

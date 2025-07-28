@@ -17,35 +17,25 @@ void Run() {
     Particle.Update();
     GameWorld.Update();
     
-    // Cast a ray from the player
-    
-    Hit hit;
+    if (Engine.cameraController == nullptr) 
+        return;
     
     Camera* cameraPtr = Engine.cameraController->GetComponent<Camera>();
-    
-    glm::vec3 from    = cameraPtr->transform.position;
+    if (cameraPtr == nullptr) 
+        return;
     glm::vec3 forward = cameraPtr->forward;
-    
-    // Prevent player controller from going under ground
-    if (Physics.Raycast(from, glm::vec3(0.0f, -1.0f, 0.0f), 1000, hit, LayerMask::Ground)) {
-        
-        RigidBody* bodyPtr = Engine.cameraController->GetComponent<RigidBody>();
-        
-        rp3d::Transform transform = bodyPtr->getTransform();
-        rp3d::Vector3 position = transform.getPosition();
-        
-        if (position.y < hit.point.y) {
-            position.y = hit.point.y;
-            transform.setPosition( position );
-            bodyPtr->setTransform( transform );
-        }
-        
-    }
+    glm::vec3 from = cameraPtr->transform.position;
     
     // Pick an actor
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
-        glm::vec3 fromHigh = from;
+        glm::vec3 fromHigh = cameraPtr->transform.position;
+        
+        GameWorld.RemoveDecor( Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward );
+        
+        
+        
+        /*
         if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
             Actor* hitActor = (Actor*)hit.userData;
             if (hitActor != nullptr) 
@@ -55,12 +45,13 @@ void Run() {
             for (unsigned int i=0; i < 24; i++) 
                 Engine.console.WriteDialog(i, "");
         }
+        */
     }
-    
+        
     // Murder an actor
     if (Input.CheckMouseRightPressed()) {
         //Input.SetMouseRightPressed(false);
-        glm::vec3 fromHigh = from;
+        Hit hit;
         if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
             Actor* hitActor = (Actor*)hit.userData;
             if (hitActor == actorInSights) {
@@ -82,6 +73,7 @@ void Run() {
         float xx = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         float zz = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         
+        Hit hit;
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             
             Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
@@ -156,23 +148,37 @@ void Run() {
     //
     
     if (isProfilerEnabled) {
+        glm::vec3 playerPos(0);
+        if (Engine.sceneMain != nullptr) 
+            if (Engine.sceneMain->camera != nullptr) 
+                playerPos = Engine.sceneMain->camera->transform.position;
         
-        Engine.console.WriteDialog( 0, "[Profiler]" );
-        Engine.console.WriteDialog( 1, "AI          " + Float.ToString( Profiler.profileActorAI ) );
-        Engine.console.WriteDialog( 2, "Engine      " + Float.ToString( Profiler.profileGameEngineUpdate ) );
-        Engine.console.WriteDialog( 3, "Renderer    " + Float.ToString( Profiler.profileRenderSystem ) );
+        Engine.console.WriteDialog(0, "player      " + Float.ToString( playerPos.x ) + ", " + Float.ToString( playerPos.y ) + ", " + Float.ToString( playerPos.z ));
         
-        Engine.console.WriteDialog( 5, "Draw calls      " + Int.ToString(Renderer.GetNumberOfDrawCalls()) );
+        // Get chunk info
+        glm::vec3 chunkPosition(0);
+        Hit hit;
+        if (Physics.Raycast(from, glm::vec3(0.0f, -1.0f, 0.0f), 1000, hit, LayerMask::Ground)) {
+            GameObject* chunkObject = (GameObject*)hit.userData;
+            chunkPosition = chunkObject->GetPosition();
+            Engine.console.WriteDialog(1, "chunk       " + Float.ToString( chunkPosition.x ) + "_" + Float.ToString( chunkPosition.z ));
+        }
         
-        Engine.console.WriteDialog( 7, "GameObjects     " + Int.ToString(Engine.GetNumberOfGameObjects()) );
-        Engine.console.WriteDialog( 8, "Components      " + Int.ToString(Engine.GetNumberOfComponents()) );
+        Engine.console.WriteDialog(10, "AI          " + Float.ToString( Profiler.profileActorAI ) );
+        Engine.console.WriteDialog(11, "Engine      " + Float.ToString( Profiler.profileGameEngineUpdate ) );
+        Engine.console.WriteDialog(12, "Renderer    " + Float.ToString( Profiler.profileRenderSystem ) );
         
-        Engine.console.WriteDialog( 9, "MeshRenderers   " + Int.ToString(Renderer.GetNumberOfMeshRenderers()) );
-        Engine.console.WriteDialog(10, "Meshes          " + Int.ToString(Renderer.GetNumberOfMeshes()) );
-        Engine.console.WriteDialog(11, "Materials       " + Int.ToString(Renderer.GetNumberOfMaterials()) );
-        Engine.console.WriteDialog(12, "RigidBodies     " + Int.ToString(Physics.world->getNbRigidBodies()) );
-        Engine.console.WriteDialog(13, "Actors          " + Int.ToString(AI.GetNumberOfActors()) );
-        Engine.console.WriteDialog(14, "Colliders       " + Int.ToString(Engine.mBoxCollider.size()) );
+        Engine.console.WriteDialog(13, "Draw calls      " + Int.ToString(Renderer.GetNumberOfDrawCalls()) );
+        
+        Engine.console.WriteDialog(14, "GameObjects     " + Int.ToString(Engine.GetNumberOfGameObjects()) );
+        Engine.console.WriteDialog(15, "Components      " + Int.ToString(Engine.GetNumberOfComponents()) );
+        
+        Engine.console.WriteDialog(16, "MeshRenderers   " + Int.ToString(Renderer.GetNumberOfMeshRenderers()) );
+        Engine.console.WriteDialog(17, "Meshes          " + Int.ToString(Renderer.GetNumberOfMeshes()) );
+        Engine.console.WriteDialog(18, "Materials       " + Int.ToString(Renderer.GetNumberOfMaterials()) );
+        Engine.console.WriteDialog(19, "RigidBodies     " + Int.ToString(Physics.world->getNbRigidBodies()) );
+        Engine.console.WriteDialog(20, "Actors          " + Int.ToString(AI.GetNumberOfActors()) );
+        Engine.console.WriteDialog(21, "Colliders       " + Int.ToString(Engine.mBoxCollider.size()) );
         
         
     }
@@ -245,8 +251,33 @@ void Run() {
     
     
     //
-    // Camera controller movement
+    // Cast a ray from the player
+    
+    Hit hit;
+    float heightStanding = 0.87f;
+    
+    // Prevent player controller from going under ground
+    if (Physics.Raycast(from, glm::vec3(0.0f, -1.0f, 0.0f), 1000, hit, LayerMask::Ground)) {
+        
+        RigidBody* bodyPtr = Engine.cameraController->GetComponent<RigidBody>();
+        
+        rp3d::Transform transform = bodyPtr->getTransform();
+        rp3d::Vector3 position = transform.getPosition();
+        GameObject* chunkObject = (GameObject*)hit.userData;
+        
+        glm::vec3 chunkPosition = chunkObject->GetPosition();
+        
+        if (position.y < hit.point.y + heightStanding) {
+            position.y = hit.point.y + heightStanding;
+            transform.setPosition( position );
+            bodyPtr->setTransform( transform );
+        }
+        
+    }
+    
+    
     //
+    // Camera controller movement
     
     if (Engine.cameraController == nullptr) 
         return;
@@ -272,6 +303,9 @@ void Run() {
             if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         }
         
+        // Apply gravity
+        //force -= mainCamera->up;
+        
         // Double speed
         if (Input.CheckKeyCurrent(VK_CONTROL)) 
             forceDblTime += 0.24f;
@@ -287,11 +321,16 @@ void Run() {
         // Decelerate
         if ( glm::length(force) >  0.0001f) force -= (force * forceDecelerate);
         if (-glm::length(force) < -0.0001f) force -= (force * forceDecelerate);
+        float forceLength = glm::length(forceTotal);
+        
+        // Prevent drift
+        if (forceLength < 0.0001f) 
+            return;
         
         Engine.cameraController->AddForce(forceTotal.x, forceTotal.y, forceTotal.z);
         
         // Field of view zoom effect
-        float fovPullback = glm::length(forceTotal) * 40.0f;
+        float fovPullback = forceLength * 40.0f;
         if (fovPullback > 4.0f) 
             fovPullback = 4.0f;
         Engine.sceneMain->camera->fov = 60 + fovPullback;

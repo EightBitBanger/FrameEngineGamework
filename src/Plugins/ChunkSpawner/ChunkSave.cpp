@@ -41,6 +41,8 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
             } else {
                 // TODO handle actors that are not in any chunk..
                 //Engine.console.Print("DEBUG :: actor cannot be saved, not in a valid chunk?");
+                
+                actorPos.y -= 500.0f;
             }
             
             // Position
@@ -81,10 +83,9 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
         
         // Check to delete the save file if no actors where counted
         if (saveCounter == 0) {
-            if (fs.FileExists(chunkName)) {
+            
+            if (fs.FileExists(chunkName)) 
                 fs.FileDelete(chunkName);
-                Engine.console.Print(chunkName);
-            }
         }
         
         unsigned int bufferSz = buffer.size();
@@ -112,7 +113,6 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
         
         Serializer.Serialize(staticName, (void*)staticElements, sizeof(StaticElement) * numberOfStatics);
     }
-    
     
     return 0;
 }

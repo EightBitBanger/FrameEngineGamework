@@ -21,9 +21,12 @@ bool RenderSystem::setTargetCamera(Camera* currentCamera, glm::vec3& eye, glm::m
     eye.z = currentCamera->transform.position.z;
     
     // Forward looking angle
-    currentCamera->forward.x = cos( (currentCamera->transform.rotation.x * 180) / glm::pi<float>() );
-    currentCamera->forward.y = tan( (currentCamera->transform.rotation.y * 180) / glm::pi<float>() );
-    currentCamera->forward.z = sin( (currentCamera->transform.rotation.x * 180) / glm::pi<float>() );
+    float pitch = currentCamera->GetPitch();
+    float yaw   = currentCamera->GetYaw();
+    
+    currentCamera->forward.x = cos(pitch) * sin(yaw);
+    currentCamera->forward.y = sin(pitch);
+    currentCamera->forward.z = cos(pitch) * cos(yaw);
     
     currentCamera->forward = glm::normalize( currentCamera->forward );
     

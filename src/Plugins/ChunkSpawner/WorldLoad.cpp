@@ -55,7 +55,8 @@ bool ChunkManager::LoadWorld(void) {
             float yaw   = String.ToFloat(playerLookAngleString[0]);
             float pitch = String.ToFloat(playerLookAngleString[1]);
             Camera* cameraPtr = Engine.cameraController->GetComponent<Camera>();
-            cameraPtr->mouseLookAngle = glm::vec2(yaw, pitch);
+            cameraPtr->yaw = yaw;
+            cameraPtr->pitch = pitch;
             continue;
         }
         
