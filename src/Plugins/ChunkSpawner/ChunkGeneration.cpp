@@ -1,48 +1,50 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
-
-void ChunkManager::GenerateBiomeColorField(glm::vec3* colorField, unsigned int width, unsigned int height,
-                                           float noiseScaleX, float noiseScaleZ,
-                                           int offsetX, int offsetZ, int seed) {
-    // Define your biome base colors
-    Color grassland = Colors.green;
-    Color desert    = Colors.yellow;
-    Color tundra    = Colors.white;
-    Color forest    = Colors.dkgreen; // assuming a darker green exists
-    Color mountain  = Colors.gray;
+void ChunkManager::GenerateBiomeFromPerlinNoise(glm::vec3* colorField, float* heightField, Chunk& chunk, Biome& biome) {
+    Color biomeColor;
+    biomeColor = glm::vec3(biome.color.r, biome.color.g, biome.color.b);
+    float offsetX = chunk.x + biome.offsetX;
+    float offsetZ = chunk.y + biome.offsetZ;
     
-    for (unsigned int i = 0; i < width * height; i++) {
-        unsigned int x = i % width;
-        unsigned int z = i / width;
+    unsigned int size = chunkSize * chunkSize;
+    
+    for (unsigned int i = 0; i < size; i++) {
+        unsigned int x = i % chunkSize;
+        unsigned int z = i / chunkSize;
         
-        float worldX = (float)(x + offsetX) * noiseScaleX;
-        float worldZ = (float)(z + offsetZ) * noiseScaleZ;
+        float xCoord = ((float)x + offsetX) * biome.noiseWidth;
+        float zCoord = ((float)z + offsetZ) * biome.noiseHeight;
         
-        // Use Perlin noise to drive biome selection (0.0 - 1.0 range)
-        float biomeNoise = glm::clamp(Random.Perlin(worldX, 0, worldZ, seed), 0.0f, 1.0f);
+        float noise = Random.Perlin(xCoord, 0, zCoord, worldSeed);
+        noise = glm::clamp(noise, 0.0f, 1.0f);
         
-        Color baseColor;
+        Color original;
+        original = Color(colorField[i].x, colorField[i].y, colorField[i].z);
+        Color result = Colors.Lerp(original, biomeColor, noise);
+        float height = Float.Lerp(heightField[i], 100.0f, noise);
         
-        // You can divide biomeNoise range into sections for different biomes
-        if (biomeNoise < 0.2f)
-            baseColor = tundra;
-        else if (biomeNoise < 0.4f)
-            baseColor = mountain;
-        else if (biomeNoise < 0.6f)
-            baseColor = forest;
-        else if (biomeNoise < 0.8f)
-            baseColor = grassland;
-        else
-            baseColor = desert;
-        
-        // Add slight color variation for realism
-        float variant = (Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100) * 0.0001f);
-        baseColor.r += variant;
-        baseColor.g += variant;
-        baseColor.b += variant;
-        
-        colorField[i] = glm::vec3(baseColor.r, baseColor.g, baseColor.b);
+        colorField[i] = glm::vec3(result.r, result.g, result.b);
+        //heightField[i] = height;
     }
+    
+    
+    
+    
+    //AddColorFieldFromPerlinNoise(colorField, chunkSZ, chunkSZ, biomeLayer->noiseWidth, biomeLayer->noiseHeight, biomeColor, offsetX, offsetZ);
+    //AddHeightFieldFromPerlinNoise(heightField, chunkSZ, chunkSZ, biomeLayer->noiseWidth, biomeLayer->noiseHeight, 100.0f, offsetX, offsetZ, 20.0f, worldSeed);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
 
 
@@ -50,6 +52,34 @@ void ChunkManager::GenerateBiomeColorField(glm::vec3* colorField, unsigned int w
 
 
 
+
+
+
+
+void ChunkManager::AddColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, 
+                                                float noiseWidth, float noiseHeight, Color color, int offsetX, int offsetZ) {
+    unsigned int size = width * height;
+    
+    for (unsigned int i = 0; i < size; i++) {
+        unsigned int x = i % width;
+        unsigned int z = i / width;
+        
+        float xCoord = ((float)x + offsetX) * noiseWidth;
+        float zCoord = ((float)z + offsetZ) * noiseHeight;
+        
+        float noise = Random.Perlin(xCoord, 0, zCoord, worldSeed);
+        noise = glm::clamp(noise, 0.0f, 1.0f);
+        
+        Color original;
+        original = Color(colorField[i].x, colorField[i].y, colorField[i].z);
+        
+        Color result = Colors.Lerp(original, color, noise);
+        
+        colorField[i] = glm::vec3(result.r, result.g, result.b);
+    }
+    
+    return;
+}
 
 
 
@@ -91,7 +121,7 @@ float ChunkManager::AddHeightFieldFromPerlinNoise(float* heightField, unsigned i
             noise -= heightThreshold;
         }
         
-        heightField[i] += noise;//Math.Round((noise * 2.0)) * 0.5;
+        heightField[i] += noise;
         
         if (heightField[i] < minimumHeight)
             minimumHeight = heightField[i];
@@ -119,31 +149,6 @@ void ChunkManager::GenerateColorFieldFromHeightField(glm::vec3* colorField, floa
         
         colorField[i] = glm::vec3(color.r, color.g, color.b);
     }
-    return;
-}
-
-void ChunkManager::AddColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, 
-                                                float noiseWidth, float noiseHeight, Color color, int offsetX, int offsetZ) {
-    unsigned int size = width * height;
-    
-    for (unsigned int i = 0; i < size; i++) {
-        unsigned int x = i % width;
-        unsigned int z = i / width;
-        
-        float xCoord = ((float)x + offsetX) * noiseWidth;
-        float zCoord = ((float)z + offsetZ) * noiseHeight;
-        
-        float noise = Random.Perlin(xCoord, 0, zCoord, 100);
-        noise = glm::clamp(noise, 0.0f, 1.0f);
-        
-        Color original;
-        original = Color(colorField[i].x, colorField[i].y, colorField[i].z);
-        
-        Color result = Colors.Lerp(original, color, noise);
-        
-        colorField[i] = glm::vec3(result.r, result.g, result.b);
-    }
-    
     return;
 }
 

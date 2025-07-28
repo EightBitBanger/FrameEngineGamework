@@ -170,7 +170,12 @@ public:
     bool ApplyWorldRule(std::string key, std::string value);
     
     // Biome generation
-    void GenerateBiomeColorField(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseScaleX, float noiseScaleZ, int offsetX, int offsetZ, int seed);
+    void GenerateBiomeFromPerlinNoise(glm::vec3* colorField, float* heightField, Chunk& chunk, Biome& biome);
+    
+    
+    /// Set a layer of perlin noise into a color field.
+    void AddColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, Color color, int offsetX, int offsetZ);
+    
     
     // World generation
     
@@ -192,9 +197,6 @@ public:
     
     /// Smooth the terrain height starting at a given height level and moving downward.
     void GenerateWaterTableFromHeightField(float* heightField, unsigned int width, unsigned int height, float tableHeight);
-    
-    /// Set a layer of perlin noise into a color field. The perlin noise is used to fade from the first color to the second.
-    void AddColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, Color color, int offsetX, int offsetZ);
     
     /// Generate a snow cap effect of a given color capColor and starting at the height beginHeight.
     /// The bias will determine how much snow will be added.

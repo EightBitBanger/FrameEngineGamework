@@ -84,33 +84,21 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     
     // Example biome generation
-    Color biomeColor;
     unsigned int numberOfBiomes = world.mBiomes.size();
     for (unsigned int b=0; b < numberOfBiomes; b++) {
         Biome* biomeLayer = &world.mBiomes[b];
+        
         Color biomeColor;
         biomeColor = glm::vec3(biomeLayer->color.r, biomeLayer->color.g, biomeLayer->color.b);
+        
         float offsetX = chunk.x + biomeLayer->offsetX;
         float offsetZ = chunk.y + biomeLayer->offsetZ;
         
         AddColorFieldFromPerlinNoise(colorField, chunkSZ, chunkSZ, biomeLayer->noiseWidth, biomeLayer->noiseHeight, biomeColor, offsetX, offsetZ);
+        //AddHeightFieldFromPerlinNoise(heightField, chunkSZ, chunkSZ, biomeLayer->noiseWidth, biomeLayer->noiseHeight, 100.0f, offsetX, offsetZ, 20.0f, worldSeed);
+        
+        //GenerateBiomeFromPerlinNoise(colorField, heightField, chunk, *biomeLayer);
     }
-    
-    /*
-    // Desert
-    float biomeNoise      = 0.001f;
-    float biomeThreshold  = 0.3f;
-    biomeColor = Colors.yellow * 0.3f;
-    AddColorFieldFromPerlinNoise(colorField, chunkSZ, chunkSZ, biomeNoise, biomeNoise, biomeThreshold, Colors.dkgreen, biomeColor, chunk.x, chunk.y);
-    
-    // Tropical
-    biomeNoise      = 0.003f;
-    biomeThreshold  = 0.3f;
-    biomeColor      = Colors.green * 0.7f;
-    AddColorFieldFromPerlinNoise(colorField, chunkSZ, chunkSZ, biomeNoise, biomeNoise, biomeThreshold, Colors.dkgreen, biomeColor, chunk.x + 1000, chunk.y + 1000);
-    */
-    
-    
     
     //AddColorFieldSnowCap(colorField, heightField, chunkSZ, chunkSZ, world.snowCapColor, world.snowCapHeight, world.snowCapBias);
     
