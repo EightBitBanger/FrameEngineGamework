@@ -11,18 +11,18 @@ class ENGINE_API DecorationElement {
 public:
     
     /// Decoration type
-    int type;
+    DecorationType type;
     
     /// Position relative to the structure center
     glm::vec3 position;
     
     DecorationElement() : 
-        type(DECORATION_GRASS),
+        type(DecorationType::Grass),
         position(glm::vec3(0))
     {
     }
     
-    DecorationElement(int newType, glm::vec3 newPosition) : 
+    DecorationElement(DecorationType newType, glm::vec3 newPosition) : 
         type(newType),
         position(newPosition)
     {

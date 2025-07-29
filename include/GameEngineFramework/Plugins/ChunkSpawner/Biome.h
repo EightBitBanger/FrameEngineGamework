@@ -3,6 +3,7 @@
 
 #include <GameEngineFramework/Engine/Engine.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/Decor.h>
 
 class ENGINE_API Biome {
     
@@ -15,6 +16,10 @@ public:
     
     float offsetX;
     float offsetZ;
+    
+    std::vector<Perlin> perlin;
+    
+    std::vector<DecorationSpecifier> decorations;
     
     Biome() : 
         color(1, 1, 1),

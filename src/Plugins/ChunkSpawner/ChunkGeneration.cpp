@@ -1,50 +1,47 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
-void ChunkManager::GenerateBiomeFromPerlinNoise(glm::vec3* colorField, float* heightField, Chunk& chunk, Biome& biome) {
-    Color biomeColor;
-    biomeColor = glm::vec3(biome.color.r, biome.color.g, biome.color.b);
-    float offsetX = chunk.x + biome.offsetX;
-    float offsetZ = chunk.y + biome.offsetZ;
+void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chunk* chunk, Biome* biome, float* weightMask, float* totalWeights) {
+    unsigned int chunkSZ = chunkSize + 1;
+    unsigned int fieldSize = chunkSZ * chunkSZ;
     
-    unsigned int size = chunkSize * chunkSize;
-    
-    for (unsigned int i = 0; i < size; i++) {
-        unsigned int x = i % chunkSize;
-        unsigned int z = i / chunkSize;
+    // Apply height contribution from each Perlin layer
+    for (unsigned int i = 0; i < biome->perlin.size(); i++) {
+        Perlin& layer = biome->perlin[i];
         
-        float xCoord = ((float)x + offsetX) * biome.noiseWidth;
-        float zCoord = ((float)z + offsetZ) * biome.noiseHeight;
-        
-        float noise = Random.Perlin(xCoord, 0, zCoord, worldSeed);
-        noise = glm::clamp(noise, 0.0f, 1.0f);
-        
-        Color original;
-        original = Color(colorField[i].x, colorField[i].y, colorField[i].z);
-        Color result = Colors.Lerp(original, biomeColor, noise);
-        float height = Float.Lerp(heightField[i], 100.0f, noise);
-        
-        colorField[i] = glm::vec3(result.r, result.g, result.b);
-        //heightField[i] = height;
+        for (unsigned int j = 0; j < fieldSize; j++) {
+            unsigned int x = j % chunkSZ;
+            unsigned int z = j / chunkSZ;
+            
+            float xCoord = ((float)x + chunk->x + layer.offsetX) * layer.noiseWidth;
+            float zCoord = ((float)z + chunk->y + layer.offsetY) * layer.noiseHeight;
+            
+            float noise = Random.Perlin(xCoord, 0, zCoord, worldSeed) * layer.heightMultuplier;
+            
+            /*
+            if (layer.heightThreshold > 0.0f && noise < layer.heightThreshold) {
+                continue;
+            }
+            
+            if (layer.heightThreshold > 0.0f)
+                noise -= layer.heightThreshold;
+            */
+            
+            float normalizedWeight = weightMask[j] / (totalWeights[j] + 0.0001f);
+            heightField[j] += noise * normalizedWeight;
+        }
     }
     
-    
-    
-    
-    //AddColorFieldFromPerlinNoise(colorField, chunkSZ, chunkSZ, biomeLayer->noiseWidth, biomeLayer->noiseHeight, biomeColor, offsetX, offsetZ);
-    //AddHeightFieldFromPerlinNoise(heightField, chunkSZ, chunkSZ, biomeLayer->noiseWidth, biomeLayer->noiseHeight, 100.0f, offsetX, offsetZ, 20.0f, worldSeed);
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    // Apply biome base color blending
+    for (unsigned int i = 0; i < fieldSize; i++) {
+        float normalizedWeight = weightMask[i] / (totalWeights[i] + 0.0001f);
+        normalizedWeight = glm::clamp(normalizedWeight, 0.0f, 1.0f);
+        
+        Color original(colorField[i].x, colorField[i].y, colorField[i].z);
+        Color target(biome->color.r, biome->color.g, biome->color.b);
+        Color result = Colors.Lerp(original, target, normalizedWeight);
+        
+        colorField[i] = glm::vec3(result.r, result.g, result.b);
+    }
 }
 
 
@@ -77,8 +74,6 @@ void ChunkManager::AddColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned 
         
         colorField[i] = glm::vec3(result.r, result.g, result.b);
     }
-    
-    return;
 }
 
 
@@ -89,7 +84,6 @@ void ChunkManager::SetHeightFieldValues(float* heightField, unsigned int width, 
     for (unsigned int i = 0; i < size; i++) {
         heightField[i] = value;
     }
-    return;
 }
 
 void ChunkManager::SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color) {
@@ -98,7 +92,6 @@ void ChunkManager::SetColorFieldValues(glm::vec3* colorField, unsigned int width
     for (unsigned int i = 0; i < size; i++) {
         colorField[i] = colorVec;
     }
-    return;
 }
 
 float ChunkManager::AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, 
@@ -149,7 +142,6 @@ void ChunkManager::GenerateColorFieldFromHeightField(glm::vec3* colorField, floa
         
         colorField[i] = glm::vec3(color.r, color.g, color.b);
     }
-    return;
 }
 
 void ChunkManager::GenerateWaterTableFromHeightField(float* heightField, 
@@ -160,7 +152,6 @@ void ChunkManager::GenerateWaterTableFromHeightField(float* heightField,
         if (heightField[i] < tableHeight) 
             heightField[i] *= 0.9;
     
-    return;
 }
 
 void ChunkManager::AddColorFieldSnowCap(glm::vec3* colorField, float* heightField, 
@@ -180,8 +171,6 @@ void ChunkManager::AddColorFieldSnowCap(glm::vec3* colorField, float* heightFiel
         
         colorField[i] = glm::vec3(color.r, color.g, color.b);
     }
-    
-    return;
 }
 
 void ChunkManager::AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, 
@@ -216,8 +205,6 @@ void ChunkManager::AddColorFieldWaterTable(glm::vec3* colorField, float* heightF
         
         colorField[i] = glm::vec3(color.r, color.g, color.b);
     }
-    
-    return;
 }
 
 Mesh* ChunkManager::CreateMeshFromHeightField(float* heightField, 
@@ -236,8 +223,6 @@ void ChunkManager::AddHeightStepToMesh(float* heightField, unsigned int width, u
     
     for (unsigned int i = 0; i < size; i++) 
         heightField[i] = Math.Round((heightField[i] * 10)) / 10;
-    
-    return;
 }
 
 void ChunkManager::AddHeightFieldToMesh(Mesh* mesh, 
@@ -296,8 +281,6 @@ void ChunkManager::AddHeightFieldToMesh(Mesh* mesh,
         }
         
     }
-    
-    return;
 }
 
 void ChunkManager::AddHeightFieldToMeshSimplified(Mesh* mesh, 
@@ -356,8 +339,6 @@ void ChunkManager::AddHeightFieldToMeshSimplified(Mesh* mesh,
         }
         
     }
-    
-    return;
 }
 
 void ChunkManager::AddHeightFieldToMeshReduced(Mesh* mesh, 
@@ -423,6 +404,4 @@ void ChunkManager::AddHeightFieldToMeshReduced(Mesh* mesh,
         }
         
     }
-    
-    return;
 }

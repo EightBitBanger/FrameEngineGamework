@@ -120,6 +120,7 @@
 				</Compiler>
 				<Linker>
 					<Add library="core.dll" />
+					<Add library="plugins.dll" />
 				</Linker>
 			</Target>
 			<Target title="Plugins-debug">
@@ -198,6 +199,7 @@
 					<Add option="-flto" />
 					<Add option="-pg -lgmon" />
 					<Add library="core.dll" />
+					<Add library="plugins.dll" />
 				</Linker>
 			</Target>
 			<Target title="Core-profile">
@@ -829,64 +831,46 @@
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/Chunk.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/ChunkCreate.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/ChunkDestroy.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/ChunkGeneration.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/ChunkLoad.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/ChunkManager.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/ChunkManagerDecorate.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/ChunkManagerUpdate.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/ChunkSave.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
@@ -897,36 +881,26 @@
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/WorldLoad.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/WorldSave.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ParticleSystem/Emitter.cpp">
 			<Option virtualFolder="root/Plugins/ParticleSystem/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/ParticleSystem/ParticleSystem.cpp">
 			<Option virtualFolder="root/Plugins/ParticleSystem/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="src/Plugins/WeatherSystem/WeatherSystem.cpp">
 			<Option virtualFolder="root/Plugins/WeatherSystem/" />
-			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
@@ -1184,7 +1158,6 @@
 		</Unit>
 		<Unit filename="src/plugins.cpp">
 			<Option virtualFolder="root/" />
-			<Option target="Game-debug" />
 			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
@@ -1217,7 +1190,6 @@
 			<Option virtualFolder="root/tests/" />
 			<Option target="Runtime" />
 			<Option target="Runtime-debug" />
-			<Option target="Game-debug" />
 			<Option target="Runtime-profile" />
 		</Unit>
 		<Unit filename="tests/units/testComponents.cpp">

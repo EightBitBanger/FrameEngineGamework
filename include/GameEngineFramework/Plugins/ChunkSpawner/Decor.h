@@ -45,22 +45,21 @@ struct Decoration {
     };
 };
 
-#define DECORATION_GRASS        1
-#define DECORATION_TREE         3
-#define DECORATION_ACTOR        5
-#define DECORATION_STRUCTURE    7
+
+enum class DecorationType {
+    Grass,
+    Tree,
+    Structure,
+    Actor
+};
+
+
 
 class ENGINE_API DecorationSpecifier {
     
 public:
     
-    /// Decoration types
-    /// 0  = Thin grass
-    /// 1  = Grass
-    /// 2  = Thick grass
-    /// 3  = Tree
-    /// 4  = Actor
-    int type;
+    DecorationType type;
     
     /// Decoration subtype name.
     std::string name;
@@ -93,7 +92,7 @@ public:
     float noise;
     
     DecorationSpecifier() : 
-        type(0),
+        type(DecorationType::Grass),
         name(""),
         density(10),
         
@@ -104,12 +103,7 @@ public:
         spawnStackHeightMax(1),
         threshold(0.1f),
         noise(0.1f)
-        
     {
-        
-        //colorLow  = Colors.green * 0.3f;
-        //colorHigh = Colors.green * 0.3f;
-        
     }
     
 };

@@ -38,6 +38,9 @@ public:
     
     /// Base list of all static geometry in this chunk.
     std::vector<StaticObject> statics;
+    
+    /// Biome region tracking map.
+    std::vector<int> biomeMap;
 };
 
 

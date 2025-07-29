@@ -43,9 +43,6 @@ public:
     Color actorColorLow;
     Color actorColorHigh;
     
-    std::vector<DecorationSpecifier> mDecorations;
-    
-    std::vector<Perlin> mPerlin;
     std::vector<Biome> mBiomes;
     
     std::vector<Structure> mStructures;
@@ -170,12 +167,11 @@ public:
     bool ApplyWorldRule(std::string key, std::string value);
     
     // Biome generation
-    void GenerateBiomeFromPerlinNoise(glm::vec3* colorField, float* heightField, Chunk& chunk, Biome& biome);
+    void GenerateBiome(glm::vec3* colorField, float* heightField, Chunk* chunk, Biome* biome, float* weightMask, float* totalWeights);
     
     
     /// Set a layer of perlin noise into a color field.
     void AddColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, Color color, int offsetX, int offsetZ);
-    
     
     // World generation
     
@@ -234,11 +230,11 @@ public:
     
     void RemoveDecor(glm::vec3 position, glm::vec3 direction);
     
-    // Decoration functions
-    void AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, Decoration::Grass grassType);
-    void AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, Decoration::Tree treeType);
-    void AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 position);
-    void AddDecoreActor(std::string name, glm::vec3 position);
+    // Decoration
+    void AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
+    void AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
+    void AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
+    void AddDecoreActor(glm::vec3 position, std::string name);
     
     void DecodeGenome(std::string name, Actor* actorPtr);
     

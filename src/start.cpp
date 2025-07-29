@@ -299,7 +299,7 @@ void Start() {
     
     //
     // Perlin layers
-    
+    /*
     // Mountain base ripple formation
     Perlin perlinMountainA;
     perlinMountainA.heightMultuplier = 20;
@@ -315,7 +315,7 @@ void Start() {
     perlinMountainB.noiseHeight = 0.014;
     perlinMountainB.offsetX = 100.0f;
     perlinMountainB.offsetY = 100.0f;
-
+    
     // Macro scale world formation
     Perlin perlinMountainC;
     perlinMountainC.heightMultuplier = 100;
@@ -347,55 +347,103 @@ void Start() {
     //GameWorld.world.mPerlin.push_back(perlinMountainA);
     //GameWorld.world.mPerlin.push_back(perlinMountainB);
     //GameWorld.world.mPerlin.push_back(perlinMountainC);
-    GameWorld.world.mPerlin.push_back(perlinLayerA);
-    GameWorld.world.mPerlin.push_back(perlinLayerB);
-    GameWorld.world.mPerlin.push_back(perlinFlatland);
+    //GameWorld.world.mPerlin.push_back(perlinLayerA);
+    //GameWorld.world.mPerlin.push_back(perlinLayerB);
+    //GameWorld.world.mPerlin.push_back(perlinFlatland);
+    */
     
     
     //
     // Biomes
     Color biomeColor;
     
+    // Planes
+    Biome biomeLayerPlains;
+    biomeColor = Colors.green * 0.1f;
+    biomeLayerPlains.color = glm::vec3(biomeColor.r, biomeColor.g, biomeColor.b);
+    biomeLayerPlains.offsetX = 7600;
+    biomeLayerPlains.offsetZ = 7600;
+    biomeLayerPlains.noiseWidth  = 0.001f;
+    biomeLayerPlains.noiseHeight = 0.001f;
+    
     // Desert
     Biome biomeLayerDesert;
-    biomeColor = Colors.Lerp(Colors.yellow, Colors.red, 0.3f) * 0.5f;
+    biomeColor = Colors.Lerp(Colors.yellow, Colors.red, 0.15f) * 0.3f;
     biomeLayerDesert.color = glm::vec3(biomeColor.r, biomeColor.g, biomeColor.b);
     biomeLayerDesert.offsetX = 1000;
     biomeLayerDesert.offsetZ = 1000;
     biomeLayerDesert.noiseWidth  = 0.001f;
     biomeLayerDesert.noiseHeight = 0.001f;
     
-    // Tropical
-    Biome biomeLayerTropical;
-    biomeColor = Colors.green * 0.4f;
-    biomeLayerTropical.color = glm::vec3(biomeColor.r, biomeColor.g, biomeColor.b);
-    biomeLayerTropical.offsetX = 7600;
-    biomeLayerTropical.offsetZ = 7600;
-    biomeLayerTropical.noiseWidth  = 0.001f;
-    biomeLayerTropical.noiseHeight = 0.001f;
     
+    //
+    // Perlin
     
+    Perlin perlinPlains;
+    perlinPlains.heightMultuplier = 30;
+    perlinPlains.heightThreshold = 0.0f;
+    perlinPlains.noiseWidth  = 0.01;
+    perlinPlains.noiseHeight = 0.01;
     
-    GameWorld.world.mBiomes.push_back(biomeLayerDesert);
-    GameWorld.world.mBiomes.push_back(biomeLayerTropical);
+    Perlin perlinDesert;
+    perlinDesert.heightMultuplier = 3;
+    perlinDesert.heightThreshold = 0.0f;
+    perlinDesert.noiseWidth  = 0.07;
+    perlinDesert.noiseHeight = 0.07;
+    perlinDesert.offsetX = 100.0f;
+    perlinDesert.offsetY = 100.0f;
+    
+    Perlin perlinDesertHills;
+    perlinDesertHills.heightMultuplier = 10;
+    perlinDesertHills.heightThreshold = 0.0f;
+    perlinDesertHills.noiseWidth  = 0.01;
+    perlinDesertHills.noiseHeight = 0.01;
+    
+    biomeLayerPlains.perlin.push_back(perlinPlains);
+    biomeLayerDesert.perlin.push_back(perlinDesert);
+    biomeLayerDesert.perlin.push_back(perlinDesertHills);
     
     
     //
     // Decoration generation
     
-    DecorationSpecifier decorGrass;
-    decorGrass.type = DECORATION_GRASS;
-    decorGrass.density = 1000;
-    decorGrass.spawnHeightMaximum = 10;
-    decorGrass.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorGrass.spawnStackHeightMin = 1;
-    decorGrass.spawnStackHeightMax = 8;
-    decorGrass.threshold = 0.0f;
-    decorGrass.noise = 0.5f;
+    DecorationSpecifier decorGrassShort;
+    decorGrassShort.type = DecorationType::Grass;
+    decorGrassShort.name = "Short";
+    decorGrassShort.density = 400;
+    decorGrassShort.spawnHeightMaximum = 10;
+    decorGrassShort.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorGrassShort.spawnStackHeightMin = 1;
+    decorGrassShort.spawnStackHeightMax = 8;
+    decorGrassShort.threshold = 0.0f;
+    decorGrassShort.noise = 0.5f;
+    
+    DecorationSpecifier decorGrassTall;
+    decorGrassTall.type = DecorationType::Grass;
+    decorGrassTall.name = "Tall";
+    decorGrassTall.density = 400;
+    decorGrassTall.spawnHeightMaximum = 10;
+    decorGrassTall.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorGrassTall.spawnStackHeightMin = 1;
+    decorGrassTall.spawnStackHeightMax = 8;
+    decorGrassTall.threshold = 0.0f;
+    decorGrassTall.noise = 0.5f;
+    
+    DecorationSpecifier decorGrassDesert;
+    decorGrassDesert.type = DecorationType::Grass;
+    decorGrassDesert.name = "Dry";
+    decorGrassDesert.density = 100;
+    decorGrassDesert.spawnHeightMaximum = 10;
+    decorGrassDesert.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorGrassDesert.spawnStackHeightMin = 1;
+    decorGrassDesert.spawnStackHeightMax = 8;
+    decorGrassDesert.threshold = 0.0f;
+    decorGrassDesert.noise = 0.5f;
     
     DecorationSpecifier decorTrees;
-    decorTrees.type = DECORATION_TREE;
-    decorTrees.density = 10;
+    decorTrees.type = DecorationType::Tree;
+    decorTrees.name = "Oak";
+    decorTrees.density = 100;
     decorTrees.spawnHeightMaximum = 10;
     decorTrees.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorTrees.spawnStackHeightMin = 4;
@@ -403,28 +451,17 @@ void Start() {
     decorTrees.threshold = -0.08f;
     decorTrees.noise     = 0.001f;
     
-    DecorationSpecifier decorStructure;
-    decorStructure.type = DECORATION_STRUCTURE;
-    decorStructure.density = 3;
-    decorStructure.spawnHeightMaximum = 20;
-    decorStructure.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorStructure.spawnStackHeightMax = 4;
-    decorStructure.spawnStackHeightMin = 2;
-    decorStructure.threshold = 0.02f;
-    decorStructure.noise     = 0.087f;
-    
-    
-    GameWorld.world.mDecorations.push_back(decorGrass);
-    GameWorld.world.mDecorations.push_back(decorTrees);
-    GameWorld.world.mDecorations.push_back(decorStructure);
-    
+    biomeLayerPlains.decorations.push_back(decorGrassShort);
+    biomeLayerPlains.decorations.push_back(decorGrassTall);
+    biomeLayerPlains.decorations.push_back(decorTrees);
+    biomeLayerDesert.decorations.push_back(decorGrassDesert);
     
     
     //
     // Actors
     
     DecorationSpecifier decorSheep;
-    decorSheep.type = DECORATION_ACTOR;
+    decorSheep.type = DecorationType::Actor;
     decorSheep.name = "Sheep";
     decorSheep.density = 20;
     decorSheep.spawnHeightMaximum = 10;
@@ -433,7 +470,7 @@ void Start() {
     decorSheep.noise     = 0.3f;
     
     DecorationSpecifier decorHorse;
-    decorHorse.type = DECORATION_ACTOR;
+    decorHorse.type = DecorationType::Actor;
     decorHorse.name = "Horse";
     decorHorse.density = 2;
     decorHorse.spawnHeightMaximum = 10;
@@ -442,7 +479,7 @@ void Start() {
     decorHorse.noise     = 0.5;
     
     DecorationSpecifier decorBovine;
-    decorBovine.type = DECORATION_ACTOR;
+    decorBovine.type = DecorationType::Actor;
     decorBovine.name = "Bovine";
     decorBovine.density = 2;
     decorBovine.spawnHeightMaximum = 10;
@@ -451,7 +488,7 @@ void Start() {
     decorBovine.noise     = 0.5f;
     
     DecorationSpecifier decorBear;
-    decorBear.type = DECORATION_ACTOR;
+    decorBear.type = DecorationType::Actor;
     decorBear.name = "Bear";
     decorBear.density = 1;
     decorBear.spawnHeightMaximum = 50;
@@ -460,7 +497,7 @@ void Start() {
     decorBear.noise     = 0.5f;
     
     DecorationSpecifier decorDog;
-    decorDog.type = DECORATION_ACTOR;
+    decorDog.type = DecorationType::Actor;
     decorDog.name = "Dog";
     decorDog.density = 1;
     decorDog.spawnHeightMaximum = 50;
@@ -468,11 +505,16 @@ void Start() {
     decorDog.threshold = 0.0f;
     decorDog.noise     = 0.5f;
     
-    GameWorld.world.mDecorations.push_back(decorSheep);
-    GameWorld.world.mDecorations.push_back(decorBovine);
-    GameWorld.world.mDecorations.push_back(decorHorse);
-    GameWorld.world.mDecorations.push_back(decorBear);
-    GameWorld.world.mDecorations.push_back(decorDog);
+    //biomeLayerDesert.decorations.push_back(decorSheep);
+    //biomeLayerDesert.decorations.push_back(decorBovine);
+    //biomeLayerDesert.decorations.push_back(decorHorse);
+    //biomeLayerDesert.decorations.push_back(decorBear);
+    //biomeLayerDesert.decorations.push_back(decorDog);
+    
+    
+    GameWorld.world.mBiomes.push_back(biomeLayerDesert);
+    GameWorld.world.mBiomes.push_back(biomeLayerPlains);
+    
     
     // Lighting levels
     
@@ -489,9 +531,9 @@ void Start() {
     
     // World rendering
     GameWorld.chunkSize = 64;
-    GameWorld.renderDistance = 8;
-    GameWorld.staticDistance = 0.5f;
-    GameWorld.actorDistance  = 0.3f;
+    GameWorld.renderDistance = 9;
+    GameWorld.staticDistance = 0.8f;
+    GameWorld.actorDistance  = 0.4f;
     
     GameWorld.world.snowCapHeight = 20.0f;
     GameWorld.world.snowCapBias = 8.0f;

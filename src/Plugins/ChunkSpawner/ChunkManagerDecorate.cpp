@@ -2,71 +2,69 @@
 
 
 void ChunkManager::Decorate(Chunk& chunk) {
-    unsigned int numberOfDecorations = world.mDecorations.size();
-    if (numberOfDecorations == 0) 
+    unsigned int numberOfBiomes = world.mBiomes.size();
+    if (numberOfBiomes == 0 || chunk.biomeMap.empty())
         return;
     
     Mesh* staticMesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
     chunk.statics.clear();
-    
     staticMesh->ClearSubMeshes();
     
-    for (int xx=0; xx < chunkSize; xx++) {
-        for (int zz=0; zz < chunkSize; zz++) {
-            float xp = xx - (chunkSize / 2);
+    unsigned int chunkSZ = chunkSize + 1;
+    
+    for (int xx = 0; xx < chunkSize; xx++) {
+        float xp = xx - (chunkSize / 2);
+        float staticX = chunk.x - xp;
+        
+        for (int zz = 0; zz < chunkSize; zz++) {
             float zp = zz - (chunkSize / 2);
+            float staticZ = chunk.y - zp;
             
-            float staticX = (chunk.x - xp);
-            float staticZ = (chunk.y - zp);
+            glm::vec3 worldPos(staticX, 0, staticZ);
+            int index = zz * chunkSZ + xx;
             
-            glm::vec3 from(staticX, 0, staticZ);
+            // Find which biome dominates here
+            int biomeIndex = chunk.biomeMap[index];
+            if (biomeIndex < 0 || biomeIndex >= (int)world.mBiomes.size())
+                continue;
             
-            // Pick a random decoration for this world
-            DecorationSpecifier decor = world.mDecorations[Random.Range(0, world.mDecorations.size())];
+            Biome& biome = world.mBiomes[biomeIndex];
             
-            if (decor.type == DECORATION_ACTOR) {
-                if ((unsigned int)Random.Range(0, 10000) > decor.density) 
-                    continue;
-            } else {
+            // Loop over that biome's decorations
+            for (unsigned int d = 0; d < biome.decorations.size(); d++) {
+                DecorationSpecifier& decor = biome.decorations[d];
+                
                 if ((unsigned int)Random.Range(0, 1000) > decor.density) 
                     continue;
-            }
-            
-            // Perlin generation
-            if (Random.Perlin(xx * decor.noise, 0, zz * decor.noise, chunk.seed) < decor.threshold) 
-                continue;
-            
-            float distance = 2000.0f;
-            float height = 0.0f;
-            
-            Hit hit;
-            if (Physics.Raycast(from, glm::vec3(0, -1, 0), distance, hit, LayerMask::Ground)) 
-                height = hit.point.y;
-            
-            if (height > world.staticHeightCutoff) 
-                continue;
-            
-            if (height == 0.0f) 
-                continue;
-            
-            // World spawn height range
-            if (height > decor.spawnHeightMaximum || height < decor.spawnHeightMinimum) 
-                continue;
-            
-            switch (decor.type) {
+                if ((unsigned int)Random.Range(0, 1000) > decor.density) 
+                    continue;
                 
-            case DECORATION_GRASS: 
-                if (Random.Range(0, 100) > 50) 
-                    {AddDecorGrass(chunk, staticMesh, glm::vec3(-xp, height, -zp), Decoration::Grass::Short); break;}
-                else 
-                    {AddDecorGrass(chunk, staticMesh, glm::vec3(-xp, height, -zp), Decoration::Grass::Tall); break;}
-                break;
+                // Perlin generation
+                if (Random.Perlin(xx * decor.noise, 0, zz * decor.noise, chunk.seed) < decor.threshold) 
+                    continue;
                 
-            case DECORATION_TREE:   AddDecorTree(chunk, staticMesh, glm::vec3(-xp, height, -zp), Decoration::Tree::Oak); break;
-            case DECORATION_ACTOR:  AddDecoreActor(decor.name, glm::vec3(from.x, height, from.z)); break;
-            case DECORATION_STRUCTURE:  AddDecorStructure(chunk, staticMesh, glm::vec3(-xp, height, -zp)); break;
+                float height = 0.0f;
+                glm::vec3 from(staticX, 0, staticZ);
+                
+                Hit hit;
+                if (Physics.Raycast(from, glm::vec3(0, -1, 0), 2000.0f, hit, LayerMask::Ground)) 
+                    height = hit.point.y;
+                
+                if (height > world.staticHeightCutoff) 
+                    continue;
+                
+                switch (decor.type) {
+                    
+                case DecorationType::Grass:      AddDecorGrass(chunk, staticMesh, glm::vec3(-xp, height, -zp), decor.name); break;
+                case DecorationType::Tree:       AddDecorTree(chunk, staticMesh, glm::vec3(-xp, height, -zp), decor.name); break;
+                case DecorationType::Actor:      AddDecoreActor(glm::vec3(from.x, height, from.z), decor.name); break;
+                case DecorationType::Structure:  AddDecorStructure(chunk, staticMesh, glm::vec3(-xp, height, -zp), decor.name); break;
+                    
+                }
                 
             }
+            
+            
             
         }
         
@@ -210,26 +208,28 @@ void ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction) {
     }
 }
 
-void ChunkManager::AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, Decoration::Grass grassType) {
+void ChunkManager::AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
     Color finalColor = Colors.white;
     float grassWidth = 1.0f;
     float grassHeight = 1.0f;
     
-    switch (grassType) {
-        
-    case Decoration::Grass::Short:
+    if (name == "Short") {
         grassWidth = 1.2f;
         grassHeight = 0.5f;
-        finalColor = Colors.green * (0.024f + (Random.Range(0, 80) * 0.0007f));
-        break;
-        
-    case Decoration::Grass::Tall:
+        finalColor = Colors.green * 0.034f;
+    }
+    if (name == "Tall") {
         grassWidth = 0.7f;
         grassHeight = 2.0f;
-        finalColor = Colors.green * (0.024f + (Random.Range(0, 80) * 0.0007f));
-        break;
-        
+        finalColor = Colors.green * 0.034f;
     }
+    
+    if (name == "Dry") {
+        grassWidth = 0.7f;
+        grassHeight = 2.0f;
+        finalColor = Colors.brown * 0.08f;
+    }
+    finalColor += Colors.MakeRandomGrayScale() * 0.0087f;
     
     glm::vec3 scale(grassWidth, grassHeight, grassWidth);
     glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
@@ -239,7 +239,7 @@ void ChunkManager::AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 posit
 }
 
 
-void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, Decoration::Tree treeType) {
+void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
     float minimumHeight = 3.0f;
     float maximumHeight = 5.0f;
     
@@ -251,11 +251,9 @@ void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 positi
     float leafWidth = 1.0f;
     float leafHeight = 0.7f;
     
-    switch (treeType) {
-        
-    case Decoration::Tree::Oak:
+    if (name == "Oak") {
         minimumHeight = 10.0f;
-        maximumHeight = 15.0f;
+        maximumHeight = 18.0f;
         
         numberOfLeavesMin = 4;
         numberOfLeavesMax = 8;
@@ -264,8 +262,6 @@ void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 positi
         trunkSize = 0.7f;
         leafWidth = 7.0f;
         leafHeight = 3.0f;
-        break;
-        
     }
     
     float height = Random.Range(minimumHeight, maximumHeight);
@@ -301,7 +297,7 @@ void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 positi
 
 
 
-void ChunkManager::AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 position) {
+void ChunkManager::AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
     
     return;
     
@@ -422,7 +418,7 @@ void ChunkManager::DecodeGenome(std::string name, Actor* actorPtr) {
     return;
 }
 
-void ChunkManager::AddDecoreActor(std::string name, glm::vec3 position) {
+void ChunkManager::AddDecoreActor(glm::vec3 position, std::string name) {
     Actor* actor = SummonActor(position);
     DecodeGenome(name, actor);
     
