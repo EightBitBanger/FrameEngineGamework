@@ -19,11 +19,11 @@ bool ChunkManager::SaveWorld(void) {
     
     // Save world chunks
     
-    unsigned int numberOfChunks = chunks.size();
+    unsigned int numberOfChunks = chunks.Size();
     unsigned int numberOfActors = AI.GetNumberOfActors();
     
     for (unsigned int c=0; c < numberOfChunks; c++) 
-        SaveChunk( chunks[c], false );
+        SaveChunk(*chunks[c], false );
     
     // Reset actor save marker
     for (unsigned int a=0; a < numberOfActors; a++) {

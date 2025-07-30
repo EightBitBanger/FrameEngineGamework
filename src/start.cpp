@@ -394,10 +394,10 @@ void Start() {
     perlinDesert.offsetY = 100.0f;
     
     Perlin perlinDesertHills;
-    perlinDesertHills.heightMultuplier = 10;
+    perlinDesertHills.heightMultuplier = 5;
     perlinDesertHills.heightThreshold = 0.0f;
-    perlinDesertHills.noiseWidth  = 0.01;
-    perlinDesertHills.noiseHeight = 0.01;
+    perlinDesertHills.noiseWidth  = 0.03;
+    perlinDesertHills.noiseHeight = 0.03;
     
     biomeLayerPlains.perlin.push_back(perlinPlains);
     biomeLayerDesert.perlin.push_back(perlinDesert);

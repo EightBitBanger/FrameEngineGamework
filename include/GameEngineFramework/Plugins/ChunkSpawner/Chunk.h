@@ -17,6 +17,12 @@ public:
     /// Is the chunk active in the scene
     bool isActive;
     
+    /// Is this chunk finished generating
+    bool isGenerated;
+    
+    /// Is the chunk fully generated
+    bool isComplete;
+    
     /// Current seed used to generate this chunk
     int seed;
     
@@ -41,6 +47,11 @@ public:
     
     /// Biome region tracking map.
     std::vector<int> biomeMap;
+    
+    /// Generation fields
+    float* heightField;
+    glm::vec3* colorField;
+    
 };
 
 

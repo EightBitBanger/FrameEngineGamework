@@ -1,4 +1,8 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
+#include <GameEngineFramework/Timer/Timer.h>
+
+void chunkGenerationThread(void);
+bool isChunkGenerationActive = false;
 
 ChunkManager::ChunkManager() : 
     isInitiated(false),
@@ -35,6 +39,17 @@ ChunkManager::ChunkManager() :
 
 void ChunkManager::Initiate(void) {
     
+    // Fire up the generation thread
+    if (isChunkGenerationActive) 
+        return;
+    isChunkGenerationActive = true;
+    threadTimer.SetRefreshRate(3);
+    generationThread = new std::thread( chunkGenerationThread );
+    
+    Log.Write( " >> Starting thread chunk generator" );
+    
+    
+    // Initiate AI
     AI.SetWaterLevel( world.waterLevel );
     
     // Source meshes for world construction
@@ -143,7 +158,7 @@ void ChunkManager::ClearWorld(void) {
     world.doGenerateChunks = false;
     isInitiated = false;
     
-    for (unsigned int c=0; c < chunks.size(); c++) 
+    for (unsigned int c=0; c < chunks.Size(); c++) 
         DestroyChunk( chunks[c] );
     
     unsigned int numberOfActors = AI.GetNumberOfActors();
@@ -153,7 +168,7 @@ void ChunkManager::ClearWorld(void) {
     mChunkCounterX = 0;
     mChunkCounterZ = 0;
     
-    chunks.clear();
+    //chunks.clear();
     mWorldRules.clear();
     
     return;
@@ -231,9 +246,9 @@ bool ChunkManager::ApplyWorldRule(std::string key, std::string value) {
 }
 
 Chunk* ChunkManager::FindChunk(int x, int y) {
-    unsigned int numberOfChunks = chunks.size();
+    unsigned int numberOfChunks = chunks.Size();
     for (unsigned int i=0; i < numberOfChunks; i++) {
-        Chunk* chunk = &chunks[i];
+        Chunk* chunk = chunks[i];
         if ((chunk->x != x) | (chunk->y != y)) 
             continue;
         return chunk;
@@ -241,4 +256,33 @@ Chunk* ChunkManager::FindChunk(int x, int y) {
     return nullptr;
 }
 
+
+extern ChunkManager GameWorld;
+
+void chunkGenerationThread(void) {
+    
+    while (isChunkGenerationActive) {
+        std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
+        std::lock_guard<std::mutex> lock(GameWorld.mux);
+        
+        if (!GameWorld.threadTimer.Update()) 
+            continue;
+        
+        unsigned int numberOfChunks = GameWorld.generating.size();
+        if (numberOfChunks == 0) 
+            continue;
+        
+        float chunkSZ = GameWorld.chunkSize;
+        Chunk* chunk = GameWorld.generating[0];
+        GameWorld.generating.erase( GameWorld.generating.begin() );
+        
+        //GameWorld.FinalizeChunk(chunk);
+        
+        chunk->isGenerated = true;
+    }
+    
+    Log.Write( " >> Shutting down chunk generation" );
+    
+    return;
+}
 

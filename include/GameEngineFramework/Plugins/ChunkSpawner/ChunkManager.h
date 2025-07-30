@@ -155,8 +155,10 @@ public:
     
     // Chunks
     
-    Chunk CreateChunk(float x, float y);
-    bool DestroyChunk(Chunk& chunk);
+    Chunk* CreateChunk(float x, float y);
+    void FinalizeChunk(Chunk* chunk);
+    
+    bool DestroyChunk(Chunk* chunk);
     
     // World rules
     
@@ -240,7 +242,7 @@ public:
     
     void Decorate(Chunk& chunk);
     
-    std::vector<Chunk> chunks;
+    PoolAllocator<Chunk> chunks;
     
     // World material batches
     
@@ -248,7 +250,15 @@ public:
     Material* worldMaterial;
     Material* staticMaterial;
     
+    // List of chunks to process for generation
+    std::vector<Chunk*> generating;
+    std::mutex mux;
+    Timer threadTimer;
+    
 private:
+    
+    // Chunk generation thread
+    std::thread* generationThread;
     
     // World generation functions
     

@@ -2,6 +2,8 @@
 
 Chunk::Chunk() : 
     isActive(false),
+    isGenerated(false),
+    isComplete(false),
     seed(0),
     x(0),
     y(0),
@@ -10,6 +12,8 @@ Chunk::Chunk() :
     staticObject(nullptr),
     rigidBody(nullptr),
     bodyCollider(nullptr),
-    meshCollider(nullptr)
+    meshCollider(nullptr),
+    heightField(nullptr),
+    colorField(nullptr)
 {
 }

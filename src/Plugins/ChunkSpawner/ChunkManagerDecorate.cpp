@@ -143,20 +143,20 @@ void ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction) {
     int bestSubMeshIndex = -1;
     glm::vec3 bestLocalPos;
     
-    for (unsigned int i = 0; i < chunks.size(); i++) {
-        Chunk& chunk = chunks[i];
+    for (unsigned int i = 0; i < chunks.Size(); i++) {
+        Chunk& chunk = *chunks[i];
         glm::vec3 chunkPos = glm::vec3(chunk.x, 0, chunk.y);
         
         if (glm::distance(chunkPos, position) > chunkSize) 
             continue;
         
-        Mesh* chunkMesh = chunks[i].staticObject->GetComponent<MeshRenderer>()->mesh;
+        Mesh* chunkMesh = chunks[i]->staticObject->GetComponent<MeshRenderer>()->mesh;
         
         SubMesh subMesh;
         for (unsigned int s = 0; s < chunkMesh->GetSubMeshCount(); s++) {
             chunkMesh->GetSubMesh(s, subMesh);
             
-            glm::vec3 worldPos = subMesh.position + glm::vec3(chunks[i].x, 0, chunks[i].y);
+            glm::vec3 worldPos = subMesh.position + glm::vec3(chunks[i]->x, 0, chunks[i]->y);
             
             if (glm::distance(worldPos, position) > maxDistance) 
                 continue;
@@ -189,7 +189,7 @@ void ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction) {
     
     // Remove the best candidate
     if (bestChunkIndex != -1) {
-        Chunk& chunk = chunks[bestChunkIndex];
+        Chunk& chunk = *chunks[bestChunkIndex];
         Mesh* mesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
         
         // Remove from statics

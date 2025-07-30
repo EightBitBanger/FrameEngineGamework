@@ -1,26 +1,27 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
+bool testFlip = false;
 
-Chunk ChunkManager::CreateChunk(float x, float y) {
+Chunk* ChunkManager::CreateChunk(float x, float y) {
     
-    Chunk chunk;
+    Chunk* chunk = chunks.Create();
     
-    chunk.x = x;
-    chunk.y = y;
+    chunk->x = x;
+    chunk->y = y;
     
-    chunk.gameObject = Engine.Create<GameObject>();
-    chunk.staticObject = Engine.Create<GameObject>();
+    chunk->gameObject = Engine.Create<GameObject>();
+    chunk->staticObject = Engine.Create<GameObject>();
     
-    chunk.gameObject->name = Float.ToString(x) + "_" + Float.ToString(y);
+    chunk->gameObject->name = Float.ToString(x) + "_" + Float.ToString(y);
     
     // Add renderers
-    chunk.gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-    chunk.staticObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+    chunk->gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+    chunk->staticObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     
-    MeshRenderer* chunkRenderer = chunk.gameObject->GetComponent<MeshRenderer>();
-    MeshRenderer* staticRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
+    MeshRenderer* chunkRenderer = chunk->gameObject->GetComponent<MeshRenderer>();
+    MeshRenderer* staticRenderer = chunk->staticObject->GetComponent<MeshRenderer>();
     
-    chunk.gameObject->renderDistance   = (renderDistance * chunkSize) * 0.5f;
-    chunk.staticObject->renderDistance = (renderDistance * chunkSize) * 0.5f * staticDistance;
+    chunk->gameObject->renderDistance   = (renderDistance * chunkSize) * 0.5f;
+    chunk->staticObject->renderDistance = (renderDistance * chunkSize) * 0.5f * staticDistance;
     
     // Bounding box area
     glm::vec3 boundMin(-1, -1, -1);
@@ -34,7 +35,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     // Chunk renderer
     
-    Transform* chunkTransform = chunk.gameObject->GetComponent<Transform>();
+    Transform* chunkTransform = chunk->gameObject->GetComponent<Transform>();
     
     chunkTransform->SetPosition(x, 0, y);
     chunkTransform->scale = glm::vec3( 1, 1, 1 );
@@ -46,7 +47,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     
     // Static renderer
     
-    Transform* staticTransform = chunk.staticObject->GetComponent<Transform>();
+    Transform* staticTransform = chunk->staticObject->GetComponent<Transform>();
     
     staticTransform->SetPosition( x, 0, y);
     staticTransform->scale = glm::vec3( 1, 1, 1 );
@@ -56,10 +57,15 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
     staticRenderer->EnableFrustumCulling();
     staticRenderer->material = staticMaterial;
     
+    return chunk;
+}
+
+
+
+
+void ChunkManager::FinalizeChunk(Chunk* chunk) {
     
-    //
     // Generate biome blend masks
-    
     unsigned int chunkSZ = chunkSize + 1;
     unsigned int fieldSize = chunkSZ * chunkSZ;
     unsigned int numberOfBiomes = world.mBiomes.size();
@@ -74,8 +80,8 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
             unsigned int x = i % chunkSZ;
             unsigned int z = i / chunkSZ;
             
-            float xCoord = (x + chunk.x + biome.offsetX) * biome.noiseWidth;
-            float zCoord = (z + chunk.y + biome.offsetZ) * biome.noiseHeight;
+            float xCoord = (x + chunk->x + biome.offsetX) * biome.noiseWidth;
+            float zCoord = (z + chunk->y + biome.offsetZ) * biome.noiseHeight;
             
             float strength = Random.Perlin(xCoord, 0, zCoord, worldSeed);
             strength = glm::clamp(strength, 0.0f, 1.0f);
@@ -86,7 +92,7 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
         
     }
     
-    // Calculate dominate biome for decoration generation
+    // Calculate dominant biome for decoration generation
     std::vector<int> dominantBiome(fieldSize, -1);
     for (unsigned int i = 0; i < fieldSize; i++) {
         float maxW = 0.0f;
@@ -98,16 +104,16 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
             }
         }
     }
-    chunk.biomeMap = dominantBiome;
+    chunk->biomeMap = dominantBiome;
     
-    // Zero out
-    float heightField [ chunkSZ * chunkSZ ];
-    glm::vec3 colorField  [ chunkSZ * chunkSZ ];
-    SetHeightFieldValues(heightField, chunkSZ, chunkSZ, 0);
-    SetColorFieldValues(colorField, chunkSZ, chunkSZ, Colors.white);
+    chunk->heightField = (float*)malloc(sizeof(float) * (chunkSZ * chunkSZ));
+    chunk->colorField = (glm::vec3*)malloc(sizeof(glm::vec3) * (chunkSZ * chunkSZ));
+    
+    SetHeightFieldValues(chunk->heightField, chunkSZ, chunkSZ, 0);
+    SetColorFieldValues(chunk->colorField, chunkSZ, chunkSZ, Colors.red);
     
     // Generate terrain color
-    GenerateColorFieldFromHeightField(colorField, heightField, chunkSZ, chunkSZ, world.chunkColorLow, world.chunkColorHigh, world.chunkColorBias);
+    GenerateColorFieldFromHeightField(chunk->colorField, chunk->heightField, chunkSZ, chunkSZ, world.chunkColorLow, world.chunkColorHigh, world.chunkColorBias);
     
     // Biome generation
     if (numberOfBiomes > 0) {
@@ -119,59 +125,26 @@ Chunk ChunkManager::CreateChunk(float x, float y) {
             Color biomeColor;
             biomeColor = glm::vec3(biomeLayer->color.r, biomeLayer->color.g, biomeLayer->color.b);
             
-            float offsetX = chunk.x + biomeLayer->offsetX;
-            float offsetZ = chunk.y + biomeLayer->offsetZ;
+            float offsetX = chunk->x + biomeLayer->offsetX;
+            float offsetZ = chunk->y + biomeLayer->offsetZ;
             
-            GenerateBiome(colorField, heightField, &chunk, &world.mBiomes[b], biomeWeights[b].data(), totalWeights.data());
+            GenerateBiome(chunk->colorField, chunk->heightField, chunk, &world.mBiomes[b], biomeWeights[b].data(), totalWeights.data());
         }
     }
     
     for (unsigned int i = 0; i < fieldSize; i++) {
         if (totalWeights[i] < 0.01f) {
-            float xCoord = ((i % chunkSZ) + x) * 0.05f;
-            float zCoord = ((i / chunkSZ) + y) * 0.05f;
+            float xCoord = ((i % chunkSZ) + chunk->x) * 0.05f;
+            float zCoord = ((i / chunkSZ) + chunk->y) * 0.05f;
             
             float noise = Random.Perlin(xCoord, 0, zCoord, worldSeed) * 2.0f;
             
-            heightField[i] += noise;
+            chunk->heightField[i] += noise;
             
             Color fallback = Colors.Lerp(world.chunkColorLow, world.chunkColorHigh, glm::clamp(noise * 0.05f, 0.0f, 1.0f));
-            colorField[i] = glm::vec3(fallback.r, fallback.g, fallback.b);
+            chunk->colorField[i] = glm::vec3(fallback.r, fallback.g, fallback.b);
         }
     }
     
-    //AddColorFieldSnowCap(colorField, heightField, chunkSZ, chunkSZ, world.snowCapColor, world.snowCapHeight, world.snowCapBias);
-    
-    //GenerateWaterTableFromHeightField(heightField, chunkSZ, chunkSZ, world.waterLevel);
-    
-    AddHeightFieldToMesh(chunkRenderer->mesh, heightField, colorField, chunkSZ, chunkSZ, 0, 0, 1, 1);
-    chunkRenderer->mesh->Load();
-    
-    // Physics
-    
-    chunk.rigidBody = Physics.world->createRigidBody( rp3d::Transform::identity() );
-    
-    chunk.rigidBody->setAngularLockAxisFactor( rp3d::Vector3(0, 0, 0) );
-    chunk.rigidBody->setLinearLockAxisFactor( rp3d::Vector3(0, 0, 0) );
-    chunk.rigidBody->setType(rp3d::BodyType::STATIC);
-    
-    rp3d::Transform bodyTransform = rp3d::Transform::identity();
-    bodyTransform.setPosition( rp3d::Vector3(x, 0, y) );
-    
-    chunk.rigidBody->setTransform(bodyTransform);
-    
-    // Generate a height field collider
-    
-    MeshCollider* meshCollider = Physics.CreateHeightFieldMap(heightField, chunkSZ, chunkSZ, 1, 1, 1);
-    
-    rp3d::Collider* bodyCollider = chunk.rigidBody->addCollider( meshCollider->heightFieldShape, rp3d::Transform::identity() );
-    bodyCollider->setUserData( (void*)chunk.gameObject );
-    bodyCollider->setCollisionCategoryBits((unsigned short)LayerMask::Ground);
-    bodyCollider->setCollideWithMaskBits((unsigned short)CollisionMask::Entity);
-    
-    chunk.bodyCollider = bodyCollider;
-    chunk.meshCollider = meshCollider;
-    
-    return chunk;
 }
 

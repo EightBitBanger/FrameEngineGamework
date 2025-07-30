@@ -17,15 +17,6 @@ void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chun
             
             float noise = Random.Perlin(xCoord, 0, zCoord, worldSeed) * layer.heightMultuplier;
             
-            /*
-            if (layer.heightThreshold > 0.0f && noise < layer.heightThreshold) {
-                continue;
-            }
-            
-            if (layer.heightThreshold > 0.0f)
-                noise -= layer.heightThreshold;
-            */
-            
             float normalizedWeight = weightMask[j] / (totalWeights[j] + 0.0001f);
             heightField[j] += noise * normalizedWeight;
         }

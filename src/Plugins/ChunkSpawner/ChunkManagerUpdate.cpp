@@ -65,6 +65,63 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
                     
                 }
                 
+                // Check if the chunk has finished being generated
+                if (chunk->isGenerated && !chunk->isComplete) {
+                    chunk->isComplete = true;
+                    
+                    int chunkSZ = chunkSize+1;
+                    
+                    Mesh* chunkMesh = chunk->gameObject->GetComponent<MeshRenderer>()->mesh;
+                    AddHeightFieldToMesh(chunkMesh, chunk->heightField, chunk->colorField, chunkSZ, chunkSZ, 0, 0, 1, 1);
+                    chunkMesh->Load();
+                    
+                    // Physics
+                    
+                    chunk->rigidBody = Physics.world->createRigidBody( rp3d::Transform::identity() );
+                    
+                    chunk->rigidBody->setAngularLockAxisFactor( rp3d::Vector3(0, 0, 0) );
+                    chunk->rigidBody->setLinearLockAxisFactor( rp3d::Vector3(0, 0, 0) );
+                    chunk->rigidBody->setType(rp3d::BodyType::STATIC);
+                    
+                    rp3d::Transform bodyTransform = rp3d::Transform::identity();
+                    bodyTransform.setPosition( rp3d::Vector3(chunk->x, 0, chunk->y) );
+                    
+                    chunk->rigidBody->setTransform(bodyTransform);
+                    
+                    // Generate a height field collider
+                    
+                    MeshCollider* meshCollider = Physics.CreateHeightFieldMap(chunk->heightField, chunkSZ, chunkSZ, 1, 1, 1);
+                    
+                    rp3d::Collider* bodyCollider = chunk->rigidBody->addCollider( meshCollider->heightFieldShape, rp3d::Transform::identity() );
+                    bodyCollider->setUserData( (void*)chunk->gameObject );
+                    bodyCollider->setCollisionCategoryBits((unsigned short)LayerMask::Ground);
+                    bodyCollider->setCollideWithMaskBits((unsigned short)CollisionMask::Entity);
+                    
+                    chunk->bodyCollider = bodyCollider;
+                    chunk->meshCollider = meshCollider;
+                    
+                    
+                    //
+                    // Load / generate decorations / actors
+                    
+                    std::string filename = Int.ToString(chunkPos.x) + "_" + Int.ToString(chunkPos.y);
+                    std::string chunkFilename = "worlds/" + world.name + "/chunks/" + filename;
+                    std::string staticFilename = "worlds/" + world.name + "/static/" + filename;
+                    
+                    if (Serializer.CheckExists(chunkFilename) || Serializer.CheckExists(staticFilename)) {
+                        LoadChunk(*chunk);
+                        
+                    } else {
+                        chunk->seed = worldSeed + ((chunkPos.x * 2) + (chunkPos.y * 4) / 2);
+                        
+                        Random.SetSeed(chunk->seed);
+                        Decorate(*chunk);
+                    }
+                    
+                    free(chunk->heightField);
+                    free(chunk->colorField);
+                }
+                
                 continue;
             }
             
@@ -72,35 +129,24 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
             if (glm::distance(chunkPos, playerPos) > (renderDistance * (chunkSizeSub / 2))) 
                 continue;
             
-            // Generate the chunk
-            std::string filename = Int.ToString(chunkPos.x) + "_" + Int.ToString(chunkPos.y);
-            std::string chunkFilename = "worlds/" + world.name + "/chunks/" + filename;
-            std::string staticFilename = "worlds/" + world.name + "/static/" + filename;
+            Chunk* chunk = CreateChunk(chunkPos.x, chunkPos.y);
             
-            Chunk chunk = CreateChunk(chunkPos.x, chunkPos.y);
+            mux.lock();
+            generating.push_back(chunk);
+            mux.unlock();
             
-            if (Serializer.CheckExists(chunkFilename) || Serializer.CheckExists(staticFilename)) {
-                LoadChunk(chunk);
-                
-            } else {
-                chunk.seed = worldSeed + ((chunkPos.x * 2) + (chunkPos.y * 4) / 2);
-                
-                Random.SetSeed(chunk.seed);
-                Decorate(chunk);
-            }
-            chunks.push_back(chunk);
         }
     }
     return;
 }
 
 void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
-    unsigned int numberOfChunks = chunks.size();
+    unsigned int numberOfChunks = chunks.Size();
     if (numberOfChunks == 0) 
         return;
     
     for (unsigned int c = 0; c < numberOfChunks; c++) {
-        Chunk& chunk = chunks[mChunkIndex];
+        Chunk& chunk = *chunks[mChunkIndex];
         if (chunk.gameObject == nullptr) 
             continue;
         
@@ -109,8 +155,7 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
         
         if (glm::distance(chunkPos, playerPos) > (renderDistance * chunkSize) * 1.5f) {
             SaveChunk(chunk, true);
-            DestroyChunk(chunk);
-            chunks.erase(chunks.begin() + mChunkIndex);
+            DestroyChunk(&chunk);
         }
         
         mChunkIndex++;
@@ -121,9 +166,9 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
 }
 
 bool ChunkManager::IsChunkFound(const glm::vec2 &chunkPosition) {
-    unsigned int numberOfChunks = chunks.size();
+    unsigned int numberOfChunks = chunks.Size();
     for (unsigned int c = 0; c < numberOfChunks; c++) {
-        Chunk& chunk = chunks[c];
+        Chunk& chunk = *chunks[c];
         if (glm::vec3(chunk.x, 0, chunk.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y)) 
             return true;
     }
