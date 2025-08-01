@@ -295,109 +295,50 @@ void Start() {
     Weather.SetStaticMaterial(GameWorld.staticMaterial);
     Weather.SetWaterMaterial(GameWorld.waterMaterial);
     
-    
-    
-    //
-    // Perlin layers
-    /*
-    // Mountain base ripple formation
-    Perlin perlinMountainA;
-    perlinMountainA.heightMultuplier = 20;
-    perlinMountainA.heightThreshold = 10.0f;
-    perlinMountainA.noiseWidth  = 0.02;
-    perlinMountainA.noiseHeight = 0.02;
-    
-    // Macro scale world formation
-    Perlin perlinMountainB;
-    perlinMountainB.heightMultuplier = 20;
-    perlinMountainB.heightThreshold = 20.0f;
-    perlinMountainB.noiseWidth  = 0.014;
-    perlinMountainB.noiseHeight = 0.014;
-    perlinMountainB.offsetX = 100.0f;
-    perlinMountainB.offsetY = 100.0f;
-    
-    // Macro scale world formation
-    Perlin perlinMountainC;
-    perlinMountainC.heightMultuplier = 100;
-    perlinMountainC.heightThreshold = 20.0f;
-    perlinMountainC.noiseWidth  = 0.014;
-    perlinMountainC.noiseHeight = 0.014;
-    perlinMountainC.offsetX = 100.0f;
-    perlinMountainC.offsetY = 100.0f;
-    
-    // Low level ripple layers
-    Perlin perlinLayerA;
-    perlinLayerA.heightMultuplier = 20;
-    perlinLayerA.heightThreshold = 1.0f;
-    perlinLayerA.noiseWidth  = 0.02;
-    perlinLayerA.noiseHeight = 0.02;
-    
-    Perlin perlinLayerB;
-    perlinLayerB.heightMultuplier = 1.7;
-    //perlinLayerB.heightThreshold = 0.1f;
-    perlinLayerB.noiseWidth  = 0.1;
-    perlinLayerB.noiseHeight = 0.1;
-    
-    // Flat world base layer
-    Perlin perlinFlatland;
-    perlinFlatland.heightMultuplier = 0.4;
-    perlinFlatland.noiseWidth  = 0.5;
-    perlinFlatland.noiseHeight = 0.5;
-    
-    //GameWorld.world.mPerlin.push_back(perlinMountainA);
-    //GameWorld.world.mPerlin.push_back(perlinMountainB);
-    //GameWorld.world.mPerlin.push_back(perlinMountainC);
-    //GameWorld.world.mPerlin.push_back(perlinLayerA);
-    //GameWorld.world.mPerlin.push_back(perlinLayerB);
-    //GameWorld.world.mPerlin.push_back(perlinFlatland);
-    */
-    
-    
-    //
-    // Biomes
-    Color biomeColor;
-    
-    // Planes
+    // Plains
     Biome biomeLayerPlains;
-    biomeColor = Colors.green * 0.1f;
+    Color biomeColor;
+    biomeColor = Colors.green * 0.087f;
     biomeLayerPlains.color = glm::vec3(biomeColor.r, biomeColor.g, biomeColor.b);
-    biomeLayerPlains.offsetX = 7600;
-    biomeLayerPlains.offsetZ = 7600;
-    biomeLayerPlains.noiseWidth  = 0.001f;
-    biomeLayerPlains.noiseHeight = 0.001f;
+    biomeLayerPlains.region.offsetX = 7600;
+    biomeLayerPlains.region.offsetZ = 7600;
+    biomeLayerPlains.region.noiseWidth  = 0.001f;
+    biomeLayerPlains.region.noiseHeight = 0.001f;
     
     // Desert
     Biome biomeLayerDesert;
     biomeColor = Colors.Lerp(Colors.yellow, Colors.red, 0.15f) * 0.3f;
     biomeLayerDesert.color = glm::vec3(biomeColor.r, biomeColor.g, biomeColor.b);
-    biomeLayerDesert.offsetX = 1000;
-    biomeLayerDesert.offsetZ = 1000;
-    biomeLayerDesert.noiseWidth  = 0.001f;
-    biomeLayerDesert.noiseHeight = 0.001f;
+    biomeLayerDesert.region.offsetX = 1000;
+    biomeLayerDesert.region.offsetZ = 1000;
+    biomeLayerDesert.region.noiseWidth  = 0.001f;
+    biomeLayerDesert.region.noiseHeight = 0.001f;
     
     
     //
-    // Perlin
+    // Perlin world generation
     
     Perlin perlinPlains;
-    perlinPlains.heightMultuplier = 30;
-    perlinPlains.heightThreshold = 0.0f;
-    perlinPlains.noiseWidth  = 0.01;
-    perlinPlains.noiseHeight = 0.01;
+    perlinPlains.heightMultuplier = 3;
+    perlinPlains.heightThreshold  = 0.0f;
+    perlinPlains.noiseWidth       = 0.07;
+    perlinPlains.noiseHeight      = 0.07;
     
     Perlin perlinDesert;
-    perlinDesert.heightMultuplier = 3;
-    perlinDesert.heightThreshold = 0.0f;
-    perlinDesert.noiseWidth  = 0.07;
-    perlinDesert.noiseHeight = 0.07;
+    perlinDesert.heightMultuplier = 1.24f;
+    perlinDesert.heightThreshold  = 0.0f;
+    perlinDesert.noiseWidth       = 0.07;
+    perlinDesert.noiseHeight      = 0.07;
     perlinDesert.offsetX = 100.0f;
     perlinDesert.offsetY = 100.0f;
     
     Perlin perlinDesertHills;
-    perlinDesertHills.heightMultuplier = 5;
-    perlinDesertHills.heightThreshold = 0.0f;
-    perlinDesertHills.noiseWidth  = 0.03;
-    perlinDesertHills.noiseHeight = 0.03;
+    perlinDesertHills.heightMultuplier = 2.0f;
+    perlinDesertHills.heightThreshold  = 0.0f;
+    perlinDesertHills.noiseWidth       = 0.09;
+    perlinDesertHills.noiseHeight      = 0.09;
+    perlinDesertHills.offsetX = 50.0f;
+    perlinDesertHills.offsetY = 50.0f;
     
     biomeLayerPlains.perlin.push_back(perlinPlains);
     biomeLayerDesert.perlin.push_back(perlinDesert);
@@ -413,8 +354,6 @@ void Start() {
     decorGrassShort.density = 400;
     decorGrassShort.spawnHeightMaximum = 10;
     decorGrassShort.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorGrassShort.spawnStackHeightMin = 1;
-    decorGrassShort.spawnStackHeightMax = 8;
     decorGrassShort.threshold = 0.0f;
     decorGrassShort.noise = 0.5f;
     
@@ -424,8 +363,6 @@ void Start() {
     decorGrassTall.density = 400;
     decorGrassTall.spawnHeightMaximum = 10;
     decorGrassTall.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorGrassTall.spawnStackHeightMin = 1;
-    decorGrassTall.spawnStackHeightMax = 8;
     decorGrassTall.threshold = 0.0f;
     decorGrassTall.noise = 0.5f;
     
@@ -435,19 +372,15 @@ void Start() {
     decorGrassDesert.density = 100;
     decorGrassDesert.spawnHeightMaximum = 10;
     decorGrassDesert.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorGrassDesert.spawnStackHeightMin = 1;
-    decorGrassDesert.spawnStackHeightMax = 8;
     decorGrassDesert.threshold = 0.0f;
     decorGrassDesert.noise = 0.5f;
     
     DecorationSpecifier decorTrees;
     decorTrees.type = DecorationType::Tree;
     decorTrees.name = "Oak";
-    decorTrees.density = 100;
+    decorTrees.density = 80;
     decorTrees.spawnHeightMaximum = 10;
     decorTrees.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorTrees.spawnStackHeightMin = 4;
-    decorTrees.spawnStackHeightMax = 24;
     decorTrees.threshold = -0.08f;
     decorTrees.noise     = 0.001f;
     
@@ -514,6 +447,7 @@ void Start() {
     
     GameWorld.world.mBiomes.push_back(biomeLayerDesert);
     GameWorld.world.mBiomes.push_back(biomeLayerPlains);
+    
     
     
     // Lighting levels

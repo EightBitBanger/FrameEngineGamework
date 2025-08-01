@@ -48,6 +48,10 @@ public:
     /// Biome region tracking map.
     std::vector<int> biomeMap;
     
+    /// Biome blend masks
+    std::vector<std::vector<float>> biomeWeights;
+    std::vector<float> totalWeights;
+    
     /// Generation fields
     float* heightField;
     glm::vec3* colorField;

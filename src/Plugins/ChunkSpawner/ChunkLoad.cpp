@@ -1,7 +1,7 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
-bool ChunkManager::LoadChunk(Chunk& chunk) {
-    std::string chunkPosStr = Float.ToString( chunk.x ) + "_" + Float.ToString( chunk.y );
+bool ChunkManager::LoadChunk(Chunk* chunk) {
+    std::string chunkPosStr = Float.ToString( chunk->x ) + "_" + Float.ToString( chunk->y );
     std::string worldChunks = "worlds\\" + world.name + "\\chunks\\";
     std::string worldStatic = "worlds\\" + world.name + "\\static\\";
     
@@ -63,7 +63,7 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
     // Load static
     
     if (Serializer.CheckExists( staticName )) {
-        MeshRenderer* meshRenderer = chunk.staticObject->GetComponent<MeshRenderer>();
+        MeshRenderer* meshRenderer = chunk->staticObject->GetComponent<MeshRenderer>();
         Mesh* staticMesh = meshRenderer->mesh;
         
         unsigned int fileSize = Serializer.GetFileSize(staticName);
@@ -120,7 +120,7 @@ bool ChunkManager::LoadChunk(Chunk& chunk) {
             staticMesh->ChangeSubMeshRotation(index-1, rotR, glm::vec3(0, 1.0f, 0));
             
             staticMesh->GetSubMesh(index, staticObj.subMesh);
-            chunk.statics.push_back(staticObj);
+            chunk->statics.push_back(staticObj);
         }
         
         staticMesh->Load();

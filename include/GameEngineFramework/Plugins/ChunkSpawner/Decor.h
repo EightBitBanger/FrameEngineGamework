@@ -73,17 +73,11 @@ public:
     /// Fade to top generation color.
     glm::vec3 colorHigh;
     
-    /// Minimum spawn height.
+    /// Minimum generation height.
     float spawnHeightMinimum;
     
-    /// Maximum spawn height.
+    /// Maximum generation height.
     float spawnHeightMaximum;
-    
-    /// Minimum plant generation stack height.
-    unsigned int spawnStackHeightMin;
-    
-    /// Maximum plant generation stack height.
-    unsigned int spawnStackHeightMax;
     
     /// Threshold to generate decoration from perlin noise.
     float threshold;
@@ -99,8 +93,6 @@ public:
         spawnHeightMinimum(0),
         spawnHeightMaximum(100),
         
-        spawnStackHeightMin(1),
-        spawnStackHeightMax(1),
         threshold(0.1f),
         noise(0.1f)
     {

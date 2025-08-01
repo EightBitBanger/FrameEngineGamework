@@ -142,8 +142,8 @@ public:
     
     // Save / load
     
-    bool SaveChunk(Chunk& chunk, bool doClearActors);
-    bool LoadChunk(Chunk& chunk);
+    bool SaveChunk(Chunk* chunk, bool doClearActors);
+    bool LoadChunk(Chunk* chunk);
     
     bool SaveWorld(void);
     bool LoadWorld(void);
@@ -156,9 +156,10 @@ public:
     // Chunks
     
     Chunk* CreateChunk(float x, float y);
-    void FinalizeChunk(Chunk* chunk);
-    
     bool DestroyChunk(Chunk* chunk);
+    
+    void GenerateChunkBiomes(Chunk* chunk);
+    void GenerateChunkBlendMasks(Chunk* chunk);
     
     // World rules
     
@@ -228,19 +229,19 @@ public:
     void Update(void);
     
     // Base decoration function
-    unsigned int AddDecor(Chunk& chunk, unsigned int index, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
+    unsigned int AddDecor(Chunk* chunk, unsigned int index, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
     
     void RemoveDecor(glm::vec3 position, glm::vec3 direction);
     
     // Decoration
-    void AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
-    void AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
-    void AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
+    void AddDecorGrass(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
+    void AddDecorTree(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
+    void AddDecorStructure(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
     void AddDecoreActor(glm::vec3 position, std::string name);
     
     void DecodeGenome(std::string name, Actor* actorPtr);
     
-    void Decorate(Chunk& chunk);
+    void Decorate(Chunk* chunk);
     
     PoolAllocator<Chunk> chunks;
     

@@ -1,7 +1,7 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
-bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
-    std::string chunkPosStr = Float.ToString( chunk.x ) + "_" + Float.ToString( chunk.y );
+bool ChunkManager::SaveChunk(Chunk* chunk, bool doClearActors) {
+    std::string chunkPosStr = Float.ToString( chunk->x ) + "_" + Float.ToString( chunk->y );
     std::string worldChunks = "worlds\\" + world.name + "\\chunks\\";
     std::string worldStatic = "worlds\\" + world.name + "\\static\\";
     
@@ -36,7 +36,7 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
             // Get point height
             if (Physics.Raycast(actorPos, glm::vec3(0, -1, 0), 2000, hit, LayerMask::Ground)) {
                 actorPos.y = hit.point.y;
-                if (((GameObject*)hit.collider->getUserData()) != chunk.gameObject) 
+                if (((GameObject*)hit.collider->getUserData()) != chunk->gameObject) 
                     continue;
             } else {
                 // TODO handle actors that are not in any chunk..
@@ -99,15 +99,15 @@ bool ChunkManager::SaveChunk(Chunk& chunk, bool doClearActors) {
     }
     
     // Save static objects
-    unsigned int numberOfStatics = chunk.statics.size();
+    unsigned int numberOfStatics = chunk->statics.size();
     StaticElement staticElements[numberOfStatics];
     if (numberOfStatics > 0) {
         
         for (unsigned int s=0; s < numberOfStatics; s++) {
-            staticElements[s].position = chunk.statics[s].position;
-            staticElements[s].rotation = chunk.statics[s].rotation;
-            staticElements[s].scale    = chunk.statics[s].scale;
-            staticElements[s].color    = chunk.statics[s].color;
+            staticElements[s].position = chunk->statics[s].position;
+            staticElements[s].rotation = chunk->statics[s].rotation;
+            staticElements[s].scale    = chunk->statics[s].scale;
+            staticElements[s].color    = chunk->statics[s].color;
             continue;
         }
         

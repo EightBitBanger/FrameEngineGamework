@@ -11,22 +11,31 @@ public:
     
     glm::vec3 color;
     
-    float noiseWidth;
-    float noiseHeight;
-    
-    float offsetX;
-    float offsetZ;
+    class GenerationRegion {
+        
+    public:
+        float noiseWidth;
+        float noiseHeight;
+        
+        float offsetX;
+        float offsetZ;
+        
+        GenerationRegion() : 
+            noiseWidth(0),
+            noiseHeight(0),
+            
+            offsetX(0),
+            offsetZ(0)
+        {}
+        
+    } region;
     
     std::vector<Perlin> perlin;
     
     std::vector<DecorationSpecifier> decorations;
     
     Biome() : 
-        color(1, 1, 1),
-        noiseWidth(0),
-        noiseHeight(0),
-        offsetX(0),
-        offsetZ(0)
+        color(1, 1, 1)
     {}
     
 };

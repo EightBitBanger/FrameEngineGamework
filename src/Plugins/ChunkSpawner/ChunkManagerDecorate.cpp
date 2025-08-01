@@ -1,30 +1,30 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
 
-void ChunkManager::Decorate(Chunk& chunk) {
+void ChunkManager::Decorate(Chunk* chunk) {
     unsigned int numberOfBiomes = world.mBiomes.size();
-    if (numberOfBiomes == 0 || chunk.biomeMap.empty())
+    if (numberOfBiomes == 0 || chunk->biomeMap.empty())
         return;
     
-    Mesh* staticMesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
-    chunk.statics.clear();
+    Mesh* staticMesh = chunk->staticObject->GetComponent<MeshRenderer>()->mesh;
+    chunk->statics.clear();
     staticMesh->ClearSubMeshes();
     
     unsigned int chunkSZ = chunkSize + 1;
     
     for (int xx = 0; xx < chunkSize; xx++) {
         float xp = xx - (chunkSize / 2);
-        float staticX = chunk.x - xp;
+        float staticX = chunk->x - xp;
         
         for (int zz = 0; zz < chunkSize; zz++) {
             float zp = zz - (chunkSize / 2);
-            float staticZ = chunk.y - zp;
+            float staticZ = chunk->y - zp;
             
             glm::vec3 worldPos(staticX, 0, staticZ);
             int index = zz * chunkSZ + xx;
             
             // Find which biome dominates here
-            int biomeIndex = chunk.biomeMap[index];
+            int biomeIndex = chunk->biomeMap[index];
             if (biomeIndex < 0 || biomeIndex >= (int)world.mBiomes.size())
                 continue;
             
@@ -34,13 +34,11 @@ void ChunkManager::Decorate(Chunk& chunk) {
             for (unsigned int d = 0; d < biome.decorations.size(); d++) {
                 DecorationSpecifier& decor = biome.decorations[d];
                 
-                if ((unsigned int)Random.Range(0, 1000) > decor.density) 
-                    continue;
-                if ((unsigned int)Random.Range(0, 1000) > decor.density) 
+                if ((unsigned int)Random.Range(0, 10000) > decor.density) 
                     continue;
                 
                 // Perlin generation
-                if (Random.Perlin(xx * decor.noise, 0, zz * decor.noise, chunk.seed) < decor.threshold) 
+                if (Random.Perlin(xx * decor.noise, 0, zz * decor.noise, chunk->seed) < decor.threshold) 
                     continue;
                 
                 float height = 0.0f;
@@ -75,7 +73,7 @@ void ChunkManager::Decorate(Chunk& chunk) {
 }
 
 
-unsigned int ChunkManager::AddDecor(Chunk& chunk, unsigned int index, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color) {
+unsigned int ChunkManager::AddDecor(Chunk* chunk, unsigned int index, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color) {
     staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshWallHorz, false);
     staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshWallVert, false);
     
@@ -101,7 +99,7 @@ unsigned int ChunkManager::AddDecor(Chunk& chunk, unsigned int index, Mesh* stat
     staticObject.scale    = scale;
     staticObject.color    = glm::vec3(color.r, color.g, color.b);
     
-    chunk.statics.push_back(staticObject);
+    chunk->statics.push_back(staticObject);
     return index;
 }
 
@@ -208,7 +206,7 @@ void ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction) {
     }
 }
 
-void ChunkManager::AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
+void ChunkManager::AddDecorGrass(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
     Color finalColor = Colors.white;
     float grassWidth = 1.0f;
     float grassHeight = 1.0f;
@@ -234,12 +232,12 @@ void ChunkManager::AddDecorGrass(Chunk& chunk, Mesh* staticMesh, glm::vec3 posit
     glm::vec3 scale(grassWidth, grassHeight, grassWidth);
     glm::vec3 rotation(0.0f, 0.0f, Random.Range(0, 360));
     
-    unsigned int beginningIndex = chunk.statics.size();
+    unsigned int beginningIndex = chunk->statics.size();
     AddDecor(chunk, beginningIndex, staticMesh, position + glm::vec3(0.0f, grassHeight * 0.16f, 0.0f), rotation, scale, finalColor);
 }
 
 
-void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
+void ChunkManager::AddDecorTree(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
     float minimumHeight = 3.0f;
     float maximumHeight = 5.0f;
     
@@ -252,16 +250,16 @@ void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 positi
     float leafHeight = 0.7f;
     
     if (name == "Oak") {
-        minimumHeight = 10.0f;
-        maximumHeight = 18.0f;
+        minimumHeight = 8.0f;
+        maximumHeight = 12.0f;
         
-        numberOfLeavesMin = 4;
-        numberOfLeavesMax = 8;
-        leafSpreadWidth  = 3.0f;
-        leafSpreadHeight = 2.0f;
+        numberOfLeavesMin = 6;
+        numberOfLeavesMax = 10;
+        leafSpreadWidth  = 1.25f;
+        leafSpreadHeight = 0.5f;
         trunkSize = 0.7f;
-        leafWidth = 7.0f;
-        leafHeight = 3.0f;
+        leafWidth = 5.5f;
+        leafHeight = 2.0f;
     }
     
     float height = Random.Range(minimumHeight, maximumHeight);
@@ -272,7 +270,7 @@ void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 positi
     Color finalColor;
     finalColor = Colors.brown * (0.02f + (Random.Range(0, 80) * 0.001f));
     
-    unsigned int beginningIndex = chunk.statics.size();
+    unsigned int beginningIndex = chunk->statics.size();
     AddDecor(chunk, beginningIndex, staticMesh, glm::vec3(position.x, position.y + (height * 0.25f), position.z), rotation, scale, finalColor);
     
     int numberOfLeaves = numberOfLeavesMin + (Random.Range(0, numberOfLeavesMax));
@@ -297,7 +295,7 @@ void ChunkManager::AddDecorTree(Chunk& chunk, Mesh* staticMesh, glm::vec3 positi
 
 
 
-void ChunkManager::AddDecorStructure(Chunk& chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
+void ChunkManager::AddDecorStructure(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
     
     return;
     

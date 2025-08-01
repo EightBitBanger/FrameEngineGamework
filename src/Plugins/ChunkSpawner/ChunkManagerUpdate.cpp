@@ -45,6 +45,8 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
             if (IsChunkFound(chunkPos)) {
                 
                 Chunk* chunk = FindChunk(chunkPos.x, chunkPos.y);
+                if (chunk == nullptr) 
+                    continue;
                 
                 // Check active fade in
                 if (!chunk->isActive) {
@@ -68,6 +70,8 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
                 // Check if the chunk has finished being generated
                 if (chunk->isGenerated && !chunk->isComplete) {
                     chunk->isComplete = true;
+                    
+                    GenerateChunkBiomes(chunk);
                     
                     int chunkSZ = chunkSize+1;
                     
@@ -109,13 +113,13 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
                     std::string staticFilename = "worlds/" + world.name + "/static/" + filename;
                     
                     if (Serializer.CheckExists(chunkFilename) || Serializer.CheckExists(staticFilename)) {
-                        LoadChunk(*chunk);
+                        LoadChunk(chunk);
                         
                     } else {
                         chunk->seed = worldSeed + ((chunkPos.x * 2) + (chunkPos.y * 4) / 2);
                         
                         Random.SetSeed(chunk->seed);
-                        Decorate(*chunk);
+                        Decorate(chunk);
                     }
                     
                     free(chunk->heightField);
@@ -146,16 +150,16 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
         return;
     
     for (unsigned int c = 0; c < numberOfChunks; c++) {
-        Chunk& chunk = *chunks[mChunkIndex];
-        if (chunk.gameObject == nullptr) 
+        Chunk* chunk = chunks[mChunkIndex];
+        if (chunk->gameObject == nullptr) 
             continue;
         
-        glm::vec3 chunkPos(chunk.x, 0, chunk.y);
+        glm::vec3 chunkPos(chunk->x, 0, chunk->y);
         glm::vec3 playerPos(playerPosition.x, 0, playerPosition.z);
         
         if (glm::distance(chunkPos, playerPos) > (renderDistance * chunkSize) * 1.5f) {
             SaveChunk(chunk, true);
-            DestroyChunk(&chunk);
+            DestroyChunk(chunk);
         }
         
         mChunkIndex++;
