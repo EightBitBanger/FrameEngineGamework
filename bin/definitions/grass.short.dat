@@ -1,0 +1,5 @@
+width = 2.5
+height = 1.0
+
+colorMin = green * 0.13
+colorMax = green * 0.24

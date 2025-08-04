@@ -1,0 +1,17 @@
+heightMin = 8.0
+heightMax = 12.0
+
+leafCountMin = 6
+leafCountMax = 10
+
+leafSpreadArea = 1.25
+leafSpreadHeight = 0.5
+leafWidth = 5.5
+leafHeight = 2.0
+trunkSize = 0.7
+
+trunkColorMin = brown * 0.4
+trunkColorMax = brown * 0.7
+
+leafColorMin = green * 0.3
+leafColorMax = green * 0.4

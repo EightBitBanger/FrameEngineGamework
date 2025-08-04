@@ -163,7 +163,7 @@ void ActorSystem::UpdateProximityList(Actor* actor) {
         return;
     
     // Select a random actor
-    unsigned int index = Random.Range(0, mActors.Size()-1);
+    unsigned int index = Random.Range((unsigned int)0, mActors.Size()-1);
     if (index >= mActors.Size()) 
         return;
     Actor* targetActor = mActors[index];

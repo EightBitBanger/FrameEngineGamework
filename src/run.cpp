@@ -32,20 +32,6 @@ void Run() {
         glm::vec3 fromHigh = cameraPtr->transform.position;
         
         GameWorld.RemoveDecor( Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward );
-        
-        
-        
-        /*
-        if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
-            Actor* hitActor = (Actor*)hit.userData;
-            if (hitActor != nullptr) 
-                actorInSights = hitActor;
-        } else {
-            actorInSights = nullptr;
-            for (unsigned int i=0; i < 24; i++) 
-                Engine.console.WriteDialog(i, "");
-        }
-        */
     }
         
     // Murder an actor

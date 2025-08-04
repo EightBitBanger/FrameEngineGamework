@@ -16,33 +16,40 @@ void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chun
             float zCoord = ((float)z + chunk->y + layer.offsetY) * layer.noiseHeight;
             
             float noise = Random.Perlin(xCoord, 0, zCoord, worldSeed) * layer.heightMultuplier;
+            float normalizedWeight = weightMask[j] / (totalWeights[j] + 0.3f);
+            float pointHeight = heightField[j] + (noise * normalizedWeight);
             
-            float normalizedWeight = weightMask[j] / (totalWeights[j] + 0.0001f);
-            heightField[j] += noise * normalizedWeight;
+            if (pointHeight > layer.heightBlowoutHeight) 
+                pointHeight *= layer.heightBlowoutMul;
+            
+            if (pointHeight < layer.heightMin) 
+                pointHeight = layer.heightMin;
+            if (pointHeight > layer.heightMax) 
+                pointHeight = layer.heightMax;
+            
+            heightField[j] = pointHeight;
         }
+        
     }
     
-    // Apply biome base color blending
+    // Apply biome blending weights
     for (unsigned int i = 0; i < fieldSize; i++) {
-        float normalizedWeight = weightMask[i] / (totalWeights[i] + 0.0001f);
+        float normalizedWeight = weightMask[i] / (totalWeights[i] + 0.3f);
         normalizedWeight = glm::clamp(normalizedWeight, 0.0f, 1.0f);
         
-        Color original(colorField[i].x, colorField[i].y, colorField[i].z);
-        Color target(biome->color.r, biome->color.g, biome->color.b);
-        Color result = Colors.Lerp(original, target, normalizedWeight);
+        Color colorBase(colorField[i].x, colorField[i].y, colorField[i].z);
+        Color colorLow = biome->colorLow;
+        Color colorHigh = biome->colorHigh;
+        
+        float heightBias = (chunk->heightField[i] - biome->colorHeight) * biome->colorBias;
+        heightBias = glm::clamp(heightBias, 0.0f, 1.0f);
+        Color colorTarget = Colors.Lerp(biome->colorLow, biome->colorHigh, heightBias);
+        
+        Color result = Colors.Lerp(colorBase, colorTarget, normalizedWeight);
         
         colorField[i] = glm::vec3(result.r, result.g, result.b);
     }
 }
-
-
-
-
-
-
-
-
-
 
 void ChunkManager::AddColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, 
                                                 float noiseWidth, float noiseHeight, Color color, int offsetX, int offsetZ) {
@@ -116,11 +123,11 @@ float ChunkManager::AddHeightFieldFromPerlinNoise(float* heightField, unsigned i
 
 void ChunkManager::GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, 
                                                      unsigned int width, unsigned int height, 
-                                                     Color low, Color high, float bias) {
+                                                     Color low, Color high, float bias, float beginHeight) {
     unsigned int size = width * height;
     
     for (unsigned int i = 0; i < size; i++) {
-        float heightBias = heightField[i] * bias;
+        float heightBias = (heightField[i] - beginHeight) * bias;
         heightBias = glm::clamp(heightBias, 0.0f, 1.0f);
         
         Color color = Colors.Lerp(low, high, heightBias);

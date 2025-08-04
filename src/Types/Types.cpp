@@ -4,6 +4,24 @@
 #include <algorithm>
 #include <sstream>
 
+std::string StringType::Copy(std::string source, unsigned int begin, unsigned int count) {
+    if (begin >= source.size()) {
+        return "";
+    }
+    
+    // Adjust count to avoid overflow
+    if (begin + count > source.size()) 
+        count = source.size() - begin;
+    
+    char buffer[count + 1];  // +1 for null terminator
+    source.copy(buffer, count, begin);
+    buffer[count] = '\0';
+    
+    std::string result(buffer);
+    //delete[] buffer;
+    return result;
+}
+
 float StringType::ToFloat(const std::string& value) {
     float output;
     std::stringstream(value) >> output;
@@ -97,6 +115,10 @@ void StringType::Uppercase(std::string& str) {
     return;
 }
 
+std::string StringType::RemoveWhiteSpace(std::string str) {
+    str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
+    return str;
+}
 
 std::string FloatType::ToString(float value) {
     std::stringstream sstream;

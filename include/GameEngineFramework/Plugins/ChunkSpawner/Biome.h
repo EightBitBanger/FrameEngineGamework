@@ -9,7 +9,15 @@ class ENGINE_API Biome {
     
 public:
     
-    glm::vec3 color;
+    /// Main biome color range.
+    Color colorLow;
+    Color colorHigh;
+    
+    /// Rate of shift from color low to high.
+    float colorBias;
+    
+    /// Beginning height where the color shifts from high to low.
+    float colorHeight;
     
     class GenerationRegion {
         
@@ -35,7 +43,10 @@ public:
     std::vector<DecorationSpecifier> decorations;
     
     Biome() : 
-        color(1, 1, 1)
+        colorLow(1, 1, 1),
+        colorHigh(1, 1, 1),
+        colorBias(0.87f),
+        colorHeight(0.0f)
     {}
     
 };

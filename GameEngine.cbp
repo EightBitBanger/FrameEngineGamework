@@ -4,7 +4,7 @@
 	<Project>
 		<Option title="GameEngineFramework" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="root/;root/Logging/;root/Application/;root/Renderer/;root/ActorAI/;root/Audio/;root/Engine/;root/Engine/components/;root/Input/;root/Math/;root/Physics/;root/Profiler/;root/Resources/;root/Scripting/;root/Serialization/;root/tests/;root/ActorAI/components/;root/Engine/types/;root/Physics/components/;root/Resources/assets/;root/Scripting/components/;root/tests/units/;root/Types/;root/Timer/;root/MemoryAllocators/;root/Networking/;root/Transform/;root/ActorAI/genetics/;root/Engine/componentUpdate/;root/Renderer/components/;root/Renderer/pipeline/;root/Plugins/;root/Plugins/ChunkSpawner/;root/Plugins/ParticleSystem/;root/Plugins/WeatherSystem/;root/Audio/components/;root/Renderer/types/;root/UI/;root/UI/components/;root/ImGUI/;root/ImGUI/backends/" />
+		<Option virtualFolders="root/;root/Logging/;root/Application/;root/Renderer/;root/ActorAI/;root/Audio/;root/Engine/;root/Engine/components/;root/Input/;root/Math/;root/Physics/;root/Profiler/;root/Resources/;root/Scripting/;root/Serialization/;root/tests/;root/ActorAI/components/;root/Engine/types/;root/Physics/components/;root/Resources/assets/;root/Scripting/components/;root/tests/units/;root/Types/;root/Timer/;root/MemoryAllocators/;root/Networking/;root/Transform/;root/ActorAI/genetics/;root/Engine/componentUpdate/;root/Renderer/components/;root/Renderer/pipeline/;root/Plugins/;root/Plugins/ChunkSpawner/;root/Plugins/ParticleSystem/;root/Plugins/WeatherSystem/;root/Audio/components/;root/Renderer/types/;root/UI/;root/UI/components/;root/ImGUI/;root/ImGUI/backends/;root/Plugins/ChunkSpawner/definitions/" />
 		<Build>
 			<Target title="Runtime">
 				<Option output="bin/runtime.exe" prefix_auto="0" extension_auto="0" />
@@ -392,6 +392,11 @@
 		</Unit>
 		<Unit filename="include/GameEngineFramework/Plugins/ChunkSpawner/Structure.h">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ChunkSpawner/WorldGeneration.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
 		</Unit>
 		<Unit filename="include/GameEngineFramework/Plugins/ParticleSystem/Emitter.h">
 			<Option virtualFolder="root/Plugins/ParticleSystem/" />
@@ -886,6 +891,16 @@
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/WorldSave.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/definitions/grass.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/definitions/" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/definitions/tree.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/definitions/" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>

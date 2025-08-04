@@ -37,6 +37,7 @@ ChunkManager::ChunkManager() :
     return;
 }
 
+
 void ChunkManager::Initiate(void) {
     
     // Fire up the generation thread
@@ -109,8 +110,83 @@ void ChunkManager::Initiate(void) {
     // Underwater blue fog
     
     fogWater = Renderer.CreateFog();
-    
     Engine.sceneMain->AddFogLayerToScene(fogWater);
+    
+    // Load definitions
+    std::string definitionDirectory = "definitions\\";
+    if (!fs.DirectoryExists(definitionDirectory)) 
+        return;
+    
+    std::vector<std::string> dirList = fs.DirectoryGetList(definitionDirectory);
+    for (unsigned int i=0; i < dirList.size(); i++) {
+        std::string filename = dirList[i];
+        
+        std::ifstream file(definitionDirectory + filename);
+        if (!file.is_open()) 
+            continue;
+        
+        std::vector<std::string> nameParts = String.Explode(filename, '.');
+        if (nameParts.size() != 3) 
+            continue;
+        
+        std::string type = nameParts[0];
+        std::string name = nameParts[1];
+        
+        std::string line;
+        std::unordered_map<std::string, std::string> keys;
+        while (std::getline(file, line)) {
+            line = String.RemoveWhiteSpace(line);
+            std::vector<std::string> split = String.Explode(line, '=');
+            if (split.size() != 2) 
+                continue;
+            keys[split[0]] = split[1];
+        }
+        
+        if (type == "grass") {
+            // Extract the definition data from the file
+            DefinitionTypeGrass definition;
+            definition.name = name;
+            
+            if (keys["width"] != "") definition.width = String.ToFloat( keys["width"] );
+            if (keys["height"] != "") definition.height = String.ToFloat( keys["height"] );
+            
+            if (keys["colorMin"] != "") definition.colorMin = GetColorByName(keys["colorMin"]);
+            if (keys["colorMax"] != "") definition.colorMax = GetColorByName(keys["colorMax"]);
+            
+            world.definitionGrass[name] = definition;
+            file.close();
+            continue;
+        }
+        
+        if (type == "tree") {
+            // Extract the definition data from the file
+            DefinitionTypeTree definition;
+            definition.name = name;
+            
+            if (keys["heightMin"] != "") definition.heightMin = String.ToFloat( keys["heightMin"] );
+            if (keys["heightMax"] != "") definition.heightMax = String.ToFloat( keys["heightMax"] );
+            
+            if (keys["leafCountMin"] != "") definition.leafCountMin = String.ToUint( keys["leafCountMin"] );
+            if (keys["leafCountMax"] != "") definition.leafCountMax = String.ToUint( keys["leafCountMax"] );
+            
+            if (keys["leafSpreadArea"] != "") definition.leafSpreadArea = String.ToFloat( keys["leafSpreadArea"] );
+            if (keys["leafSpreadHeight"] != "") definition.leafSpreadHeight = String.ToFloat( keys["leafSpreadHeight"] );
+            if (keys["leafWidth"] != "") definition.leafWidth = String.ToFloat( keys["leafWidth"] );
+            if (keys["leafHeight"] != "") definition.leafHeight = String.ToFloat( keys["leafHeight"] );
+            if (keys["trunkSize"] != "") definition.trunkSize = String.ToFloat( keys["trunkSize"] );
+            
+            if (keys["trunkColorMin"] != "") definition.trunkColorMin = GetColorByName(keys["trunkColorMin"]);
+            if (keys["trunkColorMax"] != "") definition.trunkColorMax = GetColorByName(keys["trunkColorMax"]);
+            if (keys["leafColorMin"] != "") definition.leafColorMin = GetColorByName(keys["leafColorMin"]);
+            if (keys["leafColorMax"] != "") definition.leafColorMax = GetColorByName(keys["leafColorMax"]);
+            
+            world.definitionTree[name] = definition;
+            file.close();
+            continue;
+        }
+        
+        file.close();
+    }
     
     return;
 }
@@ -132,6 +208,36 @@ Actor* ChunkManager::SummonActor(glm::vec3 position) {
 void ChunkManager::KillActor(Actor* actor) {
     AI.DestroyActor( actor );
 }
+
+
+Color ChunkManager::GetColorByName(std::string name) {
+    float multiplier = 1.0f;
+    if (name.find("*") != std::string::npos) {
+        std::vector<std::string> muls = String.Explode(name, '*');
+        for (unsigned int i=0; i < muls.size(); i++) {
+            multiplier *= String.ToFloat(muls[1]);
+        }
+        name = muls[0];
+    }
+    Color result = Colors.white;
+    if (name == "red")     result = Colors.red;
+    if (name == "green")   result = Colors.green;
+    if (name == "blue")    result = Colors.blue;
+    if (name == "dkred")   result = Colors.dkred;
+    if (name == "dkgreen") result = Colors.dkgreen;
+    if (name == "dkblue")  result = Colors.dkblue;
+    if (name == "yellow")  result = Colors.yellow;
+    if (name == "orange")  result = Colors.orange;
+    if (name == "purple")  result = Colors.purple;
+    if (name == "gray")    result = Colors.gray;
+    if (name == "ltgray")  result = Colors.ltgray;
+    if (name == "dkgray")  result = Colors.dkgray;
+    if (name == "white")   result = Colors.white;
+    if (name == "black")   result = Colors.black;
+    if (name == "brown")   result = Colors.brown;
+    return result * multiplier;
+}
+
 
 
 bool ChunkManager::WorldDirectoryInitiate(void) {
@@ -268,8 +374,8 @@ void chunkGenerationThread(void) {
             continue;
         std::lock_guard<std::mutex> lock(GameWorld.mux);
         float chunkSZ = GameWorld.chunkSize;
-        unsigned int numberOfChunks = GameWorld.generating.size();
         
+        unsigned int numberOfChunks = GameWorld.generating.size();
         if (numberOfChunks == 0) 
             continue;
         

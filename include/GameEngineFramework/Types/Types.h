@@ -11,6 +11,9 @@ class ENGINE_API StringType {
     
 public:
     
+    /// Copies the source string starting at 'begin' size of 'count'.
+    std::string Copy(std::string source, unsigned int begin, unsigned int count);
+    
     /// Return a float containing the numbers from text.
     float ToFloat(const std::string& value);
     
@@ -52,6 +55,9 @@ public:
     
     /// Convert a string to upper case letters
     void Uppercase(std::string& str);
+    
+    /// Strip out all the white space in a string.
+    std::string RemoveWhiteSpace(std::string str);
     
 };
 

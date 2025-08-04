@@ -3,6 +3,8 @@
 
 #include <GameEngineFramework/Engine/Engine.h>
 
+#include <GameEngineFramework/Plugins/ChunkSpawner/WorldGeneration.h>
+
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Perlin.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Biome.h>
@@ -11,108 +13,8 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/Scenery.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/StaticObject.h>
 
-
-class ENGINE_API WorldGeneration {
-    
-public:
-    
-    std::string name;
-    
-    bool doGenerateChunks;
-    
-    bool doAutoBreeding;
-    
-    float snowCapHeight;
-    float snowCapBias;
-    Color snowCapColor;
-    
-    Color waterColorLow;
-    Color waterColorHigh;
-    
-    float waterLevel;
-    
-    float ambientLight;
-    
-    Color chunkColorLow;
-    Color chunkColorHigh;
-    float chunkColorBias;
-    
-    Color staticColorLow;
-    Color staticColorHigh;
-    
-    Color actorColorLow;
-    Color actorColorHigh;
-    
-    std::vector<Biome> mBiomes;
-    
-    std::vector<Structure> mStructures;
-    
-    // Static plant generation
-    
-    unsigned int staticDensity;
-    float staticHeightCutoff;
-    
-    // Tree generation
-    
-    unsigned int treeDensity;
-    float treeHeightCutoff;
-    float treeHeightLow;
-    float treeHeightHigh;
-    
-    unsigned int numberOfLeaves;
-    float leafSpreadArea;
-    float leafSpreadHeight;
-    float leafHeightOffset;
-    
-    // Actors
-    unsigned int actorDensity;
-    
-    
-    WorldGeneration() :
-        name("default"),
-        
-        doGenerateChunks(false),
-        doAutoBreeding(true),
-        
-        snowCapHeight(60.0f),
-        snowCapBias(2.0f),
-        snowCapColor(0.7f, 0.85f, 1.1f, 1.0f),
-        
-        waterColorLow(Colors.black),
-        waterColorHigh(Colors.blue),
-        
-        waterLevel(-21.0f),
-        
-        ambientLight(1.0f),
-        
-        chunkColorLow(Colors.black),
-        chunkColorHigh(Colors.white),
-        
-        staticColorLow(Colors.black),
-        staticColorHigh(Colors.white),
-        
-        actorColorLow(Colors.black),
-        actorColorHigh(Colors.white),
-        
-        staticDensity(200),
-        staticHeightCutoff(50),
-        
-        treeDensity(40),
-        treeHeightCutoff(50),
-        treeHeightLow(5),
-        treeHeightHigh(8),
-        
-        numberOfLeaves(15),
-        leafSpreadArea(3.0f),
-        leafSpreadHeight(1.4f),
-        leafHeightOffset(-0.4f),
-        
-        actorDensity(10)
-    {
-    }
-    
-};
-
+#include <GameEngineFramework/Plugins/ChunkSpawner/definitions/tree.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/definitions/grass.h>
 
 
 class ENGINE_API ChunkManager {
@@ -192,7 +94,7 @@ public:
     
     /// Generate a color field containing a color range from from low to high. The bias will determine the fade 
     /// from the low color to the high color based on the height field values.
-    void GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color low, Color high, float bias);
+    void GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color low, Color high, float bias, float beginHeight);
     
     /// Smooth the terrain height starting at a given height level and moving downward.
     void GenerateWaterTableFromHeightField(float* heightField, unsigned int width, unsigned int height, float tableHeight);
@@ -203,6 +105,9 @@ public:
     
     /// Generate a water level effect.
     void AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color waterColor, float beginHeight, float bias, float waterTableHeight);
+    
+    /// Translate a color by name to a color value.
+    Color GetColorByName(std::string name);
     
     // Mapping to a mesh
     

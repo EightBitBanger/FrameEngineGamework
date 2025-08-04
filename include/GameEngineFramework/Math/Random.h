@@ -26,6 +26,9 @@ public:
     /// Return an integer between the min and max values.
     int Range(int min, int max);
     
+    /// Return an unsigned integer between the min and max values.
+    unsigned int Range(unsigned int min, unsigned int max);
+    
     /// Return a vector 3 with each element ranging between the min and max values.
     glm::vec3 RangedVector(int min, int max);
     

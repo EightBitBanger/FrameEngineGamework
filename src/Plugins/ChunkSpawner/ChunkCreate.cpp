@@ -1,5 +1,4 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
-bool testFlip = false;
 
 Chunk* ChunkManager::CreateChunk(float x, float y) {
     
@@ -66,12 +65,12 @@ void ChunkManager::GenerateChunkBlendMasks(Chunk* chunk) {
     // Generate biome blend masks
     unsigned int chunkSZ = chunkSize + 1;
     unsigned int fieldSize = chunkSZ * chunkSZ;
-    unsigned int numberOfBiomes = world.mBiomes.size();
+    unsigned int numberOfBiomes = world.biomes.size();
     std::vector<std::vector<float>> biomeWeights(numberOfBiomes);
     std::vector<float> totalWeights(fieldSize, 0.0f);
     
     for (unsigned int b = 0; b < numberOfBiomes; b++) {
-        Biome& biome = world.mBiomes[b];
+        Biome& biome = world.biomes[b];
         biomeWeights[b].resize(fieldSize);
         
         for (unsigned int i = 0; i < fieldSize; i++) {
@@ -88,7 +87,12 @@ void ChunkManager::GenerateChunkBlendMasks(Chunk* chunk) {
             totalWeights[i] += strength;
         }
         
+        // Clamp for proper biome blending
+        for (unsigned int i = 0; i < fieldSize; i++) 
+            totalWeights[i] = glm::clamp(totalWeights[i], 0.25f, 1.0f);
+        
     }
+    
     chunk->biomeWeights = biomeWeights;
     chunk->totalWeights = totalWeights;
     
@@ -98,10 +102,12 @@ void ChunkManager::GenerateChunkBlendMasks(Chunk* chunk) {
         float maxW = 0.0f;
         for (unsigned int b = 0; b < numberOfBiomes; b++) {
             float w = chunk->biomeWeights[b][i];
-            if (w > maxW) {
+            if (w >= maxW) {
                 maxW = w;
                 dominantBiome[i] = b;
             }
+            if (dominantBiome[i] < 0.0f) 
+                dominantBiome[i] = 0.0f;
         }
     }
     chunk->biomeMap = dominantBiome;
@@ -111,20 +117,19 @@ void ChunkManager::GenerateChunkBlendMasks(Chunk* chunk) {
 void ChunkManager::GenerateChunkBiomes(Chunk* chunk) {
     unsigned int chunkSZ = chunkSize + 1;
     unsigned int fieldSize = chunkSZ * chunkSZ;
-    unsigned int numberOfBiomes = world.mBiomes.size();
+    unsigned int numberOfBiomes = world.biomes.size();
     
     chunk->heightField = (float*)malloc(sizeof(float) * (chunkSZ * chunkSZ));
     chunk->colorField = (glm::vec3*)malloc(sizeof(glm::vec3) * (chunkSZ * chunkSZ));
     
     SetHeightFieldValues(chunk->heightField, chunkSZ, chunkSZ, 0);
-    SetColorFieldValues(chunk->colorField, chunkSZ, chunkSZ, Colors.red);
+    SetColorFieldValues(chunk->colorField, chunkSZ, chunkSZ, Colors.black);
     
     // Generate terrain base color
-    GenerateColorFieldFromHeightField(chunk->colorField, chunk->heightField, chunkSZ, chunkSZ, world.chunkColorLow, world.chunkColorHigh, world.chunkColorBias);
     
     if (numberOfBiomes > 0) 
         for (unsigned int b=0; b < numberOfBiomes; b++) 
-            GenerateBiome(chunk->colorField, chunk->heightField, chunk, &world.mBiomes[b], chunk->biomeWeights[b].data(), chunk->totalWeights.data());
+            GenerateBiome(chunk->colorField, chunk->heightField, chunk, &world.biomes[b], chunk->biomeWeights[b].data(), chunk->totalWeights.data());
     
     // Fill in blank regions
     for (unsigned int i = 0; i < fieldSize; i++) {
@@ -138,8 +143,7 @@ void ChunkManager::GenerateChunkBiomes(Chunk* chunk) {
         
         chunk->heightField[i] += noise;
         
-        //Color fallback = Colors.Lerp(world.chunkColorLow, world.chunkColorHigh, glm::clamp(noise * 0.05f, 0.0f, 1.0f));
-        //chunk->colorField[i] = glm::vec3(fallback.r, fallback.g, fallback.b);
+        chunk->colorField[i] = Colors.green.ToVec3();
     }
     chunk->biomeWeights.clear();
     chunk->totalWeights.clear();

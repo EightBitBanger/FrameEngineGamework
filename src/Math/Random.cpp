@@ -26,6 +26,11 @@ int NumberGeneration::Range(int min, int max) {
     return dist(mGenerator);
 }
 
+unsigned int NumberGeneration::Range(unsigned int min, unsigned int max) {
+    std::uniform_int_distribution<int> dist(min, max - 1);
+    return static_cast<unsigned int>( dist(mGenerator) );
+}
+
 glm::vec3 NumberGeneration::RangedVector(int min, int max) {
     glm::vec3 vec(Range(min, max), 
                   Range(min, max), 

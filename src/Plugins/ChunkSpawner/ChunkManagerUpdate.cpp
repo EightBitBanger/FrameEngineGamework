@@ -15,17 +15,15 @@ void ChunkManager::Update(void) {
 }
 
 void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
-    
     for (mChunkCounterX = 0; mChunkCounterX <= renderDistance; mChunkCounterX++) {
-        
         if (mChunkCounterX >= renderDistance) {
             mChunkCounterX = 0;
             break;
         }
         
         int xx = mChunkCounterX;
-        
         for (mChunkCounterZ = 0; mChunkCounterZ <= renderDistance; mChunkCounterZ++) {
+            std::lock_guard<std::mutex> lock(mux);
             
             if (mChunkCounterZ >= renderDistance) {
                 mChunkCounterZ = 0;
@@ -33,7 +31,6 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
             }
             
             int zz = mChunkCounterZ;
-            
             int chunkSizeSub = chunkSize;
             
             float chunkX = Math.Round((playerPosition.x + (chunkSizeSub / 2)) / chunkSizeSub + xx);
@@ -43,18 +40,15 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
                                (chunkZ * chunkSizeSub) - (renderDistance * (chunkSizeSub / 2)));
             
             if (IsChunkFound(chunkPos)) {
-                
                 Chunk* chunk = FindChunk(chunkPos.x, chunkPos.y);
                 if (chunk == nullptr) 
                     continue;
                 
                 // Check active fade in
                 if (!chunk->isActive) {
-                    
                     chunk->fadeIn += 1;
                     
                     if (chunk->fadeIn > 10) {
-                        
                         chunk->isActive = true;
                         
                         MeshRenderer* chunkRenderer  = chunk->gameObject->GetComponent<MeshRenderer>();
@@ -62,7 +56,6 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
                         
                         Engine.sceneMain->AddMeshRendererToSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
                         Engine.sceneMain->AddMeshRendererToSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
-                        
                     }
                     
                 }
@@ -104,9 +97,7 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
                     chunk->bodyCollider = bodyCollider;
                     chunk->meshCollider = meshCollider;
                     
-                    
-                    //
-                    // Load / generate decorations / actors
+                    // Load or generate the chunk
                     
                     std::string filename = Int.ToString(chunkPos.x) + "_" + Int.ToString(chunkPos.y);
                     std::string chunkFilename = "worlds/" + world.name + "/chunks/" + filename;
@@ -134,11 +125,7 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
                 continue;
             
             Chunk* chunk = CreateChunk(chunkPos.x, chunkPos.y);
-            
-            mux.lock();
             generating.push_back(chunk);
-            mux.unlock();
-            
         }
     }
     return;

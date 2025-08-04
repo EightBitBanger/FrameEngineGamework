@@ -288,6 +288,7 @@ void Start() {
     // Add the collider to the camera controller game object.
     Engine.cameraController->AddColliderBox(boxShape, 0, 0, 0, LayerMask::Ground);
     
+    
     // Weather system
     
     Weather.SetPlayerObject(Engine.cameraController);
@@ -295,54 +296,111 @@ void Start() {
     Weather.SetStaticMaterial(GameWorld.staticMaterial);
     Weather.SetWaterMaterial(GameWorld.waterMaterial);
     
+    
+    // Biome region noise
+    
     // Plains
     Biome biomeLayerPlains;
-    Color biomeColor;
-    biomeColor = Colors.green * 0.087f;
-    biomeLayerPlains.color = glm::vec3(biomeColor.r, biomeColor.g, biomeColor.b);
-    biomeLayerPlains.region.offsetX = 7600;
-    biomeLayerPlains.region.offsetZ = 7600;
+    biomeLayerPlains.colorHeight = GameWorld.world.waterLevel + 16;
+    biomeLayerPlains.colorBias = 0.024f;
+    biomeLayerPlains.colorLow = Colors.green * 0.09f;
+    biomeLayerPlains.colorHigh = Colors.green * 0.1f;
+    biomeLayerPlains.region.offsetX = 3200;
+    biomeLayerPlains.region.offsetZ = 3200;
     biomeLayerPlains.region.noiseWidth  = 0.001f;
     biomeLayerPlains.region.noiseHeight = 0.001f;
     
     // Desert
     Biome biomeLayerDesert;
-    biomeColor = Colors.Lerp(Colors.yellow, Colors.red, 0.15f) * 0.3f;
-    biomeLayerDesert.color = glm::vec3(biomeColor.r, biomeColor.g, biomeColor.b);
+    Color desertLow, desertHigh;
+    desertLow  = Colors.Lerp(Colors.yellow, Colors.dkgray, 0.7f);
+    desertHigh = Colors.Lerp(desertLow, Colors.red, 0.1f);
+    biomeLayerDesert.colorLow = Colors.Lerp(desertLow, desertHigh, 0.35f);
+    biomeLayerDesert.colorHigh   = Colors.Lerp(desertLow, desertHigh, 0.75f);
+    biomeLayerDesert.colorHeight = -2.0f;
+    biomeLayerDesert.colorBias   = 0.05f;
     biomeLayerDesert.region.offsetX = 1000;
     biomeLayerDesert.region.offsetZ = 1000;
     biomeLayerDesert.region.noiseWidth  = 0.001f;
     biomeLayerDesert.region.noiseHeight = 0.001f;
     
+    // Forest
+    Biome biomeLayerForest;
+    biomeLayerForest.colorHeight = GameWorld.world.waterLevel + 16;
+    biomeLayerForest.colorBias = 0.024f;
+    biomeLayerForest.colorLow = Colors.green * 0.087f;
+    biomeLayerForest.colorHigh = Colors.brown * 0.4f;
+    biomeLayerForest.region.offsetX = 7600;
+    biomeLayerForest.region.offsetZ = 7600;
+    biomeLayerForest.region.noiseWidth  = 0.001f;
+    biomeLayerForest.region.noiseHeight = 0.001f;
     
-    //
-    // Perlin world generation
     
+    // Terrain generation noise
+    
+    // Plains
     Perlin perlinPlains;
-    perlinPlains.heightMultuplier = 3;
-    perlinPlains.heightThreshold  = 0.0f;
-    perlinPlains.noiseWidth       = 0.07;
-    perlinPlains.noiseHeight      = 0.07;
+    perlinPlains.heightMultuplier = 1.1f;
+    perlinPlains.heightMin        = GameWorld.world.waterLevel + 15;
+    perlinPlains.noiseWidth       = 0.08;
+    perlinPlains.noiseHeight      = 0.08;
     
+    Perlin perlinPlainsHills;
+    perlinPlainsHills.heightMultuplier = 10;
+    perlinPlainsHills.heightMin        = GameWorld.world.waterLevel + 15;
+    perlinPlainsHills.noiseWidth       = 0.01;
+    perlinPlainsHills.noiseHeight      = 0.01;
+    
+    // Desert
     Perlin perlinDesert;
-    perlinDesert.heightMultuplier = 1.24f;
-    perlinDesert.heightThreshold  = 0.0f;
-    perlinDesert.noiseWidth       = 0.07;
-    perlinDesert.noiseHeight      = 0.07;
+    perlinDesert.heightMultuplier = 1.1f;
+    perlinDesert.heightMin        = GameWorld.world.waterLevel + 15;
+    perlinDesert.noiseWidth       = 0.2;
+    perlinDesert.noiseHeight      = 0.2;
     perlinDesert.offsetX = 100.0f;
     perlinDesert.offsetY = 100.0f;
     
     Perlin perlinDesertHills;
-    perlinDesertHills.heightMultuplier = 2.0f;
-    perlinDesertHills.heightThreshold  = 0.0f;
-    perlinDesertHills.noiseWidth       = 0.09;
-    perlinDesertHills.noiseHeight      = 0.09;
+    perlinDesertHills.heightMultuplier = 20.0f;
+    perlinDesertHills.heightMin        = GameWorld.world.waterLevel + 15;
+    perlinDesertHills.heightMax        = GameWorld.world.waterLevel + 45;
+    perlinDesertHills.noiseWidth       = 0.02;
+    perlinDesertHills.noiseHeight      = 0.02;
+    perlinDesertHills.heightBlowoutMul     = 20.0f;
+    perlinDesertHills.heightBlowoutHeight  = GameWorld.world.waterLevel + 30;
     perlinDesertHills.offsetX = 50.0f;
     perlinDesertHills.offsetY = 50.0f;
     
+    // Forest
+    Perlin perlinForest;
+    perlinForest.heightMultuplier = 1.2f;
+    perlinForest.heightMin        = GameWorld.world.waterLevel + 15;
+    perlinForest.noiseWidth       = 0.2;
+    perlinForest.noiseHeight      = 0.2;
+    
+    Perlin perlinForestRipple;
+    perlinForestRipple.heightMultuplier = 10.0f;
+    perlinForestRipple.heightMin        = GameWorld.world.waterLevel + 15;
+    perlinForestRipple.noiseWidth       = 0.05;
+    perlinForestRipple.noiseHeight      = 0.05;
+    
+    Perlin perlinForestHills;
+    perlinForestHills.heightMultuplier = 200.0f;
+    perlinForestHills.heightMin        = GameWorld.world.waterLevel + 15;
+    perlinForestHills.noiseWidth       = 0.008;
+    perlinForestHills.noiseHeight      = 0.008;
+    
+    
+    
+    biomeLayerPlains.perlin.push_back(perlinPlainsHills);
     biomeLayerPlains.perlin.push_back(perlinPlains);
-    biomeLayerDesert.perlin.push_back(perlinDesert);
+    
     biomeLayerDesert.perlin.push_back(perlinDesertHills);
+    biomeLayerDesert.perlin.push_back(perlinDesert);
+    
+    biomeLayerForest.perlin.push_back(perlinForestHills);
+    biomeLayerForest.perlin.push_back(perlinForestRipple);
+    biomeLayerForest.perlin.push_back(perlinForest);
     
     
     //
@@ -350,8 +408,8 @@ void Start() {
     
     DecorationSpecifier decorGrassShort;
     decorGrassShort.type = DecorationType::Grass;
-    decorGrassShort.name = "Short";
-    decorGrassShort.density = 400;
+    decorGrassShort.name = "short";
+    decorGrassShort.density = 80;
     decorGrassShort.spawnHeightMaximum = 10;
     decorGrassShort.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrassShort.threshold = 0.0f;
@@ -359,35 +417,55 @@ void Start() {
     
     DecorationSpecifier decorGrassTall;
     decorGrassTall.type = DecorationType::Grass;
-    decorGrassTall.name = "Tall";
-    decorGrassTall.density = 400;
+    decorGrassTall.name = "tall";
+    decorGrassTall.density = 40;
     decorGrassTall.spawnHeightMaximum = 10;
     decorGrassTall.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrassTall.threshold = 0.0f;
     decorGrassTall.noise = 0.5f;
     
-    DecorationSpecifier decorGrassDesert;
-    decorGrassDesert.type = DecorationType::Grass;
-    decorGrassDesert.name = "Dry";
-    decorGrassDesert.density = 100;
-    decorGrassDesert.spawnHeightMaximum = 10;
-    decorGrassDesert.spawnHeightMinimum = GameWorld.world.waterLevel;
-    decorGrassDesert.threshold = 0.0f;
-    decorGrassDesert.noise = 0.5f;
+    DecorationSpecifier decorGrassDry;
+    decorGrassDry.type = DecorationType::Grass;
+    decorGrassDry.name = "dry";
+    decorGrassDry.density = 40;
+    decorGrassDry.spawnHeightMaximum = 10;
+    decorGrassDry.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorGrassDry.threshold = 0.0f;
+    decorGrassDry.noise = 0.5f;
     
     DecorationSpecifier decorTrees;
     decorTrees.type = DecorationType::Tree;
-    decorTrees.name = "Oak";
-    decorTrees.density = 80;
-    decorTrees.spawnHeightMaximum = 10;
+    decorTrees.name = "oak";
+    decorTrees.density = 3;
+    decorTrees.spawnHeightMaximum = 20;
     decorTrees.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorTrees.threshold = -0.08f;
     decorTrees.noise     = 0.001f;
     
+    DecorationSpecifier decorTreesDense;
+    decorTreesDense.type = DecorationType::Tree;
+    decorTreesDense.name = "oak";
+    decorTreesDense.density = 200;
+    decorTreesDense.spawnHeightMaximum = 20;
+    decorTreesDense.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorTreesDense.threshold = -0.08f;
+    decorTreesDense.noise     = 0.001f;
+    
+    DecorationSpecifier decorGrassDense;
+    decorGrassDense.type = DecorationType::Grass;
+    decorGrassDense.name = "short";
+    decorGrassDense.density = 800;
+    decorGrassDense.spawnHeightMaximum = 10;
+    decorGrassDense.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorGrassDense.threshold = 0.0f;
+    decorGrassDense.noise = 0.5f;
+    
     biomeLayerPlains.decorations.push_back(decorGrassShort);
     biomeLayerPlains.decorations.push_back(decorGrassTall);
     biomeLayerPlains.decorations.push_back(decorTrees);
-    biomeLayerDesert.decorations.push_back(decorGrassDesert);
+    biomeLayerDesert.decorations.push_back(decorGrassDry);
+    biomeLayerForest.decorations.push_back(decorTreesDense);
+    biomeLayerForest.decorations.push_back(decorGrassDense);
     
     
     //
@@ -396,7 +474,7 @@ void Start() {
     DecorationSpecifier decorSheep;
     decorSheep.type = DecorationType::Actor;
     decorSheep.name = "Sheep";
-    decorSheep.density = 20;
+    decorSheep.density = 4;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorSheep.threshold = 0.0f;
@@ -438,25 +516,24 @@ void Start() {
     decorDog.threshold = 0.0f;
     decorDog.noise     = 0.5f;
     
-    //biomeLayerDesert.decorations.push_back(decorSheep);
-    //biomeLayerDesert.decorations.push_back(decorBovine);
-    //biomeLayerDesert.decorations.push_back(decorHorse);
-    //biomeLayerDesert.decorations.push_back(decorBear);
-    //biomeLayerDesert.decorations.push_back(decorDog);
+    biomeLayerPlains.decorations.push_back(decorSheep);
+    biomeLayerDesert.decorations.push_back(decorBovine);
+    biomeLayerPlains.decorations.push_back(decorHorse);
+    biomeLayerPlains.decorations.push_back(decorBear);
+    biomeLayerPlains.decorations.push_back(decorDog);
     
     
-    GameWorld.world.mBiomes.push_back(biomeLayerDesert);
-    GameWorld.world.mBiomes.push_back(biomeLayerPlains);
+    GameWorld.world.biomes.push_back(biomeLayerPlains);
+    GameWorld.world.biomes.push_back(biomeLayerDesert);
+    GameWorld.world.biomes.push_back(biomeLayerForest);
     
     
     
     // Lighting levels
     
-    GameWorld.world.chunkColorLow   = Colors.MakeGrayScale(0.3f);
     GameWorld.world.staticColorLow  = Colors.MakeGrayScale(0.3f);
     GameWorld.world.actorColorLow   = Colors.MakeGrayScale(0.02f);
     
-    GameWorld.world.chunkColorHigh  = Colors.MakeGrayScale(0.87f);
     GameWorld.world.staticColorHigh = Colors.MakeGrayScale(0.87f);
     GameWorld.world.actorColorHigh  = Colors.MakeGrayScale(0.87f);
     
@@ -472,10 +549,6 @@ void Start() {
     GameWorld.world.snowCapHeight = 20.0f;
     GameWorld.world.snowCapBias = 8.0f;
     GameWorld.world.waterLevel = -8.0f;
-    
-    GameWorld.world.chunkColorLow  = Colors.brown * Colors.green * Colors.MakeGrayScale(0.4f);
-    GameWorld.world.chunkColorHigh = Colors.brown * Colors.MakeGrayScale(0.2f);
-    GameWorld.world.chunkColorBias = 0.087f;
     
     
     // Load world

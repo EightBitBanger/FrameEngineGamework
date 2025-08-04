@@ -188,15 +188,14 @@ Color::Color() :
 
 Color::Color(const glm::vec3& vec) : r(vec.x), g(vec.y), b(vec.z) {}
 
-Color& Color::
-    operator=(const glm::vec3& vec) {
+Color& Color::operator=(const glm::vec3& vec) {
     r = vec.x;
     g = vec.y;
     b = vec.z;
     return *this;
 }
 
-Color::Color(Color& color) : 
+Color::Color(const Color& color) : 
     r(color.r),
     g(color.g),
     b(color.b),
@@ -229,6 +228,11 @@ Color::Color(float red, float green, float blue) :
 {
 }
 
+glm::vec3 Color::ToVec3(void) {
+    return glm::vec3(r, g, b);
+}
+
+
 Color& ColorPreset::Make(float r, float g, float b) {
     mCustom.r = r;
     mCustom.g = g;
@@ -238,10 +242,10 @@ Color& ColorPreset::Make(float r, float g, float b) {
 }
 
 Color& ColorPreset::Range(Color begin, Color end) {
-    float randomScale = Random.Range(0, 100) * 0.01f;
-    mRandom = Color( glm::lerp(begin.r, end.r, randomScale), 
-                     glm::lerp(begin.g, end.g, randomScale), 
-                     glm::lerp(begin.b, end.b, randomScale), 1);
+    float scale = Random.Range(0.0, 1.0);
+    mRandom = Color( glm::lerp(begin.r, end.r, scale), 
+                     glm::lerp(begin.g, end.g, scale), 
+                     glm::lerp(begin.b, end.b, scale), 1);
     return mRandom;
 }
 
@@ -276,3 +280,4 @@ Color& ColorPreset::Lerp(Color min, Color max, float bias) {
                      glm::lerp(min.b, max.b, bias), 1);
     return mCustom;
 }
+
