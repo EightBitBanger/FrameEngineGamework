@@ -33,7 +33,7 @@ void Run() {
         
         GameWorld.RemoveDecor( Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward );
     }
-        
+    
     // Murder an actor
     if (Input.CheckMouseRightPressed()) {
         //Input.SetMouseRightPressed(false);

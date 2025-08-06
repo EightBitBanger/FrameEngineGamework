@@ -29,12 +29,12 @@ public:
     float snowCapBias;
     Color snowCapColor;
     
-    Color waterColorLow;
-    Color waterColorHigh;
-    
     float waterLevel;
     
     float ambientLight;
+    
+    Color waterColorLow;
+    Color waterColorHigh;
     
     Color staticColorLow;
     Color staticColorHigh;
@@ -49,27 +49,6 @@ public:
     std::unordered_map<std::string, DefinitionTypeTree> definitionTree;
     std::unordered_map<std::string, DefinitionTypeGrass> definitionGrass;
     
-    // Static plant generation
-    
-    unsigned int staticDensity;
-    float staticHeightCutoff;
-    
-    // Tree generation
-    
-    unsigned int treeDensity;
-    float treeHeightCutoff;
-    float treeHeightLow;
-    float treeHeightHigh;
-    
-    unsigned int numberOfLeaves;
-    float leafSpreadArea;
-    float leafSpreadHeight;
-    float leafHeightOffset;
-    
-    // Actors
-    unsigned int actorDensity;
-    
-    
     WorldGeneration() :
         name("default"),
         
@@ -80,33 +59,18 @@ public:
         snowCapBias(2.0f),
         snowCapColor(0.7f, 0.85f, 1.1f, 1.0f),
         
-        waterColorLow(Colors.black),
-        waterColorHigh(Colors.blue),
-        
         waterLevel(-21.0f),
         
         ambientLight(1.0f),
+        
+        waterColorLow(Colors.black),
+        waterColorHigh(Colors.blue),
         
         staticColorLow(Colors.black),
         staticColorHigh(Colors.white),
         
         actorColorLow(Colors.black),
-        actorColorHigh(Colors.white),
-        
-        staticDensity(200),
-        staticHeightCutoff(50),
-        
-        treeDensity(40),
-        treeHeightCutoff(50),
-        treeHeightLow(5),
-        treeHeightHigh(8),
-        
-        numberOfLeaves(15),
-        leafSpreadArea(3.0f),
-        leafSpreadHeight(1.4f),
-        leafHeightOffset(-0.4f),
-        
-        actorDensity(10)
+        actorColorHigh(Colors.white)
     {
     }
     

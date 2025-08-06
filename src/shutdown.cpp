@@ -9,7 +9,7 @@ void Shutdown(void) {
     //if (GameWorld.world.doGenerateChunks) 
     //    GameWorld.SaveWorld();
     
-    //GameWorld.world.doGenerateChunks = false;
+    GameWorld.isChunkGenerationActive = false;
     
     return;
 }

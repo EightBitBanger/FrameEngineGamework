@@ -5,48 +5,34 @@
 #include <GameEngineFramework/Engine/types/color.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 
-
-class ENGINE_API DecorationElement {
-    
-public:
-    
-    /// Decoration type
-    DecorationType type;
-    
-    /// Position relative to the structure center
-    glm::vec3 position;
-    
-    DecorationElement() : 
-        type(DecorationType::Grass),
-        position(glm::vec3(0))
-    {
-    }
-    
-    DecorationElement(DecorationType newType, glm::vec3 newPosition) : 
-        type(newType),
-        position(newPosition)
-    {
-    }
-    
+struct StructurePart {
+    glm::ivec2 offset;
+    glm::vec3 rotation;
+    glm::vec3 scale;
+    Color color;
 };
+
 
 class ENGINE_API Structure {
     
 public:
     
-    // Structure name
     std::string name;
+    float buildSpread;
     
-    /// How rare the structure is in the world
-    /// Higher number will increase rarity
-    unsigned int rarity;
+    unsigned int actorCountMin;
+    unsigned int actorCountMax;
     
-    // Decorations included in this structure
-    std::vector<DecorationElement> elements;
+    float actorSpread;
+    
+    std::vector<StructurePart> parts;
     
     Structure() : 
         name(""),
-        rarity(10)
+        buildSpread(0.0f),
+        actorCountMin(0),
+        actorCountMax(0),
+        actorSpread(0.0f)
     {
     }
     

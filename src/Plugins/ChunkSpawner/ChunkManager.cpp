@@ -2,10 +2,10 @@
 #include <GameEngineFramework/Timer/Timer.h>
 
 void chunkGenerationThread(void);
-bool isChunkGenerationActive = false;
 
 ChunkManager::ChunkManager() : 
     isInitiated(false),
+    isChunkGenerationActive(false),
     
     renderDistance(16),
     staticDistance(renderDistance * 0.7f),
@@ -39,7 +39,6 @@ ChunkManager::ChunkManager() :
 
 
 void ChunkManager::Initiate(void) {
-    
     // Fire up the generation thread
     if (isChunkGenerationActive) 
         return;
@@ -367,8 +366,8 @@ extern ChunkManager GameWorld;
 
 void chunkGenerationThread(void) {
     
-    while (isChunkGenerationActive) {
-        std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
+    while (GameWorld.isChunkGenerationActive) {
+        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(10) );
         
         if (!GameWorld.threadTimer.Update()) 
             continue;

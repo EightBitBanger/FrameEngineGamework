@@ -73,6 +73,11 @@ void ChunkManager::GenerateChunkBlendMasks(Chunk* chunk) {
         Biome& biome = world.biomes[b];
         biomeWeights[b].resize(fieldSize);
         
+        // Default to the first biome
+        float baseBiome = 0.0f;
+        if (b == 0) 
+            baseBiome = 0.1f;
+        
         for (unsigned int i = 0; i < fieldSize; i++) {
             unsigned int x = i % chunkSZ;
             unsigned int z = i / chunkSZ;
@@ -80,10 +85,11 @@ void ChunkManager::GenerateChunkBlendMasks(Chunk* chunk) {
             float xCoord = (x + chunk->x + biome.region.offsetX) * biome.region.noiseWidth;
             float zCoord = (z + chunk->y + biome.region.offsetZ) * biome.region.noiseHeight;
             
-            float strength = Random.Perlin(xCoord, 0, zCoord, worldSeed);
+            float strength = Random.Perlin(xCoord, 0, zCoord, worldSeed) * 4.0f;
+            
             strength = glm::clamp(strength, 0.0f, 1.0f);
             
-            biomeWeights[b][i] = strength;
+            biomeWeights[b][i] = strength + baseBiome;
             totalWeights[i] += strength;
         }
         
@@ -131,20 +137,6 @@ void ChunkManager::GenerateChunkBiomes(Chunk* chunk) {
         for (unsigned int b=0; b < numberOfBiomes; b++) 
             GenerateBiome(chunk->colorField, chunk->heightField, chunk, &world.biomes[b], chunk->biomeWeights[b].data(), chunk->totalWeights.data());
     
-    // Fill in blank regions
-    for (unsigned int i = 0; i < fieldSize; i++) {
-        if (chunk->totalWeights[i] > 0.1f) 
-            continue;
-        
-        float xCoord = ((i % chunkSZ) + chunk->x) * 0.09f;
-        float zCoord = ((i / chunkSZ) + chunk->y) * 0.09f;
-        
-        float noise = Random.Perlin(xCoord, 0, zCoord, worldSeed) * 2.0f;
-        
-        chunk->heightField[i] += noise;
-        
-        chunk->colorField[i] = Colors.green.ToVec3();
-    }
     chunk->biomeWeights.clear();
     chunk->totalWeights.clear();
 }

@@ -108,6 +108,7 @@ bool ChunkManager::SaveChunk(Chunk* chunk, bool doClearActors) {
             staticElements[s].rotation = chunk->statics[s].rotation;
             staticElements[s].scale    = chunk->statics[s].scale;
             staticElements[s].color    = chunk->statics[s].color;
+            staticElements[s].type     = static_cast<uint8_t>(chunk->statics[s].type);
             continue;
         }
         

@@ -24,6 +24,7 @@ public:
     WorldGeneration world;
     
     bool isInitiated;
+    bool isChunkGenerationActive;
     
     float renderDistance;
     float staticDistance;
@@ -134,7 +135,9 @@ public:
     void Update(void);
     
     // Base decoration function
-    unsigned int AddDecor(Chunk* chunk, unsigned int index, Mesh* staticMesh, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
+    unsigned int AddDecor(Chunk* chunk, unsigned int index, Mesh* staticMesh, DecorationMesh type, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
+    
+    void AddDecorMesh(Mesh* staticMesh, DecorationMesh type, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
     
     void RemoveDecor(glm::vec3 position, glm::vec3 direction);
     

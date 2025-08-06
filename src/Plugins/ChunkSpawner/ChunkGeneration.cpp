@@ -17,7 +17,7 @@ void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chun
             
             float noise = Random.Perlin(xCoord, 0, zCoord, worldSeed) * layer.heightMultuplier;
             float normalizedWeight = weightMask[j] / (totalWeights[j] + 0.3f);
-            float pointHeight = heightField[j] + (noise * normalizedWeight);
+            float pointHeight = heightField[j] + (noise * normalizedWeight) * 0.5f;
             
             if (pointHeight > layer.heightBlowoutHeight) 
                 pointHeight *= layer.heightBlowoutMul;
@@ -36,6 +36,8 @@ void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chun
     for (unsigned int i = 0; i < fieldSize; i++) {
         float normalizedWeight = weightMask[i] / (totalWeights[i] + 0.3f);
         normalizedWeight = glm::clamp(normalizedWeight, 0.0f, 1.0f);
+        if (colorField[i] == Colors.black.ToVec3()) 
+            colorField[i] = biome->colorLow.ToVec3();
         
         Color colorBase(colorField[i].x, colorField[i].y, colorField[i].z);
         Color colorLow = biome->colorLow;

@@ -398,6 +398,16 @@
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ChunkSpawner/definitions/grass.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/definitions/" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/Plugins/ChunkSpawner/definitions/tree.h">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/definitions/" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
 		<Unit filename="include/GameEngineFramework/Plugins/ParticleSystem/Emitter.h">
 			<Option virtualFolder="root/Plugins/ParticleSystem/" />
 		</Unit>
@@ -891,16 +901,6 @@
 		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/WorldSave.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
-			<Option target="Plugins" />
-			<Option target="Plugins-debug" />
-		</Unit>
-		<Unit filename="src/Plugins/ChunkSpawner/definitions/grass.h">
-			<Option virtualFolder="root/Plugins/ChunkSpawner/definitions/" />
-			<Option target="Plugins" />
-			<Option target="Plugins-debug" />
-		</Unit>
-		<Unit filename="src/Plugins/ChunkSpawner/definitions/tree.h">
-			<Option virtualFolder="root/Plugins/ChunkSpawner/definitions/" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>

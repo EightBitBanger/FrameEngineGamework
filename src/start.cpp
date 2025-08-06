@@ -313,12 +313,12 @@ void Start() {
     // Desert
     Biome biomeLayerDesert;
     Color desertLow, desertHigh;
-    desertLow  = Colors.Lerp(Colors.yellow, Colors.dkgray, 0.7f);
-    desertHigh = Colors.Lerp(desertLow, Colors.red, 0.1f);
-    biomeLayerDesert.colorLow = Colors.Lerp(desertLow, desertHigh, 0.35f);
-    biomeLayerDesert.colorHigh   = Colors.Lerp(desertLow, desertHigh, 0.75f);
+    desertLow  = Colors.Lerp(Colors.yellow, Colors.dkgray, 0.8f);
+    desertHigh = Colors.Lerp(desertLow, Colors.red, 0.3f);
+    biomeLayerDesert.colorLow = Colors.Lerp(desertLow, Colors.dkgray, 0.1f) * 0.4f;
+    biomeLayerDesert.colorHigh   = Colors.Lerp(desertLow, desertHigh, 0.5f) * 0.4f;
     biomeLayerDesert.colorHeight = -2.0f;
-    biomeLayerDesert.colorBias   = 0.05f;
+    biomeLayerDesert.colorBias   = 0.08f;
     biomeLayerDesert.region.offsetX = 1000;
     biomeLayerDesert.region.offsetZ = 1000;
     biomeLayerDesert.region.noiseWidth  = 0.001f;
@@ -363,7 +363,7 @@ void Start() {
     Perlin perlinDesertHills;
     perlinDesertHills.heightMultuplier = 20.0f;
     perlinDesertHills.heightMin        = GameWorld.world.waterLevel + 15;
-    perlinDesertHills.heightMax        = GameWorld.world.waterLevel + 45;
+    perlinDesertHills.heightMax        = GameWorld.world.waterLevel + 40;
     perlinDesertHills.noiseWidth       = 0.02;
     perlinDesertHills.noiseHeight      = 0.02;
     perlinDesertHills.heightBlowoutMul     = 20.0f;
@@ -374,19 +374,19 @@ void Start() {
     // Forest
     Perlin perlinForest;
     perlinForest.heightMultuplier = 1.2f;
-    perlinForest.heightMin        = GameWorld.world.waterLevel + 15;
+    perlinForest.heightMin        = GameWorld.world.waterLevel + 20;
     perlinForest.noiseWidth       = 0.2;
     perlinForest.noiseHeight      = 0.2;
     
     Perlin perlinForestRipple;
     perlinForestRipple.heightMultuplier = 10.0f;
-    perlinForestRipple.heightMin        = GameWorld.world.waterLevel + 15;
+    perlinForestRipple.heightMin        = GameWorld.world.waterLevel + 20;
     perlinForestRipple.noiseWidth       = 0.05;
     perlinForestRipple.noiseHeight      = 0.05;
     
     Perlin perlinForestHills;
     perlinForestHills.heightMultuplier = 200.0f;
-    perlinForestHills.heightMin        = GameWorld.world.waterLevel + 15;
+    perlinForestHills.heightMin        = GameWorld.world.waterLevel + 20;
     perlinForestHills.noiseWidth       = 0.008;
     perlinForestHills.noiseHeight      = 0.008;
     
@@ -409,7 +409,7 @@ void Start() {
     DecorationSpecifier decorGrassShort;
     decorGrassShort.type = DecorationType::Grass;
     decorGrassShort.name = "short";
-    decorGrassShort.density = 80;
+    decorGrassShort.density = 1000;
     decorGrassShort.spawnHeightMaximum = 10;
     decorGrassShort.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrassShort.threshold = 0.0f;
@@ -418,7 +418,7 @@ void Start() {
     DecorationSpecifier decorGrassTall;
     decorGrassTall.type = DecorationType::Grass;
     decorGrassTall.name = "tall";
-    decorGrassTall.density = 40;
+    decorGrassTall.density = 400;
     decorGrassTall.spawnHeightMaximum = 10;
     decorGrassTall.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrassTall.threshold = 0.0f;
@@ -427,7 +427,7 @@ void Start() {
     DecorationSpecifier decorGrassDry;
     decorGrassDry.type = DecorationType::Grass;
     decorGrassDry.name = "dry";
-    decorGrassDry.density = 40;
+    decorGrassDry.density = 300;
     decorGrassDry.spawnHeightMaximum = 10;
     decorGrassDry.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrassDry.threshold = 0.0f;
@@ -436,7 +436,7 @@ void Start() {
     DecorationSpecifier decorTrees;
     decorTrees.type = DecorationType::Tree;
     decorTrees.name = "oak";
-    decorTrees.density = 3;
+    decorTrees.density = 10;
     decorTrees.spawnHeightMaximum = 20;
     decorTrees.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorTrees.threshold = -0.08f;
@@ -445,7 +445,7 @@ void Start() {
     DecorationSpecifier decorTreesDense;
     decorTreesDense.type = DecorationType::Tree;
     decorTreesDense.name = "oak";
-    decorTreesDense.density = 200;
+    decorTreesDense.density = 2000;
     decorTreesDense.spawnHeightMaximum = 20;
     decorTreesDense.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorTreesDense.threshold = -0.08f;
@@ -454,11 +454,20 @@ void Start() {
     DecorationSpecifier decorGrassDense;
     decorGrassDense.type = DecorationType::Grass;
     decorGrassDense.name = "short";
-    decorGrassDense.density = 800;
+    decorGrassDense.density = 4000;
     decorGrassDense.spawnHeightMaximum = 10;
     decorGrassDense.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorGrassDense.threshold = 0.0f;
     decorGrassDense.noise = 0.5f;
+    
+    DecorationSpecifier decorGrassTallDense;
+    decorGrassTallDense.type = DecorationType::Grass;
+    decorGrassTallDense.name = "tall";
+    decorGrassTallDense.density = 2000;
+    decorGrassTallDense.spawnHeightMaximum = 10;
+    decorGrassTallDense.spawnHeightMinimum = GameWorld.world.waterLevel;
+    decorGrassTallDense.threshold = 0.0f;
+    decorGrassTallDense.noise = 0.5f;
     
     biomeLayerPlains.decorations.push_back(decorGrassShort);
     biomeLayerPlains.decorations.push_back(decorGrassTall);
@@ -466,6 +475,7 @@ void Start() {
     biomeLayerDesert.decorations.push_back(decorGrassDry);
     biomeLayerForest.decorations.push_back(decorTreesDense);
     biomeLayerForest.decorations.push_back(decorGrassDense);
+    biomeLayerForest.decorations.push_back(decorGrassTallDense);
     
     
     //
@@ -474,7 +484,7 @@ void Start() {
     DecorationSpecifier decorSheep;
     decorSheep.type = DecorationType::Actor;
     decorSheep.name = "Sheep";
-    decorSheep.density = 4;
+    decorSheep.density = 40;
     decorSheep.spawnHeightMaximum = 10;
     decorSheep.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorSheep.threshold = 0.0f;
@@ -483,7 +493,7 @@ void Start() {
     DecorationSpecifier decorHorse;
     decorHorse.type = DecorationType::Actor;
     decorHorse.name = "Horse";
-    decorHorse.density = 2;
+    decorHorse.density = 20;
     decorHorse.spawnHeightMaximum = 10;
     decorHorse.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorHorse.threshold = 0.0f;
@@ -492,7 +502,7 @@ void Start() {
     DecorationSpecifier decorBovine;
     decorBovine.type = DecorationType::Actor;
     decorBovine.name = "Bovine";
-    decorBovine.density = 2;
+    decorBovine.density = 40;
     decorBovine.spawnHeightMaximum = 10;
     decorBovine.spawnHeightMinimum = GameWorld.world.waterLevel;
     decorBovine.threshold = 0.0f;
@@ -501,7 +511,7 @@ void Start() {
     DecorationSpecifier decorBear;
     decorBear.type = DecorationType::Actor;
     decorBear.name = "Bear";
-    decorBear.density = 1;
+    decorBear.density = 8;
     decorBear.spawnHeightMaximum = 50;
     decorBear.spawnHeightMinimum = 10;
     decorBear.threshold = 0.0f;
@@ -516,16 +526,160 @@ void Start() {
     decorDog.threshold = 0.0f;
     decorDog.noise     = 0.5f;
     
+    DecorationSpecifier decorVillage;
+    decorVillage.type = DecorationType::Structure;
+    decorVillage.name = "village";
+    decorVillage.density = 8;
+    decorVillage.noise = 0.08f;
+    decorVillage.threshold = 0.0f;
+    decorVillage.spawnHeightMinimum = GameWorld.world.waterLevel + 4;
+    decorVillage.spawnHeightMaximum = GameWorld.world.waterLevel + 24;
+    
+    
     biomeLayerPlains.decorations.push_back(decorSheep);
+    biomeLayerPlains.decorations.push_back(decorVillage);
+    
     biomeLayerDesert.decorations.push_back(decorBovine);
+    
     biomeLayerPlains.decorations.push_back(decorHorse);
     biomeLayerPlains.decorations.push_back(decorBear);
     biomeLayerPlains.decorations.push_back(decorDog);
     
-    
     GameWorld.world.biomes.push_back(biomeLayerPlains);
     GameWorld.world.biomes.push_back(biomeLayerDesert);
     GameWorld.world.biomes.push_back(biomeLayerForest);
+    
+    
+    // Structures
+    
+    Structure village;
+    village.name = "village";
+    village.buildSpread = 30.0f;
+    
+    village.actorCountMin = 0;
+    village.actorCountMax = 8;
+    village.actorSpread = 8.0f;
+    
+    float height = 30.0f;
+    float radius = 3.0f;
+    float angle = 27.0f;
+    int numPoles = 8;
+    
+    float stickThickness = 0.25f;
+    Color stickColor = Colors.brown * 0.24f;
+    
+    for (int i = 0; i < numPoles; i++) {
+        float ang = (360.0f / numPoles) * i;
+        float rad = glm::radians(ang);
+        
+        float x = std::cos(rad) * radius;
+        float z = std::sin(rad) * radius;
+        
+        glm::vec3 rotation(0.0f, angle, -ang);
+        
+        StructurePart pole;
+        pole.offset = glm::ivec2((int)x + 3, (int)z + 3);
+        pole.rotation = rotation;
+        pole.scale = glm::vec3(stickThickness, height, stickThickness);
+        pole.color = stickColor;
+        
+        village.parts.push_back(pole);
+    }
+    
+    // Add to world structure list
+    GameWorld.world.structures.push_back(village);
+    
+    
+    
+    
+    /*
+    Structure hut;
+    hut.name = "village";
+    hut.actorCount = 2;
+    
+    float wallHeight = 10.0f;
+    float roofHeight = 2.0f;
+    float postThickness = 0.25f;
+    float halfExt = 4.0f;
+    Color postColor = Colors.brown;
+    Color roofColor = Colors.brown * 0.9f;
+    
+    // Corner posts
+    int cornersX[4] = {0, 0, halfExt, halfExt};
+    int cornersZ[4] = {0, halfExt, 0, halfExt};
+    
+    for (int i = 0; i < 4; i++) {
+        StructurePart post;
+        post.offset = glm::ivec2(cornersX[i], cornersZ[i]);
+        post.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+        post.scale = glm::vec3(postThickness, wallHeight, postThickness);
+        post.color = postColor;
+        hut.parts.push_back(post);
+    }
+    
+    StructurePart northWall;
+    northWall.offset = glm::ivec2(halfExt / 2.0f, 0);
+    northWall.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+    northWall.scale = glm::vec3(halfExt * 2.0f, wallHeight, postThickness);
+    northWall.color = postColor;
+    hut.parts.push_back(northWall);
+    
+    StructurePart southWall;
+    southWall.offset = glm::ivec2((halfExt / 2.0f), halfExt);
+    southWall.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+    southWall.scale = glm::vec3(halfExt * 2.0f, wallHeight, postThickness);
+    southWall.color = postColor;
+    hut.parts.push_back(southWall);
+    
+    
+    
+    
+    // Side walls (centered between corner posts)
+    
+    StructurePart southWall = northWall;
+    southWall.offset = glm::ivec2(2, 4);
+    hut.parts.push_back(southWall);
+    
+    StructurePart westWall;
+    westWall.offset = glm::ivec2(0, 2);
+    westWall.rotation = glm::vec3(0.0f, 90.0f, 0.0f);
+    westWall.scale = glm::vec3(1.5f, wallHeight, postThickness);
+    westWall.color = postColor;
+    hut.parts.push_back(westWall);
+    
+    StructurePart eastWall = westWall;
+    eastWall.offset = glm::ivec2(4, 2);
+    hut.parts.push_back(eastWall);
+    
+    // Flat roof (center tile + 4 beams around it)
+    for (int x = 1; x < 4; x++) {
+        for (int z = 1; z < 4; z++) {
+            StructurePart roof;
+            roof.offset = glm::ivec2(x, z);
+            roof.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+            roof.scale = glm::vec3(1.0f, roofHeight, 1.0f);
+            roof.color = roofColor;
+    
+            hut.parts.push_back(roof);
+        }
+    }
+    
+    // Optional center pole chimney
+    StructurePart centerPost;
+    centerPost.offset = glm::ivec2(2, 2);
+    centerPost.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+    centerPost.scale = glm::vec3(0.2f, wallHeight * 1.2f, 0.2f);
+    centerPost.color = postColor * 0.7f;
+    hut.parts.push_back(centerPost);
+    
+    
+    // Add to world
+    GameWorld.world.structures.push_back(hut);
+    */
+    
+    
+    
+    
     
     
     

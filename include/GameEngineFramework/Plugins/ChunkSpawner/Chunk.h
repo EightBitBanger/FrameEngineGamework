@@ -45,6 +45,9 @@ public:
     /// Base list of all static geometry in this chunk.
     std::vector<StaticObject> statics;
     
+    /// List of the location of any structures on this chunk.
+    std::vector<glm::vec3> structureLocations;
+    
     /// Biome region tracking map.
     std::vector<int> biomeMap;
     

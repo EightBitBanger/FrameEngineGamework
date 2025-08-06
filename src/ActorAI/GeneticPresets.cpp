@@ -30,7 +30,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     targetActor->physical.SetSpeedMultiplier(1.24f);
     
     targetActor->physical.SetYouthScale(0.1f);
-    targetActor->physical.SetAdultScale(0.5f);
+    targetActor->physical.SetAdultScale(0.75f);
     
     targetActor->behavior.SetHeightPreferenceMax(20.0f);
     

@@ -97,29 +97,10 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
             staticObj.rotation = staticElements[i].rotation;
             staticObj.scale    = staticElements[i].scale;
             staticObj.color    = staticElements[i].color;
+            staticObj.type     = static_cast<DecorationMesh>(staticElements[i].type);
             
-            staticMesh->AddSubMesh(posX, posY, posZ, subMeshWallHorz, false);
-            staticMesh->AddSubMesh(posX, posY, posZ, subMeshWallVert, false);
+            AddDecorMesh(staticMesh, staticObj.type, staticObj.position, staticObj.rotation, staticObj.scale, staticObj.color);
             
-            unsigned int index = staticMesh->GetSubMeshCount() - 1;
-            
-            Color color;
-            color = Color(colR, colG, colB);
-            
-            staticMesh->ChangeSubMeshColor(index,   color);
-            staticMesh->ChangeSubMeshColor(index-1, color);
-            
-            staticMesh->ChangeSubMeshScale(index,   scaleX, scaleY, scaleZ);
-            staticMesh->ChangeSubMeshScale(index-1, scaleX, scaleY, scaleZ);
-            
-            staticMesh->ChangeSubMeshRotation(index,   rotY, glm::vec3(0, 0, 1.0f));
-            staticMesh->ChangeSubMeshRotation(index-1, rotY, glm::vec3(0, 0, 1.0f));
-            staticMesh->ChangeSubMeshRotation(index,   rotP, glm::vec3(1.0f, 0, 0));
-            staticMesh->ChangeSubMeshRotation(index-1, rotP, glm::vec3(1.0f, 0, 0));
-            staticMesh->ChangeSubMeshRotation(index,   rotR, glm::vec3(0, 1.0f, 0));
-            staticMesh->ChangeSubMeshRotation(index-1, rotR, glm::vec3(0, 1.0f, 0));
-            
-            staticMesh->GetSubMesh(index, staticObj.subMesh);
             chunk->statics.push_back(staticObj);
         }
         

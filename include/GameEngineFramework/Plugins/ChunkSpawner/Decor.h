@@ -54,7 +54,6 @@ enum class DecorationType {
 };
 
 
-
 class ENGINE_API DecorationSpecifier {
     
 public:
