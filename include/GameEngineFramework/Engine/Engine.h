@@ -270,6 +270,7 @@ private:
     };
     
     struct DefaultMeshes {
+        Mesh* grass = nullptr;
         Mesh* grassHorz = nullptr;
         Mesh* grassVert = nullptr;
         Mesh* stemHorz = nullptr;
@@ -277,6 +278,7 @@ private:
         Mesh* wallHorizontal = nullptr;
         Mesh* wallVertical = nullptr;
         Mesh* log = nullptr;
+        Mesh* leaf = nullptr;
         
         Mesh* cube = nullptr;
         Mesh* chunk = nullptr;

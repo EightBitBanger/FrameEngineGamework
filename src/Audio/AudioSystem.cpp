@@ -85,47 +85,6 @@ void AudioSystem::SetVolume(float volume) {
     return;
 }
 
-//
-// Audio thread entry point
-//
-
-extern AudioSystem Audio;
-
-void AudioThreadMain(void) {
-    
-    // Temporary mix buffer
-    std::vector<int32_t> buffer;
-    buffer.resize(512);
-    
-    while (isAudioThreadActive) {
-        
-        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(10) );
-        
-        // Check if the buffer is low
-        int available = SDL_GetAudioStreamAvailable(Audio.mStream);
-        if (available > 8192) 
-            continue;
-        
-        std::lock_guard<std::mutex> lock(Audio.mux);
-        
-        std::fill(buffer.begin(), buffer.end(), 0);
-        
-        // Mix the currently playing sounds
-        Audio.MixActiveSounds(buffer);
-        
-        // Send in the next section of mixed audio
-        SDL_PutAudioStreamData(Audio.mStream, buffer.data(), buffer.size() * sizeof(int32_t));
-        SDL_FlushAudioStream(Audio.mStream);
-        
-        continue;
-    }
-    
-    std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(2) );
-    Log.Write(" >> Shutting down on thread audio");
-    
-    return;
-}
-
 
 float normalize(float value, float min, float max) {
     return 1.0f - (value - min) / (max - min);
@@ -229,3 +188,46 @@ void AudioSystem::MixActiveSounds(std::vector<int32_t>& buffer) {
         }
     }
 }
+
+
+//
+// Audio thread entry point
+//
+
+extern AudioSystem Audio;
+
+void AudioThreadMain(void) {
+    
+    // Temporary mix buffer
+    std::vector<int32_t> buffer;
+    buffer.resize(512);
+    
+    while (isAudioThreadActive) {
+        
+        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(10) );
+        
+        // Check if the buffer is low
+        int available = SDL_GetAudioStreamAvailable(Audio.mStream);
+        if (available > 8192) 
+            continue;
+        
+        std::lock_guard<std::mutex> lock(Audio.mux);
+        
+        std::fill(buffer.begin(), buffer.end(), 0);
+        
+        // Mix the currently playing sounds
+        Audio.MixActiveSounds(buffer);
+        
+        // Send in the next section of mixed audio
+        SDL_PutAudioStreamData(Audio.mStream, buffer.data(), buffer.size() * sizeof(int32_t));
+        SDL_FlushAudioStream(Audio.mStream);
+        
+        continue;
+    }
+    
+    std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(2) );
+    Log.Write(" >> Shutting down on thread audio");
+    
+    return;
+}
+

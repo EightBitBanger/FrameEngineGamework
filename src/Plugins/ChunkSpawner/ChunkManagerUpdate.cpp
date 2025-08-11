@@ -15,6 +15,9 @@ void ChunkManager::Update(void) {
 }
 
 void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
+    if (!mux.try_lock()) 
+        return;
+    
     for (mChunkCounterX = 0; mChunkCounterX <= renderDistance; mChunkCounterX++) {
         if (mChunkCounterX >= renderDistance) {
             mChunkCounterX = 0;
@@ -23,7 +26,6 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
         
         int xx = mChunkCounterX;
         for (mChunkCounterZ = 0; mChunkCounterZ <= renderDistance; mChunkCounterZ++) {
-            std::lock_guard<std::mutex> lock(mux);
             
             if (mChunkCounterZ >= renderDistance) {
                 mChunkCounterZ = 0;
@@ -128,6 +130,7 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
             generating.push_back(chunk);
         }
     }
+    mux.unlock();
     return;
 }
 

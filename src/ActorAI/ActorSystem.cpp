@@ -155,19 +155,14 @@ bool ActorSystem::UpdateGarbageCollection(Actor* actor) {
 void actorThreadMain() {
     
     while (isActorThreadActive) {
-        if (!doUpdate) {
-            std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
+        std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
+        if (!doUpdate) 
             continue;
-        }
         
         AI.Update();
-        continue;
     }
     
     std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(100) );
-    
     Log.Write( " >> Shutting down on thread AI" );
-    
-    return;
 }
 

@@ -125,7 +125,12 @@ bool ActorSystem::HandleFocusState(Actor* actor, Actor* target, float distance) 
 
 
 bool ActorSystem::HandleBreedingState(Actor* actor, Actor* target, float distance) {
-    if (actor->counters.mBreedingCoolDownCounter > 0) return false;
+    if (!actor->isActive || !target->isActive) 
+        return false;
+    
+    if (actor->counters.mBreedingCoolDownCounter > 0 || target->counters.mBreedingCoolDownCounter > 0) 
+        return false;
+    
     if (actor->physical.mAge < actor->physical.mAgeAdult) return false;
     
     if (actor->state.current == ActorState::State::Breed) 

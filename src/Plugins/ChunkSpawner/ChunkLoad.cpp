@@ -97,9 +97,9 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
             staticObj.rotation = staticElements[i].rotation;
             staticObj.scale    = staticElements[i].scale;
             staticObj.color    = staticElements[i].color;
-            staticObj.type     = static_cast<DecorationMesh>(staticElements[i].type);
+            staticObj.type     = staticElements[i].type;
             
-            AddDecorMesh(staticMesh, staticObj.type, staticObj.position, staticObj.rotation, staticObj.scale, staticObj.color);
+            AddDecorMesh(staticMesh, static_cast<DecorationMesh>(staticObj.type), staticObj.position, staticObj.rotation, staticObj.scale, staticObj.color);
             
             chunk->statics.push_back(staticObj);
         }

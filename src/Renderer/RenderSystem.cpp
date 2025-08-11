@@ -371,9 +371,7 @@ extern RenderSystem Renderer;
 void RenderThreadMain(void) {
     
     while (isThreadActive) {
-        
         std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
-        
         
         continue;
     }

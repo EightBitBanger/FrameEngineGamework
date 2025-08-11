@@ -192,7 +192,6 @@ void Start() {
     // Event callbacks
     Platform.EventCallbackLoseFocus = EventLostFocus;
     
-    
     //Engine.EnableProfiler();
     
     //Engine.EnablePhysicsDebugRenderer();
@@ -444,7 +443,7 @@ void Start() {
     
     DecorationSpecifier decorTreesDense;
     decorTreesDense.type = DecorationType::Tree;
-    decorTreesDense.name = "oak";
+    decorTreesDense.name = "pine";
     decorTreesDense.density = 2000;
     decorTreesDense.spawnHeightMaximum = 20;
     decorTreesDense.spawnHeightMinimum = GameWorld.world.waterLevel;
@@ -529,7 +528,7 @@ void Start() {
     DecorationSpecifier decorVillage;
     decorVillage.type = DecorationType::Structure;
     decorVillage.name = "village";
-    decorVillage.density = 8;
+    decorVillage.density = 2;
     decorVillage.noise = 0.08f;
     decorVillage.threshold = 0.0f;
     decorVillage.spawnHeightMinimum = GameWorld.world.waterLevel + 4;
@@ -558,7 +557,7 @@ void Start() {
     
     village.actorCountMin = 0;
     village.actorCountMax = 8;
-    village.actorSpread = 8.0f;
+    village.actorSpread = 4.0f;
     
     float height = 30.0f;
     float radius = 3.0f;
@@ -684,15 +683,13 @@ void Start() {
     
     
     // Lighting levels
+    //Weather.SetWorldLightLevel(0.0087f, 0.3f);
     
     GameWorld.world.staticColorLow  = Colors.MakeGrayScale(0.3f);
     GameWorld.world.actorColorLow   = Colors.MakeGrayScale(0.02f);
     
     GameWorld.world.staticColorHigh = Colors.MakeGrayScale(0.87f);
     GameWorld.world.actorColorHigh  = Colors.MakeGrayScale(0.87f);
-    
-    GameWorld.world.ambientLight = 0.87f;
-    
     
     // World rendering
     GameWorld.chunkSize = 64;

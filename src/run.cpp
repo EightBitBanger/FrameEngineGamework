@@ -10,6 +10,7 @@ float forceDblTime=0;
 
 Actor* actorInSights = nullptr;
 
+
 void Run() {
     
     // Update plug-in systems
@@ -26,17 +27,23 @@ void Run() {
     glm::vec3 forward = cameraPtr->forward;
     glm::vec3 from = cameraPtr->transform.position;
     
-    // Pick an actor
+    
+    // Place static object
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
-        glm::vec3 fromHigh = cameraPtr->transform.position;
         
-        GameWorld.RemoveDecor( Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward );
+        GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, DecorationType::Tree, "willow");
+        
     }
     
-    // Murder an actor
+    // Remove static object
     if (Input.CheckMouseRightPressed()) {
-        //Input.SetMouseRightPressed(false);
+        Input.SetMouseRightPressed(false);
+        
+        GameWorld.RemoveDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward);
+        
+        // Destroy an actor
+        /*
         Hit hit;
         if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
             Actor* hitActor = (Actor*)hit.userData;
@@ -47,7 +54,11 @@ void Run() {
             
             hitActor->biological.health = 0.0f;
         }
+        */
     }
+    
+    
+    
     
     
     
@@ -63,7 +74,8 @@ void Run() {
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             
             Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
-            AI.genomes.presets.Human(actor);
+            
+            AI.genomes.presets.Spider(actor);
             
             //float range = Random.Range(0, 100);
             
@@ -83,48 +95,12 @@ void Run() {
             }
             */
             
-            actor->physical.SetAge( Random.Range(actor->physical.GetAdultAge(), actor->physical.GetAdultAge() * 2.0f) );
+            actor->physical.SetAge( Random.Range(actor->physical.GetAdultAge() / 2.0f, actor->physical.GetSeniorAge()) );
             actor->RebuildGeneticExpression();
             
             actor->isActive = true;
             actor->physical.UpdatePhysicalCollider();
         }
-        
-        /*
-        // Spawn a tree example
-        if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Ground)) {
-            
-            GameObject* gameObject = (GameObject*)hit.gameObject;
-            
-            std::vector<std::string> name_pos = String.Explode(gameObject->name, '_');
-            float posX = String.ToInt( name_pos[0] );
-            float posZ = String.ToInt( name_pos[1] );
-            
-            Chunk* chunk = GameWorld.FindChunk(posX, posZ);
-            
-            if (chunk->gameObject != nullptr) {
-                
-                float chunkPosX = posX - hit.point.x + xx;
-                float chunkPosY = hit.point.y;
-                float chunkPosZ = posZ - hit.point.z + zz;
-                
-                GameObject* hitObject = chunk->staticObject;
-                
-                MeshRenderer* chunkRenderer = hitObject->GetComponent<MeshRenderer>();
-                
-                StaticObject staticObj;
-                staticObj.x = chunkPosX;
-                staticObj.y = chunkPosY;
-                staticObj.z = chunkPosZ;
-                
-                GameWorld.AddDecorTree(*chunk, staticObj, chunkRenderer->mesh, -chunkPosX, chunkPosY, -chunkPosZ, Decoration::TreeOak);
-                chunkRenderer->mesh->Load();
-                
-            }
-            
-        }
-        */
-        
     }
     
     
@@ -166,7 +142,21 @@ void Run() {
         Engine.console.WriteDialog(20, "Actors          " + Int.ToString(AI.GetNumberOfActors()) );
         Engine.console.WriteDialog(21, "Colliders       " + Int.ToString(Engine.mBoxCollider.size()) );
         
-        
+    } else {
+        DecorationHitInfo hit = GameWorld.QueryDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, 8.0f);
+        if (hit.didHit) {
+            std::string type;
+            switch (hit.type) {
+                case DecorationMesh::WallHorizontal: type = "horizontal"; break;
+                case DecorationMesh::WallVerticle: type = "verticle"; break;
+                case DecorationMesh::Cross: type = "cross"; break;
+                case DecorationMesh::Log: type = "log"; break;
+            }
+            
+            Engine.console.WriteDialog(3, type);
+        } else {
+            Engine.console.WriteDialog(3, "");
+        }
     }
     
     

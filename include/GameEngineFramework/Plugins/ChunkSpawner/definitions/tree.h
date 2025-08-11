@@ -25,6 +25,8 @@ public:
     Color leafColorMin;
     Color leafColorMax;
     
+    std::string leafType;
+    
     DefinitionTypeTree() : 
         name(""),
         heightMin(0.0f),

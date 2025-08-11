@@ -90,6 +90,9 @@ void ActorSystem::ClearOldGeneticRenderers(Actor* actor) {
 void ActorSystem::ExpressActorGenetics(Actor* actor) {
     if (!actor->genetics.mDoReexpressGenetics)
         return;
+    if (!actor->genetics.mux.try_lock()) 
+        return;
+    
     actor->genetics.mDoReexpressGenetics = false;
     
     unsigned int numberOfGenes = actor->genetics.mGenes.size();
@@ -100,6 +103,7 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
     if (numberOfRenderers != numberOfGenes) {
         actor->genetics.mDoUpdateGenetics = true;
         actor->genetics.mDoReexpressGenetics = true;
+        actor->genetics.mux.unlock();
         return;
     }
     
@@ -115,9 +119,7 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
                                                 actor->genetics.mGenes[a].color.y,
                                                 actor->genetics.mGenes[a].color.z);
         
-        meshRenderer->transform.position = glm::vec3(actor->navigation.mPosition.x,
-                                                     actor->navigation.mPosition.y,
-                                                     actor->navigation.mPosition.z);
+        meshRenderer->transform.position = actor->navigation.mPosition;
         
         // Check scale inheritance
         if (actor->genetics.mGenes[a].scaleIndex == 0) {
@@ -179,7 +181,6 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
         
         // Apply offset positioning
         if (actor->genetics.mGenes[a].attachmentIndex > 0) {
-            
             unsigned int attachmentIndex = actor->genetics.mGenes[a].attachmentIndex - 1;
             
             actor->genetics.mGenes[a].offset = actor->genetics.mGenes[attachmentIndex].offset;
@@ -194,7 +195,7 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
         
         continue;
     }
-    
+    actor->genetics.mux.unlock();
     return;
 }
 

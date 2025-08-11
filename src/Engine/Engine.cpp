@@ -94,6 +94,7 @@ void EngineSystemManager::Initiate() {
     shaders.water         = Resources.CreateShaderFromTag("water");
     
     // Load default meshes
+    meshes.grass           = Resources.CreateMeshFromTag("grass");
     meshes.grassHorz       = Resources.CreateMeshFromTag("grassHorz");
     meshes.grassVert       = Resources.CreateMeshFromTag("grassVert");
     
@@ -104,6 +105,7 @@ void EngineSystemManager::Initiate() {
     meshes.wallVertical    = Resources.CreateMeshFromTag("wallv");
     
     meshes.log             = Resources.CreateMeshFromTag("log");
+    meshes.leaf            = Resources.CreateMeshFromTag("leaf");
     
     meshes.cube            = Resources.CreateMeshFromTag("cube");
     meshes.chunk           = Resources.CreateMeshFromTag("chunk");

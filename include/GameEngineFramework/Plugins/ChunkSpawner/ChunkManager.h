@@ -16,6 +16,14 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/definitions/tree.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/definitions/grass.h>
 
+struct DecorationHitInfo {
+    bool didHit = false;
+    DecorationMesh type;
+    glm::vec3 worldPosition;
+    glm::vec3 hitPoint;
+    glm::vec3 normal;
+};
+
 
 class ENGINE_API ChunkManager {
     
@@ -135,11 +143,13 @@ public:
     void Update(void);
     
     // Base decoration function
-    unsigned int AddDecor(Chunk* chunk, unsigned int index, Mesh* staticMesh, DecorationMesh type, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
+    void AddDecor(Chunk* chunk, Mesh* staticMesh, DecorationMesh type, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
     
     void AddDecorMesh(Mesh* staticMesh, DecorationMesh type, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
     
+    bool PlaceDecor(glm::vec3 position, glm::vec3 direction, DecorationType type, const std::string& name);
     void RemoveDecor(glm::vec3 position, glm::vec3 direction);
+    DecorationHitInfo QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance);
     
     // Decoration
     void AddDecorGrass(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
@@ -198,19 +208,14 @@ private:
     unsigned int mBreedingCoolDown;
     unsigned int mDeathCoolDown;
     
-    // Mesh generation
+    // Mesh cache
     
-    /// World generation meshes
     SubMesh subMeshWallHorz;
     SubMesh subMeshWallVert;
-    
-    SubMesh subMeshGrassHorz;
-    SubMesh subMeshGrassVert;
-    
-    SubMesh subMeshStemHorz;
-    SubMesh subMeshStemVert;
-    
-    SubMesh subMeshTree;
+    SubMesh subMeshPlain;
+    SubMesh subMeshCross;
+    SubMesh subMeshLeaf;
+    SubMesh subMeshLog;
     
     Mesh* waterMesh;
     

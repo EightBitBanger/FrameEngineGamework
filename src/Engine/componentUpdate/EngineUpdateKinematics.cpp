@@ -9,7 +9,9 @@ void EngineSystemManager::UpdateKinematics(void) {
     unsigned int numberOfActors = AI.GetNumberOfActors();
     for (unsigned int i=0; i < numberOfActors; i++) {
         Actor* actor = AI.GetActor(i);
-        std::lock_guard<std::mutex> (actor->navigation.mux);
+        
+        if (!actor->navigation.mux.try_lock()) 
+            continue;
         
         if (actor->physical.mColliderBody != nullptr && actor->isGarbage) {
             if (actor->physical.mColliderBody != nullptr) 
@@ -81,6 +83,8 @@ void EngineSystemManager::UpdateKinematics(void) {
         actor->navigation.mRotation = actorRotation;
         actor->navigation.mVelocity = actorVelocity;
         actor->navigation.mTargetPoint = actorTarget;
+        
+        actor->navigation.mux.unlock();
     }
     
     return;

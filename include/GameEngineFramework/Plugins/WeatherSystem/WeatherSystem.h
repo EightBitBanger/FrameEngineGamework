@@ -36,6 +36,9 @@ public:
     void SetTime(float newTime);
     float GetTime(void);
     
+    /// Set the universal light level.
+    void SetWorldLightLevel(float min, float max);
+    
     /// Set the current weather cycle.
     void SetWeather(WeatherType type);
     
@@ -63,6 +66,9 @@ public:
 private:
     
     float mWorldTime;
+    
+    float mWorldLightLow;
+    float mWorldLightHigh;
     
     float mLightIntensity;
     glm::vec3 mLightAngle;

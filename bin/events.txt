@@ -58,7 +58,7 @@ Resource definitions
 <MainScene>
  >> Starting thread chunk generator
 
- >> Shutting down on thread audio
  >> Shutting down chunk generation
-
+ >> Shutting down on thread audio
+ >> Shutting down on thread renderer
  >> Shutting down on thread AI

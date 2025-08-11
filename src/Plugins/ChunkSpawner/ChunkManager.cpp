@@ -48,39 +48,27 @@ void ChunkManager::Initiate(void) {
     
     Log.Write( " >> Starting thread chunk generator" );
     
-    
     // Initiate AI
     AI.SetWaterLevel( world.waterLevel );
     
     // Source meshes for world construction
+    float scaler = 0.5f;
+    Engine.meshes.wallHorizontal->ChangeSubMeshScale(0, scaler, scaler, scaler);
+    Engine.meshes.wallVertical->ChangeSubMeshScale(0, scaler, scaler, scaler);
+    Engine.meshes.plain->ChangeSubMeshScale(0, scaler, scaler, scaler);
     
-    glm::vec3 normalUp(0, 1, 0);
+    Engine.meshes.grass->ChangeSubMeshScale(0, scaler, scaler, scaler);
+    Engine.meshes.leaf->ChangeSubMeshScale(0, scaler, scaler, scaler);
+    Engine.meshes.log->ChangeSubMeshScale(0, scaler, 1.0f, scaler);
     
-    Engine.meshes.wallHorizontal->SetNormals(normalUp);
-    Engine.meshes.wallVertical->SetNormals(normalUp);
-    Engine.meshes.grassHorz->SetNormals(normalUp);
-    Engine.meshes.grassVert->SetNormals(normalUp);
-    Engine.meshes.stemHorz->SetNormals(normalUp);
-    Engine.meshes.stemVert->SetNormals(normalUp);
-    
-    Engine.meshes.wallHorizontal->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
-    Engine.meshes.wallVertical->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
-    Engine.meshes.grassHorz->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
-    Engine.meshes.grassVert->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
-    Engine.meshes.stemHorz->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
-    Engine.meshes.stemVert->ChangeSubMeshScale(0, 0.5f, 0.5f, 0.5f);
-    
-    Engine.meshes.log->ChangeSubMeshScale(2, 0.5f, 1.0f, 0.5f);
-    Engine.meshes.log->GetSubMesh(2, subMeshTree);
-    
+    // Get sub meshes
     Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshWallHorz);
-    Engine.meshes.wallVertical  ->GetSubMesh(0, subMeshWallVert);
+    Engine.meshes.wallVertical->GetSubMesh(0, subMeshWallVert);
+    Engine.meshes.plain->GetSubMesh(0, subMeshPlain);
     
-    Engine.meshes.grassHorz->GetSubMesh(0, subMeshGrassHorz);
-    Engine.meshes.grassVert->GetSubMesh(0, subMeshGrassVert);
-    
-    Engine.meshes.stemHorz->GetSubMesh(0, subMeshStemHorz);
-    Engine.meshes.stemVert->GetSubMesh(0, subMeshStemVert);
+    Engine.meshes.grass->GetSubMesh(0, subMeshCross);
+    Engine.meshes.leaf->GetSubMesh(0, subMeshLeaf);
+    Engine.meshes.log->GetSubMesh(0, subMeshLog);
     
     waterMesh      = Engine.Create<Mesh>();
     waterMaterial  = Engine.Create<Material>();
@@ -111,7 +99,9 @@ void ChunkManager::Initiate(void) {
     fogWater = Renderer.CreateFog();
     Engine.sceneMain->AddFogLayerToScene(fogWater);
     
+    //
     // Load definitions
+    
     std::string definitionDirectory = "definitions\\";
     if (!fs.DirectoryExists(definitionDirectory)) 
         return;
@@ -210,31 +200,40 @@ void ChunkManager::KillActor(Actor* actor) {
 
 
 Color ChunkManager::GetColorByName(std::string name) {
-    float multiplier = 1.0f;
-    if (name.find("*") != std::string::npos) {
-        std::vector<std::string> muls = String.Explode(name, '*');
-        for (unsigned int i=0; i < muls.size(); i++) {
-            multiplier *= String.ToFloat(muls[1]);
-        }
-        name = muls[0];
-    }
+    std::vector<std::string> parts = String.Explode(name, '*');
     Color result = Colors.white;
-    if (name == "red")     result = Colors.red;
-    if (name == "green")   result = Colors.green;
-    if (name == "blue")    result = Colors.blue;
-    if (name == "dkred")   result = Colors.dkred;
-    if (name == "dkgreen") result = Colors.dkgreen;
-    if (name == "dkblue")  result = Colors.dkblue;
-    if (name == "yellow")  result = Colors.yellow;
-    if (name == "orange")  result = Colors.orange;
-    if (name == "purple")  result = Colors.purple;
-    if (name == "gray")    result = Colors.gray;
-    if (name == "ltgray")  result = Colors.ltgray;
-    if (name == "dkgray")  result = Colors.dkgray;
-    if (name == "white")   result = Colors.white;
-    if (name == "black")   result = Colors.black;
-    if (name == "brown")   result = Colors.brown;
-    return result * multiplier;
+    
+    for (unsigned int i = 0; i < parts.size(); i++) {
+        std::string token = parts[i];
+        
+        // Try to interpret as a number
+        /*
+        if (String.IsFloat(token)) {
+            result *= String.ToFloat(token);
+            continue;
+        }
+        */
+        
+        Color colorMul = Colors.white;
+        if (token == "red")     {colorMul = Colors.red; continue;}
+        if (token == "green")   {colorMul = Colors.green; continue;}
+        if (token == "blue")    {colorMul = Colors.blue; continue;}
+        if (token == "dkred")   {colorMul = Colors.dkred; continue;}
+        if (token == "dkgreen") {colorMul = Colors.dkgreen; continue;}
+        if (token == "dkblue")  {colorMul = Colors.dkblue; continue;}
+        if (token == "yellow")  {colorMul = Colors.yellow; continue;}
+        if (token == "orange")  {colorMul = Colors.orange; continue;}
+        if (token == "purple")  {colorMul = Colors.purple; continue;}
+        if (token == "gray")    {colorMul = Colors.gray; continue;}
+        if (token == "ltgray")  {colorMul = Colors.ltgray; continue;}
+        if (token == "dkgray")  {colorMul = Colors.dkgray; continue;}
+        if (token == "white")   {colorMul = Colors.white; continue;}
+        if (token == "black")   {colorMul = Colors.black; continue;}
+        if (token == "brown")   {colorMul = Colors.brown; continue;}
+        
+        result = Colors.Lerp(result, colorMul, 0.5f);
+    }
+    return result;
 }
 
 
@@ -389,5 +388,28 @@ void chunkGenerationThread(void) {
     Log.Write( " >> Shutting down chunk generation" );
     
     return;
+}
+
+
+float Snap1D(float v, float grid, float origin = 0.0f) {
+    return origin + std::round((v - origin) / grid) * grid;
+}
+
+glm::vec3 SnapAxes(glm::vec3 p, glm::bvec3 axes, float grid, glm::vec3 origin = glm::vec3(0.0f)) {
+    if (axes.x) p.x = Snap1D(p.x, grid, origin.x);
+    if (axes.y) p.y = Snap1D(p.y, grid, origin.y);
+    if (axes.z) p.z = Snap1D(p.z, grid, origin.z);
+    return p;
+}
+
+// Choose which axes to snap based on the face normal we’re placing onto.
+//  - Up/Down face => snap XZ (ground-like)
+//  - +/-X face    => snap YZ (vertical wall)
+//  - +/-Z face    => snap XY (vertical wall)
+glm::bvec3 AxesForFace(const glm::vec3& n) {
+    glm::vec3 an = glm::abs(n);
+    if (an.y >= an.x && an.y >= an.z) return glm::bvec3(true,  false, true ); // XZ
+    if (an.x >= an.y && an.x >= an.z) return glm::bvec3(false, true,  true ); // YZ
+    return                                   glm::bvec3(true,  true,  false); // XY
 }
 

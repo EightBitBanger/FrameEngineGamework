@@ -103,6 +103,10 @@ std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
         genetics += Float.ToString( gene.color.y ) + ",";
         genetics += Float.ToString( gene.color.z ) + "|";
         
+        genetics += Float.ToString( gene.animationAxis.x ) + ",";
+        genetics += Float.ToString( gene.animationAxis.y ) + ",";
+        genetics += Float.ToString( gene.animationAxis.z ) + "|";
+        
         genetics += Float.ToString( phen.scale.x ) + ",";
         genetics += Float.ToString( phen.scale.y ) + ",";
         genetics += Float.ToString( phen.scale.z ) + "|";
@@ -205,7 +209,7 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
         std::vector<std::string> subGenes = String.Explode( (genes[i]), '|' );
         
         // Check invalid gene
-        if (subGenes.size() != 9) 
+        if (subGenes.size() != 10) 
             continue;
         
         std::vector<std::string> Codon;
@@ -214,6 +218,7 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
         Phen phenotype;
         Bio biotype;
         
+        // Genotype
         Codon = String.Explode( subGenes[0], ',' );
         if (Codon.size() == 3) {
             gene.position.x = String.ToFloat( Codon[0] );
@@ -246,24 +251,32 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
         }
         Codon = String.Explode( subGenes[5], ',' );
         if (Codon.size() == 3) {
+            gene.animationAxis.x = String.ToFloat( Codon[0] );
+            gene.animationAxis.y = String.ToFloat( Codon[1] );
+            gene.animationAxis.z = String.ToFloat( Codon[2] );
+        }
+        
+        // Phenotype
+        Codon = String.Explode( subGenes[6], ',' );
+        if (Codon.size() == 3) {
             phenotype.scale.x = String.ToFloat( Codon[0] );
             phenotype.scale.y = String.ToFloat( Codon[1] );
             phenotype.scale.z = String.ToFloat( Codon[2] );
         }
-        Codon = String.Explode( subGenes[6], ',' );
+        Codon = String.Explode( subGenes[7], ',' );
         if (Codon.size() == 3) {
             phenotype.color.x = String.ToFloat( Codon[0] );
             phenotype.color.y = String.ToFloat( Codon[1] );
             phenotype.color.z = String.ToFloat( Codon[2] );
         }
         
-        Codon = String.Explode( subGenes[7], ',' );
+        Codon = String.Explode( subGenes[8], ',' );
         if (Codon.size() == 3) {
             gene.expressionFactor = String.ToFloat( Codon[0] );
             gene.expressionMax    = String.ToFloat( Codon[1] );
             gene.expressionAge    = String.ToUint(  Codon[2] );
         }
-        Codon = String.Explode( subGenes[8], ',' );
+        Codon = String.Explode( subGenes[9], ',' );
         if (Codon.size() == 4) {
             if (Codon[0] == "0") {gene.doExpress = false;}
             if (Codon[1] == "0") {gene.animationType = ActorState::Animation::Body;}

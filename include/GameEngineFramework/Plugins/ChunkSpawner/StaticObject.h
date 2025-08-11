@@ -6,7 +6,10 @@
 enum class DecorationMesh {
     WallHorizontal,
     WallVerticle,
-    Cross
+    Plain,
+    Cross,
+    Leaf,
+    Log
 };
 
 
@@ -19,7 +22,7 @@ public:
     glm::vec3 scale;
     glm::vec3 color;
     
-    DecorationMesh type;
+    unsigned int type;
     
     StaticObject();
 };
@@ -31,7 +34,7 @@ struct StaticElement {
     glm::vec3 rotation;
     glm::vec3 scale;
     glm::vec3 color;
-    uint8_t type;
+    unsigned int type;
 };
 
 

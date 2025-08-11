@@ -22,6 +22,14 @@ std::string StringType::Copy(std::string source, unsigned int begin, unsigned in
     return result;
 }
 
+std::string StringType::Trim(const std::string& str) {
+    size_t first = str.find_first_not_of(" \t\n\r\f\v");
+    if (first == std::string::npos) 
+        return ""; // string is all whitespace
+    size_t last = str.find_last_not_of(" \t\n\r\f\v");
+    return str.substr(first, (last - first + 1));
+}
+
 float StringType::ToFloat(const std::string& value) {
     float output;
     std::stringstream(value) >> output;
@@ -57,6 +65,17 @@ unsigned long int StringType::ToLongUint(const std::string& value) {
     std::stringstream(value) >> output;
     return output;
 }
+
+
+bool StringType::IsFloat(const std::string& str) {
+    std::string trimmed = Trim(str);
+    if (trimmed.empty()) 
+        return false;
+    char* endPtr = nullptr;
+    std::strtof(trimmed.c_str(), &endPtr);
+    return (*endPtr == '\0' && endPtr != trimmed.c_str());
+}
+
 
 std::vector<std::string> StringType::Explode(const std::string& value, const char character) {
 	std::vector<std::string> result;

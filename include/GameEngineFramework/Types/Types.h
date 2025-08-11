@@ -50,14 +50,20 @@ public:
     /// Check if a string contains only numbers.
     bool IsNumeric(const std::string& str);
     
+    /// Check if a string can be converted to a float.
+    bool IsFloat(const std::string& str);
+    
     /// Convert a string to lower case letters
     void Lowercase(std::string& str);
     
     /// Convert a string to upper case letters
     void Uppercase(std::string& str);
     
-    /// Strip out all the white space in a string.
+    /// Strip out all the space characters in a string.
     std::string RemoveWhiteSpace(std::string str);
+    
+    /// Trim down a string by all common white space characters.
+    std::string Trim(const std::string& str);
     
 };
 

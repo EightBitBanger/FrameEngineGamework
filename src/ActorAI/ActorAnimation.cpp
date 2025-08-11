@@ -22,8 +22,11 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
         geneRenderer->transform.matrix = glm::translate(glm::mat4(1), geneRenderer->transform.position);
         
         // Scale body by age
-        float ageScalerValue = glm::clamp((float)actor->physical.mAge * 0.001f, 0.0f, 1.0f);
-        float ageScale = Math.Lerp(actor->physical.mYouthScale, actor->physical.mAdultScale, ageScalerValue);
+        float ageScaler = 1.0f;
+        if (actor->physical.mAge < actor->physical.mAgeAdult) 
+            ageScaler = (float)actor->physical.mAge / (float)actor->physical.mAgeAdult;
+        
+        float ageScale = Math.Lerp((float)actor->physical.mYouthScale, (float)actor->physical.mAdultScale, ageScaler);
         geneRenderer->transform.matrix = glm::scale(geneRenderer->transform.matrix, glm::vec3(ageScale));
         
         // Determine animation
@@ -101,23 +104,24 @@ void ActorSystem::UpdateAnimationBody(glm::mat4& matrix, Actor* actor, MeshRende
 }
 
 void ActorSystem::UpdateAnimationLimb(glm::mat4& matrix, Actor* actor, unsigned int a) {
-    // Rotate body
+    // Rotate
     float bodyRotationLength = glm::length(actor->navigation.mRotation);
     if (bodyRotationLength != 0.0f) 
         matrix = glm::rotate(matrix, glm::radians(bodyRotationLength), glm::normalize(actor->navigation.mRotation));
     
-    // Translate body
+    // Translate
     matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].offset.x, actor->genetics.mGenes[a].offset.y, actor->genetics.mGenes[a].offset.z));
     
     if (actor->genetics.mGenes[a].animationType != ActorState::Animation::Limb || !actor->state.mIsWalking) {
-        // Genetic translation
-        matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
-        
         // Rotate gene
         glm::vec3 baseRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, actor->genetics.mGenes[a].rotation.y, actor->genetics.mGenes[a].rotation.z);
         float geneRotationLength = glm::length(baseRotation);
         if (geneRotationLength != 0.0f) 
             matrix = glm::rotate(matrix, geneRotationLength, glm::normalize(baseRotation));
+        
+        // Genetic translation
+        matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
+        
         return;
     }
     

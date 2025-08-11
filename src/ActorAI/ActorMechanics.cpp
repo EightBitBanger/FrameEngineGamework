@@ -9,6 +9,12 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
     glm::vec3 forward(0);
     glm::vec3 position(0);
     
+    float speedScaler = 0.0f;
+    float ageScaler = 1.0f;
+    if (actor->physical.mAge < actor->physical.mAgeSenior) 
+        ageScaler = (float)actor->physical.mAge / (float)actor->physical.mAgeSenior;
+    speedScaler = Math.Lerp(actor->physical.mSpeedYouth, actor->physical.mSpeed, ageScaler) * 0.01f;
+    
     switch (actor->state.mode) {
         
         case ActorState::Mode::Sleeping:
@@ -32,31 +38,26 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             
         case ActorState::Mode::MoveTo:
             forward = CalculateForwardVelocity(actor);
-            forward *= actor->physical.mSpeed * 0.01f;
-            
+            forward *= speedScaler;
             actor->state.mIsWalking = true;
             actor->state.mode = ActorState::Mode::WalkTo;
             break;
             
         case ActorState::Mode::WalkTo:
             forward = CalculateForwardVelocity(actor);
-            forward *= actor->physical.mSpeed * 0.01f;
+            forward *= speedScaler;
             actor->state.mIsWalking = true;
             actor->state.mIsRunning = false;
             break;
             
         case ActorState::Mode::RunTo:
             forward = CalculateForwardVelocity(actor);
-            forward *= actor->physical.mSpeed * 0.01f;
+            forward *= speedScaler;
             forward *= actor->physical.mSpeedMul;
             actor->state.mIsWalking = true;
             actor->state.mIsRunning = true;
             break;
-            
     }
-    
-    if (actor->physical.GetAge() < actor->physical.GetAdultAge()) 
-        forward *= actor->physical.mSpeedYouth;
     
     actor->navigation.mVelocity = forward;
     return;

@@ -11,6 +11,9 @@ WeatherSystem::WeatherSystem() :
     
     mWorldTime(0000),
     
+    mWorldLightLow(0.0087f),
+    mWorldLightHigh(0.87f),
+    
     mLightIntensity(1.0f),
     mLightAngle(glm::vec3(0)),
     
@@ -151,8 +154,6 @@ void WeatherSystem::Initiate(void) {
     
     // Zero the weather systems
     SetWeather( WeatherType::Clear );
-    
-    return;
 }
 
 
@@ -177,7 +178,6 @@ void WeatherSystem::Update(void) {
         lightRiseFall = Float.Lerp(0.0f, 1.0f, fullDayRange);
     }
     
-    
     float mLightIntensity = lightRiseFall - 0.224f;
     
     if (mLightIntensity < 0.0f) 
@@ -195,7 +195,7 @@ void WeatherSystem::Update(void) {
     mLightTransform->RotateEuler(mLightAngle.x, mLightAngle.y, mLightAngle.z);
     
     // Sun brightness
-    mSunLight->intensity = Float.Lerp(0.0f, 0.87f, mLightIntensity);
+    mSunLight->intensity = Float.Lerp(mWorldLightLow, mWorldLightHigh, mLightIntensity);
     
     // World lighting
     mWorldMaterial->ambient  = Colors.Lerp(Colors.MakeGrayScale(0.2f), Colors.MakeGrayScale(0.45f), mLightIntensity);
@@ -211,7 +211,7 @@ void WeatherSystem::Update(void) {
     mWaterMaterial->diffuse  = Colors.Lerp(waterColorLow, waterColorHigh, mLightIntensity);
     
     // Set sky color
-    float skyColor = Math.Lerp(0.0087f, 0.87f, mLightIntensity);
+    float skyColor = Math.Lerp(mWorldLightLow, mWorldLightHigh, mLightIntensity);
     SetSkyAmbientColor( Colors.MakeGrayScale(skyColor) );
     
     // Interpolate fog cycle
@@ -230,7 +230,6 @@ void WeatherSystem::Update(void) {
     
     float fogBias = mWeatherFogCounter / fogBiasMax;
     
-    
     // Calculate fog color from time
     
     Color finalColorNear = Colors.Lerp(mFogWorld->fogColorBegin, mWorldFogColorNear, fogBias);
@@ -245,16 +244,10 @@ void WeatherSystem::Update(void) {
     mFogWorld->fogColorBegin = finalColorNear;
     mFogWorld->fogColorEnd = finalColorFar;
     
-    
     // Shift to the next weather cycle
-    
     if (mNextWeather != mCurrentWeather) {
-        
-        
         // Begin shift
-        
         if (mWeatherShiftCounter == 0) {
-            
             AddWeather(mNextWeather);
             
             // Trigger the fog to begin shifting
@@ -266,67 +259,45 @@ void WeatherSystem::Update(void) {
             mWeatherShiftCounter = 0;
             
             // Finish shift
-            
             SetWeather(mNextWeather);
-            
             mCurrentWeather = mNextWeather;
-            
         }
-        
     }
-    
-    
-    return;
 }
 
 void WeatherSystem::SetSkyAmbientColor(Color skyColor) {
-    
     mSkyMaterial->ambient = skyColor;
-    
-    return;
 }
 
 void WeatherSystem::SetPlayerObject(GameObject* player) {
-    
     if (mSkyObject == nullptr) 
         return;
-    
     mSkyObject->GetComponent<Transform>()->parent = player->GetComponent<Transform>();
-    
-    return;
 }
 
 void WeatherSystem::SetWorldMaterial(Material* materialPtr) {
-    
     mWorldMaterial = materialPtr;
-    
-    return;
 }
 
 void WeatherSystem::SetStaticMaterial(Material* materialPtr) {
-    
     mStaticMaterial = materialPtr;
-    
-    return;
 }
 
 void WeatherSystem::SetWaterMaterial(Material* materialPtr) {
-    
     mWaterMaterial = materialPtr;
-    
-    return;
 }
 
 void WeatherSystem::SetTime(float newTime) {
-    
     mWorldTime = newTime;
-    
-    return;
 }
 
 float WeatherSystem::GetTime(void) {
-    
     return mWorldTime;
+}
+
+void WeatherSystem::SetWorldLightLevel(float low, float high) {
+    mWorldLightLow = low;
+    mWorldLightHigh = high;
 }
 
 void WeatherSystem::SetWeather(WeatherType type) {
@@ -369,23 +340,16 @@ void WeatherSystem::SetWeather(WeatherType type) {
         
         return;
     }
-    
-    return;
 }
 
 void WeatherSystem::SetWeatherNext(WeatherType type) {
-    
     mNextWeather = type;
-    
     if (type == WeatherType::Clear) {
-        
         FogClear();
-        
         return;
     }
     
     if (type == WeatherType::Rain) {
-        
         mWeatherFogCounter = 1;
         
         mWorldFogDensity   = 1.0f;
@@ -393,12 +357,10 @@ void WeatherSystem::SetWeatherNext(WeatherType type) {
         mWorldFogFar       = 200.0f;
         mWorldFogColorNear = Colors.ltgray;
         mWorldFogColorFar  = Colors.gray;
-        
         return;
     }
     
     if (type == WeatherType::Snow) {
-        
         mWeatherFogCounter = 1;
         
         mWorldFogDensity   = 8.0f;
@@ -409,8 +371,6 @@ void WeatherSystem::SetWeatherNext(WeatherType type) {
         
         return;
     }
-    
-    return;
 }
 
 void WeatherSystem::AddWeather(WeatherType type) {
@@ -430,30 +390,22 @@ void WeatherSystem::AddWeather(WeatherType type) {
         mSnowEmitter->Activate();
         return;
     }
-    
-    return;
 }
 
 WeatherType WeatherSystem::GetWeatherCurrent(void) {
-    
     return mCurrentWeather;
 }
 
 WeatherType WeatherSystem::GetWeatherNext(void) {
-    
     return mNextWeather;
 }
 
 float WeatherSystem::GetWeatherCycleCounter(void) {
-    
     return mWeatherMasterCounter;
 }
 
 void WeatherSystem::SetWeatherCycleCounter(float counter) {
-    
     mWeatherMasterCounter = counter;
-    
-    return;
 }
 
 void WeatherSystem::FogClear(void) {
@@ -467,7 +419,5 @@ void WeatherSystem::FogClear(void) {
     
     mWorldFogColorNear = Colors.ltgray;
     mWorldFogColorFar = Colors.Lerp(Colors.blue, Colors.gray, 0.7f);
-    
-    return;
 }
 

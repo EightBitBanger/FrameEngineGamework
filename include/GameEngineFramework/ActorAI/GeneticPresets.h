@@ -34,22 +34,34 @@ public:
         
         void Human(Actor* targetActor);
         
-        void Sheep(Actor* targetActor);
-        
         void Bear(Actor* targetActor);
-        
         void Dog(Actor* targetActor);
         
+        void Sheep(Actor* targetActor);
+        void Boar(Actor* targetActor);
         void Bovine(Actor* targetActor);
-        
         void Horse(Actor* targetActor);
+        
+        void Elk(Actor* targetActor);
+        
+        void Spider(Actor* targetActor);
         
     private:
         
         void Creepy(Actor* targetActor);
         
+        void Raptor(Actor* targetActor);
+        
     } presets;
     
+    
+    class ENGINE_API GeneticBuilder {
+        
+    public:
+        
+        Gene BuildAddLeg(float xx, float yy, float zz, float length, float width, Color color, bool invert, bool side, float canter, float tilt, float offset);
+        
+    } build;
     
 };
 

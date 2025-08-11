@@ -4,7 +4,7 @@
 	<Project>
 		<Option title="GameEngineFramework" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="root/;root/Logging/;root/Application/;root/Renderer/;root/ActorAI/;root/Audio/;root/Engine/;root/Engine/components/;root/Input/;root/Math/;root/Physics/;root/Profiler/;root/Resources/;root/Scripting/;root/Serialization/;root/tests/;root/ActorAI/components/;root/Engine/types/;root/Physics/components/;root/Resources/assets/;root/Scripting/components/;root/tests/units/;root/Types/;root/Timer/;root/MemoryAllocators/;root/Networking/;root/Transform/;root/ActorAI/genetics/;root/Engine/componentUpdate/;root/Renderer/components/;root/Renderer/pipeline/;root/Plugins/;root/Plugins/ChunkSpawner/;root/Plugins/ParticleSystem/;root/Plugins/WeatherSystem/;root/Audio/components/;root/Renderer/types/;root/UI/;root/UI/components/;root/ImGUI/;root/ImGUI/backends/;root/Plugins/ChunkSpawner/definitions/" />
+		<Option virtualFolders="root/;root/Logging/;root/Application/;root/Renderer/;root/ActorAI/;root/Audio/;root/Engine/;root/Engine/components/;root/Input/;root/Math/;root/Physics/;root/Profiler/;root/Resources/;root/Scripting/;root/Serialization/;root/tests/;root/ActorAI/components/;root/Engine/types/;root/Physics/components/;root/Resources/assets/;root/Scripting/components/;root/tests/units/;root/Types/;root/Timer/;root/MemoryAllocators/;root/Networking/;root/Transform/;root/ActorAI/genetics/;root/Engine/componentUpdate/;root/Renderer/components/;root/Renderer/pipeline/;root/Plugins/;root/Plugins/ChunkSpawner/;root/Plugins/ParticleSystem/;root/Plugins/WeatherSystem/;root/Audio/components/;root/Renderer/types/;root/UI/;root/UI/components/;root/Plugins/ChunkSpawner/definitions/" />
 		<Build>
 			<Target title="Runtime">
 				<Option output="bin/runtime.exe" prefix_auto="0" extension_auto="0" />
@@ -245,6 +245,7 @@
 			<Add library="opengl32" />
 			<Add library="rp3d" />
 			<Add library="sdl3" />
+			<Add library="ImGUI" />
 			<Add directory="vendor" />
 		</Linker>
 		<Unit filename="include/GameEngineFramework/ActorAI/ActorStates.h">
@@ -1169,11 +1170,9 @@
 			<Option virtualFolder="root/" />
 			<Option target="Game" />
 			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 		</Unit>
 		<Unit filename="src/plugins.cpp">
 			<Option virtualFolder="root/" />
-			<Option target="Game-profile" />
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
@@ -1187,7 +1186,6 @@
 			<Option virtualFolder="root/" />
 			<Option target="Game" />
 			<Option target="Game-debug" />
-			<Option target="Game-profile" />
 		</Unit>
 		<Unit filename="src/start.cpp">
 			<Option virtualFolder="root/" />
@@ -1254,99 +1252,6 @@
 			<Option target="Runtime" />
 			<Option target="Runtime-debug" />
 			<Option target="Runtime-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/backends/imgui_impl_opengl3.cpp">
-			<Option virtualFolder="root/ImGUI/backends/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/backends/imgui_impl_opengl3.h">
-			<Option virtualFolder="root/ImGUI/backends/" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/backends/imgui_impl_sdl3.cpp">
-			<Option virtualFolder="root/ImGUI/backends/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/backends/imgui_impl_sdl3.h">
-			<Option virtualFolder="root/ImGUI/backends/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/backends/imgui_impl_win32.cpp">
-			<Option virtualFolder="root/ImGUI/backends/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/backends/imgui_impl_win32.h">
-			<Option virtualFolder="root/ImGUI/backends/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/imconfig.h">
-			<Option virtualFolder="root/ImGUI/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/imgui.cpp">
-			<Option virtualFolder="root/ImGUI/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/imgui.h">
-			<Option virtualFolder="root/ImGUI/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/imgui_draw.cpp">
-			<Option virtualFolder="root/ImGUI/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/imgui_internal.h">
-			<Option virtualFolder="root/ImGUI/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/imgui_tables.cpp">
-			<Option virtualFolder="root/ImGUI/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/imgui_widgets.cpp">
-			<Option virtualFolder="root/ImGUI/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/imstb_rectpack.h">
-			<Option virtualFolder="root/ImGUI/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/imstb_textedit.h">
-			<Option virtualFolder="root/ImGUI/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
-		</Unit>
-		<Unit filename="vendor/ImGUI/imstb_truetype.h">
-			<Option virtualFolder="root/ImGUI/" />
-			<Option target="Core" />
-			<Option target="Core-debug" />
-			<Option target="Core-profile" />
 		</Unit>
 		<Extensions />
 	</Project>

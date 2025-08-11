@@ -1,0 +1,17 @@
+heightMin = 5.0
+heightMax = 10.0
+
+leafCountMin = 7
+leafCountMax = 8
+
+leafSpreadArea = 2.0
+leafSpreadHeight = 1.0
+leafWidth = 5.5
+leafHeight = 2.0
+trunkSize = 1.0
+
+trunkColorMin = orange * 0.3
+trunkColorMax = orange * 0.4
+
+leafColorMin = yellow * 0.4
+leafColorMax = yellow * 0.5
