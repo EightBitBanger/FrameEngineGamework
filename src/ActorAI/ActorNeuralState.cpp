@@ -128,6 +128,9 @@ bool ActorSystem::HandleBreedingState(Actor* actor, Actor* target, float distanc
     if (!actor->isActive || !target->isActive) 
         return false;
     
+    if (mActors.Size() > 500) 
+        return false;
+    
     if (actor->counters.mBreedingCoolDownCounter > 0 || target->counters.mBreedingCoolDownCounter > 0) 
         return false;
     

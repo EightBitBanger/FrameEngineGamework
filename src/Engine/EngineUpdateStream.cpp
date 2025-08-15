@@ -3,28 +3,35 @@
 
 
 void EngineSystemManager::UpdateComponentStream(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    
     unsigned int numberOfGameObjects = mGameObjects.Size();
     if (numberOfGameObjects == 0) 
         return;
     
     unsigned int objectsPerTick = glm::max((unsigned int)1, numberOfGameObjects / 8);
-    
-    for (unsigned int i = 0; i < objectsPerTick; i++) {
+    for (unsigned int i = 0; i < numberOfGameObjects; i++) {
         mObjectIndex = (mObjectIndex + 1) % numberOfGameObjects;
         GameObject* gameObject = mGameObjects[mObjectIndex];
         
         // Check game object render distance
         bool shouldRender = true;
-        
-        if (gameObject->renderDistance > 0) 
-            if (glm::distance(gameObject->mTransformCache->position, sceneMain->camera->transform.position) > gameObject->renderDistance) 
-                shouldRender = false;
+        Transform* transformCache = (Transform*)gameObject->mComponents[EngineComponents::Transform];
+        if (sceneMain != nullptr) 
+            if (sceneMain->camera != nullptr) 
+                if (gameObject->renderDistance > 0) 
+                    if (glm::distance(transformCache->position, sceneMain->camera->transform.position) > gameObject->renderDistance) 
+                        shouldRender = false;
         
         // Update the active state of associated components
+        MeshRenderer*    meshRendererCache = (MeshRenderer*)gameObject->mComponents[EngineComponents::MeshRenderer];
+        Light*           lightCache        = (Light*)gameObject->mComponents[EngineComponents::Light];
+        rp3d::RigidBody* rigidBodyCache    = (rp3d::RigidBody*)gameObject->mComponents[EngineComponents::RigidBody];
+        
         bool activeState = gameObject->isActive && shouldRender;
-        if (gameObject->mMeshRendererCache != nullptr)   gameObject->mMeshRendererCache->isActive = activeState;
-        if (gameObject->mLightCache != nullptr)          gameObject->mLightCache->isActive = activeState;
-        if (gameObject->mRigidBodyCache != nullptr)      gameObject->mRigidBodyCache->setIsActive(activeState);
+        if (meshRendererCache != nullptr)  meshRendererCache->isActive = activeState;
+        if (lightCache != nullptr)         lightCache->isActive = activeState;
+        if (rigidBodyCache != nullptr)     rigidBodyCache->setIsActive(activeState);
         
         // Check last object
         if (mObjectIndex == numberOfGameObjects - 1) {
@@ -64,14 +71,9 @@ void EngineSystemManager::UpdateComponentStream(void) {
         //
         // Set buffer stream objects and components
         
-        mStreamBuffer[mDataStreamIndex].gameObject    = gameObject;
-        mStreamBuffer[mDataStreamIndex].transform     = gameObject->mTransformCache;
-        mStreamBuffer[mDataStreamIndex].light         = gameObject->mLightCache;
-        mStreamBuffer[mDataStreamIndex].actor         = gameObject->mActorCache;
-        mStreamBuffer[mDataStreamIndex].camera        = gameObject->mCameraCache;
-        mStreamBuffer[mDataStreamIndex].rigidBody     = gameObject->mRigidBodyCache;
-        mStreamBuffer[mDataStreamIndex].meshRenderer  = gameObject->mMeshRendererCache;
-        mStreamBuffer[mDataStreamIndex].sound         = gameObject->mSoundCache;
+        mStreamBuffer[mDataStreamIndex].gameObject = gameObject;
+        for (unsigned int i=0; i < EngineComponents::NumberOfComponents; i++) 
+            mStreamBuffer[mDataStreamIndex].components[i] = gameObject->mComponents[i];
         
         mDataStreamIndex++;
         mStreamSize = std::max(mStreamSize, mDataStreamIndex);

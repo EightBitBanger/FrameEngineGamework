@@ -2,8 +2,8 @@
 
 void EngineSystemManager::UpdateLight(unsigned int index) {
     
-    mStreamBuffer[index].light->position  = mStreamBuffer[index].transform->position;
-    mStreamBuffer[index].light->direction = mStreamBuffer[index].transform->EulerAngles();
+    ((Light*)mStreamBuffer[index].components[EngineComponents::Light])->position  = ((Transform*)mStreamBuffer[index].components[EngineComponents::Transform])->position;
+    ((Light*)mStreamBuffer[index].components[EngineComponents::Light])->direction = ((Transform*)mStreamBuffer[index].components[EngineComponents::Transform])->EulerAngles();
     
     return;
 }

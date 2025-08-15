@@ -30,7 +30,6 @@ void EngineSystemManager::Update(void) {
     
     // Update player/camera position in the simulation
     if (sceneMain != nullptr) {
-        
         if (sceneMain->camera != nullptr) {
             
             Camera* activeCamera = sceneMain->camera;
@@ -55,12 +54,11 @@ void EngineSystemManager::Update(void) {
     UpdateKinematics();
     
     // Update attached components
-    std::lock_guard<std::mutex>(sceneMain->mux);
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].rigidBody    != nullptr)  UpdateRigidBody(i);
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].meshRenderer != nullptr)  UpdateMeshRenderer(i);
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].camera       != nullptr)  UpdateCamera(i);
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].light        != nullptr)  UpdateLight(i);
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].sound        != nullptr)  UpdateAudio(i);
+    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].components[EngineComponents::RigidBody] != nullptr)     UpdateRigidBody(i);
+    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].components[EngineComponents::MeshRenderer] != nullptr)  UpdateMeshRenderer(i);
+    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].components[EngineComponents::Camera] != nullptr)        UpdateCamera(i);
+    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].components[EngineComponents::Light] != nullptr)         UpdateLight(i);
+    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].components[EngineComponents::Sound] != nullptr)         UpdateAudio(i);
     
     return;
 }

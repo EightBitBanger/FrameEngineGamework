@@ -25,8 +25,8 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     targetActor->physical.SetAdultAge( 1000 );
     targetActor->physical.SetSeniorAge( 40000 );
     
-    targetActor->physical.SetSpeed(0.5f);
-    targetActor->physical.SetSpeedYouth(0.3f);
+    targetActor->physical.SetSpeed(0.8f);
+    targetActor->physical.SetSpeedYouth(0.5f);
     targetActor->physical.SetSpeedMultiplier(1.24f);
     
     targetActor->physical.SetYouthScale(0.1f);

@@ -19,40 +19,36 @@ void ParticleSystem::Update(void) {
 
     // Update emitters
     for (unsigned int e = 0; e < numberOfEmitters; e++) {
-        
         Emitter* emitterPtr = mEmitters[e];
-        
         if (!emitterPtr->mIsActive) 
             continue;
         
         // Check to spawn in more particles
         if (emitterPtr->mNumberOfParticles < emitterPtr->maxParticles) {
             
-            // Spawn from a point
+            // Point emitter
             if (emitterPtr->type == EmitterType::Point) {
-                
                 emitterPtr->mSpawnRate++;
                 
                 if (emitterPtr->mSpawnRate > emitterPtr->spawnRate) {
-                    
                     emitterPtr->mSpawnRate = 0;
                     
                     glm::vec3 spawnPosition = emitterPtr->position;
-                    glm::vec3 spawnScale = emitterPtr->scale;
                     glm::vec3 spawnVelocity = emitterPtr->direction;
+                    glm::vec3 spawnScale    = emitterPtr->scale;
                     
                     emitterPtr->AddParticle(spawnPosition, spawnScale, spawnVelocity, emitterPtr->colorBegin, emitterPtr->colorEnd);
                 }
             }
-
-            // Spawn within an area
+            
+            // Area emitter
             if (emitterPtr->type == EmitterType::AreaEffector) {
                 
                 while (emitterPtr->mNumberOfParticles < emitterPtr->maxParticles) {
                     
                     glm::vec3 spawnPosition = playerPosition;
-                    glm::vec3 spawnScale = emitterPtr->scale;
                     glm::vec3 spawnVelocity = emitterPtr->direction;
+                    glm::vec3 spawnScale    = emitterPtr->scale;
                     
                     float randomX = Random.Range(0.0f, emitterPtr->width) - Random.Range(0.0f, emitterPtr->width);
                     float randomY = Random.Range(0.0f, emitterPtr->height) - Random.Range(0.0f, emitterPtr->height);
@@ -66,7 +62,7 @@ void ParticleSystem::Update(void) {
                 }
             }
         }
-
+        
         // Point emitter
         if (emitterPtr->type == EmitterType::Point) {
             // Update emitter particles
@@ -86,7 +82,7 @@ void ParticleSystem::Update(void) {
                     (emitterPtr->mParticlePositions[p].z < emitterPtr->position.z - emitterPtr->width) || 
                     (emitterPtr->mParticlePositions[p].z > emitterPtr->position.z + emitterPtr->width)) {
                     
-                    emitterPtr->ResetParticle(p);
+                    emitterPtr->ResetParticle(p, emitterPtr->scale, emitterPtr->colorBegin);
                 }
                 
                 // Interpolate color

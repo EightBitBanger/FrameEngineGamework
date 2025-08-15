@@ -51,6 +51,6 @@ bool MeshRenderer::RemoveLevelOfDetail(unsigned int index) {
     return true;
 }
 
-bool MeshRenderer::GetNumberOfLevelsOfDetail(unsigned int index) {
+unsigned int MeshRenderer::GetNumberOfLevelsOfDetail(void) {
     return mLods.size();
 }

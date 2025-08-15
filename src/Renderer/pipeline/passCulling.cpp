@@ -11,7 +11,7 @@ bool RenderSystem::CullingPass(MeshRenderer* currentEntity, Camera* currentCamer
     
     // Calculate frustum position
     glm::vec3 mBoundingAreaMax = currentEntity->transform.position + currentEntity->mBoundingBoxMax;
-    glm::vec3 mBoundingAreaMin = currentEntity->transform.position - currentEntity->mBoundingBoxMin;
+    glm::vec3 mBoundingAreaMin = currentEntity->transform.position + currentEntity->mBoundingBoxMin;
     
     // Perform frustum culling
     return FrustumCheckAABB(frustum, mBoundingAreaMin, mBoundingAreaMax);

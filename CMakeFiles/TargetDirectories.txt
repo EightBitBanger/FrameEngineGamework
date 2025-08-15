@@ -1,0 +1,3 @@
+C:/Users/Sniperchicken/Desktop/FrameEngineGameWork/CMakeFiles/core.dir
+C:/Users/Sniperchicken/Desktop/FrameEngineGameWork/CMakeFiles/edit_cache.dir
+C:/Users/Sniperchicken/Desktop/FrameEngineGameWork/CMakeFiles/rebuild_cache.dir

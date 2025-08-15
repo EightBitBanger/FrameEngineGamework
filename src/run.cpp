@@ -32,7 +32,10 @@ void Run() {
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
         
-        GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, DecorationType::Tree, "willow");
+        GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, DecorationType::Tree, "birch");
+        //GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, DecorationType::Tree, "willow");
+        //GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, DecorationType::Tree, "spruce");
+        //GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, DecorationType::Tree, "oak");
         
     }
     
@@ -41,25 +44,7 @@ void Run() {
         Input.SetMouseRightPressed(false);
         
         GameWorld.RemoveDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward);
-        
-        // Destroy an actor
-        /*
-        Hit hit;
-        if (Physics.Raycast(from, forward, 1000, hit, LayerMask::Actor)) {
-            Actor* hitActor = (Actor*)hit.userData;
-            if (hitActor == actorInSights) {
-                for (unsigned int i=0; i < 24; i++) 
-                    Engine.console.WriteDialog(i, "");
-            }
-            
-            hitActor->biological.health = 0.0f;
-        }
-        */
     }
-    
-    
-    
-    
     
     
     
@@ -70,37 +55,92 @@ void Run() {
         float xx = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         float zz = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         
+        
         Hit hit;
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
-            
             Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
-            
             AI.genomes.presets.Spider(actor);
-            
-            //float range = Random.Range(0, 100);
-            
-            //if (range >= 0  && range <  30)   {AI.genomes.presets.Sheep(actor);}
-            //if (range >= 30 && range <  60)   {AI.genomes.presets.Bear(actor);}
-            //if (range >= 60 && range <= 100)  {AI.genomes.presets.Human(actor);}
-            
-            /*
-            unsigned int randomActor = Random.Range(0, 5);
-            switch (randomActor) {
-                default:
-                case 0: AI.genomes.presets.Human(actor); break;
-                case 1: AI.genomes.presets.Bovine(actor); break;
-                case 2: AI.genomes.presets.Horse(actor); break;
-                case 3: AI.genomes.presets.Sheep(actor); break;
-                case 4: AI.genomes.presets.Bear(actor); break;
-            }
-            */
-            
             actor->physical.SetAge( Random.Range(actor->physical.GetAdultAge() / 2.0f, actor->physical.GetSeniorAge()) );
             actor->RebuildGeneticExpression();
-            
             actor->isActive = true;
             actor->physical.UpdatePhysicalCollider();
         }
+        
+        /*
+        
+        Hit hit;
+        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
+            
+            glm::vec3 position = glm::vec3(hit.point.x, hit.point.y+1, hit.point.z);
+            
+            // Fire emitter
+            Emitter* fireEmitter = Particle.CreateEmitter();
+            fireEmitter->type = EmitterType::Point;
+            fireEmitter->position  = position;
+            fireEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
+            fireEmitter->scale     = glm::vec3(0.1f, 0.04f, 0.1f);
+            fireEmitter->scaleTo   = glm::vec3(1.0008f, 1.0008f, 1.0008f);
+            
+            fireEmitter->velocity = glm::vec3(0.0f, 0.01f, 0.0f);
+            fireEmitter->velocityBias = 0.008f;
+            
+            fireEmitter->width = 0.1f;
+            fireEmitter->height = 0.1f;
+            
+            fireEmitter->angle = 0.18f;
+            fireEmitter->spread = 0.4f;
+            
+            fireEmitter->colorBegin = Colors.red;
+            fireEmitter->colorEnd = Colors.yellow;
+            
+            fireEmitter->maxParticles = 20;
+            fireEmitter->spawnRate = 20;
+            
+            fireEmitter->heightMinimum = GameWorld.world.waterLevel;
+            
+            Material* fireEmitterMaterial = fireEmitter->GetMaterial();
+            
+            //fireEmitterMaterial->EnableBlending();
+            //fireEmitterMaterial->shader = Engine.shaders.water;
+            
+            
+            // Smoke emitter test
+            
+            Emitter* smokeEmitter = Particle.CreateEmitter();
+            smokeEmitter->type = EmitterType::Point;
+            smokeEmitter->position = position;
+            smokeEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
+            smokeEmitter->scale     = glm::vec3(0.08f, 0.08f, 0.08f);
+            smokeEmitter->scaleTo   = glm::vec3(1.005f, 1.0005f, 1.005f);
+            
+            float randomX = Random.Range(-1.0f, 1.0f) * 0.0024f;
+            float randomZ = Random.Range(-1.0f, 1.0f) * 0.0024f;
+            
+            smokeEmitter->velocity = glm::vec3(randomX, 0.024f, randomZ);
+            smokeEmitter->velocityBias = 0.02f;
+            
+            smokeEmitter->width = 4;
+            smokeEmitter->height = 8;
+            
+            smokeEmitter->angle = 0.3f;
+            smokeEmitter->spread = 0.5f;
+            
+            smokeEmitter->colorBegin = Colors.dkgray;
+            smokeEmitter->colorEnd = Colors.gray;
+            
+            smokeEmitter->maxParticles = 40;
+            smokeEmitter->spawnRate = 16;
+            
+            smokeEmitter->heightMinimum = GameWorld.world.waterLevel;
+            
+            Material* smokeEmitterMaterial = smokeEmitter->GetMaterial();
+            
+            //smokeEmitterMaterial->EnableBlending();
+            //smokeEmitterMaterial->shader = Engine.shaders.water;
+        }
+        
+        */
+        
     }
     
     

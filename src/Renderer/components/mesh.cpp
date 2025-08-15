@@ -25,22 +25,14 @@ Mesh::Mesh() :
     AllocateBuffers();
     
     SetDefaultAttributes();
-    return;
 }
 
 Mesh::~Mesh() {
-    
     FreeBuffers();
-    
-    return;
 }
 
 
 void Mesh::AddPlain(float x, float y, float z, float width, float height, Color color, float uCoord, float vCoord, float uStart, float vStart, unsigned int uOffset, unsigned int vOffset) {
-    
-    // Align the mesh
-    z = (z * 2) - x;
-    
     Vertex vertex[4];
     vertex[0] = Vertex( x-width, y, z+height,   color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + 0,      vStart + (vOffset * vCoord) + vCoord);
     vertex[1] = Vertex( x+width, y, z+height,   color.r, color.g, color.b,   0, 1, 0,   uStart + (uOffset * uCoord) + 0,      vStart + (vOffset * vCoord) + 0 );
@@ -62,8 +54,7 @@ void Mesh::AddPlain(float x, float y, float z, float width, float height, Color 
     subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(3);
     
-    AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
-    return;
+    AddSubMesh(x, y, z, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
 }
 
 void Mesh::AddPlainSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub) {
@@ -78,16 +69,10 @@ void Mesh::AddPlainSubDivided(float x, float y, float z, float width, float heig
                      color);
             
         }
-        
     }
-    return;
 }
 
 void Mesh::AddWall(float x, float y, float z, float width, float height, Color color) {
-    
-    // Align the mesh
-    z -= x;
-    
     Vertex vertex[4];
     vertex[0] = Vertex( x-width, y+height, z,   color.r, color.g, color.b,   0,0,1,  0, 1 );
     vertex[1] = Vertex( x+width, y+height, z,   color.r, color.g, color.b,   0,0,1,  0, 0 );
@@ -109,22 +94,16 @@ void Mesh::AddWall(float x, float y, float z, float width, float height, Color c
     subBuffer.indexBuffer.push_back(2);
     subBuffer.indexBuffer.push_back(3);
     
-    AddSubMesh(x, y, x, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
-    return;
+    AddSubMesh(x, y, z, subBuffer.vertexBuffer, subBuffer.indexBuffer, false);
 }
 
 void Mesh::AddWallSubDivided(float x, float y, float z, float width, float height, Color color, unsigned int widthSub, unsigned int heightSub) {
-    for (unsigned int h=0; h < heightSub; h++) {
-        for (unsigned int w=0; w < widthSub; w++) {
-            
+    for (unsigned int h=0; h < heightSub; h++) 
+        for (unsigned int w=0; w < widthSub; w++) 
             AddWall( x + (w * width), y + (h * height), z, width, height, color);
-        }
-    }
-    return;
 }
 
 int Mesh::AddQuad(float x, float y, float z, float width, float height, Color color) {
-    
     Vertex vertex[4];
     vertex[0] = Vertex( x, y,       z,         color.r, color.g, color.b,   0, 1, 0,  0, 0 );
     vertex[1] = Vertex( x+width, y, z,         color.r, color.g, color.b,   0, 1, 0,  1, 0 );
@@ -160,14 +139,14 @@ void Mesh::AddSphere(float x, float y, float z, float radius, unsigned int rings
         
         for (s = 0; s < sectors; s++) {
             
-            float const y = sin(-(glm::pi<float>() / 2.0f) + glm::pi<float>() * r * R);
-            float const x = cos(2 * glm::pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
-            float const z = sin(2 * glm::pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
+            float const ys = sin(-(glm::pi<float>() / 2.0f) + glm::pi<float>() * r * R);
+            float const xs = cos(2 * glm::pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
+            float const zs = sin(2 * glm::pi<float>() * s * S) * sin(glm::pi<float>() * r * R);
             
             vertices.push_back(Vertex(
-                x * radius, y * radius, z * radius,
+                xs * radius, ys * radius, zs * radius,
                 color.r, color.g, color.b,
-                x, y, z,
+                xs, ys, zs,
                 (float)s * S, (float)r * R
             ));
             
@@ -188,7 +167,6 @@ void Mesh::AddSphere(float x, float y, float z, float radius, unsigned int rings
         }
         
     }
-    
     AddSubMesh(x, y, z, vertices, indices, false);
 }
 
@@ -196,36 +174,37 @@ int Mesh::AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGp
     return AddSubMesh(x, y, z, mesh.vertexBuffer, mesh.indexBuffer, doUploadToGpu);
 }
 
-int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu) {
+int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vertexBuffer, std::vector<Index>& indexBuffer, bool doUploadToGpu) {
     for (std::vector<SubMesh>::iterator it = mFreeMesh.begin(); it != mFreeMesh.end(); ++it) {
-        if (vrtxBuffer.size() != it->vertexCount)
+        if (vertexBuffer.size() != it->vertexCount || indexBuffer.size() != it->indexCount)
             continue;
         
-        SubMesh freeMesh = *it;
-        mFreeMesh.erase(it);
+        const SubMesh& slot = *it;
         
-        freeMesh.position = glm::vec3(x, y, z);
-        mSubMesh.push_back(freeMesh);
-        
-        if ((freeMesh.vertexBegin + freeMesh.vertexCount) > mVertexBuffer.size() ||
-            (freeMesh.indexBegin + freeMesh.indexCount) > mIndexBuffer.size())
+        if ((slot.vertexBegin + slot.vertexCount) > mVertexBuffer.size() ||
+            (slot.indexBegin  + slot.indexCount)  > mIndexBuffer.size())
             return -1;
         
-        for (size_t i = 0; i < vrtxBuffer.size(); ++i) {
-            Vertex& dst = mVertexBuffer[freeMesh.vertexBegin + i];
-            const Vertex& src = vrtxBuffer[i];
-            dst = src;
-            dst.x += x; dst.y += y; dst.z += z;
+        SubMesh freeMesh = slot;
+        mFreeMesh.erase(it);
+        freeMesh.position = glm::vec3(x, y, z);
+        
+        mSubMesh.push_back(freeMesh);
+        const int submeshIdx = static_cast<int>(mSubMesh.size() - 1);
+        
+        for (size_t i = 0; i < vertexBuffer.size(); ++i) {
+            Vertex v = vertexBuffer[i];
+            v.x += x; v.y += y; v.z += z;
+            mVertexBuffer[freeMesh.vertexBegin + i] = v;
+        }
+        for (size_t i = 0; i < indexBuffer.size(); ++i) {
+            mIndexBuffer[freeMesh.indexBegin + i].index =
+                indexBuffer[i].index + freeMesh.vertexBegin;
         }
         
-        for (size_t i = 0; i < indxBuffer.size(); ++i) {
-            mIndexBuffer[freeMesh.indexBegin + i].index = indxBuffer[i].index + freeMesh.vertexBegin;
-        }
-        
-        if (doUploadToGpu)
+        if (doUploadToGpu) 
             Load();
-        
-        return freeMesh.vertexBegin;
+        return submeshIdx;
     }
     
     unsigned int startVertex = mVertexBuffer.size();
@@ -233,16 +212,16 @@ int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer,
     
     SubMesh newMesh;
     newMesh.vertexBegin = startVertex;
-    newMesh.vertexCount = vrtxBuffer.size();
+    newMesh.vertexCount = vertexBuffer.size();
     newMesh.indexBegin  = startIndex;
-    newMesh.indexCount  = indxBuffer.size();
+    newMesh.indexCount  = indexBuffer.size();
     newMesh.position    = glm::vec3(x, y, z);
     
     mSubMesh.push_back(newMesh);
     
     // Reserve with padding to reduce reallocations
-    size_t requiredVertexSize = mVertexBuffer.size() + vrtxBuffer.size();
-    size_t requiredIndexSize  = mIndexBuffer.size() + indxBuffer.size();
+    size_t requiredVertexSize = mVertexBuffer.size() + vertexBuffer.size();
+    size_t requiredIndexSize  = mIndexBuffer.size() + indexBuffer.size();
     
     if (mVertexBuffer.capacity() < requiredVertexSize)
         mVertexBuffer.reserve(requiredVertexSize + 1000);
@@ -250,7 +229,7 @@ int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer,
     if (mIndexBuffer.capacity() < requiredIndexSize)
         mIndexBuffer.reserve(requiredIndexSize + 1000);
     
-    for (std::vector<Vertex>::iterator it = vrtxBuffer.begin(); it != vrtxBuffer.end(); ++it) {
+    for (std::vector<Vertex>::iterator it = vertexBuffer.begin(); it != vertexBuffer.end(); ++it) {
         Vertex vertex = *it;
         vertex.x += x;
         vertex.y += y;
@@ -258,7 +237,7 @@ int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer,
         mVertexBuffer.push_back(vertex);
     }
     
-    for (std::vector<Index>::iterator it = indxBuffer.begin(); it != indxBuffer.end(); ++it) {
+    for (std::vector<Index>::iterator it = indexBuffer.begin(); it != indexBuffer.end(); ++it) {
         Index index = *it;
         index.index += startVertex;
         mIndexBuffer.push_back(index);
@@ -266,98 +245,129 @@ int Mesh::AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer,
     
     if (doUploadToGpu)
         Load();
-    
-    return startVertex;
+    return mSubMesh.size() - 1;
 }
 
-bool Mesh::ReplaceSubMesh(unsigned int index, SubMesh& subMesh) {
-    if (index >= mSubMesh.size()) 
+bool Mesh::ReplaceSubMesh(unsigned int index, SubMesh& newMesh, bool doUploadToGpu) {
+    if (index >= mSubMesh.size())
+        return false;
+    const SubMesh& dst = mSubMesh[index];
+    
+    if (newMesh.vertexBuffer.size() != dst.vertexCount ||
+        newMesh.indexBuffer.size()  != dst.indexCount)
         return false;
     
-    // Remove the existing sub mesh at the index
-    RemoveSubMesh(index);
+    const glm::vec3 pos = dst.position;
+    for (size_t i = 0; i < newMesh.vertexBuffer.size(); ++i) {
+        Vertex v = newMesh.vertexBuffer[i];
+        v.x += pos.x; v.y += pos.y; v.z += pos.z;
+        mVertexBuffer[dst.vertexBegin + i] = v;
+    }
     
-    // Add the new sub mesh at the same position
-    float x = mSubMesh[index].position.x;
-    float y = mSubMesh[index].position.y;
-    float z = mSubMesh[index].position.z;
+    for (size_t i = 0; i < newMesh.indexBuffer.size(); ++i) {
+        mIndexBuffer[dst.indexBegin + i].index =
+            newMesh.indexBuffer[i].index + dst.vertexBegin;
+    }
     
-    AddSubMesh(x, y, z, subMesh, true);
-    
+    if (doUploadToGpu)
+        Load();
     return true;
 }
 
-bool Mesh::RemoveSubMesh(unsigned int index) {
+bool Mesh::ReplaceSubMesh(unsigned int index, std::vector<Vertex>& vertexBuffer, std::vector<Index>&  indexBuffer, bool doUploadToGpu) {
+    if (index >= mSubMesh.size())
+        return false;
+
+    const SubMesh& dst = mSubMesh[index];
+    if (vertexBuffer.size() != dst.vertexCount ||
+        indexBuffer.size()  != dst.indexCount)
+        return false;
+
+    const glm::vec3 pos = dst.position;
+
+    for (size_t i = 0; i < vertexBuffer.size(); ++i) {
+        Vertex v = vertexBuffer[i];
+        v.x += pos.x; v.y += pos.y; v.z += pos.z;
+        mVertexBuffer[dst.vertexBegin + i] = v;
+    }
+
+    for (size_t i = 0; i < indexBuffer.size(); ++i) {
+        mIndexBuffer[dst.indexBegin + i].index = indexBuffer[i].index + dst.vertexBegin;
+    }
+
+    if (doUploadToGpu)
+        Load();
+    return true;
+}
+
+bool Mesh::RemoveSubMesh(unsigned int index, bool doUploadToGpu) {
     if (index >= mSubMesh.size()) 
         return false;
+    SubMesh& subMesh = mSubMesh[index];
     
-    std::vector<Vertex> destMesh;
-    SubMesh& sourceMesh = mSubMesh[index];
+    Vertex zeroV{};
+    for (unsigned int i = 0; i < subMesh.vertexCount; ++i) 
+        mVertexBuffer[subMesh.vertexBegin + i] = zeroV;
     
-    for (std::vector<Vertex>::iterator it = mVertexBuffer.begin() + sourceMesh.vertexBegin; it != mVertexBuffer.begin() + sourceMesh.vertexBegin + sourceMesh.vertexCount; ++it) {
-        Vertex vertex;
-        *it = vertex;
-        destMesh.push_back(vertex);
+    Index zeroI{0};
+    for (unsigned int i = 0; i < subMesh.indexCount; ++i) 
+        mIndexBuffer[subMesh.indexBegin + i] = zeroI;
+    
+    if (doUploadToGpu) {
+        LoadVertexRange(subMesh.vertexBegin, subMesh.vertexCount);
+        LoadIndexRange (subMesh.indexBegin,  subMesh.indexCount);
     }
     
-    mFreeMesh.push_back(sourceMesh);
-    
+    mFreeMesh.push_back(subMesh);
     mSubMesh.erase(mSubMesh.begin() + index);
-    
     return true;
 }
 
 bool Mesh::GetSubMesh(unsigned int index, SubMesh& subMesh) {
     if (index >= mSubMesh.size()) 
         return false;
+    const SubMesh& subMeshSrc = mSubMesh[index];
     
-    const SubMesh& sourceMesh = mSubMesh[index];
-    
-    std::vector<Vertex>::iterator vertexStart = mVertexBuffer.begin() + sourceMesh.vertexBegin;
-    std::vector<Vertex>::iterator vertexEnd   = vertexStart + sourceMesh.vertexCount;
+    std::vector<Vertex>::iterator vertexStart = mVertexBuffer.begin() + subMeshSrc.vertexBegin;
+    std::vector<Vertex>::iterator vertexEnd   = vertexStart + subMeshSrc.vertexCount;
     subMesh.vertexBuffer.insert(subMesh.vertexBuffer.end(), vertexStart, vertexEnd);
     
-    std::vector<Index>::iterator indexStart = mIndexBuffer.begin() + sourceMesh.indexBegin;
-    std::vector<Index>::iterator indexEnd   = indexStart + sourceMesh.indexCount;
+    std::vector<Index>::iterator indexStart = mIndexBuffer.begin() + subMeshSrc.indexBegin;
+    std::vector<Index>::iterator indexEnd   = indexStart + subMeshSrc.indexCount;
     subMesh.indexBuffer.insert(subMesh.indexBuffer.end(), indexStart, indexEnd);
     
-    subMesh.vertexCount += sourceMesh.vertexCount;
-    subMesh.indexCount  += sourceMesh.indexCount;
-    subMesh.position     = sourceMesh.position;
-    
+    subMesh.vertexCount += subMeshSrc.vertexCount;
+    subMesh.indexCount  += subMeshSrc.indexCount;
+    subMesh.position     = subMeshSrc.position;
     return true;
 }
 
 bool Mesh::GetSubMesh(unsigned int index, std::vector<Vertex>& vertexBuffer, std::vector<Index>& indexBuffer) {
-    
     if (index >= mSubMesh.size()) 
         return false;
+    const SubMesh& subMesh = mSubMesh[index];
     
-    const SubMesh& sourceMesh = mSubMesh[index];
-    
-    std::vector<Vertex>::iterator vertexStart = mVertexBuffer.begin() + sourceMesh.vertexBegin;
-    std::vector<Vertex>::iterator vertexEnd   = vertexStart + sourceMesh.vertexCount;
+    std::vector<Vertex>::iterator vertexStart = mVertexBuffer.begin() + subMesh.vertexBegin;
+    std::vector<Vertex>::iterator vertexEnd   = vertexStart + subMesh.vertexCount;
     vertexBuffer.insert(vertexBuffer.end(), vertexStart, vertexEnd);
     
-    std::vector<Index>::iterator indexStart = mIndexBuffer.begin() + sourceMesh.indexBegin;
-    std::vector<Index>::iterator indexEnd   = indexStart + sourceMesh.indexCount;
+    std::vector<Index>::iterator indexStart = mIndexBuffer.begin() + subMesh.indexBegin;
+    std::vector<Index>::iterator indexEnd   = indexStart + subMesh.indexCount;
     indexBuffer.insert(indexBuffer.end(), indexStart, indexEnd);
-    
     return true;
 }
 
 bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) {
     if (index >= mSubMesh.size()) 
         return false;
+    SubMesh& subMesh = mSubMesh[index];
     
-    SubMesh& sourceMesh = mSubMesh[index];
+    float dx = x - subMesh.position.x;
+    float dy = y - subMesh.position.y;
+    float dz = z - subMesh.position.z;
     
-    float dx = x - sourceMesh.position.x;
-    float dy = y - sourceMesh.position.y;
-    float dz = z - sourceMesh.position.z;
-    
-    std::vector<Vertex>::iterator vertexStart = mVertexBuffer.begin() + sourceMesh.vertexBegin;
-    std::vector<Vertex>::iterator vertexEnd   = vertexStart + sourceMesh.vertexCount;
+    std::vector<Vertex>::iterator vertexStart = mVertexBuffer.begin() + subMesh.vertexBegin;
+    std::vector<Vertex>::iterator vertexEnd   = vertexStart + subMesh.vertexCount;
     
     for (std::vector<Vertex>::iterator it = vertexStart; it != vertexEnd; ++it) {
         Vertex& vertex = *it;
@@ -366,22 +376,20 @@ bool Mesh::ChangeSubMeshPosition(unsigned int index, float x, float y, float z) 
         vertex.z += dz;
     }
     
-    sourceMesh.position = glm::vec3(x, y, z);
-    
+    subMesh.position = glm::vec3(x, y, z);
     return true;
 }
 
 bool Mesh::ChangeSubMeshRotation(unsigned int index, float angle, glm::vec3 axis) {
     if (index >= mSubMesh.size()) 
         return false;
-    
-    SubMesh& sourceMesh = mSubMesh[index];
+    SubMesh& subMesh = mSubMesh[index];
     
     glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis);
-    glm::vec3 pivot = sourceMesh.position;
+    glm::vec3 pivot = subMesh.position;
     
-    unsigned int start = sourceMesh.vertexBegin;
-    unsigned int end   = start + sourceMesh.vertexCount;
+    unsigned int start = subMesh.vertexBegin;
+    unsigned int end   = start + subMesh.vertexCount;
     
     for (unsigned int i = start; i < end; i++) {
         Vertex& vertex = mVertexBuffer[i];
@@ -395,15 +403,38 @@ bool Mesh::ChangeSubMeshRotation(unsigned int index, float angle, glm::vec3 axis
     return true;
 }
 
+bool Mesh::ChangeSubMeshRotationAroundPoint(unsigned int index, float angle, glm::vec3 axis, glm::vec3 center) {
+    if (index >= mSubMesh.size())
+        return false;
+    const SubMesh& subMesh = mSubMesh[index];
+    
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis);
+    
+    unsigned int start = subMesh.vertexBegin;
+    unsigned int end   = start + subMesh.vertexCount;
+    
+    for (unsigned int i = start; i < end; ++i) {
+        Vertex& v = mVertexBuffer[i];
+        
+        glm::vec4 toLocal(v.x - center.x, v.y - center.y, v.z - center.z, 1.0f);
+        glm::vec4 rotated = rotationMatrix * toLocal;
+        
+        v.x = rotated.x + center.x;
+        v.y = rotated.y + center.y;
+        v.z = rotated.z + center.z;
+    }
+    return true;
+}
+
 bool Mesh::ChangeSubMeshScale(unsigned int index, float scaleX, float scaleY, float scaleZ) {
     if (index >= mSubMesh.size()) 
         return false;
     
-    SubMesh& sourceMesh = mSubMesh[index];
-    glm::vec3 pivot = sourceMesh.position;
+    SubMesh& subMesh = mSubMesh[index];
+    glm::vec3 pivot = subMesh.position;
     
-    unsigned int start = sourceMesh.vertexBegin;
-    unsigned int end   = start + sourceMesh.vertexCount;
+    unsigned int start = subMesh.vertexBegin;
+    unsigned int end   = start + subMesh.vertexCount;
     
     for (unsigned int i = start; i < end; ++i) {
         Vertex& vertex = mVertexBuffer[i];
@@ -412,7 +443,6 @@ bool Mesh::ChangeSubMeshScale(unsigned int index, float scaleX, float scaleY, fl
         vertex.y = (vertex.y - pivot.y) * scaleY + pivot.y;
         vertex.z = (vertex.z - pivot.z) * scaleZ + pivot.z;
     }
-    
     return true;
 }
 
@@ -420,17 +450,16 @@ bool Mesh::ChangeSubMeshColor(unsigned int index, Color newColor) {
     if (index >= mSubMesh.size()) 
         return false;
     
-    SubMesh& sourceMesh = mSubMesh[index];
+    SubMesh& subMesh = mSubMesh[index];
     
-    std::vector<Vertex>::iterator itStart = mVertexBuffer.begin() + sourceMesh.vertexBegin;
-    std::vector<Vertex>::iterator itEnd   = itStart + sourceMesh.vertexCount;
+    std::vector<Vertex>::iterator itStart = mVertexBuffer.begin() + subMesh.vertexBegin;
+    std::vector<Vertex>::iterator itEnd   = itStart + subMesh.vertexCount;
     
     for (std::vector<Vertex>::iterator it = itStart; it != itEnd; ++it) {
         it->r = newColor.r;
         it->g = newColor.g;
         it->b = newColor.b;
     }
-    
     return true;
 }
 
@@ -438,22 +467,21 @@ bool Mesh::ChangeSubMeshPoints(unsigned int index, std::vector<glm::vec3> points
     if (index >= mSubMesh.size()) 
         return false;
     
-    SubMesh& sourceMesh = mSubMesh[index];
+    SubMesh& subMesh = mSubMesh[index];
     
-    if (points.size() < sourceMesh.vertexCount)
+    if (points.size() < subMesh.vertexCount)
         return false;
     
-    unsigned int start = sourceMesh.vertexBegin;
-    unsigned int end   = start + sourceMesh.vertexCount;
+    unsigned int start = subMesh.vertexBegin;
+    unsigned int end   = start + subMesh.vertexCount;
     
-    for (unsigned int i = 0; i < sourceMesh.vertexCount; ++i) {
+    for (unsigned int i = 0; i < subMesh.vertexCount; ++i) {
         const glm::vec3& point = points[i];
         Vertex& vertex = mVertexBuffer[start + i];
         vertex.x = point.x;
         vertex.y = point.y;
         vertex.z = point.z;
     }
-    
     return true;
 }
 
@@ -461,7 +489,6 @@ void Mesh::ClearSubMeshes(void) {
     mSubMesh.clear();
     mVertexBuffer.clear();
     mIndexBuffer.clear();
-    return;
 }
 
 void Mesh::Load(void) {
@@ -492,50 +519,84 @@ void Mesh::Load(void) {
     );
 }
 
-bool Mesh::LoadRange(unsigned int start, unsigned int count) {
-    if (!mAreBuffersAllocated) {
-        AllocateBuffers();
-        mAreBuffersAllocated = true;
-    }
-    
-    if ((start >= mVertexBuffer.size()) || ((start + count) > mVertexBuffer.size())) 
-        return false;
-    
-    if ((start >= mIndexBuffer.size()) || ((start + count) > mIndexBuffer.size())) 
-        return false;
-    
-    glBindVertexArray(mVertexArray);
-    
-    glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
-    glBufferSubData(
-        GL_ARRAY_BUFFER,
-        static_cast<GLintptr>(start * sizeof(Vertex)),
-        static_cast<GLsizeiptr>(count * sizeof(Vertex)),
-        &mVertexBuffer[start]
-    );
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
-    glBufferSubData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        static_cast<GLintptr>(start * sizeof(Index)),
-        static_cast<GLsizeiptr>(count * sizeof(Index)),
-        &mIndexBuffer[start]
-    );
-    
-    return true;
-}
-
 void Mesh::Unload(void) {
-    
     if (!mAreBuffersAllocated) 
         return;
     
     FreeBuffers();
     
     mAreBuffersAllocated = false;
-    
-    return;
 }
+
+
+bool Mesh::LoadVertexRange(unsigned int vertexStart, unsigned int vertexCount) {
+    if (vertexCount == 0) return true;
+    
+    if (!mAreBuffersAllocated) {
+        AllocateBuffers();
+        mAreBuffersAllocated = true;
+    }
+    
+    // Check to do a full reupload
+    const unsigned int cpuVerts = static_cast<unsigned int>(mVertexBuffer.size());
+    if (cpuVerts > mVertexBufferSz) {
+        Load();
+        return true;
+    }
+    
+    // Bounds check against both CPU data and GPU allocation size
+    if (vertexStart >= cpuVerts || (vertexStart + vertexCount) > cpuVerts) return false;
+    if ((vertexStart + vertexCount) > mVertexBufferSz) return false;
+    
+    glBindVertexArray(mVertexArray);
+    glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
+    glBufferSubData(
+        GL_ARRAY_BUFFER,
+        static_cast<GLintptr>(vertexStart * sizeof(Vertex)),
+        static_cast<GLsizeiptr>(vertexCount * sizeof(Vertex)),
+        &mVertexBuffer[vertexStart]
+    );
+    return true;
+}
+
+bool Mesh::LoadIndexRange(unsigned int indexStart, unsigned int indexCount) {
+    if (indexCount == 0) return true;
+    
+    if (!mAreBuffersAllocated) {
+        AllocateBuffers();
+        mAreBuffersAllocated = true;
+    }
+    
+    // If CPU buffer grew beyond last allocated GPU size, do a full reupload.
+    const unsigned int cpuIdx = static_cast<unsigned int>(mIndexBuffer.size());
+    if (cpuIdx > mIndexBufferSz) {
+        Load();
+        return true;
+    }
+    
+    // Bounds check against both CPU data and GPU allocation size
+    if (indexStart >= cpuIdx || (indexStart + indexCount) > cpuIdx) return false;
+    if ((indexStart + indexCount) > mIndexBufferSz) return false;
+    
+    glBindVertexArray(mVertexArray);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
+    glBufferSubData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        static_cast<GLintptr>(indexStart * sizeof(Index)),
+        static_cast<GLsizeiptr>(indexCount * sizeof(Index)),
+        &mIndexBuffer[indexStart]
+    );
+    return true;
+}
+
+bool Mesh::LoadSubMesh(unsigned int submeshIndex) {
+    if (submeshIndex >= mSubMesh.size()) return false;
+    const SubMesh& sm = mSubMesh[submeshIndex];
+    bool okV = LoadVertexRange(sm.vertexBegin, sm.vertexCount);
+    bool okI = LoadIndexRange (sm.indexBegin,  sm.indexCount);
+    return okV && okI;
+}
+
 
 bool Mesh::CheckIsAllocatedOnGPU(void) {
     return mAreBuffersAllocated;
@@ -555,7 +616,6 @@ Vertex Mesh::GetVertex(unsigned int index) {
 
 void Mesh::SetVertex(unsigned int index, Vertex vertex) {
     mVertexBuffer[index] = vertex;
-    return;
 }
 
 Index Mesh::GetIndex(unsigned int index) {
@@ -564,7 +624,6 @@ Index Mesh::GetIndex(unsigned int index) {
 
 void Mesh::SetIndex(unsigned int index, Index position) {
     mIndexBuffer[index] = position;
-    return;
 }
 
 void Mesh::CalculateNormals(void) {
@@ -590,22 +649,15 @@ void Mesh::CalculateNormals(void) {
 }
 
 void Mesh::SetNormals(glm::vec3 normals) {
-    
-    for (unsigned int i=0; i < mVertexBufferSz; i++) {
-        
+    for (unsigned int i=0; i < mVertexBuffer.size(); i++) {
         mVertexBuffer[i].nx = normals.x;
         mVertexBuffer[i].ny = normals.y;
         mVertexBuffer[i].nz = normals.z;
-        
-        continue;
     }
-    
-    return;
 }
 
 void Mesh::SetPrimitive(int primitiveType) {
     mPrimitive = primitiveType;
-    return;
 }
 
 void Mesh::SetAttribute(int index, int attributeCount, int vertexSize, int byteOffset) {
@@ -613,36 +665,30 @@ void Mesh::SetAttribute(int index, int attributeCount, int vertexSize, int byteO
     glEnableVertexAttribArray(index);
     GLintptr offset = byteOffset;
     glVertexAttribPointer(index, attributeCount, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*)offset);
-    return;
 }
 
 void Mesh::DisableAttribute(int index) {
     Bind();
     glDisableVertexAttribArray(index);
-    return;
 }
 
 void Mesh::LoadVertexBuffer(Vertex* bufferData, int vertexCount) {
     glBindVertexArray(mVertexArray);
     glBindBuffer(GL_ARRAY_BUFFER, mBufferVertex);
     glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), &bufferData[0], GL_STATIC_DRAW);
-    return;
 }
 
 void Mesh::LoadIndexBuffer(Index* bufferData, int indexCount) {
     glBindVertexArray(mVertexArray);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(Index), &bufferData[0], GL_STATIC_DRAW);
-    return;
 }
 
 void Mesh::Bind() {
     glBindVertexArray(mVertexArray);
-    return;
 }
 
 void Mesh::AllocateBuffers(void) {
-    
     mVertexBufferSz = mVertexBuffer.size();
     mIndexBufferSz  = mIndexBuffer.size();
     
@@ -656,8 +702,6 @@ void Mesh::AllocateBuffers(void) {
     glGenBuffers(1, &mBufferIndex);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index), NULL, GL_STATIC_DRAW);
-    
-    return;
 }
 
 void Mesh::FreeBuffers(void) {
@@ -667,21 +711,14 @@ void Mesh::FreeBuffers(void) {
     mVertexArray = 0;
     mBufferVertex = 0;
     mBufferIndex = 0;
-    return;
 }
 
 void Mesh::DrawVertexArray(void) {
-    
     glDrawArrays(mPrimitive, 0, mVertexBufferSz);
-    
-    return;
 }
 
 void Mesh::DrawIndexArray(void) {
-    
     glDrawElements(mPrimitive, mIndexBufferSz, GL_UNSIGNED_INT, (void*)0);
-    
-    return;
 }
 
 unsigned int Mesh::GetSubMeshCount(void) {
@@ -689,13 +726,10 @@ unsigned int Mesh::GetSubMeshCount(void) {
 }
 
 void Mesh::SetDefaultAttributes(void) {
-    
     Bind();
     
     SetAttribute(0, 3, sizeof(Vertex), 0);
     SetAttribute(1, 3, sizeof(Vertex), 12);
     SetAttribute(2, 3, sizeof(Vertex), 24);
     SetAttribute(3, 2, sizeof(Vertex), 36);
-    
-    return;
 }

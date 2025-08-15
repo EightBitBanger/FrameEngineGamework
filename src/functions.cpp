@@ -337,7 +337,7 @@ void MainMenuDisable(void) {
     
     // Clear the console
     Engine.console.Disable();
-    Engine.console.Clear();
+    Engine.console.ClearInput();
     
     Engine.sceneMain->camera->EnableMouseLook();
     

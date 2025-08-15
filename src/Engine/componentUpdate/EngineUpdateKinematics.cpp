@@ -86,31 +86,5 @@ void EngineSystemManager::UpdateKinematics(void) {
         
         actor->navigation.mux.unlock();
     }
-    
-    return;
-}
-
-
-void EngineSystemManager::GenerateCollider(Actor* actor) {
-    /*
-    rp3d::RigidBody* rigidBody = mStreamBuffer[index].rigidBody;
-    
-    unsigned int numberOfColliders = rigidBody->getNbColliders();
-    
-    if (numberOfColliders == 0) {
-        
-        rp3d::Transform colliderOffset(rp3d::Transform::identity());
-        
-        colliderOffset.setPosition(rp3d::Vector3(0.0f, 1.0f, 0.0f));
-        rp3d::Collider* collider = rigidBody->addCollider(colliders.box, colliderOffset);
-        
-        collider->setCollisionCategoryBits(static_cast<unsigned short>(LayerMask::Actor));
-        collider->setCollideWithMaskBits(static_cast<unsigned short>(CollisionMask::Entity));
-        
-        collider->setUserData(static_cast<void*>(mStreamBuffer[index].gameObject));
-        rigidBody->setUserData(static_cast<void*>(mStreamBuffer[index].gameObject));
-    }
-    */
-    return;
 }
 

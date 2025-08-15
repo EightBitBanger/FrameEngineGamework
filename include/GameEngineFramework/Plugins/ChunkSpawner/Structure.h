@@ -6,7 +6,7 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
 
 struct StructurePart {
-    glm::ivec2 offset;
+    glm::vec3 offset;
     glm::vec3 rotation;
     glm::vec3 scale;
     Color color;

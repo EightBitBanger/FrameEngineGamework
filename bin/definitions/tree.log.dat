@@ -1,0 +1,7 @@
+heightMin = 1.0
+heightMax = 1.0
+
+trunkSize = 1.0
+
+trunkColorMin = brown * 0.4
+trunkColorMax = brown * 0.5

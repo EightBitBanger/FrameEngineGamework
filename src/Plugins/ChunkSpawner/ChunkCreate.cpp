@@ -24,8 +24,8 @@ Chunk* ChunkManager::CreateChunk(float x, float y) {
     chunk->staticObject->renderDistance = (renderDistance * chunkSize) * 0.5f * staticDistance;
     
     // Bounding box area
-    glm::vec3 boundMin(-1, -1, -1);
-    glm::vec3 boundMax(1, 1, 1);
+    glm::vec3 boundMin(-chunkSize, -100, -chunkSize);
+    glm::vec3 boundMax(chunkSize, 100, chunkSize);
     
     chunkRenderer->SetBoundingBoxMin(boundMin);
     chunkRenderer->SetBoundingBoxMax(boundMax);

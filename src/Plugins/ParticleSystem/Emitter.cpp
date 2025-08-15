@@ -60,14 +60,29 @@ void Emitter::AddParticle(glm::vec3 position, glm::vec3 initialScale, glm::vec3 
     
     mParticlePositions.push_back(position);
     mParticleVelocities.push_back(force);
+    mParticleScale.push_back(glm::vec3(1.0f));
     mParticleColors.push_back(glm::vec3(colorBegin.r, colorBegin.g, colorBegin.b));
-    
-    ResetParticle(mNumberOfParticles - 1);
-    
     return;
 }
 
-unsigned int Emitter::ResetParticle(unsigned int index) {
+unsigned int Emitter::ResetParticle(unsigned int index, glm::vec3 initialScale, Color initialColor) {
+    // Reset mesh fully
+    SubMesh particleSubMesh;
+    Engine.meshes.cube->GetSubMesh(0, particleSubMesh);
+    
+    unsigned int numberOfVertices = particleSubMesh.vertexBuffer.size();
+    
+    for (unsigned int i = 0; i < numberOfVertices; i++) {
+        
+        particleSubMesh.vertexBuffer[i].x *= initialScale.x;
+        particleSubMesh.vertexBuffer[i].y *= initialScale.y;
+        particleSubMesh.vertexBuffer[i].z *= initialScale.z;
+        
+        particleSubMesh.vertexBuffer[i].r = initialColor.r;
+        particleSubMesh.vertexBuffer[i].g = initialColor.g;
+        particleSubMesh.vertexBuffer[i].b = initialColor.b;
+    }
+    mMesh->ReplaceSubMesh(index, particleSubMesh);
     
     // Spawn spread
     float initSpread = spread;
@@ -79,7 +94,7 @@ unsigned int Emitter::ResetParticle(unsigned int index) {
         randomOffset.z = (Random.Range(0, 100) * 0.001f - Random.Range(0, 100) * 0.001f) * initSpread;
     }
     mParticlePositions[index] = position + randomOffset;
-
+    
     // Spawn angle
     float initAngle = angle;
     glm::vec3 randomVelocity(0);
@@ -90,7 +105,7 @@ unsigned int Emitter::ResetParticle(unsigned int index) {
         randomVelocity.z = (Random.Range(0, 100) * 0.0001f - Random.Range(0, 100) * 0.0001f) * initAngle;
     }
     mParticleVelocities[index] = direction + randomVelocity;
-
+    
     mParticleColors[index] = glm::vec3(colorBegin.r, colorBegin.g, colorBegin.b);
     return index;
 }

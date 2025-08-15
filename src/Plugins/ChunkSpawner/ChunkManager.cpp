@@ -202,36 +202,38 @@ void ChunkManager::KillActor(Actor* actor) {
 Color ChunkManager::GetColorByName(std::string name) {
     std::vector<std::string> parts = String.Explode(name, '*');
     Color result = Colors.white;
+    bool firstColor = true;
     
     for (unsigned int i = 0; i < parts.size(); i++) {
         std::string token = parts[i];
         
         // Try to interpret as a number
-        /*
         if (String.IsFloat(token)) {
             result *= String.ToFloat(token);
             continue;
         }
-        */
         
-        Color colorMul = Colors.white;
-        if (token == "red")     {colorMul = Colors.red; continue;}
-        if (token == "green")   {colorMul = Colors.green; continue;}
-        if (token == "blue")    {colorMul = Colors.blue; continue;}
-        if (token == "dkred")   {colorMul = Colors.dkred; continue;}
-        if (token == "dkgreen") {colorMul = Colors.dkgreen; continue;}
-        if (token == "dkblue")  {colorMul = Colors.dkblue; continue;}
-        if (token == "yellow")  {colorMul = Colors.yellow; continue;}
-        if (token == "orange")  {colorMul = Colors.orange; continue;}
-        if (token == "purple")  {colorMul = Colors.purple; continue;}
-        if (token == "gray")    {colorMul = Colors.gray; continue;}
-        if (token == "ltgray")  {colorMul = Colors.ltgray; continue;}
-        if (token == "dkgray")  {colorMul = Colors.dkgray; continue;}
-        if (token == "white")   {colorMul = Colors.white; continue;}
-        if (token == "black")   {colorMul = Colors.black; continue;}
-        if (token == "brown")   {colorMul = Colors.brown; continue;}
+        float damp = 0.87f;
+        float bias = 0.5f;
+        if (firstColor) 
+            bias = 1.0f;
         
-        result = Colors.Lerp(result, colorMul, 0.5f);
+        if (token == "red")     {result = Colors.Lerp(result, Colors.red,     bias) * damp; firstColor = false;}
+        if (token == "green")   {result = Colors.Lerp(result, Colors.green,   bias) * damp; firstColor = false;}
+        if (token == "blue")    {result = Colors.Lerp(result, Colors.blue,    bias) * damp; firstColor = false;}
+        if (token == "dkred")   {result = Colors.Lerp(result, Colors.dkred,   bias) * damp; firstColor = false;}
+        if (token == "dkgreen") {result = Colors.Lerp(result, Colors.dkgreen, bias) * damp; firstColor = false;}
+        if (token == "dkblue")  {result = Colors.Lerp(result, Colors.dkblue,  bias) * damp; firstColor = false;}
+        if (token == "yellow")  {result = Colors.Lerp(result, Colors.yellow,  bias) * damp; firstColor = false;}
+        if (token == "orange")  {result = Colors.Lerp(result, Colors.orange,  bias) * damp; firstColor = false;}
+        if (token == "purple")  {result = Colors.Lerp(result, Colors.purple,  bias) * damp; firstColor = false;}
+        if (token == "gray")    {result = Colors.Lerp(result, Colors.gray,    bias) * damp; firstColor = false;}
+        if (token == "ltgray")  {result = Colors.Lerp(result, Colors.ltgray,  bias) * damp; firstColor = false;}
+        if (token == "dkgray")  {result = Colors.Lerp(result, Colors.dkgray,  bias) * damp; firstColor = false;}
+        if (token == "white")   {result = Colors.Lerp(result, Colors.white,   bias) * damp; firstColor = false;}
+        if (token == "black")   {result = Colors.Lerp(result, Colors.black,   bias) * damp; firstColor = false;}
+        if (token == "brown")   {result = Colors.Lerp(result, Colors.brown,   bias) * damp; firstColor = false;}
+        
     }
     return result;
 }

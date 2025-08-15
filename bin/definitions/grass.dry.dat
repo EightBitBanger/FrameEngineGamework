@@ -1,5 +1,5 @@
 width = 1.1
 height = 3.3
 
-colorMin = yellow * 0.2
-colorMax = yellow * 0.28
+colorMin = yellow * 0.1
+colorMax = yellow * 0.14

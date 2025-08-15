@@ -50,15 +50,23 @@ public:
     
     /// Get a component of a given type.
     template <class T> T* GetComponent(void) {
+        if (std::is_same<T, Transform>::value)     return (T*)mComponents[EngineComponents::Transform];
+        if (std::is_same<T, Camera>::value)        return (T*)mComponents[EngineComponents::Camera];
+        if (std::is_same<T, Light>::value)         return (T*)mComponents[EngineComponents::Light];
+        if (std::is_same<T, MeshRenderer>::value)  return (T*)mComponents[EngineComponents::MeshRenderer];
+        if (std::is_same<T, RigidBody>::value)     return (T*)mComponents[EngineComponents::RigidBody];
+        if (std::is_same<T, Actor>::value)         return (T*)mComponents[EngineComponents::Actor];
+        if (std::is_same<T, Sound>::value)         return (T*)mComponents[EngineComponents::Sound];
         
-        if (std::is_same<T, Transform>::value)        return (T*)mTransformCache;
-        if (std::is_same<T, Camera>::value)           return (T*)mCameraCache;
-        if (std::is_same<T, Light>::value)            return (T*)mLightCache;
-        if (std::is_same<T, MeshRenderer>::value)     return (T*)mMeshRendererCache;
-        if (std::is_same<T, RigidBody>::value)        return (T*)mRigidBodyCache;
-        if (std::is_same<T, Actor>::value)            return (T*)mActorCache;
-        if (std::is_same<T, Sound>::value)            return (T*)mSoundCache;
+        /*
+        constexpr short idx = component_index<T>::value;
         
+        if (idx < 0 || idx >= EngineComponents::NumberOfComponents) 
+            return nullptr;
+        
+        return reinterpret_cast<T*>(mComponents[idx]);
+        // if you store a common base: return static_cast<T*>(mComponents[idx]);
+        */
         return nullptr;
     }
     
@@ -183,6 +191,8 @@ private:
     std::vector<Component*> mComponentList;
     
     // Cached component pointers, to avoid overhead from working with components internally
+    void* mComponents[ EngineComponents::NumberOfComponents ];
+    /*
     Transform*       mTransformCache;
     Camera*          mCameraCache;
     RigidBody*       mRigidBodyCache;
@@ -190,7 +200,7 @@ private:
     Light*           mLightCache;
     Actor*           mActorCache;
     Sound*           mSoundCache;
-    
+    */
 };
 
 #endif

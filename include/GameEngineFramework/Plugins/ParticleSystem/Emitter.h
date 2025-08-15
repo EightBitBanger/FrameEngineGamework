@@ -72,7 +72,7 @@ public:
     void AddParticle(glm::vec3 position, glm::vec3 initialScale, glm::vec3 force, Color colorBegin, Color colorEnd);
     
     /// Reset a particle by its index.
-    unsigned int ResetParticle(unsigned int index);
+    unsigned int ResetParticle(unsigned int index, glm::vec3 initialScale, Color initialColor);
     
     /// Enable the rendering and updates for this emitter.
     void Activate(void);
@@ -95,8 +95,9 @@ private:
     unsigned int mNumberOfParticles;
     
     std::vector<glm::vec3> mParticlePositions;
-    std::vector<glm::vec3> mParticleVelocities;
+    std::vector<glm::vec3> mParticleScale;
     std::vector<glm::vec3> mParticleColors;
+    std::vector<glm::vec3> mParticleVelocities;
     
     GameObject* mParticleObject;
     

@@ -875,6 +875,11 @@
 			<Option target="Plugins" />
 			<Option target="Plugins-debug" />
 		</Unit>
+		<Unit filename="src/Plugins/ChunkSpawner/ChunkManagerBuild.cpp">
+			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
+			<Option target="Plugins" />
+			<Option target="Plugins-debug" />
+		</Unit>
 		<Unit filename="src/Plugins/ChunkSpawner/ChunkManagerDecorate.cpp">
 			<Option virtualFolder="root/Plugins/ChunkSpawner/" />
 			<Option target="Plugins" />

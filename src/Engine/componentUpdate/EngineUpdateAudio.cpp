@@ -2,10 +2,8 @@
 
 void EngineSystemManager::UpdateAudio(unsigned int index) {
     
-    glm::vec3 position = mStreamBuffer[index].transform->position;
+    glm::vec3 position = ((Transform*)mStreamBuffer[index].components[EngineComponents::Transform])->position;
     
-    mStreamBuffer[index].sound->SetPosition( position );
-    
-    return;
+    ((Sound*)mStreamBuffer[index].components[EngineComponents::Sound])->SetPosition( position );
 }
 

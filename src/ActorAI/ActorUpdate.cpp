@@ -18,7 +18,7 @@ extern int tickCounter;
 
 
 void ActorSystem::Update(void) {
-    std::lock_guard<std::mutex> (Engine.sceneMain->mux);
+    std::lock_guard<std::mutex> lock(Engine.sceneMain->mux);
     
     // Update animation states (Runs hot!)
     if (mAnimationTimer.Update()) {

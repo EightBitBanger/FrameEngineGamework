@@ -45,6 +45,7 @@ rp3d::BoxShape* EngineSystemManager::GetColliderBox(glm::vec3 extents) {
 
 
 void EngineSystemManager::Initiate() {
+    mStreamBuffer.resize(1024);
     
     // Initiate console
     console.input = UI.CreateTextField();

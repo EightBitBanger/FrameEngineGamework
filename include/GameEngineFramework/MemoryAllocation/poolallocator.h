@@ -1,18 +1,9 @@
-//
-// Custom allocator pool class
-//
-// Author: David Penning
-
 #ifndef _POOL_ALLOCATOR_SUPPORT__
 #define _POOL_ALLOCATOR_SUPPORT__
 
 #include <cstdlib>
 #include <vector>
 #include <mutex>
-
-
-//
-// Configuration
 
 #define  ENABLE_CONSOLE_DEBUG__
 #define  ENABLE_DEBUG_DETAILS__
@@ -36,10 +27,10 @@
 
 struct CustomAllocator {
     
-    /** Initial number of pools.*/
+    /// Initial number of pools.
     int poolSize;
     
-    /** Number of objects per pool.*/
+    /// Number of objects per pool.
     int poolCount;
     
 };
@@ -67,7 +58,6 @@ public:
         
     }
     ~PoolAllocator() {
-        
         // Iterate the pool list
         int poolListSz = m_pool.size();
         for (int i=0; i < poolListSz; i++) {
@@ -95,159 +85,108 @@ public:
             
     #endif
 #endif
-            
             // Deallocate the pool pair
             std::free(poolPtr);
-            
         }
-        
     }
     
-    /** Reserves an object and returns its pointer.*/
+    /// Reserves an object and returns its pointer.
     T* Create(void) {
         std::lock_guard<std::mutex> lock(mux);
         
-        T* objectPtr = nullptr;
-        
-        // Iterate the pool list
-        int poolListSz = m_pool.size();
-        for (int i=0; i < poolListSz; i++) {
-            
-            // Get the next pool and free list
-            T* poolPtr = m_pool[i].first;
-            std::vector<bool>& boolPtr = m_pool[i].second;
-            
-            // Iterate the pool objects
-            int poolSz = this->m_poolSz;
-            for (int f=0; f < poolSz; f++) {
-                
-                // Check if the object is available
-                if (!boolPtr[f]) {
-                    
-#ifdef ENABLE_CONSOLE_DEBUG__
-    #ifdef ENABLE_DEBUG_ON_CONSTRUCT__
-                    
-                    std::cout << "  Constructed :: " << &poolPtr[f] << "   Pool * " << &poolPtr[0] << std::endl;
-                    
-    #endif
-#endif
-                    
-                    // Call the constructor
-                    T& objectRef = poolPtr[f];
-                    construct(objectRef);
-                    
-                    // Mark the object as active
-                    boolPtr[f] = true;
-                    
-                    m_activeList.push_back(&poolPtr[f]);
-                    
-                    return &poolPtr[f];
-                }
-                
-            }
-            
-        }
-        
-        // All pools are full, allocate a new pool
-        if (objectPtr == nullptr) {
-            
+        // Ensure we have at least one free slot
+        if (m_free.empty()) {
             this->allocate();
             if (m_pool.empty() || m_pool.back().first == nullptr) 
                 return nullptr;
-            
-            std::pair<T*, std::vector<bool>>& poolPair = m_pool[m_pool.size()-1];
-            
-            T& poolPtr = *poolPair.first;
-            std::vector<bool>& boolPtr = poolPair.second;
-            
-#ifdef ENABLE_CONSOLE_DEBUG__
-    #ifdef ENABLE_DEBUG_ON_CONSTRUCT__
-            
-            std::cout << "  Constructed :: " << &poolPtr << "   Pool * " << &poolPtr << std::endl;
-            
-    #endif
-#endif
-            
-            // Call the constructor
-            new (&poolPtr) T();
-            
-            // Mark the first object as active
-            boolPtr[0] = true;
-            
-            m_activeList.push_back(&poolPtr);
-            
-            objectPtr = &poolPtr;
         }
         
-        return objectPtr;
+        // Pop a free (pool,slot) location
+        std::pair<int,int> loc = m_free.back();
+        m_free.pop_back();
+        int poolIdx = loc.first;
+        int slotIdx = loc.second;
+        
+        T* poolPtr = m_pool[poolIdx].first;
+        std::vector<bool>& used = m_pool[poolIdx].second;
+        
+        // Invariant: slot should be free; but be defensive
+        int guard = 0;
+        while (used[slotIdx]) {
+            if (m_free.empty()) {
+                this->allocate();
+                if (m_pool.empty() || m_pool.back().first == nullptr)
+                    return nullptr;
+            }
+            loc = m_free.back(); m_free.pop_back();
+            poolIdx = loc.first; slotIdx = loc.second;
+            poolPtr = m_pool[poolIdx].first;
+            used = m_pool[poolIdx].second;
+            if (++guard > 4) break; // shouldn't happen
+        }
+        
+#ifdef ENABLE_CONSOLE_DEBUG__
+    #ifdef ENABLE_DEBUG_ON_CONSTRUCT__
+        std::cout << "  Constructed :: " << &poolPtr[slotIdx] << "   Pool * " << &poolPtr[0] << std::endl;
+    #endif
+#endif
+        construct(poolPtr[slotIdx]);
+        used[slotIdx] = true;
+        m_activeList.push_back(&poolPtr[slotIdx]);
+        return &poolPtr[slotIdx];
     }
     
-    /** Frees an object.*/
+    /// Frees an object.
     bool Destroy(T* objectPtr) {
         std::lock_guard<std::mutex> lock(mux);
         
-        // Iterate the list of pools
-        int poolListSz = m_pool.size();
-        for (int i=0; i < poolListSz; i++) {
-            
-            // Get the next pool and state list
-            T* poolPtr = m_pool[i].first;
-            std::vector<bool>& boolPtr = m_pool[i].second;
-            
-            // Iterate the pool its self
-            int poolSz = this->m_poolSz;
-            for (int f=0; f < poolSz; f++) {
-                
-                // Check matching pointers
-                if (objectPtr == &poolPtr[f]) {
-                    
-                    // Check if the object is active
-                    if (boolPtr[f]) {
-                        
+        // Find owning pool by pointer range
+        int poolIdx = -1;
+        int poolListSz = static_cast<int>(m_pool.size());
+        for (int i = 0; i < poolListSz; ++i) {
+            T* base = m_pool[i].first;
+            if (objectPtr >= base && objectPtr < (base + m_poolSz)) {
+                poolIdx = i;
+                break;
+            }
+        }
+        if (poolIdx < 0) return false; // not ours
+        
+        T* base = m_pool[poolIdx].first;
+        int slotIdx = static_cast<int>(objectPtr - base);
+        std::vector<bool>& used = m_pool[poolIdx].second;
+        
+        if (!used[slotIdx]) return false; // double free or invalid
+        
 #ifdef ENABLE_CONSOLE_DEBUG__
     #ifdef ENABLE_DEBUG_ON_DESTRUCT__
-                        T& poolRef = *poolPtr;
-                        
-                        std::cout << "  Destructed :: " << &poolPtr[f] << "   Pool * " << &poolRef << std::endl;
-                        
+        std::cout << "  Destructed :: " << &base[slotIdx] << "   Pool * " << &base[0] << std::endl;
     #endif
 #endif
-                        
-                        // Explicitly call the destructor
-                        destruct(poolPtr[f]);
-                        
-                        // Mark the object as inactive
-                        boolPtr[f] = false;
-                        
-                        // Object is inactive, remove it from the list
-                        int ListSize = m_activeList.size();
-                        for (int a=0; a < ListSize; a++) {
-                            if (m_activeList[a] == objectPtr) {
-                                m_activeList.erase( m_activeList.begin() + a );
-                                break;
-                            }
-                        }
-                        
-                        return true;
-                    } else return false;
-                    
-                }
-                
-            }
-            
-        }
+        destruct(base[slotIdx]);
+        used[slotIdx] = false;
         
-        return false;
+        // Remove from active list
+        int ListSize = static_cast<int>(m_activeList.size());
+        for (int a = 0; a < ListSize; ++a) {
+            if (m_activeList[a] == objectPtr) {
+                m_activeList.erase(m_activeList.begin() + a);
+                break;
+            }
+        }
+
+        // Return slot to free-list
+        m_free.emplace_back(poolIdx, slotIdx);
+        return true;
     }
     
-    /** Returns the number of active objects.*/
+    /// Returns the number of active objects.
     unsigned int Size(void) {
         std::lock_guard<std::mutex> lock(mux);
         return m_activeList.size();
     }
     
-    
-    /** Returns the number of used memory locations.*/
+    /// Returns the number of used memory locations.
     int GetObjectCount(void) {
         std::lock_guard<std::mutex> lock(mux);
         
@@ -263,17 +202,14 @@ public:
             // Iterate the pool its self
             int poolSz = this->m_poolSz;
             for (int f=0; f < poolSz; f++) {
-                
                 // Check if the object is active
                 if (boolPtr[f]) ObjectCount++;
-                
             }
-            
         }
-        
         return ObjectCount;
     }
-    /** Returns the number of unused memory locations.*/
+    
+    /// Returns the number of unused memory locations.
     int GetFreeCount(void) {
         std::lock_guard<std::mutex> lock(mux);
         
@@ -289,18 +225,14 @@ public:
             // Iterate the pool its self
             int poolSz = this->m_poolSz;
             for (int a=0; a < poolSz; a++) {
-                
                 // Check if the object is inactive
                 if (!boolPtr[a]) FreeCount++;
-                
             }
-            
         }
-        
         return FreeCount;
     }
     
-    /** Debug output to console. Must #define ENABLE_CONSOLE_DEBUG__ */
+    /// Debug output to console. Must #define ENABLE_CONSOLE_DEBUG__
     void Debug(void) {
         std::lock_guard<std::mutex> lock(mux);
         
@@ -358,7 +290,7 @@ public:
         
     }
     
-    /** Forces a memory dump. Must #define ENABLE_CRASH_DUMP__. */
+    /// Forces a memory dump. Must #define ENABLE_CRASH_DUMP__
     void ForceCrashDump(const char* FileName) {
         std::lock_guard<std::mutex> lock(mux);
         
@@ -414,6 +346,7 @@ private:
     
     std::vector< std::pair<T*, std::vector<bool>> > m_pool;
     std::vector< T* > m_activeList;
+    std::vector< std::pair<int,int> > m_free; // (poolIdx, slotIdx) free-list
     
     int m_poolSz;
     int m_poolCount;
@@ -424,7 +357,7 @@ private:
     std::pair<T*, std::vector<bool>> allocate(void) {
         
         // Allocate a pool and a state list pair
-        T* poolPtr = (T*) malloc(m_poolSz * sizeof(T));
+        T* poolPtr = (T*) std::malloc(m_poolSz * sizeof(T));
         std::vector<bool> boolList;
         
         // Check the pool allocation
@@ -435,9 +368,16 @@ private:
         
         // Add the pair to the list
         std::pair<T*, std::vector<bool>> poolPair = std::make_pair(poolPtr, boolList);
-        m_pool.push_back( poolPair );
+        m_pool.push_back(poolPair);
         
+        // Update pool count
         m_poolCount++;
+        
+        // Push all slots of this pool into the free-list
+        int idx = static_cast<int>(m_pool.size()) - 1;
+        for (int f = 0; f < m_poolSz; ++f) {
+            m_free.emplace_back(idx, f);
+        }
         
         return poolPair;
     }

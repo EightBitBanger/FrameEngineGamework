@@ -51,7 +51,7 @@ public:
     bool RemoveLevelOfDetail(unsigned int index);
     
     /// Get the number of levels of detail.
-    bool GetNumberOfLevelsOfDetail(unsigned int index);
+    unsigned int GetNumberOfLevelsOfDetail(void);
     
     
     MeshRenderer();

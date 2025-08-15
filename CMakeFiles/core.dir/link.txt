@@ -1,0 +1,3 @@
+C:\CMake\bin\cmake.exe -E rm -f CMakeFiles\core.dir/objects.a
+\CodeBlocks\MinGW\bin\ar.exe qc CMakeFiles\core.dir/objects.a @CMakeFiles\core.dir\objects1.rsp
+\CodeBlocks\MinGW\bin\c++.exe -static-libgcc -static-libstdc++ -Wl,-Bstatic -lwinpthread -Wl,-Bdynamic -shared -o bin\core.dll -Wl,--out-implib,vendor\libcore.dll.a -Wl,--major-image-version,0,--minor-image-version,0 -Wl,--whole-archive CMakeFiles\core.dir/objects.a -Wl,--no-whole-archive @CMakeFiles\core.dir\linkLibs.rsp

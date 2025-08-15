@@ -13,5 +13,5 @@ trunkSize = 1.0
 trunkColorMin = brown * 0.4
 trunkColorMax = brown * 0.7
 
-leafColorMin = red * green
-leafColorMax = red * green
+leafColorMin = green * 0.1
+leafColorMax = green * 0.13

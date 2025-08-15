@@ -27,8 +27,8 @@ Material::Material() :
     mFaceWinding(GL_CCW),
     mFaceCullSide(GL_BACK),
     
-    mBlendSource(BLEND_SRC_COLOR),
-    mBlendDestination(BLEND_SRC_ALPHA),
+    mBlendSource(BLEND_SRC_ALPHA),
+    mBlendDestination(BLEND_ONE_MINUS_SRC_ALPHA),
     mBlendAlphaSource(BLEND_ONE_MINUS_SRC_COLOR),
     mBlendAlphaDestination(BLEND_ONE_MINUS_SRC_ALPHA),
     mBlendFunction(BLEND_EQUATION_ADD)

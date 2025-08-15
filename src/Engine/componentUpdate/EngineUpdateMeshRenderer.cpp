@@ -1,12 +1,16 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateMeshRenderer(unsigned int index) {
-    mStreamBuffer[index].meshRenderer->transform.position  = mStreamBuffer[index].transform->position;
-    mStreamBuffer[index].meshRenderer->transform.rotation  = mStreamBuffer[index].transform->rotation;
-    mStreamBuffer[index].meshRenderer->transform.scale     = mStreamBuffer[index].transform->scale;
+    std::lock_guard<std::mutex> lock(((MeshRenderer*)mStreamBuffer[index].components[EngineComponents::MeshRenderer])->mux);
+    ((MeshRenderer*)mStreamBuffer[index].components[EngineComponents::MeshRenderer])->transform.position = 
+    ((Transform*)mStreamBuffer[index].components[EngineComponents::Transform])->position;
     
-    mStreamBuffer[index].meshRenderer->transform.matrix = mStreamBuffer[index].transform->matrix;
+    ((MeshRenderer*)mStreamBuffer[index].components[EngineComponents::MeshRenderer])->transform.rotation = 
+    ((Transform*)mStreamBuffer[index].components[EngineComponents::Transform])->rotation;
     
-    return;
+    ((MeshRenderer*)mStreamBuffer[index].components[EngineComponents::MeshRenderer])->transform.scale = 
+    ((Transform*)mStreamBuffer[index].components[EngineComponents::Transform])->scale;
+    
+    ((MeshRenderer*)mStreamBuffer[index].components[EngineComponents::MeshRenderer])->transform.matrix = 
+    ((Transform*)mStreamBuffer[index].components[EngineComponents::Transform])->matrix;
 }
-

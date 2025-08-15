@@ -29,6 +29,7 @@
 #include <GameEngineFramework/Networking/NetworkSystem.h>
 
 #include <GameEngineFramework/Engine/EngineSystems.h>
+#include <GameEngineFramework/Engine/EngineComponents.h>
 
 #define  CONSOLE_NUMBER_OF_ELEMENTS   32
 #define  PROFILER_NUMBER_OF_ELEMENTS  24
@@ -39,7 +40,7 @@
 #endif
 
 
-#define COMPONENT_STREAM_BUFFER_SIZE   1024 * 1024   // One magabyte
+#define COMPONENT_STREAM_BUFFER_SIZE   1024 * 1024
 
 
 class ENGINE_API EngineSystemManager {
@@ -202,7 +203,7 @@ public:
         
         void Enable(void);
         void Disable(void);
-        void Clear(void);
+        void ClearInput(void);
         
         void Print(std::string text);
         void WriteDialog(unsigned int index, std::string text);
@@ -244,7 +245,6 @@ private:
     
     // Actor genetics update
     void ClearOldGeneticRenderers(unsigned int index);
-    void GenerateCollider(Actor* actor);
     MeshRenderer* CreateMeshRendererForGene(unsigned int index, unsigned int geneIndex, Mesh* sourceMesh);
     void ExpressActorGenetics(unsigned int index);
     
@@ -293,21 +293,12 @@ private:
     unsigned int mStreamSize;
     
     struct ComponentDataStreamBuffer {
-        // Base object
         GameObject*    gameObject;
-        // Components
-        Transform*     transform;
-        // Rendering
-        Light*         light;
-        Actor*         actor;
-        Camera*        camera;
-        RigidBody*     rigidBody;
-        MeshRenderer*  meshRenderer;
-        // Audio
-        Sound*         sound;
+        
+        void* components[EngineComponents::NumberOfComponents];
     };
     
-    ComponentDataStreamBuffer mStreamBuffer[ COMPONENT_STREAM_BUFFER_SIZE ];
+    std::vector<ComponentDataStreamBuffer> mStreamBuffer;
     
     // Debug rendering
     bool usePhysicsDebugRenderer;

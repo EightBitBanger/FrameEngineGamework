@@ -161,9 +161,15 @@ public:
     
     void Decorate(Chunk* chunk);
     
-    PoolAllocator<Chunk> chunks;
+    // Build functions
+    class ENGINE_API BuildFunctions {
+    public:
+        
+        void StackAtAngle(Structure& structure, glm::vec3 position, glm::vec3 scale, glm::vec3 angle, float stepHeight, int length, Color color);
+        
+    } build;
     
-    // World material batches
+    // World materials
     
     Material* waterMaterial;
     Material* worldMaterial;
@@ -173,6 +179,9 @@ public:
     std::vector<Chunk*> generating;
     std::mutex mux;
     Timer threadTimer;
+    
+    
+    PoolAllocator<Chunk> chunks;
     
 private:
     

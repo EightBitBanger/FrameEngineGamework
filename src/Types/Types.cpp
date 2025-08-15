@@ -93,23 +93,31 @@ std::vector<std::string> StringType::Explode(const std::string& value, const cha
 
 std::string StringType::GetNameFromFilename(const std::string& filename) {
     std::vector<std::string> pathParts = Explode(filename, '/');
+    if (pathParts.size() == 1) 
+        pathParts = Explode(filename, '\\');
     return pathParts[pathParts.size()-1];
 }
 
 std::string StringType::GetNameFromFilenameNoExt(const std::string& filename) {
     std::vector<std::string> pathParts = Explode(filename, '/');
+    if (pathParts.size() == 1) 
+        pathParts = Explode(filename, '\\');
     std::vector<std::string> name = Explode(pathParts[pathParts.size()-1], '.');
     return name[0];
 }
 
 std::string StringType::GetExtFromFilename(const std::string& filename) {
     std::vector<std::string> pathParts = Explode(filename, '/');
+    if (pathParts.size() == 1) 
+        pathParts = Explode(filename, '\\');
     std::vector<std::string> name = Explode(pathParts[pathParts.size()-1], '.');
     return name[1];
 }
 
 std::string StringType::GetPathFromFilename(const std::string& filename) {
     std::vector<std::string> pathParts = Explode(filename, '/');
+    if (pathParts.size() == 1) 
+        pathParts = Explode(filename, '\\');
     std::string path;
     for (unsigned int i=0; i < pathParts.size()-1; i++) 
         path += pathParts[i];

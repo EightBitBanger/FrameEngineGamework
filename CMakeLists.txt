@@ -31,7 +31,7 @@ if(ENABLE_UNIT_TESTS)
 endif()
 
 # Common libraries
-set(COMMON_LIBS glew32s.lib opengl32.a Ws2_32.lib)
+set(COMMON_LIBS glew32s.lib opengl32.a Ws2_32.lib ImGUI.a)
 
 # Recursively collect files
 function(auto_sources var)

@@ -11,7 +11,7 @@ GameObject* EngineSystemManager::CreateGameObject(void) {
 
 bool EngineSystemManager::DestroyGameObject(GameObject* gameObjectPtr) {
     gameObjectPtr->isGarbage = true;
-    return false;
+    return true;
 }
 
 unsigned int EngineSystemManager::GetNumberOfGameObjects(void) {
@@ -22,7 +22,6 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position) {
     
     GameObject* cameraController = CreateGameObject();
     cameraController->name = "camera";
-    cameraController->mTransformCache->position = position;
     
     // Add a camera component
     Component* cameraComponent = CreateComponent<Camera>();
@@ -48,6 +47,7 @@ GameObject* EngineSystemManager::CreateCameraController(glm::vec3 position) {
     cameraController->SetAngularDamping(1);
     cameraController->SetMass(10);
     cameraController->DisableGravity();
+    cameraController->SetPosition(position);
     
     return cameraController;
 }
@@ -110,7 +110,8 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     
     skyObject->renderDistance = -1;
     
-    skyObject->mTransformCache->SetScale(10000, 2000, 10000);
+    Transform* transformCache = (Transform*)skyObject->mComponents[EngineComponents::Transform];
+    transformCache->SetScale(10000, 2000, 10000);
     
     return skyObject;
 }

@@ -10,8 +10,8 @@ leafWidth = 5.5
 leafHeight = 2.0
 trunkSize = 1.0
 
-trunkColorMin = orange * 0.3
-trunkColorMax = orange * 0.4
+trunkColorMin = orange * 0.8 * gray * 0.4
+trunkColorMax = orange * 0.8 * gray * 0.4
 
-leafColorMin = yellow * 0.4
-leafColorMax = yellow * 0.5
+leafColorMin = yellow * 0.1
+leafColorMax = yellow * 0.2

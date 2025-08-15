@@ -31,14 +31,11 @@ void RenderSystem::RenderFrame(void) {
         if (!scenePtr->isActive) 
             continue;
         
-        std::lock_guard<std::mutex> lock(scenePtr->mux);
-        
         // Set the camera projection angle
         setTargetCamera(scenePtr->camera, eye, viewProjection);
         
         // Extract camera projection edges for clipping
-        glm::mat4 inverseViewProjMatrix = glm::inverse( viewProjection );
-        Frustum frustum = FrustumExtractPlanes(inverseViewProjMatrix);
+        Frustum frustum = FrustumExtractPlanes(viewProjection);
         
         // Gather fog layers
         accumulateSceneFogLayers(scenePtr);
@@ -76,9 +73,9 @@ void RenderSystem::RenderFrame(void) {
             
             // Geometry pass
             for (MeshRenderer* currentEntity : *renderQueueGroup) {
-                std::lock_guard<std::mutex>(currentEntity->mux);
+                std::lock_guard<std::mutex> lock(currentEntity->mux);
                 
-                if (currentEntity->mDoCulling && CullingPass(currentEntity, scenePtr->camera, viewProjection, frustum))
+                if (currentEntity->mDoCulling && !CullingPass(currentEntity, scenePtr->camera, viewProjection, frustum))
                     continue;
                 
                 GeometryPass(currentEntity, eye, scenePtr->camera->forward, viewProjection);

@@ -15,8 +15,6 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
     if (!currentEntity->material->mDoShadowPass)
         return false;
     
-    std::lock_guard<std::mutex>(currentEntity->mux);
-    
     // Calculate shadow distance
     float shadowDistance = glm::distance( eye, currentEntity->transform.position );
     
@@ -91,31 +89,19 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
         // Render the shadow pass
         mNumberOfDrawCalls++;
         currentEntity->mesh->DrawIndexArray();
-        
-        continue;
     }
-    
     
     if (mCurrentMaterial->mDoBlending) {
-        
         glEnable( GL_BLEND );
         glBlendFunc(mCurrentMaterial->mBlendSource, mCurrentMaterial->mBlendDestination);
-        
     } else {
-        
         glDisable( GL_BLEND );
-        
     }
     
-    
     if (mCurrentMaterial->mDoFaceCulling) {
-        
         glEnable( GL_CULL_FACE );
-        
     } else {
-        
         glDisable( GL_CULL_FACE );
-        
     }
     
     return true;

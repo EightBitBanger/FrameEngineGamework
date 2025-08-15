@@ -3,7 +3,7 @@
 
 #include <GameEngineFramework/configuration.h>
 
-#include <GameEngineFramework/Engine/ComponentTypes.h>
+#include <GameEngineFramework/Engine/EngineComponents.h>
 
 #include <string>
 
@@ -29,10 +29,10 @@ public:
     
 private:
     
-    // Set the component type and reference object.
+    // Set the component type and reference object
     void SetComponent(ComponentType type, void* object);
     
-    // Type identifier declaring the component pointer type.
+    // Type identifier declaring the component pointer type
     ComponentType mType;
     
     // Object pointer

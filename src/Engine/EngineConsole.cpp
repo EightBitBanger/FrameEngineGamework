@@ -9,8 +9,8 @@ void ConsoleReturnCallback(std::string& console_text) {
     
     // Provide blanks to prevent access crashes 
     // by the clients functions
-    if (arguments.size() < 32) 
-        for (unsigned int i=0; i < 32; i++) 
+    if (arguments.size() < CONSOLE_NUMBER_OF_ELEMENTS) 
+        for (unsigned int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) 
             arguments.push_back("");
     
     std::string command = arguments[0];
@@ -29,7 +29,7 @@ void ConsoleReturnCallback(std::string& console_text) {
     if (it == functionList.end()) {
         std::string commandNotFound = "Unknown command '" + command + "'";
         Engine.console.Print(commandNotFound);
-        Engine.console.Clear();
+        Engine.console.ClearInput();
         return;
     }
     
@@ -45,34 +45,31 @@ void ConsoleReturnCallback(std::string& console_text) {
             Camera* mainCamera = Engine.cameraController->GetComponent<Camera>();
             mainCamera->EnableMouseLook();
         }
-        Engine.console.Clear();
+        Engine.console.ClearInput();
         Platform.HideMouseCursor();
     }
-    return;
 }
 
 
 bool EngineSystemManager::CommandConsole::RegisterCommand(std::string name, void(*function_ptr)(std::vector<std::string>)) {
     functionList[name] = function_ptr;
-    return false;
+    return true;
 }
 
 void EngineSystemManager::CommandConsole::Enable(void) {
     input->isActive = true;
-    for (unsigned int i=0; i < 32; i++) {
+    for (unsigned int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) {
         Text* text = textElements[i];
         text->isActive = true;
     }
-    return;
 }
 
 void EngineSystemManager::CommandConsole::Disable(void) {
     input->isActive = false;
-    return;
 }
 
 void EngineSystemManager::CommandConsole::ShiftUp(void) {
-    for (unsigned int i=31; i > 0; i--) {
+    for (unsigned int i=(CONSOLE_NUMBER_OF_ELEMENTS-1); i > 0; i--) {
         textElements[i]->text = textElements[i - 1]->text;
         textElements[i]->color = textElements[i - 1]->color;
         textElements[i]->isActive = textElements[i - 1]->isActive;
@@ -84,18 +81,15 @@ void EngineSystemManager::CommandConsole::Print(std::string text) {
     textElements[0]->isActive = true;
     textElements[0]->color.a = 3.0f;
     textElements[0]->text = text;
-    return;
 }
 
 void EngineSystemManager::CommandConsole::WriteDialog(unsigned int index, std::string text) {
     textDialog[index]->isActive = true;
     textDialog[index]->color.a = 3.0f;
     textDialog[index]->text = text;
-    return;
 }
 
-void EngineSystemManager::CommandConsole::Clear(void) {
+void EngineSystemManager::CommandConsole::ClearInput(void) {
     input->text = '\0';
-    return;
 }
 

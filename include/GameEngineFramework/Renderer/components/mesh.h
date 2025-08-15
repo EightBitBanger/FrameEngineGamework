@@ -42,14 +42,17 @@ public:
     /// Add a sub mesh into this vertex buffer. The index of the sub mesh in the mesh will be returned. A return value of negative one indicated an error.
     int AddSubMesh(float x, float y, float z, SubMesh& mesh, bool doUploadToGpu=true);
     
-    /// Replace a sub mesh at an index.
-    bool ReplaceSubMesh(unsigned int index, SubMesh& subMesh);
+    /// Replace a sub mesh at an index with a given sub mesh object.
+    bool ReplaceSubMesh(unsigned int index, SubMesh& newMesh, bool doUploadToGpu=true);
+    
+    /// Replace a sub mesh at an index with the given arrays of vertex and index data.
+    bool ReplaceSubMesh(unsigned int index, std::vector<Vertex>& vertexBuffer, std::vector<Index>& indexBuffer, bool doUploadToGpu=true);
     
     /// Add a vertex buffer directly into this vertex buffer. The index of the sub mesh in the mesh will be returned. A return value of negative one indicated an error.
-    int AddSubMesh(float x, float y, float z, std::vector<Vertex>& vrtxBuffer, std::vector<Index>& indxBuffer, bool doUploadToGpu=true);
+    int AddSubMesh(float x, float y, float z, std::vector<Vertex>& vertexBuffer, std::vector<Index>& indexBuffer, bool doUploadToGpu=true);
     
     /// Remove a sub mesh from this vertex buffer.
-    bool RemoveSubMesh(unsigned int index);
+    bool RemoveSubMesh(unsigned int index, bool doUploadToGpu=true);
     
     /// Get the vertex and index buffer as a sub mesh.
     bool GetSubMesh(unsigned int index, SubMesh& subMesh);
@@ -67,6 +70,9 @@ public:
     /// Update the orientation of a sub mesh.
     bool ChangeSubMeshRotation(unsigned int index, float angle, glm::vec3 axis);
     
+    /// Rotate a sub mesh around an arbitrary world-space point.
+    bool ChangeSubMeshRotationAroundPoint(unsigned int index, float angle, glm::vec3 axis, glm::vec3 center);
+    
     /// Update the scale of a sub mesh.
     bool ChangeSubMeshScale(unsigned int index, float x, float y, float z);
     
@@ -80,12 +86,19 @@ public:
     /// Fully re-upload the vertex buffer onto the GPU.
     void Load(void);
     
-    /// Re-upload a range of the buffer onto the GPU.
-    bool LoadRange(unsigned int start, unsigned int count);
-    
-    
     /// Purge the vertex buffer from the GPU.
     void Unload(void);
+    
+    
+    /// Re-upload a vertex slice to the GPU.
+    bool LoadVertexRange(unsigned int vertexStart, unsigned int vertexCount);
+    
+    /// Re-upload an index slice to the GPU.
+    bool LoadIndexRange(unsigned int indexStart, unsigned int indexCount);
+    
+    /// Re-upload both slices for a specific sub mesh.
+    bool LoadSubMesh(unsigned int subMeshIndex);
+    
     
     /// Return whether the buffers are allocated on the GPU.
     bool CheckIsAllocatedOnGPU(void);

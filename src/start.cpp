@@ -3,6 +3,8 @@
 
 #include <GameEngineFramework/plugins.h>
 
+#include <glm/gtx/euler_angles.hpp>
+
 #include <vector>
 #include <cmath>
 #include <cstdint>
@@ -10,6 +12,7 @@
 #include <cmath>
 #include <cstdint>
 #include <random>
+
 
 // Simple smooth interpolated noise (not Perlin, but deterministic)
 float ValueNoise1D(int x, uint32_t seed) {
@@ -146,6 +149,32 @@ void keyBindF4() {
     for (unsigned int i=0; i < 20; i++) 
         Engine.console.WriteDialog(i, "");
 }
+
+
+
+
+
+
+void BuildStack(Structure& structure, glm::vec3 position, glm::vec3 scale, float height, int length, Color color) {
+    for (int l=0; l < length; l++) {
+        float step = height * static_cast<float>(l);
+        glm::vec3 pos(0.0f, step, 0.0f);
+        
+        StructurePart pole;
+        pole.offset   = position + pos;
+        pole.rotation = glm::vec3(0);
+        pole.scale    = scale;
+        pole.color    = color;
+        
+        structure.parts.push_back(pole);
+    }
+}
+
+
+
+
+
+
 
 
 
@@ -528,12 +557,11 @@ void Start() {
     DecorationSpecifier decorVillage;
     decorVillage.type = DecorationType::Structure;
     decorVillage.name = "village";
-    decorVillage.density = 2;
+    decorVillage.density = 200;
     decorVillage.noise = 0.08f;
     decorVillage.threshold = 0.0f;
     decorVillage.spawnHeightMinimum = GameWorld.world.waterLevel + 4;
     decorVillage.spawnHeightMaximum = GameWorld.world.waterLevel + 24;
-    
     
     biomeLayerPlains.decorations.push_back(decorSheep);
     biomeLayerPlains.decorations.push_back(decorVillage);
@@ -550,21 +578,109 @@ void Start() {
     
     
     // Structures
-    
     Structure village;
     village.name = "village";
-    village.buildSpread = 30.0f;
-    
+    village.buildSpread = 25.0f;
     village.actorCountMin = 0;
     village.actorCountMax = 8;
     village.actorSpread = 4.0f;
     
-    float height = 30.0f;
+    glm::vec3 stackPos(0, 10, 0);
+    
+    //BuildStackYaw(village,   stackPos, glm::vec3(1.0f, 1.0f, 1.0f),  0, 1.0f, 10, Colors.brown * 0.2f);   // Forward
+    //BuildStackPitch(village, stackPos, glm::vec3(1.0f, 1.0f, 1.0f),  90, 1.0f, 10, Colors.brown * 0.2f);  // Up
+    //BuildStackYaw(village,   stackPos, glm::vec3(1.0f, 1.0f, 1.0f),  180, 1.0f, 10, Colors.brown * 0.2f); // Backward
+    //BuildStackPitch(village, stackPos, glm::vec3(1.0f, 1.0f, 1.0f),  270, 1.0f, 10, Colors.brown * 0.2f); // Down
+    /*
+    for (unsigned int i=0; i < 80; i++) {
+        float randYaw   = Random.Range(-90.0f, 90.0f);
+        float randPitch = Random.Range(-90.0f, 90.0f);
+        int randHeight = Random.Range(9, 10);
+        
+        BuildStackAngle(village, stackPos, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(randYaw, randPitch, 0), 1.0f, randHeight, Colors.brown * 0.2f);
+        
+        //BuildStackYaw(village, stackPos, glm::vec3(1.0f, 1.0f, 1.0f), randYaw, 1.0f, randHeight, Colors.brown * 0.2f);
+        //BuildStackPitch(village, stackPos, glm::vec3(1.0f, 1.0f, 1.0f), randYaw, 1.0f, randHeight, Colors.brown * 0.2f);
+    }
+    */
+    
+    
+    
+    
+    
+    float spread = 4.0f;
+    float height = 4.0f;
+    
+    float thickness = 1.0f;
+    Color color = Colors.brown * 0.1f;
+    glm::vec3 position(0, 0, 0);
+    
+    float halfExtent = 1.0f / 2.0f;
+    float halfSpread = spread / 2.0f;
+    float extentOffset = halfSpread - halfExtent;
+    float heightOffset = height - halfExtent;
+    
+    for (unsigned int x=0; x < 2; x++) {
+        for (unsigned int z=0; z < 2; z++) {
+            position.x = (x * spread) - halfSpread;
+            position.z = (z * spread) - halfSpread;
+            
+            GameWorld.build.StackAtAngle(village, position, glm::vec3(thickness, 1, thickness), glm::vec3(0, 90, 0), 1, height, color);
+        }
+    }
+    
+    position.x = halfSpread;
+    position.y = heightOffset;
+    position.z = -extentOffset;
+    GameWorld.build.StackAtAngle(village, position, glm::vec3(thickness, 1, thickness), glm::vec3(0), 1, spread, color);
+    
+    position.x = -halfSpread;
+    position.y = heightOffset;
+    position.z = -extentOffset;
+    GameWorld.build.StackAtAngle(village, position, glm::vec3(thickness, 1, thickness), glm::vec3(0), 1, spread, color);
+    
+    
+    position.x = -extentOffset;
+    position.y = heightOffset;
+    position.z = -halfSpread;
+    GameWorld.build.StackAtAngle(village, position, glm::vec3(thickness, 1, thickness), glm::vec3(90, 0, 0), 1, spread, color);
+    
+    position.x = -extentOffset;
+    position.y = heightOffset;
+    position.z = halfSpread;
+    GameWorld.build.StackAtAngle(village, position, glm::vec3(thickness, 1, thickness), glm::vec3(90, 0, 0), 1, spread, color);
+    float offsetMul = 1.24f;
+    
+    for (unsigned int i=0; i < 5; i++) {
+        position.x = i - halfSpread;
+        position.y = heightOffset - 0.25f;
+        position.z = -(halfSpread * offsetMul);
+        GameWorld.build.StackAtAngle(village, position, glm::vec3(thickness, 1, thickness), glm::vec3(0, 45, 45), 1, spread, color);
+        
+        position.x = i - halfSpread;
+        position.y = heightOffset - 0.25f;
+        position.z = (halfSpread * offsetMul);
+        GameWorld.build.StackAtAngle(village, position, glm::vec3(thickness, 1, thickness), glm::vec3(180, 45, 45), 1, spread, color);
+    }
+    
+    
+    
+    GameWorld.world.structures.push_back(village);
+    
+    /*
+    Structure village;
+    village.name = "village";
+    village.buildSpread = 25.0f;
+    village.actorCountMin = 0;
+    village.actorCountMax = 8;
+    village.actorSpread = 4.0f;
+    
+    float height = 14.0f;
     float radius = 3.0f;
     float angle = 27.0f;
     int numPoles = 8;
     
-    float stickThickness = 0.25f;
+    float stickThickness = 0.8f;
     Color stickColor = Colors.brown * 0.24f;
     
     for (int i = 0; i < numPoles; i++) {
@@ -587,6 +703,196 @@ void Start() {
     
     // Add to world structure list
     GameWorld.world.structures.push_back(village);
+    */
+    
+    
+    
+    
+    
+    /*
+    Structure village;
+    village.name = "village";
+    village.buildSpread = 30.0f;
+    
+    village.actorCountMin = 0;
+    village.actorCountMax = 8;
+    village.actorSpread = 4.0f;
+    
+    float height = 14.0f;
+    float radius = 3.0f;
+    float angle = 27.0f;
+    int numPoles = 8;
+    
+    float stickThickness = 0.8f;
+    Color stickColor = Colors.brown * 0.24f;
+    
+    for (int i = 0; i < numPoles; i++) {
+        float ang = (360.0f / numPoles) * i;
+        float rad = glm::radians(ang);
+        
+        float x = std::cos(rad) * radius;
+        float z = std::sin(rad) * radius;
+        
+        glm::vec3 rotation(0.0f, angle, -ang);
+        
+        StructurePart pole;
+        pole.offset = glm::ivec2((int)x + 3, (int)z + 3);
+        pole.rotation = rotation;
+        pole.scale = glm::vec3(stickThickness, height, stickThickness);
+        pole.color = stickColor;
+        
+        village.parts.push_back(pole);
+    }
+    
+    // Add to world structure list
+    GameWorld.world.structures.push_back(village);
+    */
+    
+    
+    
+    /*
+    Structure house;
+    house.name = "village";
+    house.buildSpread = 30.0f;
+    
+    house.actorCountMin = 0;
+    house.actorCountMax = 6;
+    house.actorSpread   = 4.0f;
+    
+    // ---- Tunables ----
+    const float width          = 8.0f;   // X span (left-right)
+    const float depth          = 10.0f;  // Z span (front-back)
+    const float wallHeight     = 6.0f;   // vertical post height
+    const float roofPitchDeg   = 35.0f;  // pitch of rafters
+    const int   rafterCount    = 5;      // rafters per side (spaced along Z)
+    const float stickThickness = 0.6f;   // thickness of each stick
+    
+    Color postColor   = Colors.brown * 0.28f;
+    Color beamColor   = Colors.brown * 0.12f;
+    Color rafterColor = Colors.brown * 0.24f;
+    
+    // helper to push a stick
+    auto addStick = [&](glm::ivec2 gridXZ, glm::vec3 rotDeg, glm::vec3 scale, Color col) {
+        StructurePart p;
+        p.offset   = glm::ivec2(gridXZ.x + 3, gridXZ.y + 3); // keep your +3 offset convention
+        p.rotation = rotDeg;                                  // degrees, same convention as your teepee
+        p.scale    = scale;                                   // (thickness, length, thickness)
+        p.color    = col;
+        house.parts.push_back(p);
+    };
+    
+    // Convert world-like float coords to your integer grid offsets (rounding keeps it stable)
+    auto toGrid = [](float x, float z) -> glm::ivec2 {
+        return glm::ivec2((int)std::round(x), (int)std::round(z));
+    };
+    
+    // Footprint corners (centered around origin, like your ring code)
+    const float hx = width * 0.5f;
+    const float hz = depth * 0.5f;
+    
+    // Corner posts (vertical)
+    {
+        glm::vec3 rot(0.0f, 0.0f, 0.0f); // vertical along local Y, no tilt
+        glm::vec3 scl(stickThickness, wallHeight, stickThickness);
+    
+        addStick(toGrid(-hx, -hz), rot, scl, postColor); // Front-Left
+        addStick(toGrid( hx, -hz), rot, scl, postColor); // Front-Right
+        addStick(toGrid(-hx,  hz), rot, scl, postColor); // Back-Left
+        addStick(toGrid( hx,  hz), rot, scl, postColor); // Back-Right
+    }
+    
+    // Ridge posts (centered along Z at ± around middle to support ridge)
+    {
+        glm::vec3 rot(0.0f, 0.0f, 0.0f);
+        glm::vec3 scl(stickThickness, wallHeight + 1.5f, stickThickness);
+    
+        addStick(toGrid(0.0f, -hz * 0.6f), rot, scl, postColor);
+        addStick(toGrid(0.0f,  hz * 0.6f), rot, scl, postColor);
+    }
+    
+    // Top plates (side beams) — shallow tilt so they visually sit above posts
+    // Left plate: runs along +Z and -Z near x = -hx
+    // Right plate: near x = +hx
+    // Since parts are Y-aligned, we "lay them along Z" via a small X-rotation and Yaw them to 90°.
+    {
+        // Effective length equals depth; add small fudge so they overlap into posts
+        float plateLen = depth + 1.0f;
+        // Small upward tilt to imply elevation (you can reduce to ~8–12 to lower)
+        float plateTilt = 12.0f;
+    
+        // Left plate
+        {
+            glm::ivec2 at = toGrid(-hx, 0.0f);
+            // Rotate so the stick lies roughly along Z: rotate X by ~90° to lay it, then yaw 0/180 has little effect here;
+            // We add a small positive tilt so it appears higher.
+            glm::vec3 rot(90.0f - plateTilt, 0.0f, 0.0f);
+            glm::vec3 scl(stickThickness, plateLen, stickThickness);
+            addStick(at, rot, scl, beamColor);
+        }
+        // Right plate
+        {
+            glm::ivec2 at = toGrid(hx, 0.0f);
+            glm::vec3 rot(90.0f - plateTilt, 0.0f, 0.0f);
+            glm::vec3 scl(stickThickness, plateLen, stickThickness);
+            addStick(at, rot, scl, beamColor);
+        }
+    }
+    
+    // Ridge beam — centered at x = 0, runs along Z with a modest tilt so it reads above plates
+    {
+        float ridgeLen = depth + 1.2f;
+        glm::ivec2 at = toGrid(0.0f, 0.0f);
+        glm::vec3 rot(90.0f - roofPitchDeg * 0.5f, 0.0f, 0.0f); // laid along Z with slight upward feel
+        glm::vec3 scl(stickThickness, ridgeLen, stickThickness);
+        addStick(at, rot, scl, beamColor);
+    }
+    
+    // Rafters — pairs from left/right plates up toward ridge, spaced along Z
+    {
+        // Space rafters evenly along the depth
+        for (int i = 0; i < rafterCount; ++i) {
+            float t = (rafterCount == 1) ? 0.5f : (float)i / (float)(rafterCount - 1);
+            float z = -hz + t * depth;
+    
+            // Left rafter: base near (-hx, z), tilt up toward ridge (in +X direction)
+            {
+                // Aim roughly toward center with roof pitch as X-rotation.
+                glm::ivec2 at = toGrid(-hx + 0.3f, z); // slight nudge inward so it visually sits on plate
+                glm::vec3 rot( -roofPitchDeg,  0.0f,  90.0f ); // rotate around Z to lay along X, then pitch down around X
+                glm::vec3 scl(stickThickness, hx + 0.5f, stickThickness); // length spans to ridge
+                addStick(at, rot, scl, rafterColor);
+            }
+    
+            // Right rafter: base near (+hx, z), tilt up toward ridge (in -X direction)
+            {
+                glm::ivec2 at = toGrid( hx - 0.3f, z);
+                glm::vec3 rot(  roofPitchDeg, 0.0f, 90.0f ); // mirrored pitch
+                glm::vec3 scl(stickThickness, hx + 0.5f, stickThickness);
+                addStick(at, rot, scl, rafterColor);
+            }
+        }
+    }
+    
+    // Front header beam (door lintel feel) — shallow tilt so it reads above ground
+    {
+        float headerLen = width + 0.8f;
+        glm::ivec2 at = toGrid(0.0f, -hz);
+        glm::vec3 rot(90.0f - 10.0f, 90.0f, 0.0f); // lay along X with small tilt
+        glm::vec3 scl(stickThickness, headerLen, stickThickness);
+        addStick(at, rot, scl, beamColor);
+    }
+    
+    // Back header beam
+    {
+        float headerLen = width + 0.8f;
+        glm::ivec2 at = toGrid(0.0f, hz);
+        glm::vec3 rot(90.0f - 10.0f, 90.0f, 0.0f);
+        glm::vec3 scl(stickThickness, headerLen, stickThickness);
+        addStick(at, rot, scl, beamColor);
+    }
+    
+    // Add to world structure list
+    GameWorld.world.structures.push_back(house);
     
     
     
@@ -709,85 +1015,6 @@ void Start() {
         Weather.SetWeather(WeatherType::Clear);
         GameWorld.SaveWorld();
     }
-    
-    return;
-    
-    
-    
-    
-    // Fire emitter test
-    
-    Emitter* fireEmitter = Particle.CreateEmitter();
-    
-    fireEmitter->type = EmitterType::Point;
-    fireEmitter->position = playerPosition;
-    fireEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
-    fireEmitter->scale = glm::vec3(0.08f, 0.01f, 0.08f);
-    fireEmitter->scaleTo = glm::vec3(1.0008f, 1.0008f, 1.0008f);
-    
-    fireEmitter->velocity = glm::vec3(0.0f, 0.01f, 0.0f);
-    
-    fireEmitter->velocityBias = 0.008f;
-    
-    fireEmitter->width = 0.1f;
-    fireEmitter->height = 0.1f;
-    
-    fireEmitter->angle = 0.18f;
-    fireEmitter->spread = 0.4f;
-    
-    fireEmitter->colorBegin = Colors.red;
-    fireEmitter->colorEnd = Colors.yellow;
-    
-    fireEmitter->maxParticles = 20;
-    fireEmitter->spawnRate = 20;
-    
-    fireEmitter->heightMinimum = GameWorld.world.waterLevel;
-    
-    Material* fireEmitterMaterial = fireEmitter->GetMaterial();
-    
-    //fireEmitterMaterial->EnableBlending();
-    //fireEmitterMaterial->shader = Engine.shaders.water;
-    
-    
-    
-    
-    
-    
-    // Smoke emitter test
-    
-    Emitter* smokeEmitter = Particle.CreateEmitter();
-    
-    smokeEmitter->type = EmitterType::Point;
-    
-    smokeEmitter->position = playerPosition;
-    playerPosition.y += 1.3f;
-    
-    smokeEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
-    smokeEmitter->scale = glm::vec3(0.08f, 0.03f, 0.08f);
-    smokeEmitter->scaleTo = glm::vec3(1.000f, 1.000f, 1.000f);
-    
-    smokeEmitter->velocity = glm::vec3(0.0f, 0.01f, 0.0f);
-    
-    smokeEmitter->velocityBias = 0.02f;
-    
-    smokeEmitter->width = 4;
-    smokeEmitter->height = 8;
-    
-    smokeEmitter->angle = 0.3f;
-    smokeEmitter->spread = 0.5f;
-    
-    smokeEmitter->colorBegin = Colors.dkgray;
-    smokeEmitter->colorEnd = Colors.gray;
-    
-    smokeEmitter->maxParticles = 2000;
-    smokeEmitter->spawnRate = 1;
-    
-    smokeEmitter->heightMinimum = GameWorld.world.waterLevel;
-    
-    Material* smokeEmitterMaterial = smokeEmitter->GetMaterial();
-    
-    //smokeEmitterMaterial->EnableBlending();
-    //smokeEmitterMaterial->shader = Engine.shaders.water;
     
     return;
 }
