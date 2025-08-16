@@ -54,12 +54,10 @@ void EngineSystemManager::Update(void) {
     UpdateKinematics();
     
     // Update attached components
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].components[EngineComponents::RigidBody] != nullptr)     UpdateRigidBody(i);
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].components[EngineComponents::MeshRenderer] != nullptr)  UpdateMeshRenderer(i);
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].components[EngineComponents::Camera] != nullptr)        UpdateCamera(i);
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].components[EngineComponents::Light] != nullptr)         UpdateLight(i);
-    for (unsigned int i=0; i < mStreamSize; i++ ) if (mStreamBuffer[i].components[EngineComponents::Sound] != nullptr)         UpdateAudio(i);
+    unsigned int numberOfComponents = componentUpdaters.size();
+    for (unsigned int c=0; c < numberOfComponents; c++) 
+        for (unsigned int i=0; i < GetStreamSize(); i++) 
+            componentUpdaters[c](i);
     
-    return;
 }
 

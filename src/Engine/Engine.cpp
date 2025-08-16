@@ -1,5 +1,5 @@
 #include <GameEngineFramework/Engine/Engine.h>
-
+extern EngineSystemManager Engine;
 
 EngineSystemManager::EngineSystemManager(void) : 
     sceneMain(nullptr),
@@ -17,35 +17,87 @@ EngineSystemManager::EngineSystemManager(void) :
 }
 
 
-unsigned int EngineSystemManager::GetNumberOfComponents(void) {
-    return mComponents.Size();
-}
+// Component system function pointers
 
-GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
-    if (index < mGameObjects.Size()) 
-        return mGameObjects[index];
-    return nullptr;
-}
+// Builder
+void* factoryProxyBuildTransform(void) {return (void*)Engine.CreateTransform();}
+void* factoryProxyBuildMeshRenderer(void) {return (void*)Renderer.CreateMeshRenderer();}
+void* factoryProxyBuildCamera(void) {return (void*)Renderer.CreateCamera();}
+void* factoryProxyBuildLight(void) {return (void*)Renderer.CreateLight();}
+void* factoryProxyBuildScript(void) {return (void*)Scripting.CreateScript();}
+void* factoryProxyBuildRigidBody(void) {return (void*)Physics.CreateRigidBody(0,0,0);}
+void* factoryProxyBuildActor(void) {return (void*)AI.CreateActor();}
+void* factoryProxyBuildSound(void) {return (void*)Audio.CreateSound();}
 
-rp3d::BoxShape* EngineSystemManager::GetColliderBox(glm::vec3 extents) {
-    for (unsigned int i=0; i < mBoxCollider.size(); i++) {
-        rp3d::BoxShape* colliderShape = mBoxCollider[i];
-        rp3d::Vector3 extentItem = colliderShape->getHalfExtents();
-        if (extentItem.x == extents.x && 
-            extentItem.y == extents.y && 
-            extentItem.z == extents.z) 
-            return colliderShape;
-    }
-    rp3d::Vector3 newExtent(extents.x, extents.y, extents.z);
-    rp3d::BoxShape* colliderShape = Physics.common.createBoxShape(newExtent);
-    
-    mBoxCollider.push_back( colliderShape );
-    return colliderShape;
-}
+// Destructor
+void factoryProxyDestructTransform(void* ptr) {Engine.DestroyTransform((Transform*)ptr);}
+void factoryProxyDestructMeshRenderer(void* ptr) {Renderer.DestroyMeshRenderer((MeshRenderer*)ptr);}
+void factoryProxyDestructCamera(void* ptr) {Renderer.DestroyCamera((Camera*)ptr);}
+void factoryProxyDestructLight(void* ptr) {Renderer.DestroyLight((Light*)ptr);}
+void factoryProxyDestructScript(void* ptr) {Scripting.DestroyScript((Script*)ptr);}
+void factoryProxyDestructRigidBody(void* ptr) {Physics.DestroyRigidBody((rp3d::RigidBody*)ptr);}
+void factoryProxyDestructActor(void* ptr) {AI.DestroyActor((Actor*)ptr);}
+void factoryProxyDestructSound(void* ptr) {Audio.DestroySound((Sound*)ptr);}
+
+// Updaters
+void factoryProxyUpdateRigidBody(unsigned int index) {Engine.UpdateRigidBody(index);}
+void factoryProxyUpdateMeshRenderer(unsigned int index) {Engine.UpdateMeshRenderer(index);}
+void factoryProxyUpdateCamera(unsigned int index) {Engine.UpdateCamera(index);}
+void factoryProxyUpdateLight(unsigned int index) {Engine.UpdateLight(index);}
+void factoryProxyUpdateSound(unsigned int index) {Engine.UpdateAudio(index);}
+
+
 
 
 void EngineSystemManager::Initiate() {
     mStreamBuffer.resize(1024);
+    
+    // Component types
+    componentRegistry.RegisterComponent<Transform>(EngineComponents::Transform);
+    componentRegistry.RegisterComponent<MeshRenderer>(EngineComponents::MeshRenderer);
+    componentRegistry.RegisterComponent<Camera>(EngineComponents::Camera);
+    componentRegistry.RegisterComponent<Light>(EngineComponents::Light);
+    componentRegistry.RegisterComponent<Script>(EngineComponents::Script);
+    componentRegistry.RegisterComponent<rp3d::RigidBody>(EngineComponents::RigidBody);
+    componentRegistry.RegisterComponent<Actor>(EngineComponents::Actor);
+    componentRegistry.RegisterComponent<Sound>(EngineComponents::Sound);
+    
+    componentNames[EngineComponents::Transform]     = "Transform";
+    componentNames[EngineComponents::MeshRenderer]  = "MeshRenderer";
+    componentNames[EngineComponents::Camera]        = "Camera";
+    componentNames[EngineComponents::Light]         = "Light";
+    componentNames[EngineComponents::Script]        = "Script";
+    componentNames[EngineComponents::RigidBody]     = "RigidBody";
+    componentNames[EngineComponents::Actor]         = "Actor";
+    componentNames[EngineComponents::Sound]         = "Sound";
+    
+    // Builders
+    componentBuilders[EngineComponents::Transform] = &factoryProxyBuildTransform;
+    componentBuilders[EngineComponents::MeshRenderer] = &factoryProxyBuildMeshRenderer;
+    componentBuilders[EngineComponents::Camera] = &factoryProxyBuildCamera;
+    componentBuilders[EngineComponents::Light] = &factoryProxyBuildLight;
+    componentBuilders[EngineComponents::Script] = &factoryProxyBuildScript;
+    componentBuilders[EngineComponents::RigidBody] = &factoryProxyBuildRigidBody;
+    componentBuilders[EngineComponents::Actor] = &factoryProxyBuildActor;
+    componentBuilders[EngineComponents::Sound] = &factoryProxyBuildSound;
+    
+    // Destructors
+    componentDestructors[EngineComponents::Transform] = &factoryProxyDestructTransform;
+    componentDestructors[EngineComponents::MeshRenderer] = &factoryProxyDestructMeshRenderer;
+    componentDestructors[EngineComponents::Camera] = &factoryProxyDestructCamera;
+    componentDestructors[EngineComponents::Light] = &factoryProxyDestructLight;
+    componentDestructors[EngineComponents::Script] = &factoryProxyDestructScript;
+    componentDestructors[EngineComponents::RigidBody] = &factoryProxyDestructRigidBody;
+    componentDestructors[EngineComponents::Actor] = &factoryProxyDestructActor;
+    componentDestructors[EngineComponents::Sound] = &factoryProxyDestructSound;
+    
+    // Updaters
+    componentUpdaters.push_back(&factoryProxyUpdateRigidBody);
+    componentUpdaters.push_back(&factoryProxyUpdateMeshRenderer);
+    componentUpdaters.push_back(&factoryProxyUpdateCamera);
+    componentUpdaters.push_back(&factoryProxyUpdateLight);
+    componentUpdaters.push_back(&factoryProxyUpdateSound);
+    
     
     // Initiate console
     console.input = UI.CreateTextField();
@@ -180,6 +232,45 @@ void EngineSystemManager::Shutdown(void) {
     return;
 }
 
+
+
+Transform* EngineSystemManager::CreateTransform(void) {
+    return mTransforms.Create();
+}
+
+bool EngineSystemManager::DestroyTransform(Transform* transform) {
+    return mTransforms.Destroy(transform);
+}
+
+unsigned int EngineSystemManager::GetNumberOfComponents(void) {
+    return mComponents.Size();
+}
+
+GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
+    if (index < mGameObjects.Size()) 
+        return mGameObjects[index];
+    return nullptr;
+}
+
+unsigned int EngineSystemManager::GetStreamSize(void) {
+    return mStreamSize;
+}
+
+rp3d::BoxShape* EngineSystemManager::GetColliderBox(glm::vec3 extents) {
+    for (unsigned int i=0; i < mBoxCollider.size(); i++) {
+        rp3d::BoxShape* colliderShape = mBoxCollider[i];
+        rp3d::Vector3 extentItem = colliderShape->getHalfExtents();
+        if (extentItem.x == extents.x && 
+            extentItem.y == extents.y && 
+            extentItem.z == extents.z) 
+            return colliderShape;
+    }
+    rp3d::Vector3 newExtent(extents.x, extents.y, extents.z);
+    rp3d::BoxShape* colliderShape = Physics.common.createBoxShape(newExtent);
+    
+    mBoxCollider.push_back( colliderShape );
+    return colliderShape;
+}
 
 
 //

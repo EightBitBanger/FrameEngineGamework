@@ -61,6 +61,9 @@ public:
     /// Return a pointer to a game object at the index position.
     GameObject* GetGameObject(unsigned int index);
     
+    /// Get the number of elements in the component stream.
+    unsigned int GetStreamSize(void);
+    
     // Special components and game objects
     
     /// Create a camera controller game object and return its pointer.
@@ -78,6 +81,14 @@ public:
     /// Get a collider from the collider list. If one does not exist it will be generated.
     rp3d::BoxShape* GetColliderBox(glm::vec3 extents);
     
+    /// Component type registry
+    TypeRegistry componentRegistry;
+    
+    // Component factory functions
+    std::unordered_map<ComponentType, void*(*)()> componentBuilders;
+    std::unordered_map<ComponentType, void(*)(void*)> componentDestructors;
+    std::unordered_map<ComponentType, std::string> componentNames;
+    std::vector<void(*)(unsigned int)> componentUpdaters;
     
     
     EngineSystemManager();
@@ -138,19 +149,18 @@ public:
     /// Create a component object containing the type specified.
     template <typename T> Component* CreateComponent(void) {
         void* componentObjectPtr = nullptr;
+        // Get component type
         ComponentType type = EngineComponents::Undefined;
+        type = (ComponentType)componentRegistry.GetID<T>();
         
-        if (std::is_same<T, Transform>::value)    {type = EngineComponents::Transform;     componentObjectPtr = (void*)mTransforms.Create();}
-        if (std::is_same<T, MeshRenderer>::value) {type = EngineComponents::MeshRenderer;  componentObjectPtr = (void*)Renderer.CreateMeshRenderer();}
-        if (std::is_same<T, Camera>::value)       {type = EngineComponents::Camera;        componentObjectPtr = (void*)Renderer.CreateCamera();}
-        if (std::is_same<T, Light>::value)        {type = EngineComponents::Light;         componentObjectPtr = (void*)Renderer.CreateLight();}
-        if (std::is_same<T, Script>::value)       {type = EngineComponents::Script;        componentObjectPtr = (void*)Scripting.CreateScript();}
-        if (std::is_same<T, RigidBody>::value)    {type = EngineComponents::RigidBody;     componentObjectPtr = (void*)Physics.CreateRigidBody();}
-        if (std::is_same<T, Actor>::value)        {type = EngineComponents::Actor;         componentObjectPtr = (void*)AI.CreateActor();}
-        if (std::is_same<T, Sound>::value)        {type = EngineComponents::Sound;         componentObjectPtr = (void*)Audio.CreateSound();}
+        Log.Write("+ Creating component " + componentNames[ type ]);
+        
+        // Component function factory
+        void*(*functionPtr)() = componentBuilders[type];
+        componentObjectPtr = (void*)functionPtr();
         
         if (type == EngineComponents::Undefined || componentObjectPtr == nullptr) {
-            Log.Write("!! Created invalid component");
+            Log.Write("!! Creating invalid component");
             return nullptr;
         }
         
@@ -164,23 +174,19 @@ public:
     /// Destroy a component object.
     bool DestroyComponent(Component* componentPtr) {
         ComponentType componentType = componentPtr->GetType();
-        switch (componentType) {
-            case Components.RigidBody:    {Physics.DestroyRigidBody( (RigidBody*)componentPtr->GetComponent() ); break;}
-            case Components.Actor:        {((Actor*)componentPtr->GetComponent())->isGarbage = true; break;}
-            case Components.Transform:    {mTransforms.Destroy( (Transform*)componentPtr->GetComponent() ); break;}
-            case Components.Camera:       {Renderer.DestroyCamera( (Camera*)componentPtr->GetComponent() ); break;}
-            case Components.Light:        {Renderer.DestroyLight( (Light*)componentPtr->GetComponent() ); break;}
-            case Components.MeshRenderer: {Renderer.DestroyMeshRenderer((MeshRenderer*)componentPtr->GetComponent()); break;}
-            case Components.Script:       {Scripting.DestroyScript( (Script*)componentPtr->GetComponent() ); break;}
-            case Components.Sound:        {Audio.DestroySound( (Sound*)componentPtr->GetComponent() ); break;}
-            
-        default: 
-            Log.Write("!! Destroying invalid component");
-            return false;
-            break;
-        }
+        void(*destroyer)(void*) = componentDestructors[componentType];
+        
+        Log.Write("- Destroy component " + componentNames[ componentType ]);
+        
+        destroyer( componentPtr->GetComponent() );
         return true;
     }
+    
+    /// Create a transform object and return its pointer.
+    Transform* CreateTransform(void);
+    
+    /// Destroy a transform object.
+    bool DestroyTransform(Transform* transform);
     
     /// Get the number of component objects.
     unsigned int GetNumberOfComponents(void);
@@ -218,11 +224,17 @@ public:
     } console;
     
     
+    // Update component by index
+    void UpdateMeshRenderer(unsigned int index);
+    void UpdateRigidBody(unsigned int index);
+    void UpdateCamera(unsigned int index);
+    void UpdateLight(unsigned int index);
+    void UpdateAudio(unsigned int index);
+    
     // List of box colliders
     std::vector<rp3d::BoxShape*>  mBoxCollider;
     
 private:
-    
     
     // Create a game object and return its pointer.
     GameObject* CreateGameObject(void);
@@ -232,13 +244,6 @@ private:
     
     // Batch update engine components
     void UpdateTransformationChains(void);
-    
-    // Update component by index
-    void UpdateMeshRenderer(unsigned int index);
-    void UpdateRigidBody(unsigned int index);
-    void UpdateCamera(unsigned int index);
-    void UpdateLight(unsigned int index);
-    void UpdateAudio(unsigned int index);
     
     // Update actor kinematic motion
     void UpdateKinematics(void);

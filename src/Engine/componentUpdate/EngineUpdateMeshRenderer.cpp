@@ -1,6 +1,9 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateMeshRenderer(unsigned int index) {
+    if (mStreamBuffer[index].components[EngineComponents::MeshRenderer] == nullptr) 
+        return;
+    
     std::lock_guard<std::mutex> lock(((MeshRenderer*)mStreamBuffer[index].components[EngineComponents::MeshRenderer])->mux);
     ((MeshRenderer*)mStreamBuffer[index].components[EngineComponents::MeshRenderer])->transform.position = 
     ((Transform*)mStreamBuffer[index].components[EngineComponents::Transform])->position;

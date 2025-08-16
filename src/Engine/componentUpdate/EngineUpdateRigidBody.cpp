@@ -1,6 +1,8 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateRigidBody(unsigned int index) {
+    if (mStreamBuffer[index].components[EngineComponents::RigidBody] == nullptr) 
+        return;
     
     rp3d::Transform bodyTransform = ((RigidBody*)mStreamBuffer[index].components[EngineComponents::RigidBody])->getTransform();
     rp3d::Vector3 bodyPosition = bodyTransform.getPosition();

@@ -310,10 +310,10 @@
 		<Unit filename="include/GameEngineFramework/Audio/components/sound.h">
 			<Option virtualFolder="root/Audio/components/" />
 		</Unit>
-		<Unit filename="include/GameEngineFramework/Engine/ComponentTypes.h">
+		<Unit filename="include/GameEngineFramework/Engine/Engine.h">
 			<Option virtualFolder="root/Engine/" />
 		</Unit>
-		<Unit filename="include/GameEngineFramework/Engine/Engine.h">
+		<Unit filename="include/GameEngineFramework/Engine/EngineComponents.h">
 			<Option virtualFolder="root/Engine/" />
 		</Unit>
 		<Unit filename="include/GameEngineFramework/Engine/EngineSystems.h">
@@ -354,6 +354,9 @@
 		</Unit>
 		<Unit filename="include/GameEngineFramework/Math/Random.h">
 			<Option virtualFolder="root/Math/" />
+		</Unit>
+		<Unit filename="include/GameEngineFramework/MemoryAllocation/arenaallocator.h">
+			<Option virtualFolder="root/MemoryAllocators/" />
 		</Unit>
 		<Unit filename="include/GameEngineFramework/MemoryAllocation/poolallocator.h">
 			<Option virtualFolder="root/MemoryAllocators/" />
@@ -690,6 +693,12 @@
 			<Option target="Core-profile" />
 		</Unit>
 		<Unit filename="src/Engine/Engine.cpp">
+			<Option virtualFolder="root/Engine/" />
+			<Option target="Core" />
+			<Option target="Core-debug" />
+			<Option target="Core-profile" />
+		</Unit>
+		<Unit filename="src/Engine/EngineComponents.cpp">
 			<Option virtualFolder="root/Engine/" />
 			<Option target="Core" />
 			<Option target="Core-debug" />

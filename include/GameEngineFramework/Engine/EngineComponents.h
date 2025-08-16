@@ -3,6 +3,12 @@
 
 #include <GameEngineFramework/configuration.h>
 
+#include <unordered_map>
+#include <typeindex>
+#include <typeinfo>
+#include <vector>
+#include <mutex>
+
 #include <type_traits>
 #include <cstddef>
 
@@ -23,13 +29,48 @@ struct ENGINE_API EngineComponents {
     constexpr static short NumberOfComponents = Sound + 1;
 };
 
-template<class T, class = void>
-struct component_index {
-    static_assert(!std::is_same<T, T>::value,
-                  "GetComponent<T>: T is not mapped to an EngineComponents ID");
-    static constexpr short value = EngineComponents::Undefined;
-};
 
-#define MAP_COMPONENT(TYPE, ENUM_NAME) template<> struct component_index<TYPE, void> {static constexpr short value = EngineComponents::ENUM_NAME;}
+class ENGINE_API TypeRegistry {
+    
+public:
+    
+    /// Get the ID of a given type.
+    template<typename T> int GetID() const {
+        const std::type_index key(typeid(T));
+        std::lock_guard<std::mutex> lock(mMux);
+        std::unordered_map<std::type_index, int>::const_iterator it = mTypeRegistry.find(key);
+        if (it == mTypeRegistry.end()) return -1;
+        return it->second;
+    }
+    
+    /// Registry a new type by its associated ID.
+    template<typename T> bool RegisterComponent(int fixed_id) {
+        if (fixed_id < 0) return false;
+        const std::type_index key(typeid(T));
+        std::lock_guard<std::mutex> lock(mMux);
+        
+        std::unordered_map<std::type_index, int>::const_iterator it = mTypeRegistry.find(key);
+        if (it != mTypeRegistry.end()) return it->second == fixed_id;
+        
+        // Check collision
+        if (fixed_id < (int)mIDRegistry.size() && mIDRegistry[fixed_id] != std::type_index(typeid(void))) 
+            return false;
+        
+        // Grow reverse map if needed
+        if (fixed_id >= (int)mIDRegistry.size()) 
+            mIDRegistry.resize(fixed_id + 1, std::type_index(typeid(void)));
+        
+        mIDRegistry[fixed_id] = key;
+        mTypeRegistry.emplace(key, fixed_id);
+        return true;
+    }
+    
+private:
+    
+    mutable std::mutex mMux;
+    
+    std::unordered_map<std::type_index, int> mTypeRegistry;
+    std::vector<std::type_index> mIDRegistry{};
+};
 
 #endif

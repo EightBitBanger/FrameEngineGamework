@@ -1,6 +1,9 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateCamera(unsigned int index) {
+    if (mStreamBuffer[index].components[EngineComponents::Camera] == nullptr) 
+        return;
+    
     Camera* cam = (Camera*)mStreamBuffer[index].components[EngineComponents::Camera];
     
     if (cam->useMouseLook) {
