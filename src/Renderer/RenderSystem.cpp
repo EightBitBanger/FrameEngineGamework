@@ -52,7 +52,6 @@ RenderSystem::RenderSystem() :
 }
 
 MeshRenderer* RenderSystem::CreateMeshRenderer(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mEntity.Create();
 }
 

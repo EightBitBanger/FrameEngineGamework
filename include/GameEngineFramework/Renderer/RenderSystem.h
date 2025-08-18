@@ -190,7 +190,7 @@ public:
     unsigned int GetNumberOfDrawCalls(void);
     
     friend class EngineSystemManager;
-    
+    friend class ActorSystem;
     
 private:
     
@@ -250,7 +250,7 @@ private:
     PoolAllocator<Texture>         mTexture;
     PoolAllocator<Fog>             mFog;
     
-    // TODO: Sorting and other non openGL related render functions could be threaded out here
+    // TODO Sorting and other non openGL related render functions could be threaded out here
     
     // Render support thread
     std::thread* renderThreadMain;

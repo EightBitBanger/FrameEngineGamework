@@ -1,7 +1,7 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 #include <GameEngineFramework/functions.h>
 
-#include <GameEngineFramework/plugins.h>
+#include <GameEngineFramework/Plugins/plugins.h>
 
 #include <glm/gtx/euler_angles.hpp>
 
@@ -149,11 +149,6 @@ void keyBindF4() {
     for (unsigned int i=0; i < 20; i++) 
         Engine.console.WriteDialog(i, "");
 }
-
-
-
-
-
 
 void BuildStack(Structure& structure, glm::vec3 position, glm::vec3 scale, float height, int length, Color color) {
     for (int l=0; l < length; l++) {
@@ -587,25 +582,6 @@ void Start() {
     
     glm::vec3 stackPos(0, 10, 0);
     
-    //BuildStackYaw(village,   stackPos, glm::vec3(1.0f, 1.0f, 1.0f),  0, 1.0f, 10, Colors.brown * 0.2f);   // Forward
-    //BuildStackPitch(village, stackPos, glm::vec3(1.0f, 1.0f, 1.0f),  90, 1.0f, 10, Colors.brown * 0.2f);  // Up
-    //BuildStackYaw(village,   stackPos, glm::vec3(1.0f, 1.0f, 1.0f),  180, 1.0f, 10, Colors.brown * 0.2f); // Backward
-    //BuildStackPitch(village, stackPos, glm::vec3(1.0f, 1.0f, 1.0f),  270, 1.0f, 10, Colors.brown * 0.2f); // Down
-    /*
-    for (unsigned int i=0; i < 80; i++) {
-        float randYaw   = Random.Range(-90.0f, 90.0f);
-        float randPitch = Random.Range(-90.0f, 90.0f);
-        int randHeight = Random.Range(9, 10);
-        
-        BuildStackAngle(village, stackPos, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(randYaw, randPitch, 0), 1.0f, randHeight, Colors.brown * 0.2f);
-        
-        //BuildStackYaw(village, stackPos, glm::vec3(1.0f, 1.0f, 1.0f), randYaw, 1.0f, randHeight, Colors.brown * 0.2f);
-        //BuildStackPitch(village, stackPos, glm::vec3(1.0f, 1.0f, 1.0f), randYaw, 1.0f, randHeight, Colors.brown * 0.2f);
-    }
-    */
-    
-    
-    
     
     
     float spread = 4.0f;
@@ -662,8 +638,6 @@ void Start() {
         position.z = (halfSpread * offsetMul);
         GameWorld.build.StackAtAngle(village, position, glm::vec3(thickness, 1, thickness), glm::vec3(180, 45, 45), 1, spread, color);
     }
-    
-    
     
     GameWorld.world.structures.push_back(village);
     

@@ -1,7 +1,7 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 #include <GameEngineFramework/Engine/Engine.h>
 
-#include <GameEngineFramework/plugins.h>
+#include <GameEngineFramework/Plugins/plugins.h>
 
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
 

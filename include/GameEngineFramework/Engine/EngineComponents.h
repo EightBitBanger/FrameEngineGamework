@@ -14,8 +14,13 @@
 
 typedef unsigned short int ComponentType;
 
-struct ENGINE_API EngineComponents {
-    constexpr static short Undefined     = -1;
+enum class ComponentUpdateType {
+    NoUpdate,
+    PerFrame,
+    PerObject
+};
+
+struct ENGINE_API EngineComponent {
     constexpr static short Transform     = 0;
     constexpr static short MeshRenderer  = 1;
     constexpr static short Camera        = 2;
@@ -30,7 +35,7 @@ struct ENGINE_API EngineComponents {
 };
 
 
-class ENGINE_API TypeRegistry {
+class ENGINE_API ComponentTypeRegistry {
     
 public:
     
@@ -62,10 +67,16 @@ public:
         
         mIDRegistry[fixed_id] = key;
         mTypeRegistry.emplace(key, fixed_id);
+        
+        mNumberOfComponents++;
         return true;
     }
     
+    unsigned int GetNumberOfComponents();
+    
 private:
+    
+    unsigned int mNumberOfComponents;
     
     mutable std::mutex mMux;
     

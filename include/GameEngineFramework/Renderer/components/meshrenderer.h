@@ -8,7 +8,6 @@
 #include <GameEngineFramework/Renderer/components/mesh.h>
 
 
-
 class ENGINE_API MeshRenderer {
     friend class RenderSystem;
     
@@ -56,7 +55,6 @@ public:
     
     MeshRenderer();
     
-    std::mutex mux;
 private:
     
     // Is this renderer being culled

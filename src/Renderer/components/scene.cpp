@@ -1,6 +1,5 @@
 #include <GameEngineFramework/Renderer/components/scene.h>
 
-
 Scene::Scene() : 
     doUpdateLights(true),
     isActive(true),
@@ -10,7 +9,6 @@ Scene::Scene() :
 
 void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup) {
     switch (renderQueueGroup) {
-        
         case RENDER_QUEUE_OVERLAY:      mRenderQueueOverlay.emplace( mRenderQueueOverlay.begin(), meshRenderer ); break;
         case RENDER_QUEUE_FOREGROUND:   mRenderQueueForeground.emplace( mRenderQueueForeground.begin(), meshRenderer ); break;
         case RENDER_QUEUE_POSTGEOMETRY: mRenderQueuePostGeometry.emplace( mRenderQueuePostGeometry.begin(), meshRenderer ); break;
@@ -19,14 +17,12 @@ void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQue
         case RENDER_QUEUE_PREGEOMETRY:  mRenderQueuePreGrometry.emplace( mRenderQueuePreGrometry.begin(), meshRenderer ); break;
         case RENDER_QUEUE_BACKGROUND:   mRenderQueueBackground.emplace( mRenderQueueBackground.begin(), meshRenderer ); break;
         case RENDER_QUEUE_SKY:          mRenderQueueSky.emplace( mRenderQueueSky.begin(), meshRenderer ); break;
-        
     }
     return;
 }
 
 bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup) {
     std::vector<MeshRenderer*>* renderQueue;
-    
     switch (renderQueueGroup) {
         case RENDER_QUEUE_OVERLAY:      renderQueue = &mRenderQueueOverlay; break;
         case RENDER_QUEUE_FOREGROUND:   renderQueue = &mRenderQueueForeground; break;

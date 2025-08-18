@@ -2,7 +2,7 @@
 
 #include <GameEngineFramework/functions.h>
 
-#include <GameEngineFramework/plugins.h>
+#include <GameEngineFramework/Plugins/plugins.h>
 
 
 void EventLostFocus(void) {

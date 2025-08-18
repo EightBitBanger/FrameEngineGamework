@@ -47,17 +47,28 @@ void EngineSystemManager::Update(void) {
     // Update component stream buffer
     UpdateComponentStream();
     
-    // Run through the parent matrix transform chains
-    UpdateTransformationChains();
-    
-    // Update actor kinematic movement
-    UpdateKinematics();
-    
-    // Update attached components
-    unsigned int numberOfComponents = componentUpdaters.size();
-    for (unsigned int c=0; c < numberOfComponents; c++) 
-        for (unsigned int i=0; i < GetStreamSize(); i++) 
-            componentUpdaters[c](i);
+    // Update components by type
+    unsigned int numberOfComponents = mComponentUpdaters.size();
+    for (unsigned int c=0; c < numberOfComponents; c++) {
+        
+        switch (mComponentUpdateType[c]) {
+            
+        case ComponentUpdateType::PerFrame: mComponentUpdaters[c](0); break;
+        case ComponentUpdateType::PerObject: for (unsigned int o=0; o < GetStreamSize(); o++) mComponentUpdaters[c](o); break;
+        }
+    }
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
 

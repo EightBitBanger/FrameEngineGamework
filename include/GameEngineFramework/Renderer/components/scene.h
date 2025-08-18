@@ -43,8 +43,6 @@ public:
     
     Scene();
     
-    std::mutex mux;
-    
 private:
     
     // List of mesh renderer queue groups in this scene

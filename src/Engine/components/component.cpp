@@ -5,7 +5,7 @@ extern EngineComponents Components;
 
 Component::Component() : 
     name(""),
-    mType(Components.Undefined),
+    mType(0),
     mObject(nullptr)
 {
 }

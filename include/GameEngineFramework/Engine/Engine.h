@@ -40,9 +40,6 @@
 #endif
 
 
-#define COMPONENT_STREAM_BUFFER_SIZE   1024 * 1024
-
-
 class ENGINE_API EngineSystemManager {
     
 public:
@@ -80,16 +77,6 @@ public:
     
     /// Get a collider from the collider list. If one does not exist it will be generated.
     rp3d::BoxShape* GetColliderBox(glm::vec3 extents);
-    
-    /// Component type registry
-    TypeRegistry componentRegistry;
-    
-    // Component factory functions
-    std::unordered_map<ComponentType, void*(*)()> componentBuilders;
-    std::unordered_map<ComponentType, void(*)(void*)> componentDestructors;
-    std::unordered_map<ComponentType, std::string> componentNames;
-    std::vector<void(*)(unsigned int)> componentUpdaters;
-    
     
     EngineSystemManager();
     
@@ -146,20 +133,58 @@ public:
         return false;
     }
     
+    /// Add a new component to the component registry.
+    template <typename T> bool RegisterComponent(ComponentType type, std::string name, 
+                                                 void*(*CreateFunction)(), 
+                                                 void(*DestroyFunction)(void*), 
+                                                 void(*UpdateFunction)(unsigned int), 
+                                                 ComponentUpdateType updateType) {
+        if (!mComponentRegistry.RegisterComponent<T>(type)) 
+            return false;
+        
+        mComponentNames[type] = name;
+        if (CreateFunction  != nullptr) mComponentBuilders[type]    = CreateFunction;
+        if (DestroyFunction != nullptr) mComponentDestructors[type] = DestroyFunction;
+        if (UpdateFunction  != nullptr) mComponentUpdaters.push_back(UpdateFunction);
+        
+        if (updateType != ComponentUpdateType::NoUpdate) 
+            mComponentUpdateType.push_back(updateType);
+        return true;
+    }
+    
+    /// Add a new component to the component registry.
+    template <typename T> bool RegisterPlugin(unsigned int type, std::string name, 
+                                                 void*(*CreateFunction)(), 
+                                                 void(*DestroyFunction)(void*), 
+                                                 void(*UpdateFunction)(unsigned int), 
+                                                 ComponentUpdateType updateType) {
+        if (!mComponentRegistry.RegisterComponent<T>(type)) 
+            return false;
+        
+        mComponentNames[type] = name;
+        if (CreateFunction  != nullptr) mComponentBuilders[type]    = CreateFunction;
+        if (DestroyFunction != nullptr) mComponentDestructors[type] = DestroyFunction;
+        if (UpdateFunction  != nullptr) mComponentUpdaters.push_back(UpdateFunction);
+        
+        if (updateType != ComponentUpdateType::NoUpdate) 
+            mComponentUpdateType.push_back(updateType);
+        return true;
+    }
+    
     /// Create a component object containing the type specified.
     template <typename T> Component* CreateComponent(void) {
         void* componentObjectPtr = nullptr;
         // Get component type
-        ComponentType type = EngineComponents::Undefined;
-        type = (ComponentType)componentRegistry.GetID<T>();
+        ComponentType type = -1;
+        type = (ComponentType)mComponentRegistry.GetID<T>();
         
-        Log.Write("+ Creating component " + componentNames[ type ]);
+        Log.Write("+ Creating component " + mComponentNames[ type ]);
         
         // Component function factory
-        void*(*functionPtr)() = componentBuilders[type];
+        void*(*functionPtr)() = mComponentBuilders[type];
         componentObjectPtr = (void*)functionPtr();
         
-        if (type == EngineComponents::Undefined || componentObjectPtr == nullptr) {
+        if (type == -1 || componentObjectPtr == nullptr) {
             Log.Write("!! Creating invalid component");
             return nullptr;
         }
@@ -174,9 +199,9 @@ public:
     /// Destroy a component object.
     bool DestroyComponent(Component* componentPtr) {
         ComponentType componentType = componentPtr->GetType();
-        void(*destroyer)(void*) = componentDestructors[componentType];
+        void(*destroyer)(void*) = mComponentDestructors[componentType];
         
-        Log.Write("- Destroy component " + componentNames[ componentType ]);
+        Log.Write("- Destroy component " + mComponentNames[ componentType ]);
         
         destroyer( componentPtr->GetComponent() );
         return true;
@@ -230,6 +255,8 @@ public:
     void UpdateCamera(unsigned int index);
     void UpdateLight(unsigned int index);
     void UpdateAudio(unsigned int index);
+    void UpdateTransforms(unsigned int index);
+    void UpdateKinematics(unsigned int index);
     
     // List of box colliders
     std::vector<rp3d::BoxShape*>  mBoxCollider;
@@ -241,12 +268,6 @@ private:
     
     // Destroy a game object.
     bool DestroyGameObject(GameObject* gameObjectPtr);
-    
-    // Batch update engine components
-    void UpdateTransformationChains(void);
-    
-    // Update actor kinematic motion
-    void UpdateKinematics(void);
     
     // Actor genetics update
     void ClearOldGeneticRenderers(unsigned int index);
@@ -291,6 +312,15 @@ private:
         Mesh* sphere = nullptr;
     };
     
+    // Component type registry
+    ComponentTypeRegistry mComponentRegistry;
+    std::unordered_map<ComponentType, void*(*)()> mComponentBuilders;
+    std::unordered_map<ComponentType, void(*)(void*)> mComponentDestructors;
+    std::unordered_map<ComponentType, std::string> mComponentNames;
+    std::vector<void(*)(unsigned int)> mComponentUpdaters;
+    std::vector<ComponentUpdateType> mComponentUpdateType;
+    
+    // Component stream
     void UpdateComponentStream(void);
     
     unsigned int mDataStreamIndex;
@@ -299,8 +329,7 @@ private:
     
     struct ComponentDataStreamBuffer {
         GameObject*    gameObject;
-        
-        void* components[EngineComponents::NumberOfComponents];
+        void* components[EngineComponent::NumberOfComponents];
     };
     
     std::vector<ComponentDataStreamBuffer> mStreamBuffer;

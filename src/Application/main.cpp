@@ -5,7 +5,6 @@
  #include "../../tests/framework.h"
 #endif
 
-
 int main(int argc, char* argv[]) {
     
 #ifdef RUN_UNIT_TESTS
@@ -68,6 +67,9 @@ int main(int argc, char* argv[]) {
     AI.sceneMain = Engine.sceneMain;
     AI.shader = Engine.shaders.color;
     AI.baseMesh = Engine.meshes.cube;
+    
+    // Register plug-in component types
+    RegisterPlugins();
     
     Log.WriteLn();
     Log.Write("<MainScene>");

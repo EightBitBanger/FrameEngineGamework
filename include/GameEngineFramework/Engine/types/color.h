@@ -102,6 +102,12 @@ public:
     /// Interpolate between two colors by a linear bias factor.
     Color& Lerp(Color min, Color max, float bias);
     
+    /// Clamp the color between two values.
+    Color Clamp(Color source, float min, float max);
+    
+    /// Clamp the color between two color values.
+    Color Clamp(Color source, Color min, Color max);
+    
     
 private:
     

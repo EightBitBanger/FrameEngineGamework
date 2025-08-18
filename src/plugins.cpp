@@ -1,9 +1,16 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
+#include <GameEngineFramework/functions.h>
 
-#include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
-#include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
-#include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
+#include <GameEngineFramework/Plugins/plugins.h>
 
-ChunkManager     ENGINE_API GameWorld;
-WeatherSystem    ENGINE_API Weather;
-ParticleSystem   ENGINE_API Particle;
+#include <glm/gtx/euler_angles.hpp>
+
+                                                                                                    
+enum class PluginComponent {
+    Particle
+};
+
+void RegisterPlugins(void) {
+    //RegisterPlugin<Transform>(EngineComponents::, "Transform", &buildTransform, &destructTransform, &updateTransform, ComponentUpdateType::PerObject);
+}
+

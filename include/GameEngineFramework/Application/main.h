@@ -16,5 +16,7 @@
 
 #include <GameEngineFrameWork/Application/Platform.h>
 
+#include <GameEngineFrameWork/Plugins/plugins.h>
+
 #include <GameEngineFrameWork/Engine/Engine.h>
 

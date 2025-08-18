@@ -21,3 +21,7 @@ std::string Codon::ToString(void) {
     sstream << x << " " << y << " " << z;
     return sstream.str();
 }
+
+glm::vec3 Codon::ToVec3(void) {
+    return glm::vec3(x, y, z);
+}

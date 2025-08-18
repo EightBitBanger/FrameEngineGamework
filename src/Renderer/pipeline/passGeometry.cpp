@@ -5,27 +5,24 @@
 
 
 bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection) {
-    
-    if (!currentEntity->isActive) 
-        return false;
-    
     // Mesh binding
     
     // Level of detail shift selection
     Mesh* mesh = LevelOfDetailPass(currentEntity, eye);
-    
     if (mesh == nullptr) 
         return false;
     
     BindMesh( mesh );
     
     // Material binding
+    
     Material* materialPtr = currentEntity->material;
     if (materialPtr == nullptr) 
         return false;
     BindMaterial( materialPtr );
     
     // Shader binding
+    
     Shader* shaderPtr = materialPtr->shader;
     if (shaderPtr == nullptr) 
         return false;

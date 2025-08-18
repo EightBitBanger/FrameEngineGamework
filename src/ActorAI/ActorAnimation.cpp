@@ -9,7 +9,6 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
     for (unsigned int a = 0; a < actor->genetics.mGeneticRenderers.size(); a++) {
         // Update the renderers position
         MeshRenderer* geneRenderer = actor->genetics.mGeneticRenderers[a];
-        std::lock_guard<std::mutex> (geneRenderer->mux);
         
         //  Skip genes that should not express
         if (!actor->genetics.mGenes[a].doExpress) {
@@ -43,11 +42,12 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
         case ActorState::Animation::Limb:
             UpdateAnimationLimb(geneRenderer->transform.matrix, actor, a);
             break;
-            
         }
         
         // Final render scale
         geneRenderer->transform.matrix = glm::scale(geneRenderer->transform.matrix, geneRenderer->transform.scale);
+        
+        geneRenderer->isActive = true;
     }
     return;
 }

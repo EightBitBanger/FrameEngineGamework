@@ -6,7 +6,6 @@ ENGINE_API extern UIntType              UInt;
 ENGINE_API extern FloatType             Float;
 ENGINE_API extern StringType            String;
 
-ENGINE_API extern EngineComponents      Components;
 ENGINE_API extern ColorPreset           Colors;
 ENGINE_API extern NumberGeneration      Random;
 ENGINE_API extern Logger                Log;

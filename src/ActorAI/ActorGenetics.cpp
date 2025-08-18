@@ -9,6 +9,8 @@ void ActorSystem::UpdateActorGenetics(Actor* actor) {
         return;
     actor->genetics.mDoUpdateGenetics = false;
     
+    std::lock_guard<std::mutex> lock(Renderer.mux);
+    
     ClearOldGeneticRenderers(actor);
     
     unsigned int numberOfGenes = actor->genetics.mGenes.size();
@@ -24,12 +26,6 @@ void ActorSystem::UpdateActorGenetics(Actor* actor) {
         }
         
         MeshRenderer* newRenderer = CreateMeshRendererForGene(actor, a, baseMesh);
-        newRenderer->isActive = true;
-        
-        newRenderer->EnableFrustumCulling();
-        newRenderer->SetBoundingBoxMin(glm::vec3(-1, -1, -1));
-        newRenderer->SetBoundingBoxMax(glm::vec3(1, 1, 1));
-        
         glm::vec4 orientation = glm::vec4(Transform().rotation.w, Transform().rotation.x, Transform().rotation.y, Transform().rotation.z);
         actor->genetics.mGeneticRenderers.push_back(newRenderer);
         actor->state.mAnimation.push_back(orientation);
@@ -51,6 +47,10 @@ MeshRenderer* ActorSystem::CreateMeshRendererForGene(Actor* actor, unsigned int 
     MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
     newRenderer->isActive = false;
     
+    newRenderer->EnableFrustumCulling();
+    newRenderer->SetBoundingBoxMin(glm::vec3(-1, -1, -1));
+    newRenderer->SetBoundingBoxMax(glm::vec3(1, 1, 1));
+    
     newRenderer->mesh = sourceMesh;
     newRenderer->material = Renderer.CreateMaterial();
     newRenderer->material->isShared = false;
@@ -62,12 +62,6 @@ MeshRenderer* ActorSystem::CreateMeshRendererForGene(Actor* actor, unsigned int 
     newRenderer->material->EnableCulling();
     newRenderer->material->EnableDepthTest();
     newRenderer->material->DisableShadowVolumePass();
-    
-    newRenderer->transform.position = actor->navigation.mPosition;
-    
-    newRenderer->transform.scale = glm::vec3(actor->genetics.mGenes[geneIndex].scale.x,
-                                             actor->genetics.mGenes[geneIndex].scale.y,
-                                             actor->genetics.mGenes[geneIndex].scale.z);
     
     return newRenderer;
 }
@@ -113,31 +107,29 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
             continue;
         
         MeshRenderer* meshRenderer = actor->genetics.mGeneticRenderers[a];
-        
-        // Genetic color
-        meshRenderer->material->diffuse = Color(actor->genetics.mGenes[a].color.x,
-                                                actor->genetics.mGenes[a].color.y,
-                                                actor->genetics.mGenes[a].color.z);
-        
         meshRenderer->transform.position = actor->navigation.mPosition;
         
-        // Check scale inheritance
-        if (actor->genetics.mGenes[a].scaleIndex == 0) {
-            
-            // Default scale
-            meshRenderer->transform.scale = glm::clamp(glm::vec3(actor->genetics.mGenes[a].scale.x,
-                                                                 actor->genetics.mGenes[a].scale.y,
-                                                                 actor->genetics.mGenes[a].scale.z), 0.0f, 2.0f);
-            
+        // Color inheritance
+        Color targetColor;
+        if (actor->genetics.mGenes[a].colorIndex == 0) {
+            targetColor = actor->genetics.mGenes[a].color.ToVec3();
         } else {
-            
+            // Inherit scale from another gene
+            unsigned int colorIndex = actor->genetics.mGenes[a].colorIndex - 1;
+            targetColor = actor->genetics.mGenes[colorIndex].color.ToVec3();
+        }
+        meshRenderer->material->diffuse = Colors.Clamp(targetColor, 0.0f, 1.0f);
+        
+        // Scale inheritance
+        glm::vec3 targetScale;
+        if (actor->genetics.mGenes[a].scaleIndex == 0) {
+            targetScale = actor->genetics.mGenes[a].scale.ToVec3();
+        } else {
             // Inherit scale from another gene
             unsigned int scaleIndex = actor->genetics.mGenes[a].scaleIndex - 1;
-            meshRenderer->transform.scale = glm::clamp(glm::vec3(actor->genetics.mGenes[scaleIndex].scale.x,
-                                                                 actor->genetics.mGenes[scaleIndex].scale.y,
-                                                                 actor->genetics.mGenes[scaleIndex].scale.z), 0.0f, 2.0f);
-            
+            targetScale = actor->genetics.mGenes[scaleIndex].scale.ToVec3();
         }
+        meshRenderer->transform.scale = glm::clamp(targetScale, 0.0f, 2.0f);
         
         // Check custom expression
         if (actor->genetics.mGenes[a].type != EXPRESSION_TYPE_BASE) {
@@ -191,7 +183,7 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
         meshRenderer->transform.RotateAxis(actor->genetics.mGenes[a].rotation.y, glm::vec3(0, 1, 0));
         meshRenderer->transform.RotateAxis(actor->genetics.mGenes[a].rotation.z, glm::vec3(0, 0, 1));
         
-        // TODO: Apply biological effectors
+        // TODO Apply biological effectors
         
         continue;
     }

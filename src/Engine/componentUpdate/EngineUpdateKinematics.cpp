@@ -5,7 +5,7 @@
 #define TERMINAL_VELOCITY  39.24f
 
 
-void EngineSystemManager::UpdateKinematics(void) {
+void EngineSystemManager::UpdateKinematics(unsigned int index) {
     unsigned int numberOfActors = AI.GetNumberOfActors();
     for (unsigned int i=0; i < numberOfActors; i++) {
         Actor* actor = AI.GetActor(i);

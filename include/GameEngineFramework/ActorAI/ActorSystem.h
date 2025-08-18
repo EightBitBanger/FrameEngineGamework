@@ -87,6 +87,11 @@ public:
     
 private:
     
+    // Update at the rate of tick
+    void UpdateTick();
+    // Update at the frame rate
+    void UpdateFast();
+    
     // Master update timer
     Timer mMainTimer;
     // Animation update timer

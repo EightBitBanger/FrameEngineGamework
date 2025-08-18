@@ -13,7 +13,7 @@
 #include <type_traits>
 
 extern RenderSystem Renderer;
-extern EngineComponents Components;
+extern EngineComponent Components;
 
 
 class ENGINE_API GameObject {
@@ -50,13 +50,13 @@ public:
     
     /// Get a component of a given type.
     template <class T> T* GetComponent(void) {
-        if (std::is_same<T, Transform>::value)     return (T*)mComponents[EngineComponents::Transform];
-        if (std::is_same<T, Camera>::value)        return (T*)mComponents[EngineComponents::Camera];
-        if (std::is_same<T, Light>::value)         return (T*)mComponents[EngineComponents::Light];
-        if (std::is_same<T, MeshRenderer>::value)  return (T*)mComponents[EngineComponents::MeshRenderer];
-        if (std::is_same<T, RigidBody>::value)     return (T*)mComponents[EngineComponents::RigidBody];
-        if (std::is_same<T, Actor>::value)         return (T*)mComponents[EngineComponents::Actor];
-        if (std::is_same<T, Sound>::value)         return (T*)mComponents[EngineComponents::Sound];
+        if (std::is_same<T, Transform>::value)     return (T*)mComponents[EngineComponent::Transform];
+        if (std::is_same<T, Camera>::value)        return (T*)mComponents[EngineComponent::Camera];
+        if (std::is_same<T, Light>::value)         return (T*)mComponents[EngineComponent::Light];
+        if (std::is_same<T, MeshRenderer>::value)  return (T*)mComponents[EngineComponent::MeshRenderer];
+        if (std::is_same<T, RigidBody>::value)     return (T*)mComponents[EngineComponent::RigidBody];
+        if (std::is_same<T, Actor>::value)         return (T*)mComponents[EngineComponent::Actor];
+        if (std::is_same<T, Sound>::value)         return (T*)mComponents[EngineComponent::Sound];
         
         /*
         constexpr short idx = component_index<T>::value;
@@ -191,16 +191,8 @@ private:
     std::vector<Component*> mComponentList;
     
     // Cached component pointers, to avoid overhead from working with components internally
-    void* mComponents[ EngineComponents::NumberOfComponents ];
-    /*
-    Transform*       mTransformCache;
-    Camera*          mCameraCache;
-    RigidBody*       mRigidBodyCache;
-    MeshRenderer*    mMeshRendererCache;
-    Light*           mLightCache;
-    Actor*           mActorCache;
-    Sound*           mSoundCache;
-    */
+    void* mComponents[ EngineComponent::NumberOfComponents ];
+    
 };
 
 #endif

@@ -68,20 +68,22 @@ void RenderSystem::RenderFrame(void) {
             if (!renderQueueGroup || renderQueueGroup->empty()) 
                 continue;
             
-            // Sorting
             SortingPass(eye, renderQueueGroup);
             
             // Geometry pass
             for (MeshRenderer* currentEntity : *renderQueueGroup) {
-                std::lock_guard<std::mutex> lock(currentEntity->mux);
-                
-                if (currentEntity->mDoCulling && !CullingPass(currentEntity, scenePtr->camera, viewProjection, frustum))
+                if (!currentEntity->isActive) 
                     continue;
+                
+                if (currentEntity->mDoCulling) 
+                    if (!CullingPass(currentEntity, scenePtr->camera, viewProjection, frustum)) 
+                        continue;
                 
                 GeometryPass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
             }
             
             // Shadow pass
+            /*
             if (mNumberOfShadows > 0) {
                 
                 shaders.shadowCaster->Bind();
@@ -93,6 +95,7 @@ void RenderSystem::RenderFrame(void) {
                 if (mCurrentShader) 
                     mCurrentShader->Bind();
             }
+            */
         }
     }
     

@@ -1,7 +1,7 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 #include <GameEngineFramework/functions.h>
 
-#include <GameEngineFramework/plugins.h>
+#include <GameEngineFramework/Plugins/plugins.h>
 
 
 void Shutdown(void) {
@@ -13,4 +13,3 @@ void Shutdown(void) {
     
     return;
 }
-

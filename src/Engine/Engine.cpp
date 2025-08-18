@@ -20,31 +20,33 @@ EngineSystemManager::EngineSystemManager(void) :
 // Component system function pointers
 
 // Builder
-void* factoryProxyBuildTransform(void) {return (void*)Engine.CreateTransform();}
-void* factoryProxyBuildMeshRenderer(void) {return (void*)Renderer.CreateMeshRenderer();}
-void* factoryProxyBuildCamera(void) {return (void*)Renderer.CreateCamera();}
-void* factoryProxyBuildLight(void) {return (void*)Renderer.CreateLight();}
-void* factoryProxyBuildScript(void) {return (void*)Scripting.CreateScript();}
-void* factoryProxyBuildRigidBody(void) {return (void*)Physics.CreateRigidBody(0,0,0);}
-void* factoryProxyBuildActor(void) {return (void*)AI.CreateActor();}
-void* factoryProxyBuildSound(void) {return (void*)Audio.CreateSound();}
+void* buildTransform(void) {return (void*)Engine.CreateTransform();}
+void* buildMeshRenderer(void) {return (void*)Renderer.CreateMeshRenderer();}
+void* buildCamera(void) {return (void*)Renderer.CreateCamera();}
+void* buildLight(void) {return (void*)Renderer.CreateLight();}
+void* buildScript(void) {return (void*)Scripting.CreateScript();}
+void* buildRigidBody(void) {return (void*)Physics.CreateRigidBody(0,0,0);}
+void* buildActor(void) {return (void*)AI.CreateActor();}
+void* buildSound(void) {return (void*)Audio.CreateSound();}
 
 // Destructor
-void factoryProxyDestructTransform(void* ptr) {Engine.DestroyTransform((Transform*)ptr);}
-void factoryProxyDestructMeshRenderer(void* ptr) {Renderer.DestroyMeshRenderer((MeshRenderer*)ptr);}
-void factoryProxyDestructCamera(void* ptr) {Renderer.DestroyCamera((Camera*)ptr);}
-void factoryProxyDestructLight(void* ptr) {Renderer.DestroyLight((Light*)ptr);}
-void factoryProxyDestructScript(void* ptr) {Scripting.DestroyScript((Script*)ptr);}
-void factoryProxyDestructRigidBody(void* ptr) {Physics.DestroyRigidBody((rp3d::RigidBody*)ptr);}
-void factoryProxyDestructActor(void* ptr) {AI.DestroyActor((Actor*)ptr);}
-void factoryProxyDestructSound(void* ptr) {Audio.DestroySound((Sound*)ptr);}
+void destructTransform(void* ptr) {Engine.DestroyTransform((Transform*)ptr);}
+void destructMeshRenderer(void* ptr) {Renderer.DestroyMeshRenderer((MeshRenderer*)ptr);}
+void destructCamera(void* ptr) {Renderer.DestroyCamera((Camera*)ptr);}
+void destructLight(void* ptr) {Renderer.DestroyLight((Light*)ptr);}
+void destructScript(void* ptr) {Scripting.DestroyScript((Script*)ptr);}
+void destructRigidBody(void* ptr) {Physics.DestroyRigidBody((rp3d::RigidBody*)ptr);}
+void destructActor(void* ptr) {AI.DestroyActor((Actor*)ptr);}
+void destructSound(void* ptr) {Audio.DestroySound((Sound*)ptr);}
 
 // Updaters
-void factoryProxyUpdateRigidBody(unsigned int index) {Engine.UpdateRigidBody(index);}
-void factoryProxyUpdateMeshRenderer(unsigned int index) {Engine.UpdateMeshRenderer(index);}
-void factoryProxyUpdateCamera(unsigned int index) {Engine.UpdateCamera(index);}
-void factoryProxyUpdateLight(unsigned int index) {Engine.UpdateLight(index);}
-void factoryProxyUpdateSound(unsigned int index) {Engine.UpdateAudio(index);}
+void updateRigidBody(unsigned int index) {Engine.UpdateRigidBody(index);}
+void updateMeshRenderer(unsigned int index) {Engine.UpdateMeshRenderer(index);}
+void updateCamera(unsigned int index) {Engine.UpdateCamera(index);}
+void updateLight(unsigned int index) {Engine.UpdateLight(index);}
+void updateSound(unsigned int index) {Engine.UpdateAudio(index);}
+void updateTransform(unsigned int index) {Engine.UpdateTransforms(index);}
+void updateKinematics(unsigned int index) {Engine.UpdateKinematics(index);}
 
 
 
@@ -53,51 +55,14 @@ void EngineSystemManager::Initiate() {
     mStreamBuffer.resize(1024);
     
     // Component types
-    componentRegistry.RegisterComponent<Transform>(EngineComponents::Transform);
-    componentRegistry.RegisterComponent<MeshRenderer>(EngineComponents::MeshRenderer);
-    componentRegistry.RegisterComponent<Camera>(EngineComponents::Camera);
-    componentRegistry.RegisterComponent<Light>(EngineComponents::Light);
-    componentRegistry.RegisterComponent<Script>(EngineComponents::Script);
-    componentRegistry.RegisterComponent<rp3d::RigidBody>(EngineComponents::RigidBody);
-    componentRegistry.RegisterComponent<Actor>(EngineComponents::Actor);
-    componentRegistry.RegisterComponent<Sound>(EngineComponents::Sound);
-    
-    componentNames[EngineComponents::Transform]     = "Transform";
-    componentNames[EngineComponents::MeshRenderer]  = "MeshRenderer";
-    componentNames[EngineComponents::Camera]        = "Camera";
-    componentNames[EngineComponents::Light]         = "Light";
-    componentNames[EngineComponents::Script]        = "Script";
-    componentNames[EngineComponents::RigidBody]     = "RigidBody";
-    componentNames[EngineComponents::Actor]         = "Actor";
-    componentNames[EngineComponents::Sound]         = "Sound";
-    
-    // Builders
-    componentBuilders[EngineComponents::Transform] = &factoryProxyBuildTransform;
-    componentBuilders[EngineComponents::MeshRenderer] = &factoryProxyBuildMeshRenderer;
-    componentBuilders[EngineComponents::Camera] = &factoryProxyBuildCamera;
-    componentBuilders[EngineComponents::Light] = &factoryProxyBuildLight;
-    componentBuilders[EngineComponents::Script] = &factoryProxyBuildScript;
-    componentBuilders[EngineComponents::RigidBody] = &factoryProxyBuildRigidBody;
-    componentBuilders[EngineComponents::Actor] = &factoryProxyBuildActor;
-    componentBuilders[EngineComponents::Sound] = &factoryProxyBuildSound;
-    
-    // Destructors
-    componentDestructors[EngineComponents::Transform] = &factoryProxyDestructTransform;
-    componentDestructors[EngineComponents::MeshRenderer] = &factoryProxyDestructMeshRenderer;
-    componentDestructors[EngineComponents::Camera] = &factoryProxyDestructCamera;
-    componentDestructors[EngineComponents::Light] = &factoryProxyDestructLight;
-    componentDestructors[EngineComponents::Script] = &factoryProxyDestructScript;
-    componentDestructors[EngineComponents::RigidBody] = &factoryProxyDestructRigidBody;
-    componentDestructors[EngineComponents::Actor] = &factoryProxyDestructActor;
-    componentDestructors[EngineComponents::Sound] = &factoryProxyDestructSound;
-    
-    // Updaters
-    componentUpdaters.push_back(&factoryProxyUpdateRigidBody);
-    componentUpdaters.push_back(&factoryProxyUpdateMeshRenderer);
-    componentUpdaters.push_back(&factoryProxyUpdateCamera);
-    componentUpdaters.push_back(&factoryProxyUpdateLight);
-    componentUpdaters.push_back(&factoryProxyUpdateSound);
-    
+    RegisterComponent<Transform>   (EngineComponent::Transform,    "Transform",    &buildTransform,    &destructTransform,    &updateTransform,    ComponentUpdateType::PerObject);
+    RegisterComponent<MeshRenderer>(EngineComponent::MeshRenderer, "MeshRenderer", &buildMeshRenderer, &destructMeshRenderer, &updateMeshRenderer, ComponentUpdateType::PerObject);
+    RegisterComponent<Camera>      (EngineComponent::Camera,       "Camera",       &buildCamera,       &destructCamera,       &updateCamera,       ComponentUpdateType::PerObject);
+    RegisterComponent<Light>       (EngineComponent::Light,        "Light",        &buildLight,        &destructLight,        &updateLight,        ComponentUpdateType::PerObject);
+    RegisterComponent<Script>      (EngineComponent::Script,       "Script",       &buildScript,       &destructScript,       nullptr,             ComponentUpdateType::NoUpdate);
+    RegisterComponent<RigidBody>   (EngineComponent::RigidBody,    "RigidBody",    &buildRigidBody,    &destructRigidBody,    &updateRigidBody,    ComponentUpdateType::PerObject);
+    RegisterComponent<Actor>       (EngineComponent::Actor,        "Actor",        &buildActor,        &destructActor,        &updateKinematics,   ComponentUpdateType::PerFrame);
+    RegisterComponent<Sound>       (EngineComponent::Sound,        "Sound",        &buildSound,        &destructSound,        &updateSound,        ComponentUpdateType::PerObject);
     
     // Initiate console
     console.input = UI.CreateTextField();

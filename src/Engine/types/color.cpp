@@ -281,3 +281,17 @@ Color& ColorPreset::Lerp(Color min, Color max, float bias) {
     return mCustom;
 }
 
+Color ColorPreset::Clamp(Color source, float min, float max) {
+    glm::clamp(source.r, min, max);
+    glm::clamp(source.g, min, max);
+    glm::clamp(source.b, min, max);
+    return source;
+}
+
+Color ColorPreset::Clamp(Color source, Color min, Color max) {
+    glm::clamp(source.r, min.r, max.r);
+    glm::clamp(source.g, min.g, max.g);
+    glm::clamp(source.b, min.b, max.b);
+    return source;
+}
+

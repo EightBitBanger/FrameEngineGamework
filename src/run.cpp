@@ -1,7 +1,8 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 #include <GameEngineFramework/functions.h>
 
-#include <GameEngineFramework/plugins.h>
+#include <GameEngineFramework/Plugins/plugins.h>
+
 
 bool isProfilerEnabled = false;
 
@@ -9,7 +10,6 @@ glm::vec3 force(0);
 float forceDblTime=0;
 
 Actor* actorInSights = nullptr;
-
 
 void Run() {
     
