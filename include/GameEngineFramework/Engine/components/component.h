@@ -7,10 +7,7 @@
 
 #include <string>
 
-
-
 class ENGINE_API Component {
-    
 public:
     
     friend class EngineSystemManager;
@@ -26,7 +23,6 @@ public:
     
     Component();
     
-    
 private:
     
     // Set the component type and reference object
@@ -39,6 +35,5 @@ private:
     void* mObject;
     
 };
-
 
 #endif

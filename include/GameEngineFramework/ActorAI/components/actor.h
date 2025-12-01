@@ -50,6 +50,8 @@ public:
     /// reset as they are owned and must be reset by the engine system.
     void Reset(void);
     
+    Actor();
+    
     
     class ENGINE_API NavigationSystem {
         
@@ -87,7 +89,7 @@ public:
         
     private:
         
-        glm::vec3 mVelocity;     // Movement vector
+        glm::vec3 mVelocity;     // Rate of movement
         glm::vec3 mPosition;     // Position of the actor in the world
         glm::vec3 mRotation;     // Direction the actor is currently facing
         glm::vec3 mFacing;       // Direction the head is currently facing
@@ -105,11 +107,7 @@ public:
         // Height is updated on another thread
         std::vector<glm::vec3> mQueryPoints;
         
-        std::mutex mux;
-        
     } navigation;
-    
-    
     
     
     class ENGINE_API Behavior {
@@ -201,11 +199,7 @@ public:
         float mHeightPreferenceMin;     // Minimum world height this actor prefers to inhabit
         float mHeightPreferenceMax;     // Maximum world height this actor prefers to inhabit
         
-        std::mutex mux;
-        
     } behavior;
-    
-    
     
     
     class ENGINE_API State {
@@ -230,13 +224,9 @@ public:
         // List of animation states for each genetic component
         std::vector<glm::vec4> mAnimation;
         
-        std::mutex mux;
-        
         State();
         
     } state;
-    
-    
     
     
     class ENGINE_API IdiosyncraticCharacteristics {
@@ -275,11 +265,7 @@ public:
         // List of memories collected by this entity
         std::unordered_map<std::string, std::string> mMemories;
         
-        std::mutex mux;
-        
     } memories;
-    
-    
     
     
     class ENGINE_API GeneticsSystem {
@@ -336,11 +322,7 @@ public:
         // List of render components representing genetic expression
         std::vector<MeshRenderer*> mGeneticRenderers;
         
-        std::mutex mux;
-        
     } genetics;
-    
-    
     
     
     class ENGINE_API BiologicalSystem {
@@ -369,11 +351,7 @@ public:
         // Biological elements
         std::vector<Bio> mBiologics;
         
-        std::mutex mux;
-        
     } biological;
-    
-    
     
     
     class ENGINE_API PhysicalAttributes {
@@ -461,11 +439,7 @@ public:
         glm::vec3 mColliderScale;    // Collider scale
         rp3d::CollisionBody* mColliderBody;
         
-        std::mutex mux;
-        
     } physical;
-    
-    
     
     
     class ENGINE_API CooldownCounters {
@@ -508,11 +482,7 @@ public:
         unsigned int mAttackCoolDownCounter;      // Attacking time out counter
         unsigned int mBreedingCoolDownCounter;    // Prevents over breeding
         
-        std::mutex mux;
-        
     } counters;
-    
-    
     
     
     class ENGINE_API UserVariables {
@@ -551,12 +521,7 @@ public:
         void* mUserDataA;
         void* mUserDataB;
         
-        std::mutex mux;
-        
     } user;
-    
-    
-    Actor();
     
 private:
     

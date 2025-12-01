@@ -36,7 +36,6 @@ struct ENGINE_API EngineComponent {
 
 
 class ENGINE_API ComponentTypeRegistry {
-    
 public:
     
     /// Get the ID of a given type.
@@ -49,7 +48,7 @@ public:
     }
     
     /// Registry a new type by its associated ID.
-    template<typename T> bool RegisterComponent(int fixed_id) {
+    template<typename T> bool RegisterComponentType(int fixed_id) {
         if (fixed_id < 0) return false;
         const std::type_index key(typeid(T));
         std::lock_guard<std::mutex> lock(mMux);

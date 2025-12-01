@@ -100,11 +100,19 @@ public:
     /// Get a string of text from the clipboard.
     std::string GetClipboardText(void);
     
+    /// Enable vertical refresh synchronization.
+    void EnableVSync(void);
+    /// Disable vertical refresh synchronization.
+    void DisableVSync(void);
+    /// Check if vertical refresh synchronization if enabled.
+    bool IsVSyncEnabled(void) const { return mVSyncEnabled; }
+    
     /// Set the target render context.
     GLenum SetRenderTarget(void);
     
     /// Event callback for window losing focus.
     void(*EventCallbackLoseFocus)(void);
+    void(*EventCallbackResize)(void);
     
     /// Internal event loop calling function.
     void EventLoop(void);
@@ -112,6 +120,8 @@ public:
 private:
     
     bool mIsWindowRunning;
+    
+    bool mVSyncEnabled;
     
 };
 

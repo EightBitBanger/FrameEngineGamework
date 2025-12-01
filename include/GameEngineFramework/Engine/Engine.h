@@ -93,7 +93,6 @@ public:
         extern ActorSystem AI;
         
         if (std::is_same<T, GameObject>::value)    return (T*)CreateGameObject();
-        
         if (std::is_same<T, Mesh>::value)          return (T*)Renderer.CreateMesh();
         if (std::is_same<T, Material>::value)      return (T*)Renderer.CreateMaterial();
         if (std::is_same<T, Shader>::value)        return (T*)Renderer.CreateShader();
@@ -139,7 +138,7 @@ public:
                                                  void(*DestroyFunction)(void*), 
                                                  void(*UpdateFunction)(unsigned int), 
                                                  ComponentUpdateType updateType) {
-        if (!mComponentRegistry.RegisterComponent<T>(type)) 
+        if (!mComponentRegistry.RegisterComponentType<T>(type)) 
             return false;
         
         mComponentNames[type] = name;
@@ -158,7 +157,7 @@ public:
                                                  void(*DestroyFunction)(void*), 
                                                  void(*UpdateFunction)(unsigned int), 
                                                  ComponentUpdateType updateType) {
-        if (!mComponentRegistry.RegisterComponent<T>(type)) 
+        if (!mComponentRegistry.RegisterComponentType<T>(type)) 
             return false;
         
         mComponentNames[type] = name;
@@ -177,8 +176,6 @@ public:
         // Get component type
         ComponentType type = -1;
         type = (ComponentType)mComponentRegistry.GetID<T>();
-        
-        Log.Write("+ Creating component " + mComponentNames[ type ]);
         
         // Component function factory
         void*(*functionPtr)() = mComponentBuilders[type];
@@ -200,8 +197,6 @@ public:
     bool DestroyComponent(Component* componentPtr) {
         ComponentType componentType = componentPtr->GetType();
         void(*destroyer)(void*) = mComponentDestructors[componentType];
-        
-        Log.Write("- Destroy component " + mComponentNames[ componentType ]);
         
         destroyer( componentPtr->GetComponent() );
         return true;
@@ -356,6 +351,5 @@ public:
 #ifndef BUILD_CORE
     extern EngineSystemManager  Engine;
 #endif
-
 
 #endif

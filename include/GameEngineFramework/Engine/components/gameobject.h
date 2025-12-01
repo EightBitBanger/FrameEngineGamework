@@ -8,13 +8,12 @@
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
 #include <GameEngineFramework/Audio/components/sound.h>
 
+#include <GameEngineFramework/Engine/EngineComponents.h>
 #include <GameEngineFramework/Engine/components/component.h>
 
 #include <type_traits>
 
 extern RenderSystem Renderer;
-extern EngineComponent Components;
-
 
 class ENGINE_API GameObject {
     
@@ -48,34 +47,12 @@ public:
     /// Get the number of components attached to the game object.
     unsigned int GetComponentCount(void);
     
-    /// Get a component of a given type.
-    template <class T> T* GetComponent(void) {
-        if (std::is_same<T, Transform>::value)     return (T*)mComponents[EngineComponent::Transform];
-        if (std::is_same<T, Camera>::value)        return (T*)mComponents[EngineComponent::Camera];
-        if (std::is_same<T, Light>::value)         return (T*)mComponents[EngineComponent::Light];
-        if (std::is_same<T, MeshRenderer>::value)  return (T*)mComponents[EngineComponent::MeshRenderer];
-        if (std::is_same<T, RigidBody>::value)     return (T*)mComponents[EngineComponent::RigidBody];
-        if (std::is_same<T, Actor>::value)         return (T*)mComponents[EngineComponent::Actor];
-        if (std::is_same<T, Sound>::value)         return (T*)mComponents[EngineComponent::Sound];
-        
-        /*
-        constexpr short idx = component_index<T>::value;
-        
-        if (idx < 0 || idx >= EngineComponents::NumberOfComponents) 
-            return nullptr;
-        
-        return reinterpret_cast<T*>(mComponents[idx]);
-        // if you store a common base: return static_cast<T*>(mComponents[idx]);
-        */
-        return nullptr;
-    }
-    
     /// Get a script component by name.
     template <class T> T* GetComponent(std::string scriptName) {
         for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
             Component* currentComponentPtr = *it;
             
-            if (currentComponentPtr->GetType() == Components.Script) {
+            if (currentComponentPtr->GetType() == EngineComponent::Script) {
                 T* componentPtr = (T*)currentComponentPtr->GetComponent();
                 
                 if (componentPtr->name == scriptName) {
@@ -86,6 +63,23 @@ public:
         return nullptr;
     }
     
+    /// Get a component of a given type.
+    template <class T> T* GetComponent(void) {
+        ComponentType type = mComponentRegistry->GetID<T>();
+        if (type < 0)
+            return nullptr;
+        // Return built-in component
+        if (type < EngineComponent::NumberOfComponents) 
+            return static_cast<T*>(mComponents[type]);
+        // Check component list
+        for (Component* c : mComponentList) {
+            if (!c) continue;
+            if (c->GetType() == type) {
+                return static_cast<T*>(c->GetComponent());
+            }
+        }
+        return nullptr;
+    }
     
     //
     // Physics
@@ -193,6 +187,8 @@ private:
     // Cached component pointers, to avoid overhead from working with components internally
     void* mComponents[ EngineComponent::NumberOfComponents ];
     
+    // Reference to all the engine components.
+    ComponentTypeRegistry* mComponentRegistry;
 };
 
 #endif
