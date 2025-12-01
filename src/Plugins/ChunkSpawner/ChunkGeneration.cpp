@@ -1,5 +1,10 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
+
+// Snap to a grid
 float Snap1D(float v, float grid, float origin = 0.0f);
+
+// Smoothly damp values outside [minH, maxH]
+float DampenHeightToRange(float v, float minH, float maxH, float softness);
 
 void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chunk* chunk, Biome* biome, float* weightMask, float* totalWeights) {
     unsigned int chunkSZ = chunkSize + 1;
@@ -23,12 +28,12 @@ void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chun
             if (pointHeight > layer.heightBlowoutHeight) 
                 pointHeight *= layer.heightBlowoutMul;
             
-            //if (pointHeight < layer.heightMin) 
-            //    pointHeight = layer.heightMin;
-            //if (pointHeight > layer.heightMax) 
-            //    pointHeight = layer.heightMax;
+            // Smoothly damp toward [heightMin, heightMax] instead of hard clamping.
+            // Tweak softness per taste (e.g. 0.15f–0.35f).
+            const float heightSoftness = 24.0f;
+            pointHeight = DampenHeightToRange(pointHeight, layer.heightMin, layer.heightMax, heightSoftness);
             
-            pointHeight = Snap1D(pointHeight, 1.0f, 0.5f);
+            //pointHeight = Snap1D(pointHeight, 1.0f, 0.5f);
             heightField[j] = pointHeight;
         }
         
@@ -407,3 +412,26 @@ void ChunkManager::AddHeightFieldToMeshReduced(Mesh* mesh,
         
     }
 }
+
+float DampenHeightToRange(float v, float minH, float maxH, float softness) {
+    if (softness <= 0.0f || minH >= maxH) 
+        return glm::clamp(v, minH, maxH);
+    
+    // Below min: asymptotically approach minH - (1/softness)
+    if (v < minH) {
+        float d = minH - v;
+        float factor = 1.0f / (1.0f + d * softness);
+        return minH - d * factor;
+    }
+    
+    // Above max: asymptotically approach maxH + (1/softness)
+    if (v > maxH) {
+        float d = v - maxH;
+        float factor = 1.0f / (1.0f + d * softness);
+        return maxH + d * factor;
+    }
+    
+    // Inside the band, leave it alone.
+    return v;
+}
+

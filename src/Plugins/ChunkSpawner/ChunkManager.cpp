@@ -237,6 +237,23 @@ void ChunkManager::Initiate(void) {
                         continue;
                     }
                     
+                    if (line.find("actor") != std::string::npos) {
+                        line.erase(line.begin(), line.begin()+5);
+                        std::vector<std::string> splitLines = String.Explode(line, ' ');
+                        if (splitLines.size() < 6) 
+                            continue;
+                        DecorationSpecifier decoration;
+                        decoration.name               = splitLines[0];
+                        decoration.density            = String.ToUint(splitLines[1]);
+                        decoration.noise              = String.ToFloat(splitLines[2]);
+                        decoration.threshold          = String.ToFloat(splitLines[3]);
+                        decoration.spawnHeightMinimum = String.ToFloat(splitLines[4]);
+                        decoration.spawnHeightMaximum = String.ToFloat(splitLines[5]);
+                        
+                        biome.decorations.push_back(decoration);
+                        continue;
+                    }
+                    
                 }
                 
                 world.biomes.push_back(biome);

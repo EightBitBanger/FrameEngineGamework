@@ -50,11 +50,8 @@ void MouseButtonRight() {
             
             if (GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, name, hitMaxDistance, hitThreshold)) 
                 Inventory.RemoveItem(Inventory.GetSelectorIndex());
-            
         }
-        
     }
-    
 }
 
 MeshRenderer* targetMeshRenderer = nullptr;
