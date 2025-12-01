@@ -1,0 +1,11 @@
+id 4
+mesh leaf
+
+width 2.0
+height 5.0
+
+colorMin green * 0.1
+colorMax green * 0.1
+
+stackMax 64
+bitmap log_oak

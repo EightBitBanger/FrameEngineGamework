@@ -1,0 +1,11 @@
+id 5
+mesh log
+
+width 0.4
+height 1.0
+
+colorMin brown * 0.2
+colorMax brown * 0.22
+
+stackMax 64
+bitmap log_oak

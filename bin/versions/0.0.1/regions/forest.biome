@@ -1,0 +1,16 @@
+colorHeight 0
+colorBias 0.08
+colorLow  green * 0.07
+colorHigh brown * 0.1
+offsetX 5500
+offsetZ 5500
+noiseWidth  0.001
+noiseHeight 0.001
+
+perlin  10.0  0  1000  0 0  0.04 0.04
+perlin  20.0  0  1000  0 0  0.01 0.01
+perlin  20.0  0  1000  0 0  0.008 0.008
+
+decoration grass      1000  2.2 0.2  -20.0 200.0
+decoration grass_tall 500   2.2 0.24 -20.0 200.0
+decoration oak_tree   1     3.0 0.2 -20.0 200.0

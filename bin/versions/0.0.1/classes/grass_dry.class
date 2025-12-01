@@ -1,0 +1,11 @@
+id 2
+mesh grass
+
+width 0.4
+height 1.5
+
+colorMin green * yellow * 0.1
+colorMax green * yellow * 0.14
+
+stackMax 64
+bitmap grass_tall
