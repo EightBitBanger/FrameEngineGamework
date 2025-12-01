@@ -1,6 +1,5 @@
 #include <GameEngineFramework/Engine/Engine.h>
 
-ENGINE_API EngineComponents     Components;
 ENGINE_API ColorPreset          Colors;
 ENGINE_API NumberGeneration     Random;
 ENGINE_API Logger               Log;

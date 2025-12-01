@@ -1,8 +1,5 @@
 #include <GameEngineFramework/Engine/components/component.h>
 
-extern EngineComponents Components;
-
-
 Component::Component() : 
     name(""),
     mType(0),

@@ -142,22 +142,27 @@ void ActorSystem::HandleBreedWith(Actor* actor, Actor* target) {
         return;
     if (glm::distance(actor->navigation.mPosition, target->navigation.mPosition) > actor->behavior.mDistanceToInflict) 
         return;
+    if (actor->physical.mAge > actor->physical.mAgeSenior) 
+        return;
+    
+    if (mActors.Size() > 8000) 
+        return;
     
     glm::vec3 spawnPoint = Math.Lerp(actor->navigation.mPosition, target->navigation.mPosition, 0.5f);
     
     Actor* offspring = CreateActor();
     offspring->Reset();
+    genomes.BlendGenomes(actor, target, offspring);
     
     std::string homePosition = Float.ToString(spawnPoint.x) + "," +
                                Float.ToString(spawnPoint.y) + "," +
                                Float.ToString(spawnPoint.z);
-    actor->memories.Add("home", homePosition);
+    offspring->memories.Add("home", homePosition);
     
     offspring->navigation.SetPosition(spawnPoint);
     offspring->navigation.SetTargetPoint(spawnPoint);
     
-    offspring->physical.SetAge( Random.Range(20, 80) );
-    genomes.BlendGenomes(actor, target, offspring);
+    offspring->physical.SetAge( Random.Range(10, 50) );
     offspring->RebuildGeneticExpression();
     
     offspring->isActive = true;
@@ -176,6 +181,11 @@ void ActorSystem::HandleBreedWith(Actor* actor, Actor* target) {
 }
 
 void ActorSystem::HandleVitality(Actor* actor) {
+    
+    // Expiration 
+    if (actor->physical.mAge > actor->physical.mAgeSenior) 
+        actor->biological.health -= 100.25f;
+    
     // Check if the target is.. no longer with us
     if (actor->biological.health > 0.0f) 
         return;

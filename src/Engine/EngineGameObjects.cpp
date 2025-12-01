@@ -4,6 +4,7 @@
 
 GameObject* EngineSystemManager::CreateGameObject(void) {
     GameObject* newGameObject = mGameObjects.Create();
+    newGameObject->mComponentRegistry = &mComponentRegistry;
     mGameObjectActive.push_back(newGameObject);
     newGameObject->AddComponent( CreateComponent<Transform>() );
     return newGameObject;
@@ -110,7 +111,7 @@ GameObject* EngineSystemManager::CreateSky(std::string meshTagName, Color colorL
     
     skyObject->renderDistance = -1;
     
-    Transform* transformCache = (Transform*)skyObject->mComponents[EngineComponents::Transform];
+    Transform* transformCache = (Transform*)skyObject->mComponents[EngineComponent::Transform];
     transformCache->SetScale(10000, 2000, 10000);
     
     return skyObject;

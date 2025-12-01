@@ -213,39 +213,32 @@ std::string Actor::GetName(void) {
 // Targeting / navigation and focus
 
 void Actor::NavigationSystem::SetPosition(glm::vec3 position) {
-    std::lock_guard<std::mutex> lock(mux);
     mPosition = position;
     mTargetPoint = position;
 }
 
 glm::vec3 Actor::NavigationSystem::GetPosition(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mPosition;
 }
 
 void Actor::NavigationSystem::SetTargetPoint(glm::vec3 position) {
-    std::lock_guard<std::mutex> lock(mux);
     mTargetPoint = position;
     return;
 }
 
 glm::vec3 Actor::NavigationSystem::GetTargetPoint(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mTargetPoint;
 }
 
 Actor* Actor::NavigationSystem::GetTargetActor(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mTargetActor;
 }
 
 void Actor::NavigationSystem::SetTargetActor(Actor* actorPtr) {
-    std::lock_guard<std::mutex> lock(mux);
     mTargetActor = actorPtr;
 }
 
 float Actor::NavigationSystem::GetDistanceToTarget(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mDistanceToTarget;
 }
 
@@ -254,42 +247,34 @@ float Actor::NavigationSystem::GetDistanceToTarget(void) {
 // AI state behavioral hardwiring
 
 void Actor::Behavior::SetDistanceToFocus(float distance) {
-    std::lock_guard<std::mutex> lock(mux);
     mDistanceToFocus = distance;
 }
 
 float Actor::Behavior::GetDistanceToFocus(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mDistanceToFocus;
 }
 
 void Actor::Behavior::SetDistanceToWalk(float distance) {
-    std::lock_guard<std::mutex> lock(mux);
     mDistanceToWalk = distance;
 }
 
 float Actor::Behavior::GetDistanceToWalk(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mDistanceToWalk;
 }
 
 void Actor::Behavior::SetDistanceToAttack(float distance) {
-    std::lock_guard<std::mutex> lock(mux);
     mDistanceToAttack = distance;
 }
 
 float Actor::Behavior::GetDistanceToAttack(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mDistanceToAttack;
 }
 
 void Actor::Behavior::SetDistanceToFlee(float distance) {
-    std::lock_guard<std::mutex> lock(mux);
     mDistanceToFlee = distance;
 }
 
 float Actor::Behavior::GetDistanceToFlee(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mDistanceToFlee;
 }
 
@@ -326,43 +311,35 @@ unsigned int Actor::Behavior::GetCooldownMove(void) {
 }
 
 void Actor::Behavior::SetHeightPreferenceMin(float height) {
-    std::lock_guard<std::mutex> lock(mux);
     mHeightPreferenceMin = height;
 }
 
 float Actor::Behavior::GetHeightPreferenceMin(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mHeightPreferenceMin;
 }
 
 void Actor::Behavior::SetHeightPreferenceMax(float height) {
-    std::lock_guard<std::mutex> lock(mux);
     mHeightPreferenceMax = height;
 
 }
 
 float Actor::Behavior::GetHeightPreferenceMax(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mHeightPreferenceMax;
 }
 
 void Actor::Behavior::SetPredatorState(bool state) {
-    std::lock_guard<std::mutex> lock(mux);
     mIsPredator = state;
 }
 
 bool Actor::Behavior::GetPredatorState(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mIsPredator;
 }
 
 void Actor::Behavior::SetPreyState(bool state) {
-    std::lock_guard<std::mutex> lock(mux);
     mIsPrey = state;
 }
 
 bool Actor::Behavior::GetPreyState(void) {
-    std::lock_guard<std::mutex> lock(mux);
     return mIsPrey;
 }
 
@@ -371,12 +348,10 @@ bool Actor::Behavior::GetPreyState(void) {
 // Memories
 
 void Actor::IdiosyncraticCharacteristics::Add(std::string name, std::string memory) {
-    std::lock_guard<std::mutex> lock(mux);
     mMemories[name] = memory;
 }
 
 bool Actor::IdiosyncraticCharacteristics::Remove(std::string name) {
-    std::lock_guard<std::mutex> lock(mux);
     mMemories.erase(name);
     return false;
 }
@@ -410,12 +385,10 @@ unsigned int Actor::IdiosyncraticCharacteristics::GetNumberOfMemories(void) {
 }
 
 void Actor::IdiosyncraticCharacteristics::Clear(void) {
-    std::lock_guard<std::mutex> lock(mux);
     mMemories.clear();
 }
 
 bool Actor::IdiosyncraticCharacteristics::CheckExists(std::string name) {
-    std::lock_guard<std::mutex> lock(mux);
     std::unordered_map<std::string, std::string>::iterator it = mMemories.find(name);
     if (it != mMemories.end()) 
         return true;

@@ -13,7 +13,6 @@ extern MathCore Math;
 extern bool isActorThreadActive;
 extern bool doUpdate;
 
-extern int actorCounter;
 extern int tickCounter;
 
 
@@ -27,6 +26,8 @@ void ActorSystem::Update(void) {
 
 
 void ActorSystem::UpdateFast() {
+    std::lock_guard<std::mutex> lock(Renderer.mux);
+    
     unsigned int numberOfActors = mActiveActors.size();
     for (unsigned int i = 0; i < numberOfActors; i++) {
         Actor* actor = mActiveActors[i];
@@ -55,22 +56,8 @@ void ActorSystem::UpdateFast() {
 
 void ActorSystem::UpdateTick() {
     unsigned int numberOfActors = mActors.Size();
-    if (numberOfActors == 0) 
-        return;
-    
     for (unsigned int i = 0; i < numberOfActors; i++) {
-        if (actorCounter >= numberOfActors) {
-            actorCounter = 0;
-            doUpdate = false;
-            break;
-        }
-        
-        Actor* actor = mActors[actorCounter];
-        actorCounter++;
-        
-        // Check garbage actors
-        if (UpdateGarbageCollection(actor)) 
-            continue;
+        Actor* actor = mActors[i];
         
         if (actor->isGarbage || !actor->isActive) 
             continue;
@@ -87,5 +74,15 @@ void ActorSystem::UpdateTick() {
         
         HandleCooldownCounters(actor);
     }
+    
+    // Garbage collection pass
+    for (unsigned int i = 0; i < numberOfActors; i++) {
+        Actor* actor = mActors[i];
+        
+        // Check garbage actors
+        if (UpdateGarbageCollection(actor)) 
+            continue;
+    }
+    
 }
 

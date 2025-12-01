@@ -361,35 +361,78 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
         offspring->physical.SetSexualOrientation(false); // Female
     }
     
+    // Inheritance bias
     offspring->genetics.mGenes.clear();
     for (unsigned int i=0; i < numberOfGenesA; i++) {
         if (Random.Range(0, 100) > 50) 
-        {gradient = 0.0f;} else {gradient = 1.0f;}
+            {gradient = 0.0f;} else {gradient = 1.0f;}
         
-        Gene variant = Lerp(parentA->genetics.mGenes[i], parentB->genetics.mGenes[i], gradient);
-        offspring->genetics.mGenes.push_back(variant);
+        Gene geneticVariant = Lerp(parentA->genetics.mGenes[i], 
+                                   parentB->genetics.mGenes[i], gradient);
+        offspring->genetics.mGenes.push_back(geneticVariant);
     }
     
-    // Process genetic index colors
-    for (unsigned int w=0; w < numberOfGenesA; w++) {
-        for (unsigned int i=0; i < numberOfGenesA; i++) {
-            if (offspring->genetics.mGenes[i].colorIndex == 0) 
-                continue;
+    // Parent-indexed inheritance for color and scale.
+    // - Index 0 = no inheritance
+    // - Index k>0 = inherit from gene (k-1)
+    // - Multiple passes allow chained references to settle
+    // - Invalid/self references are nulled (set to 0) to avoid OOB or no-op loops
+    unsigned int numberOfGenes = offspring->genetics.mGenes.size();
+    for (unsigned int pass = 0; pass < numberOfGenes; ++pass) {
+        bool wasChanged = false;
+        
+        for (unsigned int i = 0; i < numberOfGenes; ++i) {
+            Gene& gene = offspring->genetics.mGenes[i];
             
-            // Color index
-            unsigned int geneParentIndex = offspring->genetics.mGenes[i].colorIndex - 1;
-            offspring->genetics.mGenes[i].color.x = offspring->genetics.mGenes[geneParentIndex].color.x;
-            offspring->genetics.mGenes[i].color.y = offspring->genetics.mGenes[geneParentIndex].color.y;
-            offspring->genetics.mGenes[i].color.z = offspring->genetics.mGenes[geneParentIndex].color.z;
+            // Color
+            if (gene.colorIndex > 0) {
+                unsigned int j = gene.colorIndex - 1; // 1-based -> 0-based
+                if (j < numberOfGenes && j != i) {
+                    Gene& parent = offspring->genetics.mGenes[j];
+                    // Copy parent color
+                    if (gene.color.x != parent.color.x || 
+                        gene.color.y != parent.color.y || 
+                        gene.color.z != parent.color.z) {
+                        gene.color.x = parent.color.x;
+                        gene.color.y = parent.color.y;
+                        gene.color.z = parent.color.z;
+                        wasChanged = true;
+                    }
+                } else {
+                    // Bad reference -> disable inheritance
+                    gene.colorIndex = 0;
+                }
+            }
+            
+            // Scale
+            if (gene.scaleIndex > 0) {
+                unsigned int j = gene.scaleIndex - 1; // 1-based -> 0-based
+                if (j < numberOfGenes && j != i) {
+                    Gene& parent = offspring->genetics.mGenes[j];
+                    // Copy parent scale (genotype scale)
+                    if (gene.scale.x != parent.scale.x || 
+                        gene.scale.y != parent.scale.y || 
+                        gene.scale.z != parent.scale.z) {
+                        gene.scale.x = parent.scale.x;
+                        gene.scale.y = parent.scale.y;
+                        gene.scale.z = parent.scale.z;
+                        wasChanged = true;
+                    }
+                } else {
+                    // Bad reference -> disable inheritance
+                    gene.scaleIndex = 0;
+                }
+            }
         }
+        
+        if (!wasChanged) break; // done early if nothing changed on this pass
     }
+    
     return true;
 }
 
 void GeneticPresets::ClearGenes(Actor* actorPtr) {
-    
     actorPtr->genetics.mGenes.clear();
-    
     return;
 }
 

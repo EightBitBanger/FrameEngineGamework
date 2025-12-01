@@ -342,7 +342,7 @@ void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     
     // Limb FL gene
     Gene geneLimbFrontLeft;
-    geneLimbFrontLeft.offset    = Codon(0.17, 0.75, 0.4);
+    geneLimbFrontLeft.offset    = Codon(0.17, 0.75, 0.425);
     geneLimbFrontLeft.position  = Codon(0, -0.4, 0);
     geneLimbFrontLeft.rotation  = Codon(0, 0, 0);
     geneLimbFrontLeft.scale     = Codon(0.2, 0.65, 0.2);
@@ -355,7 +355,7 @@ void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     
     // Limb FR gene
     Gene geneLimbFrontRight;
-    geneLimbFrontRight.offset    = Codon(-0.17, 0.75, 0.4);
+    geneLimbFrontRight.offset    = Codon(-0.17, 0.75, 0.425);
     geneLimbFrontRight.position  = Codon(0, -0.4, 0);
     geneLimbFrontRight.rotation  = Codon(0, 0, 0);
     geneLimbFrontRight.scale     = Codon(0.2, 0.65, 0.2);
@@ -369,7 +369,7 @@ void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     
     // Limb RL gene
     Gene geneLimbRearLeft;
-    geneLimbRearLeft.offset    = Codon(0.17, 0.75, -0.4);
+    geneLimbRearLeft.offset    = Codon(0.17, 0.75, -0.425);
     geneLimbRearLeft.position  = Codon(0, -0.4, 0);
     geneLimbRearLeft.rotation  = Codon(0, 0, 0);
     geneLimbRearLeft.scale     = Codon(0.2, 0.65, 0.2);
@@ -382,7 +382,7 @@ void GeneticPresets::ActorPresets::Sheep(Actor* targetActor) {
     
     // Limb RR gene
     Gene geneLimbRearRight;
-    geneLimbRearRight.offset    = Codon(-0.17, 0.75, -0.4);
+    geneLimbRearRight.offset    = Codon(-0.17, 0.75, -0.425);
     geneLimbRearRight.position  = Codon(0, -0.4, 0);
     geneLimbRearRight.rotation  = Codon(0, 0, 0);
     geneLimbRearRight.scale     = Codon(0.2, 0.65, 0.2);
@@ -1041,23 +1041,30 @@ void GeneticPresets::ActorPresets::Horse(Actor* targetActor) {
     Color limbRRColor = Colors.gray;
     Color limbRLColor = Colors.gray;
     
-    if (Random.Range(0, 100) > 30) limbFRColor *= Colors.brown;
-    if (Random.Range(0, 100) > 30) limbFLColor *= Colors.brown;
-    if (Random.Range(0, 100) > 30) limbRRColor *= Colors.brown;
-    if (Random.Range(0, 100) > 30) limbRLColor *= Colors.brown;
+    if (Random.Range(0, 100) > 60) {
+        limbFRColor *= Colors.brown;
+        limbFLColor *= Colors.brown;
+        limbRRColor *= Colors.brown;
+        limbRLColor *= Colors.brown;
+    }
     
-    limbFRColor *= Colors.MakeRandomGrayScale();
-    limbFLColor *= Colors.MakeRandomGrayScale();
-    limbRRColor *= Colors.MakeRandomGrayScale();
-    limbRLColor *= Colors.MakeRandomGrayScale();
+    Color grayScale = Colors.MakeRandomGrayScale();
+    limbFRColor *= grayScale;
+    limbFLColor *= grayScale;
+    limbRRColor *= grayScale;
+    limbRLColor *= grayScale;
     
     if (Random.Range(0, 100) > 95) {
-        limbFRColor = Colors.black; limbFLColor = Colors.black;
-        limbRRColor = Colors.black; limbRLColor = Colors.black;
+        limbFRColor = Colors.black;
+        limbFLColor = Colors.black;
+        limbRRColor = Colors.black;
+        limbRLColor = Colors.black;
     }
     if (Random.Range(0, 100) > 95) {
-        limbFRColor = Colors.white; limbFLColor = Colors.white;
-        limbRRColor = Colors.white; limbRLColor = Colors.white;
+        limbFRColor = Colors.white;
+        limbFLColor = Colors.white;
+        limbRRColor = Colors.white;
+        limbRLColor = Colors.white;
     }
     
     // Body

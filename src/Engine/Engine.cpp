@@ -52,7 +52,7 @@ void updateKinematics(unsigned int index) {Engine.UpdateKinematics(index);}
 
 
 void EngineSystemManager::Initiate() {
-    mStreamBuffer.resize(1024);
+    mStreamBuffer.resize(1024 * 32);
     
     // Component types
     RegisterComponent<Transform>   (EngineComponent::Transform,    "Transform",    &buildTransform,    &destructTransform,    &updateTransform,    ComponentUpdateType::PerObject);
@@ -435,4 +435,3 @@ void EngineSystemManager::UpdatePhysicsDebugRenderer(void) {
     
     return;
 }
-

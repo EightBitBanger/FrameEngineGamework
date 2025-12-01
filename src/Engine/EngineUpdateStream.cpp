@@ -3,90 +3,85 @@
 
 
 void EngineSystemManager::UpdateComponentStream(void) {
-    std::lock_guard<std::mutex> lock(mux);
-    
     unsigned int numberOfGameObjects = mGameObjects.Size();
-    if (numberOfGameObjects == 0) 
-        return;
+    if (numberOfGameObjects == 0) return;
     
+    mDataStreamIndex = 0;
     std::vector<GameObject*> garbageObjects;
     
-    unsigned int objectsPerTick = glm::max((unsigned int)1, numberOfGameObjects / 8);
     for (unsigned int i = 0; i < numberOfGameObjects; i++) {
-        mObjectIndex = (mObjectIndex + 1) % numberOfGameObjects;
+        mObjectIndex = i;
         GameObject* gameObject = mGameObjects[mObjectIndex];
         
-        // Check game object render distance
+        // Guard transform before use
         bool doUpdate = true;
-        Transform* transformCache = (Transform*)gameObject->mComponents[EngineComponents::Transform];
-        if (sceneMain != nullptr) 
-            if (sceneMain->camera != nullptr) 
-                if (gameObject->renderDistance > 0) 
-                    if (glm::distance(transformCache->position, sceneMain->camera->transform.position) > gameObject->renderDistance) 
-                        doUpdate = false;
-        
-        // Update the active state of associated components
-        MeshRenderer*    meshRendererCache = (MeshRenderer*)gameObject->mComponents[EngineComponents::MeshRenderer];
-        Light*           lightCache        = (Light*)gameObject->mComponents[EngineComponents::Light];
-        rp3d::RigidBody* rigidBodyCache    = (rp3d::RigidBody*)gameObject->mComponents[EngineComponents::RigidBody];
-        
-        bool activeState = gameObject->isActive && doUpdate;
-        if (meshRendererCache != nullptr)  meshRendererCache->isActive = activeState;
-        if (lightCache != nullptr)         lightCache->isActive = activeState;
-        if (rigidBodyCache != nullptr)     rigidBodyCache->setIsActive(activeState);
-        
-        // Check last object
-        if (mObjectIndex == numberOfGameObjects - 1) {
-            mStreamSize = mDataStreamIndex;
-            mDataStreamIndex = 0;
+        Transform* transformCache = (Transform*)gameObject->mComponents[EngineComponent::Transform];
+        if (sceneMain && sceneMain->camera && gameObject->renderDistance > 0 && transformCache) {
+            if (glm::distance(transformCache->position, sceneMain->camera->transform.position) > gameObject->renderDistance) {
+                doUpdate = false;
+            }
         }
         
-        // Check garbage collection
-        if (gameObject->isGarbage) 
-            garbageObjects.push_back(gameObject);
+        MeshRenderer*    meshRendererCache = (MeshRenderer*)gameObject->mComponents[EngineComponent::MeshRenderer];
+        Light*           lightCache        = (Light*)gameObject->mComponents[EngineComponent::Light];
+        rp3d::RigidBody* rigidBodyCache    = (rp3d::RigidBody*)gameObject->mComponents[EngineComponent::RigidBody];
         
-        if (!gameObject->isActive || !doUpdate) 
-            continue;
+        bool activeState = gameObject->isActive && doUpdate;
+        if (meshRendererCache)  meshRendererCache->isActive = activeState;
+        if (lightCache)         lightCache->isActive = activeState;
+        if (rigidBodyCache)     rigidBodyCache->setIsActive(activeState);
+        
+        if (gameObject->isGarbage) garbageObjects.push_back(gameObject);
+        if (!gameObject->isActive || !doUpdate) continue;
+        
+        // Grow the stream buffer
+        if (mDataStreamIndex >= mStreamBuffer.size()) 
+            mStreamBuffer.emplace_back();
         
         // Set buffer stream object and components
-        mStreamBuffer[mDataStreamIndex].gameObject = gameObject;
-        for (unsigned int i=0; i < EngineComponents::NumberOfComponents; i++) 
-            if (gameObject->mComponents[i] != nullptr) 
-                mStreamBuffer[mDataStreamIndex].components[i] = gameObject->mComponents[i];
+        auto& slot = mStreamBuffer[mDataStreamIndex];
         
-        // Extend the stream buffer if needed
+        // Clear old pointers
+        slot.gameObject = nullptr;
+        for (unsigned int c = 0; c < EngineComponent::NumberOfComponents; ++c) {
+            slot.components[c] = nullptr;
+        }
+        
+        slot.gameObject = gameObject;
+        for (unsigned int c = 0; c < EngineComponent::NumberOfComponents; ++c) {
+            if (gameObject->mComponents[c]) slot.components[c] = gameObject->mComponents[c];
+        }
+        
         mDataStreamIndex++;
-        if (mStreamBuffer.capacity() <= mDataStreamIndex) 
-            mStreamBuffer.reserve(mStreamBuffer.capacity() * 2);
         
-        mStreamSize = std::max(mStreamSize, mDataStreamIndex);
+        // Preallocate some space
+        if (mStreamBuffer.capacity() <= mDataStreamIndex) {
+            size_t newCap = mStreamBuffer.capacity() ? mStreamBuffer.capacity() * 2 : 64;
+            mStreamBuffer.reserve(newCap);
+        }
     }
+    
+    // Finalize stream size for this tick
+    mStreamSize = mDataStreamIndex;
     
     // Destroy garbage objects
     unsigned int numberOfObjectsOnDeathRow = garbageObjects.size();
     for (unsigned int i=0; i < numberOfObjectsOnDeathRow; i++) {
         GameObject* gameObject = garbageObjects[i];
         
-        // Remove the game object from the active list
         for (std::vector<GameObject*>::iterator it = mGameObjectActive.begin(); it != mGameObjectActive.end(); ++it) {
-            if (gameObject != *it) 
-                continue;
-            
-            mGameObjectActive.erase(it);
-            break;
+            if (gameObject == *it) { mGameObjectActive.erase(it); break; }
         }
         
         gameObject->Deactivate();
         
         unsigned int numberOfComponents = gameObject->GetComponentCount();
-        for (unsigned int i=0; i < numberOfComponents; i++) {
-            Component* componentPtr = gameObject->GetComponentIndex(i);
-            DestroyComponent( componentPtr );
-            mComponents.Destroy( componentPtr );
+        for (unsigned int j=0; j < numberOfComponents; j++) {
+            Component* componentPtr = gameObject->GetComponentIndex(j);
+            DestroyComponent(componentPtr);
+            mComponents.Destroy(componentPtr);
         }
         
         mGameObjects.Destroy(gameObject);
     }
-    
 }
-

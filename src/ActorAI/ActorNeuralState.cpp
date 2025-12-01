@@ -15,6 +15,7 @@ void ActorSystem::UpdateActorState(Actor* actor) {
     
     if (actor->navigation.mTargetActor == nullptr) 
         return;
+    
     float distanceToProximityTarget = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition);
     actor->navigation.mDistanceToTarget = distanceToProximityTarget;
     
@@ -128,25 +129,24 @@ bool ActorSystem::HandleBreedingState(Actor* actor, Actor* target, float distanc
     if (!actor->isActive || !target->isActive) 
         return false;
     
-    if (mActors.Size() > 500) 
+    if (actor->counters.mBreedingCoolDownCounter > 0 || 
+        target->counters.mBreedingCoolDownCounter > 0) 
         return false;
     
-    if (actor->counters.mBreedingCoolDownCounter > 0 || target->counters.mBreedingCoolDownCounter > 0) 
-        return false;
-    
-    if (actor->physical.mAge < actor->physical.mAgeAdult) return false;
-    
-    if (actor->state.current == ActorState::State::Breed) 
+    if (actor->physical.mAge < actor->physical.mAgeAdult || 
+        actor->physical.mAge > actor->physical.mAgeSenior) 
         return false;
     
     if (actor->navigation.mPosition.y > actor->behavior.mHeightPreferenceMax || 
         actor->navigation.mPosition.y < actor->behavior.mHeightPreferenceMin) 
-        return false;
+        if (Random.Range(0, 100) > 20) 
+            return false;
     
     if (distance > actor->behavior.GetDistanceToAttack()) {
         actor->state.current = ActorState::State::None;
         return false;
     }
+    
     if (actor->physical.GetSexualOrientation() == target->physical.GetSexualOrientation()) 
         return false;
     

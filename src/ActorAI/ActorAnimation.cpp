@@ -7,7 +7,6 @@
 
 void ActorSystem::UpdateAnimationState(Actor* actor) {
     for (unsigned int a = 0; a < actor->genetics.mGeneticRenderers.size(); a++) {
-        // Update the renderers position
         MeshRenderer* geneRenderer = actor->genetics.mGeneticRenderers[a];
         
         //  Skip genes that should not express

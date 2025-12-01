@@ -51,8 +51,10 @@ PlatformLayer::PlatformLayer() :
     isFullscreen(false),
     
     EventCallbackLoseFocus(nullfunc),
+    EventCallbackResize(nullfunc),
     
-    mIsWindowRunning(false)
+    mIsWindowRunning(false),
+    mVSyncEnabled(false)
 {
 }
 
@@ -441,12 +443,7 @@ GLenum PlatformLayer::SetRenderTarget(void) {
     renderContext = wglCreateContext((HDC)deviceContext);
     
     wglMakeCurrent((HDC)deviceContext, (HGLRC)renderContext);
-    
-    // Enable VSYNC
-    //typedef BOOL (APIENTRY * PFNWGLSWAPINTERVALEXTPROC)(int interval);
-    //PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = NULL;
-    //wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
-    //wglSwapIntervalEXT(1);
+    if (mVSyncEnabled) EnableVSync(); else DisableVSync();
     
 #endif
     
@@ -460,6 +457,7 @@ GLenum PlatformLayer::SetRenderTarget(void) {
         return -1;
     }
     SDL_GL_MakeCurrent((SDL_Window*)windowHandle, (SDL_GLContext)deviceContext);
+    if (mVSyncEnabled) SDL_GL_SetSwapInterval(1); else SDL_GL_SetSwapInterval(0);
     
 #endif
     
@@ -509,5 +507,43 @@ GLenum PlatformLayer::SetRenderTarget(void) {
 
 void PlatformLayer::EventLoop(void) {
     
+}
+
+void PlatformLayer::EnableVSync(void) {
+#ifdef PLATFORM_WINDOWS
+    // WGL_EXT_swap_control
+    typedef BOOL (APIENTRY * PFNWGLSWAPINTERVALEXTPROC)(int);
+    PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT =
+        (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+    if (wglSwapIntervalEXT) {
+        wglSwapIntervalEXT(1); // enable vsync
+        mVSyncEnabled = true;
+    }
+#endif
+#ifdef PLATFORM_LINUX
+    // SDL3: still SDL_GL_SetSwapInterval
+    if (deviceContext) {
+        SDL_GL_SetSwapInterval(1);
+        mVSyncEnabled = true;
+    }
+#endif
+}
+
+void PlatformLayer::DisableVSync(void) {
+#ifdef PLATFORM_WINDOWS
+    typedef BOOL (APIENTRY * PFNWGLSWAPINTERVALEXTPROC)(int);
+    PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT =
+        (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
+    if (wglSwapIntervalEXT) {
+        wglSwapIntervalEXT(0); // disable vsync
+        mVSyncEnabled = false;
+    }
+#endif
+#ifdef PLATFORM_LINUX
+    if (deviceContext) {
+        SDL_GL_SetSwapInterval(0);
+        mVSyncEnabled = false;
+    }
+#endif
 }
 

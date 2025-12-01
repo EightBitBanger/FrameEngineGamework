@@ -1,7 +1,7 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateTransforms(unsigned int index) {
-    Transform* current = (Transform*)mStreamBuffer[index].components[EngineComponents::Transform];
+    Transform* current = (Transform*)mStreamBuffer[index].components[EngineComponent::Transform];
     Transform* parent = current->parent;
     
     glm::vec3 currentPosition = current->position;

@@ -1,10 +1,10 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 void EngineSystemManager::UpdateCamera(unsigned int index) {
-    if (mStreamBuffer[index].components[EngineComponents::Camera] == nullptr) 
+    if (mStreamBuffer[index].components[EngineComponent::Camera] == nullptr) 
         return;
     
-    Camera* cam = (Camera*)mStreamBuffer[index].components[EngineComponents::Camera];
+    Camera* cam = (Camera*)mStreamBuffer[index].components[EngineComponent::Camera];
     
     if (cam->useMouseLook) {
         double mouseDiffX = Input.mouseX - Renderer.displayCenter.x;
@@ -31,6 +31,6 @@ void EngineSystemManager::UpdateCamera(unsigned int index) {
     
     cam->transform.rotation = glm::vec3(cam->pitch, cam->yaw, 0.0f);
     
-    cam->transform.position = ((Transform*)mStreamBuffer[index].components[EngineComponents::Transform])->position;
+    cam->transform.position = ((Transform*)mStreamBuffer[index].components[EngineComponent::Transform])->position;
 }
 

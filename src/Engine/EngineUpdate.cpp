@@ -44,6 +44,9 @@ void EngineSystemManager::Update(void) {
         
     }
     
+    std::lock_guard<std::mutex> lock(mux);
+    std::lock_guard<std::mutex> renderLock(Renderer.mux);
+    
     // Update component stream buffer
     UpdateComponentStream();
     
@@ -59,16 +62,3 @@ void EngineSystemManager::Update(void) {
     }
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

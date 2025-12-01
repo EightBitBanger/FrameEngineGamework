@@ -96,7 +96,7 @@ glm::vec3 ActorSystem::CalculateForwardVelocity(Actor* actor) {
     glm::vec3 forward(0);
     forward.x = cos( glm::radians( -(actor->navigation.mRotation.y - 90.0f) ) );
     forward.z = sin( glm::radians( -(actor->navigation.mRotation.y - 90.0f) ) );
-    // TODO: Should actors fly???
+    // TODO should actors fly???
     //forward.y = tan( glm::radians( -(actor->mRotation.x - 90) ) );
     return forward;
 }

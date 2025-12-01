@@ -7,11 +7,9 @@
 
 void EngineSystemManager::UpdateKinematics(unsigned int index) {
     unsigned int numberOfActors = AI.GetNumberOfActors();
+    
     for (unsigned int i=0; i < numberOfActors; i++) {
         Actor* actor = AI.GetActor(i);
-        
-        if (!actor->navigation.mux.try_lock()) 
-            continue;
         
         if (actor->physical.mColliderBody != nullptr && actor->isGarbage) {
             if (actor->physical.mColliderBody != nullptr) 
@@ -83,8 +81,6 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
         actor->navigation.mRotation = actorRotation;
         actor->navigation.mVelocity = actorVelocity;
         actor->navigation.mTargetPoint = actorTarget;
-        
-        actor->navigation.mux.unlock();
     }
 }
 

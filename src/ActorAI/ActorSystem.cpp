@@ -1,3 +1,5 @@
+#include <GameEngineFramework/Engine/Engine.h>
+
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Math/Random.h>
@@ -12,7 +14,6 @@ bool isActorThreadActive = true;
 bool doUpdate = false;
 void actorThreadMain(void);
 
-int actorCounter=0;
 int tickCounter=0;
 
 
@@ -128,7 +129,7 @@ bool ActorSystem::UpdateGarbageCollection(Actor* actor) {
     if (!actor->isGarbage) 
         return false;
     actor->isGarbage = false;
-    
+    std::lock_guard<std::mutex> lock(Renderer.mux);
     ClearOldGeneticRenderers(actor);
     
     actor->navigation.mVelocity = glm::vec3(0);
@@ -155,7 +156,7 @@ bool ActorSystem::UpdateGarbageCollection(Actor* actor) {
 void actorThreadMain() {
     
     while (isActorThreadActive) {
-        std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
+        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
         if (!doUpdate) 
             continue;
         

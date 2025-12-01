@@ -112,21 +112,19 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
                 continue;
             }
             
+            Platform.EventCallbackResize();
             break;
         }
         
         case WM_GETMINMAXINFO: { // Minimum window size
-            
             LPMINMAXINFO lpMMI = (LPMINMAXINFO)lParam;
             lpMMI -> ptMinTrackSize.x = WINDOW_WIDTH_MIN;
             lpMMI -> ptMinTrackSize.y = WINDOW_HEIGHT_MIN;
-            
             break;
         }
         
         
         case WM_MOVE: {
-            
             RECT windowDim;
             GetWindowRect(wHnd, &windowDim);
             
@@ -150,23 +148,17 @@ LRESULT CALLBACK WindowProc(HWND wHnd, UINT Messages, WPARAM wParam, LPARAM lPar
             Platform.windowArea.y = windowDim.top + verticalMargin - 2.0f;
             Platform.windowArea.w = clientRect.right - clientRect.left;
             Platform.windowArea.h = windowDim.bottom - windowDim.top;
-            
             break;
         }
         
         case WM_KILLFOCUS: 
-            
             Platform.EventCallbackLoseFocus();
-            
             break;
         
         case WM_CLOSE: // Window (X) close button
-            
             Platform.isActive = false;
             PostQuitMessage(0);
-            
             break;
-        
         
         default: 
             return DefWindowProc (wHnd, Messages, wParam, lParam);

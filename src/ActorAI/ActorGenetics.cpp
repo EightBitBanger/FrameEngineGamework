@@ -9,8 +9,6 @@ void ActorSystem::UpdateActorGenetics(Actor* actor) {
         return;
     actor->genetics.mDoUpdateGenetics = false;
     
-    std::lock_guard<std::mutex> lock(Renderer.mux);
-    
     ClearOldGeneticRenderers(actor);
     
     unsigned int numberOfGenes = actor->genetics.mGenes.size();
@@ -84,8 +82,6 @@ void ActorSystem::ClearOldGeneticRenderers(Actor* actor) {
 void ActorSystem::ExpressActorGenetics(Actor* actor) {
     if (!actor->genetics.mDoReexpressGenetics)
         return;
-    if (!actor->genetics.mux.try_lock()) 
-        return;
     
     actor->genetics.mDoReexpressGenetics = false;
     
@@ -97,7 +93,6 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
     if (numberOfRenderers != numberOfGenes) {
         actor->genetics.mDoUpdateGenetics = true;
         actor->genetics.mDoReexpressGenetics = true;
-        actor->genetics.mux.unlock();
         return;
     }
     
@@ -187,7 +182,6 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
         
         continue;
     }
-    actor->genetics.mux.unlock();
     return;
 }
 
