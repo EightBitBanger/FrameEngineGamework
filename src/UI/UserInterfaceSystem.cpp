@@ -31,9 +31,7 @@
 extern PlatformLayer Platform;
 
 
-UserInterfaceSystem::UserInterfaceSystem() 
-{
-}
+UserInterfaceSystem::UserInterfaceSystem() {}
 
 
 void UserInterfaceSystem::Initiate(void* windowHandle, void* deviceCntext) {
@@ -91,9 +89,8 @@ void UserInterfaceSystem::Render(void) {
     ImGui::NewFrame();
     
     UpdatePanelElements();
-    
+    UpdateSpriteElements();
     UpdateTextFieldElements();
-    
     UpdateTextElements();
     
     ImGui::Render();
@@ -225,19 +222,18 @@ void UserInterfaceSystem::UpdateTextFieldElements(void) {
 }
 
 void UserInterfaceSystem::UpdatePanelElements(void) {
-    
     for (unsigned int i=0; i < mPanelElements.Size(); i++) {
         Panel* panel = mPanelElements[i];
-        if (!panel->isActive)
+        if (!panel->isActive) 
             continue;
         
         ImVec2 pos(panel->x, panel->y);
         ImVec2 sz(panel->w, panel->h);
-        ImGui::SetNextWindowBgAlpha(0.3f);
+        ImGui::SetNextWindowBgAlpha(panel->alpha);
         ImGui::SetNextWindowPos(pos, ImGuiCond_Always);
         ImGui::SetNextWindowSize(sz, ImGuiCond_Always);
         
-        ImGui::Begin("OverlayPanel", nullptr, 
+        ImGui::Begin(panel->name.c_str(), nullptr, 
         ImGuiWindowFlags_NoTitleBar | 
         ImGuiWindowFlags_NoResize | 
         ImGuiWindowFlags_NoMove | 
@@ -254,6 +250,29 @@ void UserInterfaceSystem::UpdatePanelElements(void) {
     }
     
     return;
+}
+
+void UserInterfaceSystem::UpdateSpriteElements() {
+    for (unsigned int i = 0; i < mSpriteElements.Size(); i++) {
+        Sprite* sprite = mSpriteElements[i];
+        if (!sprite->isActive || sprite->texture == nullptr) 
+            continue;
+        
+        ImVec2 p0((float)sprite->x, (float)sprite->y);
+        ImVec2 p1((float)(sprite->x + sprite->w),(float)(sprite->y + sprite->h));
+        ImVec2 uv0(sprite->u0, sprite->v0);
+        ImVec2 uv1(sprite->u1, sprite->v1);
+        
+        ImU32 tintCol = IM_COL32(
+            (int)(sprite->tint.r * 255),
+            (int)(sprite->tint.g * 255),
+            (int)(sprite->tint.b * 255),
+            (int)(sprite->tint.a * 255)
+        );
+        
+        ImTextureID handle = (ImTextureID)sprite->texture->GetHandle();
+        ImGui::GetBackgroundDrawList()->AddImage(handle, p0, p1, uv0, uv1, tintCol);
+    }
 }
 
 Text* UserInterfaceSystem::CreateText(void) {
@@ -278,4 +297,12 @@ Panel* UserInterfaceSystem::CreatePanel(void) {
 
 bool UserInterfaceSystem::DestroyPanel(Panel* panelPtr) {
     return mPanelElements.Destroy(panelPtr);
+}
+
+Sprite* UserInterfaceSystem::CreateSprite(void) {
+    return mSpriteElements.Create();
+}
+
+bool UserInterfaceSystem::DestroySprite(Sprite* spritePtr) {
+    return mSpriteElements.Destroy(spritePtr);
 }

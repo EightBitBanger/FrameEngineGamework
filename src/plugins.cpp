@@ -1,16 +1,16 @@
-#include <GameEngineFramework/Engine/EngineSystems.h>
-#include <GameEngineFramework/functions.h>
-
 #include <GameEngineFramework/Plugins/plugins.h>
 
-#include <glm/gtx/euler_angles.hpp>
-
-                                                                                                    
 enum class PluginComponent {
     Particle
 };
 
+void* buildParticle() {return (void*)Particle.CreateEmitter();}
+void destructParticle(void* ptr) {Particle.DestroyEmitter((Emitter*)ptr);}
+void updateParticle(unsigned int index) {Particle.Update();}
+
 void RegisterPlugins(void) {
-    //RegisterPlugin<Transform>(EngineComponents::, "Transform", &buildTransform, &destructTransform, &updateTransform, ComponentUpdateType::PerObject);
+    
+    Engine.RegisterPlugin<Emitter>((unsigned int)PluginComponent::Particle, "Particle", &buildParticle, &destructParticle, &updateParticle, ComponentUpdateType::PerObject);
+    
 }
 

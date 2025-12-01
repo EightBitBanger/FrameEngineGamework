@@ -3,7 +3,6 @@
 
 #include <GameEngineFramework/Plugins/plugins.h>
 
-
 bool isProfilerEnabled = false;
 
 glm::vec3 force(0);
@@ -11,12 +10,63 @@ float forceDblTime=0;
 
 Actor* actorInSights = nullptr;
 
+const float hitMaxDistance        = 4.5f;
+const float hitThreshold          = 0.97f;
+const float clickRepeatTimeout    = 250.0f;
+
+float clickCooldownLeft  = 0.0;
+float clickCooldownRight = 0.0;
+bool isLeftClickHold     = false;
+bool isRightClickHold    = false;
+
+bool CheckCooldown(float nowMs, float& nextAllowedMs, float cooldownMs) {
+    if (nowMs < nextAllowedMs) return false;
+    nextAllowedMs = nowMs + cooldownMs;
+    return true;
+}
+
+void MouseButtonLeft() {
+    if (CheckCooldown(Time.Current(), clickCooldownLeft, clickRepeatTimeout)) {
+        
+        DecorationHitInfo info = GameWorld.QueryDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, hitMaxDistance, hitThreshold);
+        if (info.didHit) {
+            
+            if (GameWorld.RemoveDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, hitMaxDistance, hitThreshold)) {
+                
+                Inventory.AddItem(info.type);
+            }
+            
+        }
+        
+    }
+    
+}
+
+void MouseButtonRight() {
+    if (CheckCooldown(Time.Current(), clickCooldownRight, clickRepeatTimeout)) {
+        
+        if (!Inventory.CheckSlotEmpty(Inventory.GetSelectorIndex())) {
+            std::string name = Inventory.QueryItem(Inventory.GetSelectorIndex());
+            
+            if (GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, name, hitMaxDistance, hitThreshold)) 
+                Inventory.RemoveItem(Inventory.GetSelectorIndex());
+            
+        }
+        
+    }
+    
+}
+
+MeshRenderer* targetMeshRenderer = nullptr;
+
+
 void Run() {
     
     // Update plug-in systems
     Weather.Update();
     Particle.Update();
     GameWorld.Update();
+    Inventory.Update();
     
     if (Engine.cameraController == nullptr) 
         return;
@@ -24,47 +74,119 @@ void Run() {
     Camera* cameraPtr = Engine.cameraController->GetComponent<Camera>();
     if (cameraPtr == nullptr) 
         return;
+    
     glm::vec3 forward = cameraPtr->forward;
     glm::vec3 from = cameraPtr->transform.position;
     
-    
-    // Place static object
+    // Left click cooldown
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
-        
-        GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, DecorationType::Tree, "birch");
-        //GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, DecorationType::Tree, "willow");
-        //GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, DecorationType::Tree, "spruce");
-        //GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, DecorationType::Tree, "oak");
-        
+        isLeftClickHold = true;
     }
     
-    // Remove static object
+    if (isLeftClickHold) {
+        MouseButtonLeft();
+    }
+    
+    if (Input.CheckMouseLeftReleased()) {
+        Input.SetMouseLeftReleased(false);
+        isLeftClickHold = false;
+        
+        clickCooldownLeft = Time.Current();
+    }
+    
+    // Right click cooldown
     if (Input.CheckMouseRightPressed()) {
         Input.SetMouseRightPressed(false);
+        isRightClickHold = true;
+    }
+    
+    if (isRightClickHold) {
+        MouseButtonRight();
+    }
+    
+    if (Input.CheckMouseRightReleased()) {
+        Input.SetMouseRightReleased(false);
+        isRightClickHold = false;
         
-        GameWorld.RemoveDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward);
+        clickCooldownRight = Time.Current();
+    }
+    
+    // Scroll inventory items
+    if (Input.mouseWheelDelta < 0.0f) 
+        Inventory.NextSlot();
+    if (Input.mouseWheelDelta > 0.0f) 
+        Inventory.PrevSlot();
+    
+    
+    DecorationHitInfo info = GameWorld.QueryDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, hitMaxDistance, hitThreshold);
+    
+    if (info.didHit) {
+        
+        Engine.console.WriteDialog(0, info.type);
+        
+        // Initiate the mesh outline shadow effect
+        if (!targetMeshRenderer) {
+            targetMeshRenderer = Engine.Create<MeshRenderer>();
+            targetMeshRenderer->mesh = Engine.Create<Mesh>();
+            targetMeshRenderer->material = Engine.Create<Material>();
+            
+            targetMeshRenderer->mesh->isShared = false;
+            targetMeshRenderer->mesh->SetPrimitive(MESH_LINE_LOOP);
+            targetMeshRenderer->material->isShared = false;
+            targetMeshRenderer->material->shader = Engine.shaders.colorUnlit;
+            
+            targetMeshRenderer->material->ambient = Colors.black;
+            
+            Engine.sceneMain->AddMeshRendererToSceneRoot(targetMeshRenderer);
+        }
+        
+        // Generate mesh outline shadow effect
+        SubMesh& subMesh = GameWorld.mStaticMeshes[info.mesh];
+        targetMeshRenderer->mesh->ClearSubMeshes();
+        targetMeshRenderer->mesh->AddSubMesh(0.0f, 0.0f, 0.0f, subMesh, true);
+        targetMeshRenderer->mesh->Load();
+        
+        glm::vec3 position = info.worldPosition;
+        glm::vec3 scale    = info.scale * 1.009f;
+        glm::vec3 rotation = info.rotation;
+        
+        targetMeshRenderer->transform.SetPosition(position);
+        targetMeshRenderer->transform.SetOrientation(rotation * 3.14159f / 180.0f);
+        
+        targetMeshRenderer->transform.SetScale(scale);
+        targetMeshRenderer->transform.UpdateMatrix();
+        targetMeshRenderer->isActive = true;
+        
+    } else {
+        Engine.console.WriteDialog(0, "");
+        if (targetMeshRenderer) 
+            targetMeshRenderer->isActive = false;
     }
     
     
     
-    // Spawn actors
     if (Input.CheckMouseMiddlePressed()) {
         //Input.SetMouseMiddlePressed(false);
         float randAmount = 8.0f;
         float xx = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         float zz = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         
-        
         Hit hit;
         if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
-            AI.genomes.presets.Spider(actor);
-            actor->physical.SetAge( Random.Range(actor->physical.GetAdultAge() / 2.0f, actor->physical.GetSeniorAge()) );
+            
+            //AI.genomes.presets.Spider(actor);
+            AI.genomes.presets.Human(actor);
+            
+            actor->physical.SetAge( actor->physical.GetAdultAge() );
+            actor->physical.UpdatePhysicalCollider();
+            
             actor->RebuildGeneticExpression();
             actor->isActive = true;
-            actor->physical.UpdatePhysicalCollider();
+            
         }
+        
         
         /*
         
@@ -182,21 +304,6 @@ void Run() {
         Engine.console.WriteDialog(20, "Actors          " + Int.ToString(AI.GetNumberOfActors()) );
         Engine.console.WriteDialog(21, "Colliders       " + Int.ToString(Engine.mBoxCollider.size()) );
         
-    } else {
-        DecorationHitInfo hit = GameWorld.QueryDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, 8.0f);
-        if (hit.didHit) {
-            std::string type;
-            switch (hit.type) {
-                case DecorationMesh::WallHorizontal: type = "horizontal"; break;
-                case DecorationMesh::WallVerticle: type = "verticle"; break;
-                case DecorationMesh::Cross: type = "cross"; break;
-                case DecorationMesh::Log: type = "log"; break;
-            }
-            
-            Engine.console.WriteDialog(3, type);
-        } else {
-            Engine.console.WriteDialog(3, "");
-        }
     }
     
     
