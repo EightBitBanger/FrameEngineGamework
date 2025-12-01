@@ -1,9 +1,16 @@
 #ifndef USER_INTERFACE_SYSTEM
 #define USER_INTERFACE_SYSTEM
 
+#include <GameEngineFramework/MemoryAllocation/poolallocator.h>
+
 #include <GameEngineFramework/UI/components/text.h>
 #include <GameEngineFramework/UI/components/textField.h>
 #include <GameEngineFramework/UI/components/panel.h>
+#include <GameEngineFramework/UI/components/sprite.h>
+
+#ifndef SDL_Event
+ #define SDL_Event  int
+#endif
 
 
 class ENGINE_API UserInterfaceSystem {
@@ -30,10 +37,15 @@ public:
     /// Destroy a text field element and free its memory.
     bool DestroyTextField(TextField* textFieldPtr);
     
-    /// Create a new text element and return its pointer.
+    /// Create a new panel element and return its pointer.
     Panel* CreatePanel(void);
-    /// Destroy a text element and free its memory.
+    /// Destroy a panel element and free its memory.
     bool DestroyPanel(Panel* panelPtr);
+    
+    /// Create a new sprite element and return its pointer.
+    Sprite* CreateSprite(void);
+    /// Destroy a sprite element and free its memory.
+    bool DestroySprite(Sprite* spritePtr);
     
 private:
     
@@ -41,11 +53,13 @@ private:
     void UpdateTextElements(void);
     void UpdateTextFieldElements(void);
     void UpdatePanelElements(void);
+    void UpdateSpriteElements(void);
     
     // Element allocators
     PoolAllocator<Text> mTextElements;
     PoolAllocator<TextField> mTextFieldElements;
     PoolAllocator<Panel> mPanelElements;
+    PoolAllocator<Sprite> mSpriteElements;
     
 };
 

@@ -5,16 +5,13 @@
 #include <string>
 
 class ENGINE_API Panel {
-    
 public:
     
+    std::string name;
     bool isActive;
     
-    int x;
-    int y;
-    
-    int w;
-    int h;
+    int x, y, w, h;
+    float alpha;
     
     Panel();
     
