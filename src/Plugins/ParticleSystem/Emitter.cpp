@@ -30,12 +30,10 @@ Emitter::Emitter() :
     mSpawnRate(0),
     
     mNumberOfParticles(0),
-    mParticleObject(nullptr),
     
     mMesh(nullptr),
-    mMaterial(nullptr)
-{
-}
+    mMaterial(nullptr),
+    mMeshRenderer(nullptr) {}
 
 void Emitter::AddParticle(glm::vec3 position, glm::vec3 initialScale, glm::vec3 force, Color colorBegin, Color colorEnd) {
     mNumberOfParticles++;
@@ -113,8 +111,7 @@ unsigned int Emitter::ResetParticle(unsigned int index, glm::vec3 initialScale, 
 void Emitter::Activate(void) {
     if (mIsActive) 
         return;
-    MeshRenderer* particleRenderer = mParticleObject->GetComponent<MeshRenderer>();
-    Engine.sceneMain->AddMeshRendererToSceneRoot(particleRenderer, RENDER_QUEUE_GEOMETRY);
+    Engine.sceneMain->AddMeshRendererToSceneRoot(mMeshRenderer, RENDER_QUEUE_GEOMETRY);
     mIsActive = true;
     return;
 }
@@ -122,8 +119,7 @@ void Emitter::Activate(void) {
 void Emitter::Deactivate(void) {
     if (!mIsActive) 
         return;
-    MeshRenderer* particleRenderer = mParticleObject->GetComponent<MeshRenderer>();
-    Engine.sceneMain->RemoveMeshRendererFromSceneRoot(particleRenderer, RENDER_QUEUE_GEOMETRY);
+    Engine.sceneMain->RemoveMeshRendererFromSceneRoot(mMeshRenderer, RENDER_QUEUE_GEOMETRY);
     mIsActive = false;
     return;
 }

@@ -78,7 +78,7 @@ Material* ResourceManager::CreateMaterialFromTag(std::string resourceName) {
     if (!texTag->isLoaded) 
         texTag->Load();
     Material* materialPtr = Renderer.CreateMaterial();
-    materialPtr->texture.UploadTextureToGPU(texTag->buffer, texTag->width, texTag->height, texTag->filtration);
+    materialPtr->texture.UploadTextureToGPU(texTag->buffer, texTag->width, texTag->height, texTag->filtration, GL_LINEAR);
     return materialPtr;
 }
 
@@ -108,7 +108,6 @@ void ResourceManager::DestroyAssets(void) {
 }
 
 bool ResourceManager::LoadTexture(std::string path, std::string resourceName, bool loadImmediately) {
-    
     TextureTag textureTag;
     
     textureTag.name = resourceName;
@@ -126,10 +125,6 @@ bool ResourceManager::LoadTexture(std::string path, std::string resourceName, bo
 }
 
 bool ResourceManager::LoadWaveFront(std::string path, std::string resourceName, bool loadImmediately) {
-    
-    // should probably load sub meshes as well
-    //newAsset.name = loader.LoadedMeshes[ i ].MeshName;
-    
     MeshTag newAsset;
     
     newAsset.name = resourceName;

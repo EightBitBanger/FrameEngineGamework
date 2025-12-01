@@ -9,9 +9,7 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
     std::string staticName = worldStatic + chunkPosStr;
     
     // Load actors
-    
     if (Serializer.CheckExists( chunkName )) {
-        
         unsigned int fileSize = Serializer.GetFileSize(chunkName);
         if (fileSize != 0) {
             std::string dataBuffer;
@@ -75,33 +73,12 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
         unsigned int currentIndex = sizeof(unsigned int)-1;
         
         for (unsigned int i=0; i < numberOfStaticElements; i++) {
+            glm::vec3 position = staticElements[i].position;
+            glm::vec3 rotation = staticElements[i].rotation;
+            glm::vec3 scale    = staticElements[i].scale;
+            glm::vec3 color    = staticElements[i].color;
             
-            float posX = staticElements[i].position.x;
-            float posY = staticElements[i].position.y;
-            float posZ = staticElements[i].position.z;
-            
-            float rotY = staticElements[i].rotation.x;
-            float rotP = staticElements[i].rotation.y;
-            float rotR = staticElements[i].rotation.z;
-            
-            float scaleX = staticElements[i].scale.x;
-            float scaleY = staticElements[i].scale.y;
-            float scaleZ = staticElements[i].scale.z;
-            
-            float colR = staticElements[i].color.r;
-            float colG = staticElements[i].color.g;
-            float colB = staticElements[i].color.b;
-            
-            StaticObject staticObj;
-            staticObj.position = staticElements[i].position;
-            staticObj.rotation = staticElements[i].rotation;
-            staticObj.scale    = staticElements[i].scale;
-            staticObj.color    = staticElements[i].color;
-            staticObj.type     = staticElements[i].type;
-            
-            AddDecorMesh(staticMesh, static_cast<DecorationMesh>(staticObj.type), staticObj.position, staticObj.rotation, staticObj.scale, staticObj.color);
-            
-            chunk->statics.push_back(staticObj);
+            AddDecor(chunk, mStaticIndexToMesh[staticElements[i].mesh], world.classIndexToName[staticElements[i].type], position, rotation);
         }
         
         staticMesh->Load();

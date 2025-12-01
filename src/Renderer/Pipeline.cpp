@@ -83,7 +83,6 @@ void RenderSystem::RenderFrame(void) {
             }
             
             // Shadow pass
-            /*
             if (mNumberOfShadows > 0) {
                 
                 shaders.shadowCaster->Bind();
@@ -95,7 +94,7 @@ void RenderSystem::RenderFrame(void) {
                 if (mCurrentShader) 
                     mCurrentShader->Bind();
             }
-            */
+            
         }
     }
     

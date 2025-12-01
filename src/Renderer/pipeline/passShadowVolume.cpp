@@ -74,8 +74,8 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
         // Shadow intensity
         shadowAttenuation[0].r = currentEntity->material->mShadowVolumeAngleOfView;
         shadowAttenuation[0].g = currentEntity->material->mShadowVolumeColorIntensity;
-        shadowAttenuation[0].b = currentEntity->material->mShadowVolumeIntensityHigh  * 0.1;
-        shadowAttenuation[0].a = currentEntity->material->mShadowVolumeIntensityLow   * 0.1;
+        shadowAttenuation[0].b = currentEntity->material->mShadowVolumeIntensityHigh  * 0.1f;
+        shadowAttenuation[0].a = currentEntity->material->mShadowVolumeIntensityLow   * 0.1f;
         
         // Send in the shadow data through the lighting parameters for this pass
         shaders.shadowCaster->SetLightCount(1);

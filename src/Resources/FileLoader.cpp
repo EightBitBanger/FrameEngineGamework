@@ -53,12 +53,8 @@ FileLoader::FileLoader(std::string FileName)
         }
         
         std::vector<std::string> ValueList;
-        
-        for (int i=1; i < MaxSz; i++) {
-            
+        for (int i=1; i < MaxSz; i++) 
             ValueList.push_back(ArrayData[i]);
-            
-        }
         
         this ->assetData.insert( std::pair<std::string, std::vector<std::string>>(ArrayData[0], ValueList) );
         

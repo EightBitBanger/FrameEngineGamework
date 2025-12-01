@@ -1,4 +1,5 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
+float Snap1D(float v, float grid, float origin = 0.0f);
 
 void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chunk* chunk, Biome* biome, float* weightMask, float* totalWeights) {
     unsigned int chunkSZ = chunkSize + 1;
@@ -17,16 +18,17 @@ void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chun
             
             float noise = Random.Perlin(xCoord, 0, zCoord, worldSeed) * layer.heightMultuplier;
             float normalizedWeight = weightMask[j] / (totalWeights[j] + 0.3f);
-            float pointHeight = heightField[j] + (noise * normalizedWeight) * 0.5f;
+            float pointHeight = heightField[j] + (noise * normalizedWeight);
             
             if (pointHeight > layer.heightBlowoutHeight) 
                 pointHeight *= layer.heightBlowoutMul;
             
-            if (pointHeight < layer.heightMin) 
-                pointHeight = layer.heightMin;
-            if (pointHeight > layer.heightMax) 
-                pointHeight = layer.heightMax;
+            //if (pointHeight < layer.heightMin) 
+            //    pointHeight = layer.heightMin;
+            //if (pointHeight > layer.heightMax) 
+            //    pointHeight = layer.heightMax;
             
+            pointHeight = Snap1D(pointHeight, 1.0f, 0.5f);
             heightField[j] = pointHeight;
         }
         
@@ -56,7 +58,6 @@ void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chun
 void ChunkManager::AddColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, 
                                                 float noiseWidth, float noiseHeight, Color color, int offsetX, int offsetZ) {
     unsigned int size = width * height;
-    
     for (unsigned int i = 0; i < size; i++) {
         unsigned int x = i % width;
         unsigned int z = i / width;
@@ -86,11 +87,12 @@ void ChunkManager::SetHeightFieldValues(float* heightField, unsigned int width, 
     }
 }
 
-void ChunkManager::SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color) {
+void ChunkManager::SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color, float noise) {
     glm::vec3 colorVec(color.r, color.g, color.b);
     unsigned int size = width * height;
     for (unsigned int i = 0; i < size; i++) {
-        colorField[i] = colorVec;
+        glm::vec3 additive = (Colors.MakeRandomGrayScale().ToVec3() * 0.5f + 1.0f) * 0.7f;
+        colorField[i] = Math.Lerp(colorVec, additive, noise);
     }
 }
 

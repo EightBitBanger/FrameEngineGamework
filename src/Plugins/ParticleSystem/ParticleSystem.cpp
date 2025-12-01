@@ -16,7 +16,7 @@ void ParticleSystem::Update(void) {
     glm::vec3 playerPosition = AI.GetPlayerWorldPosition();
     
     unsigned int numberOfEmitters = mEmitters.Size();
-
+    
     // Update emitters
     for (unsigned int e = 0; e < numberOfEmitters; e++) {
         Emitter* emitterPtr = mEmitters[e];
@@ -60,7 +60,9 @@ void ParticleSystem::Update(void) {
                     
                     emitterPtr->AddParticle(spawnPosition, spawnScale, spawnVelocity, emitterPtr->colorBegin, emitterPtr->colorEnd);
                 }
+                
             }
+            
         }
         
         // Point emitter
@@ -97,21 +99,19 @@ void ParticleSystem::Update(void) {
             }
             
             emitterPtr->mMesh->Load();
-            
-            continue;
         }
-
+        
         // Area effector emitter
         if (emitterPtr->type == EmitterType::AreaEffector) {
             
             // Update emitter particles
             
-            for (unsigned int p = 0; p < emitterPtr->mNumberOfParticles; p++) {
+            for (unsigned int p=0; p < emitterPtr->mNumberOfParticles; p++) {
                 
                 // Solve velocity
                 emitterPtr->mParticlePositions[p] += emitterPtr->mParticleVelocities[p];
                 
-                // Add target scale
+                // Factor in target scale
                 emitterPtr->scale *= emitterPtr->scaleTo;
                 
                 // Integrate velocities
@@ -127,33 +127,24 @@ void ParticleSystem::Update(void) {
                     (emitterPtr->mParticlePositions[p].y > emitterPtr->heightMaximum) || 
                     (emitterPtr->mParticlePositions[p].y < emitterPtr->heightMinimum)) {
                     
-                    float randomX = Random.Range(0.0f, emitterPtr->width) - Random.Range(0.0f, emitterPtr->width);
+                    float randomX = Random.Range(0.0f, emitterPtr->width)  - Random.Range(0.0f, emitterPtr->width);
                     float randomY = Random.Range(0.0f, emitterPtr->height) - Random.Range(0.0f, emitterPtr->height);
-                    float randomZ = Random.Range(0.0f, emitterPtr->width) - Random.Range(0.0f, emitterPtr->width);
+                    float randomZ = Random.Range(0.0f, emitterPtr->width)  - Random.Range(0.0f, emitterPtr->width);
                     
                     emitterPtr->mParticlePositions[p] = playerPosition + glm::vec3(randomX, randomY, randomZ);
-                    
-                    if (emitterPtr->mParticlePositions[p].y < emitterPtr->heightMinimum) 
-                        emitterPtr->mParticlePositions[p].y = emitterPtr->heightMinimum + 200;
-                    
                 }
                 
                 emitterPtr->mMesh->ChangeSubMeshPosition(p, emitterPtr->mParticlePositions[p].x, emitterPtr->mParticlePositions[p].y, emitterPtr->mParticlePositions[p].z);
             }
             
             emitterPtr->mMesh->Load();
-            
-            continue;
         }
     }
     return;
 }
 
 Emitter* ParticleSystem::CreateEmitter(void) {
-    
     Emitter* newEmitter = mEmitters.Create();
-    
-    newEmitter->mParticleObject = Engine.Create<GameObject>();
     
     // Material
     Material* particleMaterial = Engine.Create<Material>();
@@ -167,29 +158,23 @@ Emitter* ParticleSystem::CreateEmitter(void) {
     
     // Mesh
     Mesh* particleMesh = Engine.Create<Mesh>();
-    
     newEmitter->mMesh = particleMesh;
-    
     particleMesh->isShared = false;
     
-    Component* particleRendererComponent = Engine.CreateComponent<MeshRenderer>();
-    newEmitter->mParticleObject->AddComponent(particleRendererComponent);
-    MeshRenderer* particleRenderer = newEmitter->mParticleObject->GetComponent<MeshRenderer>();
-    particleRenderer->mesh = particleMesh;
-    particleRenderer->material = particleMaterial;
+    newEmitter->mMeshRenderer = Engine.Create<MeshRenderer>();
+    newEmitter->mMeshRenderer->isActive = true;
+    newEmitter->mMeshRenderer->mesh = particleMesh;
+    newEmitter->mMeshRenderer->material = particleMaterial;
     
-    Engine.sceneMain->AddMeshRendererToSceneRoot(newEmitter->mParticleObject->GetComponent<MeshRenderer>(), RENDER_QUEUE_GEOMETRY);
+    Engine.sceneMain->AddMeshRendererToSceneRoot(newEmitter->mMeshRenderer, RENDER_QUEUE_GEOMETRY);
     
     return newEmitter;
 }
 
 void ParticleSystem::DestroyEmitter(Emitter* emitterPtr) {
+    Engine.sceneMain->RemoveMeshRendererFromSceneRoot(emitterPtr->mMeshRenderer, RENDER_QUEUE_GEOMETRY);
+    Engine.Destroy<MeshRenderer>(emitterPtr->mMeshRenderer);
     
-    MeshRenderer* particleRenderer = emitterPtr->mParticleObject->GetComponent<MeshRenderer>();
-    
-    Engine.sceneMain->RemoveMeshRendererFromSceneRoot(particleRenderer, RENDER_QUEUE_GEOMETRY);
-    Engine.Destroy<GameObject>(emitterPtr->mParticleObject);
-    
-    return;
+    mEmitters.Destroy(emitterPtr);
 }
 

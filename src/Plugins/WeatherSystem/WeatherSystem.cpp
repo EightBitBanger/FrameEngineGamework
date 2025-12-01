@@ -113,44 +113,36 @@ void WeatherSystem::Initiate(void) {
     // Rain emitter
     
     mRainEmitter = Particle.CreateEmitter();
-    
     mRainEmitter->type = EmitterType::AreaEffector;
     mRainEmitter->position = glm::vec3(0, 0, 0);
     mRainEmitter->direction = glm::vec3(0, -0.9f, 0);
-    mRainEmitter->scale = glm::vec3(0.018f, 0.4f, 0.018f);
-    
-    mRainEmitter->velocity = glm::vec3(0.0f, -0.9f, 0.0f);
-    
+    mRainEmitter->scale = glm::vec3(0.012f, 0.4f, 0.012f);
+    mRainEmitter->velocity = glm::vec3(0.0f, -0.8f, 0.0f);
     mRainEmitter->width = 40.0f;
     mRainEmitter->height = 70.0f;
-    
     mRainEmitter->colorBegin = Colors.Lerp(Colors.blue, Colors.ltgray, 0.2f);
     mRainEmitter->colorEnd = Colors.Lerp(Colors.blue, Colors.ltgray, 0.7);
-    
     mRainEmitter->maxParticles = 2000;
-    
     mRainEmitter->heightMinimum = GameWorld.world.waterLevel;
+    
+    
     
     // Snow emitter
     
     mSnowEmitter = Particle.CreateEmitter();
-    
     mSnowEmitter->type = EmitterType::AreaEffector;
     mSnowEmitter->position = glm::vec3(0, 0, 0);
     mSnowEmitter->direction = glm::vec3(0, -0.3f, 0);
     mSnowEmitter->scale = glm::vec3(0.05f, 0.02f, 0.05f);
-    
     mSnowEmitter->velocity = glm::vec3(0.0f, -0.03f, 0.0f);
-    
     mSnowEmitter->width = 30.0f;
     mSnowEmitter->height = 70.0f;
-    
     mSnowEmitter->colorBegin = Colors.white;
     mSnowEmitter->colorEnd = Colors.white;
-    
     mSnowEmitter->maxParticles = 2000;
-    
     mSnowEmitter->heightMinimum = GameWorld.world.waterLevel;
+    
+    
     
     // Zero the weather systems
     SetWeather( WeatherType::Clear );
@@ -170,11 +162,8 @@ void WeatherSystem::Update(void) {
     float lightRiseFall;
     
     if (fullDayRange > 0.5f) {
-        
         lightRiseFall = Float.Lerp(1.0f, 0.0f, fullDayRange);
-        
     } else {
-        
         lightRiseFall = Float.Lerp(0.0f, 1.0f, fullDayRange);
     }
     

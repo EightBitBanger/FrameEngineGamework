@@ -15,7 +15,9 @@ void ChunkManager::Update(void) {
 }
 
 void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
-    if (!mux.try_lock()) 
+    if (!mux.try_lock())
+        return;
+    if (!world.doGenerateChunks)
         return;
     
     for (mChunkCounterX = 0; mChunkCounterX <= renderDistance; mChunkCounterX++) {
@@ -38,12 +40,12 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
             float chunkX = Math.Round((playerPosition.x + (chunkSizeSub / 2)) / chunkSizeSub + xx);
             float chunkZ = Math.Round((playerPosition.z + (chunkSizeSub / 2)) / chunkSizeSub + zz);
             
-            glm::vec2 chunkPos((chunkX * chunkSizeSub) - (renderDistance * (chunkSizeSub / 2)), 
-                               (chunkZ * chunkSizeSub) - (renderDistance * (chunkSizeSub / 2)));
+            glm::vec2 chunkPos((chunkX * chunkSizeSub) - (renderDistance * (chunkSizeSub / 2)),
+                            (chunkZ * chunkSizeSub) - (renderDistance * (chunkSizeSub / 2)));
             
             if (IsChunkFound(chunkPos)) {
                 Chunk* chunk = FindChunk(chunkPos.x, chunkPos.y);
-                if (chunk == nullptr) 
+                if (chunk == nullptr)
                     continue;
                 
                 // Check active fade in
@@ -52,14 +54,13 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
                     
                     if (chunk->fadeIn > 10) {
                         chunk->isActive = true;
-                        
+                    
                         MeshRenderer* chunkRenderer  = chunk->gameObject->GetComponent<MeshRenderer>();
                         MeshRenderer* staticRenderer = chunk->staticObject->GetComponent<MeshRenderer>();
-                        
+                    
                         Engine.sceneMain->AddMeshRendererToSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
                         Engine.sceneMain->AddMeshRendererToSceneRoot( staticRenderer, RENDER_QUEUE_GEOMETRY );
                     }
-                    
                 }
                 
                 // Check if the chunk has finished being generated
@@ -118,12 +119,11 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
                     free(chunk->heightField);
                     free(chunk->colorField);
                 }
-                
                 continue;
             }
             
             glm::vec2 playerPos(playerPosition.x, playerPosition.z);
-            if (glm::distance(chunkPos, playerPos) > (renderDistance * (chunkSizeSub / 2))) 
+            if (glm::distance(chunkPos, playerPos) > (renderDistance * (chunkSizeSub / 2)))
                 continue;
             
             Chunk* chunk = CreateChunk(chunkPos.x, chunkPos.y);
@@ -131,17 +131,16 @@ void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {
         }
     }
     mux.unlock();
-    return;
 }
 
 void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
     unsigned int numberOfChunks = chunks.Size();
-    if (numberOfChunks == 0) 
+    if (numberOfChunks == 0)
         return;
     
     for (unsigned int c = 0; c < numberOfChunks; c++) {
-        Chunk* chunk = chunks[mChunkIndex];
-        if (chunk->gameObject == nullptr) 
+        Chunk* chunk = chunks[c];
+        if (chunk->gameObject == nullptr)
             continue;
         
         glm::vec3 chunkPos(chunk->x, 0, chunk->y);
@@ -151,19 +150,14 @@ void ChunkManager::DestroyChunks(const glm::vec3 &playerPosition) {
             SaveChunk(chunk, true);
             DestroyChunk(chunk);
         }
-        
-        mChunkIndex++;
-        if (mChunkIndex >= numberOfChunks) 
-            mChunkIndex = 0;
     }
-    return;
 }
 
 bool ChunkManager::IsChunkFound(const glm::vec2 &chunkPosition) {
     unsigned int numberOfChunks = chunks.Size();
     for (unsigned int c = 0; c < numberOfChunks; c++) {
         Chunk& chunk = *chunks[c];
-        if (glm::vec3(chunk.x, 0, chunk.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y)) 
+        if (glm::vec3(chunk.x, 0, chunk.y) == glm::vec3(chunkPosition.x, 0, chunkPosition.y))
             return true;
     }
     return false;
@@ -172,33 +166,26 @@ bool ChunkManager::IsChunkFound(const glm::vec2 &chunkPosition) {
 
 void ChunkManager::UpdateFogSettings(const glm::vec3 &playerPosition) {
     if (playerPosition.y < world.waterLevel) {
-        
         fogWater->fogHeightCutoff = 1000.0f;
         fogWater->fogDensity = 0.8f;
         fogWater->fogBegin = 0.0f;
         fogWater->fogEnd = 24.0f;
         fogWater->fogColorBegin = Colors.blue;
         fogWater->fogColorEnd = Colors.blue;
-        
     } else {
-        
         fogWater->fogHeightCutoff = world.waterLevel;
         fogWater->fogDensity = 0.8f;
         fogWater->fogBegin = 0.0f;
         fogWater->fogEnd = 1.0f;
         fogWater->fogColorBegin = Colors.blue;
         fogWater->fogColorEnd = Colors.blue;
-        
     }
-    return;
 }
 
 
 void ChunkManager::InitializePlayerHeight(glm::vec3 &playerPosition) {
-    
-    if (isInitiated) 
+    if (isInitiated)
         return;
-    
     playerPosition.y = 0;
     
     Hit hit;
@@ -207,7 +194,5 @@ void ChunkManager::InitializePlayerHeight(glm::vec3 &playerPosition) {
         Engine.cameraController->SetPosition(playerPosition);
         isInitiated = true;
     }
-    
-    return;
 }
 

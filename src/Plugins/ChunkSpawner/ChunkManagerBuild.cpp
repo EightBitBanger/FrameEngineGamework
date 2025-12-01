@@ -32,8 +32,60 @@ void ChunkManager::BuildFunctions::StackAtAngle(Structure& structure, glm::vec3 
     }
 }
 
-/*
-void ChunkManager::BuildFunctions::LeafCluster(Structure& structure, glm::vec3 position, glm::vec3 scale, glm::vec3 angle, float stepHeight, int length, Color color) {
+
+
+
+bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const std::string& name) {
+    float heightMin = 4.0f;
+    float heightMax = 8.0f;
+    
+    unsigned int numberOfLeavesMin = 0;
+    unsigned int numberOfLeavesMax = 0;
+    
+    float leafSpreadArea  = 1.0f;
+    float leafSpreadHeight = 1.0f;
+    float leafWidth = 1.0f;
+    float leafHeight = 1.0f;
+    Color leafColorMin;
+    Color leafColorMax;
+    
+    float trunkSize = 1.0f;
+    Color trunkColorMin = Colors.white;
+    Color trunkColorMax = Colors.white;
+    
+    // Find the definition
+    /*
+    std::unordered_map<std::string, ClassDefinition>::iterator itClass = world.classDefinitions.find(name);
+    if (itClass == world.classDefinitions.end())
+        return false;
+    
+    const ClassDefinition& definition = itClass->second;
+    std::unordered_map<std::string, SubMesh>::iterator itMesh = mStaticMeshes.find(definition.mesh);
+    if (itMesh == mStaticMeshes.end()) 
+        return false;
+    */
+    
+    if (heightMax == 0.0f && heightMin == 0.0f) 
+        return false;
+    
+    float height = Random.Range(heightMin, heightMax);
+    
+    glm::vec3 scale(trunkSize, 1.0f, trunkSize);
+    glm::vec3 rotation(0.0f, 0.0f, 0.0f);
+    
+    Color color = Colors.Range(trunkColorMin, trunkColorMax);
+    
+    std::string logMesh = "log";
+    std::string logType = "oak_log";
+    
+    std::string leafMesh = "leaf";
+    std::string leafType = "oak_leaf";
+    
+    
+    
+    for (unsigned int s=0; s < (int)height; s++) 
+        AddDecor(chunk, logMesh, logType, glm::vec3(position.x, position.y + s, position.z), rotation);
+    
     unsigned int clustersMin = 5;
     unsigned int clustersMax = 7;
     unsigned int numberOfClusters = Random.Range(clustersMin, clustersMax);
@@ -84,96 +136,23 @@ void ChunkManager::BuildFunctions::LeafCluster(Structure& structure, glm::vec3 p
             glm::vec3 leafRot(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
             
             Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-            AddDecor(chunk, staticMesh, DecorationMesh::Leaf, leafPos, leafRot, leafScale, leafColor);
+            AddDecor(chunk, leafMesh, leafType, leafPos, leafRot);
         }
     }
-}
-*/
-
-
-
-
-
-
-void ChunkManager::AddDecorGrass(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
-    float grassWidth = 0.0f;
-    float grassHeight = 0.0f;
     
-    Color colorMin = Colors.white;
-    Color colorMax = Colors.white;
+    return true;
     
-    for (std::unordered_map<std::string, DefinitionTypeGrass>::iterator it = world.definitionGrass.begin(); it != world.definitionGrass.end(); ++it) {
-        if (it->first != name) 
-            continue;
-        DefinitionTypeGrass& definition = it->second;
-        
-        grassWidth  = definition.width;
-        grassHeight = definition.height;
-        colorMin    = definition.colorMin;
-        colorMax    = definition.colorMax;
-        break;
-    }
-    if (grassWidth == 0.0f && grassHeight == 0.0f) 
-        return;
     
-    Color finalColor = Colors.Range(colorMin, colorMax);
-    glm::vec3 scale(grassWidth, grassHeight, grassWidth);
-    glm::vec3 rotation(0.0f, Random.Range(0, 360), 0.0f);
     
-    AddDecor(chunk, staticMesh, DecorationMesh::Cross, position + glm::vec3(0.0f, grassHeight * 0.16f, 0.0f), rotation, scale, finalColor);
-}
-
-void ChunkManager::AddDecorTree(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
-    float heightMin = 0.0f;
-    float heightMax = 0.0f;
     
-    unsigned int numberOfLeavesMin = 0;
-    unsigned int numberOfLeavesMax = 0;
     
-    float leafSpreadArea  = 0.0f;
-    float leafSpreadHeight = 0.0f;
-    float leafWidth = 0.0f;
-    float leafHeight = 0.0f;
-    Color leafColorMin;
-    Color leafColorMax;
     
-    float trunkSize = 0.0f;
-    Color trunkColorMin;
-    Color trunkColorMax;
+    /*
     
-    for (std::unordered_map<std::string, DefinitionTypeTree>::iterator it = world.definitionTree.begin(); it != world.definitionTree.end(); ++it) {
-        if (it->first != name) 
-            continue;
-        DefinitionTypeTree& definition = it->second;
-        
-        heightMin = definition.heightMin;
-        heightMax = definition.heightMax;
-        
-        numberOfLeavesMin = definition.leafCountMin;
-        numberOfLeavesMax = definition.leafCountMax;
-        
-        leafSpreadArea    = definition.leafSpreadArea;
-        leafSpreadHeight  = definition.leafSpreadHeight;
-        leafWidth         = definition.leafWidth;
-        leafHeight        = definition.leafHeight;
-        leafColorMin      = definition.leafColorMin;
-        leafColorMax      = definition.leafColorMax;
-        
-        trunkSize         = definition.trunkSize;
-        trunkColorMin     = definition.trunkColorMin;
-        trunkColorMax     = definition.trunkColorMax;
-        break;
-    }
-    if (heightMax == 0.0f && heightMin == 0.0f) 
-        return;
-    
-    float height = Random.Range(heightMin, heightMax);
-    
-    glm::vec3 scale(trunkSize, height, trunkSize);
-    glm::vec3 rotation(0.0f, 0.0f, 0.0f);
-    
-    Color trunkColor = Colors.Range(trunkColorMin, trunkColorMax);
-    AddDecor(chunk, staticMesh, DecorationMesh::Log, glm::vec3(position.x, position.y + (height * 0.25f), position.z), rotation, scale, trunkColor);
+    //
+    // Build tree logs
+    //for (unsigned int s=0; s < (int)height; s++) 
+    //    PlaceDecor(chunk, staticMesh, DecorationMesh::Log, DecorationStatic::LogOak, glm::vec3(position.x, position.y + s, position.z), rotation, scale, trunkColor);
     
     //
     // Tree type generation
@@ -229,59 +208,94 @@ void ChunkManager::AddDecorTree(Chunk* chunk, Mesh* staticMesh, glm::vec3 positi
                 glm::vec3 leafRot(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
                 
                 Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, leafPos, leafRot, leafScale, leafColor);
+                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, leafPos, leafRot, leafScale, leafColor);
             }
         }
-        return;
+        return true;
     }
     
-    
     if (name == "pine") {
-        unsigned int numberOfLeaves = Random.Range(numberOfLeavesMin, numberOfLeavesMax);
+        // Tunable tilt controls (packed in-place)
+        float baseTilt        = 1.0f;   // starting tilt in degrees
+        float rateOfTilt      = 16.0f;   // added per ring
+        float tiltOffsetMul   = 0.007f;  // feeds radius calc
         
-        // keep base sizes intact
+        // Optional shaping/jitter
+        bool  useCurve        = false;   // enable curve shaping across rings
+        float curveExp        = 1.0f;    // >1 ease-in, <1 ease-out
+        float curveBlend      = 1.0f;    // 0 linear, 1 fully curved
+        float ringJitterDeg   = 0.087f;  // random +- per ring
+        float leafJitterDeg   = 0.087f;  // random +- per leaf
+        
+        // Safety and direction
+        bool  clampTilt       = true;
+        float minTiltDeg      = 90.0f;
+        float maxTiltDeg      = 60.0f;
+        float directionSign   = 1.0f;    // 1 = down, -1 = up
+        
+        // Original geometry inputs
+        unsigned int numberOfLeaves = Random.Range(numberOfLeavesMin, numberOfLeavesMax);
         float baseLeafWidth  = leafWidth;
         float baseLeafHeight = leafHeight;
-        float baseTilt    = 28.0f;
-        float baseScale   = 0.7f;
-        float baseHeight  = position.y + (height * 0.5f);
+        float baseScale      = 0.7f;
+        float baseHeight     = position.y + height - 6;
         
-        float rateOfTilt    = 15.0f;
-        float rateOfScale   = 0.08f;
-        float rateOfHeight  = 0.7f;
-        float tiltOffsetMul = 0.007f;
+        float rateOfScale    = 0.08f;
+        float rateOfHeight   = 1.0f;
+        unsigned int numberOfRings = 5;
         
-        unsigned int numberOfRings = 4;
+        // Local tilt evaluator
+        auto evalTilt = [&](unsigned int ringIndex) -> float {
+            float r1 = float(ringIndex + 1);
+            float inc = r1 * rateOfTilt;
+            
+            float tilt = baseTilt + inc;
+            if (clampTilt) {
+                if (tilt < minTiltDeg) tilt = minTiltDeg;
+                if (tilt > maxTiltDeg) tilt = maxTiltDeg;
+            }
+            return tilt * directionSign;
+        };
         
         for (unsigned int r = 0; r < numberOfRings; r++) {
+            float leafTiltRing = evalTilt(r);
             
-            float leafTilt    = baseTilt   + (r * rateOfTilt);
-            float scaleFactor = baseScale  - (r * rateOfScale);
-            float ringHeight  = baseHeight + (r * rateOfHeight);
+            if (ringJitterDeg > 0.0f) {
+                float j = Random.Range(-ringJitterDeg, ringJitterDeg);
+                leafTiltRing += j;
+            }
+            
+            float scaleFactor = baseScale  - (float(r + 1) * rateOfScale);
+            float ringHeight  = baseHeight + (float(r + 1) * rateOfHeight);
             
             for (unsigned int l = 0; l < numberOfLeaves; l++) {
                 glm::vec3 leafScale = glm::vec3(baseLeafWidth, baseLeafHeight, baseLeafWidth) * scaleFactor;
+            
+                float leafTilt = leafTiltRing;
+                if (leafJitterDeg > 0.0f) {
+                    float lj = Random.Range(-leafJitterDeg, leafJitterDeg);
+                    leafTilt += lj;
+                }
+            
                 float radius = (leafSpreadArea * scaleFactor) - (leafTilt * tiltOffsetMul);
                 if (radius < 0.0f) radius = 0.0f;
-                
+            
                 float someRandomYaw = Random.Range(1, 100) * 0.5f;
-                
-                float angle = ((360.0f / numberOfLeaves) * l) + someRandomYaw;
+                float angle = ((360.0f / numberOfLeaves) * float(l)) + someRandomYaw;
                 float rad   = glm::radians(angle);
-                
+            
                 float dx = std::cos(rad) * radius;
                 float dz = std::sin(rad) * radius;
                 glm::vec3 leafPosition(position.x + dx, ringHeight, position.z + dz);
-                
+            
                 float yawDeg = glm::degrees(std::atan2(dx, dz));
-                
-                glm::vec3 leafRotation(leafTilt, yawDeg, 0);
-                
+                glm::vec3 leafRotation(leafTilt, yawDeg, 0.0f);
+            
                 Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, leafPosition, leafRotation, leafScale, leafColor);
+                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafPine, leafPosition, leafRotation, leafScale, leafColor);
             }
         }
-        return;
+        return true;
     }
     
     
@@ -352,10 +366,10 @@ void ChunkManager::AddDecorTree(Chunk* chunk, Mesh* staticMesh, glm::vec3 positi
                 glm::vec3 leafScale = glm::vec3(baseLeafWidth, baseLeafHeight, baseLeafWidth) * sizeFactor;
                 
                 Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, leafPos, leafRot, leafScale, leafColor);
+                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, leafPos, leafRot, leafScale, leafColor);
             }
         }
-        return;
+        return true;
     }
     
     
@@ -388,9 +402,9 @@ void ChunkManager::AddDecorTree(Chunk* chunk, Mesh* staticMesh, glm::vec3 positi
             glm::vec3 leafScale(baseLeafWidth * scaleMul, baseLeafHeight * scaleMul, baseLeafWidth * 0.45f * scaleMul);
             
             Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-            AddDecor(chunk, staticMesh, DecorationMesh::Leaf, leafPos, leafRot, leafScale, leafColor);
+            AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, leafPos, leafRot, leafScale, leafColor);
         }
-        return;
+        return true;
     }
     
     
@@ -428,10 +442,10 @@ void ChunkManager::AddDecorTree(Chunk* chunk, Mesh* staticMesh, glm::vec3 positi
                 glm::vec3 leafScale = glm::vec3(baseLeafWidth, baseLeafHeight, baseLeafWidth) * scaleMul;
                 
                 Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, leafPos, leafRot, leafScale, leafColor);
+                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, leafPos, leafRot, leafScale, leafColor);
             }
         }
-        return;
+        return true;
     }
     
     
@@ -472,11 +486,11 @@ void ChunkManager::AddDecorTree(Chunk* chunk, Mesh* staticMesh, glm::vec3 positi
                 float scaleMul = 0.75f + Random.Range(0.0f, 0.25f);
                 glm::vec3 leafScale(baseLeafWidth * scaleMul, baseLeafHeight * scaleMul, baseLeafWidth * scaleMul);
                 
-                Color leafColor = Colors.Range(leafColorMin, leafColorMax); // lighter palette recommended in defs
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, leafPos, leafRot, leafScale, leafColor);
+                Color leafColor = Colors.Range(leafColorMin, leafColorMax);
+                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, leafPos, leafRot, leafScale, leafColor);
             }
         }
-        return;
+        return true;
     }
     
     
@@ -519,20 +533,107 @@ void ChunkManager::AddDecorTree(Chunk* chunk, Mesh* staticMesh, glm::vec3 positi
                 glm::vec3 scl(baseLeafWidth * scale, baseLeafHeight * scale, baseLeafWidth * scale);
                 
                 Color col = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, pos, rot, scl, col);
+                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, pos, rot, scl, col);
             }
         }
-        return;
+        return true;
     }
+    */
     
     // No leaf type was selected
-    Log.Write("! Leaf type not defined - " + name);
+    //Log.Write("! Leaf type not defined - " + name);
+    return false;
+}
+
+
+
+/*
+bool ChunkManager::AddDecorGrass(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
+    float grassWidth = 0.0f;
+    float grassHeight = 0.0f;
+    
+    Color colorMin = Colors.white;
+    Color colorMax = Colors.white;
+    
+    for (std::unordered_map<std::string, ClassDefinitionGrass>::iterator it = world.definitionGrass.begin(); it != world.definitionGrass.end(); ++it) {
+        if (it->first != name) 
+            continue;
+        ClassDefinitionGrass& definition = it->second;
+        
+        grassWidth  = definition.width;
+        grassHeight = definition.height;
+        colorMin    = definition.colorMin;
+        colorMax    = definition.colorMax;
+        break;
+    }
+    
+    Color finalColor = Colors.Range(colorMin, colorMax);
+    glm::vec3 scale(grassWidth, grassHeight, grassWidth);
+    glm::vec3 rotation(0.0f, 0.0f, 0.0f);
+    
+    AddDecor(chunk, staticMesh, DecorationMesh::Grass, DecorationStatic::Grass, position + glm::vec3(0.0f, grassHeight, 0.0f), rotation, scale, finalColor);
+    return true;
+}
+
+bool ChunkManager::AddDecorLog(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
+    float grassWidth = 0.0f;
+    float grassHeight = 0.0f;
+    
+    Color colorMin = Colors.white;
+    Color colorMax = Colors.white;
+    
+    for (std::unordered_map<std::string, ClassDefinitionLog>::iterator it = world.definitionLog.begin(); it != world.definitionLog.end(); ++it) {
+        if (it->first != name) 
+            continue;
+        ClassDefinitionLog& definition = it->second;
+        
+        grassWidth  = definition.width;
+        grassHeight = definition.height;
+        colorMin    = definition.colorMin;
+        colorMax    = definition.colorMax;
+        break;
+    }
+    
+    Color finalColor = Colors.Range(colorMin, colorMax);
+    glm::vec3 scale(grassWidth, grassHeight, grassWidth);
+    glm::vec3 rotation(0.0f, 0.0f, 0.0f);
+    
+    AddDecor(chunk, staticMesh, DecorationMesh::Log, DecorationStatic::LogOak, position + glm::vec3(0.0f, grassHeight, 0.0f), rotation, scale, finalColor);
+    return true;
+}
+
+
+bool ChunkManager::AddDecorLeaf(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
+    float grassWidth = 0.0f;
+    float grassHeight = 0.0f;
+    
+    Color colorMin = Colors.white;
+    Color colorMax = Colors.white;
+    
+    for (std::unordered_map<std::string, ClassDefinitionLeaf>::iterator it = world.definitionLeaf.begin(); it != world.definitionLeaf.end(); ++it) {
+        if (it->first != name) 
+            continue;
+        ClassDefinitionLeaf& definition = it->second;
+        
+        grassWidth  = definition.width;
+        grassHeight = definition.height;
+        colorMin    = definition.colorMin;
+        colorMax    = definition.colorMax;
+        break;
+    }
+    
+    Color finalColor = Colors.Range(colorMin, colorMax);
+    glm::vec3 scale(grassWidth, grassHeight, grassWidth);
+    glm::vec3 rotation(0.0f, 0.0f, 0.0f);
+    
+    AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, position + glm::vec3(0.0f, grassHeight, 0.0f), rotation, scale, finalColor);
+    return true;
 }
 
 
 
 
-void ChunkManager::AddDecorStructure(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
+bool ChunkManager::AddDecorStructure(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name) {
     Structure* structure = nullptr;
     // Find the matching structure by name
     for (unsigned int i = 0; i < world.structures.size(); i++) {
@@ -542,8 +643,7 @@ void ChunkManager::AddDecorStructure(Chunk* chunk, Mesh* staticMesh, glm::vec3 p
         break;
     }
     if (structure == nullptr)
-        return;
-    
+        return false;
     
     float RandomArea = 30.0f;
     glm::vec3 RandomPosition;
@@ -557,14 +657,14 @@ void ChunkManager::AddDecorStructure(Chunk* chunk, Mesh* staticMesh, glm::vec3 p
         glm::vec3 pos = chunk->structureLocations[i];
         
         if (glm::distance(pos, structurePosition) < structure->buildSpread) 
-            return;
+            return false;
     }
     chunk->structureLocations.push_back(structurePosition);
     
     // Check chunk boundary
     glm::vec3 chunkPos(chunk->x, 0, chunk->y);
     if (glm::distance(chunkPos, structurePosition) > chunkSize * 0.6f) 
-        return;
+        return false;
     
     // Place structure parts
     for (unsigned int p = 0; p < structure->parts.size(); p++) {
@@ -575,14 +675,14 @@ void ChunkManager::AddDecorStructure(Chunk* chunk, Mesh* staticMesh, glm::vec3 p
         glm::vec3 scale = part.scale;
         Color color = part.color;
         
-        AddDecor(chunk, staticMesh, DecorationMesh::Log, translation, orientation, scale, color);
+        AddDecor(chunk, staticMesh, DecorationMesh::Log, DecorationStatic::LogOak, translation, orientation, scale, color);
     }
     
     // Spawn actors
     if (structure->actorCountMin >= structure->actorCountMax) 
-        return;
+        return false;
     if (structure->actorCountMax == 0) 
-        return;
+        return false;
     
     unsigned int numberOfActors = Random.Range(structure->actorCountMin, structure->actorCountMax);
     
@@ -604,5 +704,6 @@ void ChunkManager::AddDecorStructure(Chunk* chunk, Mesh* staticMesh, glm::vec3 p
         actor->isActive = true;
         actor->physical.UpdatePhysicalCollider();
     }
+    return true;
 }
-
+*/

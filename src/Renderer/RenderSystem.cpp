@@ -6,22 +6,18 @@
 
 #include <iostream>
 
-CustomAllocator EntityPool   {1000, 1};
-CustomAllocator MaterialPool {1000, 1};
-CustomAllocator MeshPool     {500, 1};
-CustomAllocator LightPool    {500, 1};
+CustomAllocator EntityPool   {1024, 1};
+CustomAllocator MaterialPool {1024, 1};
+CustomAllocator MeshPool     {512, 1};
+CustomAllocator LightPool    {512, 1};
 
 extern Logger Log;
-
 extern IntType Int;
-
 extern ColorPreset  Colors;
-
 
 // Render thread
 bool isThreadActive = true;
 void RenderThreadMain(void);
-
 
 
 RenderSystem::RenderSystem() : 
@@ -56,7 +52,6 @@ MeshRenderer* RenderSystem::CreateMeshRenderer(void) {
 }
 
 bool RenderSystem::DestroyMeshRenderer(MeshRenderer* meshRendererPtr) {
-    std::lock_guard<std::mutex> lock(mux);
     if (meshRendererPtr->mesh != nullptr) 
         if (meshRendererPtr->mesh->isShared == false) 
             mMesh.Destroy(meshRendererPtr->mesh);
@@ -370,7 +365,7 @@ extern RenderSystem Renderer;
 void RenderThreadMain(void) {
     
     while (isThreadActive) {
-        std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(1) );
+        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(100) );
         
         continue;
     }

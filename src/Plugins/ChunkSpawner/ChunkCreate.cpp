@@ -1,7 +1,6 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
 Chunk* ChunkManager::CreateChunk(float x, float y) {
-    
     Chunk* chunk = chunks.Create();
     chunk->isActive = false;
     
@@ -75,7 +74,7 @@ void ChunkManager::GenerateChunkBlendMasks(Chunk* chunk) {
         
         // Default to the first biome
         float baseBiome = 0.0f;
-        if (b == 0) 
+        if (b == 0)
             baseBiome = 0.1f;
         
         for (unsigned int i = 0; i < fieldSize; i++) {
@@ -94,8 +93,9 @@ void ChunkManager::GenerateChunkBlendMasks(Chunk* chunk) {
         }
         
         // Clamp for proper biome blending
-        for (unsigned int i = 0; i < fieldSize; i++) 
-            totalWeights[i] = glm::clamp(totalWeights[i], 0.25f, 1.0f);
+        const float clampMin = 0.25f;
+        for (unsigned int i = 0; i < fieldSize; i++)
+            totalWeights[i] = glm::clamp(totalWeights[i], clampMin, 1.0f);
         
     }
     
@@ -112,7 +112,7 @@ void ChunkManager::GenerateChunkBlendMasks(Chunk* chunk) {
                 maxW = w;
                 dominantBiome[i] = b;
             }
-            if (dominantBiome[i] < 0.0f) 
+            if (dominantBiome[i] < 0.0f)
                 dominantBiome[i] = 0.0f;
         }
     }
@@ -129,12 +129,12 @@ void ChunkManager::GenerateChunkBiomes(Chunk* chunk) {
     chunk->colorField = (glm::vec3*)malloc(sizeof(glm::vec3) * (chunkSZ * chunkSZ));
     
     SetHeightFieldValues(chunk->heightField, chunkSZ, chunkSZ, 0);
-    SetColorFieldValues(chunk->colorField, chunkSZ, chunkSZ, Colors.black);
+    SetColorFieldValues(chunk->colorField, chunkSZ, chunkSZ, Colors.black, 0.01f);
     
     // Generate terrain base color
     
-    if (numberOfBiomes > 0) 
-        for (unsigned int b=0; b < numberOfBiomes; b++) 
+    if (numberOfBiomes > 0)
+        for (unsigned int b=0; b < numberOfBiomes; b++)
             GenerateBiome(chunk->colorField, chunk->heightField, chunk, &world.biomes[b], chunk->biomeWeights[b].data(), chunk->totalWeights.data());
     
     chunk->biomeWeights.clear();

@@ -38,7 +38,6 @@ TextureTag::TextureTag() :
 }
 
 bool TextureTag::Load(void) {
-    
     if (isLoaded) 
         Unload();
     

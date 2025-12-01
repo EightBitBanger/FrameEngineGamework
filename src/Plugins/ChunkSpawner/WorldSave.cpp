@@ -8,7 +8,6 @@ extern WeatherSystem  weather;
 
 
 bool ChunkManager::SaveWorld(void) {
-    
     if (!world.doGenerateChunks) 
         return false;
     
@@ -49,6 +48,9 @@ bool ChunkManager::SaveWorld(void) {
     worldDataBuffer += "weather_current=" + Int.ToString((int)Weather.GetWeatherCurrent()) + "\n";
     worldDataBuffer += "weather_next=" + Int.ToString((int)Weather.GetWeatherNext()) + "\n";
     worldDataBuffer += "weather_cycle=" + Float.ToString(Weather.GetWeatherCycleCounter()) + "\n";
+    // Version
+    std::string versionString = version;
+    worldDataBuffer += "version=" + versionString + "\n";
     
     Serializer.Serialize(worldName + "/world.dat", (void*)worldDataBuffer.data(), worldDataBuffer.size());
     

@@ -14,47 +14,46 @@ void ChunkManager::Decorate(Chunk* chunk) {
     chunk->statics.clear();
     staticMesh->ClearSubMeshes();
     
+    const float grid         = 1.0f;
+    const glm::vec3 gridOrigin(0.5f, 0.5f, 0.5f);
+    
     unsigned int chunkSZ = chunkSize + 1;
     
+    uint8_t placementGrid[chunkSize][chunkSize];
+    ZeroMemory(placementGrid, chunkSize * chunkSize);
+    
     for (int xx = 0; xx < chunkSize; xx++) {
-        float xp = xx - (chunkSize / 2);
+        float xp = xx - (chunkSize / 2) + 0.5f;
         float staticX = chunk->x - xp;
         
         for (int zz = 0; zz < chunkSize; zz++) {
-            float zp = zz - (chunkSize / 2);
+            float zp = zz - (chunkSize / 2) + 0.5f;
             float staticZ = chunk->y - zp;
-            
-            glm::vec3 worldPos(staticX, 0, staticZ);
             int index = zz * chunkSZ + xx;
             
             // Find which biome dominates here
             int biomeIndex = chunk->biomeMap[index];
             if (biomeIndex < 0 || biomeIndex >= (int)world.biomes.size())
                 continue;
-            
             Biome& biome = world.biomes[biomeIndex];
             
-            // Loop over that biome's decorations
+            // Loop over the biome's decorations
             for (unsigned int d = 0; d < biome.decorations.size(); d++) {
-                DecorationSpecifier& decor = biome.decorations[d];
-                
-                // Use world-space for noise, not chunk-local loop coords
-                float wx = staticX;   // world X
-                float wz = staticZ;   // world Z
-                
-                auto hash2D = [](int x, int z, uint32_t seed) -> uint32_t {
-                    uint32_t h = (uint32_t)x * 374761393u + (uint32_t)z * 668265263u + seed * 1274126177u;
-                    h ^= h >> 13; h *= 1274126177u; h ^= h >> 16;
-                    return h;
-                };
-                uint32_t h = hash2D((int)std::floor(wx), (int)std::floor(wz), (uint32_t)chunk->seed);
-                
-                if ((h % 100000u) > decor.density) continue;
-                
-                if (Random.Perlin(wx * decor.noise, 0.0f, wz * decor.noise, chunk->seed) < decor.threshold) 
+                DecorationSpecifier& decoration = biome.decorations[d];
+                if (placementGrid[xx][zz] == 0xff) 
                     continue;
                 
-                if (Random.Perlin(wx * decor.noise * 0.5f, 0.0f, wz * decor.noise * 0.5f, chunk->seed) < decor.threshold) 
+                // Use world-space for noise, not chunk-local loop coords
+                float wx = Snap1D(staticX, grid, gridOrigin.x);
+                float wz = Snap1D(staticZ, grid, gridOrigin.z);
+                
+                if (Random.Range(1, 1000) > decoration.density) 
+                    continue;
+                
+                if (Random.Perlin(wx * decoration.noise, 0.0f, wz * decoration.noise, chunk->seed) < decoration.threshold) 
+                    continue;
+                
+                if (Random.Perlin(wx * decoration.noise * 0.5f, 0.0f, wz * decoration.noise * 0.5f, chunk->seed) < decoration.threshold) 
                     continue;
                 
                 float height = 0.0f;
@@ -64,55 +63,57 @@ void ChunkManager::Decorate(Chunk* chunk) {
                 if (Physics.Raycast(from, glm::vec3(0, -1, 0), 2000.0f, hit, LayerMask::Ground)) 
                     height = hit.point.y;
                 
-                if (height < decor.spawnHeightMinimum || height > decor.spawnHeightMaximum) 
+                height = Snap1D(height, grid, gridOrigin.y);
+                
+                if (height < decoration.spawnHeightMinimum || height > decoration.spawnHeightMaximum) 
                     continue;
                 
-                switch (decor.type) {
+                glm::vec3 position(-xp, height, -zp);
+                
+                // Special generation
+                if (decoration.name.find("oak_tree") != std::string::npos) {
                     
-                case DecorationType::Grass:      AddDecorGrass(chunk, staticMesh, glm::vec3(-xp, height, -zp), decor.name); break;
-                case DecorationType::Tree:       AddDecorTree(chunk, staticMesh, glm::vec3(-xp, height, -zp), decor.name); break;
-                case DecorationType::Actor:      AddDecoreActor(glm::vec3(from.x, height, from.z), decor.name); break;
-                case DecorationType::Structure:  AddDecorStructure(chunk, staticMesh, glm::vec3(-xp, height, -zp), decor.name); break;
+                    BuildDecorStructure(chunk, position, "oak_tree");
                     
+                    placementGrid[xx][zz] = 0xff;
+                    continue;
+                }
+                
+                // Place static
+                if (world.classDefinitions.find(decoration.name) != world.classDefinitions.end()) {
+                    ClassDefinition& definition = world.classDefinitions[decoration.name];
+                    if (mStaticMeshes.find(definition.mesh) == mStaticMeshes.end()) 
+                        continue;
+                    
+                    AddDecor(chunk, definition.mesh, decoration.name, position, glm::vec3(0.0f));
+                    placementGrid[xx][zz] = 0xff;
+                    
+                    continue;
                 }
                 
             }
-            
-            
             
         }
         
     }
     
     staticMesh->Load();
-    return;
 }
 
 
-
-void ChunkManager::AddDecor(Chunk* chunk, Mesh* staticMesh, DecorationMesh type, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color) {
-    AddDecorMesh(staticMesh, type, position, rotation, scale, color);
+void ChunkManager::AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, glm::vec3 position, glm::vec3 rotation) {
+    ClassDefinition definition = world.classDefinitions[type];
     
-    StaticObject staticObject;
-    staticObject.position = position;
-    staticObject.rotation = rotation;
-    staticObject.scale    = scale;
-    staticObject.color    = color.ToVec3();
-    staticObject.type     = static_cast<unsigned int>(type);
+    Color color = Colors.Lerp(definition.colorMax, definition.colorMin, 0.5f);
+    glm::vec3 scale(definition.width, definition.height, definition.width);
     
-    chunk->statics.push_back(staticObject);
-}
-
-
-void ChunkManager::AddDecorMesh(Mesh* staticMesh, DecorationMesh type, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color) {
-    switch (type) {
-        case DecorationMesh::WallHorizontal: staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshWallHorz, false); break;
-        case DecorationMesh::WallVerticle:   staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshWallVert, false); break;
-        case DecorationMesh::Plain:          staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshPlain, false); break;
-        case DecorationMesh::Cross:          staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshCross, false); break;
-        case DecorationMesh::Leaf:           staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshLeaf, false); break;
-        case DecorationMesh::Log:            staticMesh->AddSubMesh(position.x, position.y, position.z, subMeshLog, false); break;
-    }
+    if (mStaticMeshes.find(mesh) == mStaticMeshes.end()) 
+        return;
+    
+    Mesh* staticMesh = chunk->staticObject->GetComponent<MeshRenderer>()->mesh;
+    
+    SubMesh& subMesh = mStaticMeshes[mesh];
+    staticMesh->AddSubMesh(position.x, position.y, position.z, subMesh, false);
     
     unsigned int indexMesh = staticMesh->GetSubMeshCount() - 1;
     staticMesh->ChangeSubMeshColor(indexMesh, color);
@@ -122,7 +123,21 @@ void ChunkManager::AddDecorMesh(Mesh* staticMesh, DecorationMesh type, glm::vec3
     staticMesh->ChangeSubMeshRotation(indexMesh, rotation.x, glm::vec3(1, 0, 0));
     staticMesh->ChangeSubMeshRotation(indexMesh, rotation.y, glm::vec3(0, 1, 0));
     staticMesh->ChangeSubMeshRotation(indexMesh, rotation.z, glm::vec3(0, 0, 1));
+    
+    // Add static object to the chunk list
+    StaticObject staticObject;
+    staticObject.position = position;
+    staticObject.rotation = rotation;
+    staticObject.scale    = scale;
+    staticObject.color    = color.ToVec3();
+    staticObject.mesh     = mStaticMeshToIndex[mesh];
+    staticObject.type     = world.classNameToIndex[type];
+    
+    chunk->statics.push_back(staticObject);
 }
+
+
+
 
 
 bool RayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
@@ -152,25 +167,14 @@ bool RayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
     return true;
 }
 
-
-bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, DecorationType type, const std::string& name) {
+DecorationHitInfo ChunkManager::QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold) {
+    DecorationHitInfo result;
     direction = glm::normalize(direction);
-    
-    const float threshold   = 0.7f;
-    const float maxDistance = 10.0f;
-    const float epsPush     = 0.02f;
-    
     float bestDot = -1.0f;
-    int bestChunkIndex = -1;
-    int bestSubMeshIndex = -1;
-    glm::vec3 bestLocalPos(0.0f);
-    glm::vec3 bestHitPoint(0.0f);
-    glm::vec3 bestHitNormal(0.0f);
     
     for (unsigned int i = 0; i < chunks.Size(); i++) {
         Chunk& c = *chunks[i];
         
-        // Skip far chunks
         glm::vec3 chunkPos(c.x, 0.0f, c.y);
         if (glm::distance(chunkPos, position) > chunkSize)
             continue;
@@ -202,7 +206,6 @@ bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, Decoratio
             if (dot < threshold)
                 continue;
             
-            // Work out which face we hit
             glm::vec3 hitPoint = position + direction * hitT;
             glm::vec3 n(0.0f);
             const float faceEps = 0.001f;
@@ -213,117 +216,36 @@ bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, Decoratio
             else if (std::abs(hitPoint.z - boxMin.z) < faceEps) n = glm::vec3( 0, 0,-1);
             else if (std::abs(hitPoint.z - boxMax.z) < faceEps) n = glm::vec3( 0, 0, 1);
             
-            // Pick the best-aligned thing in front of us
+            // Found a better-aligned hit
             if (dot > bestDot) {
                 bestDot = dot;
-                bestChunkIndex = (int)i;
-                bestSubMeshIndex = (int)s;
-                bestLocalPos = sub.position;
-                bestHitPoint = hitPoint;
-                bestHitNormal = (glm::length(n) > 0.0f) ? glm::normalize(n) : glm::vec3(0,1,0);
+                result.didHit = false;
+                
+                // Find matching Decoration in chunk.statics to get type/name
+                for (const StaticObject& object : c.statics) {
+                    if (object.position != sub.position) 
+                        continue;
+                    
+                    result.didHit         = true;
+                    result.worldPosition  = worldPos;
+                    result.hitPoint       = hitPoint;
+                    result.normal         = n;
+                    result.rotation       = object.rotation;
+                    result.scale          = object.scale;
+                    
+                    result.mesh  = mStaticIndexToMesh[object.mesh];
+                    result.type  = world.classIndexToName[object.type];
+                    break;
+                }
             }
         }
     }
     
-    if (bestChunkIndex != -1) {
-        // We hit a static; place on that face
-        Chunk& chunk = *chunks[bestChunkIndex];
-        Mesh* staticMesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
-        
-        const float grid = 1.0f;
-        const glm::vec3 gridOrigin(0.0f);
-        
-        glm::vec3 mountWorld = bestHitPoint;
-        mountWorld = SnapAxes(mountWorld, AxesForFace(bestHitNormal), grid, gridOrigin);
-        mountWorld += bestHitNormal * epsPush;
-        
-        glm::vec3 localPos(mountWorld.x - chunk.x, mountWorld.y, mountWorld.z - chunk.y);
-        
-        switch (type) {
-            case DecorationType::Grass:
-                AddDecorGrass(&chunk, staticMesh, localPos, name);
-                staticMesh->Load();
-                return true;
-            
-            case DecorationType::Tree:
-                AddDecorTree(&chunk, staticMesh, localPos, name);
-                staticMesh->Load();
-                return true;
-            
-            case DecorationType::Structure:
-                AddDecorStructure(&chunk, staticMesh, localPos, name);
-                staticMesh->Load();
-                return true;
-            
-            case DecorationType::Actor:
-                AddDecoreActor(mountWorld, name);
-                return true;
-        }
-        return false;
-    } else {
-        
-        // Place on ground where we’re looking at
-        Hit groundHit;
-        const float kMaxPlaceDistance = 2000.0f;
-        if (!Physics.Raycast(position, direction, kMaxPlaceDistance, groundHit, LayerMask::Ground)) {
-            glm::vec3 probe = position + direction * 10.0f;
-            if (!Physics.Raycast(glm::vec3(probe.x, probe.y + 1000.0f, probe.z),
-                                 glm::vec3(0, -1, 0), 2000.0f, groundHit, LayerMask::Ground)) {
-                return false;
-            }
-        }
-        
-        const float grid = 1.0f;
-        const glm::vec3 gridOrigin(0.0f);
-        
-        glm::vec3 worldHit = groundHit.point;
-        // Snap on XZ for ground; keep Y from the raycast
-        worldHit = SnapAxes(worldHit, glm::bvec3(true, false, true), grid, gridOrigin);
-        
-        // Pick the nearest chunk to the hit point (tighten scope versus camera position)
-        int bestIdx = -1;
-        float bestDist = 1e9f;
-        for (unsigned int i = 0; i < chunks.Size(); i++) {
-            glm::vec3 cpos(chunks[i]->x, 0.0f, chunks[i]->y);
-            float d = glm::distance(cpos, worldHit);
-            if (d < bestDist && d <= chunkSize) {
-                bestDist = d;
-                bestIdx = (int)i;
-            }
-        }
-        if (bestIdx == -1) return false;
-        
-        Chunk& chunk = *chunks[bestIdx];
-        Mesh* staticMesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
-        
-        glm::vec3 localPos(worldHit.x - chunk.x, worldHit.y, worldHit.z - chunk.y);
-        
-        switch (type) {
-            case DecorationType::Grass:
-                AddDecorGrass(&chunk, staticMesh, localPos, name);
-                staticMesh->Load();
-                return true;
-            case DecorationType::Tree:
-                AddDecorTree(&chunk, staticMesh, localPos, name);
-                staticMesh->Load();
-                return true;
-            case DecorationType::Structure:
-                AddDecorStructure(&chunk, staticMesh, localPos, name);
-                staticMesh->Load();
-                return true;
-            case DecorationType::Actor:
-                AddDecoreActor(worldHit, name);
-                return true;
-        }
-    }
-    
-    return false;
+    return result;
 }
 
-void ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction) {
-    float threshold   =   0.7f;   // Focal threshold for selection
-    float maxDistance =   10.0f;  // Max selection distance
-    
+
+bool ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold) {
     float closestDot = -1.0f;
     int bestChunkIndex = -1;
     int bestSubMeshIndex = -1;
@@ -385,56 +307,69 @@ void ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction) {
             chunk.statics.erase(chunk.statics.begin() + i);
             
             mesh->RemoveSubMesh(bestSubMeshIndex);
-            break;
+            
+            mesh->Load();
+            return true;
         }
-        
-        mesh->Load();
     }
+    return false;
 }
 
-DecorationHitInfo ChunkManager::QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance) {
-    DecorationHitInfo result;
-    direction = glm::normalize(direction);
+bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance, float threshold) {
+    std::unordered_map<std::string, ClassDefinition>::iterator itClass = world.classDefinitions.find(name);
+    if (itClass == world.classDefinitions.end())
+        return false;
     
-    const float threshold = 0.7f;
+    const ClassDefinition& definition = itClass->second;
+    auto itMesh = mStaticMeshes.find(definition.mesh);
+    if (itMesh == mStaticMeshes.end()) 
+        return false;
+    
+    glm::vec3 cameraDir = glm::normalize(direction);
+    
+    const float grid = 1.0f;
+    const glm::vec3 gridOrigin(0.5f, 0.5f, 0.5f);
+    
     float bestDot = -1.0f;
+    int   bestChunkIndex   = -1;
+    int   bestSubMeshIndex = -1;
+    glm::vec3 bestHitPoint(0.0f);
+    glm::vec3 bestHitNormal(0.0f);
+    glm::vec3 bestSubLocalPos(0.0f);
     
-    for (unsigned int i = 0; i < chunks.Size(); i++) {
-        Chunk& c = *chunks[i];
+    for (unsigned int ci = 0; ci < chunks.Size(); ++ci) {
+        Chunk& chunk = *chunks[ci];
+        glm::vec3 chunkWorld(chunk.x, 0.0f, chunk.y);
         
-        // Small optimization: skip chunks far from camera
-        glm::vec3 chunkPos(c.x, 0.0f, c.y);
-        if (glm::distance(chunkPos, position) > chunkSize)
+        if (glm::distance(chunkWorld, position) > chunkSize)
             continue;
         
-        Mesh* mesh = c.staticObject->GetComponent<MeshRenderer>()->mesh;
-        unsigned int subCount = mesh->GetSubMeshCount();
+        Mesh* mesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
+        const unsigned subCount = mesh->GetSubMeshCount();
         
-        for (unsigned int s = 0; s < subCount; ++s) {
-            SubMesh sub;
-            mesh->GetSubMesh(s, sub);
+        for (unsigned s = 0; s < subCount; ++s) {
+            SubMesh sub; mesh->GetSubMesh(s, sub);
             
-            glm::vec3 worldPos = sub.position + glm::vec3(c.x, 0.0f, c.y);
-            
-            if (glm::distance(worldPos, position) > maxDistance)
+            glm::vec3 centerWorld = sub.position + chunkWorld;
+            if (glm::distance(centerWorld, position) > maxDistance)
                 continue;
             
-            glm::vec3 aabbScale = glm::vec3(2.0f); // match your RemoveDecor hitbox size
-            glm::vec3 boxMin = worldPos - (aabbScale * 0.5f);
-            glm::vec3 boxMax = worldPos + (aabbScale * 0.5f);
+            const glm::vec3 half(0.5f);
+            glm::vec3 boxMin = centerWorld - half;
+            glm::vec3 boxMax = centerWorld + half;
             
-            float hitT = 0.0f;
-            if (!RayIntersectsAABB(position, direction, boxMin, boxMax, hitT))
+            float t = 0.0f;
+            if (!RayIntersectsAABB(position, cameraDir, boxMin, boxMax, t))
                 continue;
-            if (hitT > maxDistance)
+            if (t > maxDistance)
                 continue;
             
-            glm::vec3 toObject = glm::normalize(worldPos - position);
-            float dot = glm::dot(toObject, direction);
+            glm::vec3 toObj = glm::normalize(centerWorld - position);
+            float dot = glm::dot(toObj, cameraDir);
             if (dot < threshold)
                 continue;
             
-            glm::vec3 hitPoint = position + direction * hitT;
+            glm::vec3 hitPoint = position + cameraDir * t;
             glm::vec3 n(0.0f);
             const float faceEps = 0.001f;
             if      (std::abs(hitPoint.x - boxMin.x) < faceEps) n = glm::vec3(-1, 0, 0);
@@ -444,30 +379,70 @@ DecorationHitInfo ChunkManager::QueryDecor(glm::vec3 position, glm::vec3 directi
             else if (std::abs(hitPoint.z - boxMin.z) < faceEps) n = glm::vec3( 0, 0,-1);
             else if (std::abs(hitPoint.z - boxMax.z) < faceEps) n = glm::vec3( 0, 0, 1);
             
-            // Found a better-aligned hit
             if (dot > bestDot) {
-                bestDot = dot;
-                result.didHit = false;
-                
-                // Find matching Decoration in chunk.statics to get type/name
-                for (const StaticObject& object : c.statics) {
-                    if (object.position != sub.position) 
-                        continue;
-                    
-                    result.didHit = true;
-                    result.worldPosition = worldPos;
-                    result.hitPoint = hitPoint;
-                    result.normal = n;
-                    
-                    result.type = static_cast<DecorationMesh>(object.type);
-                    break;
-                }
+                bestDot          = dot;
+                bestChunkIndex   = (int)ci;
+                bestSubMeshIndex = (int)s;
+                bestHitPoint     = hitPoint;
+                bestHitNormal    = (glm::length(n) > 0.0f) ? glm::normalize(n) : glm::vec3(0,1,0);
+                bestSubLocalPos  = sub.position;
             }
         }
     }
     
-    return result;
+    const auto placeStatic = [&](Chunk& chunk, const glm::vec3& worldPos) -> bool {
+        glm::vec3 localPos(worldPos.x - chunk.x, worldPos.y, worldPos.z - chunk.y);
+        
+        Color color = Colors.Range(definition.colorMin, definition.colorMax);
+        glm::vec3 scale(definition.width, definition.height, definition.width);
+        glm::vec3 rotation(0.0f);
+        
+        AddDecor(&chunk, definition.mesh, world.classIndexToName[definition.id], localPos, rotation);
+        Mesh* staticMesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
+        staticMesh->Load();
+        return true;
+    };
+    
+    if (bestChunkIndex != -1) {
+        Chunk& chunk = *chunks[bestChunkIndex];
+        
+        glm::vec3 hitBlockWorld = bestSubLocalPos + glm::vec3(chunk.x, 0.0f, chunk.y);
+        hitBlockWorld = SnapAxes(hitBlockWorld, glm::bvec3(true, true, true), grid, gridOrigin);
+        
+        glm::vec3 placeWorld = hitBlockWorld + bestHitNormal * grid;
+        glm::bvec3 axes = AxesForFace(bestHitNormal);
+        placeWorld = SnapAxes(placeWorld, axes, grid, gridOrigin);
+        
+        return placeStatic(chunk, placeWorld);
+    }
+    
+    // No static object was hit, check ground
+    Hit groundHit;
+    if (!Physics.Raycast(position, cameraDir, maxDistance, groundHit, LayerMask::Ground)) 
+        return false;
+    
+    glm::vec3 worldHit = groundHit.point;
+    worldHit = SnapAxes(worldHit, glm::bvec3(true, false, true), grid, gridOrigin);
+    
+    int bestIdx = -1;
+    float bestDist = 1e9f;
+    for (unsigned int i = 0; i < chunks.Size(); ++i) {
+        glm::vec3 cpos(chunks[i]->x, 0.0f, chunks[i]->y);
+        float d = glm::distance(cpos, worldHit);
+        if (d < bestDist && d <= chunkSize) {
+            bestDist = d;
+            bestIdx = (int)i;
+        }
+    }
+    if (bestIdx == -1)
+        return false;
+    
+    return placeStatic(*chunks[bestIdx], worldHit);
 }
+
+
+
+
 
 void ChunkManager::DecodeGenome(std::string name, Actor* actorPtr) {
     
@@ -481,7 +456,8 @@ void ChunkManager::DecodeGenome(std::string name, Actor* actorPtr) {
     return;
 }
 
-void ChunkManager::AddDecoreActor(glm::vec3 position, std::string name) {
+/*
+bool ChunkManager::AddDecoreActor(glm::vec3 position, std::string name) {
     Actor* actor = SummonActor(position);
     DecodeGenome(name, actor);
     
@@ -493,5 +469,29 @@ void ChunkManager::AddDecoreActor(glm::vec3 position, std::string name) {
     
     actor->physical.UpdatePhysicalCollider();
     actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
+    return true;
+}
+*/
+
+
+float Snap1D(float v, float grid, float origin) {
+    return origin + std::round((v - origin) / grid) * grid;
 }
 
+glm::vec3 SnapAxes(glm::vec3 p, glm::bvec3 axes, float grid, glm::vec3 origin) {
+    if (axes.x) p.x = Snap1D(p.x, grid, origin.x);
+    if (axes.y) p.y = Snap1D(p.y, grid, origin.y);
+    if (axes.z) p.z = Snap1D(p.z, grid, origin.z);
+    return p;
+}
+
+// Choose which axes to snap based on the face normal we’re placing onto.
+//  - Up/Down face => snap XZ (ground-like)
+//  - +/-X face    => snap YZ (vertical wall)
+//  - +/-Z face    => snap XY (vertical wall)
+glm::bvec3 AxesForFace(const glm::vec3& n) {
+    glm::vec3 an = glm::abs(n);
+    if (an.y >= an.x && an.y >= an.z) return glm::bvec3(true,  false, true ); // XZ
+    if (an.x >= an.y && an.x >= an.z) return glm::bvec3(false, true,  true ); // YZ
+    return                                   glm::bvec3(true,  true,  false); // XY
+}

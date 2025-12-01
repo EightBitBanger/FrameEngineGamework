@@ -6,15 +6,15 @@
 
 
 bool ChunkManager::LoadWorld(void) {
+    std::lock_guard<std::mutex> lock(mux);
     
     world.doGenerateChunks = true;
+    generating.clear();
     
-    // Setup world directory structure
     if (!WorldDirectoryInitiate()) {
         // Initiate new world settings
         
         AddWorldRule("do_auto_breeding", "true");
-        
     }
     
     // Load world data file
@@ -89,6 +89,12 @@ bool ChunkManager::LoadWorld(void) {
             continue;
         }
         
+        if (lineSplit[0] == "version") {
+            if (version != lineSplit[1]) {
+                Engine.console.Print( "Incompatible version " + lineSplit[1] );
+            }
+            continue;
+        }
     }
     
     // Load world rules
