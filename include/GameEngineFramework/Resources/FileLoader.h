@@ -4,7 +4,7 @@ in the following way:
 
 define_asset YourAssetName
 
-Data/value pairs can be specified by
+Key/value pairs can be specified by
 the following layout:
 
 Name Value
@@ -23,13 +23,14 @@ Data...
 #ifndef _FILE_LOADER_SUPPORT__
 #define _FILE_LOADER_SUPPORT__
 
+#include <GameEngineFramework/configuration.h>
+
 #include <fstream>
 #include <vector>
 #include <map>
 
 
-class FileLoader {
-    
+class ENGINE_API FileLoader {
 public:
     
     /// Array of raw data strings from a loaded file.
@@ -52,12 +53,10 @@ public:
     /// Returns a data block of the index location from the name.
     std::string GetDataBlockByName(std::string Name);
     
-    
 private:
     
     // State of the loaded file
     bool isFileLoaded;
-    
 };
 
 #endif

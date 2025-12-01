@@ -35,6 +35,8 @@
 
 
 class ENGINE_API RenderSystem {
+    friend class EngineSystemManager;
+    friend class ActorSystem;
     
 public:
     
@@ -189,8 +191,7 @@ public:
     /// Get number of draw calls made in the last frame.
     unsigned int GetNumberOfDrawCalls(void);
     
-    friend class EngineSystemManager;
-    friend class ActorSystem;
+    std::mutex mux;
     
 private:
     
@@ -254,7 +255,6 @@ private:
     
     // Render support thread
     std::thread* renderThreadMain;
-    std::mutex mux;
     
     
     //

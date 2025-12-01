@@ -4,25 +4,19 @@
 #include <GameEngineFramework/Engine/Engine.h>
 
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
-#include <GameEngineFramework/Plugins/ChunkSpawner/Perlin.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Biome.h>
-#include <GameEngineFramework/Plugins/ChunkSpawner/Decor.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Structure.h>
-#include <GameEngineFramework/Plugins/ChunkSpawner/Scenery.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/StaticObject.h>
 
-#include <GameEngineFramework/Plugins/ChunkSpawner/definitions/tree.h>
-#include <GameEngineFramework/Plugins/ChunkSpawner/definitions/grass.h>
-
+#include <GameEngineFramework/Plugins/ChunkSpawner/ClassDefinition.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/PerlinDefinition.h>
 
 class ENGINE_API WorldGeneration {
-    
 public:
     
     std::string name;
     
     bool doGenerateChunks;
-    
     bool doAutoBreeding;
     
     float snowCapHeight;
@@ -46,8 +40,12 @@ public:
     
     std::vector<Structure> structures;
     
-    std::unordered_map<std::string, DefinitionTypeTree> definitionTree;
-    std::unordered_map<std::string, DefinitionTypeGrass> definitionGrass;
+    std::unordered_map<unsigned int, std::string> classIndexToName;
+    std::unordered_map<std::string, unsigned int> classNameToIndex;
+    
+    std::unordered_map<std::string, ClassDefinition> classDefinitions;
+    
+    //std::unordered_map<std::string, std::vector<StructureDefinition>> structureDefinitions;
     
     WorldGeneration() :
         name("default"),
@@ -60,7 +58,6 @@ public:
         snowCapColor(0.7f, 0.85f, 1.1f, 1.0f),
         
         waterLevel(-21.0f),
-        
         ambientLight(1.0f),
         
         waterColorLow(Colors.black),
@@ -70,10 +67,7 @@ public:
         staticColorHigh(Colors.white),
         
         actorColorLow(Colors.black),
-        actorColorHigh(Colors.white)
-    {
-    }
-    
+        actorColorHigh(Colors.white) {}
 };
 
 

@@ -10,6 +10,7 @@
 #include <GameEngineFramework/Resources/assets/MeshTag.h>
 
 #include <GameEngineFramework/Resources/FileSystem.h>
+#include <GameEngineFramework/Resources/FileLoader.h>
 
 #include <thread>
 #include <mutex>

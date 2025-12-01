@@ -6,30 +6,31 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/WorldGeneration.h>
 
 #include <GameEngineFramework/Plugins/ChunkSpawner/Chunk.h>
-#include <GameEngineFramework/Plugins/ChunkSpawner/Perlin.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/PerlinDefinition.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Biome.h>
-#include <GameEngineFramework/Plugins/ChunkSpawner/Decor.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Structure.h>
-#include <GameEngineFramework/Plugins/ChunkSpawner/Scenery.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/StaticObject.h>
-
-#include <GameEngineFramework/Plugins/ChunkSpawner/definitions/tree.h>
-#include <GameEngineFramework/Plugins/ChunkSpawner/definitions/grass.h>
 
 struct DecorationHitInfo {
     bool didHit = false;
-    DecorationMesh type;
+    
+    std::string type;
+    std::string mesh;
+    
     glm::vec3 worldPosition;
     glm::vec3 hitPoint;
     glm::vec3 normal;
+    glm::vec3 scale;
+    glm::vec3 rotation;
 };
 
 
 class ENGINE_API ChunkManager {
-    
 public:
     
     WorldGeneration world;
+    
+    std::string version;
     
     bool isInitiated;
     bool isChunkGenerationActive;
@@ -99,7 +100,7 @@ public:
     // Color field
     
     /// Initiates a color field grid array of colors and set them to zero.
-    void SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color);
+    void SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color, float noise);
     
     /// Generate a color field containing a color range from from low to high. The bias will determine the fade 
     /// from the low color to the high color based on the height field values.
@@ -142,20 +143,13 @@ public:
     
     void Update(void);
     
-    // Base decoration function
-    void AddDecor(Chunk* chunk, Mesh* staticMesh, DecorationMesh type, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
+    // Decoration functions
+    void AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, glm::vec3 position, glm::vec3 rotation);
     
-    void AddDecorMesh(Mesh* staticMesh, DecorationMesh type, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Color color);
+    DecorationHitInfo QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
+    bool PlaceDecor(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance, float threshold);
+    bool RemoveDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
     
-    bool PlaceDecor(glm::vec3 position, glm::vec3 direction, DecorationType type, const std::string& name);
-    void RemoveDecor(glm::vec3 position, glm::vec3 direction);
-    DecorationHitInfo QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance);
-    
-    // Decoration
-    void AddDecorGrass(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
-    void AddDecorTree(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
-    void AddDecorStructure(Chunk* chunk, Mesh* staticMesh, glm::vec3 position, std::string name);
-    void AddDecoreActor(glm::vec3 position, std::string name);
     
     void DecodeGenome(std::string name, Actor* actorPtr);
     
@@ -169,6 +163,8 @@ public:
         
     } build;
     
+    bool BuildDecorStructure(Chunk* chunk, glm::vec3 position, const std::string& name);
+    
     // World materials
     
     Material* waterMaterial;
@@ -179,7 +175,6 @@ public:
     std::vector<Chunk*> generating;
     std::mutex mux;
     Timer threadTimer;
-    
     
     PoolAllocator<Chunk> chunks;
     
@@ -218,13 +213,14 @@ private:
     unsigned int mDeathCoolDown;
     
     // Mesh cache
+public:
     
-    SubMesh subMeshWallHorz;
-    SubMesh subMeshWallVert;
-    SubMesh subMeshPlain;
-    SubMesh subMeshCross;
-    SubMesh subMeshLeaf;
-    SubMesh subMeshLog;
+    std::unordered_map<std::string, unsigned int> mStaticMeshToIndex;
+    std::unordered_map<unsigned int, std::string> mStaticIndexToMesh;
+    
+    std::unordered_map<std::string, SubMesh> mStaticMeshes;
+    
+private:
     
     Mesh* waterMesh;
     

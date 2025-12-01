@@ -2,7 +2,6 @@
 #define _CHUNK__
 
 #include <GameEngineFramework/Engine/Engine.h>
-#include <GameEngineFramework/Plugins/ChunkSpawner/Scenery.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/StaticObject.h>
 
 #include <deque>

@@ -99,15 +99,11 @@ private:
     std::vector<glm::vec3> mParticleColors;
     std::vector<glm::vec3> mParticleVelocities;
     
-    GameObject* mParticleObject;
-    
     Mesh* mMesh;
     Material* mMaterial;
-    
-public:
+    MeshRenderer* mMeshRenderer;
     
     friend class ParticleSystem;
-    
 };
 
 

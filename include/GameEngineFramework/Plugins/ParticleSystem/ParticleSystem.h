@@ -11,22 +11,20 @@ class ENGINE_API ParticleSystem {
     
 public:
     
-    ParticleSystem();
-    
     void Initiate(void);
-    
     void Update(void);
     
-    
+    /// Create a new particle emitter and return its pointer.
     Emitter* CreateEmitter(void);
     
+    /// Destroy an emitter object.
     void DestroyEmitter(Emitter* emitterPtr);
     
+    ParticleSystem();
     
 private:
     
     PoolAllocator<Emitter> mEmitters;
-    
 };
 
 

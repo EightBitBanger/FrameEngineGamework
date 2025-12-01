@@ -13,6 +13,7 @@ struct StructurePart {
 };
 
 
+
 class ENGINE_API Structure {
     
 public:

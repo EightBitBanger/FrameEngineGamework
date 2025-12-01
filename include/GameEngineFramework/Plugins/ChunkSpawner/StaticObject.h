@@ -3,27 +3,14 @@
 
 #include <GameEngineFramework/Engine/Engine.h>
 
-enum class DecorationMesh {
-    WallHorizontal,
-    WallVerticle,
-    Plain,
-    Cross,
-    Leaf,
-    Log
-};
-
-
 class ENGINE_API StaticObject {
-    
 public:
-    
     glm::vec3 position;
     glm::vec3 rotation;
     glm::vec3 scale;
     glm::vec3 color;
-    
+    unsigned int mesh;
     unsigned int type;
-    
     StaticObject();
 };
 
@@ -34,6 +21,7 @@ struct StaticElement {
     glm::vec3 rotation;
     glm::vec3 scale;
     glm::vec3 color;
+    unsigned int mesh;
     unsigned int type;
 };
 
