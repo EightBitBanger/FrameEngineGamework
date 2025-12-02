@@ -7,6 +7,4 @@ Panel::Panel() :
     y(0),
     w(0),
     h(0),
-    alpha(0.3f)
-{
-}
+    alpha(0.3f) {}

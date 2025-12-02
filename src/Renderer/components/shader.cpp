@@ -40,119 +40,96 @@ Shader::Shader() :
 
 Shader::~Shader() {
     if (mIsShaderLoaded) glDeleteProgram(mShaderProgram);
-    return;
 }
 
 void Shader::SetModelMatrix(glm::mat4 &ModelMatrix) {
     glUniformMatrix4fv(mModelMatrixLocation, 1, GL_FALSE, &ModelMatrix[0][0]);
-    return;
 }
 
 void Shader::SetInverseModelMatrix(glm::mat3 &InverseModelMatrix) {
     glUniformMatrix3fv(mModelInvMatrixLocation, 1, GL_FALSE, &InverseModelMatrix[0][0]);
-    return;
 }
 
 void Shader::SetShadowMatrix(glm::mat4 &shadowMatrix) {
     glUniformMatrix4fv(mShadowMatrixLocation, 1, GL_FALSE, &shadowMatrix[0][0]);
-    return;
 }
 
 void Shader::SetProjectionMatrix(glm::mat4 &projectionMatrix) {
     glUniformMatrix4fv(mProjectionMatrixLocation, 1, GL_FALSE, &projectionMatrix[0][0]);
-    return;
 }
 
 void Shader::SetCameraPosition(glm::vec3 cameraPosition) {
     glUniform3f(mCameraPosition, cameraPosition.x, cameraPosition.y, cameraPosition.z);
-    return;
 }
 
 void Shader::SetCameraAngle(glm::vec3 cameraAngle) {
     glUniform3f(mCameraAngle, cameraAngle.x, cameraAngle.y, cameraAngle.z);
-    return;
 }
 
 void Shader::SetMaterialAmbient(Color color) {
     glUniform3f(mMaterialAmbientLocation, color.r, color.g, color.b);
-    return;
 }
 
 void Shader::SetMaterialDiffuse(Color color) {
     glUniform3f(mMaterialDiffuseLocation, color.r, color.g, color.b);
-    return;
 }
 
 void Shader::SetMaterialSpecular(Color color) {
     glUniform3f(mMaterialSpecularLocation, color.r, color.g, color.b);
-    return;
 }
 
 void Shader::SetTextureSampler(unsigned int index) {
     glUniform1i(mSamplerLocation, index);
-    return;
 }
 
 
 void Shader::SetFogCount(int numberOfFogLayers) {
     glUniform1i(mFogCountLocation, numberOfFogLayers);
-    return;
 }
 
 void Shader::SetFogDensity(unsigned int numberOfLayers, float* density) {
     glUniform1fv(mFogDensityLocation, numberOfLayers, density);
-    return;
 }
 
 void Shader::SetFogHeightCutoff(unsigned int numberOfLayers, float* height) {
     glUniform1fv(mFogHeightCutoffLocation, numberOfLayers, height);
-    return;
 }
 
 void Shader::SetFogBegin(unsigned int numberOfLayers, float* begin) {
     glUniform1fv(mFogBeginLocation, numberOfLayers, begin);
-    return;
 }
 
 void Shader::SetFogEnd(unsigned int numberOfLayers, float* end) {
     glUniform1fv(mFogEndLocation, numberOfLayers, end);
-    return;
 }
 
 void Shader::SetFogColorBegin(unsigned int numberOfLayers, glm::vec3* color) {
     glUniform3fv(mFogBeginColorLocation, numberOfLayers, &color[0][0]);
-    return;
 }
 
 void Shader::SetFogColorEnd(unsigned int numberOfLayers, glm::vec3* color) {
     glUniform3fv(mFogEndColorLocation, numberOfLayers, &color[0][0]);
-    return;
 }
 
 
 void Shader::SetLightCount(unsigned int numberOfLights) {
     glUniform1i(mLightCount, numberOfLights);
-    return;
 }
 
 void Shader::SetLightPositions(unsigned int numberOfLights, glm::vec3* lightPositions) {
     glUniform3fv(mLightPosition, numberOfLights, &lightPositions[0][0]);
-    return;
 }
 
 void Shader::SetLightDirections(unsigned int numberOfLights, glm::vec3* lightDirections) {
     glUniform3fv(mLightDirection, numberOfLights, &lightDirections[0][0]);
-    return;
 }
 
 void Shader::SetLightAttenuation(unsigned int numberOfLights, glm::vec4* lightAttenuation) {
     glUniform4fv(mLightAttenuation, numberOfLights, &lightAttenuation[0][0]);
-    return;
 }
 
 void Shader::SetLightColors(unsigned int numberOfLights, glm::vec3* lightColors) {
     glUniform3fv(mLightColor, numberOfLights, &lightColors[0][0]);
-    return;
 }
 
 void Shader::SetUniformLocations(void) {
@@ -214,8 +191,6 @@ void Shader::SetUniformLocations(void) {
     mLightDirection            = glGetUniformLocation(mShaderProgram, lightDirectionUniformName.c_str());
     mLightAttenuation          = glGetUniformLocation(mShaderProgram, lightAttenuationUniformName.c_str());
     mLightColor                = glGetUniformLocation(mShaderProgram, lightColorUniformName.c_str());
-    
-    return;
 }
 
 int Shader::CreateShaderProgram(std::string VertexScript, std::string FragmentScript) {
@@ -278,7 +253,5 @@ unsigned int Shader::CompileSource(unsigned int Type, std::string Script) {
 
 void Shader::Bind(void) {
     glUseProgram(mShaderProgram);
-    return;
 }
-
 

@@ -80,9 +80,7 @@ bool StringType::IsFloat(const std::string& str) {
 std::vector<std::string> StringType::Explode(const std::string& value, const char character) {
 	std::vector<std::string> result;
     std::istringstream iss(value);
-    
     for (std::string token; std::getline(iss, token, character); ) {
-        
         if (std::move(token) == "") 
             continue;
         
@@ -132,14 +130,12 @@ void StringType::Lowercase(std::string& str) {
     for (int i = 0; str[i] != '\0'; i++) {
         str[i] = tolower(str[i]);
     }
-    return;
 }
 
 void StringType::Uppercase(std::string& str) {
     for (int i = 0; str[i] != '\0'; i++) {
         str[i] = toupper(str[i]);
     }
-    return;
 }
 
 std::string StringType::RemoveWhiteSpace(std::string str) {

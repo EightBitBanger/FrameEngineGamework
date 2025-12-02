@@ -74,7 +74,5 @@ void RenderSystem::accumulateSceneLights(Scene* currentScene, glm::vec3 eye) {
         
         continue;
     }
-    
-    return;
 }
 

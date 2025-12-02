@@ -9,6 +9,4 @@ TextField::TextField() :
     h(50),
     color(1, 1, 1, 1),
     text(""),
-    callback(nullptr)
-{
-}
+    callback(nullptr) {}

@@ -31,9 +31,6 @@
 extern PlatformLayer Platform;
 
 
-UserInterfaceSystem::UserInterfaceSystem() {}
-
-
 void UserInterfaceSystem::Initiate(void* windowHandle, void* deviceCntext) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -61,7 +58,6 @@ void UserInterfaceSystem::Initiate(void* windowHandle, void* deviceCntext) {
 #endif
     
     ImGui_ImplOpenGL3_Init("#version 330 core");
-    return;
 }
 
 
@@ -97,7 +93,6 @@ void UserInterfaceSystem::Render(void) {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     
     glEnable(GL_DEPTH_TEST);
-    return;
 }
 
 
@@ -154,8 +149,6 @@ void UserInterfaceSystem::UpdateTextElements(void) {
                                                               alpha * 255), text->text.c_str());
         
     }
-    
-    return;
 }
 
 void UserInterfaceSystem::UpdateTextFieldElements(void) {
@@ -217,8 +210,6 @@ void UserInterfaceSystem::UpdateTextFieldElements(void) {
         ImGui::End();
         
     }
-    
-    return;
 }
 
 void UserInterfaceSystem::UpdatePanelElements(void) {
@@ -248,8 +239,6 @@ void UserInterfaceSystem::UpdatePanelElements(void) {
         ImGui::End();
         
     }
-    
-    return;
 }
 
 void UserInterfaceSystem::UpdateSpriteElements() {

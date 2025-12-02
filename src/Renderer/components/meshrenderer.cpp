@@ -13,22 +13,18 @@ MeshRenderer::MeshRenderer() :
 
 void MeshRenderer::EnableFrustumCulling(void) {
     mDoCulling = true;
-    return;
 }
 
 void MeshRenderer::DisableFrustumCulling(void) {
     mDoCulling = false;
-    return;
 }
 
 void MeshRenderer::SetBoundingBoxMin(glm::vec3 min) {
     mBoundingBoxMin = min;
-    return;
 }
 
 void MeshRenderer::SetBoundingBoxMax(glm::vec3 max) {
     mBoundingBoxMax = max;
-    return;
 }
 
 glm::vec3 MeshRenderer::GetBoundingBoxMin(void) {
@@ -41,7 +37,6 @@ glm::vec3 MeshRenderer::GetBoundingBoxMax(void) {
 
 void MeshRenderer::AddLevelOfDetail(LevelOfDetail lod) {
     mLods.push_back( lod );
-    return;
 }
 
 bool MeshRenderer::RemoveLevelOfDetail(unsigned int index) {

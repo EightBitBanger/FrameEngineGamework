@@ -6,6 +6,4 @@ Text::Text() :
     x(0),
     y(0),
     color(1, 1, 1, 1),
-    text("")
-{
-}
+    text("") {}

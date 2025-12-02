@@ -29,7 +29,5 @@ void RenderSystem::accumulateSceneFogLayers(Scene* currentScene) {
         
         continue;
     }
-    
-    return;
 }
 

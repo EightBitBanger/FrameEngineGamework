@@ -444,6 +444,5 @@ void Start() {
         GameWorld.SaveWorld();
     }
     
-    return;
 }
 

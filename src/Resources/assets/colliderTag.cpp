@@ -2,10 +2,6 @@
 
 
 ColliderTag::ColliderTag() : 
-    
     name(""),
     isLoaded(false),
-    
-    colliderShape(nullptr)
-{
-}
+    colliderShape(nullptr) {}

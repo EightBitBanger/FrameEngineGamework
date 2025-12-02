@@ -18,7 +18,6 @@ MeshTag::MeshTag() :
 }
 
 bool MeshTag::Load(void) {
-    
     objl::Loader loader;
     if (!loader.LoadFile(path)) 
         return false;

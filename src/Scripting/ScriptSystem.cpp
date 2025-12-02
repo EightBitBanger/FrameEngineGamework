@@ -1,7 +1,6 @@
 #include <GameEngineFramework/Scripting/ScriptSystem.h>
 
 void ScriptSystem::Update(void) {
-    
     for (unsigned int i=0; i < mScript.Size(); i++ ) {
         Script* scriptRef = mScript[i];
         
@@ -15,8 +14,6 @@ void ScriptSystem::Update(void) {
         
         scriptRef->OnUpdate(scriptRef->gameObject);
     }
-    
-    return;
 }
 
 Script* ScriptSystem::CreateScript(void) {

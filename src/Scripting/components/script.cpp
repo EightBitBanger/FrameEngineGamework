@@ -3,17 +3,10 @@
 // Dummy landing function
 void DefaultFunctionPtr(void*) {return;}
 
-
 Script::Script() : 
-    
     name(""),
-    
     isActive(false),
     hasBeenInitiated(false),
-    
     gameObject(nullptr),
-    
-    OnCreate( DefaultFunctionPtr ),
-    OnUpdate( DefaultFunctionPtr )
-{
-}
+    OnCreate(DefaultFunctionPtr),
+    OnUpdate(DefaultFunctionPtr) {}

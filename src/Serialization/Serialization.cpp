@@ -3,10 +3,6 @@
 #include <fstream>
 
 
-Serialization::Serialization(void) {
-    return;
-}
-
 bool Serialization::Serialize(std::string filename, void* buffer, unsigned int size) {
     std::ofstream fStream(filename, std::fstream::out | std::fstream::binary);
     
@@ -26,29 +22,21 @@ bool Serialization::Serialize(std::string filename, void* buffer, unsigned int s
 
 bool Serialization::Deserialize(std::string filename, void* buffer, unsigned int size) {
     std::ifstream fStream(filename, std::fstream::in | std::fstream::binary);
-    
     if (!fStream.is_open()) {
-        
         fStream.close();
-        
         return false;
     }
     
     fStream.read((char*)buffer, size);
-    
     fStream.close();
     return true;
 }
 
 
 unsigned int Serialization::GetFileSize(std::string filename) {
-    
     std::ifstream fStream(filename, std::ios::binary);
-    
     if (!fStream.is_open()) {
-        
         fStream.close();
-        
         return 0;
     }
     
@@ -60,18 +48,12 @@ unsigned int Serialization::GetFileSize(std::string filename) {
 }
 
 bool Serialization::CheckExists(std::string filename) {
-    
     std::ifstream fStream(filename);
-    
     if (!fStream.is_open()) {
-        
         fStream.close();
-        
         return 0;
     }
-    
     fStream.close();
-    
     return true;
 }
 

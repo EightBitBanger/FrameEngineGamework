@@ -188,13 +188,10 @@ void FuncTime(std::vector<std::string> args) {
         Weather.SetTime((float)time);
         
         Engine.console.Print(msgTimeSetTo + args[1]);
-        return;
     }
-    return;
 }
 
 void FuncWeather(std::vector<std::string> args) {
-    
     std::string msgWeatherSet = "Weather ";
     
     if (args[0] == "clear") {
@@ -214,18 +211,12 @@ void FuncWeather(std::vector<std::string> args) {
     }
     
     Engine.console.Print(msgWeatherSet + " invalid");
-    
-    return;
 }
 
 void MainMenuEnable(void) {
-    
     Engine.console.Enable();
-    
     Engine.sceneMain->camera->DisableMouseLook();
-    
     Input.ClearKeys();
-    
     Platform.ShowMouseCursor();
 }
 

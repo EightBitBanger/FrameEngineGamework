@@ -457,12 +457,10 @@ void Run() {
         
     }
     
-    return;
 }
 
 
 void TickUpdate(void) {
     
-    return;
 }
 

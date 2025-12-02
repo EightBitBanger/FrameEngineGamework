@@ -6,10 +6,9 @@
 
 void Shutdown(void) {
     
+    // Auto save on application termination
     //if (GameWorld.world.doGenerateChunks) 
     //    GameWorld.SaveWorld();
     
     GameWorld.isChunkGenerationActive = false;
-    
-    return;
 }

@@ -5,11 +5,9 @@
 extern Logger Log;
 
 ShaderTag::ShaderTag() : 
-    
     path(""),
     name(""),
     isLoaded(false),
-    
     vertexScript(""),
     fragmentScript("")
 {

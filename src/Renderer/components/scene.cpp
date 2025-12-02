@@ -18,7 +18,6 @@ void Scene::AddMeshRendererToSceneRoot(MeshRenderer* meshRenderer, int renderQue
         case RENDER_QUEUE_BACKGROUND:   mRenderQueueBackground.emplace( mRenderQueueBackground.begin(), meshRenderer ); break;
         case RENDER_QUEUE_SKY:          mRenderQueueSky.emplace( mRenderQueueSky.begin(), meshRenderer ); break;
     }
-    return;
 }
 
 bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int renderQueueGroup) {
@@ -46,7 +45,6 @@ bool Scene::RemoveMeshRendererFromSceneRoot(MeshRenderer* meshRenderer, int rend
 
 void Scene::AddLightToSceneRoot(Light* light) {
     mLightList.push_back( light );
-    return;
 }
 
 bool Scene::RemoveLightFromSceneRoot(Light* light) {
@@ -64,7 +62,6 @@ unsigned int GetNumberOfFogLayers(void);
 
 void Scene::AddFogLayerToScene(Fog* fogLayer) {
     mFogLayers.push_back( fogLayer );
-    return;
 }
 
 bool Scene::RemoveFogLayer(Fog* fogLayer) {

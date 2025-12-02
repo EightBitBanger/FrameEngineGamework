@@ -20,18 +20,13 @@ extern IntType Int;
 
 
 TextureTag::TextureTag() : 
-    
     path(""),
     name(""),
     isLoaded(false),
-    
     filtration(MATERIAL_FILTER_LINEAR),
-    
     width(0),
     height(0),
-    
     channels(0),
-    
     buffer(nullptr)
 {
     stbi_set_flip_vertically_on_load(true);

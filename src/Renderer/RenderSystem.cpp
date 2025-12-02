@@ -177,26 +177,18 @@ void RenderSystem::Initiate(void) {
 #endif
     
     renderThreadMain = new std::thread( RenderThreadMain );
-    
     Log.Write( " >> Starting thread renderer" );
-    
-    return;
 }
 
 void RenderSystem::Shutdown(void) {
-    
     isThreadActive = false;
-    
     renderThreadMain->join();
-    
-    return;
 }
 
 
 void RenderSystem::AddSceneToRenderQueue(Scene* scenePtr) {
     std::lock_guard<std::mutex> lock(mux);
     mActiveScenes.push_back(scenePtr);
-    return;
 }
 
 bool RenderSystem::RemoveSceneFromRenderQueue(Scene* scenePtr) {
@@ -220,7 +212,6 @@ void RenderSystem::SetViewport(unsigned int x, unsigned int y, unsigned int w, u
     viewport.y = y;
     viewport.w = w;
     viewport.h = h;
-    return;
 }
 
 // Extract frustum planes from view-projection matrix
@@ -372,9 +363,4 @@ void RenderThreadMain(void) {
     
     std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(3) );
     Log.Write( " >> Shutting down on thread renderer" );
-    
-    return;
 }
-
-
-

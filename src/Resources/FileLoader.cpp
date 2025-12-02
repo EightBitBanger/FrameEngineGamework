@@ -4,9 +4,8 @@
 
 extern StringType String;
 
-FileLoader::FileLoader(std::string FileName) 
-    : isFileLoaded(false) 
-{
+FileLoader::FileLoader(std::string FileName) : 
+    isFileLoaded(false) {
     
     std::fstream FileStream;
     
@@ -62,42 +61,27 @@ FileLoader::FileLoader(std::string FileName)
     
     FileStream.close();
     isFileLoaded = true;
-    
-    return;
 }
 
 std::string FileLoader::GetValueByName(std::string Name, unsigned int Index) {
-    
     for (std::map<std::string, std::vector<std::string>>::iterator it = assetData.begin(); it != assetData.end(); it++) {
-        
         if (it ->first == Name) {
-            
             std::vector<std::string> ValueList = it ->second;
-            if (ValueList.size() == 0) return "";
             
+            if (ValueList.size() == 0) return "";
             if (ValueList.size() < Index) return "";
             
             return ValueList[Index];
-            
         }
-        
     }
-    
     return "";
 }
 
 
 std::string FileLoader::GetDataBlockByName(std::string Name) {
-    
-    for (std::map<std::string, std::string>::iterator it = dataBlocks.begin(); it != dataBlocks.end(); it++) {
-        
-        if (it ->first == Name) {
-            
+    for (std::map<std::string, std::string>::iterator it = dataBlocks.begin(); it != dataBlocks.end(); it++) 
+        if (it ->first == Name) 
             return it ->second;
-        }
-        
-    }
-    
     return "";
 }
 

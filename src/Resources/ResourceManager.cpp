@@ -5,9 +5,8 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
 
-ResourceManager::ResourceManager() {
-    return;
-}
+ResourceManager::ResourceManager() : 
+    sceneMain(nullptr) {}
 
 void ResourceManager::Initiate(void) {
     

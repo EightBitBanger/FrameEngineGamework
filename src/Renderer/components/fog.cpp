@@ -9,6 +9,4 @@ Fog::Fog() :
     fogBegin(30),
     fogEnd(100),
     fogColorBegin{0, 0, 0, 0},
-    fogColorEnd{0, 0, 0, 0}
-{
-}
+    fogColorEnd{0, 0, 0, 0} {}
