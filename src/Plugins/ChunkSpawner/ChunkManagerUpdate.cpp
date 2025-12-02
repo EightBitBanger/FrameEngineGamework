@@ -10,8 +10,6 @@ void ChunkManager::Update(void) {
     UpdateFogSettings(playerPosition);
     DestroyChunks(playerPosition);
     GenerateChunks(playerPosition);
-    
-    return;
 }
 
 void ChunkManager::GenerateChunks(const glm::vec3 &playerPosition) {

@@ -43,7 +43,6 @@ void InputSystem::SetMousePosition(unsigned int x, unsigned int y) {
 #endif
     mouseX = x;
     mouseY = y;
-    return;
 }
 
 // Set key state

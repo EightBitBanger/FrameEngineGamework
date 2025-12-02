@@ -38,20 +38,13 @@ void AudioSystem::Initiate(void) {
         Log.Write(" !! Error initiating audio system");
         return;
     }
-    
     SDL_ResumeAudioStreamDevice(mStream);
-    
-    return;
 }
 
 
 void AudioSystem::Shutdown(void) {
-    
     isAudioThreadActive = false;
-    
     audioThread->join();
-    
-    return;
 }
 
 Sound* AudioSystem::CreateSound(void) {
@@ -82,7 +75,6 @@ Playback* AudioSystem::Play(Sound* soundPtr) {
 
 void AudioSystem::SetVolume(float volume) {
     mMasterVolume = volume;
-    return;
 }
 
 
@@ -227,7 +219,5 @@ void AudioThreadMain(void) {
     
     std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(2) );
     Log.Write(" >> Shutting down on thread audio");
-    
-    return;
 }
 

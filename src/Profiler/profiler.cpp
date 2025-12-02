@@ -11,7 +11,6 @@ ProfilerTimer::ProfilerTimer() :
 
 void ProfilerTimer::Begin(void) {
     timer.Update();
-    return;
 }
 
 float ProfilerTimer::Query(void) {
@@ -24,10 +23,8 @@ bool ProfilerTimer::CheckIsProfilerActive(void) {
 
 void ProfilerTimer::Activate(void) {
     isActive = true;
-    return;
 }
 
 void ProfilerTimer::Deactivate(void) {
     isActive = false;
-    return;
 }

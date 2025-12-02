@@ -125,8 +125,6 @@ void WeatherSystem::Initiate(void) {
     mRainEmitter->maxParticles = 2000;
     mRainEmitter->heightMinimum = GameWorld.world.waterLevel;
     
-    
-    
     // Snow emitter
     
     mSnowEmitter = Particle.CreateEmitter();
@@ -141,8 +139,6 @@ void WeatherSystem::Initiate(void) {
     mSnowEmitter->colorEnd = Colors.white;
     mSnowEmitter->maxParticles = 2000;
     mSnowEmitter->heightMinimum = GameWorld.world.waterLevel;
-    
-    
     
     // Zero the weather systems
     SetWeather( WeatherType::Clear );

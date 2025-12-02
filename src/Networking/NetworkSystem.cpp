@@ -6,9 +6,7 @@ extern Logger Log;
 
 NetworkSystem::NetworkSystem() : 
     mIsConnected(false),
-    mIsHosting(false)
-{
-}
+    mIsHosting(false) {}
 
 bool NetworkSystem::StartHost(unsigned int port) {
     

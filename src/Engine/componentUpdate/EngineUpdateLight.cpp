@@ -6,7 +6,5 @@ void EngineSystemManager::UpdateLight(unsigned int index) {
     
     ((Light*)mStreamBuffer[index].components[EngineComponent::Light])->position  = ((Transform*)mStreamBuffer[index].components[EngineComponent::Transform])->position;
     ((Light*)mStreamBuffer[index].components[EngineComponent::Light])->direction = ((Transform*)mStreamBuffer[index].components[EngineComponent::Transform])->EulerAngles();
-    
-    return;
 }
 

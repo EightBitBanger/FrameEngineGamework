@@ -83,6 +83,5 @@ void ActorSystem::UpdateTick() {
         if (UpdateGarbageCollection(actor)) 
             continue;
     }
-    
 }
 

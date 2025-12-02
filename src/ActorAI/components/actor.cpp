@@ -196,12 +196,10 @@ Actor::UserVariables::UserVariables() :
 
 void Actor::SetName(std::string newName) {
     mName = newName;
-    return;
 }
 
 void Actor::RebuildGeneticExpression(void) {
     genetics.mDoReexpressGenetics = true;
-    return;
 }
 
 std::string Actor::GetName(void) {

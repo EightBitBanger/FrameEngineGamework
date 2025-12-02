@@ -6,15 +6,11 @@
 
 NumberGeneration::NumberGeneration() :
     mSeed(100),
-    mGenerator(100)
-{
-    return;
-}
+    mGenerator(100) {}
 
 void NumberGeneration::SetSeed(int seed) {
     mGenerator.seed(seed);
     mSeed = seed;
-    return;
 }
 
 int NumberGeneration::GetSeed(void) {

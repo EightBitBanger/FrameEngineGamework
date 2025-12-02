@@ -48,7 +48,6 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
         
         geneRenderer->isActive = true;
     }
-    return;
 }
 
 
@@ -79,7 +78,6 @@ void ActorSystem::UpdateAnimationHead(glm::mat4& matrix, Actor* actor, MeshRende
     float geneRotationLength = glm::length(baseRotation);
     if (geneRotationLength != 0.0f) 
         matrix = glm::rotate(matrix, geneRotationLength, glm::normalize(baseRotation));
-    return;
 }
 
 void ActorSystem::UpdateAnimationBody(glm::mat4& matrix, Actor* actor, MeshRenderer* geneRenderer, unsigned int a) {
@@ -99,7 +97,6 @@ void ActorSystem::UpdateAnimationBody(glm::mat4& matrix, Actor* actor, MeshRende
     float geneRotationLength = glm::length(baseRotation);
     if (geneRotationLength != 0.0f) 
         matrix = glm::rotate(matrix, geneRotationLength, glm::normalize(baseRotation));
-    return;
 }
 
 void ActorSystem::UpdateAnimationLimb(glm::mat4& matrix, Actor* actor, unsigned int a) {
@@ -140,7 +137,6 @@ void ActorSystem::UpdateAnimationLimb(glm::mat4& matrix, Actor* actor, unsigned 
     } else {
         HandleAnimationSwing(actor, a, animationFactor, animationMaxSwingRange, true);
     }
-    return;
 }
 
 void ActorSystem::UpdateTargetRotation(Actor* actor) {
@@ -162,8 +158,6 @@ void ActorSystem::UpdateTargetRotation(Actor* actor) {
         
         actor->navigation.mRotation = fadeValue;
     }
-    
-    return;
 }
 
 void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned int a) {
@@ -184,7 +178,6 @@ void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned i
         
         actor->navigation.mFacing = fadeValue;
     }
-    return;
 }
 
 
@@ -201,7 +194,6 @@ void ActorSystem::ApplyAnimationRotation(glm::mat4& matrix, Actor* actor, unsign
     float animationLength = glm::length(actor->state.mAnimation[a]);
     matrix = glm::rotate(matrix, glm::radians(animationLength), 
                          glm::normalize(glm::vec3(actor->state.mAnimation[a])));
-    return;
 }
 
 void ActorSystem::HandleAnimationSwing(Actor* actor, unsigned int a, glm::vec4& animationFactor, float animationMaxSwingRange, bool animationDirection) {

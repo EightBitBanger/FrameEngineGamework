@@ -256,8 +256,6 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
     targetActor->genetics.AddGene(geneLimbFrontRight);
     targetActor->genetics.AddGene(geneLimbRearLeft);
     targetActor->genetics.AddGene(geneLimbRearRight);
-    
-    return;
 }
 
 

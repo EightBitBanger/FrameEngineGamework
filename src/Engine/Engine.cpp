@@ -177,8 +177,6 @@ void EngineSystemManager::Initiate() {
     
     sceneOverlay->camera->clipFar  =  100;
     sceneOverlay->camera->clipNear = -100;
-    
-    return;
 }
 
 void EngineSystemManager::Shutdown(void) {
@@ -193,8 +191,6 @@ void EngineSystemManager::Shutdown(void) {
     Renderer.DestroyShader(shaders.colorUnlit);
     Renderer.DestroyShader(shaders.UI);
     Renderer.DestroyShader(shaders.shadowCaster);
-    
-    return;
 }
 
 
@@ -291,8 +287,6 @@ void EngineSystemManager::EnablePhysicsDebugRenderer(void) {
     
     sceneMain->AddMeshRendererToSceneRoot( meshRendererLines, RENDER_QUEUE_FOREGROUND );
     sceneMain->AddMeshRendererToSceneRoot( meshRendererMeshes, RENDER_QUEUE_FOREGROUND );
-        
-    return;
 }
 
 void EngineSystemManager::UpdatePhysicsDebugRenderer(void) {
@@ -430,8 +424,5 @@ void EngineSystemManager::UpdatePhysicsDebugRenderer(void) {
     debugMesh->ClearSubMeshes();
     
     debugMesh->AddSubMesh(0, 0, 0, subMeshTriangles);
-    
     debugMesh->Load();
-    
-    return;
 }

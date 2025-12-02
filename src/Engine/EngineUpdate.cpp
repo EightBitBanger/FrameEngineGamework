@@ -60,5 +60,4 @@ void EngineSystemManager::Update(void) {
         case ComponentUpdateType::PerObject: for (unsigned int o=0; o < GetStreamSize(); o++) mComponentUpdaters[c](o); break;
         }
     }
-    
 }

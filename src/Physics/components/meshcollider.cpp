@@ -7,10 +7,6 @@ MeshCollider::MeshCollider() :
     
     triangleMesh(nullptr),
     vertexBuffer(nullptr),
-    indexBuffer(nullptr)
-{
-}
+    indexBuffer(nullptr) {}
 
-MeshCollider::~MeshCollider() {
-    
-}
+MeshCollider::~MeshCollider() {}

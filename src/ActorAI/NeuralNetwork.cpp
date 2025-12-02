@@ -39,7 +39,6 @@ void NeuralNetwork::FeedForward(const std::vector<float>& input) {
             
         }
     }
-    return;
 }
 
 std::vector<float> NeuralNetwork::GetResults(void) {
@@ -81,19 +80,16 @@ void NeuralNetwork::AddNeuralLayer(int numberOfNeurons, int numberOfInputs) {
     */
     
     mTopology.push_back(layer);
-    return;
 }
 
 void NeuralNetwork::ClearTopology(void) {
     mTopology.clear();
-    return;
 }
 
 void NeuralNetwork::Train(TrainingSet& trainingSet, float learningRate) {
     FeedForward(trainingSet.input);
     std::vector<std::vector<float>> deltas = CalculateDeltas(trainingSet.target);
     UpdateWeights(trainingSet.input, deltas, learningRate);
-    return;
 }
 
 std::vector<std::vector<float>> NeuralNetwork::CalculateDeltas(const std::vector<float>& target) {
@@ -158,7 +154,6 @@ void NeuralNetwork::UpdateWeights(const std::vector<float>& input, const std::ve
         
         previousLayerOutputs = currentLayer.neurons;
     }
-    return;
 }
 
 // Activation functions
@@ -215,13 +210,9 @@ void NeuralNetwork::LoadState(std::vector<std::string>& state) {
                 
                 layer.weights[ws][w] = String.ToFloat(weightString);
             }
-            
         }
-        
         mTopology.push_back(layer);
     }
-    
-    return;
 }
 
 
@@ -304,8 +295,6 @@ void NeuralNetwork::LoadStateBin(const std::vector<float>& state) {
         
         mTopology.push_back(std::move(layer));
     }
-    
-    return;
 }
 
 std::vector<float> NeuralNetwork::SaveStateBin(void) {
@@ -329,6 +318,5 @@ std::vector<float> NeuralNetwork::SaveStateBin(void) {
             }
         }
     }
-    
     return state;
 }

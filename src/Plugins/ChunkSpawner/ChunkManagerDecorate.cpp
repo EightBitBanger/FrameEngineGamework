@@ -445,15 +445,12 @@ bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, const std
 
 
 void ChunkManager::DecodeGenome(std::string name, Actor* actorPtr) {
-    
     if (name == "Human")  {AI.genomes.presets.Human( actorPtr );}
     if (name == "Sheep")  {AI.genomes.presets.Sheep( actorPtr );}
     if (name == "Bear")   {AI.genomes.presets.Bear( actorPtr );}
     if (name == "Dog")    {AI.genomes.presets.Dog( actorPtr );}
     if (name == "Bovine") {AI.genomes.presets.Bovine( actorPtr );}
     if (name == "Horse")  {AI.genomes.presets.Horse( actorPtr );}
-    
-    return;
 }
 
 /*
@@ -493,5 +490,5 @@ glm::bvec3 AxesForFace(const glm::vec3& n) {
     glm::vec3 an = glm::abs(n);
     if (an.y >= an.x && an.y >= an.z) return glm::bvec3(true,  false, true ); // XZ
     if (an.x >= an.y && an.x >= an.z) return glm::bvec3(false, true,  true ); // YZ
-    return                                   glm::bvec3(true,  true,  false); // XY
+                                      return glm::bvec3(true,  true,  false); // XY
 }

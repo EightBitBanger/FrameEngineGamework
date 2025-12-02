@@ -17,24 +17,20 @@ Sound::Sound() :
 void Sound::SetPosition(glm::vec3 position) {
     std::lock_guard<std::mutex> lock(mux);
     mPosition = position;
-    return;
 }
 
 void Sound::SetMinimumFalloff(float falloff) {
     std::lock_guard<std::mutex> lock(mux);
     mRangeMin = falloff;
-    return;
 }
 
 void Sound::SetMaximumFalloff(float falloff) {
     std::lock_guard<std::mutex> lock(mux);
     mRangeMax = falloff;
-    return;
 }
 
 void Sound::SetFalloffMultiplier(float multiplier) {
     std::lock_guard<std::mutex> lock(mux);
     mFalloff = multiplier;
-    return;
 }
 

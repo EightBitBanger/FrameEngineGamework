@@ -31,8 +31,6 @@ void ActorSystem::UpdateActorState(Actor* actor) {
     if (Random.Range(0, 100) > 80) 
         if (HandleBreedingState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
             return;
-    
-    return;
 }
 
 bool ActorSystem::HandleWalkState(Actor* actor) {
@@ -40,10 +38,8 @@ bool ActorSystem::HandleWalkState(Actor* actor) {
         actor->state.current == ActorState::State::Flee || 
         actor->state.mode != ActorState::Mode::Idle) 
         return false;
-    
     actor->state.current = ActorState::State::None;
     actor->state.mode    = ActorState::Mode::MoveRandom;
-    
     return true;
 }
 
@@ -215,12 +211,9 @@ void ActorSystem::UpdateActorMemories(Actor* actor) {
                     actor->state.current = ActorState::State::None;
                     actor->state.mode = ActorState::Mode::MoveTo;
                 }
-                
                 continue;
             }
         }
-        
     }
-    
 }
 

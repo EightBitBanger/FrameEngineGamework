@@ -62,7 +62,6 @@ void ActorSystem::HandleTargettingMechanics(Actor* actor) {
             break;
             
     }
-    return;
 }
 
 
@@ -91,7 +90,6 @@ void ActorSystem::HandleTargetDistance(Actor* actor) {
         actor->state.mode = ActorState::Mode::Idle;
         
     }
-    
 }
 
 void ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
@@ -133,7 +131,6 @@ void ActorSystem::HandleEscapeEvade(Actor* actor, Actor* target) {
         return;
     }
     actor->navigation.mDistanceToTarget = currentDist;
-    
 }
 
 

@@ -315,8 +315,6 @@ void ChunkManager::Initiate(void) {
         }
         
     }
-    
-    return;
 }
 
 Actor* ChunkManager::SummonActor(glm::vec3 position) {
@@ -447,7 +445,6 @@ void ChunkManager::AddWorldRule(std::string key, std::string value) {
     
     mWorldRules.push_back( keyPair );
     ApplyWorldRule(key, value);
-    return;
 }
 
 bool ChunkManager::RemoveWorldRule(std::string key) {

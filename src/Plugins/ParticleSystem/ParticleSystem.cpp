@@ -3,13 +3,9 @@
 CustomAllocator particlePools{1000, 1};
 
 ParticleSystem::ParticleSystem() : 
-    mEmitters(particlePools)
-{
-}
+    mEmitters(particlePools) {}
 
-void ParticleSystem::Initiate(void) {
-    return;
-}
+void ParticleSystem::Initiate(void) {}
 
 void ParticleSystem::Update(void) {
     
@@ -140,7 +136,6 @@ void ParticleSystem::Update(void) {
             emitterPtr->mMesh->Load();
         }
     }
-    return;
 }
 
 Emitter* ParticleSystem::CreateEmitter(void) {

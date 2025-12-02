@@ -1,12 +1,9 @@
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
 
 PhysicsSystem::PhysicsSystem() : 
-    
     world(nullptr)
 {
     mRigidBodyFreeList.reserve(512);
-    
-    return;
 }
 
 RaybackCastCaller::RaybackCastCaller() : 
@@ -31,55 +28,39 @@ void PhysicsSystem::Initiate(void) {
     
     //world->setNbIterationsVelocitySolver(15);
     //world->setNbIterationsPositionSolver(8);
-    
-    return;
 }
 
 void PhysicsSystem::Shutdown(void) {
     for (unsigned int i=0; i < mRigidBodyFreeList.size(); i++) 
         world->destroyRigidBody( mRigidBodyFreeList[i] );
-    
     common.destroyPhysicsWorld(world);
-    
-    return;
 }
 
 void PhysicsSystem::SetWorldGravity(float x, float y, float z) {
-    
     world->setGravity(rp3d::Vector3(x, y, z));
-    
-    return;
 }
 
 rp3d::RigidBody* PhysicsSystem::CreateRigidBody(float x, float y, float z) {
-    
     rp3d::Vector3 position = rp3d::Vector3(x, y, z);
     rp3d::Quaternion orientation = rp3d::Quaternion::identity();
     rp3d::Transform physicsTransform = rp3d::Transform(position, orientation);
-    
     return world->createRigidBody(physicsTransform);
 }
 
 bool PhysicsSystem::DestroyRigidBody(rp3d::RigidBody* rigidBodyPtr) {
-    
     world->destroyRigidBody(rigidBodyPtr);
-    
     return true;
 }
 
 rp3d::CollisionBody* PhysicsSystem::CreateCollisionBody(float x, float y, float z) {
-    
     rp3d::Vector3 position = rp3d::Vector3(x, y, z);
     rp3d::Quaternion orientation = rp3d::Quaternion::identity();
     rp3d::Transform physicsTransform = rp3d::Transform(position, orientation);
-    
     return world->createCollisionBody(physicsTransform);
 }
 
 bool PhysicsSystem::DestroyCollisionBody(rp3d::CollisionBody* collisionBodyPtr) {
-    
     world->destroyCollisionBody(collisionBodyPtr);
-    
     return true;
 }
 
@@ -97,7 +78,6 @@ rp3d::CapsuleShape* PhysicsSystem::CreateColliderCapsule(float radius, float hei
 }
 
 MeshCollider* PhysicsSystem::CreateHeightFieldMap(float* heightField, unsigned int width, unsigned int height, float scaleX, float scaleY, float scaleZ) {
-    
     MeshCollider* collider = mMeshColliders.Create();
     
     unsigned int mapSize = width * height;
@@ -118,16 +98,12 @@ MeshCollider* PhysicsSystem::CreateHeightFieldMap(float* heightField, unsigned i
                                                                rp3d::HeightFieldShape::HeightDataType::HEIGHT_FLOAT_TYPE);
     
     collider->heightFieldShape->setScale( rp3d::Vector3(scaleX, scaleY, scaleZ) );
-    
     return collider;
 }
 
 bool PhysicsSystem::DestroyHeightFieldMap(MeshCollider* collider) {
-    
     common.destroyHeightFieldShape( collider->heightFieldShape );
-    
     delete( collider->heightMapBuffer );
-    
     return mMeshColliders.Destroy( collider );
 }
 
@@ -136,7 +112,6 @@ MeshCollider* PhysicsSystem::CreateTriangleMesh(float* vertices, unsigned int ve
     // TODO Physics triangle mesh collider
     
     MeshCollider* collider = mMeshColliders.Create();
-    
     collider->vertexBuffer = new float[vertexCount * 3];
     collider->indexBuffer = new unsigned int[indexCount];
     
@@ -149,44 +124,31 @@ MeshCollider* PhysicsSystem::CreateTriangleMesh(float* vertices, unsigned int ve
     }
     
     collider->triangleMesh = common.createTriangleMesh();
-    
     return collider;
 }
 
 bool PhysicsSystem::DestroyTriangleMesh(MeshCollider* collider) {
-    
     common.destroyTriangleMesh( collider->triangleMesh );
-    
     delete( collider->heightMapBuffer );
-    
     return mMeshColliders.Destroy( collider );
 }
 
 void PhysicsSystem::AddRigidBodyToFreeList(rp3d::RigidBody* rigidBodyPtr) {
-    
     mRigidBodyFreeList.push_back(rigidBodyPtr);
-    
     rigidBodyPtr->setIsActive(false);
-    
-    return;
 }
 
 rp3d::RigidBody* PhysicsSystem::RemoveRigidBodyFromFreeList(void) {
-    
     if (mRigidBodyFreeList.size() == 0) 
         return nullptr;
-    
     rp3d::RigidBody* bodyPtr = mRigidBodyFreeList[mRigidBodyFreeList.size()-1];
-    
     bodyPtr->setIsActive(true);
     
     mRigidBodyFreeList.erase( mRigidBodyFreeList.end()-1 );
-    
     return bodyPtr;
 }
 
 bool PhysicsSystem::Raycast(glm::vec3 from, glm::vec3 direction, float distance, Hit& hit, LayerMask layer) {
-    
     direction = glm::normalize( direction ) * distance;
     
     rp3d::Vector3 fromVec(from.x, 
@@ -213,6 +175,3 @@ bool PhysicsSystem::Raycast(glm::vec3 from, glm::vec3 direction, float distance,
     
     return true;
 }
-
-
-

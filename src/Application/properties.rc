@@ -24,7 +24,7 @@ BEGIN
 		VALUE "FileDescription",  ""
 		VALUE "FileVersion",      "V1.0.0.0"
 		VALUE "InternalName",     ""
-		VALUE "LegalCopyright",   "(C)2023 "
+		VALUE "LegalCopyright",   "(C)2025 "
 		VALUE "OriginalFilename", ""
 		VALUE "ProductName",      ""
 		VALUE "ProductVersion",	  "V1.0.0.0"

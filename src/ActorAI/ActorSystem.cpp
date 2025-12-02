@@ -36,21 +36,17 @@ void ActorSystem::Initiate(void) {
     mActorSystemThread = new std::thread( actorThreadMain );
     
     Log.Write( " >> Starting thread AI" );
-    
-    return;
 }
 
 void ActorSystem::Shutdown(void) {
     std::lock_guard<std::mutex> lock(mux);
     isActorThreadActive = false;
     mActorSystemThread->join();
-    return;
 }
 
 void ActorSystem::SetWaterLevel(float waterLevel) {
     std::lock_guard<std::mutex> lock(mux);
     mWorldWaterLevel = waterLevel;
-    return;
 }
 
 float ActorSystem::GetWaterLevel(void) {
@@ -62,7 +58,6 @@ float ActorSystem::GetWaterLevel(void) {
 void ActorSystem::SetPlayerWorldPosition(glm::vec3 position) {
     std::lock_guard<std::mutex> lock(mux);
     mPlayerPosition = position;
-    return;
 }
 
 glm::vec3 ActorSystem::GetPlayerWorldPosition(void) {
@@ -73,7 +68,6 @@ glm::vec3 ActorSystem::GetPlayerWorldPosition(void) {
 void ActorSystem::UpdateSendSignal(void) {
     std::lock_guard<std::mutex> lock(mux);
     doUpdate = true;
-    return;
 }
 
 Actor* ActorSystem::CreateActor(void) {
@@ -121,7 +115,6 @@ Actor* ActorSystem::GetActor(unsigned int index) {
 void ActorSystem::SetActorUpdateDistance(float distance) {
     std::lock_guard<std::mutex> lock(mux);
     mActorUpdateDistance = distance;
-    return;
 }
 
 

@@ -16,13 +16,11 @@ Playback::Playback() :
 void Playback::SetVolume(float volume) {
     std::lock_guard<std::mutex> lock(mux);
     mVolume = volume;
-    return;
 }
 
 void Playback::Seek(unsigned int position) {
     std::lock_guard<std::mutex> lock(mux);
     mCursor = position;
-    return;
 }
 
 bool Playback::CheckIsPlaying(void) {
@@ -34,11 +32,9 @@ void Playback::Replay(void) {
     std::lock_guard<std::mutex> lock(mux);
     mIsPlaying = true;
     mCursor = 0;
-    return;
 }
 
 void Playback::Stop(void) {
     std::lock_guard<std::mutex> lock(mux);
     mIsPlaying = false;
-    return;
 }

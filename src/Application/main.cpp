@@ -1,5 +1,4 @@
-#include <GameEngineFramework/Application/main.h>
-#include <GameEngineFramework/Application/procedure.h>
+#include <GameEngineFrameWork/Engine/Engine.h>
 
 #ifdef RUN_UNIT_TESTS
  #include "../../tests/framework.h"
@@ -316,23 +315,17 @@ int main(int argc, char* argv[]) {
             tickAccumulator = tickUpdateMax;
         
         if (tickAccumulator >= tickUpdateTimeout) {
-            
             tickTimer.Update();
-            
             tickAccumulator -= tickUpdateTimeout;
             
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
-                
                 TickUpdate();
-                
                 tickAccumulator -= tickUpdateTimeout;
                 
                 // Break if no more accumulated time
                 if (tickAccumulator < tickUpdateTimeout) 
                     break;
-                
-                continue;
             }
         }
         
@@ -362,7 +355,6 @@ int main(int argc, char* argv[]) {
                 
                 // Reset mouse scroll wheel state
                 Input.mouseWheelDelta = 0;
-                
                 
                 Scripting.Update();
                 

@@ -37,8 +37,6 @@ void ActorSystem::UpdateActorGenetics(Actor* actor) {
         for (unsigned int a = 0; a < numberOfGenes; a++) 
             actor->genetics.mPhen.push_back(dummyPhenotype);
     }
-    
-    return;
 }
 
 MeshRenderer* ActorSystem::CreateMeshRendererForGene(Actor* actor, unsigned int geneIndex, Mesh* sourceMesh) {
@@ -74,7 +72,6 @@ void ActorSystem::ClearOldGeneticRenderers(Actor* actor) {
     actor->genetics.mPhen.clear();
     actor->state.mAnimation.clear();
     actor->biological.mBiologics.clear();
-    return;
 }
 
 
@@ -182,6 +179,5 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
         
         continue;
     }
-    return;
 }
 

@@ -17,6 +17,5 @@ void EngineSystemManager::UpdateRigidBody(unsigned int index) {
                                                                                                      quaterion.y, 
                                                                                                      quaterion.z);
     
-    return;
 }
 

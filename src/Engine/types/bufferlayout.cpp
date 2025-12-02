@@ -28,7 +28,6 @@ void Vertex::operator= (const Vertex& vertex) {
     nz = vertex.nz;
     u = vertex.u;    // Texture UV
     v = vertex.v;
-    return;
 }
 
 void Vertex::operator+= (const Vertex& vertex) {
@@ -43,7 +42,6 @@ void Vertex::operator+= (const Vertex& vertex) {
     nz += vertex.nz;
     u += vertex.u;    // Texture UV
     v += vertex.v;
-    return;
 }
 
 Index::Index(unsigned int value) : 

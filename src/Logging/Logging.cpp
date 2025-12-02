@@ -10,7 +10,6 @@ void Logger::Write(std::string LogString) {
     FileID << LogString << "\n";
     
     FileID.close();
-    return;
 }
 
 void Logger::WriteLn(void) {
@@ -20,7 +19,6 @@ void Logger::WriteLn(void) {
     FileID << "\n";
     
     FileID.close();
-    return;
 }
 
 void Logger::Clear(void) {
@@ -33,5 +31,4 @@ void Logger::Clear(void) {
     FileID.close();
     
     if (FileExists) {remove(EVENT_LOG_FILENAME);}
-    return;
 }

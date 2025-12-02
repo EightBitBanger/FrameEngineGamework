@@ -269,33 +269,28 @@ void GameObject::AddCollider(MeshCollider* meshCollider, float x, float y, float
     offsetTransform.setPosition(rp3d::Vector3(x, y, z));
     rp3d::Collider* collider = rigidBodyCache->addCollider( meshCollider->heightFieldShape, offsetTransform );
     collider->setCollideWithMaskBits( (unsigned short)layer );
-    return;
 }
 
 void GameObject::SetStatic(void) {
     rp3d::RigidBody* rigidBodyCache = (rp3d::RigidBody*)mComponents[EngineComponent::RigidBody];
     if (rigidBodyCache == nullptr) return;
     rigidBodyCache->setType(rp3d::BodyType::STATIC);
-    return;
 }
 
 void GameObject::SetDynamic(void) {
     rp3d::RigidBody* rigidBodyCache = (rp3d::RigidBody*)mComponents[EngineComponent::RigidBody];
     if (rigidBodyCache == nullptr) return;
     rigidBodyCache->setType(rp3d::BodyType::DYNAMIC);
-    return;
 }
 
 void GameObject::SetKinematic(void) {
     rp3d::RigidBody* rigidBodyCache = (rp3d::RigidBody*)mComponents[EngineComponent::RigidBody];
     if (rigidBodyCache == nullptr) return;
     rigidBodyCache->setType(rp3d::BodyType::KINEMATIC);
-    return;
 }
 
 void GameObject::SetUserData(void* ptr){
     mUserData = ptr;
-    return;
 }
 
 void* GameObject::GetUserData(void) {

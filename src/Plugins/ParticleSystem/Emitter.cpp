@@ -60,7 +60,6 @@ void Emitter::AddParticle(glm::vec3 position, glm::vec3 initialScale, glm::vec3 
     mParticleVelocities.push_back(force);
     mParticleScale.push_back(glm::vec3(1.0f));
     mParticleColors.push_back(glm::vec3(colorBegin.r, colorBegin.g, colorBegin.b));
-    return;
 }
 
 unsigned int Emitter::ResetParticle(unsigned int index, glm::vec3 initialScale, Color initialColor) {
@@ -113,7 +112,6 @@ void Emitter::Activate(void) {
         return;
     Engine.sceneMain->AddMeshRendererToSceneRoot(mMeshRenderer, RENDER_QUEUE_GEOMETRY);
     mIsActive = true;
-    return;
 }
 
 void Emitter::Deactivate(void) {
@@ -121,7 +119,6 @@ void Emitter::Deactivate(void) {
         return;
     Engine.sceneMain->RemoveMeshRendererFromSceneRoot(mMeshRenderer, RENDER_QUEUE_GEOMETRY);
     mIsActive = false;
-    return;
 }
 
 Material* Emitter::GetMaterial(void) {

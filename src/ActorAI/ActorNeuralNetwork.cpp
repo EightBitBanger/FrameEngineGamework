@@ -69,7 +69,6 @@ void ActorSystem::HandleNeuralNetwork(Actor* actor) {
         
     }
     */
-    return;
 }
 
 /*

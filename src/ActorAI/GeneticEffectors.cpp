@@ -433,7 +433,6 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
 
 void GeneticPresets::ClearGenes(Actor* actorPtr) {
     actorPtr->genetics.mGenes.clear();
-    return;
 }
 
 void GeneticPresets::ExposeToRadiation(Actor* actorPtr, float radiationAmount) {
@@ -467,8 +466,6 @@ void GeneticPresets::ExposeToRadiation(Actor* actorPtr, float radiationAmount) {
         gene.color.z += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
         
     }
-    
-    return;
 }
 
 Gene GeneticPresets::Lerp(Gene geneA, Gene geneB, float bias) {

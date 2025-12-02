@@ -60,7 +60,6 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
     }
     
     actor->navigation.mVelocity = forward;
-    return;
 }
 
 

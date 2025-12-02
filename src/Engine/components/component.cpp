@@ -18,5 +18,4 @@ ComponentType Component::GetType(void) {
 void Component::SetComponent(ComponentType component_type, void* component_object) {
     mType = component_type;
     mObject = component_object;
-    return;
 }
