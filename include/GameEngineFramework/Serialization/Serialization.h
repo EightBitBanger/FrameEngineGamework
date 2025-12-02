@@ -10,8 +10,6 @@ class ENGINE_API Serialization {
     
 public:
     
-    Serialization();
-    
     /// Serialize data out to a file.
     bool Serialize(std::string filename, void* buffer, unsigned int size);
     

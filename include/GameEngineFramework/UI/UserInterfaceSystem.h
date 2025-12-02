@@ -17,8 +17,6 @@ class ENGINE_API UserInterfaceSystem {
     
 public:
     
-    UserInterfaceSystem();
-    
     void Initiate(void* windowHandle, void* deviceCntext);
     
     void Render(void);
