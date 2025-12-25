@@ -8,9 +8,6 @@
 #include <mutex>
 
 class ENGINE_API Playback {
-    
-    friend class AudioSystem;
-    
 public:
     
     Playback();
@@ -55,6 +52,7 @@ private:
     
     std::mutex mux;
     
+    friend class AudioSystem;
 };
 
 #endif

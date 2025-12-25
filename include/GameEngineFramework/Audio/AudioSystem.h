@@ -8,6 +8,7 @@
 #include <GameEngineFramework/Audio/components/samplebuffer.h>
 #include <GameEngineFramework/Audio/components/playback.h>
 #include <GameEngineFramework/Audio/SamplePresets.h>
+#include <GameEngineFramework/Audio/StreamParams.h>
 
 #include <GameEngineFramework/MemoryAllocation/poolallocator.h>
 #include <GameEngineFramework/Logging/Logging.h>
@@ -23,7 +24,6 @@
 
 
 class ENGINE_API AudioSystem {
-    
 public:
     
     /// World listening position and orientation in 3D space.
@@ -47,21 +47,20 @@ public:
     /// Sends in a sound to be played by the mixer.
     Playback* Play(Sound* soundPtr);
     
+    /// Get the pointer to the audio stream device.
+    SDL_AudioStream* GetOutputStream(void);
+    
     // Master effects
     
     /// Set the master volume over all sounds.
     void SetVolume(float volume);
-    
     
     void Initiate(void);
     void Shutdown(void);
     
     AudioPreset Presets;
     
-    // Caution used be the audio thread
     std::mutex mux;
-    
-    SDL_AudioStream* mStream;
     
     void MixActiveSounds(std::vector<int32_t>& buffer);
     
@@ -77,8 +76,9 @@ private:
     PoolAllocator<AudioSample> mSamples;
     PoolAllocator<Playback> mPlaybacks;
     
-    std::thread* audioThread;
+    SDL_AudioStream* mStream;
     
+    std::thread* audioThread;
 };
 
 #endif

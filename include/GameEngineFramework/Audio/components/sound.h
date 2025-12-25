@@ -1,19 +1,23 @@
 #ifndef AUDIO_SOUND_COMPONENT
 #define AUDIO_SOUND_COMPONENT
 
+#include <GameEngineFramework/Audio/StreamParams.h>
 #include <GameEngineFramework/Audio/components/samplebuffer.h>
 #include <glm/glm.hpp>
 #include <mutex>
 
 
 class ENGINE_API Sound {
-    
-    friend class AudioSystem;
-    
 public:
     
     /// Is this sound currently active.
     bool isActive;
+    
+    /// Generate audio stream by generation parameters.
+    bool doContinuousStream;
+    
+    /// Stream generation parameters.
+    VocalParameters params;
     
     /// Sample buffer of audio.
     AudioSample* sample;
@@ -47,8 +51,7 @@ private:
     // Rate of audio drop off
     float mFalloff;
     
-    std::mutex mux;
-    
+    friend class AudioSystem;
 };
 
 #endif

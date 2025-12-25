@@ -10,21 +10,15 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-
-//
-// Audio rendering
-
 class ENGINE_API AudioPreset {
-    
 public:
     
-    void RenderBlankSpace(AudioSample* sample, float duration);
+    void RenderBlankSpace(AudioSample* sample, float seconds);
+    void RenderWhiteNoise(AudioSample* sample, float seconds);
+    void RenderSquareWave(AudioSample* sample, float frequency, float seconds);
+    void RenderSweepingSineWave(AudioSample* sample, double startFreq, double endFreq, double seconds);
     
-    void RenderWhiteNoise(AudioSample* sample, float duration);
-    
-    void RenderSquareWave(AudioSample* sample, float frequency, float duration);
-    
-    void RenderSweepingSineWave(AudioSample* sample, double startFreq, double endFreq, double duration);
+    void RenderAnimalVocal(AudioSample* sample, const VocalParameters& params);
     
 };
 

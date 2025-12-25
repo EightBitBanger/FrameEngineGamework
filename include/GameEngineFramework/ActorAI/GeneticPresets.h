@@ -12,7 +12,7 @@ public:
     std::string ExtractGenome(Actor* sourceActor);
     
     /// Inject a genome string into an actor.
-    bool InjectGenome(Actor* targetActor, std::string genome);
+    bool InjectGenome(Actor* targetActor, const std::string& genome);
     
     /// Blends two parent genomes into a single offspring genome.
     bool BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspring);
@@ -23,7 +23,7 @@ public:
     /// Expose the genome to random changes.
     void ExposeToRadiation(Actor* actorPtr, float radiationAmount);
     
-    /// Linearly interpolate between two genes via the bias value.
+    /// Linearly interpolate between two genes via a bias value.
     Gene Lerp(Gene geneA, Gene geneB, float bias);
     
     

@@ -6,7 +6,6 @@
 #include <stdint.h>
 
 class ENGINE_API AudioSample {
-    
 public:
     
     AudioSample();
@@ -16,7 +15,6 @@ public:
     
     /// Array of audio sample data.
     std::vector<int32_t> sampleBuffer;
-    
 };
 
 #endif
