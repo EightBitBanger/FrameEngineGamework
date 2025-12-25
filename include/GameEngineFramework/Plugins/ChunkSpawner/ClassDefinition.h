@@ -14,8 +14,10 @@ public:
     Color colorMax;
     
     // Inventory
-    unsigned int stackMax;
-    std::string bitmap;
+    unsigned int stackMax;       // Maximum stack depth
+    std::string bitmap;          // Inventory item image
+    
+    unsigned int alignment;      // How the object is placed
     
     ClassDefinition() : 
         id(0),

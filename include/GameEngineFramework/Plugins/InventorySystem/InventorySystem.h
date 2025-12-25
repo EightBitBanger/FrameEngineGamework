@@ -41,6 +41,11 @@ public:
     // Callback
     void OnWindowResize(int windowW, int windowH);
     
+    // Save inventory state the world directory
+    bool SaveToFile(const std::string& worldDirectory) const;
+    // Load inventory state from the world directory
+    bool LoadFromFile(const std::string& worldDirectory);
+    
     std::string version;
     
 private:

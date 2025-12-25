@@ -117,7 +117,7 @@ public:
     void AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color waterColor, float beginHeight, float bias, float waterTableHeight);
     
     /// Translate a color by name to a color value.
-    Color GetColorByName(std::string name);
+    Color GetColorByName(const std::string& name);
     
     // Mapping to a mesh
     
@@ -144,7 +144,7 @@ public:
     void Update(void);
     
     // Decoration functions
-    void AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, glm::vec3 position, glm::vec3 rotation);
+    void AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, const glm::vec3& position, const glm::vec3& rotation);
     
     DecorationHitInfo QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
     bool PlaceDecor(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance, float threshold);
@@ -163,7 +163,7 @@ public:
         
     } build;
     
-    bool BuildDecorStructure(Chunk* chunk, glm::vec3 position, const std::string& name);
+    bool BuildDecorStructure(Chunk* chunk, glm::vec3 position, const std::string& pattern, const std::string& name, const std::string& mesh);
     
     // World materials
     

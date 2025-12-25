@@ -8,8 +8,11 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/Structure.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/StaticObject.h>
 
-#include <GameEngineFramework/Plugins/ChunkSpawner/ClassDefinition.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/PerlinDefinition.h>
+
+#include <GameEngineFramework/Plugins/ChunkSpawner/ClassDefinition.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/ClassActor.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/ClassStructure.h>
 
 class ENGINE_API WorldGeneration {
 public:
@@ -43,9 +46,11 @@ public:
     std::unordered_map<unsigned int, std::string> classIndexToName;
     std::unordered_map<std::string, unsigned int> classNameToIndex;
     
+    // Definitions
     std::unordered_map<std::string, ClassDefinition> classDefinitions;
+    std::unordered_map<std::string, ClassActor> classActors;
     
-    //std::unordered_map<std::string, std::vector<StructureDefinition>> structureDefinitions;
+    std::unordered_map<std::string, ClassStructure> classStructures;
     
     WorldGeneration() :
         name("default"),
