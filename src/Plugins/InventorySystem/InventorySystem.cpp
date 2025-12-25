@@ -2,6 +2,7 @@
 
 #include "GameEngineFramework/Plugins/InventorySystem/InventorySystem.h"
 #include <algorithm>
+#include <fstream>
 
 InventorySystem::InventorySystem() : 
     version("0.0.0"),
@@ -398,5 +399,176 @@ void InventorySystem::OnWindowResize(int windowW, int windowH) {
     mBar->y = yy - mSpacingGapPx;
     mBar->w = numberOfSlots * (mSlotSizePx + mSpacingGapPx) + mSpacingGapPx;
     mBar->h = mSlotSizePx + (mSpacingGapPx * 2);
+}
+
+// Save inventory to <worldDirectory>/player.dat as text
+bool InventorySystem::SaveToFile(const std::string& worldDirectory) const {
+    // Build path: "worlds/MyWorld/player.dat" style
+    std::string fileName = worldDirectory + "/player.dat";
+    
+    std::string buffer;
+    
+    // Version tag (like world.dat)
+    buffer += "inventory_version=" + version + "\n";
+    
+    // Number of slots
+    buffer += "slots=" + Int.ToString(static_cast<int>(mCount.size())) + "\n";
+    
+    // Selector index
+    buffer += "selector_index=" + Int.ToString(static_cast<int>(mSelectorIndex)) + "\n";
+    
+    // One line per slot: slotN=name,count
+    const unsigned int slotCount = static_cast<unsigned int>(mCount.size());
+    for (unsigned int i = 0; i < slotCount; ++i) {
+        buffer += "slot" + Int.ToString(static_cast<int>(i)) + "=";
+        
+        if (i < mItems.size() && mCount[i] > 0 && !mItems[i].empty()) {
+            buffer += mItems[i] + "," + Int.ToString(static_cast<int>(mCount[i]));
+        } else {
+            // Empty slot
+            buffer += ",0";
+        }
+        
+        buffer += "\n";
+    }
+    
+    // Write file using same serializer as world.dat / rules.dat
+    Serializer.Serialize(fileName, (void*)buffer.data(), buffer.size());
+    return true;
+}
+
+// Load inventory from <worldDirectory>/player.dat
+bool InventorySystem::LoadFromFile(const std::string& worldDirectory) {
+    std::string fileName = worldDirectory + "/player.dat";
+    
+    // Check size first
+    unsigned int fileSize = Serializer.GetFileSize(fileName);
+    if (fileSize == 0)
+        return false;   // No player.dat yet
+    
+    // Read text buffer
+    std::string buffer;
+    buffer.resize(fileSize + 1);
+    
+    Serializer.Deserialize(fileName, (void*)buffer.data(), fileSize);
+    
+    // Split into lines
+    std::vector<std::string> lines = String.Explode(buffer, '\n');
+    
+    // Start with a clean inventory (same number of slots)
+    const unsigned int slotCount = static_cast<unsigned int>(mCount.size());
+    for (unsigned int i = 0; i < slotCount; ++i) {
+        if (i < mItems.size()) {
+            mItems[i].clear();
+        }
+        if (i < mCount.size()) {
+            mCount[i] = 0;
+        }
+        if (i < mSlotSprites.size()) {
+            mSlotSprites[i]->isActive = false;
+        }
+    }
+    
+    // Default selector
+    mSelectorIndex = 0;
+    
+    // Parse lines: key=value
+    for (unsigned int i = 0; i < lines.size(); ++i) {
+        if (lines[i].empty())
+            continue;
+        
+        std::vector<std::string> lineSplit = String.Explode(lines[i], '=');
+        if (lineSplit.size() < 2)
+            continue;
+        
+        const std::string& key   = lineSplit[0];
+        const std::string& value = lineSplit[1];
+        
+        // Version
+        if (key == "inventory_version") {
+            version = value;
+            continue;
+        }
+        
+        // Slots (we ignore mismatch; layout is defined by Initiate)
+        if (key == "slots") {
+            // int savedSlots = String.ToInt(value);
+            // (You could compare savedSlots to slotCount here if you want)
+            continue;
+        }
+        
+        // Selector index
+        if (key == "selector_index") {
+            int idx = String.ToInt(value);
+            if (idx < 0) idx = 0;
+            if (idx >= static_cast<int>(slotCount)) idx = 0;
+            mSelectorIndex = static_cast<unsigned int>(idx);
+            continue;
+        }
+        
+        // Slot lines: "slotN=name,count"
+        if (key.rfind("slot", 0) == 0) {  // starts with "slot"
+            // Get slot index from key
+            std::string indexStr = key.substr(4); // after "slot"
+            int idx = String.ToInt(indexStr);
+            if (idx < 0 || idx >= static_cast<int>(slotCount))
+                continue;
+            
+            // Split "name,count"
+            std::vector<std::string> valSplit = String.Explode(value, ',');
+            if (valSplit.size() < 2)
+                continue;
+            
+            std::string itemName = valSplit[0];
+            int count = String.ToInt(valSplit[1]);
+            
+            if (itemName.empty() || count <= 0)
+                continue;
+            
+            // Clamp count to stackMax if we know this item class
+            unsigned int finalCount = static_cast<unsigned int>(count);
+            auto itCls = mItemClass.find(itemName);
+            if (itCls != mItemClass.end()) {
+                const ItemClass& cls = itCls->second;
+                if (finalCount > cls.stackMax)
+                    finalCount = cls.stackMax;
+            }
+            
+            // If item class doesn’t exist anymore, skip the slot
+            if (mItemClass.find(itemName) == mItemClass.end()) {
+                Engine.console.Print("InventorySystem::LoadFromFile: unknown item class '" + itemName + "'");
+                continue;
+            }
+            
+            // Store into this slot
+            mItems[idx] = itemName;
+            mCount[idx] = finalCount;
+            
+            // Load / assign sprite texture like AddItem does
+            if (idx < static_cast<int>(mSlotSprites.size())) {
+                TextureTag* matTag = Resources.FindTextureTag(itemName);
+                if (matTag != nullptr) {
+                    matTag->Load();
+                    mSlotSprites[idx]->texture->UploadTextureToGPU(
+                        matTag->buffer,
+                        matTag->width,
+                        matTag->height,
+                        GL_NEAREST,
+                        GL_NEAREST
+                    );
+                    mSlotSprites[idx]->isActive = true;
+                } else {
+                    Engine.console.Print("InventorySystem::LoadFromFile: missing texture for '" + itemName + "'");
+                    mSlotSprites[idx]->isActive = false;
+                    mItems[idx].clear();
+                    mCount[idx] = 0;
+                }
+            }
+            
+            continue;
+        }
+    }
+    
+    return true;
 }
 

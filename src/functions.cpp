@@ -36,15 +36,20 @@ void FuncList(std::vector<std::string> args) {
 
 
 void FuncSave(std::vector<std::string> args) {
-    if (args[0] != "") 
+    Engine.console.Print("Saving " + GameWorld.world.name);if (args[0] != "") 
         GameWorld.world.name = args[0];
+    bool failed=false;
     
-    if (GameWorld.SaveWorld()) {
-        Engine.console.Print("Saving: " + GameWorld.world.name);
+    if (!GameWorld.SaveWorld()) 
+        failed = true;
+    if (!Inventory.SaveToFile("worlds/" + GameWorld.world.name)) 
+        failed = true;
+    
+    if (failed) {
+        Engine.console.Print("Error saving world: " + GameWorld.world.name);
         return;
     }
     
-    Engine.console.Print("Error saving world: " + GameWorld.world.name);
 }
 
 
@@ -54,8 +59,10 @@ void FuncLoad(std::vector<std::string> args) {
     
     if (GameWorld.LoadWorld()) {
         Engine.console.Print("Loading: " + GameWorld.world.name);
+        Inventory.LoadFromFile("worlds/" + GameWorld.world.name);
         return;
     }
+    
     Engine.console.Print("Generating: " + GameWorld.world.name);
     
     GameWorld.worldSeed = Random.Range(100, 10000000) - Random.Range(100, 10000000);
@@ -70,6 +77,7 @@ void FuncLoad(std::vector<std::string> args) {
     
     GameWorld.SaveWorld();
 }
+
 
 
 void FuncRemove(std::vector<std::string> args) {

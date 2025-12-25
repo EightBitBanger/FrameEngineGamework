@@ -70,16 +70,62 @@ void ChunkManager::Decorate(Chunk* chunk) {
                 
                 glm::vec3 position(-xp, height, -zp);
                 
-                // Special generation
-                if (decoration.name.find("oak_tree") != std::string::npos) {
+                // Check actor
+                if (world.classActors.find(decoration.name) != world.classActors.end()) {
+                    const ClassActor& definition = world.classActors[decoration.name];
+                    if (definition.genome == "") 
+                        continue;
                     
-                    BuildDecorStructure(chunk, position, "oak_tree");
+                    Actor* actor = SummonActor(glm::vec3(chunk->x, 0.0f, chunk->y) + position);
                     
-                    placementGrid[xx][zz] = 0xff;
+                    //definition.colorVariant
+                    AI.genomes.InjectGenome(actor, definition.genome);
+                    
+                    // Set default age to adult
+                    actor->physical.SetAge( actor->physical.GetAdultAge() );
+                    
+                    actor->RebuildGeneticExpression();
+                    actor->physical.UpdatePhysicalCollider();
+                    actor->isActive = true;
                     continue;
                 }
                 
-                // Place static
+                // Check structure object
+                float structuralHeightMax = 0;
+                
+                if (world.classStructures.find(decoration.name) != world.classStructures.end()) {
+                    const ClassStructure& structure = world.classStructures[decoration.name];
+                    
+                    for (unsigned int s=0; s < structure.stacks.size(); s++) {
+                        const ClassStructure::SubStructureStack& stack = structure.stacks[s];
+                        ClassDefinition& definition = world.classDefinitions[stack.name];
+                        if (mStaticMeshes.find(definition.mesh) == mStaticMeshes.end()) 
+                            continue;
+                        
+                        unsigned int range = Random.Range(stack.heightMin, stack.heightMax);
+                        for (unsigned int h=0; h < range; h++) {
+                            glm::vec3 offset = position + stack.position + glm::vec3(0, h, 0);
+                            
+                            if (h > structuralHeightMax) 
+                                structuralHeightMax = h;
+                            
+                            AddDecor(chunk, definition.mesh, stack.name, offset, glm::vec3(0.0f));
+                        }
+                    }
+                    
+                    for (unsigned int s=0; s < structure.spread.size(); s++) {
+                        const ClassStructure::SubStructureSpread& spread = structure.spread[s];
+                        glm::vec3 offset = position + spread.position + glm::vec3(0, structuralHeightMax, 0);
+                        
+                        BuildDecorStructure(chunk, offset, spread.pattern, spread.name, spread.mesh);
+                        
+                        continue;
+                    }
+                    
+                    placementGrid[xx][zz] = 0xff;
+                }
+                
+                // Check static object
                 if (world.classDefinitions.find(decoration.name) != world.classDefinitions.end()) {
                     ClassDefinition& definition = world.classDefinitions[decoration.name];
                     if (mStaticMeshes.find(definition.mesh) == mStaticMeshes.end()) 
@@ -101,7 +147,7 @@ void ChunkManager::Decorate(Chunk* chunk) {
 }
 
 
-void ChunkManager::AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, glm::vec3 position, glm::vec3 rotation) {
+void ChunkManager::AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, const glm::vec3& position, const glm::vec3& rotation) {
     ClassDefinition definition = world.classDefinitions[type];
     
     Color color = Colors.Lerp(definition.colorMax, definition.colorMin, 0.5f);
@@ -315,6 +361,7 @@ bool ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction, float ma
     return false;
 }
 
+
 bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance, float threshold) {
     std::unordered_map<std::string, ClassDefinition>::iterator itClass = world.classDefinitions.find(name);
     if (itClass == world.classDefinitions.end())
@@ -395,7 +442,31 @@ bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, const std
         
         Color color = Colors.Range(definition.colorMin, definition.colorMax);
         glm::vec3 scale(definition.width, definition.height, definition.width);
-        glm::vec3 rotation(0.0f);
+        
+        glm::vec3 forward = cameraDir;
+        
+        // Fallback if direction is degenerate
+        if (glm::length2(forward) < 1e-6f) {
+            forward = glm::vec3(0.0f, 0.0f, 1.0f);
+        } else {
+            forward = glm::normalize(forward);
+        }
+        
+        // Horizontal length used for pitch
+        float horizLen = std::sqrt(forward.x * forward.x + forward.z * forward.z);
+        float yawRad   = std::atan2(forward.x, forward.z);  // Y axis
+        float pitchRad = 0.0f;
+        
+        // Flip pitch
+        if (horizLen > 1e-6f) {
+            pitchRad = std::atan2(-forward.y, horizLen);
+        }
+        
+        float yawDeg   = glm::degrees(yawRad);
+        float pitchDeg = glm::degrees(pitchRad);
+        float rollDeg  = 0.0f;
+        
+        glm::vec3 rotation(pitchDeg, yawDeg, rollDeg);
         
         AddDecor(&chunk, definition.mesh, world.classIndexToName[definition.id], localPos, rotation);
         Mesh* staticMesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
@@ -413,7 +484,7 @@ bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, const std
         glm::bvec3 axes = AxesForFace(bestHitNormal);
         placeWorld = SnapAxes(placeWorld, axes, grid, gridOrigin);
         
-        return placeStatic(chunk, placeWorld);
+        return placeStatic(chunk, position);
     }
     
     // No static object was hit, check ground
@@ -439,8 +510,6 @@ bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, const std
     
     return placeStatic(*chunks[bestIdx], worldHit);
 }
-
-
 
 
 

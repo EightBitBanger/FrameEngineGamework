@@ -35,11 +35,8 @@ void MouseButtonLeft() {
                 
                 Inventory.AddItem(info.type);
             }
-            
         }
-        
     }
-    
 }
 
 void MouseButtonRight() {
@@ -54,7 +51,7 @@ void MouseButtonRight() {
     }
 }
 
-MeshRenderer* targetMeshRenderer = nullptr;
+MeshRenderer* selectedMeshRenderer = nullptr;
 
 
 void Run() {
@@ -115,64 +112,74 @@ void Run() {
     if (Input.mouseWheelDelta > 0.0f) 
         Inventory.PrevSlot();
     
-    
     DecorationHitInfo info = GameWorld.QueryDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, hitMaxDistance, hitThreshold);
     
     if (info.didHit) {
-        
         Engine.console.WriteDialog(0, info.type);
         
         // Initiate the mesh outline shadow effect
-        if (!targetMeshRenderer) {
-            targetMeshRenderer = Engine.Create<MeshRenderer>();
-            targetMeshRenderer->mesh = Engine.Create<Mesh>();
-            targetMeshRenderer->material = Engine.Create<Material>();
+        if (!selectedMeshRenderer) {
+            selectedMeshRenderer = Engine.Create<MeshRenderer>();
+            selectedMeshRenderer->mesh = Engine.Create<Mesh>();
+            selectedMeshRenderer->material = Engine.Create<Material>();
             
-            targetMeshRenderer->mesh->isShared = false;
-            targetMeshRenderer->mesh->SetPrimitive(MESH_LINE_LOOP);
-            targetMeshRenderer->material->isShared = false;
-            targetMeshRenderer->material->shader = Engine.shaders.colorUnlit;
+            selectedMeshRenderer->mesh->isShared = false;
+            selectedMeshRenderer->mesh->SetPrimitive(MESH_LINE_LOOP);
+            selectedMeshRenderer->material->isShared = false;
+            selectedMeshRenderer->material->shader = Engine.shaders.colorUnlit;
             
-            targetMeshRenderer->material->ambient = Colors.black;
+            selectedMeshRenderer->material->ambient = Colors.black;
             
-            Engine.sceneMain->AddMeshRendererToSceneRoot(targetMeshRenderer);
+            Engine.sceneMain->AddMeshRendererToSceneRoot(selectedMeshRenderer);
         }
         
         // Generate mesh outline shadow effect
         SubMesh& subMesh = GameWorld.mStaticMeshes[info.mesh];
-        targetMeshRenderer->mesh->ClearSubMeshes();
-        targetMeshRenderer->mesh->AddSubMesh(0.0f, 0.0f, 0.0f, subMesh, true);
-        targetMeshRenderer->mesh->Load();
+        selectedMeshRenderer->mesh->ClearSubMeshes();
+        selectedMeshRenderer->mesh->AddSubMesh(0.0f, 0.0f, 0.0f, subMesh, true);
+        selectedMeshRenderer->mesh->Load();
         
         glm::vec3 position = info.worldPosition;
         glm::vec3 scale    = info.scale * 1.009f;
         glm::vec3 rotation = info.rotation;
         
-        targetMeshRenderer->transform.SetPosition(position);
-        targetMeshRenderer->transform.SetOrientation(rotation * 3.14159f / 180.0f);
+        selectedMeshRenderer->transform.SetPosition(position);
+        selectedMeshRenderer->transform.SetOrientation(rotation * 3.14159f / 180.0f);
         
-        targetMeshRenderer->transform.SetScale(scale);
-        targetMeshRenderer->transform.UpdateMatrix();
-        targetMeshRenderer->isActive = true;
+        selectedMeshRenderer->transform.SetScale(scale);
+        selectedMeshRenderer->transform.UpdateMatrix();
+        selectedMeshRenderer->isActive = true;
         
     } else {
         Engine.console.WriteDialog(0, "");
-        if (targetMeshRenderer) 
-            targetMeshRenderer->isActive = false;
+        if (selectedMeshRenderer) 
+            selectedMeshRenderer->isActive = false;
     }
     
     
     
     if (Input.CheckMouseMiddlePressed()) {
+        
         //Input.SetMouseMiddlePressed(false);
         float randAmount = 8.0f;
         float xx = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         float zz = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         
         Hit hit;
-        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
-            Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
+        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
+            Actor* actor = (Actor*)hit.userData;
             
+            std::string genome = AI.genomes.ExtractGenome(actor);
+            
+            Engine.console.WriteDialog(0, "Actor hit");
+            
+            Platform.SetClipboardText(genome);
+        }
+        
+        
+        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
+            
+            Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
             //AI.genomes.presets.Spider(actor);
             AI.genomes.presets.Human(actor);
             
@@ -182,14 +189,8 @@ void Run() {
             actor->RebuildGeneticExpression();
             actor->isActive = true;
             
-        }
-        
-        
-        /*
-        
-        Hit hit;
-        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
             
+            /*
             glm::vec3 position = glm::vec3(hit.point.x, hit.point.y+1, hit.point.z);
             
             // Fire emitter
@@ -256,9 +257,8 @@ void Run() {
             
             //smokeEmitterMaterial->EnableBlending();
             //smokeEmitterMaterial->shader = Engine.shaders.water;
+            */
         }
-        
-        */
         
     }
     

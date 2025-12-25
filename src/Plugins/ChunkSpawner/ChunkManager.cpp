@@ -143,18 +143,146 @@ void ChunkManager::Initiate(void) {
                     continue;
                 FileLoader loader(structuresPath + filename);
                 
+                ClassStructure structure;
+                
                 for (unsigned int a=0; a < loader.rawData.size(); a++) {
                     std::string line = loader.rawData[a];
-                    
                     std::vector<std::string> params = String.Explode(line, ' ');
-                    Engine.console.Print( params[0] );
                     
+                    for (unsigned int p=0; p < params.size(); p++) {
+                        
+                        if (params[p] == "stack") {
+                            params.erase(params.begin());
+                            if (params.size() < 6) 
+                                continue;
+                            
+                            ClassStructure::SubStructureStack stack;
+                            stack.name = params[p];
+                            
+                            stack.heightMin = String.ToFloat(params[p+1]);
+                            stack.heightMax = String.ToFloat(params[p+2]);
+                            
+                            stack.position  = {String.ToFloat(params[p+3]),
+                                               String.ToFloat(params[p+4]),
+                                               String.ToFloat(params[p+5])};
+                            
+                            structure.stacks.push_back(stack);
+                            
+                            continue;
+                        }
+                        
+                        if (params[p] == "spread") {
+                            params.erase(params.begin());
+                            if (params.size() < 6) 
+                                continue;
+                            
+                            ClassStructure::SubStructureSpread spread;
+                            spread.name    = params[p];
+                            spread.mesh    = params[p+1];
+                            spread.pattern = params[p+2];
+                            
+                            spread.position  = {String.ToFloat(params[p+3]),
+                                                String.ToFloat(params[p+4]),
+                                                String.ToFloat(params[p+5])};
+                            
+                            structure.spread.push_back(spread);
+                            continue;
+                        }
+                    }
+                    
+                    world.classStructures[nameParts[0]] = structure;
                 }
-                
-                
-                
             }
             
+        }
+        
+    }
+    
+    
+    
+    //
+    // Load item classes
+    std::string classesPath = versionsDirectory + version + classesDirectory;
+    if (fs.DirectoryExists(classesPath)) {
+        std::vector<std::string> dirList = fs.DirectoryGetList(classesPath);
+        
+        for (unsigned int i=0; i < dirList.size(); i++) {
+            std::string filename = dirList[i];
+            
+            if (filename.find(".class") == std::string::npos) 
+                continue;
+            
+            std::vector<std::string> nameParts = String.Explode(filename, '.');
+            if (nameParts.size() != 2)
+                continue;
+            
+            FileLoader loader(classesPath + filename);
+            std::string name = nameParts[0];
+            
+            ClassDefinition definition;
+            
+            std::string index      = loader.assetData["id"][0];
+            std::string mesh       = loader.assetData["mesh"][0];
+            std::string width      = loader.assetData["width"][0];
+            std::string height     = loader.assetData["height"][0];
+            std::string colorMin;
+            std::string colorMax;
+            std::string stackMax   = loader.assetData["stackMax"][0];
+            std::string bitmap     = loader.assetData["bitmap"][0];
+            //std::string alignment  = loader.assetData["alignment"][0];
+            
+            for (unsigned int a=0; a < loader.assetData["colorMin"].size(); a++) colorMin += loader.assetData["colorMin"][a];
+            for (unsigned int a=0; a < loader.assetData["colorMax"].size(); a++) colorMax += loader.assetData["colorMax"][a];
+            
+            if (loader.assetData.find("id") != loader.assetData.end())        definition.id        = String.ToInt(index);
+            if (loader.assetData.find("mesh") != loader.assetData.end())      definition.mesh      = mesh;
+            if (loader.assetData.find("width") != loader.assetData.end())     definition.width     = String.ToFloat(width);
+            if (loader.assetData.find("height") != loader.assetData.end())    definition.height    = String.ToFloat(height);
+            
+            if (loader.assetData.find("colorMin") != loader.assetData.end())  definition.colorMin  = GetColorByName(colorMin);
+            if (loader.assetData.find("colorMax") != loader.assetData.end())  definition.colorMax  = GetColorByName(colorMax);
+            
+            if (loader.assetData.find("stackMax") != loader.assetData.end())  definition.stackMax  = String.ToUint(stackMax);
+            if (loader.assetData.find("bitmap")   != loader.assetData.end())  definition.bitmap    = bitmap;
+            
+            //if (loader.assetData.find("alignment") != loader.assetData.end()) definition.alignment = alignment;
+            
+            world.classDefinitions[name] = definition;
+            
+            world.classIndexToName[definition.id] = name;
+            world.classNameToIndex[name] = definition.id;
+        }
+        
+    }
+    
+    
+    //
+    // Load actor classes
+    if (fs.DirectoryExists(classesPath)) {
+        std::vector<std::string> dirList = fs.DirectoryGetList(classesPath);
+        
+        for (unsigned int i=0; i < dirList.size(); i++) {
+            std::string filename = dirList[i];
+            
+            if (filename.find(".genome") == std::string::npos) 
+                continue;
+            
+            std::vector<std::string> nameParts = String.Explode(filename, '.');
+            if (nameParts.size() != 2)
+                continue;
+            
+            FileLoader loader(classesPath + filename);
+            std::string name = nameParts[0];
+            
+            ClassActor definition;
+            
+            if (loader.dataBlocks.find("genome") != loader.dataBlocks.end()) {
+                std::string genome = loader.dataBlocks["genome"];
+                genome.erase(std::remove(genome.begin(), genome.end(), '\n'), genome.end());
+                definition.genome = genome;
+            }
+            
+            world.classActors[name] = definition;
         }
         
     }
@@ -205,53 +333,36 @@ void ChunkManager::Initiate(void) {
                     if (line.find("perlin") != std::string::npos) {
                         line.erase(line.begin(), line.begin()+6);
                         std::vector<std::string> splitLines = String.Explode(line, ' ');
-                        if (splitLines.size() < 7) 
+                        if (splitLines.size() == 7) {
+                            Perlin layer;
+                            layer.heightMultuplier = String.ToFloat(splitLines[0]);
+                            layer.heightMin        = String.ToFloat(splitLines[1]);
+                            layer.heightMax        = String.ToFloat(splitLines[2]);
+                            layer.offsetX          = String.ToInt(splitLines[3]);
+                            layer.offsetY          = String.ToInt(splitLines[4]);
+                            layer.noiseWidth       = String.ToFloat(splitLines[5]);
+                            layer.noiseHeight      = String.ToFloat(splitLines[6]);
+                            
+                            biome.perlin.push_back(layer);
                             continue;
-                        Perlin layer;
-                        layer.heightMultuplier = String.ToFloat(splitLines[0]);
-                        layer.heightMin        = String.ToFloat(splitLines[1]);
-                        layer.heightMax        = String.ToFloat(splitLines[2]);
-                        layer.offsetX          = String.ToInt(splitLines[3]);
-                        layer.offsetY          = String.ToInt(splitLines[4]);
-                        layer.noiseWidth       = String.ToFloat(splitLines[5]);
-                        layer.noiseHeight      = String.ToFloat(splitLines[6]);
-                        
-                        biome.perlin.push_back(layer);
-                        continue;
+                        }
                     }
                     
                     if (line.find("decoration") != std::string::npos) {
                         line.erase(line.begin(), line.begin()+10);
                         std::vector<std::string> splitLines = String.Explode(line, ' ');
-                        if (splitLines.size() < 6) 
+                        if (splitLines.size() == 6) {
+                            DecorationSpecifier decoration;
+                            decoration.name               = splitLines[0];
+                            decoration.density            = String.ToUint(splitLines[1]);
+                            decoration.noise              = String.ToFloat(splitLines[2]);
+                            decoration.threshold          = String.ToFloat(splitLines[3]);
+                            decoration.spawnHeightMinimum = String.ToFloat(splitLines[4]);
+                            decoration.spawnHeightMaximum = String.ToFloat(splitLines[5]);
+                            
+                            biome.decorations.push_back(decoration);
                             continue;
-                        DecorationSpecifier decoration;
-                        decoration.name               = splitLines[0];
-                        decoration.density            = String.ToUint(splitLines[1]);
-                        decoration.noise              = String.ToFloat(splitLines[2]);
-                        decoration.threshold          = String.ToFloat(splitLines[3]);
-                        decoration.spawnHeightMinimum = String.ToFloat(splitLines[4]);
-                        decoration.spawnHeightMaximum = String.ToFloat(splitLines[5]);
-                        
-                        biome.decorations.push_back(decoration);
-                        continue;
-                    }
-                    
-                    if (line.find("actor") != std::string::npos) {
-                        line.erase(line.begin(), line.begin()+5);
-                        std::vector<std::string> splitLines = String.Explode(line, ' ');
-                        if (splitLines.size() < 6) 
-                            continue;
-                        DecorationSpecifier decoration;
-                        decoration.name               = splitLines[0];
-                        decoration.density            = String.ToUint(splitLines[1]);
-                        decoration.noise              = String.ToFloat(splitLines[2]);
-                        decoration.threshold          = String.ToFloat(splitLines[3]);
-                        decoration.spawnHeightMinimum = String.ToFloat(splitLines[4]);
-                        decoration.spawnHeightMaximum = String.ToFloat(splitLines[5]);
-                        
-                        biome.decorations.push_back(decoration);
-                        continue;
+                        }
                     }
                     
                 }
@@ -264,57 +375,7 @@ void ChunkManager::Initiate(void) {
     }
     
     
-    //
-    // Load item classes
-    std::string classesPath = versionsDirectory + version + classesDirectory;
-    if (fs.DirectoryExists(classesPath)) {
-        std::vector<std::string> dirList = fs.DirectoryGetList(classesPath);
-        
-        for (unsigned int i=0; i < dirList.size(); i++) {
-            std::string filename = dirList[i];
-            
-            if (filename.find(".class") == std::string::npos) 
-                continue;
-            
-            std::vector<std::string> nameParts = String.Explode(filename, '.');
-            if (nameParts.size() != 2)
-                continue;
-            
-            FileLoader loader(classesPath + filename);
-            std::string name = nameParts[0];
-            
-            ClassDefinition definition;
-            
-            std::string index    = loader.assetData["id"][0];
-            std::string mesh     = loader.assetData["mesh"][0];
-            std::string width    = loader.assetData["width"][0];
-            std::string height   = loader.assetData["height"][0];
-            std::string colorMin;
-            std::string colorMax;
-            std::string stackMax = loader.assetData["stackMax"][0];
-            std::string bitmap   = loader.assetData["bitmap"][0];
-            
-            for (unsigned int a=0; a < loader.assetData["colorMin"].size(); a++) colorMin += loader.assetData["colorMin"][a];
-            for (unsigned int a=0; a < loader.assetData["colorMax"].size(); a++) colorMax += loader.assetData["colorMax"][a];
-            
-            if (loader.assetData.find("id") != loader.assetData.end())       definition.id     = String.ToInt(index);
-            if (loader.assetData.find("mesh") != loader.assetData.end())     definition.mesh   = mesh;
-            if (loader.assetData.find("width") != loader.assetData.end())    definition.width  = String.ToFloat(width);
-            if (loader.assetData.find("height") != loader.assetData.end())   definition.height = String.ToFloat(height);
-            
-            if (loader.assetData.find("colorMin") != loader.assetData.end()) definition.colorMin = GetColorByName(colorMin);
-            if (loader.assetData.find("colorMax") != loader.assetData.end()) definition.colorMax = GetColorByName(colorMax);
-            
-            if (loader.assetData.find("stackMax") != loader.assetData.end()) definition.stackMax = String.ToUint(stackMax);
-            if (loader.assetData.find("bitmap") != loader.assetData.end())   definition.bitmap   = bitmap;
-            
-            world.classDefinitions[name] = definition;
-            
-            world.classIndexToName[definition.id] = name;
-            world.classNameToIndex[name] = definition.id;
-        }
-        
-    }
+    
 }
 
 Actor* ChunkManager::SummonActor(glm::vec3 position) {
@@ -335,7 +396,7 @@ void ChunkManager::KillActor(Actor* actor) {
 }
 
 
-Color ChunkManager::GetColorByName(std::string name) {
+Color ChunkManager::GetColorByName(const std::string& name) {
     std::vector<std::string> parts = String.Explode(name, '*');
     Color result = Colors.white;
     bool firstColor = true;

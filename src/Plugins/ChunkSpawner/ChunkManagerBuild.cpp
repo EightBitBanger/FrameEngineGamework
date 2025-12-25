@@ -35,132 +35,22 @@ void ChunkManager::BuildFunctions::StackAtAngle(Structure& structure, glm::vec3 
 
 
 
-bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const std::string& name) {
-    float heightMin = 4.0f;
-    float heightMax = 8.0f;
+bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const std::string& pattern, const std::string& name, const std::string& mesh) {
     
-    unsigned int numberOfLeavesMin = 0;
-    unsigned int numberOfLeavesMax = 0;
-    
-    float leafSpreadArea  = 1.0f;
-    float leafSpreadHeight = 1.0f;
     float leafWidth = 1.0f;
     float leafHeight = 1.0f;
-    Color leafColorMin;
-    Color leafColorMax;
     
     float trunkSize = 1.0f;
     Color trunkColorMin = Colors.white;
     Color trunkColorMax = Colors.white;
     
-    // Find the definition
-    /*
-    std::unordered_map<std::string, ClassDefinition>::iterator itClass = world.classDefinitions.find(name);
-    if (itClass == world.classDefinitions.end())
-        return false;
-    
-    const ClassDefinition& definition = itClass->second;
-    std::unordered_map<std::string, SubMesh>::iterator itMesh = mStaticMeshes.find(definition.mesh);
-    if (itMesh == mStaticMeshes.end()) 
-        return false;
-    */
-    
-    if (heightMax == 0.0f && heightMin == 0.0f) 
-        return false;
-    
-    float height = Random.Range(heightMin, heightMax);
-    
-    glm::vec3 scale(trunkSize, 1.0f, trunkSize);
-    glm::vec3 rotation(0.0f, 0.0f, 0.0f);
-    
-    Color color = Colors.Range(trunkColorMin, trunkColorMax);
-    
-    std::string logMesh = "log";
-    std::string logType = "oak_log";
-    
-    std::string leafMesh = "leaf";
-    std::string leafType = "oak_leaf";
-    
-    
-    
-    for (unsigned int s=0; s < (int)height; s++) 
-        AddDecor(chunk, logMesh, logType, glm::vec3(position.x, position.y + s, position.z), rotation);
-    
-    unsigned int clustersMin = 5;
-    unsigned int clustersMax = 7;
-    unsigned int numberOfClusters = Random.Range(clustersMin, clustersMax);
-    
-    unsigned int leavesPerClusterMin = 4;
-    unsigned int leavesPerClusterMax = 6;
-    
-    float baseLeafWidth  = leafWidth;
-    float baseLeafHeight = leafHeight;
-    
-    // vertical center of the crown
-    float crownY = position.y + (height * 0.7f);
-    
-    for (unsigned int c = 0; c < numberOfClusters; c++) {
-        // pick a random point on a sphere surface around the crown center
-        float yaw   = Random.Range(0.0f, 360.0f);
-        float pitch = Random.Range(-30.0f, 50.0f); // slight bias upward
-        float radYaw   = glm::radians(yaw);
-        float radPitch = glm::radians(pitch);
-        
-        float radius = leafSpreadArea * (Random.Range(0.0f, 0.7f));
-        
-        glm::vec3 clusterCenter(
-            position.x + std::cos(radYaw) * std::cos(radPitch) * radius,
-            crownY     + std::sin(radPitch) * radius * 0.6f,
-            position.z + std::sin(radYaw) * std::cos(radPitch) * radius
-        );
-        
-        unsigned int leavesInCluster = Random.Range(leavesPerClusterMin, leavesPerClusterMax);
-        
-        for (unsigned int l = 0; l < leavesInCluster; l++) {
-            glm::vec3 leafOffset(
-                Random.Range(-leafSpreadArea * 0.3f, leafSpreadArea * 0.3f),
-                Random.Range(-leafSpreadHeight * 0.15f, leafSpreadHeight * 0.15f),
-                Random.Range(-leafSpreadArea * 0.3f, leafSpreadArea * 0.3f)
-            );
-            
-            glm::vec3 leafPos = clusterCenter + leafOffset;
-            float leafScaler = 0.85f;
-            float leafMaxScale = 0.3f;
-            
-            glm::vec3 leafScale(
-                baseLeafWidth  * (leafScaler + Random.Range(0.0f, leafMaxScale)),
-                baseLeafHeight * (leafScaler + Random.Range(0.0f, leafMaxScale)),
-                baseLeafWidth  * (leafScaler + Random.Range(0.0f, leafMaxScale))
-            );
-            
-            glm::vec3 leafRot(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-            
-            Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-            AddDecor(chunk, leafMesh, leafType, leafPos, leafRot);
-        }
-    }
-    
-    return true;
-    
-    
-    
-    
-    
-    
-    /*
-    
-    //
-    // Build tree logs
-    //for (unsigned int s=0; s < (int)height; s++) 
-    //    PlaceDecor(chunk, staticMesh, DecorationMesh::Log, DecorationStatic::LogOak, glm::vec3(position.x, position.y + s, position.z), rotation, scale, trunkColor);
-    
-    //
-    // Tree type generation
-    
-    if (name == "oak") {
+    if (pattern == "pattern_oak_leaves") {
         unsigned int clustersMin = 5;
         unsigned int clustersMax = 7;
         unsigned int numberOfClusters = Random.Range(clustersMin, clustersMax);
+        
+        float leafSpreadArea  = 2.0f;
+        float leafSpreadHeight = 1.5f;
         
         unsigned int leavesPerClusterMin = 4;
         unsigned int leavesPerClusterMax = 6;
@@ -169,7 +59,7 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
         float baseLeafHeight = leafHeight;
         
         // vertical center of the crown
-        float crownY = position.y + (height * 0.7f);
+        float crownY = position.y;
         
         for (unsigned int c = 0; c < numberOfClusters; c++) {
             // pick a random point on a sphere surface around the crown center
@@ -178,7 +68,7 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
             float radYaw   = glm::radians(yaw);
             float radPitch = glm::radians(pitch);
             
-            float radius = leafSpreadArea * (Random.Range(0.0f, 0.7f));
+            float radius = Random.Range(0.7f, 1.2f);
             
             glm::vec3 clusterCenter(
                 position.x + std::cos(radYaw) * std::cos(radPitch) * radius,
@@ -207,45 +97,65 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
                 
                 glm::vec3 leafRot(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
                 
-                Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, leafPos, leafRot, leafScale, leafColor);
+                AddDecor(chunk, mesh, name, leafPos, leafRot);
             }
         }
         return true;
     }
     
-    if (name == "pine") {
-        // Tunable tilt controls (packed in-place)
-        float baseTilt        = 1.0f;   // starting tilt in degrees
-        float rateOfTilt      = 16.0f;   // added per ring
-        float tiltOffsetMul   = 0.007f;  // feeds radius calc
+    if (pattern == "pattern_pine_leaves") {
+        // Tunable tilt controls
+        float baseTilt        = 1.0f;
+        float rateOfTilt      = 16.0f;
+        float tiltOffsetMul   = 0.007f;
         
         // Optional shaping/jitter
-        bool  useCurve        = false;   // enable curve shaping across rings
-        float curveExp        = 1.0f;    // >1 ease-in, <1 ease-out
-        float curveBlend      = 1.0f;    // 0 linear, 1 fully curved
-        float ringJitterDeg   = 0.087f;  // random +- per ring
-        float leafJitterDeg   = 0.087f;  // random +- per leaf
+        bool  useCurve        = false;
+        float curveExp        = 1.0f;
+        float curveBlend      = 1.0f;
+        float ringJitterDeg   = 0.087f;
+        float leafJitterDeg   = 0.087f;
         
         // Safety and direction
         bool  clampTilt       = true;
         float minTiltDeg      = 90.0f;
         float maxTiltDeg      = 60.0f;
-        float directionSign   = 1.0f;    // 1 = down, -1 = up
+        float directionSign   = 1.0f;
         
-        // Original geometry inputs
-        unsigned int numberOfLeaves = Random.Range(numberOfLeavesMin, numberOfLeavesMax);
-        float baseLeafWidth  = leafWidth;
-        float baseLeafHeight = leafHeight;
-        float baseScale      = 0.7f;
-        float baseHeight     = position.y + height - 6;
+        unsigned int numberOfLeavesMin = 3;
+        unsigned int numberOfLeavesMax = 8;
+        float leafSpreadArea  = 2.0f;
+        float leafSpreadHeight = 1.5f;
         
-        float rateOfScale    = 0.08f;
-        float rateOfHeight   = 1.0f;
+        float rateOfScale     = 0.08f;
+        float rateOfHeight    = 1.0f;
         unsigned int numberOfRings = 5;
         
-        // Local tilt evaluator
-        auto evalTilt = [&](unsigned int ringIndex) -> float {
+        // Geometry inputs
+        float baseLeafWidth   = leafWidth;
+        float baseLeafHeight  = leafHeight;
+        float baseScale       = 0.7f;
+        float baseHeight      = position.y - (rateOfHeight * numberOfRings);
+        
+        const auto Clamp01 = [](float v) -> float {
+            if (v < 0.0f) return 0.0f;
+            if (v > 1.0f) return 1.0f;
+            return v;
+        };
+        
+        const auto EvalRingT = [&](unsigned int ringIndex) -> float {
+            float denom = (numberOfRings > 1) ? float(numberOfRings - 1) : 1.0f;
+            float t = float(ringIndex) / denom;
+            t = 1.0f - t;
+            
+            if (useCurve) {
+                float curved = std::pow(Clamp01(t), curveExp);
+                t = (t * (1.0f - curveBlend)) + (curved * curveBlend);
+            }
+            return Clamp01(t);
+        };
+        
+        const auto EvalTilt = [&](unsigned int ringIndex) -> float {
             float r1 = float(ringIndex + 1);
             float inc = r1 * rateOfTilt;
             
@@ -258,7 +168,13 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
         };
         
         for (unsigned int r = 0; r < numberOfRings; r++) {
-            float leafTiltRing = evalTilt(r);
+            float t = EvalRingT(r);
+            float leavesF = float(numberOfLeavesMin) + (float(numberOfLeavesMax) - float(numberOfLeavesMin)) * t;
+            
+            unsigned int leavesThisRing = (unsigned int)std::round(leavesF);
+            if (leavesThisRing < 1) leavesThisRing = 1;
+            
+            float leafTiltRing = EvalTilt(r);
             
             if (ringJitterDeg > 0.0f) {
                 float j = Random.Range(-ringJitterDeg, ringJitterDeg);
@@ -268,112 +184,168 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
             float scaleFactor = baseScale  - (float(r + 1) * rateOfScale);
             float ringHeight  = baseHeight + (float(r + 1) * rateOfHeight);
             
-            for (unsigned int l = 0; l < numberOfLeaves; l++) {
-                glm::vec3 leafScale = glm::vec3(baseLeafWidth, baseLeafHeight, baseLeafWidth) * scaleFactor;
+            float ringYawOffset = Random.Range(0.0f, 360.0f);
             
+            for (unsigned int l = 0; l < leavesThisRing; l++) {
+                glm::vec3 leafScale =
+                    glm::vec3(baseLeafWidth, baseLeafHeight, baseLeafWidth) * scaleFactor;
+                
                 float leafTilt = leafTiltRing;
                 if (leafJitterDeg > 0.0f) {
                     float lj = Random.Range(-leafJitterDeg, leafJitterDeg);
                     leafTilt += lj;
                 }
-            
+                
                 float radius = (leafSpreadArea * scaleFactor) - (leafTilt * tiltOffsetMul);
                 if (radius < 0.0f) radius = 0.0f;
-            
-                float someRandomYaw = Random.Range(1, 100) * 0.5f;
-                float angle = ((360.0f / numberOfLeaves) * float(l)) + someRandomYaw;
+                
+                // Even spacing with a single per-ring offset
+                float angle = (360.0f / float(leavesThisRing)) * float(l) + ringYawOffset;
                 float rad   = glm::radians(angle);
-            
+                
                 float dx = std::cos(rad) * radius;
                 float dz = std::sin(rad) * radius;
                 glm::vec3 leafPosition(position.x + dx, ringHeight, position.z + dz);
-            
+                
                 float yawDeg = glm::degrees(std::atan2(dx, dz));
                 glm::vec3 leafRotation(leafTilt, yawDeg, 0.0f);
-            
-                Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafPine, leafPosition, leafRotation, leafScale, leafColor);
+                
+                AddDecor(chunk, mesh, name, leafPosition, leafRotation);
             }
         }
+        
         return true;
     }
     
+    if (pattern == "pattern_birch_leaves") {
+        unsigned int clusters = Random.Range(5, 9);
+        
+        float leafSpreadArea  = 2.0f;
+        float leafSpreadHeight = 1.5f;
+        
+        unsigned int leavesPerClusterMin = 4;
+        unsigned int leavesPerClusterMax = 8;
+        
+        float baseLeafWidth  = leafWidth  * 0.75f;
+        float baseLeafHeight = leafHeight * 0.75f;
+        
+        float radius = glm::max(leafSpreadArea * 0.1f, 0.3f);
+        
+        float canopyTopY = position.y;
+        
+        float halfTreeDrop = leafSpreadHeight * 4.0f;
+        
+        float canopyThickness = leafSpreadHeight * 1.6f;
+        
+        canopyThickness *= 1.20f;
+        
+        float canopyBotY = canopyTopY - halfTreeDrop;
+        
+        float trunkBaseY = position.y;
+        float trunkFloorY = trunkBaseY;
+        
+        float denom = (clusters > 1) ? float(clusters - 1) : 1.0f;
+        
+        for (unsigned int c = 0; c < clusters; c++) {
+            float t = float(c) / denom; // 0..1
+            
+            float ringY = canopyTopY + (canopyBotY - canopyTopY) * t;
+            
+            float yaw = Random.Range(0.0f, 360.0f);
+            float rad = glm::radians(yaw);
+            float rMul = (0.7f + Random.Range(0.0f, 0.4f));
+            float dx  = std::cos(rad) * (radius * rMul);
+            float dz  = std::sin(rad) * (radius * rMul);
+            glm::vec3 clusterCenter(position.x + dx, ringY, position.z + dz);
+            
+            unsigned int leavesInCluster = Random.Range(leavesPerClusterMin, leavesPerClusterMax);
+            for (unsigned int l = 0; l < leavesInCluster; l++) {
+                
+                float yJitter = Random.Range(-leafSpreadHeight * 0.35f, leafSpreadHeight * 0.15f);
+                
+                glm::vec3 leafPos = clusterCenter + glm::vec3(
+                    Random.Range(-radius * 0.2f, radius * 0.2f),
+                    yJitter,
+                    Random.Range(-radius * 0.2f, radius * 0.2f)
+                );
+                
+                float maxY = canopyTopY;
+                float minY = canopyBotY - (leafSpreadHeight * 0.25f);
+                if (leafPos.y > maxY) leafPos.y = maxY;
+                if (leafPos.y < minY) leafPos.y = minY;
+                
+                glm::vec3 leafRot(Random.Range(0.0f, 360.0f), Random.Range(0.0f, 360.0f), Random.Range(0.0f, 360.0f));
+                
+                float scaleMul = 0.75f + Random.Range(0.0f, 0.25f);
+                glm::vec3 leafScale(baseLeafWidth * scaleMul, baseLeafHeight * scaleMul, baseLeafWidth  * scaleMul);
+                
+                AddDecor(chunk, mesh, name, leafPos, leafRot);
+            }
+        }
+        
+        return true;
+    }
     
-    if (name == "willow") {
-        // overall canopy feel
-        unsigned int curtainsMin = 6;
-        unsigned int curtainsMax = 12;
-        unsigned int numberOfCurtains = Random.Range(curtainsMin, curtainsMax);
+    if (pattern == "pattern_willow_leaves") {
+        unsigned int leavesMin = 10;
+        unsigned int leavesMax = 16;
         
-        // leaves per hanging chain
-        unsigned int segmentsMin = 5;
-        unsigned int segmentsMax = 9;
-        unsigned int leavesPerChain = Random.Range(segmentsMin, segmentsMax);
+        float leafSpreadArea   = 1.3f;
+        float leafSpreadHeight = 0.4f;
         
-        // base geo from definition
-        float baseLeafWidth  = leafWidth;
-        float baseLeafHeight = leafHeight;
+        float crownY = position.y;
+        float radius = glm::max(leafSpreadArea, 0.6f);
         
-        // start canopy a bit above mid-trunk; willows hang down from there
-        float crownY      = position.y + (height * 0.8f);
-        float baseRadius  = leafSpreadArea * 0.9f;   // ring radius where chains start
-        float maxHang     = glm::max(leafSpreadHeight, height * 0.35f); // how far chains can hang
+        unsigned int leafCount = Random.Range(leavesMin, leavesMax);
         
-        // sway/taper controls
-        float swayAmplitude = leafSpreadArea * 0.15f;     // side-to-side
-        float pitchStartDeg = 25.0f;                      // near crown
-        float pitchEndDeg   = 85.0f;                      // near tip
-        float scaleTaper    = 0.35f;                      // leaf size reduction from top to bottom
-        float radiusInward  = 0.25f;                      // inward pull as chains descend
+        unsigned int chainLenMin = 10;
+        unsigned int chainLenMax = 14;
+        float chainDrop          = leafSpreadHeight;
+        float chainOutwardPull   = 0.02f;
+        float chainJitterXZ      = 0.2f;
         
-        for (unsigned int c = 0; c < numberOfCurtains; c++) {
-            float jitterYaw   = Random.Range(-12.0f, 12.0f);
-            float angleDeg    = ((360.0f / numberOfCurtains) * c) + jitterYaw;
-            float angRad      = glm::radians(angleDeg);
+        for (unsigned int i = 0; i < leafCount; i++) {
             
-            // base point around the trunk
-            float dx0 = std::cos(angRad) * baseRadius;
-            float dz0 = std::sin(angRad) * baseRadius;
+            float angleDeg = (360.0f / float(leafCount)) * float(i);
             
-            // randomize chain length & local sway phase
-            unsigned int segCount = leavesPerChain + Random.Range(-1, 1);
-            if (segCount < 3) segCount = 3;
-            float swayPhase = Random.Range(0.0f, 6.283185f); // 0..2
+            angleDeg += Random.Range(-24.0f, 24.0f);
+            float r = radius * Random.Range(0.7f, 0.9f);
             
-            for (unsigned int s = 0; s < segCount; s++) {
-                float t = (segCount <= 1) ? 0.0f : (float)s / (float)(segCount - 1); // 0..1 along chain
+            float angRad = glm::radians(angleDeg);
+            float outX = std::cos(angRad);
+            float outZ = std::sin(angRad);
+            
+            glm::vec3 basePos(position.x + outX * r, 
+                              crownY + Random.Range(-0.3f, 0.5f), 
+                              position.z + outZ * r);
+            
+            unsigned int chainLen = Random.Range(chainLenMin, chainLenMax);
+            
+            for (unsigned int s = 0; s < chainLen; s++) {
+                float t = (chainLen <= 1) ? 0.0f : float(s) / float(chainLen - 1); // 0..1 down chain
                 
-                // vertical placement: hang downward from crownY
-                float y = crownY - (t * maxHang);
+                float y = basePos.y - (float(s) * chainDrop);
                 
-                // taper radius inward as it hangs, plus gentle sine sway
-                float radius = baseRadius * (1.0f - radiusInward * t);
-                float sway   = std::sin((t * 3.1415926f * 1.5f) + swayPhase) * (swayAmplitude * (0.5f + 0.5f * (1.0f - t)));
-                float dx     = std::cos(angRad) * radius + std::cos(angRad + 1.570796f) * sway; // sway perpendicular to radial
-                float dz     = std::sin(angRad) * radius + std::sin(angRad + 1.570796f) * sway;
+                float drift = chainOutwardPull * float(s);
+                float dx = outX * drift + Random.Range(-chainJitterXZ, chainJitterXZ);
+                float dz = outZ * drift + Random.Range(-chainJitterXZ, chainJitterXZ);
                 
-                glm::vec3 leafPos(position.x + dx, y, position.z + dz);
+                glm::vec3 leafPos(basePos.x + dx, y, basePos.z + dz);
                 
-                // orientation: face outward around trunk, pitched down more as it hangs
-                float yawDeg   = glm::degrees(std::atan2(dx, dz));   // outward
-                float pitchDeg = pitchStartDeg + (pitchEndDeg - pitchStartDeg) * t; // droop more at bottom
-                float rollDeg  = Random.Range(-8.0f, 8.0f);          // a touch of disorder
+                float yawDeg = glm::degrees(std::atan2(outX, outZ));
+                float pitchDeg = 20.0f + 55.0f * t;             // 20..75 degrees
+                float rollDeg  = Random.Range(-10.0f, 10.0f);
                 
                 glm::vec3 leafRot(pitchDeg, yawDeg, rollDeg);
                 
-                // size tapers from top to bottom
-                float sizeFactor = 1.0f - (scaleTaper * t);
-                glm::vec3 leafScale = glm::vec3(baseLeafWidth, baseLeafHeight, baseLeafWidth) * sizeFactor;
-                
-                Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, leafPos, leafRot, leafScale, leafColor);
+                AddDecor(chunk, mesh, name, leafPos, leafRot);
             }
         }
+        
         return true;
     }
-    
-    
-    if (name == "palm") {
+    if (pattern == "pattern_palm_leaves") {
+        /*
         // crown only — long fronds radiating from the top
         unsigned int frondsMin = 6;
         unsigned int frondsMax = 10;
@@ -401,14 +373,15 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
             float scaleMul = 0.85f + Random.Range(0.0f, 0.3f);
             glm::vec3 leafScale(baseLeafWidth * scaleMul, baseLeafHeight * scaleMul, baseLeafWidth * 0.45f * scaleMul);
             
-            Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-            AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, leafPos, leafRot, leafScale, leafColor);
+            AddDecor(chunk, mesh, name, leafPos, leafRot);
         }
+        */
         return true;
     }
     
     
-    if (name == "acacia") {
+    if (pattern == "pattern_acacia_leaves") {
+        /*
         // flat-topped discs with gaps
         unsigned int tiers = 2 + Random.Range(0, 2); // 2–3 levels
         unsigned int leavesPerRing = Random.Range(numberOfLeavesMin, numberOfLeavesMax);
@@ -441,60 +414,15 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
                 float scaleMul = 0.5f + Random.Range(0.0f, 0.35f);
                 glm::vec3 leafScale = glm::vec3(baseLeafWidth, baseLeafHeight, baseLeafWidth) * scaleMul;
                 
-                Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, leafPos, leafRot, leafScale, leafColor);
+                AddDecor(chunk, mesh, name, leafPos, leafRot);
             }
         }
+        */
         return true;
     }
     
-    
-    if (name == "birch") {
-        // vertical column of small, airy clusters
-        unsigned int clusters = Random.Range(5, 9);
-        unsigned int leavesPerClusterMin = 4;
-        unsigned int leavesPerClusterMax = 8;
-        
-        float baseLeafWidth  = leafWidth * 0.75f;
-        float baseLeafHeight = leafHeight * 0.75f;
-        
-        float trunkTopY = position.y + (height * 0.8f);
-        float trunkBotY = position.y + (height * 0.3f);
-        float radius    = glm::max(leafSpreadArea * 0.1f, 0.3f);
-        
-        for (unsigned int c = 0; c < clusters; c++) {
-            float t = (float)c / (float)(clusters - 1);
-            float ringY = trunkBotY + (trunkTopY - trunkBotY) * t;
-            
-            // place each cluster around the trunk with mild offset
-            float yaw = Random.Range(0.0f, 360.0f);
-            float rad = glm::radians(yaw);
-            float dx  = std::cos(rad) * (radius * (0.7f + Random.Range(0.0f, 0.4f)));
-            float dz  = std::sin(rad) * (radius * (0.7f + Random.Range(0.0f, 0.4f)));
-            glm::vec3 clusterCenter(position.x + dx, ringY, position.z + dz);
-            
-            unsigned int leavesInCluster = Random.Range(leavesPerClusterMin, leavesPerClusterMax);
-            for (unsigned int l = 0; l < leavesInCluster; l++) {
-                glm::vec3 leafPos = clusterCenter + glm::vec3(
-                    Random.Range(-radius * 0.2f, radius * 0.2f),
-                    Random.Range(-leafSpreadHeight * 0.15f, leafSpreadHeight * 0.15f),
-                    Random.Range(-radius * 0.2f, radius * 0.2f)
-                );
-                
-                glm::vec3 leafRot(Random.Range(0.0f, 360.0f), Random.Range(0.0f, 360.0f), Random.Range(0.0f, 360.0f));
-                
-                float scaleMul = 0.75f + Random.Range(0.0f, 0.25f);
-                glm::vec3 leafScale(baseLeafWidth * scaleMul, baseLeafHeight * scaleMul, baseLeafWidth * scaleMul);
-                
-                Color leafColor = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, leafPos, leafRot, leafScale, leafColor);
-            }
-        }
-        return true;
-    }
-    
-    
-    if (name == "spruce") {
+    if (pattern == "pattern_spruce_leaves") {
+        /*
         unsigned int rings = 5 + Random.Range(0u, 2u);
         unsigned int perRing = Random.Range(numberOfLeavesMin, numberOfLeavesMax);
         
@@ -532,13 +460,12 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
                 
                 glm::vec3 scl(baseLeafWidth * scale, baseLeafHeight * scale, baseLeafWidth * scale);
                 
-                Color col = Colors.Range(leafColorMin, leafColorMax);
-                AddDecor(chunk, staticMesh, DecorationMesh::Leaf, DecorationStatic::LeafOak, pos, rot, scl, col);
+                AddDecor(chunk, mesh, name, pos, rot);
             }
         }
+        */
         return true;
     }
-    */
     
     // No leaf type was selected
     //Log.Write("! Leaf type not defined - " + name);

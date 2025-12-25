@@ -30,7 +30,7 @@ void ChunkManager::GenerateBiome(glm::vec3* colorField, float* heightField, Chun
             
             // Smoothly damp toward [heightMin, heightMax] instead of hard clamping.
             // Tweak softness per taste (e.g. 0.15f–0.35f).
-            const float heightSoftness = 24.0f;
+            const float heightSoftness = 0.04f;
             pointHeight = DampenHeightToRange(pointHeight, layer.heightMin, layer.heightMax, heightSoftness);
             
             //pointHeight = Snap1D(pointHeight, 1.0f, 0.5f);
@@ -414,8 +414,8 @@ void ChunkManager::AddHeightFieldToMeshReduced(Mesh* mesh,
 }
 
 float DampenHeightToRange(float v, float minH, float maxH, float softness) {
-    if (softness <= 0.0f || minH >= maxH) 
-        return glm::clamp(v, minH, maxH);
+    //if (softness <= 0.0f || minH >= maxH) 
+    //    return glm::clamp(v, minH, maxH);
     
     // Below min: asymptotically approach minH - (1/softness)
     if (v < minH) {
