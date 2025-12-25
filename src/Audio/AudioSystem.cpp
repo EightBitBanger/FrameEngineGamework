@@ -9,9 +9,7 @@ extern NumberGeneration Random;
 AudioSystem::AudioSystem() : 
     listenerPosition(glm::vec3(100)),
     mStream(NULL),
-    mMasterVolume(1.0f)
-{
-}
+    mMasterVolume(1.0f) {}
 
 // Audio thread
 bool isAudioThreadActive = true;
@@ -71,6 +69,10 @@ Playback* AudioSystem::Play(Sound* soundPtr) {
     playback->mSound = soundPtr;
     mActiveSounds.push_back(playback);
     return playback;
+}
+
+SDL_AudioStream* AudioSystem::GetOutputStream(void) {
+    return mStream;
 }
 
 void AudioSystem::SetVolume(float volume) {
@@ -199,7 +201,8 @@ void AudioThreadMain(void) {
         std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(10) );
         
         // Check if the buffer is low
-        int available = SDL_GetAudioStreamAvailable(Audio.mStream);
+        SDL_AudioStream* stream = Audio.GetOutputStream();
+        int available = SDL_GetAudioStreamAvailable(stream);
         if (available > 8192) 
             continue;
         
@@ -211,10 +214,8 @@ void AudioThreadMain(void) {
         Audio.MixActiveSounds(buffer);
         
         // Send in the next section of mixed audio
-        SDL_PutAudioStreamData(Audio.mStream, buffer.data(), buffer.size() * sizeof(int32_t));
-        SDL_FlushAudioStream(Audio.mStream);
-        
-        continue;
+        SDL_PutAudioStreamData(stream, buffer.data(), buffer.size() * sizeof(int32_t));
+        SDL_FlushAudioStream(stream);
     }
     
     std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(2) );

@@ -17,137 +17,282 @@ extern StringType        String;
 extern RenderSystem      Renderer;
 extern ActorSystem       AI;
 
+#include <cstdio>
+#include <cstdlib>
+
+// Small helpers to avoid tons of temporary std::string allocations.
+namespace
+{
+    inline void AppendFloat(std::string& out, float value, char separator)
+    {
+        char buffer[32];
+        int len = std::snprintf(buffer, sizeof(buffer), "%.6g", value);
+        if (len > 0)
+            out.append(buffer, static_cast<std::size_t>(len));
+        if (separator != '\0')
+            out.push_back(separator);
+    }
+
+    inline void AppendUInt(std::string& out, unsigned int value, char separator)
+    {
+        char buffer[16];
+        int len = std::snprintf(buffer, sizeof(buffer), "%u", value);
+        if (len > 0)
+            out.append(buffer, static_cast<std::size_t>(len));
+        if (separator != '\0')
+            out.push_back(separator);
+    }
+
+    // Parse "x,y,z" into three floats
+    inline bool ParseFloat3(const std::string& s, float& x, float& y, float& z)
+    {
+        const char* p   = s.c_str();
+        char*       end = 0;
+
+        x = std::strtof(p, &end);
+        if (end == p || *end != ',')
+            return false;
+
+        p = end + 1;
+        y = std::strtof(p, &end);
+        if (end == p || *end != ',')
+            return false;
+
+        p = end + 1;
+        z = std::strtof(p, &end);
+        if (end == p)
+            return false;
+
+        return true;
+    }
+
+    // Parse "f1,f2,u32"
+    inline bool ParseExpressionTriple(const std::string& s,
+                                      float& factor,
+                                      float& maximum,
+                                      unsigned int& age)
+    {
+        const char* p   = s.c_str();
+        char*       end = 0;
+
+        factor = std::strtof(p, &end);
+        if (end == p || *end != ',')
+            return false;
+
+        p = end + 1;
+        maximum = std::strtof(p, &end);
+        if (end == p || *end != ',')
+            return false;
+
+        p = end + 1;
+        age = static_cast<unsigned int>(std::strtoul(p, &end, 10));
+        if (end == p)
+            return false;
+
+        return true;
+    }
+
+    // Parse "doExpress,animType,doInverse,type"
+    inline void ParseFlagsQuad(const std::string& s, Gene& gene)
+    {
+        const char* p = s.c_str();
+
+        // doExpress: keep old behavior – only explicitly clear when "0"
+        if (*p == '0')
+            gene.doExpress = false;
+
+        // Skip to next field
+        while (*p != '\0' && *p != ',')
+            ++p;
+        if (*p == ',')
+            ++p;
+
+        // animationType encoded as '0','1','2'
+        char anim = *p;
+        if (anim == '0')
+            gene.animationType = ActorState::Animation::Body;
+        else if (anim == '1')
+            gene.animationType = ActorState::Animation::Head;
+        else if (anim == '2')
+            gene.animationType = ActorState::Animation::Limb;
+
+        while (*p != '\0' && *p != ',')
+            ++p;
+        if (*p == ',')
+            ++p;
+
+        // doInverseAnimation: only explicitly set true when "1"
+        if (*p == '1')
+            gene.doInverseAnimation = true;
+
+        while (*p != '\0' && *p != ',')
+            ++p;
+        if (*p == ',')
+            ++p;
+
+        // type: rest of the string
+        char* end = 0;
+        gene.type = static_cast<unsigned int>(std::strtoul(p, &end, 10));
+    }
+}
 
 std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
-    std::string genetics;
-    
     unsigned int numberOfGenes = sourceActor->genetics.GetNumberOfGenes();
     
-    genetics += sourceActor->GetName() + ":";
+    // Reserve a decent chunk to avoid repeated reallocations
+    // Rough guess: base ~256 chars + ~160 chars per gene
+    std::string genetics;
+    genetics.reserve(256u + numberOfGenes * 160u);
+    
+    // Name
+    genetics += sourceActor->GetName();
+    genetics.push_back(':');
     
     // Physical
-    genetics += Float.ToString( sourceActor->physical.GetSpeed() ) + ":";
-    genetics += Float.ToString( sourceActor->physical.GetSpeedMultiplier() ) + ":";
-    genetics += Float.ToString( sourceActor->physical.GetSpeedYouth() ) + ":";
+    AppendFloat(genetics, sourceActor->physical.GetSpeed(),            ':');
+    AppendFloat(genetics, sourceActor->physical.GetSpeedMultiplier(),  ':');
+    AppendFloat(genetics, sourceActor->physical.GetSpeedYouth(),       ':');
     
-    genetics += Float.ToString( sourceActor->physical.GetAdultAge() ) + ":";
-    genetics += Float.ToString( sourceActor->physical.GetSeniorAge() ) + ":";
+    AppendFloat(genetics, sourceActor->physical.GetAdultAge(),         ':');
+    AppendFloat(genetics, sourceActor->physical.GetSeniorAge(),        ':');
     
-    genetics += Float.ToString( sourceActor->physical.GetYouthScale() ) + ":";
-    genetics += Float.ToString( sourceActor->physical.GetAdultScale() ) + ":";
+    AppendFloat(genetics, sourceActor->physical.GetYouthScale(),       ':');
+    AppendFloat(genetics, sourceActor->physical.GetAdultScale(),       ':');
     
     // Biological
-    genetics += Float.ToString( sourceActor->biological.health ) + ":";
-    genetics += Float.ToString( sourceActor->biological.hunger ) + ":";
-    genetics += Float.ToString( sourceActor->biological.strength ) + ":";
-    genetics += Float.ToString( sourceActor->biological.defense ) + ":";
+    AppendFloat(genetics, sourceActor->biological.health,              ':');
+    AppendFloat(genetics, sourceActor->biological.hunger,              ':');
+    AppendFloat(genetics, sourceActor->biological.strength,            ':');
+    AppendFloat(genetics, sourceActor->biological.defense,             ':');
     
     // Personality
-    genetics += Float.ToString( sourceActor->behavior.GetPredatorState() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetPreyState() ) + ":";
+    AppendFloat(genetics, sourceActor->behavior.GetPredatorState(),    ':');
+    AppendFloat(genetics, sourceActor->behavior.GetPreyState(),        ':');
     
-    genetics += Float.ToString( sourceActor->behavior.GetDistanceToFocus() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetDistanceToWalk() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetDistanceToAttack() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetDistanceToFlee() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetDistanceToInflict() ) + ":";
+    AppendFloat(genetics, sourceActor->behavior.GetDistanceToFocus(),  ':');
+    AppendFloat(genetics, sourceActor->behavior.GetDistanceToWalk(),   ':');
+    AppendFloat(genetics, sourceActor->behavior.GetDistanceToAttack(), ':');
+    AppendFloat(genetics, sourceActor->behavior.GetDistanceToFlee(),   ':');
+    AppendFloat(genetics, sourceActor->behavior.GetDistanceToInflict(),':');
     
-    genetics += UInt.ToString( sourceActor->behavior.GetCooldownAttack() ) + ":";
-    genetics += UInt.ToString( sourceActor->behavior.GetCooldownObserve() ) + ":";
-    genetics += UInt.ToString( sourceActor->behavior.GetCooldownMove() ) + ":";
+    AppendUInt (genetics, sourceActor->behavior.GetCooldownAttack(),   ':');
+    AppendUInt (genetics, sourceActor->behavior.GetCooldownObserve(),  ':');
+    AppendUInt (genetics, sourceActor->behavior.GetCooldownMove(),     ':');
     
-    genetics += Float.ToString( sourceActor->behavior.GetHeightPreferenceMin() ) + ":";
-    genetics += Float.ToString( sourceActor->behavior.GetHeightPreferenceMax() ) + ":";
+    AppendFloat(genetics, sourceActor->behavior.GetHeightPreferenceMin(), ':');
+    AppendFloat(genetics, sourceActor->behavior.GetHeightPreferenceMax(), ':');
     
     // Characteristics
-    genetics += UInt.ToString( (unsigned int)sourceActor->genetics.GetGeneration() ) + ":";
+    AppendUInt(genetics, static_cast<unsigned int>(sourceActor->genetics.GetGeneration()), ':');
     
-    if (sourceActor->physical.GetSexualOrientation() == true) 
-        {genetics += "0:";} else {genetics += "1:";}
+    if (sourceActor->physical.GetSexualOrientation() == true)
+        genetics += "0:";
+    else
+        genetics += "1:";
     
-    genetics += Float.ToString( sourceActor->physical.GetAdultAge() ) + ":";
+    AppendFloat(genetics, sourceActor->physical.GetAdultAge(), ':');
     
-    for (unsigned int i=0; i < numberOfGenes; i++) {
-        
-        Gene gene = sourceActor->genetics.GetGeneFromGenome( i );
+    // Genes
+    for (unsigned int i = 0; i < numberOfGenes; ++i) {
+        Gene gene = sourceActor->genetics.GetGeneFromGenome(i);
         
         // Check invalid gene
-        if (gene.color.x == -1.0f) 
+        if (gene.color.x == -1.0f)
             continue;
         
-        Phen phen = sourceActor->genetics.GetPhenFromPhenotype( i );
+        Phen phen = sourceActor->genetics.GetPhenFromPhenotype(i);
         
         // Check invalid phen
-        if (phen.color.x == -1.0f) 
+        if (phen.color.x == -1.0f)
             continue;
         
-        genetics += "#";
+        genetics.push_back('#');
         
-        genetics += Float.ToString( gene.position.x ) + ",";
-        genetics += Float.ToString( gene.position.y ) + ",";
-        genetics += Float.ToString( gene.position.z ) + "|";
+        // position
+        AppendFloat(genetics, gene.position.x, ',');
+        AppendFloat(genetics, gene.position.y, ',');
+        AppendFloat(genetics, gene.position.z, '\0');
+        genetics.push_back('|');
         
-        genetics += Float.ToString( gene.rotation.x ) + ",";
-        genetics += Float.ToString( gene.rotation.y ) + ",";
-        genetics += Float.ToString( gene.rotation.z ) + "|";
+        // rotation
+        AppendFloat(genetics, gene.rotation.x, ',');
+        AppendFloat(genetics, gene.rotation.y, ',');
+        AppendFloat(genetics, gene.rotation.z, '\0');
+        genetics.push_back('|');
         
-        genetics += Float.ToString( gene.scale.x ) + ",";
-        genetics += Float.ToString( gene.scale.y ) + ",";
-        genetics += Float.ToString( gene.scale.z ) + "|";
+        // scale
+        AppendFloat(genetics, gene.scale.x, ',');
+        AppendFloat(genetics, gene.scale.y, ',');
+        AppendFloat(genetics, gene.scale.z, '\0');
+        genetics.push_back('|');
         
-        genetics += Float.ToString( gene.offset.x ) + ",";
-        genetics += Float.ToString( gene.offset.y ) + ",";
-        genetics += Float.ToString( gene.offset.z ) + "|";
+        // offset
+        AppendFloat(genetics, gene.offset.x, ',');
+        AppendFloat(genetics, gene.offset.y, ',');
+        AppendFloat(genetics, gene.offset.z, '\0');
+        genetics.push_back('|');
         
-        genetics += Float.ToString( gene.color.x ) + ",";
-        genetics += Float.ToString( gene.color.y ) + ",";
-        genetics += Float.ToString( gene.color.z ) + "|";
+        // color
+        AppendFloat(genetics, gene.color.x, ',');
+        AppendFloat(genetics, gene.color.y, ',');
+        AppendFloat(genetics, gene.color.z, '\0');
+        genetics.push_back('|');
         
-        genetics += Float.ToString( gene.animationAxis.x ) + ",";
-        genetics += Float.ToString( gene.animationAxis.y ) + ",";
-        genetics += Float.ToString( gene.animationAxis.z ) + "|";
+        // animationAxis
+        AppendFloat(genetics, gene.animationAxis.x, ',');
+        AppendFloat(genetics, gene.animationAxis.y, ',');
+        AppendFloat(genetics, gene.animationAxis.z, '\0');
+        genetics.push_back('|');
         
-        genetics += Float.ToString( phen.scale.x ) + ",";
-        genetics += Float.ToString( phen.scale.y ) + ",";
-        genetics += Float.ToString( phen.scale.z ) + "|";
+        // phenotype scale
+        AppendFloat(genetics, phen.scale.x, ',');
+        AppendFloat(genetics, phen.scale.y, ',');
+        AppendFloat(genetics, phen.scale.z, '\0');
+        genetics.push_back('|');
         
-        genetics += Float.ToString( phen.color.x ) + ",";
-        genetics += Float.ToString( phen.color.y ) + ",";
-        genetics += Float.ToString( phen.color.z ) + "|";
+        // phenotype color
+        AppendFloat(genetics, phen.color.x, ',');
+        AppendFloat(genetics, phen.color.y, ',');
+        AppendFloat(genetics, phen.color.z, '\0');
+        genetics.push_back('|');
         
-        genetics += Float.ToString( gene.expressionFactor ) + ",";
-        genetics += Float.ToString( gene.expressionMax ) + ",";
-        genetics += UInt.ToString(  gene.expressionAge ) + "|";
+        // expressionFactor, expressionMax, expressionAge
+        AppendFloat(genetics, gene.expressionFactor, ',');
+        AppendFloat(genetics, gene.expressionMax,    ',');
+        AppendUInt (genetics, gene.expressionAge,    '\0');
+        genetics.push_back('|');
         
-        genetics += Float.ToString( gene.doExpress ) + ",";
-        if (gene.animationType == ActorState::Animation::Body) genetics += "0,";
-        if (gene.animationType == ActorState::Animation::Head) genetics += "1,";
-        if (gene.animationType == ActorState::Animation::Limb) genetics += "2,";
-        genetics += Float.ToString( gene.doInverseAnimation ) + ",";
+        // doExpress, animationType, doInverseAnimation, type
+        AppendUInt(genetics, gene.doExpress ? 1u : 0u, ',');
+        unsigned int animCode = 0u;
+        if (gene.animationType == ActorState::Animation::Head)
+            animCode = 1u;
+        else if (gene.animationType == ActorState::Animation::Limb)
+            animCode = 2u;
         
-        genetics += UInt.ToString( gene.type ) + "|";
-        
-        continue;
+        AppendUInt(genetics, animCode, ',');
+        AppendUInt(genetics, gene.doInverseAnimation ? 1u : 0u, ',');
+        AppendUInt(genetics, gene.type, '\0');
+        genetics.push_back('|');
     }
     
     return genetics;
 }
 
-bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
-    std::vector<std::string> traits = String.Explode( genome, ':' );
-    unsigned int numberOfTraits = traits.size();
+bool GeneticPresets::InjectGenome(Actor* targetActor, const std::string& genome) {
+    std::vector<std::string> traits = String.Explode(genome, ':');
+    unsigned int numberOfTraits = static_cast<unsigned int>(traits.size());
     
     // Physical
     if (numberOfTraits > 7) {
-        
         targetActor->SetName(traits[0]);
         
-        targetActor->physical.SetSpeed(            String.ToFloat(traits[1]) );
-        targetActor->physical.SetSpeedMultiplier(  String.ToFloat(traits[2]) );
-        targetActor->physical.SetSpeedYouth(       String.ToFloat(traits[3]) );
+        targetActor->physical.SetSpeed(           String.ToFloat(traits[1]) );
+        targetActor->physical.SetSpeedMultiplier( String.ToFloat(traits[2]) );
+        targetActor->physical.SetSpeedYouth(      String.ToFloat(traits[3]) );
         
-        targetActor->physical.SetAdultAge(   String.ToFloat(traits[4]) );
-        targetActor->physical.SetSeniorAge(  String.ToFloat(traits[5]) );
+        targetActor->physical.SetAdultAge(  String.ToFloat(traits[4]) );
+        targetActor->physical.SetSeniorAge( String.ToFloat(traits[5]) );
         
         targetActor->physical.SetYouthScale( String.ToFloat(traits[6]) );
         targetActor->physical.SetAdultScale( String.ToFloat(traits[7]) );
@@ -173,9 +318,9 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
         targetActor->behavior.SetDistanceToFlee(      String.ToFloat(traits[17]) );
         targetActor->behavior.SetDistanceToInflict(   String.ToFloat(traits[18]) );
         
-        targetActor->behavior.SetCooldownAttack(      String.ToUint( traits[19]) );
-        targetActor->behavior.SetCooldownObserve(     String.ToUint( traits[20]) );
-        targetActor->behavior.SetCooldownMove(        String.ToUint( traits[21]) );
+        targetActor->behavior.SetCooldownAttack(      String.ToUint(traits[19]) );
+        targetActor->behavior.SetCooldownObserve(     String.ToUint(traits[20]) );
+        targetActor->behavior.SetCooldownMove(        String.ToUint(traits[21]) );
         
         targetActor->behavior.SetHeightPreferenceMin( String.ToFloat(traits[22]) );
         targetActor->behavior.SetHeightPreferenceMax( String.ToFloat(traits[23]) );
@@ -183,116 +328,70 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, std::string genome) {
     
     // Characteristics
     if (numberOfTraits > 26) {
+        targetActor->genetics.SetGeneration(String.ToUint(traits[24]));
         
-        // Actor details
-        targetActor->genetics.SetGeneration( String.ToUint(traits[24]) );
+        if (String.ToUint(traits[25]) == 0)
+            targetActor->physical.SetSexualOrientation(true);   // Male
+        else
+            targetActor->physical.SetSexualOrientation(false);  // Female
         
-        // Sexuality
-        if (String.ToUint(traits[25]) == 0) {
-            targetActor->physical.SetSexualOrientation( true );  // Male
-        } else {
-            targetActor->physical.SetSexualOrientation( false ); // Female
-        }
-        
-        // Adult age
         targetActor->physical.mAgeAdult = String.ToFloat(traits[26]);
-        
     }
     
     // Extract genes from the genome string
-    std::vector<std::string> genes = String.Explode( genome, '#' );
+    std::vector<std::string> genes = String.Explode(genome, '#');
     
-    unsigned int numberOfGenes = genes.size();
-    for (unsigned int i=1; i < numberOfGenes; i++) {
-        
+    unsigned int numberOfGenes = static_cast<unsigned int>(genes.size());
+    for (unsigned int i = 1; i < numberOfGenes; ++i) {
         // Extract sub genes
-        std::vector<std::string> subGenes = String.Explode( (genes[i]), '|' );
+        std::vector<std::string> subGenes = String.Explode(genes[i], '|');
         
         // Check invalid gene
-        if (subGenes.size() != 10) 
+        if (subGenes.size() != 10)
             continue;
-        
-        std::vector<std::string> Codon;
         
         Gene gene;
         Phen phenotype;
-        Bio biotype;
+        Bio  biotype;
         
         // Genotype
-        Codon = String.Explode( subGenes[0], ',' );
-        if (Codon.size() == 3) {
-            gene.position.x = String.ToFloat( Codon[0] );
-            gene.position.y = String.ToFloat( Codon[1] );
-            gene.position.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[1], ',' );
-        if (Codon.size() == 3) {
-            gene.rotation.x = String.ToFloat( Codon[0] );
-            gene.rotation.y = String.ToFloat( Codon[1] );
-            gene.rotation.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[2], ',' );
-        if (Codon.size() == 3) {
-            gene.scale.x = String.ToFloat( Codon[0] );
-            gene.scale.y = String.ToFloat( Codon[1] );
-            gene.scale.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[3], ',' );
-        if (Codon.size() == 3) {
-            gene.offset.x = String.ToFloat( Codon[0] );
-            gene.offset.y = String.ToFloat( Codon[1] );
-            gene.offset.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[4], ',' );
-        if (Codon.size() == 3) {
-            gene.color.x = String.ToFloat( Codon[0] );
-            gene.color.y = String.ToFloat( Codon[1] );
-            gene.color.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[5], ',' );
-        if (Codon.size() == 3) {
-            gene.animationAxis.x = String.ToFloat( Codon[0] );
-            gene.animationAxis.y = String.ToFloat( Codon[1] );
-            gene.animationAxis.z = String.ToFloat( Codon[2] );
-        }
+        if (!ParseFloat3(subGenes[0], gene.position.x,      gene.position.y,      gene.position.z))
+            continue;
+        if (!ParseFloat3(subGenes[1], gene.rotation.x,      gene.rotation.y,      gene.rotation.z))
+            continue;
+        if (!ParseFloat3(subGenes[2], gene.scale.x,         gene.scale.y,         gene.scale.z))
+            continue;
+        if (!ParseFloat3(subGenes[3], gene.offset.x,        gene.offset.y,        gene.offset.z))
+            continue;
+        if (!ParseFloat3(subGenes[4], gene.color.x,         gene.color.y,         gene.color.z))
+            continue;
+        if (!ParseFloat3(subGenes[5], gene.animationAxis.x, gene.animationAxis.y, gene.animationAxis.z))
+            continue;
         
         // Phenotype
-        Codon = String.Explode( subGenes[6], ',' );
-        if (Codon.size() == 3) {
-            phenotype.scale.x = String.ToFloat( Codon[0] );
-            phenotype.scale.y = String.ToFloat( Codon[1] );
-            phenotype.scale.z = String.ToFloat( Codon[2] );
-        }
-        Codon = String.Explode( subGenes[7], ',' );
-        if (Codon.size() == 3) {
-            phenotype.color.x = String.ToFloat( Codon[0] );
-            phenotype.color.y = String.ToFloat( Codon[1] );
-            phenotype.color.z = String.ToFloat( Codon[2] );
-        }
+        if (!ParseFloat3(subGenes[6], phenotype.scale.x,    phenotype.scale.y,    phenotype.scale.z))
+            continue;
+        if (!ParseFloat3(subGenes[7], phenotype.color.x,    phenotype.color.y,    phenotype.color.z))
+            continue;
         
-        Codon = String.Explode( subGenes[8], ',' );
-        if (Codon.size() == 3) {
-            gene.expressionFactor = String.ToFloat( Codon[0] );
-            gene.expressionMax    = String.ToFloat( Codon[1] );
-            gene.expressionAge    = String.ToUint(  Codon[2] );
-        }
-        Codon = String.Explode( subGenes[9], ',' );
-        if (Codon.size() == 4) {
-            if (Codon[0] == "0") {gene.doExpress = false;}
-            if (Codon[1] == "0") {gene.animationType = ActorState::Animation::Body;}
-            if (Codon[1] == "1") {gene.animationType = ActorState::Animation::Head;}
-            if (Codon[1] == "2") {gene.animationType = ActorState::Animation::Limb;}
-            if (Codon[2] == "1") {gene.doInverseAnimation = true;}
-            gene.type = String.ToUint( Codon[3] );
-        }
+        // Expression triple
+        if (!ParseExpressionTriple(subGenes[8],
+                                gene.expressionFactor,
+                                gene.expressionMax,
+                                gene.expressionAge))
+            continue;
+        
+        // Flags: doExpress, animationType, doInverseAnimation, type
+        ParseFlagsQuad(subGenes[9], gene);
         
         targetActor->genetics.mPhen.push_back(phenotype);
         targetActor->biological.mBiologics.push_back(biotype);
-        targetActor->genetics.AddGene( gene );
+        targetActor->genetics.AddGene(gene);
     }
     
     return true;
 }
+
 
 bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspring) {
     // Check genetic incompatibility
@@ -347,7 +446,6 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
     offspring->physical.mSpeedYouth  = Float.Lerp(parentA->physical.mSpeedYouth,  parentB->physical.mSpeedYouth, gradient);
     offspring->physical.mYouthScale  = Float.Lerp(parentA->physical.mYouthScale,  parentB->physical.mYouthScale, gradient);
     offspring->physical.mAdultScale  = Float.Lerp(parentA->physical.mAdultScale,  parentB->physical.mAdultScale, gradient);
-    
     
     // Increment generation
     unsigned int generation = parentA->genetics.GetGeneration();
