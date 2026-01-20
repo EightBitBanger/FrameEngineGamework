@@ -8,7 +8,7 @@
 ## Features
 
 - Rendering
-  - Simple textured mesh renderer
+  - OpenGL textured mesh renderer
   - Point and directional lights
   - ImGUI for IU rendering
   - Fog effects
@@ -18,7 +18,7 @@
   - Terrain height field mapping
   - <a href="https://github.com/DanielChappuis/reactphysics3d/blob/master/documentation/UserDocumentation.md">Much more...</a>⁭
 
-- Audio
+- Audio through SDL3
   - Spatial 3D audio
   - Sample generation functions
   - Mixing on a seperate thread
@@ -34,9 +34,10 @@
   - Models: OBJ
 
 - Plugins
-  - Particle emitter
-  - Chunk generator (World terrain)
+  - Chunk generator for world terrain
   - Weather system
+  - Particle emitter
+  - Inventory system
 
 <br><br/>
 
@@ -57,7 +58,7 @@ While this framework currently only supports windows, I look forward to porting 
 
 
 ##  Building the repository
-First, clone the repository with git. You can then use cmake to generate the project files of your choice. You have four build options in cmake. Each option will generate a project file which will compile the selected part of the framework. To use the framework you would want to select `BUILD_APPLICATION_LIBRARY`. Modifying the core requires you to select `BUILD_CORE_LIBRARY`. The plugins can be built by selecing 'BUILD_PLUSINS'. To build the runtime executable select `BUILD_RUNTIME_EXECUTABLE`.
+First, clone the repository with git. You can then use cmake to generate the project files of your choice. You have four build options in cmake. Each option will generate a project file which will compile the selected part of the framework. To use the framework you would want to select `BUILD_APPLICATION_LIBRARY`. Modifying the core requires you to select `BUILD_CORE_LIBRARY`. The plugins can be built by selecing `BUILD_PLUSINS`. To build the runtime executable select `BUILD_RUNTIME_EXECUTABLE`.
 
 ```
 git clone https://github.com/EightBitBanger/FrameEngineGamework
