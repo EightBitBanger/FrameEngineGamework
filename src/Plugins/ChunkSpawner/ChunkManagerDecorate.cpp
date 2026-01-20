@@ -4,7 +4,6 @@ float Snap1D(float v, float grid, float origin = 0.0f);
 glm::vec3 SnapAxes(glm::vec3 p, glm::bvec3 axes, float grid, glm::vec3 origin = glm::vec3(0.0f));
 glm::bvec3 AxesForFace(const glm::vec3& n);
 
-
 void ChunkManager::Decorate(Chunk* chunk) {
     unsigned int numberOfBiomes = world.biomes.size();
     if (numberOfBiomes == 0 || chunk->biomeMap.empty())
@@ -16,12 +15,53 @@ void ChunkManager::Decorate(Chunk* chunk) {
     
     const float grid         = 1.0f;
     const glm::vec3 gridOrigin(0.5f, 0.5f, 0.5f);
+
+    const int cs = this->chunkSize;
     
-    unsigned int chunkSZ = chunkSize + 1;
+    unsigned int chunkSZ = (unsigned int)cs + 1;
     
-    uint8_t placementGrid[chunkSize][chunkSize];
-    ZeroMemory(placementGrid, chunkSize * chunkSize);
+    // Placement tracking
+
     
+    std::vector<uint8_t> placementGrid((size_t)cs * (size_t)cs, 0);
+
+
+    
+    auto GridAt = [&placementGrid, cs](int gx, int gz) -> uint8_t& {
+
+    
+        return placementGrid[(size_t)gz * (size_t)cs + (size_t)gx];
+
+    
+    };
+
+
+    
+    auto MarkPlacement = [&GridAt, cs](const glm::vec3& localPos) {
+
+    
+        const float half = (float)cs * 0.5f;
+
+    
+        const float eps  = 0.0001f;
+
+    
+        int gx = (int)std::floor((half - 0.5f) - localPos.x + eps);
+
+    
+        int gz = (int)std::floor((half - 0.5f) - localPos.z + eps);
+
+    
+        if (gx < 0 || gx >= cs) return;
+
+    
+        if (gz < 0 || gz >= cs) return;
+
+    
+        GridAt(gx, gz) = 0xff;
+
+    
+    };
     for (int xx = 0; xx < chunkSize; xx++) {
         float xp = xx - (chunkSize / 2) + 0.5f;
         float staticX = chunk->x - xp;
@@ -37,13 +77,13 @@ void ChunkManager::Decorate(Chunk* chunk) {
                 continue;
             Biome& biome = world.biomes[biomeIndex];
             
-            // Loop over the biome's decorations
+            // Generate biome decorations
             for (unsigned int d = 0; d < biome.decorations.size(); d++) {
                 DecorationSpecifier& decoration = biome.decorations[d];
-                if (placementGrid[xx][zz] == 0xff) 
+                if (GridAt(xx, zz) == 0xff) 
                     continue;
                 
-                // Use world-space for noise, not chunk-local loop coords
+                // Use world-space for noise
                 float wx = Snap1D(staticX, grid, gridOrigin.x);
                 float wz = Snap1D(staticZ, grid, gridOrigin.z);
                 
@@ -78,8 +118,13 @@ void ChunkManager::Decorate(Chunk* chunk) {
                     
                     Actor* actor = SummonActor(glm::vec3(chunk->x, 0.0f, chunk->y) + position);
                     
-                    //definition.colorVariant
                     AI.genomes.InjectGenome(actor, definition.genome);
+                    
+                    if (Random.Range(0, 100) > 50) {
+                        actor->physical.SetSexualOrientation(false); // Female
+                    } else {
+                        actor->physical.SetSexualOrientation(true);  // Male
+                    }
                     
                     // Set default age to adult
                     actor->physical.SetAge( actor->physical.GetAdultAge() );
@@ -87,6 +132,8 @@ void ChunkManager::Decorate(Chunk* chunk) {
                     actor->RebuildGeneticExpression();
                     actor->physical.UpdatePhysicalCollider();
                     actor->isActive = true;
+                    
+                    MarkPlacement(position);
                     continue;
                 }
                 
@@ -96,13 +143,20 @@ void ChunkManager::Decorate(Chunk* chunk) {
                 if (world.classStructures.find(decoration.name) != world.classStructures.end()) {
                     const ClassStructure& structure = world.classStructures[decoration.name];
                     
+                    // Stack
                     for (unsigned int s=0; s < structure.stacks.size(); s++) {
                         const ClassStructure::SubStructureStack& stack = structure.stacks[s];
                         ClassDefinition& definition = world.classDefinitions[stack.name];
                         if (mStaticMeshes.find(definition.mesh) == mStaticMeshes.end()) 
                             continue;
                         
-                        unsigned int range = Random.Range(stack.heightMin, stack.heightMax);
+                        unsigned int range = 0;
+                        if (stack.heightMax <= stack.heightMin) {
+                            range = stack.heightMax;
+                        } else {
+                            range = Random.Range(stack.heightMin, stack.heightMax);
+                        }
+                        
                         for (unsigned int h=0; h < range; h++) {
                             glm::vec3 offset = position + stack.position + glm::vec3(0, h, 0);
                             
@@ -110,19 +164,73 @@ void ChunkManager::Decorate(Chunk* chunk) {
                                 structuralHeightMax = h;
                             
                             AddDecor(chunk, definition.mesh, stack.name, offset, glm::vec3(0.0f));
+                            MarkPlacement(position);
                         }
                     }
                     
-                    for (unsigned int s=0; s < structure.spread.size(); s++) {
-                        const ClassStructure::SubStructureSpread& spread = structure.spread[s];
-                        glm::vec3 offset = position + spread.position + glm::vec3(0, structuralHeightMax, 0);
+                    // Place
+                    for (unsigned int s=0; s < structure.places.size(); s++) {
+                        const ClassStructure::SubStructurePlace& place = structure.places[s];
+                        ClassDefinition& definition = world.classDefinitions[place.name];
+                        if (mStaticMeshes.find(definition.mesh) == mStaticMeshes.end()) 
+                            continue;
                         
-                        BuildDecorStructure(chunk, offset, spread.pattern, spread.name, spread.mesh);
+                        glm::vec3 offset = position + place.position;
                         
-                        continue;
+                        AddDecor(chunk, definition.mesh, place.name, offset, glm::vec3(0.0f));
+                        MarkPlacement(position);
                     }
                     
-                    placementGrid[xx][zz] = 0xff;
+                    // Fill
+                    for (unsigned int s = 0; s < structure.fills.size(); ++s) {
+                        const ClassStructure::SubStructureFill& fill = structure.fills[s];
+                        
+                        std::unordered_map<std::string, ClassDefinition>::iterator itDef =
+                            world.classDefinitions.find(fill.name);
+                        if (itDef == world.classDefinitions.end())
+                            continue;
+                        
+                        ClassDefinition& definition = itDef->second;
+                        if (mStaticMeshes.find(definition.mesh) == mStaticMeshes.end())
+                            continue;
+                        
+                        glm::vec3 from = position + fill.from;
+                        glm::vec3 to   = position + fill.to;
+                        
+                        glm::vec3 mn(glm::min(from.x, to.x), glm::min(from.y, to.y), glm::min(from.z, to.z));
+                        glm::vec3 mx(glm::max(from.x, to.x), glm::max(from.y, to.y), glm::max(from.z, to.z));
+                        
+                        // Inclusive integer grid bounds
+                        int x0 = (int)std::floor(mn.x);
+                        int y0 = (int)std::floor(mn.y);
+                        int z0 = (int)std::floor(mn.z);
+                        
+                        int x1 = (int)std::floor(mx.x);
+                        int y1 = (int)std::floor(mx.y);
+                        int z1 = (int)std::floor(mx.z);
+                        
+                        for (int z = z0; z <= z1; ++z) {
+                            for (int y = y0; y <= y1; ++y) {
+                                for (int x = x0; x <= x1; ++x) {
+                                    glm::vec3 offset((float)x + 0.5f, (float)y + 0.5f, (float)z + 0.5f);
+                                    AddDecor(chunk, definition.mesh, fill.name, offset, glm::vec3(0.0f));
+                                    
+                                    MarkPlacement(offset);
+                                }
+                            }
+                        }
+                    }
+                    
+                    
+                    // Pattern
+                    for (unsigned int s=0; s < structure.patterns.size(); s++) {
+                        const ClassStructure::SubStructurePattern& pattern = structure.patterns[s];
+                        glm::vec3 offset = position + pattern.position + glm::vec3(0, structuralHeightMax, 0);
+                        
+                        BuildDecorStructure(chunk, offset, pattern.pattern, pattern.name, pattern.mesh);
+                    }
+                    
+                    GridAt(xx, zz) = 0xff;
                 }
                 
                 // Check static object
@@ -132,7 +240,7 @@ void ChunkManager::Decorate(Chunk* chunk) {
                         continue;
                     
                     AddDecor(chunk, definition.mesh, decoration.name, position, glm::vec3(0.0f));
-                    placementGrid[xx][zz] = 0xff;
+                    GridAt(xx, zz) = 0xff;
                     
                     continue;
                 }
@@ -376,6 +484,8 @@ bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, const std
     
     const float grid = 1.0f;
     const glm::vec3 gridOrigin(0.5f, 0.5f, 0.5f);
+
+    const int cs = this->chunkSize;
     
     float bestDot = -1.0f;
     int   bestChunkIndex   = -1;
@@ -511,33 +621,6 @@ bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, const std
     return placeStatic(*chunks[bestIdx], worldHit);
 }
 
-
-
-void ChunkManager::DecodeGenome(std::string name, Actor* actorPtr) {
-    if (name == "Human")  {AI.genomes.presets.Human( actorPtr );}
-    if (name == "Sheep")  {AI.genomes.presets.Sheep( actorPtr );}
-    if (name == "Bear")   {AI.genomes.presets.Bear( actorPtr );}
-    if (name == "Dog")    {AI.genomes.presets.Dog( actorPtr );}
-    if (name == "Bovine") {AI.genomes.presets.Bovine( actorPtr );}
-    if (name == "Horse")  {AI.genomes.presets.Horse( actorPtr );}
-}
-
-/*
-bool ChunkManager::AddDecoreActor(glm::vec3 position, std::string name) {
-    Actor* actor = SummonActor(position);
-    DecodeGenome(name, actor);
-    
-    actor->isActive = true;
-    actor->RebuildGeneticExpression();
-    
-    actor->state.current = ActorState::State::None;
-    actor->state.mode = ActorState::Mode::Idle;
-    
-    actor->physical.UpdatePhysicalCollider();
-    actor->physical.SetAge( actor->physical.GetAdultAge() + Random.Range(0, 1000) );
-    return true;
-}
-*/
 
 
 float Snap1D(float v, float grid, float origin) {

@@ -1,4 +1,5 @@
 #include <GameEngineFrameWork/Engine/Engine.h>
+#include <GameEngineFrameWork/functions.h>
 
 #ifdef RUN_UNIT_TESTS
  #include "../../tests/framework.h"
@@ -102,17 +103,16 @@ int main(int argc, char* argv[]) {
     while (Platform.isActive) {
         
 #ifdef PLATFORM_LINUX
-        
         Platform.EventLoop();
         
         SDL_Event event;
         
         while (SDL_PollEvent(&event)) {
             
-            UI.ProcedureHandlerSDL(event);
-            
             // Get event key parameter
             SDL_Keycode keycode = event.key.key;
+            
+            UI.ProcedureHandlerSDL(event);
             
             int key = static_cast<int>(keycode);
             
@@ -179,53 +179,56 @@ int main(int argc, char* argv[]) {
                 case SDLK_7: VirtualKey = VK_7; break;
                 case SDLK_8: VirtualKey = VK_8; break;
                 case SDLK_9: VirtualKey = VK_9; break;
-                
             }
             
             switch (event.type) {
-                
                 case SDL_EVENT_QUIT: 
                     Platform.isActive = false; 
                     break;
-                
+                    
                 case SDL_EVENT_KEY_DOWN: 
                     if (VirtualKey != -1) {
-                        Input.SetKeyPressed(VirtualKey); // VK virtual keys
+                        Input.SetKeyPressed(VirtualKey);   // VK virtual keys
                         Input.lastKeyPressed = VirtualKey; // Text characters
                     } else 
-                        Input.lastKeyPressed = key; // Text characters
+                        Input.lastKeyPressed = key;        // Text characters
                     break;
-                
+                    
                 case SDL_EVENT_KEY_UP: 
                     if (VirtualKey != -1) {
-                        Input.SetKeyReleased(VirtualKey); // VK virtual keys
-                        Input.lastKeyReleased = key; // Text characters
+                        Input.SetKeyReleased(VirtualKey);  // VK virtual keys
+                        Input.lastKeyReleased = key;       // Text characters
                     } else 
-                        Input.lastKeyReleased = key; // Text characters
+                        Input.lastKeyReleased = key;       // Text characters
                     break;
-                
+                    
                 case SDL_EVENT_MOUSE_BUTTON_DOWN: 
                     switch (event.button.button) {
-                        case 1: Input.SetMouseLeftPressed(true); break;
-                        case 2: Input.SetMouseMiddlePressed(true); break;
-                        case 3: Input.SetMouseRightPressed(true); break;
+                        case 1: Input.SetMouseLeftReleased(false);   Input.SetMouseLeftPressed(true); break;
+                        case 2: Input.SetMouseMiddleReleased(false); Input.SetMouseMiddlePressed(true); break;
+                        case 3: Input.SetMouseRightReleased(false);  Input.SetMouseRightPressed(true); break;
                     }
                     break;
-                
-                
+                    
                 case SDL_EVENT_MOUSE_BUTTON_UP: 
                     switch (event.button.button) {
-                        case 1: Input.SetMouseLeftReleased(true); break;
-                        case 2: Input.SetMouseMiddleReleased(true); break;
-                        case 3: Input.SetMouseRightReleased(true); break;
+                        case 1: Input.SetMouseLeftPressed(false);   Input.SetMouseLeftReleased(true); break;
+                        case 2: Input.SetMouseMiddlePressed(false); Input.SetMouseMiddleReleased(true); break;
+                        case 3: Input.SetMouseRightPressed(false);  Input.SetMouseRightReleased(true); break;
                     }
                     break;
-                
+                    
+                case SDL_EVENT_MOUSE_WHEEL: {
+                    float scroll = event.wheel.y;
+                    Input.mouseWheelDelta = scroll;
+                    break;
+                    }
+                    
                 case SDL_EVENT_MOUSE_MOTION: 
                     Input.mouseX = event.motion.x;
                     Input.mouseY = event.motion.y;
                     break;
-                
+                    
                 case SDL_EVENT_WINDOW_RESIZED: 
                     Viewport viewport;
                     viewport = Platform.GetWindowArea();
@@ -244,6 +247,9 @@ int main(int argc, char* argv[]) {
                     Platform.windowArea.y = Renderer.viewport.y;
                     Platform.windowArea.w = Renderer.viewport.w;
                     Platform.windowArea.h = Renderer.viewport.h;
+                    
+                    // Resize event callback
+                    Platform.EventCallbackResize();
                     
                     // Update scene cameras
                     for (unsigned int i=0; i < Renderer.GetRenderQueueSize(); i++) {
@@ -272,19 +278,9 @@ int main(int argc, char* argv[]) {
                         
                         continue;
                     }
-                    
                     break;
-                    
                 }
-            
         }
-        
-        // Get mouse position
-        float mouseX, mouseY;
-        SDL_GetMouseState(&mouseX, &mouseY);
-        
-        Input.mouseX = (int)mouseX;
-        Input.mouseY = (int)mouseY;
         
 #endif
         
@@ -438,17 +434,13 @@ int main(int argc, char* argv[]) {
         
 #ifdef APPLICATION_ESCAPE_KEY_PAUSE
         if (Input.CheckKeyPressed(VK_ESCAPE)) {
-            
             Platform.Pause();
             
             if (Platform.isPaused) {
-                Input.ClearKeys();
-                
                 Platform.ShowMouseCursor();
                 
+                Input.ClearKeys();
             } else {
-                SetCursorPos(Renderer.displayCenter.x, Renderer.displayCenter.y);
-                
                 Platform.HideMouseCursor();
                 
                 Time.Update();

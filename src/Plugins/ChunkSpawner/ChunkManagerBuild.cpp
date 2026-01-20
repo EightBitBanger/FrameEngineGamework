@@ -49,8 +49,8 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
         unsigned int clustersMax = 7;
         unsigned int numberOfClusters = Random.Range(clustersMin, clustersMax);
         
-        float leafSpreadArea  = 2.0f;
-        float leafSpreadHeight = 1.5f;
+        float leafSpreadArea  = 0.7f;
+        float leafSpreadHeight = 0.6f;
         
         unsigned int leavesPerClusterMin = 4;
         unsigned int leavesPerClusterMax = 6;
@@ -80,9 +80,9 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
             
             for (unsigned int l = 0; l < leavesInCluster; l++) {
                 glm::vec3 leafOffset(
-                    Random.Range(-leafSpreadArea * 0.3f, leafSpreadArea * 0.3f),
-                    Random.Range(-leafSpreadHeight * 0.15f, leafSpreadHeight * 0.15f),
-                    Random.Range(-leafSpreadArea * 0.3f, leafSpreadArea * 0.3f)
+                    Random.Range(-leafSpreadArea, leafSpreadArea),
+                    Random.Range(-leafSpreadHeight, leafSpreadHeight),
+                    Random.Range(-leafSpreadArea, leafSpreadArea)
                 );
                 
                 glm::vec3 leafPos = clusterCenter + leafOffset;
@@ -135,7 +135,7 @@ bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const s
         float baseLeafWidth   = leafWidth;
         float baseLeafHeight  = leafHeight;
         float baseScale       = 0.7f;
-        float baseHeight      = position.y - (rateOfHeight * numberOfRings);
+        float baseHeight      = position.y - (rateOfHeight * numberOfRings) + 0.25f;
         
         const auto Clamp01 = [](float v) -> float {
             if (v < 0.0f) return 0.0f;

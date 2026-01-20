@@ -124,41 +124,47 @@ void* PlatformLayer::CreateWindowHandle(std::string className, std::string windo
     SDL_SetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION, "1");
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl"); // Optional
     
-    //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1); // <– Important!
+    SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
     
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); // or 4
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     
-    // Pixel layout
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);         // if you want RGBA
-    
     // Buffering
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     
-    // Optional: Set multisampling (anti-aliasing)
+    // Pixel layout
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE,   8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,  8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+    
+    // Multi sampling
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
     
     // Create the main window
     windowHandle = SDL_CreateWindow("Render window", 800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
     
+    // Use relative mouse mode for smoother movement
+    SDL_SetWindowRelativeMouseMode((SDL_Window*)windowHandle, true);
+    
     assert(windowHandle != nullptr);
     
     glm::vec2 dim = GetDisplaySize();
-    displayWidth  = dim.x;
-    displayHeight = dim.y;
+    displayWidth  = (int)dim.x;
+    displayHeight = (int)dim.y;
     
     SDL_SetWindowResizable((SDL_Window*)windowHandle, 1);
     SetWindowCenterScale(WINDOW_WIDTH, WINDOW_HEIGHT);
     
     SDL_ShowWindow((SDL_Window*)windowHandle);
+    
+    GLint depthBitsGL = 0;
+    glGetIntegerv(GL_DEPTH_BITS, &depthBitsGL);
+    std::cout << "GL depth bits: " << depthBitsGL << std::endl;
     
     mIsWindowRunning = true;
     return (void*)windowHandle;
@@ -227,7 +233,7 @@ Viewport PlatformLayer::GetWindowArea(void) {
 #endif
 #ifdef PLATFORM_LINUX
     SDL_GetWindowPosition((SDL_Window*)windowHandle, &area.x, &area.y);
-    SDL_GetWindowSize((SDL_Window*)windowHandle, &area.w, &area.h);
+    SDL_GetWindowSizeInPixels((SDL_Window*)windowHandle, &area.w, &area.h);
 #endif
     return area;
 }
@@ -336,6 +342,7 @@ void PlatformLayer::ShowMouseCursor(void) {
     while (ShowCursor(true) < 0);
 #endif
 #ifdef PLATFORM_LINUX
+    SDL_SetWindowRelativeMouseMode((SDL_Window*)windowHandle, false);
     SDL_ShowCursor();
 #endif
 }
@@ -345,6 +352,7 @@ void PlatformLayer::HideMouseCursor(void) {
     while (ShowCursor(false) >= 0);
 #endif
 #ifdef PLATFORM_LINUX
+    SDL_SetWindowRelativeMouseMode((SDL_Window*)windowHandle, true);
     SDL_HideCursor();
 #endif
 }

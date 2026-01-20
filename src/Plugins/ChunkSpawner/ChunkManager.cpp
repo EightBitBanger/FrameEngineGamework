@@ -62,12 +62,21 @@ void ChunkManager::Initiate(void) {
     SubMesh subMeshWallHorz;
     SubMesh subMeshWallVert;
     SubMesh subMeshPlain;
+    SubMesh subMeshCube;
     SubMesh subMeshGrass;
     SubMesh subMeshLeaf;
     SubMesh subMeshLog;
     
     Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshWallHorz);
     Engine.meshes.wallVertical->GetSubMesh(0, subMeshWallVert);
+    
+    Engine.meshes.cube->GetSubMesh(0, subMeshCube);
+    Engine.meshes.cube->GetSubMesh(1, subMeshCube);
+    Engine.meshes.cube->GetSubMesh(2, subMeshCube);
+    Engine.meshes.cube->GetSubMesh(3, subMeshCube);
+    Engine.meshes.cube->GetSubMesh(4, subMeshCube);
+    Engine.meshes.cube->GetSubMesh(5, subMeshCube);
+    
     Engine.meshes.plain->GetSubMesh(0, subMeshPlain);
     Engine.meshes.grass->GetSubMesh(0, subMeshGrass);
     Engine.meshes.leaf->GetSubMesh(0, subMeshLeaf);
@@ -75,6 +84,7 @@ void ChunkManager::Initiate(void) {
     
     mStaticMeshes["wallhorizontal"]  = subMeshWallHorz;
     mStaticMeshes["wallverticle"]    = subMeshWallVert;
+    mStaticMeshes["cube"]            = subMeshCube;
     mStaticMeshes["plain"]           = subMeshPlain;
     mStaticMeshes["grass"]           = subMeshGrass;
     mStaticMeshes["leaf"]            = subMeshLeaf;
@@ -82,17 +92,19 @@ void ChunkManager::Initiate(void) {
     
     mStaticMeshToIndex["wallhorizontal"]  = 1;
     mStaticMeshToIndex["wallverticle"]    = 2;
-    mStaticMeshToIndex["plain"]           = 3;
-    mStaticMeshToIndex["grass"]           = 4;
-    mStaticMeshToIndex["leaf"]            = 5;
-    mStaticMeshToIndex["log"]             = 6;
+    mStaticMeshToIndex["cube"]            = 3;
+    mStaticMeshToIndex["plain"]           = 4;
+    mStaticMeshToIndex["grass"]           = 5;
+    mStaticMeshToIndex["leaf"]            = 6;
+    mStaticMeshToIndex["log"]             = 7;
     
     mStaticIndexToMesh[1] = "wallhorizontal";
     mStaticIndexToMesh[2] = "wallverticle";
-    mStaticIndexToMesh[3] = "plain";
-    mStaticIndexToMesh[4] = "grass";
-    mStaticIndexToMesh[5] = "leaf";
-    mStaticIndexToMesh[6] = "log";
+    mStaticIndexToMesh[3] = "cube";
+    mStaticIndexToMesh[4] = "plain";
+    mStaticIndexToMesh[5] = "grass";
+    mStaticIndexToMesh[6] = "leaf";
+    mStaticIndexToMesh[7] = "log";
     
     waterMesh      = Engine.Create<Mesh>();
     waterMaterial  = Engine.Create<Material>();
@@ -171,23 +183,57 @@ void ChunkManager::Initiate(void) {
                             continue;
                         }
                         
-                        if (params[p] == "spread") {
+                        if (params[p] == "place") {
+                            params.erase(params.begin());
+                            if (params.size() < 4) 
+                                continue;
+                            
+                            ClassStructure::SubStructurePlace place;
+                            place.name    = params[p];
+                            place.position  = {String.ToFloat(params[p+1]),
+                                               String.ToFloat(params[p+2]),
+                                               String.ToFloat(params[p+3])};
+                            
+                            structure.places.push_back(place);
+                            continue;
+                        }
+                        
+                        if (params[p] == "fill") {
+                            params.erase(params.begin());
+                            if (params.size() < 7) 
+                                continue;
+                            
+                            ClassStructure::SubStructureFill fill;
+                            fill.name    = params[p];
+                            fill.from    = {String.ToFloat(params[p+1]),
+                                            String.ToFloat(params[p+2]),
+                                            String.ToFloat(params[p+3])};
+                            fill.to      = {String.ToFloat(params[p+4]),
+                                            String.ToFloat(params[p+5]),
+                                            String.ToFloat(params[p+6])};
+                            
+                            structure.fills.push_back(fill);
+                            continue;
+                        }
+                        
+                        if (params[p] == "pattern") {
                             params.erase(params.begin());
                             if (params.size() < 6) 
                                 continue;
                             
-                            ClassStructure::SubStructureSpread spread;
-                            spread.name    = params[p];
-                            spread.mesh    = params[p+1];
-                            spread.pattern = params[p+2];
+                            ClassStructure::SubStructurePattern pattern;
+                            pattern.name    = params[p];
+                            pattern.mesh    = params[p+1];
+                            pattern.pattern = params[p+2];
                             
-                            spread.position  = {String.ToFloat(params[p+3]),
+                            pattern.position  = {String.ToFloat(params[p+3]),
                                                 String.ToFloat(params[p+4]),
                                                 String.ToFloat(params[p+5])};
                             
-                            structure.spread.push_back(spread);
+                            structure.patterns.push_back(pattern);
                             continue;
                         }
+                        
                     }
                     
                     world.classStructures[nameParts[0]] = structure;
