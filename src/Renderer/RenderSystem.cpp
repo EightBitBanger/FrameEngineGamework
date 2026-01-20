@@ -216,7 +216,6 @@ void RenderSystem::SetViewport(unsigned int x, unsigned int y, unsigned int w, u
 
 // Extract frustum planes from view-projection matrix
 Frustum RenderSystem::FrustumExtractPlanes(glm::mat4& viewProjMatrix) {
-    
     Frustum frustum;
     
     // Left
@@ -276,23 +275,17 @@ Frustum RenderSystem::FrustumExtractPlanes(glm::mat4& viewProjMatrix) {
     return frustum;
 }
 
-// Check if a point is inside the frustum
 bool RenderSystem::FrustumCheckPoint(Frustum& frustum, glm::vec3& point) {
-    
     for (int i = 0; i < 6; i++) {
-        
         if (glm::dot(glm::vec3(frustum.planes[i]), point) + frustum.planes[i].w < 0) 
             return false;
-        
     }
-    
     return true;
 }
 
 // Check if a bounding box is inside the frustum
 bool RenderSystem::FrustumCheckAABB(Frustum& frustum, glm::vec3& min, glm::vec3& max) {
     for (int i = 0; i < 6; i++) {
-        
         glm::vec3 positiveVertex = min;
         
         if (frustum.planes[i].x >= 0) positiveVertex.x = max.x;
@@ -301,7 +294,6 @@ bool RenderSystem::FrustumCheckAABB(Frustum& frustum, glm::vec3& min, glm::vec3&
         
         if (glm::dot(glm::vec3(frustum.planes[i]), positiveVertex) + frustum.planes[i].w < 0) 
             return false;
-        
     }
     return true;
 }

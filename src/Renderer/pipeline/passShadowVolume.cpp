@@ -3,7 +3,6 @@
 
 #include <GameEngineFramework/Types/types.h>
 
-
 bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection) {
     
     if (!currentEntity->isActive) 
@@ -15,6 +14,38 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
     if (!currentEntity->material->mDoShadowPass)
         return false;
     
+    Transform transform;
+    transform.position = currentEntity->transform.position;
+    transform.rotation = currentEntity->transform.rotation;
+    transform.scale    = currentEntity->transform.scale;
+    
+    transform.Scale(2.0f, 2.0f, 2.0f);
+    
+    transform.position.y -= 8.0f;
+    
+    transform.UpdateMatrix();
+    
+    // Set the projection
+    mCurrentShader->SetProjectionMatrix( viewProjection );
+    mCurrentShader->SetModelMatrix( transform.matrix );
+    
+    // Inverse transpose model matrix for lighting with non linear scaling
+    glm::mat3 invTransposeMatrix = glm::transpose( glm::inverse( transform.matrix ) );
+    mCurrentShader->SetInverseModelMatrix( invTransposeMatrix );
+    mCurrentShader->SetCameraPosition(eye);
+    mCurrentShader->SetCameraAngle(cameraAngle);
+    
+    // Set the material
+    mCurrentShader->SetMaterialAmbient(Color(1, 1, 1));
+    mCurrentShader->SetMaterialDiffuse(Color(1, 1, 1));
+    mCurrentShader->SetMaterialSpecular(Color(1, 1, 1));
+    
+    // Render the geometry
+    currentEntity->mesh->DrawIndexArray();
+    mNumberOfDrawCalls++;
+    
+    
+    /*
     // Calculate shadow distance
     float shadowDistance = glm::distance( eye, currentEntity->transform.position );
     
@@ -34,7 +65,7 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
     glEnable( GL_BLEND );
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    glEnable( GL_CULL_FACE );
+    //glEnable( GL_CULL_FACE );
     
     for (unsigned int s=0; s < mNumberOfShadows; s++) {
         
@@ -47,16 +78,18 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
         // Rotate by the inverse light angle
         glm::vec3 angles = currentEntity->transform.EulerAngles();
         
-        mShadowTransform.RotateWorldAxis( angles.x, glm::vec3(1, 0, 0), Vector3(0, 0, 0) );
-        mShadowTransform.RotateWorldAxis( angles.y, glm::vec3(0, 1, 0), Vector3(0, 0, 0) );
-        mShadowTransform.RotateWorldAxis( angles.z, glm::vec3(0, 0, 1), Vector3(0, 0, 0) );
+        //mShadowTransform.RotateWorldAxis( angles.x, glm::vec3(1, 0, 0), Vector3(0, 0, 0) );
+        //mShadowTransform.RotateWorldAxis( angles.y, glm::vec3(0, 1, 0), Vector3(0, 0, 0) );
+        //mShadowTransform.RotateWorldAxis( angles.z, glm::vec3(0, 0, 1), Vector3(0, 0, 0) );
         
         // Offset by half the distance
         glm::vec3 shadowTranslation = (glm::vec3(0, -1, 0) * shadowLength);
         mShadowTransform.Translate( shadowTranslation );
         
         // Scale the length of the shadow
-        mShadowTransform.Scale( glm::vec3(1, shadowLength * 2, 1) );
+        //mShadowTransform.Scale( glm::vec3(1, shadowLength * 2, 1) );
+        
+        mShadowTransform.Scale( glm::vec3(8, 8, 8) );
         
         glm::vec3 shadowPosition[1];
         glm::vec3 shadowDirection[1];
@@ -103,6 +136,7 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
     } else {
         glDisable( GL_CULL_FACE );
     }
+    */
     
     return true;
 }

@@ -13,13 +13,13 @@ Camera::Camera() :
     useMouseLook(false),
     isFixedAspect(false),
     isOrthographic(false),
-    yaw(0),
-    pitch(0),
+    yaw(0.0f),
+    pitch(0.0f),
     
-    fov(60),
-    aspect(1.33),
-    clipNear(0.1),
-    clipFar(10000000),
+    fov(60.0f),
+    aspect(1.33f),
+    clipNear(1.0f),
+    clipFar(100000.0f),
     
     frustumOverlap(30.0f),
     frustumOffset(100.0f),
@@ -27,8 +27,8 @@ Camera::Camera() :
     mouseLimitPitchMax(180),
     mouseLimitPitchMin(180),
     
-    mouseSensitivityYaw(1.3),
-    mouseSensitivityPitch(1.15)
+    mouseSensitivityYaw(1.3f),
+    mouseSensitivityPitch(1.15f)
 {
 }
 

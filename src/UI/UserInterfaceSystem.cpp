@@ -72,8 +72,6 @@ void UserInterfaceSystem::Render(void) {
     
     glDisable(GL_DEPTH_TEST);
     
-    ImGui_ImplOpenGL3_NewFrame();
-    
 #ifdef PLATFORM_WINDOWS
     ImGui_ImplWin32_NewFrame();
 #endif
@@ -81,6 +79,8 @@ void UserInterfaceSystem::Render(void) {
 #ifdef PLATFORM_LINUX
     ImGui_ImplSDL3_NewFrame();
 #endif
+    
+    ImGui_ImplOpenGL3_NewFrame();
     
     ImGui::NewFrame();
     
@@ -158,7 +158,6 @@ void UserInterfaceSystem::UpdateTextFieldElements(void) {
         if (!textField->isActive)
             continue;
         
-        
         // Remove padding and borders
         
         ImGui::SetNextWindowPos( ImVec2(textField->x, textField->y) );
@@ -207,8 +206,8 @@ void UserInterfaceSystem::UpdateTextFieldElements(void) {
         
         ImGui::PopStyleColor(4);
         ImGui::PopStyleVar(4);
-        ImGui::End();
         
+        ImGui::End();
     }
 }
 
@@ -233,11 +232,7 @@ void UserInterfaceSystem::UpdatePanelElements(void) {
         ImGuiWindowFlags_NoFocusOnAppearing | 
         ImGuiWindowFlags_NoNav);
         
-        
-        // Element contents here
-        
         ImGui::End();
-        
     }
 }
 

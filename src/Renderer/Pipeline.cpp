@@ -1,8 +1,5 @@
 #include <GameEngineFramework/Renderer/RenderSystem.h>
 
-//
-// Frame rendering pipeline
-//
 int dbgCounter = 0;
 
 void RenderSystem::RenderFrame(void) {
@@ -80,19 +77,24 @@ void RenderSystem::RenderFrame(void) {
                         continue;
                 
                 GeometryPass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
+                
+                ShadowVolumePass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
             }
             
             // Shadow pass
             if (mNumberOfShadows > 0) {
+                //shaders.shadowCaster->Bind();
                 
-                shaders.shadowCaster->Bind();
+                //shaders.color->Bind();
                 
+                /*
                 for (MeshRenderer* currentEntity : *renderQueueGroup) {
                     ShadowVolumePass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
                 }
+                */
                 
-                if (mCurrentShader) 
-                    mCurrentShader->Bind();
+                //if (mCurrentShader) 
+                //    mCurrentShader->Bind();
             }
             
         }

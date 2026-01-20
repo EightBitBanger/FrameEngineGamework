@@ -5,8 +5,6 @@
 
 
 bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection) {
-    // Mesh binding
-    
     // Level of detail shift selection
     Mesh* mesh = LevelOfDetailPass(currentEntity, eye);
     if (mesh == nullptr) 

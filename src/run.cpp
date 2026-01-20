@@ -76,10 +76,51 @@ void Run() {
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
         isLeftClickHold = true;
+        
     }
     
     if (isLeftClickHold) {
         MouseButtonLeft();
+        
+        
+        
+        
+        GameObject* gameObject = Engine.Create<GameObject>();
+        gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+        
+        MeshRenderer* meshRenderer = gameObject->GetComponent<MeshRenderer>();
+        meshRenderer->mesh = Engine.meshes.cube;
+        meshRenderer->material = Engine.Create<Material>();
+        meshRenderer->material->shader = Engine.shaders.color;
+        
+        meshRenderer->material->DisableCulling();
+        meshRenderer->material->EnableShadowVolumePass();
+        
+        glm::vec3 randomColor = {Random.Range(0.0f, 1.0f), 0, Random.Range(0.0f, 1.0f)};
+        
+        meshRenderer->material->diffuse = randomColor * 0.4f;
+        meshRenderer->material->ambient = Colors.gray;
+        
+        meshRenderer->material->EnableShadowVolumePass();
+        meshRenderer->material->SetShadowVolumeColor(Colors.black);
+        meshRenderer->material->SetShadowVolumeIntensityLow(0.3f);
+        meshRenderer->material->SetShadowVolumeIntensityHigh(0.8f);
+        meshRenderer->material->SetShadowVolumeColorIntensity(9.0f);
+        meshRenderer->material->SetShadowVolumeLength(10.0f);
+        
+        meshRenderer->material->SetShadowVolumeAngleOfView(0.0f);
+        
+        glm::vec3 randomOffset = {Random.Range(-10, 10), 
+                                  Random.Range(-10, 10), 
+                                  Random.Range(-10, 10)};
+        
+        Transform* transform = gameObject->GetComponent<Transform>();
+        transform->Translate( Engine.cameraController->GetPosition() + randomOffset );
+        transform->Scale(2.0f, 2.0f, 2.0f);
+        transform->UpdateMatrix();
+        
+        Engine.sceneMain->AddMeshRendererToSceneRoot(meshRenderer);
+        
     }
     
     if (Input.CheckMouseLeftReleased()) {
