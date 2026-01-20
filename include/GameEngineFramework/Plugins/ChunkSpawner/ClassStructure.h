@@ -18,22 +18,46 @@ public:
             position({0.0f}) {}
     };
     
-    class SubStructureSpread {
+    class SubStructurePlace {
+    public:
+        std::string name;
+        glm::vec3 position;
+        
+        SubStructurePlace() : 
+            name(""),
+            position({0.0f}) {}
+    };
+    
+    class SubStructureFill {
+    public:
+        std::string name;
+        glm::vec3 from;
+        glm::vec3 to;
+        
+        SubStructureFill() : 
+            name(""),
+            from({0.0f}),
+            to({0.0f}) {}
+    };
+    
+    class SubStructurePattern {
     public:
         std::string name;
         std::string mesh;
         std::string pattern;
         glm::vec3 position;
         
-        SubStructureSpread() : 
+        SubStructurePattern() : 
             name(""),
             mesh(""),
             pattern(""),
             position({0.0f}) {}
     };
     
-    std::vector<SubStructureStack>  stacks;
-    std::vector<SubStructureSpread> spread;
+    std::vector<SubStructureStack>    stacks;
+    std::vector<SubStructurePlace>    places;
+    std::vector<SubStructureFill>     fills;
+    std::vector<SubStructurePattern>  patterns;
     
     ClassStructure() {}
 };

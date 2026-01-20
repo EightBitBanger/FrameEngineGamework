@@ -170,7 +170,6 @@ public:
     /// Get the number of scenes in the render queue.
     unsigned int GetRenderQueueSize(void);
     
-    
     // Internal
     
     /// Prepare the render system.
@@ -190,6 +189,17 @@ public:
     
     /// Get number of draw calls made in the last frame.
     unsigned int GetNumberOfDrawCalls(void);
+    
+    // Culling
+    
+    /// Get the edge planes from the projection matrix
+    Frustum FrustumExtractPlanes(glm::mat4& viewProjMatrix);
+    
+    /// Check of a point is with the frustum boundary
+    bool FrustumCheckPoint(Frustum& frustum, glm::vec3& point);
+    
+    /// Check of an axis aligned bounding box is with the frustum boundary
+    bool FrustumCheckAABB(Frustum& frustum, glm::vec3& min, glm::vec3& max);
     
     std::mutex mux;
     
@@ -256,7 +266,6 @@ private:
     // Render support thread
     std::thread* renderThreadMain;
     
-    
     //
     // Render pipeline
     //
@@ -273,33 +282,16 @@ private:
     // Asset binding
     
     bool BindMesh(Mesh* meshPtr);
-    
     bool BindMaterial(Material* materialPtr);
-    
     bool BindShader(Shader* shaderPtr);
     
     // Passes
     
     bool GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection);
-    
     bool ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection);
-    
     bool SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup);
-    
     Mesh* LevelOfDetailPass(MeshRenderer* currentEntity, glm::vec3& eye);
-    
     bool CullingPass(MeshRenderer* currentEntity, Camera* currentCamera, glm::mat4& viewProjection, Frustum& frustum);
-    
-    
-    // Get the edge planes from the projection matrix
-    Frustum FrustumExtractPlanes(glm::mat4& viewProjMatrix);
-    
-    // Check of a point is with the frustum boundary
-    bool FrustumCheckPoint(Frustum& frustum, glm::vec3& point);
-    
-    // Check of an axis aligned bounding box is with the frustum boundary
-    bool FrustumCheckAABB(Frustum& frustum, glm::vec3& min, glm::vec3& max);
-    
     
     // Default assets
     

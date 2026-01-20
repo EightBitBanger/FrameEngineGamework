@@ -4,10 +4,8 @@
 //
 // Platform
 
-#define  PLATFORM_WINDOWS
-//#define  PLATFORM_LINUX
-
-
+//#define  PLATFORM_WINDOWS
+#define  PLATFORM_LINUX
 
 //
 // Application layout
@@ -25,9 +23,6 @@
 // Minimum window size (In pixels)
 #define  WINDOW_WIDTH_MIN   300
 #define  WINDOW_HEIGHT_MIN  200
-
-// Console window area
-//#define  WINDOW_CONSOLE_HIDE_ON_STARTUP
 
 #define  WINDOW_CONSOLE_LEFT    5
 #define  WINDOW_CONSOLE_TOP     50
@@ -47,7 +42,7 @@
 // Rendering
 //
 
-#define  RENDER_FRAMES_PER_SECOND          60
+#define  RENDER_FRAMES_PER_SECOND       60
 
 //#define  RENDERER_CHECK_OPENGL_ERRORS
 #define RENDER_NUMBER_OF_LIGHTS         50

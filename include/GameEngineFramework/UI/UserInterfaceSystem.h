@@ -8,10 +8,6 @@
 #include <GameEngineFramework/UI/components/panel.h>
 #include <GameEngineFramework/UI/components/sprite.h>
 
-#ifndef SDL_Event
- #define SDL_Event  int
-#endif
-
 
 class ENGINE_API UserInterfaceSystem {
     

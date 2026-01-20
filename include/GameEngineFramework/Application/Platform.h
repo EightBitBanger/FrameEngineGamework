@@ -15,7 +15,6 @@
 extern Logger Log;
 extern IntType Int;
 
-
 ENGINE_API void Start(void);
 
 ENGINE_API void Run(void);
@@ -25,7 +24,6 @@ ENGINE_API void TickUpdate(void);
 ENGINE_API void Shutdown(void);
 
 ENGINE_API void RegisterPlugins(void);
-
 
 
 class ENGINE_API PlatformLayer {

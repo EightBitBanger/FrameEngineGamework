@@ -151,7 +151,7 @@ public:
     bool RemoveDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
     
     
-    void DecodeGenome(std::string name, Actor* actorPtr);
+    //void DecodeGenome(std::string name, Actor* actorPtr);
     
     void Decorate(Chunk* chunk);
     
