@@ -65,6 +65,9 @@ void RenderSystem::RenderFrame(void) {
             if (!renderQueueGroup || renderQueueGroup->empty()) 
                 continue;
             
+            std::vector<MeshRenderer*> shadowList;
+            shadowList.reserve(100);
+            
             SortingPass(eye, renderQueueGroup);
             
             // Geometry pass
@@ -72,31 +75,64 @@ void RenderSystem::RenderFrame(void) {
                 if (!currentEntity->isActive) 
                     continue;
                 
+                if (currentEntity->material == nullptr || 
+                    currentEntity->mesh == nullptr) 
+                    continue;
+                
+                if (currentEntity->material->shader == nullptr) 
+                    continue;
+                
                 if (currentEntity->mDoCulling) 
                     if (!CullingPass(currentEntity, scenePtr->camera, viewProjection, frustum)) 
                         continue;
                 
+                // Level of detail shift selection
+                Mesh* mesh = LevelOfDetailPass(currentEntity, eye);
+                if (mesh == nullptr) 
+                    continue;
+                
+                BindMesh( mesh );
+                
+                Material* materialPtr = currentEntity->material;
+                if (materialPtr == nullptr) 
+                    continue;
+                BindMaterial( materialPtr );
+                
+                Shader* shaderPtr = materialPtr->shader;
+                if (shaderPtr == nullptr) 
+                    continue;
+                BindShader( shaderPtr );
+                
+                // Set texture count
+                unsigned int numberOfTextures = materialPtr->mTextures.size();
+                shaderPtr->SetTextureSamplerCount(numberOfTextures);
+                
                 GeometryPass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
                 
-                ShadowVolumePass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
+                if (currentEntity->material->mDoShadowPass) 
+                    shadowList.push_back(currentEntity);
             }
             
-            // Shadow pass
-            if (mNumberOfShadows > 0) {
-                //shaders.shadowCaster->Bind();
+            // Shadow volume pass
+            for (unsigned int i=0; i < shadowList.size(); i++) {
+                MeshRenderer* currentEntity = shadowList[i];
                 
-                //shaders.color->Bind();
+                BindMesh( currentEntity->mesh );
                 
-                /*
-                for (MeshRenderer* currentEntity : *renderQueueGroup) {
+                // Material binding
+                Material* materialPtr = currentEntity->material;
+                if (materialPtr == nullptr) 
+                    continue;
+                BindMaterial( materialPtr );
+                
+                shaders.shadowCaster->Bind();
+                
+                if (currentEntity->material->mDoShadowPass) 
                     ShadowVolumePass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
-                }
-                */
                 
-                //if (mCurrentShader) 
-                //    mCurrentShader->Bind();
+                if (mCurrentShader) 
+                    mCurrentShader->Bind();
             }
-            
         }
     }
     

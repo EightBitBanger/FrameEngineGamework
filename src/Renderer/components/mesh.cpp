@@ -473,7 +473,7 @@ bool Mesh::ChangeSubMeshPoints(unsigned int index, std::vector<glm::vec3> points
         return false;
     
     unsigned int start = subMesh.vertexBegin;
-    unsigned int end   = start + subMesh.vertexCount;
+    // unsigned int end = start + subMesh.vertexCount;
     
     for (unsigned int i = 0; i < subMesh.vertexCount; ++i) {
         const glm::vec3& point = points[i];

@@ -26,29 +26,11 @@ bool CheckCooldown(float nowMs, float& nextAllowedMs, float cooldownMs) {
 }
 
 void MouseButtonLeft() {
-    if (CheckCooldown(Time.Current(), clickCooldownLeft, clickRepeatTimeout)) {
-        
-        DecorationHitInfo info = GameWorld.QueryDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, hitMaxDistance, hitThreshold);
-        if (info.didHit) {
-            
-            if (GameWorld.RemoveDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, hitMaxDistance, hitThreshold)) {
-                
-                Inventory.AddItem(info.type);
-            }
-        }
-    }
+    
 }
 
 void MouseButtonRight() {
-    if (CheckCooldown(Time.Current(), clickCooldownRight, clickRepeatTimeout)) {
-        
-        if (!Inventory.CheckSlotEmpty(Inventory.GetSelectorIndex())) {
-            std::string name = Inventory.QueryItem(Inventory.GetSelectorIndex());
-            
-            if (GameWorld.PlaceDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, name, hitMaxDistance, hitThreshold)) 
-                Inventory.RemoveItem(Inventory.GetSelectorIndex());
-        }
-    }
+    
 }
 
 MeshRenderer* selectedMeshRenderer = nullptr;
@@ -59,8 +41,6 @@ void Run() {
     // Update plug-in systems
     Weather.Update();
     Particle.Update();
-    GameWorld.Update();
-    Inventory.Update();
     
     if (Engine.cameraController == nullptr) 
         return;
@@ -72,236 +52,122 @@ void Run() {
     glm::vec3 forward = cameraPtr->forward;
     glm::vec3 from = cameraPtr->transform.position;
     
-    // Left click cooldown
-    if (Input.CheckMouseLeftPressed()) {
-        Input.SetMouseLeftPressed(false);
-        isLeftClickHold = true;
-        
-    }
     
     if (isLeftClickHold) {
         MouseButtonLeft();
         
-        
-        
-        
-        GameObject* gameObject = Engine.Create<GameObject>();
-        gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-        
-        MeshRenderer* meshRenderer = gameObject->GetComponent<MeshRenderer>();
-        meshRenderer->mesh = Engine.meshes.cube;
-        meshRenderer->material = Engine.Create<Material>();
-        meshRenderer->material->shader = Engine.shaders.color;
-        
-        meshRenderer->material->DisableCulling();
-        meshRenderer->material->EnableShadowVolumePass();
-        
-        glm::vec3 randomColor = {Random.Range(0.0f, 1.0f), 0, Random.Range(0.0f, 1.0f)};
-        
-        meshRenderer->material->diffuse = randomColor * 0.4f;
-        meshRenderer->material->ambient = Colors.gray;
-        
-        meshRenderer->material->EnableShadowVolumePass();
-        meshRenderer->material->SetShadowVolumeColor(Colors.black);
-        meshRenderer->material->SetShadowVolumeIntensityLow(0.3f);
-        meshRenderer->material->SetShadowVolumeIntensityHigh(0.8f);
-        meshRenderer->material->SetShadowVolumeColorIntensity(9.0f);
-        meshRenderer->material->SetShadowVolumeLength(10.0f);
-        
-        meshRenderer->material->SetShadowVolumeAngleOfView(0.0f);
-        
-        glm::vec3 randomOffset = {Random.Range(-10, 10), 
-                                  Random.Range(-10, 10), 
-                                  Random.Range(-10, 10)};
-        
-        Transform* transform = gameObject->GetComponent<Transform>();
-        transform->Translate( Engine.cameraController->GetPosition() + randomOffset );
-        transform->Scale(2.0f, 2.0f, 2.0f);
-        transform->UpdateMatrix();
-        
-        Engine.sceneMain->AddMeshRendererToSceneRoot(meshRenderer);
-        
-    }
-    
-    if (Input.CheckMouseLeftReleased()) {
-        Input.SetMouseLeftReleased(false);
-        isLeftClickHold = false;
-        
-        clickCooldownLeft = Time.Current();
-    }
-    
-    // Right click cooldown
-    if (Input.CheckMouseRightPressed()) {
-        Input.SetMouseRightPressed(false);
-        isRightClickHold = true;
-    }
-    
-    if (isRightClickHold) {
-        MouseButtonRight();
-    }
-    
-    if (Input.CheckMouseRightReleased()) {
-        Input.SetMouseRightReleased(false);
-        isRightClickHold = false;
-        
-        clickCooldownRight = Time.Current();
-    }
-    
-    // Scroll inventory items
-    if (Input.mouseWheelDelta < 0.0f) 
-        Inventory.NextSlot();
-    if (Input.mouseWheelDelta > 0.0f) 
-        Inventory.PrevSlot();
-    
-    DecorationHitInfo info = GameWorld.QueryDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, hitMaxDistance, hitThreshold);
-    
-    if (info.didHit) {
-        Engine.console.WriteDialog(0, info.type);
-        
-        // Initiate the mesh outline shadow effect
-        if (!selectedMeshRenderer) {
-            selectedMeshRenderer = Engine.Create<MeshRenderer>();
-            selectedMeshRenderer->mesh = Engine.Create<Mesh>();
-            selectedMeshRenderer->material = Engine.Create<Material>();
+        for (unsigned int i=0; i < 24; i++) {
             
-            selectedMeshRenderer->mesh->isShared = false;
-            selectedMeshRenderer->mesh->SetPrimitive(MESH_LINE_LOOP);
-            selectedMeshRenderer->material->isShared = false;
-            selectedMeshRenderer->material->shader = Engine.shaders.colorUnlit;
+            GameObject* gameObject = Engine.Create<GameObject>();
+            gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
             
-            selectedMeshRenderer->material->ambient = Colors.black;
+            MeshRenderer* meshRenderer = gameObject->GetComponent<MeshRenderer>();
+            meshRenderer->mesh = Engine.meshes.cube;
+            meshRenderer->material = Engine.Create<Material>();
+            meshRenderer->material->shader = Engine.shaders.color;
             
-            Engine.sceneMain->AddMeshRendererToSceneRoot(selectedMeshRenderer);
-        }
-        
-        // Generate mesh outline shadow effect
-        SubMesh& subMesh = GameWorld.mStaticMeshes[info.mesh];
-        selectedMeshRenderer->mesh->ClearSubMeshes();
-        selectedMeshRenderer->mesh->AddSubMesh(0.0f, 0.0f, 0.0f, subMesh, true);
-        selectedMeshRenderer->mesh->Load();
-        
-        glm::vec3 position = info.worldPosition;
-        glm::vec3 scale    = info.scale * 1.009f;
-        glm::vec3 rotation = info.rotation;
-        
-        selectedMeshRenderer->transform.SetPosition(position);
-        selectedMeshRenderer->transform.SetOrientation(rotation * 3.14159f / 180.0f);
-        
-        selectedMeshRenderer->transform.SetScale(scale);
-        selectedMeshRenderer->transform.UpdateMatrix();
-        selectedMeshRenderer->isActive = true;
-        
-    } else {
-        Engine.console.WriteDialog(0, "");
-        if (selectedMeshRenderer) 
-            selectedMeshRenderer->isActive = false;
-    }
-    
-    
-    
-    if (Input.CheckMouseMiddlePressed()) {
-        
-        //Input.SetMouseMiddlePressed(false);
-        float randAmount = 8.0f;
-        float xx = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
-        float zz = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
-        
-        Hit hit;
-        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Actor)) {
-            Actor* actor = (Actor*)hit.userData;
+            meshRenderer->material->DisableCulling();
+            meshRenderer->material->EnableShadowVolumePass();
             
-            std::string genome = AI.genomes.ExtractGenome(actor);
+            glm::vec3 randomColor = {Random.Range(0.0f, 1.0f), 0, Random.Range(0.0f, 1.0f)};
             
-            Engine.console.WriteDialog(0, "Actor hit");
+            meshRenderer->material->diffuse = randomColor * 0.4f;
+            meshRenderer->material->ambient = Colors.gray;
             
-            Platform.SetClipboardText(genome);
-        }
-        
-        
-        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
+            meshRenderer->material->EnableShadowVolumePass();
+            meshRenderer->material->SetShadowVolumeColor((Colors.yellow + (Colors.red * Colors.gray * 0.018)) * 0.01f);
+            meshRenderer->material->SetShadowVolumeIntensityLow(0.001f);
+            meshRenderer->material->SetShadowVolumeIntensityHigh(0.03f);
+            meshRenderer->material->SetShadowVolumeColorIntensity(0.05f);
+            meshRenderer->material->SetShadowVolumeLength(8.0f);
             
-            Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
-            //AI.genomes.presets.Spider(actor);
-            AI.genomes.presets.Human(actor);
+            meshRenderer->material->SetShadowVolumeAngleOfView(4.0f);
             
-            actor->physical.SetAge( actor->physical.GetAdultAge() );
-            actor->physical.UpdatePhysicalCollider();
+            glm::vec3 randomOffset = {Random.Range(-100, 100), 
+                                      Random.Range(-100, 100) + 50, 
+                                      Random.Range(-100, 100)};
             
-            actor->RebuildGeneticExpression();
-            actor->isActive = true;
+            Transform* transform = gameObject->GetComponent<Transform>();
+            transform->Translate( Engine.cameraController->GetPosition() + randomOffset );
+            transform->Scale(2.0f, 2.0f, 2.0f);
+            transform->UpdateMatrix();
             
-            
-            /*
-            glm::vec3 position = glm::vec3(hit.point.x, hit.point.y+1, hit.point.z);
-            
-            // Fire emitter
-            Emitter* fireEmitter = Particle.CreateEmitter();
-            fireEmitter->type = EmitterType::Point;
-            fireEmitter->position  = position;
-            fireEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
-            fireEmitter->scale     = glm::vec3(0.1f, 0.04f, 0.1f);
-            fireEmitter->scaleTo   = glm::vec3(1.0008f, 1.0008f, 1.0008f);
-            
-            fireEmitter->velocity = glm::vec3(0.0f, 0.01f, 0.0f);
-            fireEmitter->velocityBias = 0.008f;
-            
-            fireEmitter->width = 0.1f;
-            fireEmitter->height = 0.1f;
-            
-            fireEmitter->angle = 0.18f;
-            fireEmitter->spread = 0.4f;
-            
-            fireEmitter->colorBegin = Colors.red;
-            fireEmitter->colorEnd = Colors.yellow;
-            
-            fireEmitter->maxParticles = 20;
-            fireEmitter->spawnRate = 20;
-            
-            fireEmitter->heightMinimum = GameWorld.world.waterLevel;
-            
-            Material* fireEmitterMaterial = fireEmitter->GetMaterial();
-            
-            //fireEmitterMaterial->EnableBlending();
-            //fireEmitterMaterial->shader = Engine.shaders.water;
-            
-            
-            // Smoke emitter test
-            
-            Emitter* smokeEmitter = Particle.CreateEmitter();
-            smokeEmitter->type = EmitterType::Point;
-            smokeEmitter->position = position;
-            smokeEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
-            smokeEmitter->scale     = glm::vec3(0.08f, 0.08f, 0.08f);
-            smokeEmitter->scaleTo   = glm::vec3(1.005f, 1.0005f, 1.005f);
-            
-            float randomX = Random.Range(-1.0f, 1.0f) * 0.0024f;
-            float randomZ = Random.Range(-1.0f, 1.0f) * 0.0024f;
-            
-            smokeEmitter->velocity = glm::vec3(randomX, 0.024f, randomZ);
-            smokeEmitter->velocityBias = 0.02f;
-            
-            smokeEmitter->width = 4;
-            smokeEmitter->height = 8;
-            
-            smokeEmitter->angle = 0.3f;
-            smokeEmitter->spread = 0.5f;
-            
-            smokeEmitter->colorBegin = Colors.dkgray;
-            smokeEmitter->colorEnd = Colors.gray;
-            
-            smokeEmitter->maxParticles = 40;
-            smokeEmitter->spawnRate = 16;
-            
-            smokeEmitter->heightMinimum = GameWorld.world.waterLevel;
-            
-            Material* smokeEmitterMaterial = smokeEmitter->GetMaterial();
-            
-            //smokeEmitterMaterial->EnableBlending();
-            //smokeEmitterMaterial->shader = Engine.shaders.water;
-            */
+            Engine.sceneMain->AddMeshRendererToSceneRoot(meshRenderer);
         }
         
     }
+    
+    /*
+    glm::vec3 position = glm::vec3(hit.point.x, hit.point.y+1, hit.point.z);
+    
+    // Fire emitter
+    Emitter* fireEmitter = Particle.CreateEmitter();
+    fireEmitter->type = EmitterType::Point;
+    fireEmitter->position  = position;
+    fireEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
+    fireEmitter->scale     = glm::vec3(0.1f, 0.04f, 0.1f);
+    fireEmitter->scaleTo   = glm::vec3(1.0008f, 1.0008f, 1.0008f);
+    
+    fireEmitter->velocity = glm::vec3(0.0f, 0.01f, 0.0f);
+    fireEmitter->velocityBias = 0.008f;
+    
+    fireEmitter->width = 0.1f;
+    fireEmitter->height = 0.1f;
+    
+    fireEmitter->angle = 0.18f;
+    fireEmitter->spread = 0.4f;
+    
+    fireEmitter->colorBegin = Colors.red;
+    fireEmitter->colorEnd = Colors.yellow;
+    
+    fireEmitter->maxParticles = 20;
+    fireEmitter->spawnRate = 20;
+    
+    fireEmitter->heightMinimum = GameWorld.world.waterLevel;
+    
+    Material* fireEmitterMaterial = fireEmitter->GetMaterial();
+    
+    //fireEmitterMaterial->EnableBlending();
+    //fireEmitterMaterial->shader = Engine.shaders.water;
+    
+    
+    // Smoke emitter test
+    
+    Emitter* smokeEmitter = Particle.CreateEmitter();
+    smokeEmitter->type = EmitterType::Point;
+    smokeEmitter->position = position;
+    smokeEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
+    smokeEmitter->scale     = glm::vec3(0.08f, 0.08f, 0.08f);
+    smokeEmitter->scaleTo   = glm::vec3(1.005f, 1.0005f, 1.005f);
+    
+    float randomX = Random.Range(-1.0f, 1.0f) * 0.0024f;
+    float randomZ = Random.Range(-1.0f, 1.0f) * 0.0024f;
+    
+    smokeEmitter->velocity = glm::vec3(randomX, 0.024f, randomZ);
+    smokeEmitter->velocityBias = 0.02f;
+    
+    smokeEmitter->width = 4;
+    smokeEmitter->height = 8;
+    
+    smokeEmitter->angle = 0.3f;
+    smokeEmitter->spread = 0.5f;
+    
+    smokeEmitter->colorBegin = Colors.dkgray;
+    smokeEmitter->colorEnd = Colors.gray;
+    
+    smokeEmitter->maxParticles = 40;
+    smokeEmitter->spawnRate = 16;
+    
+    smokeEmitter->heightMinimum = GameWorld.world.waterLevel;
+    
+    Material* smokeEmitterMaterial = smokeEmitter->GetMaterial();
+    
+    //smokeEmitterMaterial->EnableBlending();
+    //smokeEmitterMaterial->shader = Engine.shaders.water;
+    */
+    
+    
+    
     
     
     
@@ -341,72 +207,6 @@ void Run() {
         Engine.console.WriteDialog(19, "RigidBodies     " + Int.ToString(Physics.world->getNbRigidBodies()) );
         Engine.console.WriteDialog(20, "Actors          " + Int.ToString(AI.GetNumberOfActors()) );
         Engine.console.WriteDialog(21, "Colliders       " + Int.ToString(Engine.mBoxCollider.size()) );
-        
-    }
-    
-    
-    //
-    // DEBUG - Show actor stats
-    //
-    
-    if (actorInSights != nullptr && !isProfilerEnabled) {
-        Engine.console.WriteDialog( 1, actorInSights->GetName() );
-        Engine.console.WriteDialog( 2, Int.ToString( actorInSights->physical.GetAge() ) );
-        
-        Engine.console.WriteDialog( 4, "Active   " + Int.ToString( actorInSights->isActive ) );
-        Engine.console.WriteDialog( 5, "Garbage  " + Int.ToString( actorInSights->isGarbage ) );
-        
-        Engine.console.WriteDialog( 7, "[ States ]" );
-        
-        switch (actorInSights->state.current) {
-            case ActorState::State::None:    Engine.console.WriteDialog(8, "State  None"); break;
-            case ActorState::State::Attack:  Engine.console.WriteDialog(8, "State  Attack"); break;
-            case ActorState::State::Flee:    Engine.console.WriteDialog(8, "State  Flee"); break;
-            case ActorState::State::Defend:  Engine.console.WriteDialog(8, "State  Defend"); break;
-            case ActorState::State::Observe: Engine.console.WriteDialog(8, "State  Focus"); break;
-            case ActorState::State::Look:    Engine.console.WriteDialog(8, "State  Look"); break;
-            case ActorState::State::Breed:   Engine.console.WriteDialog(8, "State  Breed"); break;
-            default: Engine.console.WriteDialog(8, "Mode   Unknown"); break;
-        }
-        
-        switch (actorInSights->state.mode) {
-            case ActorState::Mode::Idle:        Engine.console.WriteDialog(9, "Mode   Idle"); break;
-            case ActorState::Mode::Sleeping:    Engine.console.WriteDialog(9, "Mode   Sleeping"); break;
-            case ActorState::Mode::MoveRandom:  Engine.console.WriteDialog(9, "Mode   MoveRandom"); break;
-            case ActorState::Mode::MoveTo:      Engine.console.WriteDialog(9, "Mode   MoveTo"); break;
-            case ActorState::Mode::WalkTo:      Engine.console.WriteDialog(9, "Mode   WalkTo"); break;
-            case ActorState::Mode::RunTo:       Engine.console.WriteDialog(9, "Mode   RunTo"); break;
-            default: Engine.console.WriteDialog(9, "Mode   Unknown"); break;
-        }
-        
-        Engine.console.WriteDialog( 11, "[ Counters ]" );
-        
-        Engine.console.WriteDialog( 12, "Attack    " + Int.ToString( actorInSights->counters.GetCoolDownAttack() ) );
-        Engine.console.WriteDialog( 13, "Movement  " + Int.ToString( actorInSights->counters.GetCoolDownMovement() ) );
-        Engine.console.WriteDialog( 14, "Observe   " + Int.ToString( actorInSights->counters.GetCoolDownObservation() ) );
-        Engine.console.WriteDialog( 15, "Breeding  " + Int.ToString( actorInSights->counters.GetCoolDownBreeding() ) );
-        
-        Engine.console.WriteDialog( 17, "Distance to target   " + Int.ToString( actorInSights->navigation.GetDistanceToTarget() ) );
-        Engine.console.WriteDialog( 18, "TargetPoint          " + Int.ToString( actorInSights->navigation.GetTargetPoint().x ) + ", " 
-                                                                + Int.ToString( actorInSights->navigation.GetTargetPoint().y ) + ", "
-                                                                + Int.ToString( actorInSights->navigation.GetTargetPoint().z ) );
-        if (actorInSights->navigation.GetTargetActor() != nullptr) {
-            Engine.console.WriteDialog( 19, "TargetActor          " + actorInSights->navigation.GetTargetActor()->GetName());
-        } else {
-            Engine.console.WriteDialog( 19, "TargetActor          nullptr");
-        }
-        
-        
-        /*
-        Engine.console.WriteDialog( 19, "[ Vitality ]" );
-        Engine.console.WriteDialog( 20, "Health   " + Int.ToString( actorInSights->biological.health ) );
-        if (actorInSights->physical.GetSexualOrientation()) 
-            Engine.console.WriteDialog( 21, "Male");
-        else 
-            Engine.console.WriteDialog( 21, "Female");
-        
-        Engine.console.WriteDialog( 22, "Mesh renderers   " + Int.ToString( actorInSights->genetics.GetNumberOfMeshRenderers() ) );
-        */
         
     }
     

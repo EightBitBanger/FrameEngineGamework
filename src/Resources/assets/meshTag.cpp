@@ -30,7 +30,7 @@ bool MeshTag::Load(void) {
     // Clear the sub mesh list
     Unload();
     
-    // Load a sub meshes
+    // Load sub meshes
     for (unsigned int a=0; a < numberOfMeshes; a++) {
         
         SubMesh subMesh;

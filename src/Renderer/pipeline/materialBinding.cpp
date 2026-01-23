@@ -5,23 +5,23 @@
 
 
 bool RenderSystem::BindMaterial(Material* materialPtr) {
-    
     if (mCurrentMaterial == materialPtr) 
         return false;
     
     mCurrentMaterial = materialPtr;
     
-    mCurrentMaterial->texture.Bind();
-    mCurrentMaterial->texture.BindTextureSlot(0);
+    // Bind textures to their slots
+    for (unsigned int i=0; i < mCurrentMaterial->mTextures.size(); i++) {
+        mCurrentMaterial->mTextures[i]->BindTextureSlot(i);
+        mCurrentMaterial->mTextures[i]->Bind();
+    }
     
     // Depth testing
     
     if (mCurrentMaterial->mDoDepthTest) {
-        
         glEnable(GL_DEPTH_TEST);
         
         glDepthMask(mCurrentMaterial->mDoDepthTest);
-        
         glDepthFunc(mCurrentMaterial->mDepthFunc);
         
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
@@ -31,15 +31,12 @@ bool RenderSystem::BindMaterial(Material* materialPtr) {
     } else {
         
         glDisable(GL_DEPTH_TEST);
-        
     }
     
     // Face culling and winding
     
     if (mCurrentMaterial->mDoFaceCulling) {
-        
         glEnable(GL_CULL_FACE);
-        
         glCullFace(mCurrentMaterial->mFaceCullSide);
         
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
@@ -49,7 +46,6 @@ bool RenderSystem::BindMaterial(Material* materialPtr) {
     } else {
         
         glDisable(GL_CULL_FACE);
-        
     }
     
     // Face winding order
@@ -62,7 +58,6 @@ bool RenderSystem::BindMaterial(Material* materialPtr) {
     // Blending
     
     if (mCurrentMaterial->mDoBlending) {
-        
         glEnable(GL_BLEND);
         
         glBlendFuncSeparate(mCurrentMaterial->mBlendSource,
@@ -77,7 +72,6 @@ bool RenderSystem::BindMaterial(Material* materialPtr) {
     } else {
         
         glDisable(GL_BLEND);
-        
     }
     
     return true;

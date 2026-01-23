@@ -42,7 +42,7 @@ bool TextureTag::Load(void) {
         return false;
     
 #ifdef EVENT_LOG_DETAILED
-    std::string logstr = "  + " + name + " " + Int.ToString(width) + " X " + Int.ToString(height);
+    std::string logstr = "  + " + name + " " + Int.ToString(width) +" X "+ Int.ToString(height) +" : "+ Int.ToString(channels);
     Log.Write(logstr);
 #endif
     

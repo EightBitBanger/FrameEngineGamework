@@ -123,7 +123,7 @@ void WeatherSystem::Initiate(void) {
     mRainEmitter->colorBegin = Colors.Lerp(Colors.blue, Colors.ltgray, 0.2f);
     mRainEmitter->colorEnd = Colors.Lerp(Colors.blue, Colors.ltgray, 0.7);
     mRainEmitter->maxParticles = 2000;
-    mRainEmitter->heightMinimum = GameWorld.world.waterLevel;
+    mRainEmitter->heightMinimum = 0.0f;
     
     // Snow emitter
     
@@ -138,7 +138,7 @@ void WeatherSystem::Initiate(void) {
     mSnowEmitter->colorBegin = Colors.white;
     mSnowEmitter->colorEnd = Colors.white;
     mSnowEmitter->maxParticles = 2000;
-    mSnowEmitter->heightMinimum = GameWorld.world.waterLevel;
+    mSnowEmitter->heightMinimum = 0.0f;
     
     // Zero the weather systems
     SetWeather( WeatherType::Clear );

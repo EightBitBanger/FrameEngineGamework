@@ -39,6 +39,22 @@ Material::Material() :
     mShadowVolumeColor = Color(1, 1, 1);
 }
 
+
+void Material::AddTexture(Texture* texture) {
+    mTextures.push_back(texture);
+}
+
+Texture* Material::GetTexture(unsigned int index) {
+    if (index >= mTextures.size()) 
+        return nullptr;
+    return mTextures[index];
+}
+
+unsigned int Material::GetNumberOfTextures(void) {
+    return mTextures.size();
+}
+
+
 void Material::EnableDepthTest(void) {
     mDoDepthTest = true;
 }

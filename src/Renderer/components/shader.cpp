@@ -20,6 +20,8 @@ Shader::Shader() :
     mMaterialAmbientLocation(0),
     mMaterialDiffuseLocation(0),
     mMaterialSpecularLocation(0),
+    
+    mSamplerCountLocation(0),
     mSamplerLocation(0),
     
     mFogDensityLocation(0),
@@ -78,10 +80,14 @@ void Shader::SetMaterialSpecular(Color color) {
     glUniform3f(mMaterialSpecularLocation, color.r, color.g, color.b);
 }
 
-void Shader::SetTextureSampler(unsigned int index) {
-    glUniform1i(mSamplerLocation, index);
+void Shader::SetTextureSamplerCount(unsigned int numberOfTextures) {
+    glUniform1i(mSamplerCountLocation, numberOfTextures);
 }
 
+void Shader::SetTextureSampler(unsigned int index) {
+    int units[4] = {0,1,2,3};
+    glUniform1iv(mSamplerLocation, 4, units);
+}
 
 void Shader::SetFogCount(int numberOfFogLayers) {
     glUniform1i(mFogCountLocation, numberOfFogLayers);
@@ -145,6 +151,8 @@ void Shader::SetUniformLocations(void) {
     std::string matDiffuseUniformName   = "m_diffuse";
     std::string matSpecularUniformName  = "m_specular";
     
+    
+    std::string mSamplerCountLocation   = "u_sampler_count";
     std::string samplerUniformName      = "u_sampler";
     
     std::string fogCountName            = "u_fog_count";

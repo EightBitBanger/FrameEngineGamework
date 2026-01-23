@@ -5,26 +5,6 @@
 
 
 bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection) {
-    // Level of detail shift selection
-    Mesh* mesh = LevelOfDetailPass(currentEntity, eye);
-    if (mesh == nullptr) 
-        return false;
-    
-    BindMesh( mesh );
-    
-    // Material binding
-    
-    Material* materialPtr = currentEntity->material;
-    if (materialPtr == nullptr) 
-        return false;
-    BindMaterial( materialPtr );
-    
-    // Shader binding
-    
-    Shader* shaderPtr = materialPtr->shader;
-    if (shaderPtr == nullptr) 
-        return false;
-    BindShader( shaderPtr );
     
     // Set the projection
     mCurrentShader->SetProjectionMatrix( viewProjection );
@@ -42,7 +22,7 @@ bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     mCurrentShader->SetMaterialSpecular(mCurrentMaterial->specular);
     
     // Render the geometry
-    mesh->DrawIndexArray();
+    currentEntity->mesh->DrawIndexArray();
     mNumberOfDrawCalls++;
     
     return true;

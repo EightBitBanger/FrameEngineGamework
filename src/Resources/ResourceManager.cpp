@@ -19,13 +19,13 @@ void ResourceManager::Initiate(void) {
     std::vector<std::string> materialDirectoryList = fs.DirectoryGetList(".\\core\\materials\\");
     
     for (unsigned int i=0; i < shaderDirectoryList.size(); i++) 
-        LoadShaderGLSL("core/shaders/" + shaderDirectoryList[i], String.GetNameFromFilenameNoExt( shaderDirectoryList[i] ));
+        LoadShaderGLSL("core\\shaders\\" + shaderDirectoryList[i], String.GetNameFromFilenameNoExt( shaderDirectoryList[i] ));
     
     for (unsigned int i=0; i < modelDirectoryList.size(); i++) 
-        LoadWaveFront("core/models/" + modelDirectoryList[i], String.GetNameFromFilenameNoExt( modelDirectoryList[i] ));
+        LoadWaveFront("core\\models\\" + modelDirectoryList[i], String.GetNameFromFilenameNoExt( modelDirectoryList[i] ));
     
     for (unsigned int i=0; i < materialDirectoryList.size(); i++) 
-        LoadTexture("core/materials/" + materialDirectoryList[i], String.GetNameFromFilenameNoExt( materialDirectoryList[i] ));
+        LoadTexture("core\\materials\\" + materialDirectoryList[i], String.GetNameFromFilenameNoExt( materialDirectoryList[i] ));
     
     return;
 }
@@ -58,6 +58,32 @@ ColliderTag* ResourceManager::FindColliderTag(std::string resourceName) {
     return nullptr;
 }
 
+bool ResourceManager::LoadMeshFromTag(std::string resourceName, Mesh* mesh) {
+    MeshTag* meshTag = FindMeshTag(resourceName);
+    if (meshTag == nullptr) return false;
+    if (!meshTag->isLoaded) 
+        if (!meshTag->Load()) 
+            return false;
+    mesh->ClearSubMeshes();
+    for (unsigned int i=0; i < meshTag->subMeshes.size(); i++) 
+        mesh->AddSubMesh(0, 0, 0, meshTag->subMeshes[i].vertexBuffer, meshTag->subMeshes[i].indexBuffer, false);
+    mesh->Load();
+    return true;
+}
+
+bool ResourceManager::LoadMaterialFromTag(std::string resourceName, Material* material, int filtrationMin, int filtrationMag) {
+    TextureTag* texTag = FindTextureTag(resourceName);
+    if (texTag == nullptr) return false;
+    if (!texTag->isLoaded) 
+        texTag->Load();
+    
+    Texture* texture = Renderer.CreateTexture();
+    texture->UploadTextureToGPU(texTag->buffer, texTag->width, texTag->height, texTag->channels, filtrationMin, filtrationMag);
+    
+    material->AddTexture(texture);
+    return true;
+}
+
 Mesh* ResourceManager::CreateMeshFromTag(std::string resourceName) {
     MeshTag* meshTag = FindMeshTag(resourceName);
     if (meshTag == nullptr) return nullptr;
@@ -77,7 +103,10 @@ Material* ResourceManager::CreateMaterialFromTag(std::string resourceName) {
     if (!texTag->isLoaded) 
         texTag->Load();
     Material* materialPtr = Renderer.CreateMaterial();
-    materialPtr->texture.UploadTextureToGPU(texTag->buffer, texTag->width, texTag->height, texTag->filtration, GL_LINEAR);
+    Texture* texture = Renderer.CreateTexture();
+    texture->UploadTextureToGPU(texTag->buffer, texTag->width, texTag->height, texTag->channels, MATERIAL_FILTER_TRILINEAR, MATERIAL_FILTER_LINEAR);
+    
+    materialPtr->AddTexture(texture);
     return materialPtr;
 }
 
