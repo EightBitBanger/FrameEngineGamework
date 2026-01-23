@@ -4,8 +4,8 @@
 //
 // Platform
 
-//#define  PLATFORM_WINDOWS
-#define  PLATFORM_LINUX
+#define  PLATFORM_WINDOWS
+//#define  PLATFORM_LINUX
 
 //
 // Application layout
@@ -34,7 +34,7 @@
 // Event log
 //
 
-//#define  EVENT_LOG_DETAILED
+#define  EVENT_LOG_DETAILED
 
 
 
@@ -54,21 +54,11 @@
 #define RENDER_NUMBER_OF_QUEUE_GROUPS   7
 
 
-
 //
 // Physics
 //
 
 #define PHYSICS_UPDATES_PER_SECOND         60
-
-
-
-//
-// Unit testing
-//
-
-//#define RUN_UNIT_TESTS
-
 
 
 //
@@ -83,10 +73,6 @@
 //
 
 #define NEURAL_LAYER_WIDTH  5
-
-
-
-
 
 
 

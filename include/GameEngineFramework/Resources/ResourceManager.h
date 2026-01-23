@@ -32,6 +32,11 @@ public:
     /// Load a GLSL shader file and assign it a resource tag name.
     bool LoadShaderGLSL(std::string path, std::string resourceName, bool loadImmediately=false);
     
+    /// Load a mesh into an existing mesh object.
+    bool LoadMeshFromTag(std::string resourceName, Mesh* mesh);
+    /// Load a texture into an existing material object. The required filtration can be applied to the texture.
+    bool LoadMaterialFromTag(std::string resourceName, Material* material, int filtrationMin, int filtrationMag);
+    
     /// Destroy and deallocate a mesh model resource by its name.
     bool UnloadMeshTag(std::string resourceName);
     /// Destroy and deallocate a texture image resource by its name.

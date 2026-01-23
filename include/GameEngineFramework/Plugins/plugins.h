@@ -3,14 +3,15 @@
 
 #include <GameEngineFramework/Engine/EngineSystems.h>
 
-#include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
 #include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
-#include <GameEngineFramework/Plugins/InventorySystem/InventorySystem.h>
 
-extern ChunkManager     GameWorld;
+//#include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
+//#include <GameEngineFramework/Plugins/InventorySystem/InventorySystem.h>
+
 extern WeatherSystem    Weather;
 extern ParticleSystem   Particle;
-extern InventorySystem  Inventory;
+//extern ChunkManager     GameWorld;
+//extern InventorySystem  Inventory;
 
 #endif

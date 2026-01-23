@@ -18,15 +18,15 @@ class ENGINE_API Transform {
     
 public:
     
-    glm::mat4 matrix;            // Transform matrix
-    glm::quat rotation;          // Rotation in world space.
-    glm::quat localRotation;     // Local rotation relative to the parent rotation.
-    
     glm::vec3 position;          // Position in world space.
+    glm::quat rotation;          // Rotation in world space.
     glm::vec3 scale;             // Scale in world space.
     
+    glm::quat localRotation;     // Local rotation relative to the parent rotation.
     glm::vec3 localPosition;     // Local translation relative to the parent translation.
     glm::vec3 localScale;        // Local scale relative to the parent scale.
+    
+    glm::mat4 matrix;            // Transform matrix
     
     Transform* parent;           // Pointer to a parent transform.
     

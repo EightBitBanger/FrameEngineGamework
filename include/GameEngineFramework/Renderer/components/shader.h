@@ -40,6 +40,10 @@ public:
     /// Set the uniform specular color of the material.
     void SetMaterialSpecular(Color color);
     
+    
+    /// Set the number of textures to be used.
+    void SetTextureSamplerCount(unsigned int numberOfTextures);
+    
     /// Set the uniform texture sampler index.
     void SetTextureSampler(unsigned int index);
     
@@ -119,6 +123,7 @@ private:
     int mMaterialDiffuseLocation;
     int mMaterialSpecularLocation;
     
+    int mSamplerCountLocation;
     int mSamplerLocation;
     
     int mFogCountLocation;

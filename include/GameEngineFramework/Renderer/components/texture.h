@@ -28,7 +28,7 @@ public:
     void BindTextureSlot(unsigned int slot);
     
     /// Upload the texture buffer onto the GPU.
-    void UploadTextureToGPU(void* textureData, unsigned int width, unsigned int height, int filterMin, int filterMag);
+    void UploadTextureToGPU(void* textureData, unsigned int width, unsigned int height, unsigned int channels, int filterMin, int filterMag);
     
     friend class RenderSystem;
     
@@ -41,6 +41,7 @@ private:
     
     unsigned int mWidth;
     unsigned int mHeight;
+    unsigned int mChannels;
     
     int mFiltration;
 };

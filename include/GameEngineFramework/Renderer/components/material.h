@@ -12,9 +12,6 @@ class ENGINE_API Material {
     
 public:
     
-    /// Texture associated with this material.
-    Texture texture;
-    
     /// Shader used by this material for rendering.
     Shader* shader;
     
@@ -30,6 +27,16 @@ public:
     
     /// Specular color for this material.
     Color specular;
+    
+    
+    /// Add a texture to this material.
+    void AddTexture(Texture* texture);
+    
+    /// Get a texture from this material.
+    Texture* GetTexture(unsigned int index);
+    
+    /// Get the number of textures in this material.
+    unsigned int GetNumberOfTextures(void);
     
     
     /// Enable depth testing.
@@ -102,6 +109,9 @@ public:
     
     
 private:
+    
+    // Textures associated with this material.
+    std::vector<Texture*> mTextures;
     
     // Should depth testing be preformed during rendering.
     bool mDoDepthTest;
