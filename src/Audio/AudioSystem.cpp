@@ -8,8 +8,8 @@ extern Logger Log;
 extern NumberGeneration Random;
 AudioSystem::AudioSystem() : 
     listenerPosition(glm::vec3(100)),
-    mStream(NULL),
-    mMasterVolume(1.0f) {}
+    mMasterVolume(1.0f),
+    mStream(NULL) {}
 
 // Audio thread
 bool isAudioThreadActive = true;

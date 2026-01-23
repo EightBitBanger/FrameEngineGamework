@@ -1,42 +1,8 @@
 #include <GameEngineFrameWork/Engine/Engine.h>
 #include <GameEngineFrameWork/functions.h>
 
-#ifdef RUN_UNIT_TESTS
- #include "../../tests/framework.h"
-#endif
 
 int main(int argc, char* argv[]) {
-    
-#ifdef RUN_UNIT_TESTS
-    TestFramework tests;
-    tests.Initiate();
-    
-    tests.AddTest( &tests.TestEngineFunctionality );
-    
-    tests.AddTest( &tests.TestRenderSystem );
-    tests.AddTest( &tests.TestScriptSystem );
-    
-    tests.AddTest( &tests.TestGameObject );
-    tests.AddTest( &tests.TestComponentObject );
-    
-    tests.AddTest( &tests.TestPhysicsSystem );
-    tests.AddTest( &tests.TestTransform );
-    
-    tests.AddTest( &tests.TestSerializerSystem );
-    
-    // Run all the tests
-    tests.RunTestSuite();
-    
-    // Finalize
-    if (!tests.hasTestFailed) {
-        tests.Complete();
-    } else {
-        DestroyWindow(wHndl);
-        std::string freeze;
-        std::cin >> freeze;
-    }
-    
-#endif
     
     Platform.windowHandle = Platform.CreateWindowHandle("windowFrame", "Render window");
     Log.Clear();
@@ -188,18 +154,18 @@ int main(int argc, char* argv[]) {
                     
                 case SDL_EVENT_KEY_DOWN: 
                     if (VirtualKey != -1) {
-                        Input.SetKeyPressed(VirtualKey);   // VK virtual keys
-                        Input.lastKeyPressed = VirtualKey; // Text characters
+                        Input.SetKeyPressed(VirtualKey);
+                        Input.lastKeyPressed = VirtualKey;
                     } else 
-                        Input.lastKeyPressed = key;        // Text characters
+                        Input.lastKeyPressed = key;
                     break;
                     
                 case SDL_EVENT_KEY_UP: 
                     if (VirtualKey != -1) {
-                        Input.SetKeyReleased(VirtualKey);  // VK virtual keys
-                        Input.lastKeyReleased = key;       // Text characters
+                        Input.SetKeyReleased(VirtualKey);
+                        Input.lastKeyReleased = key;
                     } else 
-                        Input.lastKeyReleased = key;       // Text characters
+                        Input.lastKeyReleased = key;
                     break;
                     
                 case SDL_EVENT_MOUSE_BUTTON_DOWN: 

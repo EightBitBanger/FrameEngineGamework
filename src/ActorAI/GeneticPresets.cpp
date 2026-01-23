@@ -739,7 +739,7 @@ void GeneticPresets::ActorPresets::Spider(Actor* targetActor) {
     Color headColor = Colors.dkgray * Colors.MakeGrayScale(0.03f);
     Color bodyColor = Colors.black * Colors.MakeGrayScale(0.02f);
     Color limbColor = Colors.dkgray * Colors.MakeGrayScale(0.02f);
-    Color redMark = Colors.red;
+    //Color redMark = Colors.red;
     
     if (Random.Range(0, 100) > 70) 
         bodyColor = Colors.brown * 0.03f;
@@ -1875,4 +1875,4 @@ Gene GeneticPresets::GeneticBuilder::BuildAddLeg(float xx, float yy, float zz, f
     gene.animationRange = 15.0f;
     gene.doInverseAnimation = invert;
     return gene;
-};
+}

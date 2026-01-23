@@ -55,7 +55,8 @@ void EngineSystemManager::Update(void) {
     for (unsigned int c=0; c < numberOfComponents; c++) {
         
         switch (mComponentUpdateType[c]) {
-            
+        default:
+            break;
         case ComponentUpdateType::PerFrame: mComponentUpdaters[c](0); break;
         case ComponentUpdateType::PerObject: for (unsigned int o=0; o < GetStreamSize(); o++) mComponentUpdaters[c](o); break;
         }
