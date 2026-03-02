@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <sstream>
 
-std::string StringType::Copy(std::string source, unsigned int begin, unsigned int count) {
+std::string StringType::Copy(const std::string& source, unsigned int begin, unsigned int count) {
     if (begin >= source.size()) {
         return "";
     }
@@ -138,9 +138,8 @@ void StringType::Uppercase(std::string& str) {
     }
 }
 
-std::string StringType::RemoveWhiteSpace(std::string str) {
+void StringType::RemoveWhiteSpace(std::string& str) {
     str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
-    return str;
 }
 
 std::string FloatType::ToString(float value) {

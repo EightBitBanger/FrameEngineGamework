@@ -5,35 +5,7 @@
 
 bool isProfilerEnabled = false;
 
-glm::vec3 force(0);
-float forceDblTime=0;
-
 Actor* actorInSights = nullptr;
-
-const float hitMaxDistance        = 4.5f;
-const float hitThreshold          = 0.97f;
-const float clickRepeatTimeout    = 250.0f;
-
-float clickCooldownLeft  = 0.0;
-float clickCooldownRight = 0.0;
-bool isLeftClickHold     = false;
-bool isRightClickHold    = false;
-
-bool CheckCooldown(float nowMs, float& nextAllowedMs, float cooldownMs) {
-    if (nowMs < nextAllowedMs) return false;
-    nextAllowedMs = nowMs + cooldownMs;
-    return true;
-}
-
-void MouseButtonLeft() {
-    
-}
-
-void MouseButtonRight() {
-    
-}
-
-MeshRenderer* selectedMeshRenderer = nullptr;
 
 
 void Run() {
@@ -41,140 +13,60 @@ void Run() {
     // Update plug-in systems
     Weather.Update();
     Particle.Update();
+    GameWorld.Update();
     
     if (Engine.cameraController == nullptr) 
         return;
     
-    Camera* cameraPtr = Engine.cameraController->GetComponent<Camera>();
-    if (cameraPtr == nullptr) 
+    Camera* mainCamera = Engine.sceneMain->camera;
+    if (mainCamera == nullptr) 
         return;
     
-    glm::vec3 forward = cameraPtr->forward;
-    glm::vec3 from = cameraPtr->transform.position;
+    glm::vec3 forward = mainCamera->forward;
+    glm::vec3 from = mainCamera->transform.position;
     
     
-    if (isLeftClickHold) {
-        MouseButtonLeft();
-        
-        for (unsigned int i=0; i < 24; i++) {
-            
-            GameObject* gameObject = Engine.Create<GameObject>();
-            gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-            
-            MeshRenderer* meshRenderer = gameObject->GetComponent<MeshRenderer>();
-            meshRenderer->mesh = Engine.meshes.cube;
-            meshRenderer->material = Engine.Create<Material>();
-            meshRenderer->material->shader = Engine.shaders.color;
-            
-            meshRenderer->material->DisableCulling();
-            meshRenderer->material->EnableShadowVolumePass();
-            
-            glm::vec3 randomColor = {Random.Range(0.0f, 1.0f), 0, Random.Range(0.0f, 1.0f)};
-            
-            meshRenderer->material->diffuse = randomColor * 0.4f;
-            meshRenderer->material->ambient = Colors.gray;
-            
-            meshRenderer->material->EnableShadowVolumePass();
-            meshRenderer->material->SetShadowVolumeColor((Colors.yellow + (Colors.red * Colors.gray * 0.018)) * 0.01f);
-            meshRenderer->material->SetShadowVolumeIntensityLow(0.001f);
-            meshRenderer->material->SetShadowVolumeIntensityHigh(0.03f);
-            meshRenderer->material->SetShadowVolumeColorIntensity(0.05f);
-            meshRenderer->material->SetShadowVolumeLength(8.0f);
-            
-            meshRenderer->material->SetShadowVolumeAngleOfView(4.0f);
-            
-            glm::vec3 randomOffset = {Random.Range(-100, 100), 
-                                      Random.Range(-100, 100) + 50, 
-                                      Random.Range(-100, 100)};
-            
-            Transform* transform = gameObject->GetComponent<Transform>();
-            transform->Translate( Engine.cameraController->GetPosition() + randomOffset );
-            transform->Scale(2.0f, 2.0f, 2.0f);
-            transform->UpdateMatrix();
-            
-            Engine.sceneMain->AddMeshRendererToSceneRoot(meshRenderer);
-        }
+    // Place static object
+    if (Input.CheckMouseLeftPressed()) {
+        Input.SetMouseLeftPressed(false);
         
     }
     
-    /*
-    glm::vec3 position = glm::vec3(hit.point.x, hit.point.y+1, hit.point.z);
-    
-    // Fire emitter
-    Emitter* fireEmitter = Particle.CreateEmitter();
-    fireEmitter->type = EmitterType::Point;
-    fireEmitter->position  = position;
-    fireEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
-    fireEmitter->scale     = glm::vec3(0.1f, 0.04f, 0.1f);
-    fireEmitter->scaleTo   = glm::vec3(1.0008f, 1.0008f, 1.0008f);
-    
-    fireEmitter->velocity = glm::vec3(0.0f, 0.01f, 0.0f);
-    fireEmitter->velocityBias = 0.008f;
-    
-    fireEmitter->width = 0.1f;
-    fireEmitter->height = 0.1f;
-    
-    fireEmitter->angle = 0.18f;
-    fireEmitter->spread = 0.4f;
-    
-    fireEmitter->colorBegin = Colors.red;
-    fireEmitter->colorEnd = Colors.yellow;
-    
-    fireEmitter->maxParticles = 20;
-    fireEmitter->spawnRate = 20;
-    
-    fireEmitter->heightMinimum = GameWorld.world.waterLevel;
-    
-    Material* fireEmitterMaterial = fireEmitter->GetMaterial();
-    
-    //fireEmitterMaterial->EnableBlending();
-    //fireEmitterMaterial->shader = Engine.shaders.water;
+    // Remove static object
+    if (Input.CheckMouseRightPressed()) {
+        Input.SetMouseRightPressed(false);
+        
+    }
     
     
-    // Smoke emitter test
-    
-    Emitter* smokeEmitter = Particle.CreateEmitter();
-    smokeEmitter->type = EmitterType::Point;
-    smokeEmitter->position = position;
-    smokeEmitter->direction = glm::vec3(0.0f, 0.0f, 0.0f);
-    smokeEmitter->scale     = glm::vec3(0.08f, 0.08f, 0.08f);
-    smokeEmitter->scaleTo   = glm::vec3(1.005f, 1.0005f, 1.005f);
-    
-    float randomX = Random.Range(-1.0f, 1.0f) * 0.0024f;
-    float randomZ = Random.Range(-1.0f, 1.0f) * 0.0024f;
-    
-    smokeEmitter->velocity = glm::vec3(randomX, 0.024f, randomZ);
-    smokeEmitter->velocityBias = 0.02f;
-    
-    smokeEmitter->width = 4;
-    smokeEmitter->height = 8;
-    
-    smokeEmitter->angle = 0.3f;
-    smokeEmitter->spread = 0.5f;
-    
-    smokeEmitter->colorBegin = Colors.dkgray;
-    smokeEmitter->colorEnd = Colors.gray;
-    
-    smokeEmitter->maxParticles = 40;
-    smokeEmitter->spawnRate = 16;
-    
-    smokeEmitter->heightMinimum = GameWorld.world.waterLevel;
-    
-    Material* smokeEmitterMaterial = smokeEmitter->GetMaterial();
-    
-    //smokeEmitterMaterial->EnableBlending();
-    //smokeEmitterMaterial->shader = Engine.shaders.water;
-    */
-    
-    
-    
+    // Spawn actors
+    if (Input.CheckMouseMiddlePressed()) {
+        //Input.SetMouseMiddlePressed(false);
+        float randAmount = 8.0f;
+        float xx = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
+        float zz = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
+        
+        Hit hit;
+        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
+            Actor* actor = GameWorld.SummonActor( glm::vec3(hit.point.x + xx, hit.point.y+5, hit.point.z + zz) );
+            AI.genomes.presets.Human(actor);
+            actor->physical.SetAge( Random.Range(actor->physical.GetAdultAge() / 2.0f, actor->physical.GetAdultAge() * 2.0f) );
+            
+            actor->memories.Add("action", "curiosity:1.0, speak:chirp:0.1");
+            Sound* sound = Audio.CreateSound();
+            
+            actor->RebuildGeneticExpression();
+            actor->isActive = true;
+        }
+        
+    }
     
     
     
     //
     // Profiling
     //
-    
+    /*
     if (isProfilerEnabled) {
         glm::vec3 playerPos(0);
         if (Engine.sceneMain != nullptr) 
@@ -192,6 +84,8 @@ void Run() {
             Engine.console.WriteDialog(1, "chunk       " + Float.ToString( chunkPosition.x ) + "_" + Float.ToString( chunkPosition.z ));
         }
         
+        
+        Engine.console.textDialog(, "AI          " + Float.ToString( Profiler.profileActorAI ) );
         Engine.console.WriteDialog(10, "AI          " + Float.ToString( Profiler.profileActorAI ) );
         Engine.console.WriteDialog(11, "Engine      " + Float.ToString( Profiler.profileGameEngineUpdate ) );
         Engine.console.WriteDialog(12, "Renderer    " + Float.ToString( Profiler.profileRenderSystem ) );
@@ -206,47 +100,51 @@ void Run() {
         Engine.console.WriteDialog(18, "Materials       " + Int.ToString(Renderer.GetNumberOfMaterials()) );
         Engine.console.WriteDialog(19, "RigidBodies     " + Int.ToString(Physics.world->getNbRigidBodies()) );
         Engine.console.WriteDialog(20, "Actors          " + Int.ToString(AI.GetNumberOfActors()) );
-        Engine.console.WriteDialog(21, "Colliders       " + Int.ToString(Engine.mBoxCollider.size()) );
         
     }
-    
+    */
     
     //
-    // Cast a ray from the player
+    // DEBUG - Show actor stats
+    //
     
-    Hit hit;
-    float heightStanding = 0.87f;
-    
-    // Prevent player controller from going under ground
-    if (Physics.Raycast(from, glm::vec3(0.0f, -1.0f, 0.0f), 1000, hit, LayerMask::Ground)) {
+    /*
+    if (actorInSights != nullptr && !isProfilerEnabled) {
+        Engine.console.WriteDialog( 1, actorInSights->GetName() );
+        Engine.console.WriteDialog( 2, Int.ToString( actorInSights->physical.GetAge() ) );
         
-        RigidBody* bodyPtr = Engine.cameraController->GetComponent<RigidBody>();
-        
-        rp3d::Transform transform = bodyPtr->getTransform();
-        rp3d::Vector3 position = transform.getPosition();
-        GameObject* chunkObject = (GameObject*)hit.userData;
-        
-        glm::vec3 chunkPosition = chunkObject->GetPosition();
-        
-        if (position.y < hit.point.y + heightStanding) {
-            position.y = hit.point.y + heightStanding;
-            transform.setPosition( position );
-            bodyPtr->setTransform( transform );
+        Engine.console.WriteDialog( 17, "Distance to target   " + Int.ToString( actorInSights->navigation.GetDistanceToTarget() ) );
+        Engine.console.WriteDialog( 18, "TargetPoint          " + Int.ToString( actorInSights->navigation.GetTargetPoint().x ) + ", " 
+                                                                + Int.ToString( actorInSights->navigation.GetTargetPoint().y ) + ", "
+                                                                + Int.ToString( actorInSights->navigation.GetTargetPoint().z ) );
+        if (actorInSights->navigation.GetTargetActor() != nullptr) {
+            Engine.console.WriteDialog( 19, "TargetActor          " + actorInSights->navigation.GetTargetActor()->GetName());
+        } else {
+            Engine.console.WriteDialog( 19, "TargetActor          nullptr");
         }
         
+        Engine.console.WriteDialog( 19, "[ Vitality ]" );
+        Engine.console.WriteDialog( 20, "Health   " + Int.ToString( actorInSights->biological.health ) );
+        if (actorInSights->physical.GetSexualOrientation()) 
+            Engine.console.WriteDialog( 21, "Male");
+        else 
+            Engine.console.WriteDialog( 21, "Female");
+        
+        Engine.console.WriteDialog( 22, "Mesh renderers   " + Int.ToString( actorInSights->genetics.GetNumberOfMeshRenderers() ) );
+        
     }
+    */
     
-    
+
     //
     // Camera controller movement
+    
+    glm::vec3 force(0);
     
     if (Engine.cameraController == nullptr) 
         return;
     
-    float forceAccelerate = 0.00145f;
-    float forceDecelerate = 0.0117f;
-    
-    Camera* mainCamera = Engine.sceneMain->camera;
+    float forceAccelerate = 17.0f;
     
     if (mainCamera != nullptr) {
         
@@ -256,52 +154,36 @@ void Run() {
             // WASD Directional
             if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward;}
             if (Input.CheckKeyCurrent(VK_S)) {force -= mainCamera->forward;}
-            if (Input.CheckKeyCurrent(VK_A)) {force += mainCamera->right;}
-            if (Input.CheckKeyCurrent(VK_D)) {force -= mainCamera->right;}
+            if (Input.CheckKeyCurrent(VK_A)) {force -= mainCamera->right;}
+            if (Input.CheckKeyCurrent(VK_D)) {force += mainCamera->right;}
             
             // Space/Shift Elevation
             if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
             if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
         }
         
-        // Apply gravity
-        //force -= mainCamera->up;
+        force *= forceAccelerate * forceAccelerate;
         
-        // Double speed
-        if (Input.CheckKeyCurrent(VK_CONTROL)) 
-            forceDblTime += 0.24f;
+        Engine.cameraController->AddForce(force.x, force.y, force.z);
         
-        if (forceDblTime > 1.0f) {forceDblTime -= (forceDecelerate * 8.0f);} else {forceDblTime = 1.0f;}
-        
-        if (forceDblTime > 3.5f) 
-            forceDblTime = 3.5f;
-        
-        // Accelerate
-        glm::vec3 forceTotal = force * forceAccelerate * forceDblTime;
-        
-        // Decelerate
-        if ( glm::length(force) >  0.0001f) force -= (force * forceDecelerate);
-        if (-glm::length(force) < -0.0001f) force -= (force * forceDecelerate);
-        float forceLength = glm::length(forceTotal);
-        
-        // Prevent drift
-        if (forceLength < 0.0001f) 
-            return;
-        
-        Engine.cameraController->AddForce(forceTotal.x, forceTotal.y, forceTotal.z);
+        rp3d::RigidBody* rigidBody = Engine.cameraController->GetComponent<rp3d::RigidBody>();
+        rp3d::Vector3 forceVec3 = rigidBody->getLinearVelocity();
+        float forceLen = glm::length(glm::vec3(forceVec3.x, forceVec3.y, forceVec3.z));
         
         // Field of view zoom effect
-        float fovPullback = forceLength * 40.0f;
-        if (fovPullback > 4.0f) 
-            fovPullback = 4.0f;
+        const float fovMaxPullback = 3.0f;
+        float fovPullback = (forceLen / 1.0f) * 0.3f;
+        if (fovPullback > fovMaxPullback) 
+            fovPullback = fovMaxPullback;
         Engine.sceneMain->camera->fov = 60 + fovPullback;
         
     }
     
+    return;
 }
 
 
 void TickUpdate(void) {
     
+    return;
 }
-
