@@ -158,7 +158,6 @@ public:
     /// Return the number of fog layer objects.
     unsigned int GetNumberOfFogLayers(void);
     
-    
     // Render queue
     
     /// Add a scene to the render queue for rendering.
@@ -201,6 +200,11 @@ public:
     /// Check of an axis aligned bounding box is with the frustum boundary
     bool FrustumCheckAABB(Frustum& frustum, glm::vec3& min, glm::vec3& max);
     
+    // Lighting
+    
+    /// Set the ambient lighting to be added to materials during rendering.
+    void SetAmbientIllumination(Color& color);
+    
     std::mutex mux;
     
 private:
@@ -221,6 +225,9 @@ private:
     
     // Sorting
     std::vector<std::pair<float, MeshRenderer*>> mRenderQueueSorter[5];
+    
+    // Lighting
+    Color AmbientIllumination;
     
     // Light list
     unsigned int mNumberOfLights=0;
@@ -262,7 +269,6 @@ private:
     PoolAllocator<Fog>             mFog;
     
     // TODO Sorting and other non openGL related render functions could be threaded out here
-    
     // Render support thread
     std::thread* renderThreadMain;
     
@@ -292,35 +298,6 @@ private:
     bool SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup);
     Mesh* LevelOfDetailPass(MeshRenderer* currentEntity, glm::vec3& eye);
     bool CullingPass(MeshRenderer* currentEntity, Camera* currentCamera, glm::mat4& viewProjection, Frustum& frustum);
-    
-    // Default assets
-    
-    struct DefaultShaders {
-        Shader*  texture = nullptr;
-        Shader*  textureUnlit = nullptr;
-        Shader*  color = nullptr;
-        Shader*  colorUnlit = nullptr;
-        Shader*  UI = nullptr;
-        Shader*  shadowCaster = nullptr;
-        Shader*  sky = nullptr;
-    };
-    
-    struct DefaultMeshes {
-        Mesh* cube = nullptr;
-        Mesh* chunk = nullptr;
-        Mesh* plain = nullptr;
-        Mesh* sphere = nullptr;
-        Mesh* wallHorizontal = nullptr;
-        Mesh* wallVertical = nullptr;
-    };
-    
-public:
-    
-    /// Default shaders provided by the engine.
-    DefaultShaders shaders;
-    
-    /// Default meshes provided by the engine.
-    DefaultMeshes  meshes;
     
 };
 

@@ -47,6 +47,12 @@ public:
     /// Set the uniform texture sampler index.
     void SetTextureSampler(unsigned int index);
     
+    /// Set the UV scale of each texture sample.
+    void SetTextureSamplerScale(glm::vec2* scale);
+    
+    /// Set the offset position for the texture UV.
+    void SetTextureSamplerPosition(glm::vec2* offset);
+    
     
     /// Set the number of fog layers to be drawn.
     void SetFogCount(int numberOfFogLayers);
@@ -125,6 +131,8 @@ private:
     
     int mSamplerCountLocation;
     int mSamplerLocation;
+    int mSamplerScaleLocation;
+    int mSamplerPositionLocation;
     
     int mFogCountLocation;
     int mFogDensityLocation;

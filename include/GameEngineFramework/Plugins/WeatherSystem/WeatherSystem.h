@@ -2,9 +2,11 @@
 #define __WEATHER_SYSTEM_
 
 #include <GameEngineFramework/Engine/Engine.h>
+
 #include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
+#include <GameEngineFramework/Plugins/WeatherSystem/components/Weather.h>
 
 enum class WeatherType {
     Clear,
@@ -14,15 +16,13 @@ enum class WeatherType {
 
 
 class ENGINE_API WeatherSystem {
-    
 public:
     
-    float weatherStateCounter;
+    float  weatherStateCounter;
     
     WeatherSystem();
     
     void Initiate(void);
-    
     void Update(void);
     
     void SetPlayerObject(GameObject* player);
@@ -33,15 +33,19 @@ public:
     void SetStaticMaterial(Material* materialPtr);
     void SetWaterMaterial(Material* materialPtr);
     
+    /// Generate a sky object and return its pointer.
+    GameObject* CreateSky(const std::string& meshTagName, Color low, Color high, float biasMul);
+    
     void SetTime(float newTime);
     float GetTime(void);
     
-    /// Set the universal light level.
-    void SetWorldLightLevel(float min, float max);
+    /// Set the universal lighting level.
+    void SetWorldLightLevel(float low, float high);
+    /// Set the sky lighting level
+    void SetSkyLightLevel(float low, float high);
     
     /// Set the current weather cycle.
     void SetWeather(WeatherType type);
-    
     /// Set the next weather cycle to shift to after the current one has finished.
     void SetWeatherNext(WeatherType type);
     
@@ -50,15 +54,23 @@ public:
     
     /// Return the current weather cycle.
     WeatherType GetWeatherCurrent(void);
-    
     /// Return the next weather cycle.
     WeatherType GetWeatherNext(void);
     
     /// Get the state of the master weather counter.
     float GetWeatherCycleCounter(void);
-    
     /// Set the state of the master weather counter.
     void SetWeatherCycleCounter(float counter);
+    
+    /// Set the density of the world fog.
+    void SetFogDensity(float density);
+    /// Set the bias for fog lighting.
+    void SetFogLightBias(float bias);
+    
+    /// Set the fog fade off range.
+    void SetFogRange(float nearRange, float farRange);
+    /// Set the fog color fade range.
+    void SetFogRangeColor(Color nearColor, Color farColor);
     
     /// Reset the world fog.
     void FogClear(void);
@@ -70,8 +82,13 @@ private:
     float mWorldLightLow;
     float mWorldLightHigh;
     
+    float mSkyLightLow;
+    float mSkyLightHigh;
+    
     float mLightIntensity;
     glm::vec3 mLightAngle;
+    
+    Transform* mPlayerTransform;
     
     // Sun
     GameObject* mSunObject;
@@ -87,7 +104,12 @@ private:
     Material* mStaticMaterial;
     Material* mWaterMaterial;
     
-    // Which weather type should be shifted into next after the mCurrentWeather weather cycle
+    // Base lighting targets
+    Color mWorldAmbientBase;
+    Color mStaticAmbientBase;
+    bool mCapturedAmbientBase;
+    
+    // Which weather should be shifted to next after the current weather cycle is finished
     WeatherType mNextWeather;
     // Current weather cycle taking place in the world
     WeatherType mCurrentWeather;
@@ -108,10 +130,13 @@ private:
     
     float mFogLightBias;
     
+    // Water fog
+    float mWorldWaterLevel;
+    Fog* mFogWater;
+    
     // Effect emitters
     Emitter* mRainEmitter;
     Emitter* mSnowEmitter;
-    
 };
 
 #endif

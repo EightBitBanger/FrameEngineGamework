@@ -21,6 +21,12 @@ public:
     /// Return a handle to the openGL buffer.
     void* GetHandle(void);
     
+    /// Set the texture UV scale.
+    void SetScaleUV(const glm::vec2& scale);
+    
+    /// Set the texture position offset.
+    void SetPositionUV(const glm::vec2& position);
+    
     /// Bind the material texture for rendering.
     void Bind(void);
     
@@ -42,6 +48,9 @@ private:
     unsigned int mWidth;
     unsigned int mHeight;
     unsigned int mChannels;
+    
+    glm::vec2 mScale;
+    glm::vec2 mPosition;
     
     int mFiltration;
 };

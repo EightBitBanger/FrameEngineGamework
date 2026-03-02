@@ -63,7 +63,7 @@ public:
         snowCapColor(0.7f, 0.85f, 1.1f, 1.0f),
         
         waterLevel(-21.0f),
-        ambientLight(1.0f),
+        ambientLight(0.0f),
         
         waterColorLow(Colors.black),
         waterColorHigh(Colors.blue),

@@ -66,6 +66,36 @@ public:
     
     ResourceManager();
     
+    // Default assets
+    
+    struct DefaultShaders {
+        Shader* texture = nullptr;
+        Shader* textureUnlit = nullptr;
+        Shader* color = nullptr;
+        Shader* colorUnlit = nullptr;
+        Shader* UI = nullptr;
+        Shader* shadowCaster = nullptr;
+        Shader* sky = nullptr;
+        Shader* water = nullptr;
+    } shaders;
+    
+    struct DefaultMeshes {
+        Mesh* grass = nullptr;
+        Mesh* grassHorz = nullptr;
+        Mesh* grassVert = nullptr;
+        Mesh* stemHorz = nullptr;
+        Mesh* stemVert = nullptr;
+        Mesh* wallHorizontal = nullptr;
+        Mesh* wallVertical = nullptr;
+        Mesh* log = nullptr;
+        Mesh* leaf = nullptr;
+        
+        Mesh* cube = nullptr;
+        Mesh* chunk = nullptr;
+        Mesh* plain = nullptr;
+        Mesh* sphere = nullptr;
+    } meshes;
+    
 private:
     
     // Thread loading queue

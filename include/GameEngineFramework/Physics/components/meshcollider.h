@@ -8,21 +8,22 @@
 
 
 class ENGINE_API MeshCollider {
-    
 public:
     
-    /// Height field collider.
+    /// Height field collider
     rp3d::HeightFieldShape* heightFieldShape;
     float* heightMapBuffer;
     
-    /// Triangle collider.
+    /// Concave mesh collider
     rp3d::TriangleMesh* triangleMesh;
+    rp3d::TriangleVertexArray* triangleArray;
+    
+    rp3d::ConcaveMeshShape* concaveShape;
     float* vertexBuffer;
     unsigned int* indexBuffer;
     
     MeshCollider();
     ~MeshCollider();
-    
 };
 
 #endif

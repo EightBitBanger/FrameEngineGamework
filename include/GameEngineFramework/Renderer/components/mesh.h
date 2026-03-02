@@ -60,6 +60,8 @@ public:
     /// Get the vertex and index buffer directly as arrays.
     bool GetSubMesh(unsigned int index, std::vector<Vertex>& vertexBuffer, std::vector<Index>& indexBuffer);
     
+    /// Get a pointer to a sub mesh.
+    SubMesh* GetSubMesh(unsigned int index);
     
     /// Update the color of a sub mesh.
     bool ChangeSubMeshColor(unsigned int index, Color newColor);
@@ -82,6 +84,11 @@ public:
     /// Clear all sub meshes in the mesh.
     void ClearSubMeshes(void);
     
+    /// Generate a simplified version of a submesh for LOD generation.
+    /// reductionFactor in (0, 1] – e.g., 0.5f ~ half the vertex count.
+    /// Returns false on invalid submesh index or bad inputs.
+    bool GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFactor, std::vector<Vertex>& outVertices, std::vector<Index>& outIndices);
+    bool GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFactor, SubMesh& outSubMesh);
     
     /// Fully re-upload the vertex buffer onto the GPU.
     void Load(void);
@@ -149,6 +156,9 @@ public:
     /// Set normals to a default value for the current vertex buffer.
     void SetNormals(glm::vec3 normals);
     
+    /// Remove degenerate triangles (zero area / duplicate-index) from a SubMesh.
+    /// Returns the number of triangles removed. epsilon is a positional tolerance.
+    unsigned int RemoveDegenerateTriangles(SubMesh& submesh, float epsilon = 1e-6f);
     
     friend class RenderSystem;
     
@@ -203,7 +213,5 @@ private:
     void FreeBuffers(void);
     
 };
-
-
 
 #endif

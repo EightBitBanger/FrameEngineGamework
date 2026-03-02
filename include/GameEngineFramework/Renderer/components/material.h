@@ -169,9 +169,6 @@ private:
     
     // The function used to blend colors.
     int mBlendFunction;
-    
 };
-
-
 
 #endif

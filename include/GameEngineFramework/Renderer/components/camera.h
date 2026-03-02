@@ -8,52 +8,41 @@
 
 
 class ENGINE_API Camera {
-    
 public:
     
     /// Transformation matrix.
     Transform transform;
     
-    
     /// Up angle orientation reference.
     glm::vec3 up;
-    
     /// Forward looking angle.
     glm::vec3 forward;
-    
     /// Right angle to the cameras forward angle.
     glm::vec3 right;
-    
     
     /// Camera view angle.
     Viewport viewport;
     
-    
     /// Should mouse look be calculated on update.
     bool useMouseLook;
-    
+    /// Should the camera be offset from the center point.
+    bool useThirdPersonView;
     /// Should the camera aspect be synchronized to the window aspect.
     bool isFixedAspect;
-    
     /// Should the camera be rendered orthographically or perspective.
     bool isOrthographic;
     
     /// Current camera looking angles.
     float yaw;
     float pitch;
-    
     /// Field of view.
     float fov;
-    
     /// View aspect ratio.
     float aspect;
-    
     /// Near camera clipping distance.
     float clipNear;
-    
     /// Far camera clipping distance.
     float clipFar;
-    
     
     /// How far in degrees the frustum angles should overlap when culling.
     float frustumOverlap;
@@ -62,43 +51,42 @@ public:
     /// This prevents clipping when culling large objects.
     float frustumOffset;
     
-    
     /// Maximum pitch angle limit. (in radians)
-    int mouseLimitPitchMax;
-    
+    float mouseLimitPitchMax;
     /// Minimum pitch angle limit. (in radians)
-    int mouseLimitPitchMin;
-    
+    float mouseLimitPitchMin;
     
     /// Mouse horizontal movement sensitivity. (in radians)
     double mouseSensitivityYaw;
-    
     /// Mouse vertical movement sensitivity. (in radians)
     double mouseSensitivityPitch;
     
+    /// Third person view angular stand off from center.
+    float centerStandOff;
+    /// Third person translation offset from center.
+    glm::vec3 centerPosition;
     
     /// Enable mouse look.
     void EnableMouseLook(void);
-    
     /// Disable mouse look.
     void DisableMouseLook(void);
     
+    /// Enable a third person camera offset from center.
+    void EnableThirdPersonLook();
+    
+    /// Disable camera offset for a first person view.
+    void DisableThirdPersonLook();
     
     /// Get the camera pitch angle.
     float GetPitch(void);
-    
     /// Get the camera yaw angle.
     float GetYaw(void);
-    
     
     friend class RenderSystem;
     
     Camera();
     
-    
 private:
-    
-    
     
 };
 
