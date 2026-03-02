@@ -82,11 +82,10 @@ bool ChunkManager::SaveChunk(Chunk* chunk, bool doClearActors) {
             KillActor( terminationList[a] );
         
         // Check to delete the save file if no actors where counted
-        if (saveCounter == 0) {
-            
-            if (fs.FileExists(chunkName)) 
-                fs.FileDelete(chunkName);
-        }
+        //if (saveCounter == 0) {
+        //    if (fs.FileExists(chunkName)) 
+        //        fs.FileDelete(chunkName);
+        //}
         
         unsigned int bufferSz = buffer.size();
         if (bufferSz != 0) 

@@ -3,5 +3,8 @@
 
 WeatherSystem    ENGINE_API Weather;
 ParticleSystem   ENGINE_API Particle;
-//ChunkManager     ENGINE_API GameWorld;
+
+VehicleSystem    ENGINE_API Vehicular;
+
+ChunkManager     ENGINE_API GameWorld;
 //InventorySystem  ENGINE_API Inventory;

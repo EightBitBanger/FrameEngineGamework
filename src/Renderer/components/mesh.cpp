@@ -3,6 +3,9 @@
 
 #include <GameEngineFramework/Math/Random.h>
 
+#include <unordered_map>
+#include <limits>
+
 #define GLEW_STATIC
 #include <gl/glew.h>
 
@@ -11,19 +14,13 @@ extern NumberGeneration Random;
 
 
 Mesh::Mesh() : 
-    
     isShared(false),
-    
     mPrimitive(GL_TRIANGLES),
-    
     mVertexBufferSz(0),
     mIndexBufferSz(0),
-    
     mAreBuffersAllocated(true)
 {
-    
     AllocateBuffers();
-    
     SetDefaultAttributes();
 }
 
@@ -336,10 +333,17 @@ bool Mesh::GetSubMesh(unsigned int index, SubMesh& subMesh) {
     std::vector<Index>::iterator indexEnd   = indexStart + subMeshSrc.indexCount;
     subMesh.indexBuffer.insert(subMesh.indexBuffer.end(), indexStart, indexEnd);
     
+    subMesh.name         = subMeshSrc.name;
     subMesh.vertexCount += subMeshSrc.vertexCount;
     subMesh.indexCount  += subMeshSrc.indexCount;
     subMesh.position     = subMeshSrc.position;
     return true;
+}
+
+SubMesh* Mesh::GetSubMesh(unsigned int index) {
+    if (index >= mSubMesh.size()) 
+        return nullptr;
+    return &mSubMesh[index];
 }
 
 bool Mesh::GetSubMesh(unsigned int index, std::vector<Vertex>& vertexBuffer, std::vector<Index>& indexBuffer) {
@@ -490,6 +494,334 @@ void Mesh::ClearSubMeshes(void) {
     mVertexBuffer.clear();
     mIndexBuffer.clear();
 }
+
+
+bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFactor, SubMesh& outSubMesh) {
+    // Use the existing vector-based simplifier
+    std::vector<Vertex> lodVertices;
+    std::vector<Index>  lodIndices;
+
+    if (!GenerateSimplifiedLOD(submeshIndex, reductionFactor, lodVertices, lodIndices)) {
+        return false;
+    }
+
+    if (submeshIndex >= mSubMesh.size()) {
+        return false;
+    }
+
+    const SubMesh& sourceSubMesh = mSubMesh[submeshIndex];
+
+    // Build a standalone SubMesh using the simplified data.
+    // vertexBegin/indexBegin are 0 because this is not yet packed
+    // into Mesh::mVertexBuffer / mIndexBuffer.
+    SubMesh lodSubMesh;
+    lodSubMesh.vertexBuffer.swap(lodVertices);
+    lodSubMesh.indexBuffer.swap(lodIndices);
+
+    lodSubMesh.vertexBegin = 0;
+    lodSubMesh.indexBegin  = 0;
+    lodSubMesh.vertexCount = static_cast<unsigned int>(lodSubMesh.vertexBuffer.size());
+    lodSubMesh.indexCount  = static_cast<unsigned int>(lodSubMesh.indexBuffer.size());
+
+    // Keep original name/position (caller can rename if desired)
+    lodSubMesh.name     = sourceSubMesh.name;
+    lodSubMesh.position = sourceSubMesh.position;
+
+    outSubMesh = lodSubMesh;
+    return true;
+}
+
+bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFactor, std::vector<Vertex>& outVertices, std::vector<Index>& outIndices) {
+    outVertices.clear();
+    outIndices.clear();
+
+    if (submeshIndex >= mSubMesh.size()) {
+        return false;
+    }
+
+    if (reductionFactor <= 0.0f || reductionFactor > 1.0f) {
+        return false;
+    }
+
+    const SubMesh& sourceSubMesh = mSubMesh[submeshIndex];
+
+    // Extract source vertices/indices for this submesh
+    std::vector<Vertex> srcVertices;
+    std::vector<Index>  srcIndices;
+
+    srcVertices.reserve(sourceSubMesh.vertexCount);
+    srcIndices.reserve(sourceSubMesh.indexCount);
+
+    std::vector<Vertex>::const_iterator vBegin =
+        mVertexBuffer.begin() + sourceSubMesh.vertexBegin;
+    std::vector<Vertex>::const_iterator vEnd =
+        vBegin + sourceSubMesh.vertexCount;
+
+    srcVertices.insert(srcVertices.end(), vBegin, vEnd);
+
+    std::vector<Index>::const_iterator iBegin =
+        mIndexBuffer.begin() + sourceSubMesh.indexBegin;
+    std::vector<Index>::const_iterator iEnd =
+        iBegin + sourceSubMesh.indexCount;
+
+    srcIndices.insert(srcIndices.end(), iBegin, iEnd);
+
+    if (srcVertices.empty() || srcIndices.size() < 3) {
+        return false;
+    }
+
+    // ------------------------------------------------------------
+    // Step 1: Compute bounding box of the vertices
+    // ------------------------------------------------------------
+    glm::vec3 minPos(
+        std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::max(),
+        std::numeric_limits<float>::max()
+    );
+    glm::vec3 maxPos(
+        -std::numeric_limits<float>::max(),
+        -std::numeric_limits<float>::max(),
+        -std::numeric_limits<float>::max()
+    );
+
+    for (size_t i = 0; i < srcVertices.size(); ++i) {
+        const Vertex& v = srcVertices[i];
+        if (v.x < minPos.x) minPos.x = v.x;
+        if (v.y < minPos.y) minPos.y = v.y;
+        if (v.z < minPos.z) minPos.z = v.z;
+
+        if (v.x > maxPos.x) maxPos.x = v.x;
+        if (v.y > maxPos.y) maxPos.y = v.y;
+        if (v.z > maxPos.z) maxPos.z = v.z;
+    }
+
+    glm::vec3 extent = maxPos - minPos;
+
+    const float epsilon = 1e-5f;
+    if (extent.x < epsilon) extent.x = 1.0f;
+    if (extent.y < epsilon) extent.y = 1.0f;
+    if (extent.z < epsilon) extent.z = 1.0f;
+
+    // A small tolerance for detecting boundary vertices
+    float maxExtent = glm::max(extent.x, glm::max(extent.y, extent.z));
+    float boundaryEps = maxExtent * 1e-3f; // 0.1% of the largest dimension
+
+    // ------------------------------------------------------------
+    // Step 2: Decide grid resolution from target vertex count
+    // ------------------------------------------------------------
+    float srcVertexCountF     = static_cast<float>(srcVertices.size());
+    float targetVertexCountF  = srcVertexCountF * reductionFactor;
+    if (targetVertexCountF < 3.0f) {
+        targetVertexCountF = 3.0f;
+    }
+
+    float cellsPerAxisF = glm::pow(targetVertexCountF, 1.0f / 3.0f);
+    if (cellsPerAxisF < 2.0f) {
+        cellsPerAxisF = 2.0f; // at least 2 cells per axis so we preserve min/max
+    }
+
+    unsigned int cellsPerAxis = static_cast<unsigned int>(cellsPerAxisF);
+    if (cellsPerAxis < 2u) {
+        cellsPerAxis = 2u;
+    }
+
+    // ------------------------------------------------------------
+    // Step 3: Cluster vertices into grid cells, track boundary flags
+    // ------------------------------------------------------------
+    struct Cluster {
+        glm::vec3 positionSum;
+        glm::vec3 normalSum;
+        glm::vec3 colorSum;
+        glm::vec2 uvSum;
+        unsigned int count;
+
+        bool hasMinX;
+        bool hasMaxX;
+        bool hasMinY;
+        bool hasMaxY;
+        bool hasMinZ;
+        bool hasMaxZ;
+
+        Cluster()
+            : positionSum(0.0f)
+            , normalSum(0.0f)
+            , colorSum(0.0f)
+            , uvSum(0.0f)
+            , count(0)
+            , hasMinX(false)
+            , hasMaxX(false)
+            , hasMinY(false)
+            , hasMaxY(false)
+            , hasMinZ(false)
+            , hasMaxZ(false)
+        {}
+    };
+
+    std::unordered_map<std::uint64_t, unsigned int> cellToClusterIndex;
+    std::vector<Cluster> clusterList;
+    std::vector<unsigned int> vertexToCluster(srcVertices.size(), 0);
+
+    clusterList.reserve(static_cast<size_t>(targetVertexCountF));
+
+    for (size_t i = 0; i < srcVertices.size(); ++i) {
+        const Vertex& v = srcVertices[i];
+
+        glm::vec3 pos(v.x, v.y, v.z);
+        glm::vec3 relative = (pos - minPos) / extent;
+
+        // Clamp to [0,1]
+        if (relative.x < 0.0f) relative.x = 0.0f;
+        if (relative.y < 0.0f) relative.y = 0.0f;
+        if (relative.z < 0.0f) relative.z = 0.0f;
+        if (relative.x > 1.0f) relative.x = 1.0f;
+        if (relative.y > 1.0f) relative.y = 1.0f;
+        if (relative.z > 1.0f) relative.z = 1.0f;
+
+        unsigned int ix = static_cast<unsigned int>(relative.x * static_cast<float>(cellsPerAxis - 1));
+        unsigned int iy = static_cast<unsigned int>(relative.y * static_cast<float>(cellsPerAxis - 1));
+        unsigned int iz = static_cast<unsigned int>(relative.z * static_cast<float>(cellsPerAxis - 1));
+
+        std::uint64_t key = 0;
+        key |= static_cast<std::uint64_t>(ix);
+        key |= static_cast<std::uint64_t>(iy) << 21;
+        key |= static_cast<std::uint64_t>(iz) << 42;
+
+        std::unordered_map<std::uint64_t, unsigned int>::iterator it =
+            cellToClusterIndex.find(key);
+
+        unsigned int clusterIndex;
+        if (it == cellToClusterIndex.end()) {
+            clusterList.push_back(Cluster());
+            clusterIndex = static_cast<unsigned int>(clusterList.size() - 1);
+            cellToClusterIndex[key] = clusterIndex;
+        } else {
+            clusterIndex = it->second;
+        }
+
+        Cluster& cluster = clusterList[clusterIndex];
+
+        cluster.positionSum += pos;
+        cluster.normalSum   += glm::vec3(v.nx, v.ny, v.nz);
+        cluster.colorSum    += glm::vec3(v.r, v.g, v.b);
+        cluster.uvSum       += glm::vec2(v.u, v.v);
+        cluster.count++;
+
+        if (glm::abs(pos.x - minPos.x) <= boundaryEps) cluster.hasMinX = true;
+        if (glm::abs(pos.x - maxPos.x) <= boundaryEps) cluster.hasMaxX = true;
+        if (glm::abs(pos.y - minPos.y) <= boundaryEps) cluster.hasMinY = true;
+        if (glm::abs(pos.y - maxPos.y) <= boundaryEps) cluster.hasMaxY = true;
+        if (glm::abs(pos.z - minPos.z) <= boundaryEps) cluster.hasMinZ = true;
+        if (glm::abs(pos.z - maxPos.z) <= boundaryEps) cluster.hasMaxZ = true;
+
+        vertexToCluster[i] = clusterIndex;
+    }
+
+    if (clusterList.empty()) {
+        return false;
+    }
+
+    // ------------------------------------------------------------
+    // Step 4: Build new vertex buffer from clusters, snapping bounds
+    // ------------------------------------------------------------
+    const size_t newVertexCount = clusterList.size();
+    outVertices.resize(newVertexCount);
+
+    for (size_t ci = 0; ci < newVertexCount; ++ci) {
+        const Cluster& cluster = clusterList[ci];
+        float invCount = 1.0f / static_cast<float>(cluster.count);
+
+        glm::vec3 avgPos    = cluster.positionSum * invCount;
+        glm::vec3 avgColor  = cluster.colorSum * invCount;
+        glm::vec3 avgNormal = cluster.normalSum * invCount;
+        glm::vec2 avgUv     = cluster.uvSum * invCount;
+
+        if (glm::length(avgNormal) > epsilon) {
+            avgNormal = glm::normalize(avgNormal);
+        } else {
+            avgNormal = glm::vec3(0.0f, 1.0f, 0.0f);
+        }
+
+        // Snap to global bounds if this cluster contains boundary verts
+        if (cluster.hasMinX && !cluster.hasMaxX) {
+            avgPos.x = minPos.x;
+        } else if (cluster.hasMaxX && !cluster.hasMinX) {
+            avgPos.x = maxPos.x;
+        }
+        if (cluster.hasMinY && !cluster.hasMaxY) {
+            avgPos.y = minPos.y;
+        } else if (cluster.hasMaxY && !cluster.hasMinY) {
+            avgPos.y = maxPos.y;
+        }
+        if (cluster.hasMinZ && !cluster.hasMaxZ) {
+            avgPos.z = minPos.z;
+        } else if (cluster.hasMaxZ && !cluster.hasMinZ) {
+            avgPos.z = maxPos.z;
+        }
+
+        Vertex v;
+        v.x  = avgPos.x;
+        v.y  = avgPos.y;
+        v.z  = avgPos.z;
+
+        v.r  = avgColor.x;
+        v.g  = avgColor.y;
+        v.b  = avgColor.z;
+
+        v.nx = avgNormal.x;
+        v.ny = avgNormal.y;
+        v.nz = avgNormal.z;
+
+        v.u  = avgUv.x;
+        v.v  = avgUv.y;
+
+        outVertices[ci] = v;
+    }
+
+    // ------------------------------------------------------------
+    // Step 5: Rebuild index buffer using cluster indices
+    // ------------------------------------------------------------
+    outIndices.reserve(srcIndices.size());
+
+    for (size_t i = 0; i + 2 < srcIndices.size(); i += 3) {
+        unsigned int i0 = srcIndices[i + 0].index;
+        unsigned int i1 = srcIndices[i + 1].index;
+        unsigned int i2 = srcIndices[i + 2].index;
+
+        if (i0 >= srcVertices.size() || i1 >= srcVertices.size() || i2 >= srcVertices.size()) {
+            continue;
+        }
+
+        unsigned int c0 = vertexToCluster[i0];
+        unsigned int c1 = vertexToCluster[i1];
+        unsigned int c2 = vertexToCluster[i2];
+
+        // Skip degenerate triangles after clustering
+        if (c0 == c1 || c1 == c2 || c0 == c2) {
+            continue;
+        }
+
+        Index outI0;
+        Index outI1;
+        Index outI2;
+
+        outI0.index = c0;
+        outI1.index = c1;
+        outI2.index = c2;
+
+        outIndices.push_back(outI0);
+        outIndices.push_back(outI1);
+        outIndices.push_back(outI2);
+    }
+
+    if (outIndices.size() < 3) {
+        outVertices.clear();
+        outIndices.clear();
+        return false;
+    }
+
+    return true;
+}
+
 
 void Mesh::Load(void) {
     mVertexBufferSz = mVertexBuffer.size();
@@ -654,6 +986,88 @@ void Mesh::SetNormals(glm::vec3 normals) {
         mVertexBuffer[i].ny = normals.y;
         mVertexBuffer[i].nz = normals.z;
     }
+}
+
+unsigned int Mesh::RemoveDegenerateTriangles(SubMesh& submesh, float epsilon) {
+    // Nothing to do if we don't have enough data for even a single triangle
+    if (submesh.vertexBuffer.empty() || submesh.indexBuffer.size() < 3) {
+        return 0;
+    }
+    
+    const unsigned int vertexCount = static_cast<unsigned int>(submesh.vertexBuffer.size());
+    const unsigned int indexCount  = static_cast<unsigned int>(submesh.indexBuffer.size());
+    
+    std::vector<Index> cleaned;
+    cleaned.reserve(indexCount);
+    
+    unsigned int removedCount = 0;
+    const float epsilonSq = epsilon * epsilon;
+    
+    for (unsigned int i = 0; i + 2 < indexCount; i += 3) {
+        
+        unsigned int i0 = submesh.indexBuffer[i + 0].index;
+        unsigned int i1 = submesh.indexBuffer[i + 1].index;
+        unsigned int i2 = submesh.indexBuffer[i + 2].index;
+        
+        bool invalid = false;
+        
+        // Basic index range and duplicate-index checks
+        if (i0 >= vertexCount || i1 >= vertexCount || i2 >= vertexCount) {
+            invalid = true;
+        }
+        if (i0 == i1 || i1 == i2 || i0 == i2) {
+            invalid = true;
+        }
+        
+        // If still potentially valid, test geometry
+        if (!invalid) {
+            const Vertex& v0 = submesh.vertexBuffer[i0];
+            const Vertex& v1 = submesh.vertexBuffer[i1];
+            const Vertex& v2 = submesh.vertexBuffer[i2];
+            
+            glm::vec3 p0(v0.x, v0.y, v0.z);
+            glm::vec3 p1(v1.x, v1.y, v1.z);
+            glm::vec3 p2(v2.x, v2.y, v2.z);
+            
+            glm::vec3 e0 = p1 - p0;
+            glm::vec3 e1 = p2 - p0;
+            glm::vec3 e2 = p2 - p1;
+            
+            // Any nearly-zero edge length -> degenerate
+            float d0 = glm::dot(e0, e0);
+            float d1 = glm::dot(e1, e1);
+            float d2 = glm::dot(e2, e2);
+            
+            if (d0 <= epsilonSq || d1 <= epsilonSq || d2 <= epsilonSq) {
+                invalid = true;
+            } else {
+                // Check area via cross product – near-zero area => degenerate
+                glm::vec3 n = glm::cross(e0, e1);
+                float area2Sq = glm::dot(n, n);  // proportional to squared area
+            
+                if (area2Sq <= epsilonSq) {
+                    invalid = true;
+                }
+            }
+        }
+        
+        if (invalid) {
+            removedCount++;
+            continue;
+        }
+        
+        // Keep this triangle
+        cleaned.push_back(submesh.indexBuffer[i + 0]);
+        cleaned.push_back(submesh.indexBuffer[i + 1]);
+        cleaned.push_back(submesh.indexBuffer[i + 2]);
+    }
+    
+    if (removedCount > 0) {
+        submesh.indexBuffer.swap(cleaned);
+        submesh.indexCount = static_cast<unsigned int>(submesh.indexBuffer.size());
+    }
+    
+    return removedCount;
 }
 
 void Mesh::SetPrimitive(int primitiveType) {

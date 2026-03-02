@@ -27,6 +27,49 @@ void ResourceManager::Initiate(void) {
     for (unsigned int i=0; i < materialDirectoryList.size(); i++) 
         LoadTexture("core\\materials\\" + materialDirectoryList[i], String.GetNameFromFilenameNoExt( materialDirectoryList[i] ));
     
+    // Load default shaders
+    shaders.texture       = CreateShaderFromTag("texture");
+    shaders.textureUnlit  = CreateShaderFromTag("textureUnlit");
+    shaders.color         = CreateShaderFromTag("color");
+    shaders.colorUnlit    = CreateShaderFromTag("colorUnlit");
+    shaders.UI            = CreateShaderFromTag("UI");
+    shaders.shadowCaster  = CreateShaderFromTag("shadowCaster");
+    shaders.sky           = CreateShaderFromTag("sky");
+    shaders.water         = CreateShaderFromTag("water");
+    
+    // Load default meshes
+    meshes.grass           = CreateMeshFromTag("grass");
+    meshes.grassHorz       = CreateMeshFromTag("grassHorz");
+    meshes.grassVert       = CreateMeshFromTag("grassVert");
+    
+    meshes.stemHorz        = CreateMeshFromTag("stemHorz");
+    meshes.stemVert        = CreateMeshFromTag("stemVert");
+    
+    meshes.wallHorizontal  = CreateMeshFromTag("wallh");
+    meshes.wallVertical    = CreateMeshFromTag("wallv");
+    
+    meshes.log             = CreateMeshFromTag("log");
+    meshes.leaf            = CreateMeshFromTag("leaf");
+    
+    meshes.cube            = CreateMeshFromTag("cube");
+    meshes.chunk           = CreateMeshFromTag("chunk");
+    meshes.plain           = CreateMeshFromTag("plain");
+    meshes.sphere          = CreateMeshFromTag("sphere");
+    
+    // Prevent the meshes from being garbage collected
+    meshes.grassHorz->isShared         = true;
+    meshes.grassVert->isShared         = true;
+    meshes.stemHorz->isShared          = true;
+    meshes.stemVert->isShared          = true;
+    meshes.wallHorizontal->isShared    = true;
+    meshes.wallVertical->isShared      = true;
+    meshes.log->isShared               = true;
+    
+    meshes.cube->isShared              = true;
+    meshes.chunk->isShared             = true;
+    meshes.plain->isShared             = true;
+    meshes.sphere->isShared            = true;
+    
     return;
 }
 
@@ -65,8 +108,11 @@ bool ResourceManager::LoadMeshFromTag(std::string resourceName, Mesh* mesh) {
         if (!meshTag->Load()) 
             return false;
     mesh->ClearSubMeshes();
-    for (unsigned int i=0; i < meshTag->subMeshes.size(); i++) 
+    for (unsigned int i=0; i < meshTag->subMeshes.size(); i++) {
         mesh->AddSubMesh(0, 0, 0, meshTag->subMeshes[i].vertexBuffer, meshTag->subMeshes[i].indexBuffer, false);
+        SubMesh* submesh = mesh->GetSubMesh(i);
+        submesh->name = meshTag->subMeshes[i].name;
+    }
     mesh->Load();
     return true;
 }

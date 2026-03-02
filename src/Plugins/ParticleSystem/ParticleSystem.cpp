@@ -145,7 +145,7 @@ Emitter* ParticleSystem::CreateEmitter(void) {
     Material* particleMaterial = Engine.Create<Material>();
     newEmitter->mMaterial = particleMaterial;
     
-    particleMaterial->shader = Engine.shaders.colorUnlit;
+    particleMaterial->shader = Resources.shaders.colorUnlit;
     particleMaterial->isShared = false;
     particleMaterial->ambient = Colors.white;
     particleMaterial->diffuse = Colors.white;

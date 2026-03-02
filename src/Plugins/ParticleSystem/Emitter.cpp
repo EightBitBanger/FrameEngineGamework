@@ -39,7 +39,7 @@ void Emitter::AddParticle(glm::vec3 position, glm::vec3 initialScale, glm::vec3 
     mNumberOfParticles++;
     
     SubMesh particleSubMesh;
-    Engine.meshes.cube->GetSubMesh(0, particleSubMesh);
+    Resources.meshes.cube->GetSubMesh(0, particleSubMesh);
     
     unsigned int numberOfVertices = particleSubMesh.vertexBuffer.size();
     
@@ -65,7 +65,7 @@ void Emitter::AddParticle(glm::vec3 position, glm::vec3 initialScale, glm::vec3 
 unsigned int Emitter::ResetParticle(unsigned int index, glm::vec3 initialScale, Color initialColor) {
     // Reset mesh fully
     SubMesh particleSubMesh;
-    Engine.meshes.cube->GetSubMesh(0, particleSubMesh);
+    Resources.meshes.cube->GetSubMesh(0, particleSubMesh);
     
     unsigned int numberOfVertices = particleSubMesh.vertexBuffer.size();
     

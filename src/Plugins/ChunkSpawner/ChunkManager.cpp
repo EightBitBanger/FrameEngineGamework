@@ -50,13 +50,13 @@ void ChunkManager::Initiate(void) {
     
     // Source meshes for world construction
     float scaler = 0.5f;
-    //Engine.meshes.wallHorizontal->ChangeSubMeshScale(0, scaler, scaler, scaler);
-    //Engine.meshes.wallVertical->ChangeSubMeshScale(0, scaler, scaler, scaler);
-    //Engine.meshes.plain->ChangeSubMeshScale(0, scaler, scaler, scaler);
+    //Resources.meshes.wallHorizontal->ChangeSubMeshScale(0, scaler, scaler, scaler);
+    //Resources.meshes.wallVertical->ChangeSubMeshScale(0, scaler, scaler, scaler);
+    //Resources.meshes.plain->ChangeSubMeshScale(0, scaler, scaler, scaler);
     
-    //Engine.meshes.grass->ChangeSubMeshScale(0, scaler, scaler, scaler);
-    Engine.meshes.leaf->ChangeSubMeshScale(0, scaler, scaler, scaler);
-    //Engine.meshes.log->ChangeSubMeshScale(0, scaler, 1.0f, scaler);
+    //Resources.meshes.grass->ChangeSubMeshScale(0, scaler, scaler, scaler);
+    Resources.meshes.leaf->ChangeSubMeshScale(0, scaler, scaler, scaler);
+    //Resources.meshes.log->ChangeSubMeshScale(0, scaler, 1.0f, scaler);
     
     // Get sub meshes
     SubMesh subMeshWallHorz;
@@ -67,20 +67,20 @@ void ChunkManager::Initiate(void) {
     SubMesh subMeshLeaf;
     SubMesh subMeshLog;
     
-    Engine.meshes.wallHorizontal->GetSubMesh(0, subMeshWallHorz);
-    Engine.meshes.wallVertical->GetSubMesh(0, subMeshWallVert);
+    Resources.meshes.wallHorizontal->GetSubMesh(0, subMeshWallHorz);
+    Resources.meshes.wallVertical->GetSubMesh(0, subMeshWallVert);
     
-    Engine.meshes.cube->GetSubMesh(0, subMeshCube);
-    Engine.meshes.cube->GetSubMesh(1, subMeshCube);
-    Engine.meshes.cube->GetSubMesh(2, subMeshCube);
-    Engine.meshes.cube->GetSubMesh(3, subMeshCube);
-    Engine.meshes.cube->GetSubMesh(4, subMeshCube);
-    Engine.meshes.cube->GetSubMesh(5, subMeshCube);
+    Resources.meshes.cube->GetSubMesh(0, subMeshCube);
+    Resources.meshes.cube->GetSubMesh(1, subMeshCube);
+    Resources.meshes.cube->GetSubMesh(2, subMeshCube);
+    Resources.meshes.cube->GetSubMesh(3, subMeshCube);
+    Resources.meshes.cube->GetSubMesh(4, subMeshCube);
+    Resources.meshes.cube->GetSubMesh(5, subMeshCube);
     
-    Engine.meshes.plain->GetSubMesh(0, subMeshPlain);
-    Engine.meshes.grass->GetSubMesh(0, subMeshGrass);
-    Engine.meshes.leaf->GetSubMesh(0, subMeshLeaf);
-    Engine.meshes.log->GetSubMesh(0, subMeshLog);
+    Resources.meshes.plain->GetSubMesh(0, subMeshPlain);
+    Resources.meshes.grass->GetSubMesh(0, subMeshGrass);
+    Resources.meshes.leaf->GetSubMesh(0, subMeshLeaf);
+    Resources.meshes.log->GetSubMesh(0, subMeshLog);
     
     mStaticMeshes["wallhorizontal"]  = subMeshWallHorz;
     mStaticMeshes["wallverticle"]    = subMeshWallVert;
@@ -118,17 +118,17 @@ void ChunkManager::Initiate(void) {
     
     worldMaterial->diffuse = Colors.gray;
     worldMaterial->ambient = Colors.MakeGrayScale(0.2f);
-    worldMaterial->shader = Engine.shaders.color;
+    worldMaterial->shader = Resources.shaders.color;
     
     staticMaterial->DisableCulling();
     staticMaterial->diffuse = Colors.gray;
     staticMaterial->ambient = Colors.MakeGrayScale(0.2f);
-    staticMaterial->shader = Engine.shaders.color;
+    staticMaterial->shader = Resources.shaders.color;
     
     waterMaterial->DisableCulling();
     waterMaterial->EnableBlending();
     waterMaterial->diffuse = Colors.blue * Colors.MakeGrayScale(0.4f);
-    waterMaterial->shader = Engine.shaders.water;
+    waterMaterial->shader = Resources.shaders.water;
     
     // Underwater blue fog
     fogWater = Renderer.CreateFog();
@@ -428,12 +428,15 @@ Actor* ChunkManager::SummonActor(glm::vec3 position) {
     Actor* actor = AI.CreateActor();
     actor->navigation.SetPosition(position);
     actor->navigation.SetTargetPoint(position);
+    std::string timeMin = "0";
+    std::string timeMax = "24000";
     
     std::string homePosition = Float.ToString(position.x) + "," +
                                Float.ToString(position.y) + "," +
-                               Float.ToString(position.z);
+                               Float.ToString(position.z) + "," + timeMin + "," + timeMax;
     
     actor->memories.Add("home", homePosition);
+    
     return actor;
 }
 
@@ -509,14 +512,12 @@ void ChunkManager::ClearWorld(void) {
     world.doGenerateChunks = false;
     isInitiated = false;
     
-    for (unsigned int c=chunks.Size()-1; c >= 0; c--) {
-        DestroyChunk( chunks[c] );
-        if (c == 0) break;
-    }
+    for (unsigned int c=chunks.Size(); c > 0; c--) 
+        DestroyChunk( chunks[c-1] );
     
     unsigned int numberOfActors = AI.GetNumberOfActors();
-    for (unsigned int a=0; a < numberOfActors; a++)
-        KillActor( AI.GetActor(a) );
+    for (unsigned int a=numberOfActors; a > 0; a--)
+        KillActor( AI.GetActor(a-1) );
     
     mChunkCounterX = 0;
     mChunkCounterZ = 0;

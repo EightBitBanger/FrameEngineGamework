@@ -4,6 +4,7 @@
 #include <GameEngineFramework/Types/types.h>
 
 bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection) {
+    /*
     // Calculate shadow distance
     float shadowDistance = glm::distance( eye, currentEntity->transform.position );
     
@@ -92,7 +93,7 @@ bool RenderSystem::ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye,
     } else {
         glDisable( GL_CULL_FACE );
     }
-    
+    */
     return true;
 }
 

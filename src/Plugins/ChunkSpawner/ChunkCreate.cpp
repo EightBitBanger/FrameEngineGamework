@@ -26,11 +26,9 @@ Chunk* ChunkManager::CreateChunk(float x, float y) {
     glm::vec3 boundMin(-chunkSize, -100, -chunkSize);
     glm::vec3 boundMax(chunkSize, 100, chunkSize);
     
-    chunkRenderer->SetBoundingBoxMin(boundMin);
-    chunkRenderer->SetBoundingBoxMax(boundMax);
+    chunkRenderer->SetBoundingBox(boundMin, boundMax);
     
-    staticRenderer->SetBoundingBoxMin(boundMin);
-    staticRenderer->SetBoundingBoxMax(boundMax);
+    staticRenderer->SetBoundingBox(boundMin, boundMax);
     
     // Chunk renderer
     

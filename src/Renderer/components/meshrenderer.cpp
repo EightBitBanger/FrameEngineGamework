@@ -19,11 +19,8 @@ void MeshRenderer::DisableFrustumCulling(void) {
     mDoCulling = false;
 }
 
-void MeshRenderer::SetBoundingBoxMin(glm::vec3 min) {
+void MeshRenderer::SetBoundingBox(glm::vec3 min, glm::vec3 max) {
     mBoundingBoxMin = min;
-}
-
-void MeshRenderer::SetBoundingBoxMax(glm::vec3 max) {
     mBoundingBoxMax = max;
 }
 

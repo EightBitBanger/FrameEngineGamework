@@ -130,7 +130,6 @@ void ChunkManager::Decorate(Chunk* chunk) {
                     actor->physical.SetAge( actor->physical.GetAdultAge() );
                     
                     actor->RebuildGeneticExpression();
-                    actor->physical.UpdatePhysicalCollider();
                     actor->isActive = true;
                     
                     MarkPlacement(position);

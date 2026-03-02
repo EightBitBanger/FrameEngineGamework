@@ -35,6 +35,8 @@ RenderSystem::RenderSystem() :
     mCurrentMaterial(nullptr),
     mCurrentShader(nullptr),
     
+    AmbientIllumination(Colors.black),
+    
     mNumberOfLights(0),
     mNumberOfShadows(0),
     
@@ -212,6 +214,10 @@ void RenderSystem::SetViewport(unsigned int x, unsigned int y, unsigned int w, u
     viewport.y = y;
     viewport.w = w;
     viewport.h = h;
+}
+
+void RenderSystem::SetAmbientIllumination(Color& color) {
+    AmbientIllumination = color;
 }
 
 // Extract frustum planes from view-projection matrix

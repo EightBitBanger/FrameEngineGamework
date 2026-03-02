@@ -23,6 +23,8 @@ Shader::Shader() :
     
     mSamplerCountLocation(0),
     mSamplerLocation(0),
+    mSamplerScaleLocation(0),
+    mSamplerPositionLocation(0),
     
     mFogDensityLocation(0),
     mFogBeginColorLocation(0),
@@ -85,8 +87,16 @@ void Shader::SetTextureSamplerCount(unsigned int numberOfTextures) {
 }
 
 void Shader::SetTextureSampler(unsigned int index) {
-    int units[4] = {0,1,2,3};
-    glUniform1iv(mSamplerLocation, 4, units);
+    int units[5] = {0,1,2,3,4};
+    glUniform1iv(mSamplerLocation, 5, units);
+}
+
+void Shader::SetTextureSamplerScale(glm::vec2* scale) {
+    glUniform2fv(mSamplerScaleLocation, 5, &scale[0][0]);
+}
+
+void Shader::SetTextureSamplerPosition(glm::vec2* offset) {
+    glUniform2fv(mSamplerPositionLocation, 5, &offset[0][0]);
 }
 
 void Shader::SetFogCount(int numberOfFogLayers) {
@@ -151,9 +161,10 @@ void Shader::SetUniformLocations(void) {
     std::string matDiffuseUniformName   = "m_diffuse";
     std::string matSpecularUniformName  = "m_specular";
     
-    
-    std::string mSamplerCountLocation   = "u_sampler_count";
+    std::string samplerCountLocation    = "u_sampler_count";
     std::string samplerUniformName      = "u_sampler";
+    std::string samplerScaleName        = "u_sampler_scale";
+    std::string samplerPositionName     = "u_sampler_position";
     
     std::string fogCountName            = "u_fog_count";
     std::string fogDensityName          = "u_fogDensity";
@@ -182,7 +193,12 @@ void Shader::SetUniformLocations(void) {
     mMaterialAmbientLocation   = glGetUniformLocation(mShaderProgram, matAmbientUniformName.c_str());
     mMaterialDiffuseLocation   = glGetUniformLocation(mShaderProgram, matDiffuseUniformName.c_str());
     mMaterialSpecularLocation  = glGetUniformLocation(mShaderProgram, matSpecularUniformName.c_str());
+    
+    // Sampler
+    mSamplerCountLocation      = glGetUniformLocation(mShaderProgram, samplerCountLocation.c_str());
     mSamplerLocation           = glGetUniformLocation(mShaderProgram, samplerUniformName.c_str());
+    mSamplerScaleLocation      = glGetUniformLocation(mShaderProgram, samplerScaleName.c_str());
+    mSamplerPositionLocation   = glGetUniformLocation(mShaderProgram, samplerPositionName.c_str());
     
     // Fog layers
     mFogCountLocation          = glGetUniformLocation(mShaderProgram, fogCountName.c_str());

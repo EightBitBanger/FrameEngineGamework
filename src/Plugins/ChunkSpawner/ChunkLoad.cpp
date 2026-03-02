@@ -42,15 +42,19 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
                 actor->physical.SetAge(age);
                 actor->isActive = true;
                 
-                actor->physical.UpdatePhysicalCollider();
-                
                 // Memories
-                std::vector<std::string> memorySplit = String.Explode(lineArray[5], '=');
+                std::vector<std::string> memories = String.Explode(lineArray[5], '|');
+                for (unsigned int m=0; m < memories.size(); m++) {
+                    const std::string& memory = memories[m];
+                    if (!memory.empty()) {
+                        std::vector<std::string> pairSplit = String.Explode(memory, '=');
+                        
+                        if (pairSplit.size() == 2) {
+                            actor->memories.Add(pairSplit[0], pairSplit[1]);
+                        }
+                    }
+                }
                 
-                if (memorySplit.size() == 2) 
-                    actor->memories.Add(memorySplit[0], memorySplit[1]);
-                
-                continue;
             }
             
         }

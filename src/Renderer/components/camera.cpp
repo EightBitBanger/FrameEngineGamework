@@ -11,6 +11,7 @@ Camera::Camera() :
     viewport(Viewport(0,0,800,600)),
     
     useMouseLook(false),
+    useThirdPersonView(false),
     isFixedAspect(false),
     isOrthographic(false),
     yaw(0.0f),
@@ -18,22 +19,28 @@ Camera::Camera() :
     
     fov(60.0f),
     aspect(1.33f),
-    clipNear(1.0f),
+    clipNear(0.5f),
     clipFar(100000.0f),
     
     frustumOverlap(30.0f),
     frustumOffset(100.0f),
     
-    mouseLimitPitchMax(180),
-    mouseLimitPitchMin(180),
+    mouseLimitPitchMax(89.9f),
+    mouseLimitPitchMin(-89.9f),
     
     mouseSensitivityYaw(1.3f),
-    mouseSensitivityPitch(1.15f)
+    mouseSensitivityPitch(1.15f),
+    centerStandOff(8.0f),
+    centerPosition({0.0f,0.0f,0.0f})
 {
 }
 
 void Camera::EnableMouseLook(void)  {useMouseLook = true;}
 void Camera::DisableMouseLook(void) {useMouseLook = false;}
+
+void Camera::EnableThirdPersonLook() {useThirdPersonView = true;}
+void Camera::DisableThirdPersonLook() {useThirdPersonView = false;}
+
 
 float Camera::GetPitch(void) {
     return pitch;

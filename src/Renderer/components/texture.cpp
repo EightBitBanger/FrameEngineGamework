@@ -8,6 +8,8 @@ Texture::Texture() :
     mWidth(0),
     mHeight(0),
     mChannels(0),
+    mScale({1.0f}),
+    mPosition({1.0f}),
     mFiltration(GL_LINEAR_MIPMAP_LINEAR)
 {
     glGenTextures(1, &mTextureBuffer);
@@ -27,6 +29,14 @@ unsigned int Texture::GetImageHeight(void) {
 
 unsigned int Texture::GetTextureInterpolationType(void) {
     return mFiltration;
+}
+
+void Texture::SetScaleUV(const glm::vec2& scale) {
+    mScale = scale;
+}
+
+void Texture::SetPositionUV(const glm::vec2& position) {
+    mPosition = position;
 }
 
 void Texture::Bind(void) {

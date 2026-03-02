@@ -1,8 +1,12 @@
 #include <GameEngineFramework/Renderer/RenderSystem.h>
+#include <GameEngineFramework/Profiler/profiler.h>
+
+extern ProfilerTimer Profiler;
 
 int dbgCounter = 0;
 
 void RenderSystem::RenderFrame(void) {
+    Profiler.Begin();
     
     glm::mat4 viewProjection;
     glm::vec3 eye;
@@ -105,7 +109,20 @@ void RenderSystem::RenderFrame(void) {
                 
                 // Set texture count
                 unsigned int numberOfTextures = materialPtr->mTextures.size();
+                
                 shaderPtr->SetTextureSamplerCount(numberOfTextures);
+                
+                // Get sampler scale from each texture
+                glm::vec2 scales[5]  = {{1.0f,1.0f}, {1.0f,1.0f}, {1.0f,1.0f}, {1.0f,1.0f}, {1.0f,1.0f}};
+                glm::vec2 offsets[5] = {{0.0f,0.0f}, {0.0f,0.0f}, {0.0f,0.0f}, {0.0f,0.0f}, {0.0f,0.0f}};
+                
+                for (unsigned int i=0; i < numberOfTextures; i++) {
+                    scales[i] = materialPtr->mTextures[i]->mScale;
+                    offsets[i] = materialPtr->mTextures[i]->mPosition;
+                }
+                
+                shaderPtr->SetTextureSamplerScale(scales);
+                shaderPtr->SetTextureSamplerPosition(offsets);
                 
                 GeometryPass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
                 
@@ -125,7 +142,7 @@ void RenderSystem::RenderFrame(void) {
                     continue;
                 BindMaterial( materialPtr );
                 
-                shaders.shadowCaster->Bind();
+                //shaders.shadowCaster->Bind();
                 
                 if (currentEntity->material->mDoShadowPass) 
                     ShadowVolumePass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
@@ -137,6 +154,8 @@ void RenderSystem::RenderFrame(void) {
     }
     
     mNumberOfFrames++;
+    
+    Profiler.profileRenderSystem = Profiler.Query();
     
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::EndFrame::");

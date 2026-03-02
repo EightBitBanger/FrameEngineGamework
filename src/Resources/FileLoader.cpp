@@ -45,9 +45,7 @@ FileLoader::FileLoader(std::string FileName) :
                 if (value == "[end]") break;
                 
                 BlockString += value + "\n";
-                
             }
-            
             this ->dataBlocks.emplace(BlockName, BlockString);
         }
         
@@ -56,7 +54,6 @@ FileLoader::FileLoader(std::string FileName) :
             ValueList.push_back(ArrayData[i]);
         
         this ->assetData.insert( std::pair<std::string, std::vector<std::string>>(ArrayData[0], ValueList) );
-        
     }
     
     FileStream.close();

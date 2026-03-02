@@ -225,7 +225,7 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
                     bodyTransform.setPosition(rp3d::Vector3(chunk->x, 0, chunk->y));
                     chunk->rigidBody->setTransform(bodyTransform);
                     
-                    MeshCollider* meshCollider = Physics.CreateHeightFieldMap(chunk->heightField, chunkSZ, chunkSZ, 1, 1, 1);
+                    MeshCollider* meshCollider = Physics.CreateHeightFieldMap(chunk->heightField, chunkSZ, chunkSZ, glm::vec3(1, 1, 1));
                     
                     rp3d::Collider* bodyCollider =
                         chunk->rigidBody->addCollider(meshCollider->heightFieldShape, rp3d::Transform::identity());
