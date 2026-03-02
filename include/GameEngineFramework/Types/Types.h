@@ -12,7 +12,7 @@ class ENGINE_API StringType {
 public:
     
     /// Copies the source string starting at 'begin' size of 'count'.
-    std::string Copy(std::string source, unsigned int begin, unsigned int count);
+    std::string Copy(const std::string& source, unsigned int begin, unsigned int count);
     
     /// Return a float containing the numbers from text.
     float ToFloat(const std::string& value);
@@ -60,7 +60,7 @@ public:
     void Uppercase(std::string& str);
     
     /// Strip out all the space characters in a string.
-    std::string RemoveWhiteSpace(std::string str);
+    void RemoveWhiteSpace(std::string& str);
     
     /// Trim down a string by all common white space characters.
     std::string Trim(const std::string& str);
