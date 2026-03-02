@@ -11,32 +11,21 @@
 #include <GameEngineFramework/configuration.h>
 
 struct ENGINE_API TrainingSet {
-    
     std::vector<float> input;
-    
     std::vector<float> target;
-    
 };
-
 
 struct ENGINE_API DataSet {
-    
     std::vector<float> input;
-    
 };
 
-
 struct ENGINE_API NeuralLayer {
-    
     unsigned int numberOfInputs;
     unsigned int numberOfNeurons;
     
     std::vector<float> neurons;
-    
     std::vector<std::vector<float>> weights;
-    
     std::vector<float> biases;
-    
 };
 
 

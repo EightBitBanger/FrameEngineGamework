@@ -30,8 +30,6 @@ public:
     glm::vec3 listenerPosition;
     glm::vec3 listenerDirection;
     
-    AudioSystem();
-    
     /// Create a new sound object and return its pointer.
     Sound* CreateSound(void);
     
@@ -50,15 +48,21 @@ public:
     /// Get the pointer to the audio stream device.
     SDL_AudioStream* GetOutputStream(void);
     
+    /// Get the number of sound objects.
+    unsigned int GetNumberOfSounds(void);
+    
     // Master effects
     
     /// Set the master volume over all sounds.
     void SetVolume(float volume);
     
+    
     void Initiate(void);
     void Shutdown(void);
     
-    AudioPreset Presets;
+    AudioSystem();
+    
+    AudioPreset presets;
     
     std::mutex mux;
     

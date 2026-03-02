@@ -12,9 +12,6 @@ public:
     
     friend class EngineSystemManager;
     
-    /// Component name.
-    std::string name;
-    
     /// Return the object pointer.
     void* GetComponent(void);
     

@@ -12,6 +12,7 @@
 #include <GameEngineFramework/ActorAI/Genetics/Bio.h>
 
 #include <GameEngineFramework/ActorAI/components/actor.h>
+#include <GameEngineFramework/Audio/AudioSystem.h>
 
 #include <GameEngineFramework/Timer/Timer.h>
 
@@ -28,39 +29,37 @@ public:
     
     /// Create an actor and return its pointer.
     Actor* CreateActor(void);
-    
     /// Destroy an actor.
     bool DestroyActor(Actor* actorPtr);
     
     /// Set the player position in the simulation.
     void SetPlayerWorldPosition(glm::vec3 position);
-    
     /// Get the player position in the simulation.
     glm::vec3 GetPlayerWorldPosition(void);
     
     /// Get the number of actors in the simulation.
     unsigned int GetNumberOfActors(void);
-    
     /// Get an actor from the simulation by its index.
     Actor* GetActor(unsigned int index);
-    
     
     /// Signal to the AI thread to update the simulation.
     void UpdateSendSignal(void);
     
-    
     /// Set the update distance from the camera position.
     void SetActorUpdateDistance(float distance);
-    
+    /// Set the render distance from the camera position.
+    void SetActorRenderDistance(float distance);
     
     /// Set the distance where actor detail will not be drawn
     void SetWaterLevel(float waterLevel);
-    
     /// Get the distance where actor detail will not be drawn
     float GetWaterLevel(void);
     
+    /// Set the current time of day for the actor system.
+    void SetTimeOfDay(float time);
     
-    // Called internally
+    
+    // Internal
     
     /// Initiate the actor AI system.
     void Initiate(void);
@@ -85,6 +84,18 @@ public:
     /// Base mesh for genetic rendering.
     Mesh* baseMesh;
     
+    /// Raycast against actors in the world.
+    Actor* Raycast(const glm::vec3& position, const glm::vec3& direction, float maxDistance = -1.0f);
+    
+    /// Get the number of renderers from dead actors.
+    unsigned int GetNumberOfDeadRenderers();
+    
+    /// Get a renderer from a dead actor.
+    MeshRenderer* GetDeadRenderer(unsigned int index);
+    
+    /// Remove a renderer from the dead actor renderer list.
+    MeshRenderer* RemoveDeadRenderer(unsigned int index);
+    
 private:
     
     // Update at the rate of tick
@@ -101,18 +112,12 @@ private:
     void UpdateActorState(Actor* actor);
     void UpdateProximityList(Actor* actor);
     
-    bool HandleWalkState(Actor* actor);
-    bool HandleAttackState(Actor* actor, Actor* target, float distance);
-    bool HandleFleeState(Actor* actor, Actor* target, float distance);
-    bool HandleFocusState(Actor* actor, Actor* target, float distance);
-    bool HandleBreedingState(Actor* actor, Actor* target, float distance);
-    void HandleNeuralNetwork(Actor* actor);
-    
     // Mechanical
     void HandleMovementMechanics(Actor* actor);
     void HandleTargettingMechanics(Actor* actor);
-    void HandleTargetDistance(Actor* actor);
     
+    void HandleHomeLocation(Actor* actor);
+    void HandleTargetDistance(Actor* actor);
     void HandleInflictDamage(Actor* actor, Actor* target);
     void HandleEscapeEvade(Actor* actor, Actor* target);
     void HandleBreedWith(Actor* actor, Actor* target);
@@ -142,17 +147,22 @@ private:
     void ExpressActorGenetics(Actor* actor);
     bool UpdateGarbageCollection(Actor* actor);
     
-    // Memories
-    void UpdateActorMemories(Actor* actor);
-    
     // Current position of the player in the world
     glm::vec3 mPlayerPosition;
     
-    // Distance beyond which the actors will no longer update
+    // Max update distance
     float mActorUpdateDistance;
+    
+    // Max render distance
+    float mActorRenderDistance;
     
     // Maximum world water level
     float mWorldWaterLevel;
+    
+    // Time of day
+    float mTimeOfDay;
+    
+    std::vector<MeshRenderer*> mDeadActorRenderers;
     
     std::thread* mActorSystemThread;
     std::mutex mux;
@@ -163,7 +173,6 @@ private:
     std::vector<Actor*> mFreeActors;
     
     unsigned int mNumberOfActors;
-    
 };
 
 

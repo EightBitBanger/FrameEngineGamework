@@ -4,14 +4,21 @@
 namespace ActorState {
 
 enum class Mode {
-    Idle,         // Check for an available task
-    Sleeping,     // Do nothing
-    MoveRandom,   // Move randomly
-    MoveTo,       // Move to a point, not effecting walk|run state
-    WalkTo,       // Walk to a point
-    RunTo         // Run to a point
+    Idle,           // Do nothing but conscious
+    Sleeping,       // Do nothing but effectively unconscious
+    
+    MoveAttack,     // Move to attack the target
+    MoveFlee,       // Move to flee from the target
+    
+    MoveRandom,     // Initiate a move to a random point
+    MoveToRandom,   // Move toward a random point
+    
+    MoveTo,         // Move to a point
+    WalkTo,         // Walk to a point
+    RunTo           // Run to a point
 };
 
+/*
 enum class State {
     None,         // No state
     Look,         // Look at an actor or point
@@ -21,6 +28,7 @@ enum class State {
     Defend,       // Defend from the target actor
     Breed         // Reproduce with an actor of the opposite sex
 };
+*/
 
 enum class Animation {
     Body,         // Static, no animation

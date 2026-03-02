@@ -45,6 +45,7 @@ public:
         void Elk(Actor* targetActor);
         
         void Spider(Actor* targetActor);
+        void Ladybug(Actor* targetActor);
         
     private:
         

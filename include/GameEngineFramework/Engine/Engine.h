@@ -34,7 +34,6 @@
 #define  CONSOLE_NUMBER_OF_ELEMENTS   32
 #define  PROFILER_NUMBER_OF_ELEMENTS  24
 
-
 #ifndef BUILD_CORE
     #include <GameEngineFramework/Engine/EngineSystems.h>
 #endif
@@ -61,22 +60,6 @@ public:
     /// Get the number of elements in the component stream.
     unsigned int GetStreamSize(void);
     
-    // Special components and game objects
-    
-    /// Create a camera controller game object and return its pointer.
-    GameObject* CreateCameraController(glm::vec3 position);
-    /// Generate a sky object and return its pointer.
-    GameObject* CreateSky(std::string meshTagName, Color colorLow, Color colorHigh, float biasMul);
-    
-    // Lower level UI sprite rendering
-    
-    /// Add a string of sprite quads to a mesh.
-    void AddMeshText(GameObject* overlayObject, float xPos, float yPos, float width, float height, std::string text, Color textColor);
-    /// Add a quad to a mesh mapping to a sub sprite from a sprite sheet texture.
-    void AddMeshSubSprite(GameObject* overlayObject, float xPos, float yPos, float width, float height, int index, Color meshColor);
-    
-    /// Get a collider from the collider list. If one does not exist it will be generated.
-    rp3d::BoxShape* GetColliderBox(glm::vec3 extents);
     
     EngineSystemManager();
     
@@ -87,49 +70,108 @@ public:
     /// Shutdown the engine.
     void Shutdown(void);
     
-    /// Create an object of the type specified.
+    /// Create an object of the specified type.
     template <typename T> T* Create(void) {
         std::lock_guard<std::mutex> lock(mux);
-        extern ActorSystem AI;
         
-        if (std::is_same<T, GameObject>::value)    return (T*)CreateGameObject();
-        if (std::is_same<T, Mesh>::value)          return (T*)Renderer.CreateMesh();
-        if (std::is_same<T, Material>::value)      return (T*)Renderer.CreateMaterial();
-        if (std::is_same<T, Shader>::value)        return (T*)Renderer.CreateShader();
-        if (std::is_same<T, Scene>::value)         return (T*)Renderer.CreateScene();
-        if (std::is_same<T, Camera>::value)        return (T*)Renderer.CreateCamera();
-        if (std::is_same<T, Light>::value)         return (T*)Renderer.CreateLight();
-        if (std::is_same<T, MeshRenderer>::value)  return (T*)Renderer.CreateMeshRenderer();
+        if (std::is_same<T, GameObject>::value) 
+            return (T*)CreateGameObject();
         
-        if (std::is_same<T, Actor>::value)         return (T*)AI.CreateActor();
+        ComponentType type = (ComponentType)mObjectRegistry.GetID<T>();
+        if (type == -1) {
+            Log.Write("!! Creating invalid object (type not registered)");
+            return nullptr;
+        }
         
-        Log.Write("!! Creating invalid object");
-        return nullptr;
+        std::unordered_map<ComponentType, void*(*)()>::iterator it = mObjectBuilders.find(type);
+        if (it == mObjectBuilders.end() || it->second == nullptr) {
+            Log.Write("!! Creating invalid object (no builder registered)");
+            return nullptr;
+        }
+        
+        void* objectPtr = (void*)it->second();
+        if (objectPtr == nullptr) {
+            Log.Write("!! Creating invalid object (builder returned nullptr)");
+            return nullptr;
+        }
+        
+        return (T*)objectPtr;
     }
     
-    /// Destroy an object of the type specified.
+    /// Destroy an object of the specified type.
     template <typename T> bool Destroy(T* objectPtr) {
         std::lock_guard<std::mutex> lock(mux);
-        extern ActorSystem AI;
         
-        if (std::is_same<T, GameObject>::value)    return DestroyGameObject( (GameObject*)objectPtr );
-        if (std::is_same<T, Component>::value)     return DestroyComponent( (Component*)objectPtr );
+        if (objectPtr == nullptr) {
+            Log.Write("!! Destroy called with nullptr");
+            return false;
+        }
         
-        if (std::is_same<T, Mesh>::value)          return Renderer.DestroyMesh( (Mesh*)objectPtr );
-        if (std::is_same<T, Material>::value)      return Renderer.DestroyMaterial( (Material*)objectPtr );
-        if (std::is_same<T, Shader>::value)        return Renderer.DestroyShader( (Shader*)objectPtr );
-        if (std::is_same<T, Scene>::value)         return Renderer.DestroyScene( (Scene*)objectPtr );
-        if (std::is_same<T, Camera>::value)        return Renderer.DestroyCamera( (Camera*)objectPtr );
-        if (std::is_same<T, Light>::value)         return Renderer.DestroyLight( (Light*)objectPtr );
-        if (std::is_same<T, MeshRenderer>::value)  return Renderer.DestroyMeshRenderer( (MeshRenderer*)objectPtr );
+        if (std::is_same<T, GameObject>::value) 
+            return DestroyGameObject((GameObject*)objectPtr);
         
-        if (std::is_same<T, Script>::value)        return Scripting.DestroyScript((Script*)objectPtr);
-        if (std::is_same<T, RigidBody>::value)     return Physics.DestroyRigidBody((RigidBody*)objectPtr);
-        if (std::is_same<T, Actor>::value)         return AI.DestroyActor( (Actor*)objectPtr );
-        if (std::is_same<T, Sound>::value)         return Audio.DestroySound((Sound*)objectPtr);
+        if (std::is_same<T, Component>::value) 
+            return DestroyComponent((Component*)objectPtr);
         
-        Log.Write("!! Destroying invalid object");
-        return false;
+        // General objects: look up the type in the registry
+        ComponentType type = (ComponentType)mObjectRegistry.GetID<T>();
+        if (type == -1) {
+            Log.Write("!! Destroying invalid object (type not registered)");
+            return false;
+        }
+        
+        std::unordered_map<ComponentType, void(*)(void*)>::iterator it = mObjectDestructors.find(type);
+        if (it == mObjectDestructors.end() || it->second == nullptr) {
+            Log.Write("!! Destroying invalid object (no destructor registered)");
+            return false;
+        }
+        
+        it->second((void*)objectPtr);
+        return true;
+    }
+    
+    /// Create a component object containing the specified type.
+    template <typename T> Component* CreateComponent(void) {
+        void* componentObjectPtr = nullptr;
+        
+        ComponentType type = -1;
+        type = (ComponentType)mComponentRegistry.GetID<T>();
+        
+        void*(*functionPtr)() = mComponentBuilders[type];
+        componentObjectPtr = (void*)functionPtr();
+        
+        if (type == -1 || componentObjectPtr == nullptr) {
+            Log.Write("!! Creating invalid component");
+            return nullptr;
+        }
+        
+        Component* newComponent = mComponents.Create();
+        newComponent->SetComponent(type, componentObjectPtr);
+        return newComponent;
+    }
+    
+    /// Create a component object from an existing object.
+    template <typename T> Component* CreateComponentFromObject(T* object) {
+        ComponentType type = -1;
+        type = (ComponentType)mComponentRegistry.GetID<T>();
+        
+        if (type == -1 || object == nullptr) {
+            Log.Write("!! Creating invalid component");
+            return nullptr;
+        }
+        
+        Component* newComponent = mComponents.Create();
+        newComponent->SetComponent(type, object);
+        return newComponent;
+    }
+    
+    /// Destroy a component object.
+    bool DestroyComponent(Component* componentPtr) {
+        ComponentType componentType = componentPtr->GetType();
+        void(*destroyer)(void*) = mComponentDestructors[componentType];
+        destroyer( componentPtr->GetComponent() );
+        componentPtr->mObject = nullptr;
+        return true;
     }
     
     /// Add a new component to the component registry.
@@ -151,18 +193,20 @@ public:
         return true;
     }
     
-    /// Add a new component to the component registry.
-    template <typename T> bool RegisterPlugin(unsigned int type, std::string name, 
-                                                 void*(*CreateFunction)(), 
-                                                 void(*DestroyFunction)(void*), 
-                                                 void(*UpdateFunction)(unsigned int), 
-                                                 ComponentUpdateType updateType) {
-        if (!mComponentRegistry.RegisterComponentType<T>(type)) 
+    /// Add a new plug-in component to the component registry.
+    template <typename T> bool RegisterPlugin(std::string name, 
+                                              void*(*CreateFunction)(), 
+                                              void(*DestroyFunction)(void*), 
+                                              void(*UpdateFunction)(unsigned int), 
+                                              ComponentUpdateType updateType) {
+        unsigned int pluginID = mComponentRegistry.GetNumberOfComponents();
+        
+        if (!mComponentRegistry.RegisterComponentType<T>(pluginID)) 
             return false;
         
-        mComponentNames[type] = name;
-        if (CreateFunction  != nullptr) mComponentBuilders[type]    = CreateFunction;
-        if (DestroyFunction != nullptr) mComponentDestructors[type] = DestroyFunction;
+        mComponentNames[pluginID] = name;
+        if (CreateFunction  != nullptr) mComponentBuilders[pluginID]    = CreateFunction;
+        if (DestroyFunction != nullptr) mComponentDestructors[pluginID] = DestroyFunction;
         if (UpdateFunction  != nullptr) mComponentUpdaters.push_back(UpdateFunction);
         
         if (updateType != ComponentUpdateType::NoUpdate) 
@@ -170,35 +214,12 @@ public:
         return true;
     }
     
-    /// Create a component object containing the type specified.
-    template <typename T> Component* CreateComponent(void) {
-        void* componentObjectPtr = nullptr;
-        // Get component type
-        ComponentType type = -1;
-        type = (ComponentType)mComponentRegistry.GetID<T>();
-        
-        // Component function factory
-        void*(*functionPtr)() = mComponentBuilders[type];
-        componentObjectPtr = (void*)functionPtr();
-        
-        if (type == -1 || componentObjectPtr == nullptr) {
-            Log.Write("!! Creating invalid component");
-            return nullptr;
-        }
-        
-        // Assemble the component
-        Component* newComponent = mComponents.Create();
-        newComponent->SetComponent(type, componentObjectPtr);
-        return newComponent;
-    }
-    
-    
-    /// Destroy a component object.
-    bool DestroyComponent(Component* componentPtr) {
-        ComponentType componentType = componentPtr->GetType();
-        void(*destroyer)(void*) = mComponentDestructors[componentType];
-        
-        destroyer( componentPtr->GetComponent() );
+    /// Add a new object to the object registry.
+    template <typename T> bool RegisterObject(ComponentType type, std::string name, void*(*CreateFunction)(), void(*DestroyFunction)(void*)) {
+        if (!mObjectRegistry.RegisterComponentType<T>(type)) 
+            return false;
+        mObjectBuilders[type] = CreateFunction;
+        mObjectDestructors[type] = DestroyFunction;
         return true;
     }
     
@@ -253,21 +274,12 @@ public:
     void UpdateTransforms(unsigned int index);
     void UpdateKinematics(unsigned int index);
     
-    // List of box colliders
-    std::vector<rp3d::BoxShape*>  mBoxCollider;
-    
 private:
     
     // Create a game object and return its pointer.
     GameObject* CreateGameObject(void);
-    
     // Destroy a game object.
     bool DestroyGameObject(GameObject* gameObjectPtr);
-    
-    // Actor genetics update
-    void ClearOldGeneticRenderers(unsigned int index);
-    MeshRenderer* CreateMeshRendererForGene(unsigned int index, unsigned int geneIndex, Mesh* sourceMesh);
-    void ExpressActorGenetics(unsigned int index);
     
     // List of active game objects
     std::vector<GameObject*>  mGameObjectActive;
@@ -277,36 +289,6 @@ private:
     PoolAllocator<Component>  mComponents;
     PoolAllocator<Transform>  mTransforms;
     
-    // Default assets
-    
-    struct DefaultShaders {
-        Shader*  texture = nullptr;
-        Shader*  textureUnlit = nullptr;
-        Shader*  color = nullptr;
-        Shader*  colorUnlit = nullptr;
-        Shader*  UI = nullptr;
-        Shader*  shadowCaster = nullptr;
-        Shader*  sky = nullptr;
-        Shader*  water = nullptr;
-    };
-    
-    struct DefaultMeshes {
-        Mesh* grass = nullptr;
-        Mesh* grassHorz = nullptr;
-        Mesh* grassVert = nullptr;
-        Mesh* stemHorz = nullptr;
-        Mesh* stemVert = nullptr;
-        Mesh* wallHorizontal = nullptr;
-        Mesh* wallVertical = nullptr;
-        Mesh* log = nullptr;
-        Mesh* leaf = nullptr;
-        
-        Mesh* cube = nullptr;
-        Mesh* chunk = nullptr;
-        Mesh* plain = nullptr;
-        Mesh* sphere = nullptr;
-    };
-    
     // Component type registry
     ComponentTypeRegistry mComponentRegistry;
     std::unordered_map<ComponentType, void*(*)()> mComponentBuilders;
@@ -314,6 +296,11 @@ private:
     std::unordered_map<ComponentType, std::string> mComponentNames;
     std::vector<void(*)(unsigned int)> mComponentUpdaters;
     std::vector<ComponentUpdateType> mComponentUpdateType;
+    
+    // General object registry
+    ComponentTypeRegistry mObjectRegistry;
+    std::unordered_map<ComponentType, void*(*)()> mObjectBuilders;
+    std::unordered_map<ComponentType, void(*)(void*)> mObjectDestructors;
     
     // Component stream
     void UpdateComponentStream(void);
@@ -323,7 +310,8 @@ private:
     unsigned int mStreamSize;
     
     struct ComponentDataStreamBuffer {
-        GameObject*    gameObject;
+        GameObject* gameObject;
+        uint64_t componentMask;
         void* components[EngineComponent::NumberOfComponents];
     };
     
@@ -338,13 +326,6 @@ public:
     
     GameObject* debugMeshGameObject;
     GameObject* debugLinesGameObject;
-    
-    /// Default shaders provided by the engine.
-    DefaultShaders shaders;
-    
-    /// Default meshes provided by the engine.
-    DefaultMeshes  meshes;
-    
 };
 
 

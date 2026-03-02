@@ -30,7 +30,7 @@ struct ENGINE_API EngineComponent {
     constexpr static short Actor         = 6;
     constexpr static short Sound         = 7;
     
-    // Total number of components tracker
+    // Total number of components tracker (last + 1)
     constexpr static short NumberOfComponents = Sound + 1;
 };
 

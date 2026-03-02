@@ -10,6 +10,7 @@
 
 #include <GameEngineFramework/Physics/PhysicsSystem.h>
 #include <GameEngineFramework/Renderer/RenderSystem.h>
+#include <GameEngineFramework/Audio/AudioSystem.h>
 
 #include <glm/glm.hpp>
 
@@ -21,12 +22,11 @@
 
 
 class ENGINE_API Actor {
-    
-public:
-    
     friend class ActorSystem;
     friend class GeneticPresets;
     friend class EngineSystemManager;
+    
+public:
     
     // Flags
     
@@ -37,9 +37,21 @@ public:
     // Name
     
     /// Set the name of the actor.
-    void SetName(std::string newName);
+    void SetName(const std::string& newName);
     /// Get the name of the actor.
-    std::string GetName(void);
+    const std::string& GetName(void);
+    
+    // Bounding box
+    
+    /// Set the maximum bounding box corner.
+    void SetBoundingBox(const glm::vec3& min, const glm::vec3& max);
+    /// Get the minimum bounding box corner.
+    glm::vec3 GetBoundingBoxMin(void);
+    /// Get the maximum bounding box corner.
+    glm::vec3 GetBoundingBoxMax(void);
+    
+    /// Update the bounding area by the positional offsets of the genetic elements.
+    void UpdateBoundingBoxFromGenome(void);
     
     // State
     
@@ -54,7 +66,6 @@ public:
     
     
     class ENGINE_API NavigationSystem {
-        
         friend class Actor;
         friend class ActorSystem;
         friend class GeneticPresets;
@@ -111,7 +122,6 @@ public:
     
     
     class ENGINE_API Behavior {
-        
         friend class Actor;
         friend class ActorSystem;
         friend class GeneticPresets;
@@ -201,9 +211,23 @@ public:
         
     } behavior;
     
+    class ENGINE_API VocalSynthesizer {
+    public:
+        
+        /// Set a voice by its associated name.
+        void AddVoice(const std::string& name, Sound* sound);
+        
+        /// Get a voice by its associated name.
+        Sound* GetVoice(const std::string& name);
+        
+    private:
+        
+        std::unordered_map<std::string, Sound*> mVocals;
+        
+    } voice;
+    
     
     class ENGINE_API State {
-        
         friend class Actor;
         friend class ActorSystem;
         friend class GeneticPresets;
@@ -213,7 +237,7 @@ public:
         
         // The current state the actor is in
         ActorState::Mode    mode;
-        ActorState::State   current;
+        //ActorState::State   current;
         
     private:
         
@@ -230,7 +254,6 @@ public:
     
     
     class ENGINE_API IdiosyncraticCharacteristics {
-        
         friend class Actor;
         friend class ActorSystem;
         friend class GeneticPresets;
@@ -239,11 +262,11 @@ public:
     public:
         
         /// Add a memory to this actor.
-        void Add(std::string name, std::string memory);
+        void Add(const std::string& name, const std::string& memory);
         /// Remove a memory from this actor.
-        bool Remove(std::string name);
+        bool Remove(const std::string& name);
         /// Get a memory from this actor.
-        std::string Get(std::string name);
+        std::string Get(const std::string& name);
         
         /// Get the number of memories in this actor.
         unsigned int GetNumberOfMemories(void);
@@ -256,7 +279,7 @@ public:
         void Clear(void);
         
         /// Check if a memory exists in this actor.
-        bool CheckExists(std::string memory);
+        bool CheckExists(const std::string& memory);
         
         IdiosyncraticCharacteristics();
         
@@ -269,7 +292,6 @@ public:
     
     
     class ENGINE_API GeneticsSystem {
-        
         friend class Actor;
         friend class ActorSystem;
         friend class GeneticPresets;
@@ -317,7 +339,7 @@ public:
         unsigned int mGeneration;     // Current position in the generational sequence over time
         
         std::vector<Gene> mGenes;     // Genetic blueprints
-        std::vector<Phen> mPhen;      // Phonetic expression
+        std::vector<Phen> mPhen;      // Phenotypic expression
         
         // List of render components representing genetic expression
         std::vector<MeshRenderer*> mGeneticRenderers;
@@ -326,7 +348,6 @@ public:
     
     
     class ENGINE_API BiologicalSystem {
-        
         friend class Actor;
         friend class ActorSystem;
         friend class GeneticPresets;
@@ -354,8 +375,79 @@ public:
     } biological;
     
     
-    class ENGINE_API PhysicalAttributes {
+    class ENGINE_API EmotionalState {
+        friend class Actor;
+        friend class ActorSystem;
+        friend class GeneticPresets;
+        friend class EngineSystemManager;
         
+    public:
+        
+        /// Set the fear level for the actor.
+        void SetFear(float fear);
+        /// Get the fear level for the actor.
+        float GetFear(void);
+        /// Add fear to the actor.
+        void AddFear(float additive);
+        
+        /// Set the anger level for the actor.
+        void SetAnger(float anger);
+        /// Get the anger level for the actor.
+        float GetAnger(void);
+        /// Add anger to the actor.
+        void AddAnger(float additive);
+        
+        /// Set the fatigue level for the actor.
+        void SetFatigue(float fatigue);
+        /// Get the fatigue level for the actor.
+        float GetFatigue(void);
+        /// Add fatigue to the actor.
+        void AddFatigue(float additive);
+        
+        /// Set the stress level for the actor.
+        void SetStress(float stress);
+        /// Get the stress level for the actor.
+        float GetStress(void);
+        /// Add stress to the actor.
+        void AddStress(float additive);
+        
+        /// Set the curiosity level for the actor.
+        void SetCuriosity(float curiosity);
+        /// Get the curiosity level for the actor.
+        float GetCuriosity(void);
+        /// Add curiosity to the actor.
+        void AddCuriosity(float additive);
+        
+        /// Set the comfort level for the actor.
+        void SetComfort(float comfort);
+        /// Get the comfort level for the actor.
+        float GetComfort(void);
+        /// Add comfort to the actor.
+        void AddComfort(float additive);
+        
+        /// Set the libido level for the actor.
+        void SetLibido(float libido);
+        /// Get the libido level for the actor.
+        float GetLibido(void);
+        /// Add libido to the actor.
+        void AddLibido(float additive);
+        
+        EmotionalState();
+        
+    private:
+        
+        float mFear;                    // How scared the actor is
+        float mAnger;                   // How aggressive the actor is
+        float mFatigue;                 // How much lethargic the actor has
+        float mStress;                  // How much does the actor dislike a situation
+        float mCuriosity;               // How explorative the actor is
+        float mComfort;                 // How much does the actor trust its surroundings
+        float mLibido;                  // How willing is the actor to reproduce
+        
+    } emotions;
+    
+    
+    class ENGINE_API PhysicalAttributes {
         friend class Actor;
         friend class ActorSystem;
         friend class GeneticPresets;
@@ -405,18 +497,8 @@ public:
         
         /// Set the sexual orientation for reproduction.
         void SetSexualOrientation(bool orientation);
-        
         /// Get the sexual orientation for reproduction.
         bool GetSexualOrientation(void);
-        
-        /// Regenerate the physics collider.
-        void UpdatePhysicalCollider(void);
-        
-        /// Set the scale of the physical collider to be generated.
-        void SetColliderScale(glm::vec3 extents);
-        
-        /// Set the offset position of the physical relative to the position of the actor.
-        void SetColliderOffset(glm::vec3 offset);
         
         PhysicalAttributes();
         
@@ -434,16 +516,10 @@ public:
         
         bool mSexualOrientation;     // Reproductive orientation  1=Male 0=Female
         
-        bool mDoUpdateCollider;      // Trigger an update of the collider
-        glm::vec3 mColliderOffset;   // Collider position offset
-        glm::vec3 mColliderScale;    // Collider scale
-        rp3d::CollisionBody* mColliderBody;
-        
     } physical;
     
     
     class ENGINE_API CooldownCounters {
-        
         friend class Actor;
         friend class ActorSystem;
         friend class GeneticPresets;
@@ -486,29 +562,19 @@ public:
     
     
     class ENGINE_API UserVariables {
-        
         friend class Actor;
         friend class ActorSystem;
         friend class GeneticPresets;
         friend class EngineSystemManager;
-        
     public:
-        
-        /// Set the user bit mask byte.
-        void SetUserBitmask(uint8_t bitmask);
-        
-        /// Get the user bit mask byte.
-        uint8_t GetUserBitmask(void);
         
         /// Set the user data pointer.
         void SetUserDataA(void* ptr);
-        
         /// Get the user data pointer.
         void* GetUserDataA(void);
         
         /// Set the user data pointer.
         void SetUserDataB(void* ptr);
-        
         /// Get the user data pointer.
         void* GetUserDataB(void);
         
@@ -528,6 +594,11 @@ private:
     // Actor name string
     std::string mName;
     
+    // Bounding box area for hit detection
+    glm::vec3 mBoundingBoxMin;
+    glm::vec3 mBoundingBoxMax;
+    
+    std::vector<Actor*> mTargets;
 };
 
 

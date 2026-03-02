@@ -87,12 +87,18 @@ public:
     /// Get the position of the object.
     glm::vec3 GetPosition(void);
     
+    /// Get the position of the object.
+    glm::quat GetRotation(void);
+    
     /// Set the position of the object.
     void SetPosition(float x, float y, float z);
+    /// Set the position of the object.
+    void SetPosition(glm::vec3 position);
     
-    /// Set the position of the object from a vector.
-    void SetPosition(glm::vec3 newPosition);
-    
+    /// Set the orientation quaternion of the object.
+    void SetRotation(float w, float x, float y, float z);
+    /// Set the orientation of the object from a quaternion.
+    void SetRotation(glm::quat orientation);
     
     /// Activate the game object and any associated components.
     void Activate(void);
@@ -115,20 +121,20 @@ public:
     
     
     /// Add a box collider shape at the offset position x, y and z.
-    void AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
+    rp3d::Collider* AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z);
     
     /// Add a capsule collider shape at the offset position x, y and z.
-    void AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
+    rp3d::Collider* AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z);
     
     /// Add a sphere collider shape at the offset position x, y and z.
-    void AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z, LayerMask layer = LayerMask::Default);
+    rp3d::Collider* AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z);
     
     
     /// Add a collider from a resource tag at the offset position x, y and z.
-    void AddCollider(ColliderTag* colliderTag, float x, float y, float z, LayerMask layer = LayerMask::Default);
+    rp3d::Collider* AddCollider(ColliderTag* colliderTag, float x, float y, float z);
     
     /// Add a collider from a mesh collider at the offset position x, y and z.
-    void AddCollider(MeshCollider* meshCollider, float x, float y, float z, LayerMask layer = LayerMask::Default);
+    rp3d::Collider* AddCollider(MeshCollider* meshCollider, float x, float y, float z);
     
     
     /// Set the rigid body mass.
@@ -187,8 +193,11 @@ private:
     // Cached component pointers, to avoid overhead from working with components internally
     void* mComponents[ EngineComponent::NumberOfComponents ];
     
-    // Reference to all the engine components.
+    // Reference to all the engine components
     ComponentTypeRegistry* mComponentRegistry;
+    
+    // Bit mask describing which components where added
+    uint64_t mComponentMask;
 };
 
 #endif

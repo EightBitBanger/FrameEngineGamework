@@ -31,11 +31,9 @@ public:
 
 
 struct ENGINE_API Index  {
-    
     unsigned int index;
-    
+    Index();
     Index(unsigned int value);
-    
 };
 
 
