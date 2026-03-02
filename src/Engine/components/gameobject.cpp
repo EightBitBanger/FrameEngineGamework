@@ -7,7 +7,8 @@ GameObject::GameObject() :
     isGarbage(false),
     renderDistance(-1),
     mUserData(nullptr),
-    mComponentRegistry(nullptr)
+    mComponentRegistry(nullptr),
+    mComponentMask(0)
 {
     for (unsigned int i=0; i < EngineComponent::NumberOfComponents; i++) mComponents[i] = nullptr;
 }
@@ -18,18 +19,23 @@ GameObject::GameObject() :
 
 void GameObject::AddComponent(Component* component) {
     mComponentList.push_back(component);
-    mComponents[component->GetType()] = component->GetComponent();
+    ComponentType typeID = component->GetType();
+    mComponentMask |= (1ULL << typeID);
+    mComponents[typeID] = component->GetComponent();
 }
 
 bool GameObject::RemoveComponent(Component* component) {
     for (std::vector<Component*>::iterator it = mComponentList.begin(); it != mComponentList.end(); ++it) {
-        Component* thisComponentPtr = *it;
+        Component* componentPtr = *it;
         
-        if (component != thisComponentPtr) 
+        if (component != componentPtr) 
             continue;
         
+        ComponentType typeID = component->GetType();
+        mComponentMask &= ~(1ULL << typeID);
+        
         mComponentList.erase(it);
-        mComponents[component->GetType()] = nullptr;
+        mComponents[typeID] = nullptr;
         return true;
     }
     return false;
@@ -54,6 +60,12 @@ glm::vec3 GameObject::GetPosition(void) {
     return transformCache->position;
 }
 
+glm::quat GameObject::GetRotation(void) {
+    Transform* transformCache = (Transform*)mComponents[EngineComponent::Transform];
+    if (transformCache == nullptr) return glm::quat(0.0f, 0.0f, 0.0f, 0.0f);
+    return transformCache->rotation;
+}
+
 void GameObject::SetPosition(float x, float y, float z) {
     Transform* transformCache = (Transform*)mComponents[EngineComponent::Transform];
     rp3d::RigidBody* rigidBodyCache = (rp3d::RigidBody*)mComponents[EngineComponent::RigidBody];
@@ -70,8 +82,28 @@ void GameObject::SetPosition(float x, float y, float z) {
     if (meshRendererCache != nullptr) meshRendererCache->transform.position = glm::vec3(x, y, z);
 }
 
-void GameObject::SetPosition(glm::vec3 newPosition) {
-    SetPosition(newPosition.x, newPosition.y, newPosition.z);
+void GameObject::SetRotation(float w, float x, float y, float z) {
+    Transform* transformCache = (Transform*)mComponents[EngineComponent::Transform];
+    rp3d::RigidBody* rigidBodyCache = (rp3d::RigidBody*)mComponents[EngineComponent::RigidBody];
+    if (transformCache != nullptr) 
+        transformCache->rotation = glm::quat(w, x, y, z);
+    if (rigidBodyCache != nullptr) {
+        rp3d::Quaternion rotation(w, x, y, z);
+        rp3d::Transform bodyTransform = rigidBodyCache->getTransform();
+        bodyTransform.setOrientation(rotation);
+        rigidBodyCache->setTransform(bodyTransform);
+    }
+    
+    MeshRenderer* meshRendererCache = (MeshRenderer*)mComponents[EngineComponent::MeshRenderer];
+    if (meshRendererCache != nullptr) meshRendererCache->transform.position = glm::vec3(x, y, z);
+}
+
+void GameObject::SetPosition(glm::vec3 position) {
+    SetPosition(position.x, position.y, position.z);
+}
+
+void GameObject::SetRotation(glm::quat orientation) {
+    SetRotation(orientation.w, orientation.x, orientation.y, orientation.z);
 }
 
 void GameObject::Activate(void) {
@@ -218,57 +250,49 @@ void GameObject::SetAngularAxisLockFactor(float x, float y, float z) {
     rigidBodyCache->setAngularLockAxisFactor(lockFactor);
 }
 
-void GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z, LayerMask layer) {
+rp3d::Collider* GameObject::AddColliderBox(rp3d::BoxShape* boxShape, float x, float y, float z) {
     rp3d::RigidBody* rigidBodyCache = (rp3d::RigidBody*)mComponents[EngineComponent::RigidBody];
-    if (rigidBodyCache == nullptr) return;
-    rp3d::Transform offsetTransform;
-    offsetTransform.setPosition(rp3d::Vector3(x, y, z));
-    rp3d::Collider* collider = rigidBodyCache->addCollider(boxShape, offsetTransform);
-    collider->setCollideWithMaskBits( (unsigned short)layer );
+    if (rigidBodyCache == nullptr) return nullptr;
+    rp3d::Transform transform;
+    transform.setPosition(rp3d::Vector3(x, y, z));
+    return rigidBodyCache->addCollider(boxShape, transform);
 }
 
-void GameObject::AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z, LayerMask layer) {
+rp3d::Collider* GameObject::AddColliderCapsule(rp3d::CapsuleShape* capsuleShape, float x, float y, float z) {
     rp3d::RigidBody* rigidBodyCache = (rp3d::RigidBody*)mComponents[EngineComponent::RigidBody];
-    if (rigidBodyCache == nullptr) return;
-    rp3d::Transform offsetTransform;
-    offsetTransform.setPosition(rp3d::Vector3(x, y, z));
-    rp3d::Collider* collider = rigidBodyCache->addCollider(capsuleShape, offsetTransform);
-    collider->setCollideWithMaskBits( (unsigned short)layer );
+    if (rigidBodyCache == nullptr) return nullptr;
+    rp3d::Transform transform;
+    transform.setPosition(rp3d::Vector3(x, y, z));
+    return rigidBodyCache->addCollider(capsuleShape, transform);
 }
 
-void GameObject::AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z, LayerMask layer) {
+rp3d::Collider* GameObject::AddColliderSphere(rp3d::SphereShape* sphereShape, float x, float y, float z) {
     rp3d::RigidBody* rigidBodyCache = (rp3d::RigidBody*)mComponents[EngineComponent::RigidBody];
-    if (rigidBodyCache == nullptr) return;
-    
-    rp3d::Transform offsetTransform;
-    offsetTransform.setPosition(rp3d::Vector3(x, y, z));
-    
-    rp3d::Collider* collider = rigidBodyCache->addCollider(sphereShape, offsetTransform);
-    collider->setCollideWithMaskBits( (unsigned short)layer );
+    if (rigidBodyCache == nullptr) return nullptr;
+    rp3d::Transform transform;
+    transform.setPosition(rp3d::Vector3(x, y, z));
+    return rigidBodyCache->addCollider(sphereShape, transform);
 }
 
-void GameObject::AddCollider(ColliderTag* colliderTag, float x, float y, float z, LayerMask layer) {
+rp3d::Collider* GameObject::AddCollider(ColliderTag* colliderTag, float x, float y, float z) {
     rp3d::RigidBody* rigidBodyCache = (rp3d::RigidBody*)mComponents[EngineComponent::RigidBody];
-    if (rigidBodyCache == nullptr) return;
+    if (rigidBodyCache == nullptr) return nullptr;
     if (colliderTag->isStatic) {
         rigidBodyCache->setType(rp3d::BodyType::STATIC);
     } else {
         rigidBodyCache->setType(rp3d::BodyType::DYNAMIC);
     }
-    rp3d::Transform offsetTransform;
-    offsetTransform.setPosition(rp3d::Vector3(x, y, z));
-    
-    rp3d::Collider* collider = rigidBodyCache->addCollider(colliderTag->colliderShape, offsetTransform);
-    collider->setCollideWithMaskBits( (unsigned short)layer );
+    rp3d::Transform transform;
+    transform.setPosition(rp3d::Vector3(x, y, z));
+    return rigidBodyCache->addCollider(colliderTag->colliderShape, transform);
 }
 
-void GameObject::AddCollider(MeshCollider* meshCollider, float x, float y, float z, LayerMask layer) {
+rp3d::Collider* GameObject::AddCollider(MeshCollider* meshCollider, float x, float y, float z) {
     rp3d::RigidBody* rigidBodyCache = (rp3d::RigidBody*)mComponents[EngineComponent::RigidBody];
-    if (rigidBodyCache == nullptr) return;
-    rp3d::Transform offsetTransform;
-    offsetTransform.setPosition(rp3d::Vector3(x, y, z));
-    rp3d::Collider* collider = rigidBodyCache->addCollider( meshCollider->heightFieldShape, offsetTransform );
-    collider->setCollideWithMaskBits( (unsigned short)layer );
+    if (rigidBodyCache == nullptr) return nullptr;
+    rp3d::Transform transform;
+    transform.setPosition(rp3d::Vector3(x, y, z));
+    return rigidBodyCache->addCollider( meshCollider->heightFieldShape, transform );
 }
 
 void GameObject::SetStatic(void) {

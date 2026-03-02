@@ -1,5 +1,6 @@
 #include <GameEngineFramework/Engine/Engine.h>
 extern EngineSystemManager Engine;
+extern ActorSystem AI;
 
 EngineSystemManager::EngineSystemManager(void) : 
     sceneMain(nullptr),
@@ -25,7 +26,7 @@ void* buildMeshRenderer(void) {return (void*)Renderer.CreateMeshRenderer();}
 void* buildCamera(void) {return (void*)Renderer.CreateCamera();}
 void* buildLight(void) {return (void*)Renderer.CreateLight();}
 void* buildScript(void) {return (void*)Scripting.CreateScript();}
-void* buildRigidBody(void) {return (void*)Physics.CreateRigidBody(0,0,0);}
+void* buildRigidBody(void) {return (void*)Physics.CreateRigidBody({0.0f,0.0f,0.0f});}
 void* buildActor(void) {return (void*)AI.CreateActor();}
 void* buildSound(void) {return (void*)Audio.CreateSound();}
 
@@ -48,7 +49,30 @@ void updateSound(unsigned int index) {Engine.UpdateAudio(index);}
 void updateTransform(unsigned int index) {Engine.UpdateTransforms(index);}
 void updateKinematics(unsigned int index) {Engine.UpdateKinematics(index);}
 
+// Object system function pointers
+void* rendererCreateMesh() {return (void*)Renderer.CreateMesh();}
+void* rendererCreateMaterial() {return (void*)Renderer.CreateMaterial();}
+void* rendererCreateShader() {return (void*)Renderer.CreateShader();}
+void* rendererCreateScene() {return (void*)Renderer.CreateScene();}
+void* rendererCreateCamera() {return (void*)Renderer.CreateCamera();}
+void* rendererCreateLight() {return (void*)Renderer.CreateLight();}
+void* rendererCreateMeshRenderer() {return (void*)Renderer.CreateMeshRenderer();}
 
+void rendererDestroyMesh(void* ptr) {Renderer.DestroyMesh((Mesh*)ptr);}
+void rendererDestroyMaterial(void* ptr) {Renderer.DestroyMaterial((Material*)ptr);}
+void rendererDestroyShader(void* ptr) {Renderer.DestroyShader((Shader*)ptr);}
+void rendererDestroyScene(void* ptr) {Renderer.DestroyScene((Scene*)ptr);}
+void rendererDestroyCamera(void* ptr) {Renderer.DestroyCamera((Camera*)ptr);}
+void rendererDestroyLight(void* ptr) {Renderer.DestroyLight((Light*)ptr);}
+void rendererDestroyMeshRenderer(void* ptr) {Renderer.DestroyMeshRenderer((MeshRenderer*)ptr);}
+
+void* scriptingCreateScript() {return (void*)Scripting.CreateScript();}
+void* aiCreateActor() {return (void*)AI.CreateActor();}
+void* audioCreateSound() {return (void*)Audio.CreateSound();}
+
+void scriptingDestroyScript(void* ptr) {Scripting.DestroyScript((Script*)ptr);}
+void aiDestroyActor(void* ptr) {AI.DestroyActor((Actor*)ptr);}
+void audioDestroySound(void* ptr) {Audio.DestroySound((Sound*)ptr);}
 
 
 void EngineSystemManager::Initiate() {
@@ -63,6 +87,22 @@ void EngineSystemManager::Initiate() {
     RegisterComponent<RigidBody>   (EngineComponent::RigidBody,    "RigidBody",    &buildRigidBody,    &destructRigidBody,    &updateRigidBody,    ComponentUpdateType::PerObject);
     RegisterComponent<Actor>       (EngineComponent::Actor,        "Actor",        &buildActor,        &destructActor,        &updateKinematics,   ComponentUpdateType::PerFrame);
     RegisterComponent<Sound>       (EngineComponent::Sound,        "Sound",        &buildSound,        &destructSound,        &updateSound,        ComponentUpdateType::PerObject);
+    
+    // Object types
+    unsigned int index=0;
+    RegisterObject<Mesh>(index, "Mesh", rendererCreateMesh, rendererDestroyMesh); index++;
+    RegisterObject<Material>(index, "Material", rendererCreateMaterial, rendererDestroyMaterial); index++;
+    RegisterObject<Shader>(index, "Shader", rendererCreateShader, rendererDestroyShader); index++;
+    RegisterObject<Scene>(index, "Scene", rendererCreateScene, rendererDestroyScene); index++;
+    RegisterObject<Camera>(index, "Camera", rendererCreateCamera, rendererDestroyCamera); index++;
+    RegisterObject<Light>(index, "Light", rendererCreateLight, rendererDestroyLight); index++;
+    RegisterObject<MeshRenderer>(index, "MeshRenderer", rendererCreateMeshRenderer, rendererDestroyMeshRenderer); index++;
+    
+    RegisterObject<Script>(index, "Script", scriptingCreateScript, scriptingDestroyScript); index++;
+    RegisterObject<rp3d::RigidBody>(index, "RigidBody", buildRigidBody, destructRigidBody); index++;
+    RegisterObject<Actor>(index, "Actor", aiCreateActor, aiDestroyActor); index++;
+    
+    RegisterObject<Sound>(index, "Sound", audioCreateSound, audioDestroySound); index++;
     
     // Initiate console
     console.input = UI.CreateTextField();
@@ -79,7 +119,6 @@ void EngineSystemManager::Initiate() {
         text->doFadeout = true;
         
         console.textElements.push_back(text);
-        
     }
     
     // Initiate dialog
@@ -101,68 +140,9 @@ void EngineSystemManager::Initiate() {
     console.doCloseConsoleAfterCommand = true;
     console.Disable();
     
-    // Load default shaders
-    shaders.texture       = Resources.CreateShaderFromTag("texture");
-    shaders.textureUnlit  = Resources.CreateShaderFromTag("textureUnlit");
-    shaders.color         = Resources.CreateShaderFromTag("color");
-    shaders.colorUnlit    = Resources.CreateShaderFromTag("colorUnlit");
-    shaders.UI            = Resources.CreateShaderFromTag("UI");
-    shaders.shadowCaster  = Resources.CreateShaderFromTag("shadowCaster");
-    shaders.sky           = Resources.CreateShaderFromTag("sky");
-    shaders.water         = Resources.CreateShaderFromTag("water");
-    
-    // Load default meshes
-    meshes.grass           = Resources.CreateMeshFromTag("grass");
-    meshes.grassHorz       = Resources.CreateMeshFromTag("grassHorz");
-    meshes.grassVert       = Resources.CreateMeshFromTag("grassVert");
-    
-    meshes.stemHorz        = Resources.CreateMeshFromTag("stemHorz");
-    meshes.stemVert        = Resources.CreateMeshFromTag("stemVert");
-    
-    meshes.wallHorizontal  = Resources.CreateMeshFromTag("wallh");
-    meshes.wallVertical    = Resources.CreateMeshFromTag("wallv");
-    
-    meshes.log             = Resources.CreateMeshFromTag("log");
-    meshes.leaf            = Resources.CreateMeshFromTag("leaf");
-    
-    meshes.cube            = Resources.CreateMeshFromTag("cube");
-    meshes.chunk           = Resources.CreateMeshFromTag("chunk");
-    meshes.plain           = Resources.CreateMeshFromTag("plain");
-    meshes.sphere          = Resources.CreateMeshFromTag("sphere");
-    
-    // Prevent the meshes from being garbage collected
-    meshes.grassHorz->isShared         = true;
-    meshes.grassVert->isShared         = true;
-    meshes.stemHorz->isShared          = true;
-    meshes.stemVert->isShared          = true;
-    meshes.wallHorizontal->isShared    = true;
-    meshes.wallVertical->isShared      = true;
-    meshes.log->isShared               = true;
-    
-    meshes.cube->isShared              = true;
-    meshes.chunk->isShared             = true;
-    meshes.plain->isShared             = true;
-    meshes.sphere->isShared            = true;
-    
     // Main world scene
     sceneMain = Create<Scene>();
     Renderer.AddSceneToRenderQueue( sceneMain );
-    
-    // Initiate render system defaults
-    Renderer.shaders.texture      = shaders.texture;
-    Renderer.shaders.textureUnlit = shaders.textureUnlit;
-    Renderer.shaders.color        = shaders.color;
-    Renderer.shaders.colorUnlit   = shaders.colorUnlit;
-    Renderer.shaders.UI           = shaders.UI;
-    Renderer.shaders.shadowCaster = shaders.shadowCaster;
-    Renderer.shaders.sky          = shaders.sky;
-    
-    Renderer.meshes.cube            = meshes.cube;
-    Renderer.meshes.chunk           = meshes.chunk;
-    Renderer.meshes.plain           = meshes.plain;
-    Renderer.meshes.sphere          = meshes.sphere;
-    Renderer.meshes.wallHorizontal  = meshes.wallHorizontal;
-    Renderer.meshes.wallVertical    = meshes.wallVertical;
     
     // Initiate overlay scene
     sceneOverlay = Create<Scene>();
@@ -180,17 +160,8 @@ void EngineSystemManager::Initiate() {
 }
 
 void EngineSystemManager::Shutdown(void) {
-    
     Destroy<Scene>(sceneMain);
-    
     Destroy<Scene>(sceneOverlay);
-    
-    Renderer.DestroyShader(shaders.texture);
-    Renderer.DestroyShader(shaders.textureUnlit);
-    Renderer.DestroyShader(shaders.color);
-    Renderer.DestroyShader(shaders.colorUnlit);
-    Renderer.DestroyShader(shaders.UI);
-    Renderer.DestroyShader(shaders.shadowCaster);
 }
 
 
@@ -217,29 +188,12 @@ unsigned int EngineSystemManager::GetStreamSize(void) {
     return mStreamSize;
 }
 
-rp3d::BoxShape* EngineSystemManager::GetColliderBox(glm::vec3 extents) {
-    for (unsigned int i=0; i < mBoxCollider.size(); i++) {
-        rp3d::BoxShape* colliderShape = mBoxCollider[i];
-        rp3d::Vector3 extentItem = colliderShape->getHalfExtents();
-        if (extentItem.x == extents.x && 
-            extentItem.y == extents.y && 
-            extentItem.z == extents.z) 
-            return colliderShape;
-    }
-    rp3d::Vector3 newExtent(extents.x, extents.y, extents.z);
-    rp3d::BoxShape* colliderShape = Physics.common.createBoxShape(newExtent);
-    
-    mBoxCollider.push_back( colliderShape );
-    return colliderShape;
-}
-
 
 //
 // Physics debug renderer
 //
 
 void EngineSystemManager::EnablePhysicsDebugRenderer(void) {
-    
     usePhysicsDebugRenderer = true;
     
     Physics.world->setIsDebugRenderingEnabled(true);
@@ -256,17 +210,16 @@ void EngineSystemManager::EnablePhysicsDebugRenderer(void) {
     Material* debugMaterialLines = Create<Material>();
     Material* debugMaterialMesh  = Create<Material>();
     
-    debugMaterialLines->shader = shaders.colorUnlit;
+    debugMaterialLines->shader = Resources.shaders.colorUnlit;
     debugMaterialLines->ambient = Colors.white;
     debugMaterialLines->diffuse = Colors.white;
     
-    debugMaterialMesh->shader = shaders.colorUnlit;
+    debugMaterialMesh->shader = Resources.shaders.colorUnlit;
     debugMaterialMesh->ambient = Colors.white;
     debugMaterialMesh->diffuse = Colors.white;
     
     debugLines->SetPrimitive( MESH_LINES );
     debugMesh->SetPrimitive( MESH_LINES );
-    
     
     debugLinesGameObject = Create<GameObject>();
     debugMeshGameObject = Create<GameObject>();

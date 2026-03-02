@@ -1,111 +1,135 @@
 #include <GameEngineFramework/Engine/Engine.h>
+extern EngineSystemManager Engine;
 
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Math/Random.h>
 
 void ActorSystem::UpdateActorState(Actor* actor) {
-    actor->physical.mAge++;
-    if (actor->state.mode != ActorState::Mode::Idle) 
-        return;
+    float decayMul = 0.0f;
     
-    if (Random.Range(0, 100) > 80) 
-        if (HandleWalkState(actor)) 
-            return;
+    float fear      = actor->emotions.GetFear() * decayMul;
+    float anger     = actor->emotions.GetAnger() * decayMul;
+    float comfort   = actor->emotions.GetComfort() * decayMul;
+    float curiosity = actor->emotions.GetCuriosity() * decayMul;
+    float fatigue   = actor->emotions.GetFatigue() * decayMul;
+    float stress    = actor->emotions.GetStress() * decayMul;
+    float libido    = actor->emotions.GetLibido() * decayMul;
     
-    if (actor->navigation.mTargetActor == nullptr) 
-        return;
     
-    float distanceToProximityTarget = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition);
-    actor->navigation.mDistanceToTarget = distanceToProximityTarget;
+    // Handle actions
     
-    if (HandleAttackState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
-        return;
-    if (HandleFleeState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
-        return;
+    const std::string& styleString = actor->memories.mMemories["action"];
+    if (styleString != "") {
+        std::vector<std::string> styleSplit = String.Explode(styleString, ',');
+        
+        for (unsigned int i=0; i < styleSplit.size(); i++) {
+            String.RemoveWhiteSpace( styleSplit[i] );
+            
+            std::vector<std::string> amount = String.Explode(styleSplit[i], ':');
+            if (amount.empty()) 
+                continue;
+            
+            if (amount[0] == "curiosity") {
+                if (amount.size() == 2) {
+                    float chance = String.ToFloat(amount[1]);
+                    if (Random.Range(0.0f, 1.0f) < glm::pow(chance, 4.0f)) {
+                        curiosity = glm::max(curiosity, chance);
+                    }
+                }
+            }
+            
+            if (amount[0] == "speak") {
+                if (amount.size() == 3) {
+                    float chance = String.ToFloat(amount[2]);
+                    
+                    if (Random.Range(0.0f, 1.0f) < glm::pow(chance, 4.0f)) {
+                        Sound* voice = actor->voice.GetVoice(amount[1]);
+                        Playback* playback;
+                        if (voice != nullptr) {
+                            playback = Audio.Play(voice);
+                            playback->isGarbage = true;
+                        }
+                    }
+                }
+            }
+            
+        }
+    }
     
-    if (Random.Range(0, 100) > 80) 
-        if (HandleFocusState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
-            return;
+    // Handle nearby actors
     
-    if (Random.Range(0, 100) > 80) 
-        if (HandleBreedingState(actor, actor->navigation.mTargetActor, distanceToProximityTarget)) 
-            return;
+    unsigned int numberOfTargets = actor->mTargets.size();
+    for (unsigned int i=0; i < numberOfTargets; i++) {
+        Actor* targetActor = actor->mTargets[i];
+        if (!targetActor->isActive || targetActor->isGarbage) 
+            continue;
+        
+        const std::string& targetName = targetActor->GetName();
+        const std::string& memory = actor->memories.mMemories[targetName];
+        
+        if (memory != "") {
+            
+            std::vector<std::string> memories = String.Explode(memory, ',');
+            for (unsigned int i=0; i < memories.size(); i++) {
+                std::vector<std::string> amount = String.Explode(memories[i], ':');
+                if (amount.size() == 2) {
+                    if (amount[0] == "fear")      fear      = glm::max(fear,      String.ToFloat(amount[1]));
+                    if (amount[0] == "anger")     anger     = glm::max(anger,     String.ToFloat(amount[1]));
+                    if (amount[0] == "comfort")   comfort   = glm::max(comfort,   String.ToFloat(amount[1]));
+                    if (amount[0] == "curiosity") curiosity = glm::max(curiosity, String.ToFloat(amount[1]));
+                    if (amount[0] == "fatigue")   fatigue   = glm::max(fatigue,   String.ToFloat(amount[1]));
+                    if (amount[0] == "stress")    stress    = glm::max(stress,    String.ToFloat(amount[1]));
+                    if (amount[0] == "libido")    libido    = glm::max(libido,    String.ToFloat(amount[1]));
+                }
+            }
+            
+            // Apply emotional state
+            actor->emotions.SetFear( fear );
+            actor->emotions.SetAnger( anger );
+            actor->emotions.SetComfort( comfort );
+            actor->emotions.SetCuriosity( curiosity );
+            actor->emotions.SetFatigue( fatigue );
+            actor->emotions.SetStress( stress );
+            actor->emotions.SetLibido( libido );
+        }
+        
+        // Handle emotional state
+        
+        if (anger > fear) {
+            if (anger > 0.0f) {
+                if (Random.Range(0.0f, 1.0f) < anger) {
+                    if (actor->counters.mAttackCoolDownCounter == 0) {
+                        actor->state.mode = ActorState::Mode::MoveAttack;
+                        actor->navigation.mTargetActor = targetActor;
+                    }
+                }
+                break;
+            }
+        } else {
+            if (Random.Range(0.0f, 1.0f) < fear) {
+                if (fear > 0.0f) {
+                    actor->state.mode = ActorState::Mode::MoveFlee;
+                    actor->navigation.mTargetActor = targetActor;
+                    break;
+                }
+            }
+        }
+        
+        if (curiosity > 0.0f && anger == 0.0f && fear == 0.0f) {
+            if (Random.Range(0.0f, 1.0f) < curiosity) {
+                actor->state.mode = ActorState::Mode::MoveRandom;
+                
+            } else if (Random.Range(0.0f, 1.0f) < curiosity) {
+                if (actor->state.mode == ActorState::Mode::Idle)
+                    actor->state.mode = ActorState::Mode::MoveRandom;
+                break;
+            }
+        }
+    }
 }
 
-bool ActorSystem::HandleWalkState(Actor* actor) {
-    if (actor->state.current == ActorState::State::Attack || 
-        actor->state.current == ActorState::State::Flee || 
-        actor->state.mode != ActorState::Mode::Idle) 
-        return false;
-    actor->state.current = ActorState::State::None;
-    actor->state.mode    = ActorState::Mode::MoveRandom;
-    return true;
-}
-
-bool ActorSystem::HandleAttackState(Actor* actor, Actor* target, float distance) {
-    if (actor->counters.mAttackCoolDownCounter > 0) 
-        return false;
-    
-    // Actor must be a predator
-    if (!actor->behavior.mIsPredator) {
-        actor->state.current = ActorState::State::None;
-        return false;
-    }
-    
-    // Target must be prey
-    if (!target->behavior.mIsPrey) {
-        actor->state.current = ActorState::State::None;
-        return false;
-    }
-    
-    // Check attack distance
-    if (distance > actor->behavior.GetDistanceToAttack()) {
-        actor->state.mode    = ActorState::Mode::Idle;
-        actor->state.current = ActorState::State::None;
-        return false;
-    }
-    
-    // Attack the target
-    actor->state.mode    = ActorState::Mode::RunTo;
-    actor->state.current = ActorState::State::Attack;
-    
-    target->state.mode    = ActorState::Mode::RunTo;
-    target->state.current = ActorState::State::Attack;
-    
-    actor->navigation.mTargetActor = target;
-    target->navigation.mTargetActor = actor;
-    return true;
-}
-
-
-bool ActorSystem::HandleFleeState(Actor* actor, Actor* target, float distance) {
-    // Actor must be prey
-    if (!actor->behavior.mIsPrey) {
-        actor->state.current = ActorState::State::None;
-        return false;
-    }
-    
-    // Target must be a predator
-    if (!target->behavior.mIsPredator) {
-        actor->state.current = ActorState::State::None;
-        return false;
-    }
-    
-    // Check flee distance
-    if (distance > actor->behavior.GetDistanceToFlee()) {
-        actor->state.mode    = ActorState::Mode::Idle;
-        actor->state.current = ActorState::State::None;
-        return false;
-    }
-    
-    // Target should flee
-    actor->state.mode    = ActorState::Mode::RunTo;
-    actor->state.current = ActorState::State::Flee;
-    return true;
-}
-
-
+/*
 bool ActorSystem::HandleFocusState(Actor* actor, Actor* target, float distance) {
     // Observation cool down
     if (actor->counters.mObservationCoolDownCounter > 0) return false;
@@ -157,20 +181,30 @@ bool ActorSystem::HandleBreedingState(Actor* actor, Actor* target, float distanc
     target->navigation.mTargetActor = actor;
     return true;
 }
-
+*/
 
 void ActorSystem::UpdateProximityList(Actor* actor) {
-    // Is the actor engaging with its target
+    /*
+    // Ignore if the actor is engaging with its target
     if (actor->state.current == ActorState::State::Attack || 
         actor->state.current == ActorState::State::Flee || 
         actor->state.current == ActorState::State::Observe) 
         return;
     
-    // Select a random actor
-    unsigned int index = Random.Range((unsigned int)0, mActors.Size()-1);
-    if (index >= mActors.Size()) 
+    if (actor->navigation.mTargetActor != nullptr) 
         return;
-    Actor* targetActor = mActors[index];
+    
+    std::vector<Actor*> actorList;
+    for (unsigned int i=0; i < mActiveActors.size(); i++) {
+        mActiveActors;
+        
+        // Select a random actor
+        
+        unsigned int index = Random.Range((unsigned int)0, mActors.Size()-1);
+        if (index >= mActors.Size()) 
+            return;
+    }
+    //Actor* targetActor = mActors[index];
     
     if (!targetActor->isActive || targetActor->isGarbage) 
         return;
@@ -185,35 +219,6 @@ void ActorSystem::UpdateProximityList(Actor* actor) {
     
     // Target the actor
     actor->navigation.mTargetActor = targetActor;
-}
-
-
-void ActorSystem::UpdateActorMemories(Actor* actor) {
-    unsigned int numberOfMemores = actor->memories.GetNumberOfMemories();
-    
-    for (unsigned int i=0; i < numberOfMemores; i++) {
-        std::string name = actor->memories.GetMemoryNameByIndex(i);
-        
-        // Stay nearby a home position in the world
-        if (name == "home") {
-            std::string value = actor->memories.GetMemoryValueByIndex(i);
-            
-            std::vector<std::string> split = String.Explode(value, ',');
-            if (split.size() == 3) {
-                glm::vec3 homePosition;
-                homePosition.x = String.ToFloat(split[0]);
-                homePosition.y = String.ToFloat(split[1]);
-                homePosition.z = String.ToFloat(split[2]);
-                
-                if (glm::distance(actor->navigation.mPosition, homePosition) > actor->behavior.mDistanceToWalk) {
-                    actor->navigation.mTargetPoint = homePosition;
-                    
-                    actor->state.current = ActorState::State::None;
-                    actor->state.mode = ActorState::Mode::MoveTo;
-                }
-                continue;
-            }
-        }
-    }
+    */
 }
 

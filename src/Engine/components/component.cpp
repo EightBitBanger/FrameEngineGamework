@@ -1,11 +1,9 @@
 #include <GameEngineFramework/Engine/components/component.h>
 
 Component::Component() : 
-    name(""),
     mType(0),
     mObject(nullptr)
-{
-}
+{}
 
 void* Component::GetComponent(void) {
     return mObject;

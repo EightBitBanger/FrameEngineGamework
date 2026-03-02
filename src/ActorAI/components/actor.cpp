@@ -8,15 +8,19 @@ Actor::Actor() :
     isGarbage(false),
     isActive(false),
     isSaved(false),
-    mName("")
-{
-}
+    mName(""),
+    mBoundingBoxMin(-0.5f, -0.5f, -0.5f),
+    mBoundingBoxMax(0.5f, 0.5f, 0.5f)
+{}
 
 void Actor::Reset(void) {
     isGarbage = false;
     isActive = false;
     isSaved = false;
     mName = "";
+    
+    mBoundingBoxMin = {-0.5f, -0.5f, -0.5f};
+    mBoundingBoxMax = {0.5f, 0.5f, 0.5f};
     
     // Navigation
     navigation.mVelocity      = glm::vec3(0);
@@ -48,7 +52,6 @@ void Actor::Reset(void) {
     
     // State
     state.mode          = ActorState::Mode::Idle;
-    state.current       = ActorState::State::None;
     state.mIsWalking    = false;
     state.mIsRunning    = false;
     state.mIsFacing     = true;
@@ -69,6 +72,15 @@ void Actor::Reset(void) {
     biological.defense   = 0.0f;
     biological.strength  = 1.0f;
     
+    // Emotions
+    emotions.mFear = 0.0f;
+    emotions.mAnger = 0.0f;
+    emotions.mFatigue = 0.0f;
+    emotions.mStress = 0.0f;
+    emotions.mCuriosity = 0.0f;
+    emotions.mComfort = 0.0f;
+    emotions.mLibido = 0.0f;
+    
     // Physical
     physical.mAge            = 0;
     physical.mAgeAdult       = 1000.0f;
@@ -80,10 +92,6 @@ void Actor::Reset(void) {
     physical.mYouthScale     = 0.5f;
     physical.mAdultScale     = 1.0f;
     physical.mSexualOrientation = false;
-    physical.mDoUpdateCollider = false;
-    physical.mColliderOffset = glm::vec3(0, 0.5f, 0);
-    physical.mColliderScale  = glm::vec3(0.5f, 0.5f, 0.5f);
-    physical.mColliderBody = nullptr;
     
     // Cool-down timers
     counters.mObservationCoolDownCounter = 0;
@@ -134,7 +142,6 @@ Actor::Behavior::Behavior() :
 
 Actor::State::State() : 
     mode(ActorState::Mode::Idle),
-    current(ActorState::State::None),
     mIsWalking(false),
     mIsRunning(false),
     mIsFacing(false)
@@ -144,6 +151,16 @@ Actor::State::State() :
 Actor::IdiosyncraticCharacteristics::IdiosyncraticCharacteristics() 
 {
 }
+
+Actor::EmotionalState::EmotionalState() : 
+    mFear(0.0f),
+    mAnger(0.0f),
+    mFatigue(0.0f),
+    mStress(0.0f),
+    mCuriosity(0.0f),
+    mComfort(0.0f),
+    mLibido(0.0f)
+{}
 
 Actor::PhysicalAttributes::PhysicalAttributes() : 
     mAge(0),
@@ -155,11 +172,7 @@ Actor::PhysicalAttributes::PhysicalAttributes() :
     mSnapSpeed(0.07f),
     mYouthScale(1),
     mAdultScale(1),
-    mSexualOrientation(false),
-    mDoUpdateCollider(false),
-    mColliderOffset(glm::vec3(0, 0.5f, 0)),
-    mColliderScale(glm::vec3(0.5f, 0.5f, 0.5f)),
-    mColliderBody(nullptr)
+    mSexualOrientation(false)
 {
 }
 
@@ -194,17 +207,18 @@ Actor::UserVariables::UserVariables() :
 }
 
 
-void Actor::SetName(std::string newName) {
+void Actor::SetName(const std::string& newName) {
     mName = newName;
+}
+
+const std::string& Actor::GetName(void) {
+    return mName;
 }
 
 void Actor::RebuildGeneticExpression(void) {
     genetics.mDoReexpressGenetics = true;
 }
 
-std::string Actor::GetName(void) {
-    return mName;
-}
 
 
 //
@@ -341,20 +355,32 @@ bool Actor::Behavior::GetPreyState(void) {
     return mIsPrey;
 }
 
+//
+// Voice
+
+void Actor::VocalSynthesizer::AddVoice(const std::string& name, Sound* sound) {
+    if (name == "") 
+        return;
+    mVocals[name] = sound;
+}
+
+Sound* Actor::VocalSynthesizer::GetVoice(const std::string& name) {
+    return mVocals[name];
+}
 
 //
 // Memories
 
-void Actor::IdiosyncraticCharacteristics::Add(std::string name, std::string memory) {
+void Actor::IdiosyncraticCharacteristics::Add(const std::string& name, const std::string& memory) {
     mMemories[name] = memory;
 }
 
-bool Actor::IdiosyncraticCharacteristics::Remove(std::string name) {
+bool Actor::IdiosyncraticCharacteristics::Remove(const std::string& name) {
     mMemories.erase(name);
     return false;
 }
 
-std::string Actor::IdiosyncraticCharacteristics::Get(std::string name) {
+std::string Actor::IdiosyncraticCharacteristics::Get(const std::string& name) {
     return mMemories[name];
 }
 
@@ -386,7 +412,7 @@ void Actor::IdiosyncraticCharacteristics::Clear(void) {
     mMemories.clear();
 }
 
-bool Actor::IdiosyncraticCharacteristics::CheckExists(std::string name) {
+bool Actor::IdiosyncraticCharacteristics::CheckExists(const std::string& name) {
     std::unordered_map<std::string, std::string>::iterator it = mMemories.find(name);
     if (it != mMemories.end()) 
         return true;
@@ -451,6 +477,99 @@ MeshRenderer* Actor::GeneticsSystem::GetMeshRendererAtIndex(unsigned int index) 
     if (index < mGeneticRenderers.size()) 
         return mGeneticRenderers[index];
     return nullptr;
+}
+
+//
+// Emotional state
+
+void Actor::EmotionalState::SetFear(float fear) {
+    mFear = fear;
+}
+
+float Actor::EmotionalState::GetFear(void) {
+    return mFear;
+}
+
+void Actor::EmotionalState::AddFear(float additive) {
+    mFear += additive;
+}
+
+
+void Actor::EmotionalState::SetAnger(float anger) {
+    mAnger = anger;
+}
+
+float Actor::EmotionalState::GetAnger(void) {
+    return mAnger;
+}
+
+void Actor::EmotionalState::AddAnger(float additive) {
+    mAnger += additive;
+}
+
+
+void Actor::EmotionalState::SetFatigue(float fatigue) {
+    mFatigue = fatigue;
+}
+
+float Actor::EmotionalState::GetFatigue(void) {
+    return mFatigue;
+}
+
+void Actor::EmotionalState::AddFatigue(float additive) {
+    mFatigue += additive;
+}
+
+
+void Actor::EmotionalState::SetStress(float stress) {
+    mStress = stress;
+}
+
+float Actor::EmotionalState::GetStress(void) {
+    return mStress;
+}
+
+void Actor::EmotionalState::AddStress(float additive) {
+    mStress += additive;
+}
+
+
+void Actor::EmotionalState::SetCuriosity(float curiosity) {
+    mCuriosity = curiosity;
+}
+
+float Actor::EmotionalState::GetCuriosity(void) {
+    return mCuriosity;
+}
+
+void Actor::EmotionalState::AddCuriosity(float additive) {
+    mCuriosity += additive;
+}
+
+
+void Actor::EmotionalState::SetComfort(float comfort) {
+    mComfort = comfort;
+}
+
+float Actor::EmotionalState::GetComfort(void) {
+    return mComfort;
+}
+
+void Actor::EmotionalState::AddComfort(float additive) {
+    mComfort += additive;
+}
+
+
+void Actor::EmotionalState::SetLibido(float libido) {
+    mLibido = libido;
+}
+
+float Actor::EmotionalState::GetLibido(void) {
+    return mLibido;
+}
+
+void Actor::EmotionalState::AddLibido(float additive) {
+    mLibido += additive;
 }
 
 
@@ -529,18 +648,6 @@ bool Actor::PhysicalAttributes::GetSexualOrientation(void) {
     return mSexualOrientation;
 }
 
-void Actor::PhysicalAttributes::UpdatePhysicalCollider(void) {
-    mDoUpdateCollider = true;
-}
-
-void Actor::PhysicalAttributes::SetColliderScale(glm::vec3 extents) {
-    mColliderScale = extents;
-}
-
-void Actor::PhysicalAttributes::SetColliderOffset(glm::vec3 offset) {
-    mColliderOffset = offset;
-}
-
 
 //
 // Cool down counters
@@ -577,14 +684,6 @@ unsigned int Actor::CooldownCounters::GetCoolDownBreeding(void) {
 //
 // User assignable variables
 
-void Actor::UserVariables::SetUserBitmask(uint8_t bitmask) {
-    mBitmask = bitmask;
-}
-
-uint8_t Actor::UserVariables::GetUserBitmask(void) {
-    return mBitmask;
-}
-
 void Actor::UserVariables::SetUserDataA(void* ptr) {
     mUserDataA = ptr;
 }
@@ -600,3 +699,146 @@ void Actor::UserVariables::SetUserDataB(void* ptr) {
 void* Actor::UserVariables::GetUserDataB(void) {
     return mUserDataB;
 }
+
+// Bounding box
+
+void Actor::SetBoundingBox(const glm::vec3& min, const glm::vec3& max) {
+    mBoundingBoxMin = min;
+    mBoundingBoxMax = max;
+}
+
+glm::vec3 Actor::GetBoundingBoxMin(void) {
+    return mBoundingBoxMin;
+}
+
+glm::vec3 Actor::GetBoundingBoxMax(void) {
+    return mBoundingBoxMax;
+}
+
+// Update
+
+void Actor::UpdateBoundingBoxFromGenome(void) {
+    unsigned int geneCount = genetics.mGenes.size();
+    if (geneCount == 0) {
+        SetBoundingBox(glm::vec3(-0.3f, -0.3f, -0.3f), glm::vec3(0.3f, 0.3f, 0.3f));
+        return;
+    }
+    
+    // Per-gene base mesh local bounds at scale = 1.
+    // Using [-0.5..0.5] fixes the "twice as tall" symptom if the source mesh is unit-sized.
+    glm::vec3 baseMin(-0.5f, -0.5f, -0.5f);
+    glm::vec3 baseMax( 0.5f,  0.5f,  0.5f);
+    
+    bool hasAny = false;
+    
+    glm::vec3 finalMin(0.0f);
+    glm::vec3 finalMax(0.0f);
+    
+    bool sexualOrientation = physical.GetSexualOrientation();
+    
+    for (unsigned int a = 0; a < geneCount; a++) {
+        
+        Gene& gene = genetics.mGenes[a];
+        
+        if (!gene.doExpress)
+            continue;
+        
+        if (gene.type != EXPRESSION_TYPE_BASE) {
+            if ((gene.type == EXPRESSION_TYPE_MALE   && sexualOrientation == false) ||
+                (gene.type == EXPRESSION_TYPE_FEMALE && sexualOrientation == true)) {
+                continue;
+            }
+            
+            if (physical.mAge < gene.expressionAge)
+                continue;
+        }
+        
+        glm::vec3 targetScale;
+        if (gene.scaleIndex == 0) {
+            targetScale = gene.scale.ToVec3();
+        } else {
+            unsigned int scaleIndex = gene.scaleIndex - 1;
+            if (scaleIndex < geneCount) {
+                targetScale = genetics.mGenes[scaleIndex].scale.ToVec3();
+            } else {
+                targetScale = gene.scale.ToVec3();
+            }
+        }
+        targetScale = glm::clamp(targetScale, 0.0f, 2.0f);
+        
+        if (gene.type != EXPRESSION_TYPE_BASE) {
+            
+            float expressionFactor = gene.expressionFactor;
+            
+            if (a < genetics.mPhen.size()) {
+                genetics.mPhen[a].scale.x = expressionFactor;
+                genetics.mPhen[a].scale.y = expressionFactor;
+                genetics.mPhen[a].scale.z = expressionFactor;
+            }
+            
+            float maxUniformScale = gene.expressionMax;
+            
+            glm::vec3 phenScale(1.0f);
+            if (a < genetics.mPhen.size()) {
+                phenScale = glm::vec3(genetics.mPhen[a].scale.x,
+                                      genetics.mPhen[a].scale.y,
+                                      genetics.mPhen[a].scale.z);
+            }
+            
+            targetScale *= glm::clamp(phenScale, 0.0f, maxUniformScale);
+        }
+        
+        if (gene.attachmentIndex > 0) {
+            unsigned int attachmentIndex = gene.attachmentIndex - 1;
+            if (attachmentIndex < geneCount) {
+                gene.offset = genetics.mGenes[attachmentIndex].offset;
+            }
+        }
+        
+        glm::vec3 localPos = gene.position.ToVec3() + gene.offset.ToVec3();
+        
+        glm::vec3 scaledMin = baseMin * targetScale;
+        glm::vec3 scaledMax = baseMax * targetScale;
+        
+        glm::vec3 geneMin = glm::min(scaledMin, scaledMax) + localPos;
+        glm::vec3 geneMax = glm::max(scaledMin, scaledMax) + localPos;
+        
+        if (!hasAny) {
+            finalMin = geneMin;
+            finalMax = geneMax;
+            hasAny   = true;
+        } else {
+            finalMin = glm::min(finalMin, geneMin);
+            finalMax = glm::max(finalMax, geneMax);
+        }
+    }
+    
+    if (!hasAny) {
+        SetBoundingBox(glm::vec3(-0.3f, -0.3f, -0.3f), glm::vec3(0.3f, 0.3f, 0.3f));
+        return;
+    }
+    
+    // Make X/Z square while preserving center and Y extents.
+    {
+        glm::vec3 center   = (finalMin + finalMax) * 0.5f;
+        glm::vec3 halfSize = (finalMax - finalMin) * 0.5f;
+        
+        float halfXZ = (halfSize.x > halfSize.z) ? halfSize.x : halfSize.z;
+        halfSize.x = halfXZ;
+        halfSize.z = halfXZ;
+        
+        finalMin = center - halfSize;
+        finalMax = center + halfSize;
+    }
+    
+    const float padding = 0.002f;
+    finalMin -= glm::vec3(padding);
+    finalMax += glm::vec3(padding);
+    
+    glm::vec3 finalScale(0.75f, 0.5f, 0.75f);
+    finalMin *= finalScale;
+    finalMax *= finalScale;
+    
+    SetBoundingBox(finalMin, finalMax);
+}
+

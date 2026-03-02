@@ -13,7 +13,6 @@ void EngineSystemManager::UpdateComponentStream(void) {
         mObjectIndex = i;
         GameObject* gameObject = mGameObjects[mObjectIndex];
         
-        // Guard transform before use
         bool doUpdate = true;
         Transform* transformCache = (Transform*)gameObject->mComponents[EngineComponent::Transform];
         if (sceneMain && sceneMain->camera && gameObject->renderDistance > 0 && transformCache) {
@@ -26,31 +25,30 @@ void EngineSystemManager::UpdateComponentStream(void) {
         Light*           lightCache        = (Light*)gameObject->mComponents[EngineComponent::Light];
         rp3d::RigidBody* rigidBodyCache    = (rp3d::RigidBody*)gameObject->mComponents[EngineComponent::RigidBody];
         
-        bool activeState = gameObject->isActive && doUpdate;
+        bool activeState = gameObject->isActive && doUpdate && !gameObject->isGarbage;
         if (meshRendererCache)  meshRendererCache->isActive = activeState;
         if (lightCache)         lightCache->isActive = activeState;
         if (rigidBodyCache)     rigidBodyCache->setIsActive(activeState);
         
-        if (gameObject->isGarbage) garbageObjects.push_back(gameObject);
-        if (!gameObject->isActive || !doUpdate) continue;
+        if (gameObject->isGarbage) 
+            garbageObjects.push_back(gameObject);
+        
+        if (!activeState) 
+            continue;
         
         // Grow the stream buffer
         if (mDataStreamIndex >= mStreamBuffer.size()) 
             mStreamBuffer.emplace_back();
         
         // Set buffer stream object and components
-        auto& slot = mStreamBuffer[mDataStreamIndex];
+        ComponentDataStreamBuffer& slot = mStreamBuffer[mDataStreamIndex];
         
-        // Clear old pointers
-        slot.gameObject = nullptr;
-        for (unsigned int c = 0; c < EngineComponent::NumberOfComponents; ++c) {
-            slot.components[c] = nullptr;
-        }
-        
+        // Set the object and its components
         slot.gameObject = gameObject;
-        for (unsigned int c = 0; c < EngineComponent::NumberOfComponents; ++c) {
-            if (gameObject->mComponents[c]) slot.components[c] = gameObject->mComponents[c];
-        }
+        for (unsigned int c = 0; c < EngineComponent::NumberOfComponents; ++c) 
+            slot.components[c] = gameObject->mComponents[c];
+        
+        slot.componentMask = gameObject->mComponentMask;
         
         mDataStreamIndex++;
         

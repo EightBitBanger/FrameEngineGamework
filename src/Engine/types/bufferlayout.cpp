@@ -44,8 +44,6 @@ void Vertex::operator+= (const Vertex& vertex) {
     v += vertex.v;
 }
 
-Index::Index(unsigned int value) : 
-    
-    index(value)
-{
-}
+Index::Index() : index(0) {}
+
+Index::Index(unsigned int value) : index(value) {}

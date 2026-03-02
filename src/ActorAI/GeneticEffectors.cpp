@@ -484,7 +484,7 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
             
             // Color
             if (gene.colorIndex > 0) {
-                unsigned int j = gene.colorIndex - 1; // 1-based -> 0-based
+                unsigned int j = gene.colorIndex - 1;
                 if (j < numberOfGenes && j != i) {
                     Gene& parent = offspring->genetics.mGenes[j];
                     // Copy parent color
@@ -497,7 +497,7 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
                         wasChanged = true;
                     }
                 } else {
-                    // Bad reference -> disable inheritance
+                    // Bad reference: disable inheritance
                     gene.colorIndex = 0;
                 }
             }
@@ -517,7 +517,7 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
                         wasChanged = true;
                     }
                 } else {
-                    // Bad reference -> disable inheritance
+                    // Bad reference: disable inheritance
                     gene.scaleIndex = 0;
                 }
             }

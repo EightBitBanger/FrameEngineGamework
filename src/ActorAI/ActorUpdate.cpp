@@ -35,24 +35,36 @@ void ActorSystem::UpdateFast() {
         if (actor->isGarbage || !actor->isActive) 
             continue;
         
+        float distance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
+        
+        // Genetic expression update
         UpdateActorGenetics(actor);
         ExpressActorGenetics(actor);
+        
+        // Update actor mechanical / locomotion
+        HandleMovementMechanics(actor);
+        
+        // Process nearby actors
+        HandleTargettingMechanics(actor);
+        
+        // Target tracking orientations
+        UpdateTargetRotation(actor);
         
         // Cycle the animation states
         UpdateAnimationState(actor);
         
-        // Target tracking orientations
-        UpdateTargetRotation(actor);
-        HandleMovementMechanics(actor);
-        
-        // Update actor mechanical / locomotion state
-        HandleMovementMechanics(actor);
-        HandleTargettingMechanics(actor);
-        
+        // Handle death and health effects
         HandleVitality(actor);
+        
+        if (distance > mActorUpdateDistance) 
+            continue;
+        
+        UpdateActorState(actor);
+        
     }
 }
 
+float counter=0.0f;
 
 void ActorSystem::UpdateTick() {
     unsigned int numberOfActors = mActors.Size();
@@ -67,12 +79,22 @@ void ActorSystem::UpdateTick() {
         if (distance > mActorUpdateDistance) 
             continue;
         
-        UpdateProximityList(actor);
-        UpdateActorState(actor);
-        
-        UpdateActorMemories(actor);
+        actor->physical.mAge++;
         
         HandleCooldownCounters(actor);
+        
+        UpdateProximityList(actor);
+        
+        HandleHomeLocation(actor);
+        
+        unsigned int numberOfGenes = actor->genetics.GetNumberOfGenes();
+        for (unsigned int a=0; a < numberOfGenes; a++) {
+            
+            // Trigger physical expression if the expression age was achieved
+            if (actor->physical.mAge == actor->genetics.mGenes[a].expressionAge) 
+                actor->RebuildGeneticExpression();
+        }
+        
     }
     
     // Garbage collection pass

@@ -18,10 +18,11 @@ void EngineSystemManager::UpdateCamera(unsigned int index) {
         cam->yaw   -= static_cast<float>(mouseDiffX) * sensitivityYaw;
         cam->pitch += static_cast<float>(-mouseDiffY) * sensitivityPitch;
         
-        // Clamp pitch to prevent flipping
-        float pitchLimit = glm::radians(89.0f);
-        if (cam->pitch >  pitchLimit) cam->pitch =  pitchLimit;
-        if (cam->pitch < -pitchLimit) cam->pitch = -pitchLimit;
+        float pitchLimitMax = glm::radians(cam->mouseLimitPitchMax);
+        float pitchLimitMin = glm::radians(cam->mouseLimitPitchMin);
+        
+        if (cam->pitch > pitchLimitMax) cam->pitch = pitchLimitMax;
+        if (cam->pitch < pitchLimitMin) cam->pitch = pitchLimitMin;
     }
     
     cam->forward.x = cos(cam->pitch) * sin(cam->yaw);

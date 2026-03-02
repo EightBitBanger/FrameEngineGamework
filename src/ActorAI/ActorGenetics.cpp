@@ -5,7 +5,7 @@
 #include <GameEngineFramework/Math/Random.h>
 
 void ActorSystem::UpdateActorGenetics(Actor* actor) {
-    if (!actor->genetics.mDoUpdateGenetics)
+    if (!actor->genetics.mDoUpdateGenetics) 
         return;
     actor->genetics.mDoUpdateGenetics = false;
     
@@ -44,8 +44,7 @@ MeshRenderer* ActorSystem::CreateMeshRendererForGene(Actor* actor, unsigned int 
     newRenderer->isActive = false;
     
     newRenderer->EnableFrustumCulling();
-    newRenderer->SetBoundingBoxMin(glm::vec3(-1, -1, -1));
-    newRenderer->SetBoundingBoxMax(glm::vec3(1, 1, 1));
+    newRenderer->SetBoundingBox({-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, 1.0f});
     
     newRenderer->mesh = sourceMesh;
     newRenderer->material = Renderer.CreateMaterial();
@@ -85,8 +84,7 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
     unsigned int numberOfGenes = actor->genetics.mGenes.size();
     unsigned int numberOfRenderers = actor->genetics.mGeneticRenderers.size();
     
-    // Trigger a full rebuild if any genes where added to or
-    // removed from the genome
+    // Trigger a full rebuild if any genes where added to or removed from the genome
     if (numberOfRenderers != numberOfGenes) {
         actor->genetics.mDoUpdateGenetics = true;
         actor->genetics.mDoReexpressGenetics = true;
@@ -95,7 +93,7 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
     
     for (unsigned int a = 0; a < numberOfRenderers; a++) {
         // Check should express
-        if (!actor->genetics.mGenes[a].doExpress)
+        if (!actor->genetics.mGenes[a].doExpress) 
             continue;
         
         MeshRenderer* meshRenderer = actor->genetics.mGeneticRenderers[a];
@@ -136,7 +134,7 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
             }
             
             // Process age dependent genes
-            if (actor->physical.mAge > actor->genetics.mGenes[a].expressionAge) {
+            if (actor->physical.mAge >= actor->genetics.mGenes[a].expressionAge) {
                 
                 // Express only genes that apply to this actor
                 if ((actor->genetics.mGenes[a].type == EXPRESSION_TYPE_MALE && sexualOrientation == true) || 
@@ -148,9 +146,7 @@ void ActorSystem::ExpressActorGenetics(Actor* actor) {
                     actor->genetics.mPhen[a].scale.x = expressionFactor;
                     actor->genetics.mPhen[a].scale.y = expressionFactor;
                     actor->genetics.mPhen[a].scale.z = expressionFactor;
-                    
                 }
-                
             }
             
             float maxUniformScale = actor->genetics.mGenes[a].expressionMax;

@@ -36,7 +36,6 @@ void NeuralNetwork::FeedForward(const std::vector<float>& input) {
             currentLayer.neurons[j] = tanh(sum);
             
             //currentLayer.neurons[j] = ActivationReLU(sum);
-            
         }
     }
 }
@@ -61,15 +60,7 @@ void NeuralNetwork::AddNeuralLayer(int numberOfNeurons, int numberOfInputs) {
     layer.biases.resize(numberOfNeurons);
     layer.weights.resize(numberOfNeurons, std::vector<float>(numberOfInputs));
     
-    
-    for (int i = 0; i < numberOfNeurons; ++i) {
-        for (int j = 0; j < numberOfInputs; ++j) {
-            layer.weights[i][j] = ((Random.Range(0, 100) * 0.01) / 2) * 0.5f;
-        }
-    }
-    
     // Xavier initialization
-    /*
     float range = sqrt(6.0f / (numberOfInputs + numberOfNeurons));
     
     for (int i = 0; i < numberOfNeurons; ++i) {
@@ -77,7 +68,6 @@ void NeuralNetwork::AddNeuralLayer(int numberOfNeurons, int numberOfInputs) {
             layer.weights[i][j] = (static_cast<float>(rand()) / RAND_MAX) * 2 * range - range;
         }
     }
-    */
     
     mTopology.push_back(layer);
 }

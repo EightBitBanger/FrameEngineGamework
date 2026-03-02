@@ -2,15 +2,14 @@
 #include <glm/glm.hpp>
 
 Playback::Playback() : 
-    doRepeat(false),
-    isGarbage(false),
-    mIsPlaying(true),
-    mCursor(0.0f),
-    mVolume(1.0f),
-    mSample(nullptr),
+    doRepeat(false), 
+    isGarbage(false), 
+    mIsPlaying(true), 
+    mCursor(0.0f), 
+    mVolume(1.0f), 
+    mSample(nullptr), 
     mSound(nullptr)
-{
-}
+{}
 
 
 void Playback::SetVolume(float volume) {

@@ -1,15 +1,66 @@
 #include <GameEngineFramework/Audio/AudioSystem.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/compatibility.hpp>
 
-extern Logger Log;
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <thread>
+#include <chrono>
+
+extern Logger           Log;
 extern NumberGeneration Random;
-AudioSystem::AudioSystem() : 
-    listenerPosition(glm::vec3(100)),
+
+static inline float ClampFloat(float v, float a, float b) {
+    if (v < a) return a;
+    if (v > b) return b;
+    return v;
+}
+
+static inline double ClampDouble(double v, double a, double b) {
+    if (v < a) return a;
+    if (v > b) return b;
+    return v;
+}
+
+static inline glm::vec2 SafeNormalize2(const glm::vec2& v, const glm::vec2& fallback) {
+    float len2 = glm::dot(v, v);
+    if (len2 > 1.0e-12f) {
+        return v / std::sqrt(len2);
+    }
+    float flen2 = glm::dot(fallback, fallback);
+    if (flen2 > 1.0e-12f) {
+        return fallback / std::sqrt(flen2);
+    }
+    return glm::vec2(0.0f, 1.0f);
+}
+
+static inline glm::vec3 SafeNormalize3(const glm::vec3& v, const glm::vec3& fallback) {
+    float len2 = glm::dot(v, v);
+    if (len2 > 1.0e-12f) {
+        return v / std::sqrt(len2);
+    }
+    float flen2 = glm::dot(fallback, fallback);
+    if (flen2 > 1.0e-12f) {
+        return fallback / std::sqrt(flen2);
+    }
+    return glm::vec3(0.0f, 0.0f, 1.0f);
+}
+
+static inline int32_t ClampS32(double v) {
+    if (v >  2147483647.0) return  2147483647;
+    if (v < -2147483648.0) return -2147483648LL;
+    return (int32_t)v;
+}
+
+AudioSystem::AudioSystem() :
+    listenerPosition(glm::vec3(0.0f)),
     mMasterVolume(1.0f),
-    mStream(NULL) {}
+    mStream(NULL)
+{}
 
 // Audio thread
 bool isAudioThreadActive = true;
@@ -39,10 +90,13 @@ void AudioSystem::Initiate(void) {
     SDL_ResumeAudioStreamDevice(mStream);
 }
 
-
 void AudioSystem::Shutdown(void) {
     isAudioThreadActive = false;
-    audioThread->join();
+    if (audioThread) {
+        audioThread->join();
+        delete audioThread;
+        audioThread = NULL;
+    }
 }
 
 Sound* AudioSystem::CreateSound(void) {
@@ -51,6 +105,7 @@ Sound* AudioSystem::CreateSound(void) {
 }
 
 bool AudioSystem::DestroySound(Sound* soundPtr) {
+    std::lock_guard<std::mutex> lock(mux);
     return mSounds.Destroy(soundPtr);
 }
 
@@ -60,13 +115,15 @@ AudioSample* AudioSystem::CreateAudioSample(void) {
 }
 
 bool AudioSystem::DestroyAudioSample(AudioSample* samplePtr) {
+    std::lock_guard<std::mutex> lock(mux);
     return mSamples.Destroy(samplePtr);
 }
 
 Playback* AudioSystem::Play(Sound* soundPtr) {
+    std::lock_guard<std::mutex> lock(mux);
     Playback* playback = mPlaybacks.Create();
-    playback->mSample = soundPtr->sample;
-    playback->mSound = soundPtr;
+    playback->mSample  = soundPtr->sample;
+    playback->mSound   = soundPtr;
     mActiveSounds.push_back(playback);
     return playback;
 }
@@ -75,114 +132,112 @@ SDL_AudioStream* AudioSystem::GetOutputStream(void) {
     return mStream;
 }
 
+unsigned int AudioSystem::GetNumberOfSounds(void) {
+    return mSounds.Size();
+}
+
 void AudioSystem::SetVolume(float volume) {
     mMasterVolume = volume;
 }
 
-
-float normalize(float value, float min, float max) {
-    return 1.0f - (value - min) / (max - min);
+static inline float Normalize01(float value, float minv, float maxv) {
+    // 1.0 at min, 0.0 at max
+    if (maxv <= minv) return 0.0f;
+    float t = (value - minv) / (maxv - minv);
+    return 1.0f - ClampFloat(t, 0.0f, 1.0f);
 }
 
-
 void AudioSystem::MixActiveSounds(std::vector<int32_t>& buffer) {
-    
     for (unsigned int i = 0; i < mActiveSounds.size(); i++) {
         Playback* playback = mActiveSounds[i];
-        Sound* sound = playback->mSound;
+        Sound*    sound    = playback->mSound;
         
-        std::lock_guard<std::mutex> lock(playback->mux);
-        
-        if (!sound->isActive) 
+        if (!sound->isActive)
             continue;
         
         if (!playback->mIsPlaying) {
             mActiveSounds.erase(mActiveSounds.begin() + i);
             i--;
+            
+            if (playback->isGarbage) {
+                mPlaybacks.Destroy(playback);
+            }
             continue;
         }
         
+        std::lock_guard<std::mutex> lockSound(playback->mux);
+        
         std::vector<int32_t>& sample = playback->mSample->sampleBuffer;
         
-        double attenuation = 1.0f;
-        double pan = 0.5f;
+        double attenuation = 1.0;
+        double pan         = 0.5;
         
         // Check 3D audio sample
         if (sound->isSample3D) {
+            double distance = (double)glm::distance(listenerPosition, sound->mPosition);
             
-            // Attenuation
-            double distance = glm::distance(listenerPosition, sound->mPosition);
+            if (distance <= (double)sound->mRangeMin)
+                distance = (double)sound->mRangeMin;
             
-            if (distance <= sound->mRangeMin) 
-                distance = sound->mRangeMin;
-            
-            // Check outside sound attenuation range
-            else if (distance >= sound->mRangeMax) {
-                attenuation = 0.0f;
+            if (distance >= (double)sound->mRangeMax) 
                 continue;
-            } else {
-                attenuation = normalize(distance, sound->mRangeMin, sound->mRangeMax);
-            }
             
-            // Listener orientation panning
-            glm::vec3 sourceDirection = glm::normalize(sound->mPosition - listenerPosition);
+            attenuation = (double)Normalize01((float)distance, (float)sound->mRangeMin, (float)sound->mRangeMax);
             
-            glm::vec2 forwardDirection = glm::normalize(glm::vec2(listenerDirection.x, listenerDirection.z));
-            glm::vec2 directionToSound = glm::normalize(glm::vec2(sourceDirection.x, sourceDirection.z));
+            glm::vec3 toSound3   = sound->mPosition - listenerPosition;
+            glm::vec3 srcDir3    = SafeNormalize3(toSound3, glm::vec3(0.0f, 0.0f, 1.0f));
             
-            // Calculate side
-            // Negative = left | Positive = right
-            float side = forwardDirection.x * directionToSound.y - 
-                         forwardDirection.y * directionToSound.x;
+            glm::vec2 forwardXZ  = SafeNormalize2(glm::vec2(listenerDirection.x, listenerDirection.z),
+                                                glm::vec2(0.0f, 1.0f));
+            glm::vec2 soundXZ    = SafeNormalize2(glm::vec2(srcDir3.x, srcDir3.z),
+                                                glm::vec2(0.0f, 1.0f));
             
-            // Calculate pan angle
-            float angle = glm::dot(forwardDirection, directionToSound);
-            angle = glm::clamp(angle, -1.0f, 1.0f); // Give it the ol` clamp, just in case
-            float theta = std::acos(angle); // Angle in radians
+            // 2D cross product: negative=left, positive=right
+            float side = forwardXZ.x * soundXZ.y - forwardXZ.y * soundXZ.x;
             
-            // 0.0 = left, 1.0 = right
-            pan = 0.5f + 0.5f * side * (theta / glm::pi<float>());
+            // Dot gives angle between [-1,1]
+            float d = glm::dot(forwardXZ, soundXZ);
+            d = glm::clamp(d, -1.0f, 1.0f);
+            
+            float theta = std::acos(d); // [0..pi]
+            float t     = theta / glm::pi<float>(); // [0..1]
+            
+            // Centered at 0.5, push to sides proportional to angle and side
+            pan = 0.5 + 0.5 * (double)side * (double)t;
+            pan = ClampDouble(pan, 0.0, 1.0);
         }
         
-        
-        double volume = playback->mVolume * attenuation;
+        double volume = (double)playback->mVolume * attenuation;
         
         for (unsigned int s = 0; s < buffer.size(); s += 2) {
-            
             if (playback->mCursor >= sample.size()) {
                 
                 if (playback->doRepeat) {
                     playback->mCursor = 0;
                 } else {
                     playback->mIsPlaying = false;
-                    
-                    // Check to destroy sound
-                    if (playback->isGarbage) {
-                        mActiveSounds.erase(mActiveSounds.begin() + i);
-                        mPlaybacks.Destroy(playback);
-                        i--;
-                    }
                     break;
                 }
             }
             
-            // Mix the sample
-            double sourceSample = glm::clamp(static_cast<double>(sample[playback->mCursor]), -32767.0d, 32767.0d);
+            double sourceSample = (double)sample[playback->mCursor];
             
-            double left  = static_cast<double>(sourceSample * volume * (1.0d - pan));
-            double right = static_cast<double>(sourceSample * volume * pan);
+            // Split to channels via constant-power-ish linear pan
+            double left  = sourceSample * volume * (1.0 - pan);
+            double right = sourceSample * volume * pan;
             
-            double mixedLeft  = static_cast<double>(buffer[s])     + left  / 2.0d;
-            double mixedRight = static_cast<double>(buffer[s + 1]) + right / 2.0d;
+            // Mix in (keep headroom by dividing by 2, matching your original behavior)
+            double mixedLeft  = (double)buffer[s]     + left  / 2.0;
+            double mixedRight = (double)buffer[s + 1] + right / 2.0;
             
-            buffer[s]     = static_cast<int32_t>(mixedLeft  * mMasterVolume);
-            buffer[s + 1] = static_cast<int32_t>(mixedRight * mMasterVolume);
+            // Apply master volume at write time; clamp to int32 range
+            buffer[s]     = ClampS32(mixedLeft  * (double)mMasterVolume);
+            buffer[s + 1] = ClampS32(mixedRight * (double)mMasterVolume);
             
             playback->mCursor++;
         }
     }
 }
-
 
 //
 // Audio thread entry point
@@ -192,18 +247,25 @@ extern AudioSystem Audio;
 
 void AudioThreadMain(void) {
     
-    // Temporary mix buffer
+    // Temporary mix buffer (int32 stereo interleaved).
+    // 512 samples = 256 stereo frames.
     std::vector<int32_t> buffer;
     buffer.resize(512);
     
+    // For SDL_AUDIO_S32 stereo, bytes per frame = 2 channels * 4 bytes = 8.
+    // We gate feeding when the stream already has "enough" queued bytes.
+    const int kHighWaterBytes = 32768;
+    
     while (isAudioThreadActive) {
+        std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(10));
         
-        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(10) );
-        
-        // Check if the buffer is low
         SDL_AudioStream* stream = Audio.GetOutputStream();
+        if (stream == NULL) {
+            continue;
+        }
+        
         int available = SDL_GetAudioStreamAvailable(stream);
-        if (available > 8192) 
+        if (available > kHighWaterBytes)
             continue;
         
         std::lock_guard<std::mutex> lock(Audio.mux);
@@ -214,11 +276,9 @@ void AudioThreadMain(void) {
         Audio.MixActiveSounds(buffer);
         
         // Send in the next section of mixed audio
-        SDL_PutAudioStreamData(stream, buffer.data(), buffer.size() * sizeof(int32_t));
-        SDL_FlushAudioStream(stream);
+        SDL_PutAudioStreamData(stream, buffer.data(), (int)(buffer.size() * sizeof(int32_t)));
     }
     
-    std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(2) );
+    std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(2));
     Log.Write(" >> Shutting down on thread audio");
 }
-

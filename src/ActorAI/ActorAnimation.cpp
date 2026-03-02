@@ -4,10 +4,41 @@
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Math/Random.h>
 
+static float WrapDeg360(float deg) {
+    deg = std::fmod(deg, 360.0f);
+    if (deg < 0.0f) deg += 360.0f;
+    return deg;
+}
+
+static float ShortestDeltaDeg(float fromDeg, float toDeg) {
+    float  a = WrapDeg360(fromDeg);
+    float  b = WrapDeg360(toDeg);
+    float  d = b - a;
+
+    if (d > 180.0f)  d -= 360.0f;
+    if (d < -180.0f) d += 360.0f;
+    return d;
+}
+
+static float LerpAngleDeg(float fromDeg, float toDeg, float t) {
+    float  d = ShortestDeltaDeg(fromDeg, toDeg);
+    return WrapDeg360(fromDeg + d * t);
+}
 
 void ActorSystem::UpdateAnimationState(Actor* actor) {
+    float distance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
+    float distanceMax = mActorRenderDistance / 2.0f;
+    
     for (unsigned int a = 0; a < actor->genetics.mGeneticRenderers.size(); a++) {
         MeshRenderer* geneRenderer = actor->genetics.mGeneticRenderers[a];
+        
+        if (distance > distanceMax) {
+            if (a > 0) {
+                geneRenderer->isActive = false;
+            }
+        } else {
+            geneRenderer->isActive = true;
+        }
         
         //  Skip genes that should not express
         if (!actor->genetics.mGenes[a].doExpress) {
@@ -15,14 +46,27 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
             continue;
         }
         
-        // Initial position
-        geneRenderer->transform.position = actor->navigation.mPosition;
-        geneRenderer->transform.matrix = glm::translate(glm::mat4(1), geneRenderer->transform.position);
+        if (!geneRenderer->isActive) 
+            continue;
         
         // Scale body by age
         float ageScaler = 1.0f;
+        float specialScaler = 1.0f;
         if (actor->physical.mAge < actor->physical.mAgeAdult) 
             ageScaler = (float)actor->physical.mAge / (float)actor->physical.mAgeAdult;
+        
+        // Scale age specific expressions
+        if (actor->genetics.mGenes[a].expressionAge > 0.0f) {
+            if (actor->physical.mAge > actor->genetics.mGenes[a].expressionAge) {
+                specialScaler = (actor->physical.mAge - actor->genetics.mGenes[a].expressionAge) * 0.001f;
+                if (specialScaler > 1.0f) 
+                    specialScaler = 1.0f;
+            }
+        }
+        
+        // Initial position
+        geneRenderer->transform.position = actor->navigation.mPosition;
+        geneRenderer->transform.matrix = glm::translate(glm::mat4(1), geneRenderer->transform.position);
         
         float ageScale = Math.Lerp((float)actor->physical.mYouthScale, (float)actor->physical.mAdultScale, ageScaler);
         geneRenderer->transform.matrix = glm::scale(geneRenderer->transform.matrix, glm::vec3(ageScale));
@@ -44,9 +88,7 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
         }
         
         // Final render scale
-        geneRenderer->transform.matrix = glm::scale(geneRenderer->transform.matrix, geneRenderer->transform.scale);
-        
-        geneRenderer->isActive = true;
+        geneRenderer->transform.matrix = glm::scale(geneRenderer->transform.matrix, geneRenderer->transform.scale * specialScaler);
     }
 }
 
@@ -140,24 +182,42 @@ void ActorSystem::UpdateAnimationLimb(glm::mat4& matrix, Actor* actor, unsigned 
 }
 
 void ActorSystem::UpdateTargetRotation(Actor* actor) {
-    // Get target direction angle
-    float xx = actor->navigation.mPosition.x - actor->navigation.mTargetPoint.x;
-    float zz = actor->navigation.mPosition.z - actor->navigation.mTargetPoint.z;
+    float  dx    = actor->navigation.mPosition.x - actor->navigation.mTargetPoint.x;
+    float  dz    = actor->navigation.mPosition.z - actor->navigation.mTargetPoint.z;
+    float  dist2 = (dx * dx) + (dz * dz);
     
-    actor->navigation.mRotateTo.y = glm::degrees( glm::atan(xx, zz) ) + 180.0f;
+    // Check if we're basically at the point, the direction is unstable
+    if (dist2 < 0.000001f)
+        return;
     
-    // Rotate actor toward the focal point
-    if (actor->navigation.mRotation.y != actor->navigation.mRotateTo.y) {
-        glm::vec3 fadeFrom( actor->navigation.mRotation ); // Current rotation
-        glm::vec3 fadeTo( actor->navigation.mRotateTo );   // Where we want to rotate towards
-        
-        glm::vec3 fadeValue;
-        fadeValue.x = Math.Lerp(fadeFrom.x, fadeTo.x, actor->physical.mSnapSpeed);
-        fadeValue.y = Math.Lerp(fadeFrom.y, fadeTo.y, actor->physical.mSnapSpeed);
-        fadeValue.z = Math.Lerp(fadeFrom.z, fadeTo.z, actor->physical.mSnapSpeed);
-        
-        actor->navigation.mRotation = fadeValue;
+    float  desiredYaw = glm::degrees(glm::atan(dx, dz));
+    
+    if (actor->state.mIsFacing)
+        desiredYaw += 180.0f;
+    
+    desiredYaw = WrapDeg360(desiredYaw);
+    
+    actor->navigation.mRotateTo.x = 0.0f;
+    actor->navigation.mRotateTo.y = desiredYaw;
+    actor->navigation.mRotateTo.z = 0.0f;
+    
+    float  currentYaw = WrapDeg360(actor->navigation.mRotation.y);
+    float  deltaYaw   = ShortestDeltaDeg(currentYaw, desiredYaw);
+    
+    // Snap when close enough so we don't jitter forever on float error.
+    const float kSnapEpsDeg = 0.25f;
+    if (std::fabs(deltaYaw) <= kSnapEpsDeg) {
+        actor->navigation.mRotation.y = desiredYaw;
+        return;
     }
+    
+    float t = glm::clamp(actor->physical.mSnapSpeed, 0.0f, 1.0f);
+    
+    actor->navigation.mRotation.y = LerpAngleDeg(currentYaw, desiredYaw, t);
+    
+    // Keep your existing behavior of damping x/z back to 0 over time.
+    actor->navigation.mRotation.x = Math.Lerp(actor->navigation.mRotation.x, 0.0f, t);
+    actor->navigation.mRotation.z = Math.Lerp(actor->navigation.mRotation.z, 0.0f, t);
 }
 
 void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned int a) {
@@ -166,8 +226,11 @@ void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned i
     
     actor->navigation.mLookAt.y = glm::degrees( glm::atan(xx, zz) ) + 180.0f;
     
+    if (!actor->state.mIsFacing) 
+        actor->navigation.mLookAt.y += 180.0f;
+    
     // Rotate actor toward the focal point
-    if (actor->navigation.mRotation != actor->navigation.mRotateTo) {
+    if (actor->navigation.mFacing != actor->navigation.mLookAt) {
         glm::vec3 fadeFrom( actor->navigation.mFacing ); // Current orientation
         glm::vec3 fadeTo( actor->navigation.mLookAt );   // Where we want to look at
         

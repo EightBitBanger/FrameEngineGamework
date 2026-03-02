@@ -22,6 +22,7 @@ void EngineSystemManager::Update(void) {
         }
     }
     
+    // Align text elements
     for (unsigned int i=0; i < 32; i++) {
         Text* text = console.textElements[i];
         text->x = 5;
@@ -61,4 +62,5 @@ void EngineSystemManager::Update(void) {
         case ComponentUpdateType::PerObject: for (unsigned int o=0; o < GetStreamSize(); o++) mComponentUpdaters[c](o); break;
         }
     }
+    
 }

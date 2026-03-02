@@ -4,9 +4,9 @@
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Math/Random.h>
 
-
+/*
 void ActorSystem::HandleNeuralNetwork(Actor* actor) {
-    /*
+    
     // Height preference max below water suggests
     // the actor is an aquatic actor
     bool isAquatic = actor->behavior.mHeightPreferenceMax < mWorldWaterLevel;
@@ -68,8 +68,8 @@ void ActorSystem::HandleNeuralNetwork(Actor* actor) {
         }
         
     }
-    */
 }
+*/
 
 /*
 std::vector<float> ActorSystem::Encode(const NeuralState neuralState) {

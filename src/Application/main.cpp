@@ -1,6 +1,7 @@
 #include <GameEngineFrameWork/Engine/Engine.h>
 #include <GameEngineFrameWork/functions.h>
 
+constexpr float PHYSICS_TIME_STEP = 1.0f / static_cast<float>(PHYSICS_UPDATES_PER_SECOND);
 
 int main(int argc, char* argv[]) {
     
@@ -31,8 +32,8 @@ int main(int argc, char* argv[]) {
     Engine.Initiate();
     
     AI.sceneMain = Engine.sceneMain;
-    AI.shader = Engine.shaders.color;
-    AI.baseMesh = Engine.meshes.cube;
+    AI.shader = Resources.shaders.color;
+    AI.baseMesh = Resources.meshes.cube;
     
     // Register plug-in component types
     RegisterPlugins();
@@ -386,7 +387,7 @@ int main(int argc, char* argv[]) {
             if (Profiler.CheckIsProfilerActive()) 
                 Profiler.Begin();
             
-            Physics.world->update( PHYSICS_UPDATES_PER_SECOND );
+            Physics.world->update( PHYSICS_TIME_STEP );
             
             // Generate the physics debug meshes
             Engine.UpdatePhysicsDebugRenderer();

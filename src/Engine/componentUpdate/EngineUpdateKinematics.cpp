@@ -1,43 +1,13 @@
 #include <GameEngineFramework/Engine/EngineSystems.h>
 #include <mutex>
 
-// Terminal velocity -9.81 * 2.0 * 2.0
-#define TERMINAL_VELOCITY  39.24f
-
-
 void EngineSystemManager::UpdateKinematics(unsigned int index) {
     unsigned int numberOfActors = AI.GetNumberOfActors();
     
+    // Animation states
+    
     for (unsigned int i=0; i < numberOfActors; i++) {
         Actor* actor = AI.GetActor(i);
-        
-        if (actor->physical.mColliderBody != nullptr && actor->isGarbage) {
-            if (actor->physical.mColliderBody != nullptr) 
-                Physics.DestroyCollisionBody(actor->physical.mColliderBody);
-            
-            actor->physical.mColliderBody = nullptr;
-        }
-        
-        // Check to generate a collider
-        if (actor->physical.mDoUpdateCollider) {
-            actor->physical.mDoUpdateCollider = false;
-            
-            if (actor->physical.mColliderBody != nullptr) 
-                Physics.DestroyCollisionBody(actor->physical.mColliderBody);
-            
-            actor->physical.mColliderBody = Physics.CreateCollisionBody(actor->navigation.mPosition.x, 
-                                                                        actor->navigation.mPosition.y, 
-                                                                        actor->navigation.mPosition.z);
-            
-            rp3d::Transform colliderTransform;
-            colliderTransform.setPosition( rp3d::Vector3(actor->physical.mColliderOffset.x, actor->physical.mColliderOffset.y, actor->physical.mColliderOffset.z) );
-            rp3d::Collider* coll = actor->physical.mColliderBody->addCollider( GetColliderBox(actor->physical.mColliderScale), colliderTransform );
-            
-            coll->setCollisionCategoryBits((unsigned short)LayerMask::Actor);
-            coll->setCollideWithMaskBits((unsigned short)CollisionMask::Entity);
-            
-            coll->setUserData( (void*)actor );
-        }
         
         // Check query points
         Hit hit;
@@ -54,16 +24,6 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
         glm::vec3 actorRotation = actor->navigation.mRotation;
         glm::vec3 actorVelocity = actor->navigation.mVelocity;
         glm::vec3 actorTarget   = actor->navigation.mTargetPoint;
-        
-        // Update collision body
-        if (actor->physical.mColliderBody != nullptr) {
-            rp3d::Transform transform = actor->physical.mColliderBody->getTransform();
-            transform.setPosition(rp3d::Vector3(actorPosition.x, actorPosition.y, actorPosition.z));
-            actor->physical.mColliderBody->setTransform(transform);
-        }
-        
-        actorPosition.y += 500.0f;
-        actorTarget.y += 500.0f;
         
         // Check not on ground
         if (Physics.Raycast(actorPosition, glm::vec3(0, -1, 0), 2000, hit, LayerMask::Ground)) 
@@ -82,5 +42,34 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
         actor->navigation.mVelocity = actorVelocity;
         actor->navigation.mTargetPoint = actorTarget;
     }
+    
+    // Process dead renderers into physical objects
+    mux.unlock();
+    
+    while (AI.GetNumberOfDeadRenderers() > 0) {
+        MeshRenderer* deadRenderer = AI.RemoveDeadRenderer(0);
+        
+        GameObject* gameObject = Create<GameObject>();
+        gameObject->AddComponent( CreateComponentFromObject<MeshRenderer>(deadRenderer) );
+        gameObject->AddComponent( CreateComponent<rp3d::RigidBody>() );
+        
+        Transform* transform = gameObject->GetComponent<Transform>();
+        
+        transform->scale.x = glm::length(glm::vec3(deadRenderer->transform.matrix[0]));
+        transform->scale.y = glm::length(glm::vec3(deadRenderer->transform.matrix[1]));
+        transform->scale.z = glm::length(glm::vec3(deadRenderer->transform.matrix[2]));
+        
+        rp3d::RigidBody* rigidBody = gameObject->GetComponent<rp3d::RigidBody>();
+        rp3d::Collider* collider = rigidBody->addCollider(Physics.GetColliderBox(transform->scale / 2.0f), rp3d::Transform::identity());
+        rp3d::Transform bodyTransform = rigidBody->getTransform();
+        
+        bodyTransform.setFromOpenGL( &deadRenderer->transform.matrix[0][0] );
+        
+        collider->setCollisionCategoryBits((unsigned short)LayerMask::Ground);
+        
+        rigidBody->setTransform(bodyTransform);
+        rigidBody->enableGravity(true);
+        rigidBody->updateMassPropertiesFromColliders();
+    }
+    mux.lock();
 }
-
