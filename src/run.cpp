@@ -5,10 +5,114 @@
 
 bool isProfilerEnabled = false;
 
-Actor* actorInSights = nullptr;
+GameObject* boundsObject = nullptr;
+Actor* actorTarget = nullptr;
+
+
+
+void HitDetection(void) {
+    float distance = 7.0f;
+    
+    Camera* mainCamera = Engine.sceneMain->camera;
+    if (mainCamera == nullptr) 
+        return;
+    glm::vec3 forward = mainCamera->forward;
+    glm::vec3 from = mainCamera->transform.position;
+    
+    // Actors
+    
+    /*
+    Actor* actorHit = AI.Raycast(from, forward, distance);
+    if (actorHit != nullptr) {
+        Engine.console.ClearDialog();
+        Engine.console.WriteDialog( 1, actorHit->GetName() );
+        Engine.console.WriteDialog( 2, "Age " + Int.ToString( actorHit->physical.GetAge() ) );
+        if (actorHit->physical.GetSexualOrientation()) 
+            Engine.console.WriteDialog( 6, "Male");
+        else 
+            Engine.console.WriteDialog( 6, "Female");
+        
+        Engine.console.textDialog[4]->color = Colors.green * Colors.yellow * 0.9f;
+        Engine.console.WriteDialog( 4, "[ Vitality ]" );
+        Engine.console.WriteDialog( 5, "Health   " + Int.ToString( actorHit->biological.health ) );
+        
+        Engine.console.WriteDialog( 7, "Mesh renderers   " + Int.ToString( actorHit->genetics.GetNumberOfMeshRenderers() ) );
+        return;
+    } else {
+        Engine.console.ClearDialog();
+    }
+    */
+    
+    // Static objects
+    
+    DecorationHitInfo hit = GameWorld.QueryDecor(from, forward, distance, 0.8f);
+    if (hit.didHit) {
+        Engine.console.textDialog[0]->color = Colors.green * Colors.yellow * 0.9f;
+        Engine.console.WriteDialog(0, "[object]");
+        Engine.console.WriteDialog(1, hit.type);
+        
+        if (boundsObject == nullptr) {
+            boundsObject = Engine.Create<GameObject>();
+            
+            boundsObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+            MeshRenderer* boundsRenderer = boundsObject->GetComponent<MeshRenderer>();
+            
+            boundsRenderer->mesh = Engine.Create<Mesh>();
+            boundsRenderer->mesh->SetPrimitive(MESH_LINE_STRIP);
+            boundsRenderer->mesh->isShared = false;
+            
+            boundsRenderer->material = Engine.Create<Material>();
+            boundsRenderer->material->shader = Resources.shaders.color;
+            boundsRenderer->material->diffuse = Colors.white;
+            boundsRenderer->material->ambient = Colors.white;
+            boundsRenderer->material->isShared = false;
+            
+            boundsRenderer->isActive = true;
+            Engine.sceneMain->AddMeshRendererToSceneRoot(boundsRenderer);
+        }
+        
+        Transform* transform = boundsObject->GetComponent<Transform>();
+        
+        transform->position = hit.worldPosition;
+        transform->rotation = -hit.rotation;
+        
+        transform->scale = hit.scale;
+        
+        MeshRenderer* boundsRenderer = boundsObject->GetComponent<MeshRenderer>();
+        
+        MeshTag* meshTag = Resources.FindMeshTag(hit.mesh);
+        boundsRenderer->mesh->ClearSubMeshes();
+        if (meshTag != nullptr) {
+            for (unsigned int i=0; i < meshTag->subMeshes.size(); i++) {
+                SubMesh& subMesh = meshTag->subMeshes[i];
+                
+                boundsRenderer->mesh->AddSubMesh(0, 0, 0, subMesh, false);
+            }
+        }
+        boundsRenderer->mesh->Load();
+        
+    } else {
+        Engine.console.ClearDialog();
+        if (boundsObject != nullptr) {
+            MeshRenderer* boundsRenderer = boundsObject->GetComponent<MeshRenderer>();
+            
+            Engine.sceneMain->RemoveMeshRendererFromSceneRoot(boundsRenderer, RENDER_QUEUE_GEOMETRY);
+            Engine.Destroy(boundsObject);
+            boundsObject = nullptr;
+        }
+    }
+    
+}
+
 
 
 void Run() {
+    
+    Camera* mainCamera = Engine.sceneMain->camera;
+    if (mainCamera == nullptr) 
+        return;
+    glm::vec3 forward = mainCamera->forward;
+    glm::vec3 from = mainCamera->transform.position;
     
     // Update plug-in systems
     Weather.Update();
@@ -18,30 +122,26 @@ void Run() {
     if (Engine.cameraController == nullptr) 
         return;
     
-    Camera* mainCamera = Engine.sceneMain->camera;
-    if (mainCamera == nullptr) 
-        return;
-    
-    glm::vec3 forward = mainCamera->forward;
-    glm::vec3 from = mainCamera->transform.position;
-    
-    
-    // Place static object
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
         
     }
     
-    // Remove static object
     if (Input.CheckMouseRightPressed()) {
         Input.SetMouseRightPressed(false);
+        Actor* actorHit = AI.Raycast(from, forward, 100);
+        if (actorHit != nullptr) {
+            
+            actorHit->biological.health -= 30.0f;
+            
+        }
         
     }
     
     
-    // Spawn actors
     if (Input.CheckMouseMiddlePressed()) {
         //Input.SetMouseMiddlePressed(false);
+        
         float randAmount = 8.0f;
         float xx = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
         float zz = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
@@ -60,6 +160,14 @@ void Run() {
         }
         
     }
+    
+    
+    
+    
+    HitDetection();
+    
+    
+    
     
     
     
@@ -104,6 +212,8 @@ void Run() {
     }
     */
     
+    
+    
     //
     // DEBUG - Show actor stats
     //
@@ -139,12 +249,9 @@ void Run() {
     //
     // Camera controller movement
     
+    const float forceAccelerate = 24.0f;
+    
     glm::vec3 force(0);
-    
-    if (Engine.cameraController == nullptr) 
-        return;
-    
-    float forceAccelerate = 17.0f;
     
     if (mainCamera != nullptr) {
         
@@ -172,18 +279,16 @@ void Run() {
         
         // Field of view zoom effect
         const float fovMaxPullback = 3.0f;
-        float fovPullback = (forceLen / 1.0f) * 0.3f;
+        float fovPullback = (forceLen / 1.0f) * 0.4f;
         if (fovPullback > fovMaxPullback) 
             fovPullback = fovMaxPullback;
         Engine.sceneMain->camera->fov = 60 + fovPullback;
         
     }
     
-    return;
 }
 
 
 void TickUpdate(void) {
     
-    return;
 }
