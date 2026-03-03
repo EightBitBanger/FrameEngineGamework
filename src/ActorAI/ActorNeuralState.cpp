@@ -33,7 +33,7 @@ void ActorSystem::UpdateActorState(Actor* actor) {
             if (amount[0] == "curiosity") {
                 if (amount.size() == 2) {
                     float chance = String.ToFloat(amount[1]);
-                    if (Random.Range(0.0f, 1.0f) < glm::pow(chance, 4.0f)) {
+                    if (Random.Range(0.0f, 1000.0f) < glm::pow(chance, 4.0f)) {
                         curiosity = glm::max(curiosity, chance);
                     }
                 }

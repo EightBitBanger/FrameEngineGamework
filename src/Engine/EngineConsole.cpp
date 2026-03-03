@@ -93,3 +93,9 @@ void EngineSystemManager::CommandConsole::ClearInput(void) {
     input->text = '\0';
 }
 
+void EngineSystemManager::CommandConsole::ClearDialog(void) {
+    for (unsigned int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) {
+        WriteDialog(i, "");
+        textDialog[i]->color = Colors.white;
+    }
+}
