@@ -17,8 +17,9 @@ extern ActorSystem       AI;
 
 
 void GeneticPresets::ActorPresets::Human(Actor* targetActor) {
-    
     AI.genomes.ClearGenes(targetActor);
+    
+    targetActor->SetBoundingBox({-0.35,0.0,-0.35}, {0.35,1.8,0.35});
     
     targetActor->SetName("Human");
     
