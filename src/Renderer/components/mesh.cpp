@@ -100,6 +100,103 @@ void Mesh::AddWallSubDivided(float x, float y, float z, float width, float heigh
             AddWall( x + (w * width), y + (h * height), z, width, height, color);
 }
 
+void Mesh::AddCube(float x, float y, float z, float width, float height, float depth, Color color) {
+    std::vector<Vertex> vertices;
+    std::vector<Index>  indices;
+    
+    vertices.reserve(24);
+    indices.reserve(36);
+    
+    float  halfWidth   = width;
+    float  halfHeight  = height;
+    float  halfDepth   = depth;
+    
+    // Helper to append indices for the last pushed quad (4 verts).
+    auto pushQuadIndices = [&](unsigned int baseVertex) {
+        Index idx0; idx0.index = baseVertex + 0; indices.push_back(idx0);
+        Index idx1; idx1.index = baseVertex + 1; indices.push_back(idx1);
+        Index idx2; idx2.index = baseVertex + 2; indices.push_back(idx2);
+        
+        Index idx3; idx3.index = baseVertex + 0; indices.push_back(idx3);
+        Index idx4; idx4.index = baseVertex + 2; indices.push_back(idx4);
+        Index idx5; idx5.index = baseVertex + 3; indices.push_back(idx5);
+    };
+    
+    // +Z (Front)  normal (0, 0, 1)
+    {
+        unsigned int baseVertex = static_cast<unsigned int>(vertices.size());
+    
+        vertices.push_back(Vertex(-halfWidth, +halfHeight, +halfDepth, color.r, color.g, color.b,  0, 0, 1,  0, 0));
+        vertices.push_back(Vertex(+halfWidth, +halfHeight, +halfDepth, color.r, color.g, color.b,  0, 0, 1,  1, 0));
+        vertices.push_back(Vertex(+halfWidth, -halfHeight, +halfDepth, color.r, color.g, color.b,  0, 0, 1,  1, 1));
+        vertices.push_back(Vertex(-halfWidth, -halfHeight, +halfDepth, color.r, color.g, color.b,  0, 0, 1,  0, 1));
+    
+        pushQuadIndices(baseVertex);
+    }
+    
+    // -Z (Back)   normal (0, 0, -1)
+    {
+        unsigned int baseVertex = static_cast<unsigned int>(vertices.size());
+    
+        vertices.push_back(Vertex(-halfWidth, +halfHeight, -halfDepth, color.r, color.g, color.b,  0, 0,-1,  0, 0));
+        vertices.push_back(Vertex(+halfWidth, +halfHeight, -halfDepth, color.r, color.g, color.b,  0, 0,-1,  1, 0));
+        vertices.push_back(Vertex(+halfWidth, -halfHeight, -halfDepth, color.r, color.g, color.b,  0, 0,-1,  1, 1));
+        vertices.push_back(Vertex(-halfWidth, -halfHeight, -halfDepth, color.r, color.g, color.b,  0, 0,-1,  0, 1));
+    
+        pushQuadIndices(baseVertex);
+    }
+    
+    // +X (Right)  normal (1, 0, 0)
+    {
+        unsigned int baseVertex = static_cast<unsigned int>(vertices.size());
+    
+        vertices.push_back(Vertex(+halfWidth, +halfHeight, +halfDepth, color.r, color.g, color.b,  1, 0, 0,  0, 0));
+        vertices.push_back(Vertex(+halfWidth, +halfHeight, -halfDepth, color.r, color.g, color.b,  1, 0, 0,  1, 0));
+        vertices.push_back(Vertex(+halfWidth, -halfHeight, -halfDepth, color.r, color.g, color.b,  1, 0, 0,  1, 1));
+        vertices.push_back(Vertex(+halfWidth, -halfHeight, +halfDepth, color.r, color.g, color.b,  1, 0, 0,  0, 1));
+    
+        pushQuadIndices(baseVertex);
+    }
+    
+    // -X (Left)   normal (-1, 0, 0)
+    {
+        unsigned int baseVertex = static_cast<unsigned int>(vertices.size());
+    
+        vertices.push_back(Vertex(-halfWidth, +halfHeight, -halfDepth, color.r, color.g, color.b, -1, 0, 0,  0, 0));
+        vertices.push_back(Vertex(-halfWidth, +halfHeight, +halfDepth, color.r, color.g, color.b, -1, 0, 0,  1, 0));
+        vertices.push_back(Vertex(-halfWidth, -halfHeight, +halfDepth, color.r, color.g, color.b, -1, 0, 0,  1, 1));
+        vertices.push_back(Vertex(-halfWidth, -halfHeight, -halfDepth, color.r, color.g, color.b, -1, 0, 0,  0, 1));
+    
+        pushQuadIndices(baseVertex);
+    }
+    
+    // +Y (Top)    normal (0, 1, 0)
+    {
+        unsigned int baseVertex = static_cast<unsigned int>(vertices.size());
+    
+        vertices.push_back(Vertex(-halfWidth, +halfHeight, +halfDepth, color.r, color.g, color.b,  0, 1, 0,  0, 0));
+        vertices.push_back(Vertex(+halfWidth, +halfHeight, +halfDepth, color.r, color.g, color.b,  0, 1, 0,  1, 0));
+        vertices.push_back(Vertex(+halfWidth, +halfHeight, -halfDepth, color.r, color.g, color.b,  0, 1, 0,  1, 1));
+        vertices.push_back(Vertex(-halfWidth, +halfHeight, -halfDepth, color.r, color.g, color.b,  0, 1, 0,  0, 1));
+    
+        pushQuadIndices(baseVertex);
+    }
+    
+    // -Y (Bottom) normal (0, -1, 0)
+    {
+        unsigned int baseVertex = static_cast<unsigned int>(vertices.size());
+    
+        vertices.push_back(Vertex(-halfWidth, -halfHeight, -halfDepth, color.r, color.g, color.b,  0,-1, 0,  0, 0));
+        vertices.push_back(Vertex(+halfWidth, -halfHeight, -halfDepth, color.r, color.g, color.b,  0,-1, 0,  1, 0));
+        vertices.push_back(Vertex(+halfWidth, -halfHeight, +halfDepth, color.r, color.g, color.b,  0,-1, 0,  1, 1));
+        vertices.push_back(Vertex(-halfWidth, -halfHeight, +halfDepth, color.r, color.g, color.b,  0,-1, 0,  0, 1));
+    
+        pushQuadIndices(baseVertex);
+    }
+    
+    AddSubMesh(x, y, z, vertices, indices, false);
+}
+
 int Mesh::AddQuad(float x, float y, float z, float width, float height, Color color) {
     Vertex vertex[4];
     vertex[0] = Vertex( x, y,       z,         color.r, color.g, color.b,   0, 1, 0,  0, 0 );

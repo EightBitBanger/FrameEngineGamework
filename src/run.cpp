@@ -5,13 +5,13 @@
 
 bool isProfilerEnabled = false;
 
-GameObject* boundsObject = nullptr;
+MeshRenderer* boundsRenderer = nullptr;
 Actor* actorTarget = nullptr;
 
 
 
 void HitDetection(void) {
-    float distance = 7.0f;
+    float distance = 9.0f;
     
     Camera* mainCamera = Engine.sceneMain->camera;
     if (mainCamera == nullptr) 
@@ -19,89 +19,97 @@ void HitDetection(void) {
     glm::vec3 forward = mainCamera->forward;
     glm::vec3 from = mainCamera->transform.position;
     
+    // Initiate the mesh outline shadow effect
+    
+    if (!boundsRenderer) {
+        boundsRenderer = Engine.Create<MeshRenderer>();
+        boundsRenderer->mesh = Engine.Create<Mesh>();
+        boundsRenderer->material = Engine.Create<Material>();
+        
+        boundsRenderer->mesh->isShared = false;
+        boundsRenderer->mesh->SetPrimitive(MESH_LINE_LOOP);
+        boundsRenderer->material->isShared = false;
+        boundsRenderer->material->shader = Resources.shaders.colorUnlit;
+        
+        boundsRenderer->material->ambient = Colors.MakeGrayScale(0.2f);
+        
+        Engine.sceneMain->AddMeshRendererToSceneRoot(boundsRenderer);
+    }
+    
     // Actors
     
-    /*
     Actor* actorHit = AI.Raycast(from, forward, distance);
     if (actorHit != nullptr) {
         Engine.console.ClearDialog();
-        Engine.console.WriteDialog( 1, actorHit->GetName() );
-        Engine.console.WriteDialog( 2, "Age " + Int.ToString( actorHit->physical.GetAge() ) );
+        
+        Engine.console.textDialog[0]->color = Colors.green * Colors.yellow * 0.9f;
+        Engine.console.WriteDialog( 0, "[" + actorHit->GetName() + "]");
+        
+        Engine.console.WriteDialog( 1, "Age " + Int.ToString( actorHit->physical.GetAge() ) );
         if (actorHit->physical.GetSexualOrientation()) 
-            Engine.console.WriteDialog( 6, "Male");
+            Engine.console.WriteDialog( 2, "Male");
         else 
-            Engine.console.WriteDialog( 6, "Female");
+            Engine.console.WriteDialog( 2, "Female");
         
         Engine.console.textDialog[4]->color = Colors.green * Colors.yellow * 0.9f;
         Engine.console.WriteDialog( 4, "[ Vitality ]" );
         Engine.console.WriteDialog( 5, "Health   " + Int.ToString( actorHit->biological.health ) );
         
-        Engine.console.WriteDialog( 7, "Mesh renderers   " + Int.ToString( actorHit->genetics.GetNumberOfMeshRenderers() ) );
-        return;
+        glm::vec3 boundsMax = actorHit->GetBoundingBoxMax();
+        glm::vec3 boundsMin = actorHit->GetBoundingBoxMin();
+        glm::vec3 boundsScale = (boundsMax - boundsMin) * 0.5f;
+        
+        boundsRenderer->mesh->ClearSubMeshes();
+        boundsRenderer->mesh->AddCube(0, 0, 0, boundsScale.x, boundsScale.y, boundsScale.z, Colors.white);
+        boundsRenderer->mesh->Load();
+        
+        glm::vec3 position = actorHit->navigation.GetPosition();
+        glm::vec3 scale    = boundsScale * 1.5f;
+        
+        boundsRenderer->transform.SetPosition(position);
+        boundsRenderer->transform.SetScale(scale);
+        boundsRenderer->transform.UpdateMatrix();
+        boundsRenderer->isActive = true;
+        
+        //Engine.console.WriteDialog( 6, "Mesh renderers   " + Int.ToString( actorHit->genetics.GetNumberOfMeshRenderers() ) );
     } else {
         Engine.console.ClearDialog();
     }
-    */
     
     // Static objects
     
-    DecorationHitInfo hit = GameWorld.QueryDecor(from, forward, distance, 0.8f);
-    if (hit.didHit) {
+    const float hitMaxDistance = 4.0f;
+    const float hitThreshold   = 0.9f;
+    
+    DecorationHitInfo info = GameWorld.QueryDecor(Engine.sceneMain->camera->transform.position, Engine.sceneMain->camera->forward, hitMaxDistance, hitThreshold);
+    
+    if (info.didHit && actorHit == nullptr) {
         Engine.console.textDialog[0]->color = Colors.green * Colors.yellow * 0.9f;
-        Engine.console.WriteDialog(0, "[object]");
-        Engine.console.WriteDialog(1, hit.type);
+        Engine.console.WriteDialog(0, "[" + info.type + "]");
         
-        if (boundsObject == nullptr) {
-            boundsObject = Engine.Create<GameObject>();
-            
-            boundsObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
-            MeshRenderer* boundsRenderer = boundsObject->GetComponent<MeshRenderer>();
-            
-            boundsRenderer->mesh = Engine.Create<Mesh>();
-            boundsRenderer->mesh->SetPrimitive(MESH_LINE_STRIP);
-            boundsRenderer->mesh->isShared = false;
-            
-            boundsRenderer->material = Engine.Create<Material>();
-            boundsRenderer->material->shader = Resources.shaders.color;
-            boundsRenderer->material->diffuse = Colors.white;
-            boundsRenderer->material->ambient = Colors.white;
-            boundsRenderer->material->isShared = false;
-            
-            boundsRenderer->isActive = true;
-            Engine.sceneMain->AddMeshRendererToSceneRoot(boundsRenderer);
-        }
-        
-        Transform* transform = boundsObject->GetComponent<Transform>();
-        
-        transform->position = hit.worldPosition;
-        transform->rotation = -hit.rotation;
-        
-        transform->scale = hit.scale;
-        
-        MeshRenderer* boundsRenderer = boundsObject->GetComponent<MeshRenderer>();
-        
-        MeshTag* meshTag = Resources.FindMeshTag(hit.mesh);
+        // Generate mesh outline shadow effect
+        SubMesh& subMesh = GameWorld.mStaticMeshes[info.mesh];
         boundsRenderer->mesh->ClearSubMeshes();
-        if (meshTag != nullptr) {
-            for (unsigned int i=0; i < meshTag->subMeshes.size(); i++) {
-                SubMesh& subMesh = meshTag->subMeshes[i];
-                
-                boundsRenderer->mesh->AddSubMesh(0, 0, 0, subMesh, false);
-            }
-        }
+        boundsRenderer->mesh->AddSubMesh(0.0f, 0.0f, 0.0f, subMesh, true);
         boundsRenderer->mesh->Load();
         
-    } else {
-        Engine.console.ClearDialog();
-        if (boundsObject != nullptr) {
-            MeshRenderer* boundsRenderer = boundsObject->GetComponent<MeshRenderer>();
-            
-            Engine.sceneMain->RemoveMeshRendererFromSceneRoot(boundsRenderer, RENDER_QUEUE_GEOMETRY);
-            Engine.Destroy(boundsObject);
-            boundsObject = nullptr;
-        }
+        glm::vec3 position = info.worldPosition;
+        glm::vec3 scale    = info.scale * 1.009f;
+        glm::vec3 rotation = info.rotation;
+        
+        boundsRenderer->transform.SetPosition(position);
+        boundsRenderer->transform.SetOrientation( glm::radians(rotation) );
+        boundsRenderer->transform.SetScale(scale);
+        boundsRenderer->transform.UpdateMatrix();
+        
+        boundsRenderer->isActive = true;
     }
     
+    if (!info.didHit && actorHit == nullptr) {
+        Engine.console.ClearDialog();
+        if (boundsRenderer) 
+            boundsRenderer->isActive = false;
+    }
 }
 
 
