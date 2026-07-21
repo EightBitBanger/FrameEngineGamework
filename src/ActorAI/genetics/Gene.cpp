@@ -1,0 +1,26 @@
+#include <GameEngineFramework/ActorAI/genetics/Gene.h>
+
+Gene::Gene() : 
+    position(0, 0, 0),
+    rotation(0, 0, 0),
+    scale(1, 1, 1),
+    color(0, 0, 0),
+    offset(0, 0, 0),
+    
+    attachmentIndex(0),
+    colorIndex(0),
+    scaleIndex(0),
+    
+    form(ActorState::Genetic::Base),
+    expressionFactor(1.0f),
+    expressionMax(1.0f),
+    expressionAge(0),
+    
+    doExpress(true),
+    
+    animationType(ActorState::Animation::Body),
+    doInverseAnimation(false),
+    
+    animationRange(15),
+    animationAxis(1, 0, 0)
+{}
