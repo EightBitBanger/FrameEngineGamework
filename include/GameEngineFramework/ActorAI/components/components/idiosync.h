@@ -25,6 +25,16 @@ public:
     /// Return the value of a memory by its index.
     std::string GetMemoryValueByIndex(unsigned int index);
     
+    /// Clear a specific emotion across the thought matrix.
+    void ClearEmotion(const std::string& emotionName);
+    void ClearEmotion(TriggerType type);
+    /// Set a specific emotion to a fixed value across the thought matrix.
+    void SetEmotion(const std::string& emotionName, float value);
+    void SetEmotion(TriggerType type, float value);
+    /// Scale a specific emotion across the thought matrix.
+    void ScaleEmotion(const std::string& emotionName, float factor);
+    void ScaleEmotion(TriggerType type, float factor);
+    
     /// Clear all the actor memories.
     void Clear(void);
     
@@ -46,7 +56,7 @@ private:
     // List of optimized memories for internal operation
     std::unordered_map<std::string, std::vector<MemoryTrigger>> mMemoryTriggers;
     
-    // List of emotional states forming the thought process matrix projection
+    // List of emotional states forming the thought process matrix through forward projection
     std::deque<EmotionalEmbedding> thoughtProcessProjectionMatrix;
 };
 

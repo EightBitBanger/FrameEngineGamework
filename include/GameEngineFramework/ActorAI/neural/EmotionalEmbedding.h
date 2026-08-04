@@ -1,6 +1,7 @@
 #ifndef _EMOTIONAL_EMBEDDING__
 #define _EMOTIONAL_EMBEDDING__
 
+#include <GameEngineFramework/ActorAI/components/components/memorytrigger.h>
 #include <GameEngineFramework/configuration.h>
 #include <string>
 
@@ -21,6 +22,8 @@ public:
     void Clear();
     
     float* GetEmotionByName(std::string name);
+    
+    float* GetEmotionByTrigger(TriggerType type);
     
     EmotionalEmbedding& operator+=(const EmotionalEmbedding& rhs);
     EmotionalEmbedding& operator/=(float scalar);

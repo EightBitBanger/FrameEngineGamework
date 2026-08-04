@@ -13,11 +13,8 @@ enum class Mode {
     Sleeping,
     
     MoveHunting,
-    
     MoveBreed,
-    
     MoveSocialize,
-    
     MoveRandom,
     
     MoveAttack,
@@ -26,7 +23,7 @@ enum class Mode {
     MoveTo,
     WalkTo,
     RunTo
-};                    
+};
 
 enum class Genetic : unsigned int {
     Base,

@@ -32,7 +32,7 @@
 #include <GameEngineFramework/Engine/EngineComponents.h>
 
 #define  CONSOLE_NUMBER_OF_ELEMENTS   32
-#define  PROFILER_NUMBER_OF_ELEMENTS  24
+#define  DIALOG_NUMBER_OF_ELEMENTS    42
 
 #ifndef BUILD_CORE
     #include <GameEngineFramework/Engine/EngineSystems.h>

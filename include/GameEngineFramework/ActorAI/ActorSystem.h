@@ -127,7 +127,7 @@ private:
     
     // Behavioral
     void UpdateActorState(Actor* actor);
-    void ApplyEmotionThresholds(const std::string& emotionType, float value, EmotionalEmbedding& embedding);
+    void ApplyEmotionThresholds(const MemoryTrigger& trigger, EmotionalEmbedding& embedding);
     bool EvaluateEmotionalBehavior(Actor* actor, Actor* targetActor, float threshold, EmotionalEmbedding& embedding);
     void ProjectEmotionalHistory(Actor* actor, EmotionalEmbedding& currentEmotion, float sentientScore);
     int EvaluateThoughtMatrix(Actor* actor, const EmotionalEmbedding& baselineEmotion, float sentientScore, std::vector<EmotionalEmbedding>& outThoughtMatrix);
@@ -169,6 +169,13 @@ private:
     MeshRenderer* CreateMeshRendererForGene(Actor* actor, unsigned int geneIndex, Mesh* sourceMesh);
     void ExpressActorGenetics(Actor* actor);
     void CombineParentMemories(const Actor* parentA, const Actor* parentB, Actor* child);
+    
+    // Inventory
+    bool UpdateActorInventory(Actor* actor);
+    
+    // Memories
+    bool IsMemoryShareable(TriggerType type);
+    void ShareMemories(Actor* source, Actor* target);
     
     // Submit a line for debug rendering
     void DebugRenderDrawLine(glm::vec3 from, glm::vec3 to);
