@@ -207,6 +207,7 @@ private:
     unsigned int mIndexBufferSz;
     
     bool mAreBuffersAllocated;
+    bool mDoGenerateBuffers;
     
     // Vertex buffer array
     std::vector<Vertex>   mVertexBuffer;
