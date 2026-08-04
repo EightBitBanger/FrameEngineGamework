@@ -84,6 +84,8 @@ void EngineSystemManager::CommandConsole::Print(std::string text) {
 }
 
 void EngineSystemManager::CommandConsole::WriteDialog(unsigned int index, std::string text) {
+    if (index >= textDialog.size()) 
+        return;
     textDialog[index]->isActive = true;
     textDialog[index]->color.a = 3.0f;
     textDialog[index]->text = text;
@@ -94,8 +96,8 @@ void EngineSystemManager::CommandConsole::ClearInput(void) {
 }
 
 void EngineSystemManager::CommandConsole::ClearDialog(void) {
-    for (unsigned int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) {
+    for (unsigned int i=0; i < DIALOG_NUMBER_OF_ELEMENTS; i++) 
         WriteDialog(i, "");
+    for (unsigned int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) 
         textDialog[i]->color = Colors.white;
-    }
 }

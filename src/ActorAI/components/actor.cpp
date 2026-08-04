@@ -39,7 +39,6 @@ void Actor::Reset(void) {
     mUpdateCounter = (unsigned int)Random.Range(0, 8);
     
     // Inventory
-    inventory.inHandItemName  = "";
     inventory.damageMul       = 1.0f;
     inventory.defenseMul      = 1.0f;
     inventory.handPosition    = glm::vec3(0.0f, 0.0f, 0.0f);

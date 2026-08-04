@@ -109,7 +109,7 @@ void EngineSystemManager::Initiate() {
     console.input->doStayInFocus = true;
     
     // Initiate console 
-    for (unsigned int i=0; i < 32; i++) {
+    for (unsigned int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) {
         Text* text = UI.CreateText();
         text->x = 5;
         text->y = Platform.windowArea.h - (90 + (16 * i));
@@ -122,7 +122,7 @@ void EngineSystemManager::Initiate() {
     }
     
     // Initiate dialog
-    for (unsigned int i=0; i < 32; i++) {
+    for (unsigned int i=0; i < DIALOG_NUMBER_OF_ELEMENTS; i++) {
         Text* text = UI.CreateText();
         text->x = 5;
         text->y = 16 * i;

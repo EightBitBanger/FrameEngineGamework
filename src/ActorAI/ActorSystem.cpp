@@ -233,10 +233,8 @@ Actor* ActorSystem::Raycast(const glm::vec3& position, const glm::vec3& directio
             float origin = position[axis];
             float dir    = rayDir[axis];
             
-            if (fabs(dir) < epsilon)
-            {
-                if (origin < worldMin[axis] || origin > worldMax[axis])
-                {
+            if (fabs(dir) < epsilon) {
+                if (origin < worldMin[axis] || origin > worldMax[axis]) {
                     hit = false;
                     break;
                 }
@@ -252,8 +250,7 @@ Actor* ActorSystem::Raycast(const glm::vec3& position, const glm::vec3& directio
                 if (t0 > tMin) tMin = t0;
                 if (t1 < tMax) tMax = t1;
                 
-                if (tMax < tMin)
-                {
+                if (tMax < tMin) {
                     hit = false;
                     break;
                 }

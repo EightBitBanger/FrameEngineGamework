@@ -1,9 +1,6 @@
-#include <GameEngineFramework/Engine/Engine.h>
-extern EngineSystemManager Engine;
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Math/Random.h>
-
 
 bool ActorSystem::HandleVitality(Actor* actor) {
     // Natural expiration 

@@ -129,19 +129,9 @@ bool ActorSystem::HandleTargetDistance(Actor* actor) {
     
     AI.DebugRenderDrawLine(posA, posB, Colors.white);
     
-    // Check target over shoot
-    
-    // NOTE actors freezing before moving
-    
-    /*
-    if (distance > actor->navigation.mDistanceToTarget) 
-        actor->state.mode = ActorState::Mode::Idle;
-    
-    actor->navigation.mDistanceToTarget = distance;
-    */
-    
     // Check arrived at the target
     if (distance < actor->behavior.GetDistanceToInflict()) {
+        actor->memories.ScaleEmotion(TriggerType::Curiosity, 0.1f);
         
         // Hold at idle until we repeat the attack
         actor->state.mode = ActorState::Mode::Idle;
@@ -157,17 +147,9 @@ bool ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
     posA.y = 0.0f;
     posB.y = 0.0f;
     
-    // Check target over shoot
     float distance = glm::distance(posA, posB);
-    if (distance > actor->navigation.mDistanceToTarget && 
-        target->state.mode != ActorState::Mode::MoveFlee) {
-        
-        actor->state.mode = ActorState::Mode::Idle;
-    }
-    actor->navigation.mDistanceToTarget = distance;
     
     // Check arrived at the target
-    
     if (distance > actor->behavior.GetDistanceToInflict()) 
         return false;
     
@@ -177,7 +159,7 @@ bool ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
     actor->state.mode = ActorState::Mode::Idle;
     actor->counters.SetCoolDownAttack( actor->behavior.GetCooldownAttack() );
     
-    // Divide the effect if the target defense is greater them my strength
+    // Divide the effect if the target defense is greater than my strength
     if (target->biological.defense > (actor->biological.strength * actor->inventory.damageMul)) {
         target->biological.health -= (target->biological.defense / actor->biological.strength) - 1.0f;
     } else {
@@ -190,10 +172,14 @@ bool ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
     // Check if we killed the target
     if (target->biological.health <= 0.0f) {
         target->biological.health = 0.0f;
-        
         actor->state.mode = ActorState::Mode::Idle;
         actor->navigation.mTargetActor = nullptr;
+        actor->inventory.UnequipItem();
     }
+    
+    actor->emotions.current.comfort *= 0.3f;
+    actor->memories.ScaleEmotion(TriggerType::Comfort, 0.3f);
+    
     return true;
 }
 
@@ -217,94 +203,5 @@ bool ActorSystem::HandleEscapeEvade(Actor* actor, Actor* target) {
     }
     actor->navigation.mDistanceToTarget = currentDist;
     */
-    return true;
-}
-
-bool ActorSystem::HandleBreedWith(Actor* actor, Actor* target) {
-    if (actor->counters.GetCoolDownBreeding() > 0 || target->counters.GetCoolDownBreeding() > 0) 
-        return false;
-    if (actor->physical.mAge < actor->physical.mAgeAdult || target->physical.mAge >= target->physical.mAgeSenior) 
-        return false;
-    
-    // Check to ensure actors are of opposite sexes
-    if (actor->physical.mSexualOrientation == target->physical.mSexualOrientation) 
-        return false;
-    
-    // Check interaction distance
-    float distance = glm::distance(actor->navigation.mPosition, target->navigation.mPosition);
-    if (distance > actor->behavior.mDistanceToInflict) 
-        return false;
-    
-    glm::vec3 spawnPoint = Math.Lerp(actor->navigation.mPosition, target->navigation.mPosition, 0.5f);
-    
-    Actor* offspring = CreateActor();
-    offspring->Reset();
-    
-    // Genetic recombination
-    genomes.BlendGenomes(actor, target, offspring);
-    
-    // Behavioral recombination
-    CombineParentMemories(actor, target, offspring);
-    
-    std::string homePosition = Float.ToString(spawnPoint.x) + "," +
-                               Float.ToString(spawnPoint.y) + "," +
-                               Float.ToString(spawnPoint.z);
-    offspring->memories.Add("home", homePosition);
-    
-    offspring->navigation.SetPosition(spawnPoint);
-    offspring->navigation.SetTargetPoint(spawnPoint);
-    
-    offspring->physical.SetAge( Random.Range(1, 100) );
-    offspring->RebuildGeneticExpression();
-    
-    offspring->isActive = true;
-    
-    mActiveActors.push_back(offspring);
-    
-    actor->counters.SetCoolDownBreeding(actor->behavior.GetCooldownBreed());
-    target->counters.SetCoolDownBreeding(target->behavior.GetCooldownBreed());
-    
-    actor->emotions.current.libido = 0.0f;
-    target->emotions.current.libido = 0.0f;
-    
-    actor->state.mode = ActorState::Mode::Idle;
-    target->state.mode = ActorState::Mode::Idle;
-    
-    offspring->state.mode = ActorState::Mode::Idle;
-    return true;
-}
-
-bool ActorSystem::HandleSocializeWith(Actor* actor, Actor* target) {
-    // Change mObservationCoolDownCounter to mSocialCoolDownCounter
-    if (actor->counters.mSocialCoolDownCounter > 0 || 
-        target->counters.mSocialCoolDownCounter > 0) 
-        return false;
-    
-    // Don't let someone socialize with an actor who is terrified or furious
-    if (target->emotions.current.fear > UniversalConst.emotionalThreshold || 
-        target->emotions.current.anger > UniversalConst.emotionalThreshold) 
-        return false; 
-    
-    if (target->emotions.current.social < UniversalConst.emotionalThreshold) 
-        return false; 
-    
-    // Check interaction distance
-    float distance = glm::distance(actor->navigation.mPosition, target->navigation.mPosition);
-    if (distance > actor->behavior.GetDistanceToInflict()) 
-        return false;
-    
-    // Satisfy curiosity and boost comfort
-    actor->emotions.SetComfort(glm::min(actor->emotions.GetComfort() + 0.2f, 1.0f));
-    target->emotions.SetComfort(glm::min(target->emotions.GetComfort() + 0.2f, 1.0f));
-    
-    actor->emotions.SetCuriosity(0.0f);
-    target->emotions.SetCuriosity(0.0f);
-    
-    actor->counters.mSocialCoolDownCounter  = actor->behavior.mCooldownObserve;
-    target->counters.mSocialCoolDownCounter = actor->behavior.mCooldownObserve;
-    
-    actor->state.mode = ActorState::Mode::Idle;
-    target->state.mode = ActorState::Mode::Idle;
-    
     return true;
 }

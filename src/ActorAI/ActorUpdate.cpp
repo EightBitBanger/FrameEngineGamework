@@ -50,6 +50,9 @@ void ActorSystem::UpdateFast() {
         UpdateActorGenetics(actor);
         ExpressActorGenetics(actor);
         
+        // Inventory selection
+        UpdateActorInventory(actor);
+        
         // Update actor mechanical / locomotion
         HandleMovementMechanics(actor);
         

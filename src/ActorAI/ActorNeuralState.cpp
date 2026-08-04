@@ -4,18 +4,44 @@
 #include <GameEngineFramework/Math/Random.h>
 
 extern UniversalConstants UniversalConst;
-
-static const std::vector<std::pair<std::string, ActorState::Mode>> BehavioralAssociation = {
-    {"anger",     ActorState::Mode::MoveAttack},
-    {"fear",      ActorState::Mode::MoveFlee},
-    {"libido",    ActorState::Mode::MoveBreed},
-    {"curiosity", ActorState::Mode::MoveRandom}
-};
-
 extern EngineSystemManager Engine;
+
+static const std::vector<std::pair<TriggerType, ActorState::Mode>> BehavioralAssociation = {
+    {TriggerType::Anger,     ActorState::Mode::MoveAttack},
+    {TriggerType::Fear,      ActorState::Mode::MoveFlee},
+    {TriggerType::Libido,    ActorState::Mode::MoveBreed},
+    {TriggerType::Curiosity, ActorState::Mode::MoveRandom}
+};
 
 void ActorSystem::UpdateActorState(Actor* actor) {
     EmotionalEmbedding& emotion = actor->emotions.current;
+
+    // Check if fleeing target has escaped beyond flee distance
+    if (actor->state.mode == ActorState::Mode::MoveFlee && actor->navigation.mTargetActor != nullptr) {
+        float dist = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition);
+        if (dist > actor->behavior.GetDistanceToFlee()) {
+            actor->state.mode = ActorState::Mode::Idle;
+            actor->navigation.mTargetActor = nullptr;
+        }
+    }
+
+    // De-escalate and unequip weapon when anger drops below threshold
+    if (emotion.anger < UniversalConst.emotionalThreshold && 
+        emotion.comfort > 0.0f) {
+        if (actor->state.mode == ActorState::Mode::MoveAttack) {
+            actor->state.mode = ActorState::Mode::Idle;
+            actor->navigation.mTargetActor = nullptr;
+        }
+        if (!actor->inventory.inHandItemClass.empty()) {
+            actor->inventory.UnequipItem();
+        }
+    }
+
+    // De-escalate flee mode when fear drops below threshold
+    if (actor->state.mode == ActorState::Mode::MoveFlee && emotion.fear < UniversalConst.emotionalThreshold) {
+        actor->state.mode = ActorState::Mode::Idle;
+        actor->navigation.mTargetActor = nullptr;
+    }
     
     // Fetch baseline sentience score
     const std::vector<MemoryTrigger>& sentienceList = actor->memories.mMemoryTriggers["sentience"];
@@ -23,22 +49,32 @@ void ActorSystem::UpdateActorState(Actor* actor) {
     
     ProcessMemoryTriggers(actor, emotion);
     
-    // Evaluate target relationship and pick the most intense stimulus
     std::vector<EmotionalEmbedding> thoughtMatrix;
     int bestTargetIndex = EvaluateThoughtMatrix(actor, emotion, sentientScore, thoughtMatrix);
     
-    // Commit results to the thought matrix
     if (bestTargetIndex != -1) {
         Actor* chosenTarget = actor->mTargets[bestTargetIndex];
-        EvaluateEmotionalBehavior(actor, chosenTarget, UniversalConst.emotionalThreshold, thoughtMatrix[bestTargetIndex]);
+        if (actor->state.mode == ActorState::Mode::MoveSocialize && actor->navigation.mTargetActor != nullptr) {
+            float maxThreat = glm::max(thoughtMatrix[bestTargetIndex].anger, thoughtMatrix[bestTargetIndex].fear);
+            if (maxThreat >= UniversalConst.emotionalThreshold) {
+                actor->state.mode = ActorState::Mode::Idle;
+            } else if (actor->navigation.mTargetActor->isActive && !actor->navigation.mTargetActor->isGarbage) {
+                chosenTarget = actor->navigation.mTargetActor;
+            } else {
+                actor->navigation.mTargetActor = nullptr;
+                actor->state.mode = ActorState::Mode::Idle;
+            }
+        }
         
+        EvaluateEmotionalBehavior(actor, chosenTarget, UniversalConst.emotionalThreshold, thoughtMatrix[bestTargetIndex]);
         emotion = thoughtMatrix[bestTargetIndex];
         actor->memories.thoughtProcessProjectionMatrix.push_back(emotion);
     } else {
+        
+        actor->navigation.mTargetActor = nullptr;
         actor->memories.thoughtProcessProjectionMatrix.push_back(emotion);
     }
     
-    // Flatten out the history matrix into the final active mood state
     ProjectEmotionalHistory(actor, emotion, sentientScore);
 }
 
@@ -50,29 +86,46 @@ void ActorSystem::ProcessMemoryTriggers(Actor* actor, EmotionalEmbedding& emotio
         float chance = trigger.value;
         if (Random.Range(0.0f, 1.0f) >= glm::pow(chance, 0.7f)) continue;
         
-        if (trigger.name == "curiosity") {
-            if (emotion.curiosity > UniversalConst.emotionalThreshold) emotion.curiosity = 0.0f;
-            emotion.curiosity += chance;
-        } 
-        else if (trigger.name == "libido") {
-            if (actor->counters.mBreedingCoolDownCounter == 0 && actor->physical.mAge >= actor->physical.mAgeAdult) {
-                emotion.libido += chance;
+        switch (trigger.type) {
+            case TriggerType::Curiosity:
+                if (emotion.curiosity > UniversalConst.emotionalThreshold) emotion.curiosity = 0.0f;
+                emotion.curiosity += chance;
+                break;
+                
+            case TriggerType::Libido:
+                if (actor->counters.mBreedingCoolDownCounter == 0 && actor->physical.mAge >= actor->physical.mAgeAdult) {
+                    emotion.libido += chance;
+                }
+                break;
+                
+            case TriggerType::Social:
+                if (actor->counters.mSocialCoolDownCounter == 0) {
+                    emotion.social += chance;
+                }
+                break;
+                
+            case TriggerType::Speak: {
+                std::string voiceName = actor->memories.Get("speak_voice");
+                Sound* voice = actor->voice.GetVoice(voiceName);
+                if (voice != nullptr) {
+                    Playback* playback = Audio.Play(voice);
+                    playback->isGarbage = true;
+                }
+                break;
             }
-        } 
-        else if (trigger.name == "social") {
-            if (actor->counters.mSocialCoolDownCounter == 0) {
-                emotion.social += chance;
-            }
-        } 
-        else if (trigger.name == "speak") {
-            std::string voiceName = actor->memories.Get("speak_voice"); 
-            Sound* voice = actor->voice.GetVoice(voiceName);
-            if (voice != nullptr) {
-                Playback* playback = Audio.Play(voice);
-                playback->isGarbage = true;
-            }
+            default:
+                break;
         }
-        
+    }
+}
+
+void ActorSystem::ApplyEmotionThresholds(const MemoryTrigger& trigger, EmotionalEmbedding& embedding) {
+    float* emotion = (trigger.type != TriggerType::Unknown) 
+                   ? embedding.GetEmotionByTrigger(trigger.type) 
+                   : embedding.GetEmotionByName(trigger.name);
+                   
+    if (emotion != nullptr) {
+        *emotion = glm::max(*emotion, trigger.value);
     }
 }
 
@@ -82,7 +135,6 @@ int ActorSystem::EvaluateThoughtMatrix(Actor* actor, const EmotionalEmbedding& b
     
     int bestTargetIndex = -1;
     float highestIntensity = -1.0f;
-    
     for (unsigned int i = 0; i < numberOfTargets; i++) {
         Actor* targetActor = actor->mTargets[i];
         if (!targetActor->isActive || targetActor->isGarbage) continue;
@@ -93,7 +145,7 @@ int ActorSystem::EvaluateThoughtMatrix(Actor* actor, const EmotionalEmbedding& b
         
         if (targetMemIt != actor->memories.mMemoryTriggers.end()) {
             for (const MemoryTrigger& trigger : targetMemIt->second) {
-                ApplyEmotionThresholds(trigger.name, trigger.value, outThoughtMatrix[i]);
+                ApplyEmotionThresholds(trigger, outThoughtMatrix[i]);
             }
         }
         
@@ -113,20 +165,30 @@ int ActorSystem::EvaluateThoughtMatrix(Actor* actor, const EmotionalEmbedding& b
                 kingdomIt = actor->memories.mMemoryTriggers.find(targetKingdom);
                 if (kingdomIt != actor->memories.mMemoryTriggers.end()) {
                     for (const MemoryTrigger& trigger : kingdomIt->second) {
-                        ApplyEmotionThresholds(trigger.name, trigger.value, outThoughtMatrix[i]);
+                        ApplyEmotionThresholds(trigger, outThoughtMatrix[i]);
                     }
                 }
             }
         }
         
-        // Calculate intensity to track best target
+        // Calculate base emotional intensity
         float intensity = glm::max(
             glm::max(outThoughtMatrix[i].anger, outThoughtMatrix[i].fear),
             glm::max(outThoughtMatrix[i].libido, outThoughtMatrix[i].curiosity)
         );
         
-        if (intensity > highestIntensity) {
-            highestIntensity = intensity;
+        float effectiveScore = intensity;
+        
+        // If anger is driving the action, prefer male combatants over females
+        if (outThoughtMatrix[i].anger >= UniversalConst.emotionalThreshold) {
+            bool isMaleTarget = targetActor->physical.GetSexualOrientation();
+            if (isMaleTarget) {
+                effectiveScore += 0.2f;
+            }
+        }
+        
+        if (effectiveScore > highestIntensity) {
+            highestIntensity = effectiveScore;
             bestTargetIndex = i;
         }
     }
@@ -157,16 +219,9 @@ void ActorSystem::ProjectEmotionalHistory(Actor* actor, EmotionalEmbedding& curr
     }
 }
 
-void ActorSystem::ApplyEmotionThresholds(const std::string& emotionType, float value, EmotionalEmbedding& embedding) {
-    float& emotion = *embedding.GetEmotionByName(emotionType);
-    emotion = glm::max(emotion, value);
-}
-
-
-
 bool ActorSystem::EvaluateEmotionalBehavior(Actor* actor, Actor* targetActor, float threshold, EmotionalEmbedding& emotion) {
-    // Handle socializing
-    if (actor->state.mode != ActorState::Mode::MoveSocialize &&
+    // Check socialization state trigger
+    if (actor->state.mode != ActorState::Mode::MoveSocialize && 
         emotion.social > emotion.anger && emotion.social > emotion.fear && emotion.social >= threshold && 
         actor->counters.mSocialCoolDownCounter == 0 &&
         emotion.stress < UniversalConst.emotionalThreshold && 
@@ -182,31 +237,37 @@ bool ActorSystem::EvaluateEmotionalBehavior(Actor* actor, Actor* targetActor, fl
             actor->navigation.mDistanceToTarget = glm::distance(glm::vec3(tarPos.x, 0.0f, tarPos.z), glm::vec3(pos.x, 0.0f, pos.z));
             return true;
         }
-        return false;
     }
     
-    for (const std::pair<std::string, ActorState::Mode>& behavior : BehavioralAssociation) {
-        const std::string& name = behavior.first;
+    for (const auto& behavior : BehavioralAssociation) {
+        TriggerType type = behavior.first;
         ActorState::Mode mode = behavior.second;
         
-        float* emotionValPtr = emotion.GetEmotionByName(name);
+        float* emotionValPtr = emotion.GetEmotionByTrigger(type);
         if (!emotionValPtr) continue;
         float value = *emotionValPtr;
         
-        // General validation
-        if (value <= threshold || 
-            value <= emotion.anger || 
-            value <= emotion.fear) 
-            continue;
+        if (value <= threshold) continue;
         
-        // Contextual rule enforcement
+        // Allow fear to take precedence over anger if fear >= anger
+        if (type == TriggerType::Anger && value < emotion.fear) continue;
+        if (type != TriggerType::Anger && type != TriggerType::Fear && value <= emotion.anger) continue;
+        if (type != TriggerType::Anger && type != TriggerType::Fear && value <= emotion.fear) continue;
         if (mode == ActorState::Mode::MoveAttack && (actor->state.mode == ActorState::Mode::MoveAttack || actor->counters.mAttackCoolDownCounter != 0)) continue;
         if (mode == ActorState::Mode::MoveBreed && actor->counters.mBreedingCoolDownCounter != 0) continue;
-        if (mode == ActorState::Mode::MoveRandom && (actor->state.mode == ActorState::Mode::MoveAttack || actor->state.mode == ActorState::Mode::MoveFlee)) continue;
         
+        if (mode == ActorState::Mode::MoveRandom && (actor->state.mode == ActorState::Mode::MoveAttack || 
+            actor->state.mode == ActorState::Mode::MoveFlee || 
+            actor->state.mode == ActorState::Mode::MoveSocialize || 
+            actor->state.mode == ActorState::Mode::MoveBreed)) 
+            continue;
+            
         // Execute state transition
         if (Random.Range(0.0f, 1.0f) < glm::pow(value, threshold)) {
             actor->state.mode = mode;
+            if (mode == ActorState::Mode::MoveFlee) {
+                actor->inventory.UnequipItem(); // Ensure weapon is put away when fleeing
+            }
             
             if (mode == ActorState::Mode::MoveRandom) {
                 CalculateRandomLocalPoint(actor);
@@ -214,11 +275,18 @@ bool ActorSystem::EvaluateEmotionalBehavior(Actor* actor, Actor* targetActor, fl
                     glm::vec3(actor->navigation.mTargetPoint.x, 0.0f, actor->navigation.mTargetPoint.z),
                     glm::vec3(actor->navigation.mPosition.x, 0.0f, actor->navigation.mPosition.z)
                 );
-            } else if (mode == ActorState::Mode::MoveBreed) {
+            } 
+            else if (mode == ActorState::Mode::MoveBreed) {
                 if (!actor->mTargets.empty()) actor->navigation.mTargetActor = actor->mTargets[0];
             } else {
                 actor->navigation.mTargetActor = targetActor;
                 if (mode == ActorState::Mode::MoveAttack) {
+                    emotion.comfort *= 0.3f;
+                    actor->memories.ScaleEmotion(TriggerType::Comfort, 0.3f);
+                    
+                    if (actor->inventory.inHandItemClass.empty()) 
+                        actor->inventory.EquipWeapon();
+                    
                     actor->navigation.mDistanceToTarget = glm::distance(
                         glm::vec3(targetActor->navigation.mPosition.x, 0.0f, targetActor->navigation.mPosition.z),
                         glm::vec3(actor->navigation.mPosition.x, 0.0f, actor->navigation.mPosition.z)
@@ -227,7 +295,6 @@ bool ActorSystem::EvaluateEmotionalBehavior(Actor* actor, Actor* targetActor, fl
             }
             return true;
         }
-        break; 
     }
     
     return false;

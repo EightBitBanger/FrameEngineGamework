@@ -35,10 +35,25 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             actor->state.mIsWalking = true;
             actor->state.mIsRunning = true;
             
-            actor->navigation.mTargetPoint.x = targetPosition.x;
-            actor->navigation.mTargetPoint.y = targetPosition.y;
-            actor->navigation.mTargetPoint.z = targetPosition.z;
-            actor->navigation.mTargetLook = targetPosition;
+            if (actor->navigation.mTargetActor != nullptr) {
+                glm::vec3 targetPos = actor->navigation.mTargetActor->navigation.mPosition;
+                
+                // 1. Generate a deterministic unique angle for this actor (using its memory address)
+                uintptr_t actorId = reinterpret_cast<uintptr_t>(actor);
+                float angleDeg = static_cast<float>(actorId % 360);
+                float angleRad = glm::radians(angleDeg);
+                
+                // 2. Set the offset radius slightly inside their maximum attack range
+                float attackRadius = actor->behavior.GetDistanceToAttack() * 0.5f;
+                
+                // 3. Offset the target point around the enemy
+                actor->navigation.mTargetPoint.x = targetPos.x + std::cos(angleRad) * attackRadius;
+                actor->navigation.mTargetPoint.y = targetPos.y;
+                actor->navigation.mTargetPoint.z = targetPos.z + std::sin(angleRad) * attackRadius;
+                
+                // 4. Keep looking directly at the center of the target actor
+                actor->navigation.mTargetLook = targetPos;
+            }
             actor->state.mIsFacing = true;
             
             forward = CalculateForwardVelocity(actor);
@@ -102,6 +117,14 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             break;
             
         case ActorState::Mode::MoveSocialize:
+            if (actor->navigation.mTargetActor == nullptr || 
+                !actor->navigation.mTargetActor->isActive || 
+                actor->navigation.mTargetActor->isGarbage) {
+                actor->navigation.mTargetActor = nullptr;
+                actor->state.mode = ActorState::Mode::Idle;
+                break;
+            }
+            
             actor->state.mIsWalking = true;
             actor->state.mIsRunning = false;
             
@@ -113,13 +136,12 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             forward = CalculateForwardVelocity(actor);
             forward *= speedScaler * actor->physical.mSpeedMul;
             
-            if (actor->navigation.mTargetActor != nullptr) {
-                if (!HandleSocializeWith(actor, actor->navigation.mTargetActor)) {
-                    if (glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition) < actor->behavior.mDistanceToInflict) {
-                        // Failure to socialize - set the correct social cooldown counter here
-                        actor->counters.mSocialCoolDownCounter = actor->behavior.mCooldownSocial;
-                        actor->state.mode = ActorState::Mode::Idle;
-                    }
+            if (!HandleSocializeWith(actor, actor->navigation.mTargetActor)) {
+                if (glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition) < actor->behavior.mDistanceToInflict) {
+                    // Failure to socialize - set social cooldown counter
+                    
+                    actor->counters.mSocialCoolDownCounter = actor->behavior.mCooldownSocial;
+                    actor->state.mode = ActorState::Mode::Idle;
                 }
             }
             break;

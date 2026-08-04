@@ -65,3 +65,17 @@ EmotionalEmbedding EmotionalEmbedding::operator*(float scalar) const {
     result.social    = this->social    * scalar;
     return result;
 }
+
+float* EmotionalEmbedding::GetEmotionByTrigger(TriggerType type) {
+    switch (type) {
+        case TriggerType::Fear:      return &fear;
+        case TriggerType::Anger:     return &anger;
+        case TriggerType::Comfort:   return &comfort;
+        case TriggerType::Curiosity: return &curiosity;
+        case TriggerType::Fatigue:   return &fatigue;
+        case TriggerType::Stress:    return &stress;
+        case TriggerType::Libido:    return &libido;
+        case TriggerType::Social:    return &social;
+        default:                     return nullptr;
+    }
+}

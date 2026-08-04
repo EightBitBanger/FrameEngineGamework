@@ -232,6 +232,7 @@ void ActorSystem::CombineParentMemories(const Actor* parentA, const Actor* paren
                         if (aIt->name == bIt->name) {
                             MemoryTrigger blended;
                             blended.name = aIt->name;
+                            blended.type = aIt->type;
                             blended.value = (aIt->value + bIt->value) * 0.5f;
                             blendedTriggers.push_back(blended);
                             foundMatch = true;
