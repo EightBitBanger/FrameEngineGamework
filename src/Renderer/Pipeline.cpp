@@ -95,6 +95,41 @@ void RenderSystem::RenderFrame(void) {
                 if (mesh == nullptr) 
                     continue;
                 
+                // Handle buffer load, unload, or first-time GPU allocation
+                if (mesh->doUnloadBuffer) {
+                    mesh->doUnloadBuffer = false;
+                    if (mesh->mAreBuffersAllocated) {
+                        mesh->mAreBuffersAllocated = false;
+                        mesh->FreeBuffers();
+                    }
+                } else if (mesh->doLoadBuffer || !mesh->mAreBuffersAllocated) {
+                    mesh->doLoadBuffer = false;
+                    mesh->mVertexBufferSz = mesh->mVertexBuffer.size();
+                    mesh->mIndexBufferSz  = mesh->mIndexBuffer.size();
+                    
+                    if (!mesh->mAreBuffersAllocated) {
+                        mesh->mAreBuffersAllocated = true;
+                        mesh->AllocateBuffers();
+                    }
+                    
+                    glBindVertexArray(mesh->mVertexArray);
+                    
+                    glBindBuffer(GL_ARRAY_BUFFER, mesh->mBufferVertex);
+                    glBufferData(
+                        GL_ARRAY_BUFFER,
+                        static_cast<GLsizeiptr>(mesh->mVertexBufferSz * sizeof(Vertex)),
+                        mesh->mVertexBuffer.data(),
+                        GL_STATIC_DRAW
+                    );
+                    
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->mBufferIndex);
+                    glBufferData(
+                        GL_ELEMENT_ARRAY_BUFFER,
+                        static_cast<GLsizeiptr>(mesh->mIndexBufferSz * sizeof(Index)),
+                        mesh->mIndexBuffer.data(),
+                        GL_STATIC_DRAW
+                    );
+                }
                 BindMesh( mesh );
                 
                 

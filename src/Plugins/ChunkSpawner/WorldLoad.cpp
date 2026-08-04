@@ -115,31 +115,6 @@ bool ChunkManager::LoadWorld(void) {
         continue;
     }
     
-    // Load chunks surrounding the player
-    /*
-    if (Engine.cameraController != nullptr) {
-        glm::vec3 playerPos = Engine.cameraController->GetPosition();
-        float halfChunk = chunkSize * 0.5f;
-        
-        int centerChunkX = (int)Math.Round((playerPos.x + halfChunk) / (float)chunkSize);
-        int centerChunkZ = (int)Math.Round((playerPos.z + halfChunk) / (float)chunkSize);
-        
-        // Queue up a 3x3 grid centered on the player
-        for (int dx = -3; dx <= 3; ++dx) {
-            for (int dz = -3; dz <= 3; ++dz) {
-                float chunkWorldX = (centerChunkX + dx) * (float)chunkSize;
-                float chunkWorldZ = (centerChunkZ + dz) * (float)chunkSize;
-                glm::vec2 chunkPos(chunkWorldX, chunkWorldZ);
-                
-                if (!IsChunkFound(chunkPos)) {
-                    Chunk* chunk = FindChunk(chunkPos.x, chunkPos.y);
-                    // Push immediately to the front of the line
-                    generating.push_back(chunk);
-                }
-            }
-        }
-    }
-    */
     return true;
 }
 

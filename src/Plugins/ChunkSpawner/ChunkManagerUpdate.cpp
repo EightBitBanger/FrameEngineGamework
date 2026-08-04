@@ -75,20 +75,21 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
         camPosXZ     = glm::vec2(camPtr->transform.position.x, camPtr->transform.position.z);
     }
     
-    const int chunkSizeSub = chunkSize;
-    const float streamRadius = (renderDistance * (chunkSizeSub * 0.5f));
-    const float inflateAabb  = (float)chunkSizeSub * 0.75f;
-    const float minForwardDot = 0.0f;
-    const int maxCreatesPerTick = 4;
-    int createsThisTick = 0;
+    const int chunkSizeSub        = chunkSize;
+    const float streamRadius      = (renderDistance * (chunkSizeSub * 0.5f));
+    const float inflateAabb       = (float)chunkSizeSub * 0.75f;
+    const float minForwardDot     = 0.0f;
+    const int maxCreatesPerTick   = 4;
+    int createsThisTick           = 0;
+    
+    const int forceLoadGridSize   = 1;
+    const int forceLoadRadius     = forceLoadGridSize / 2;
     
     // Center chunk indices
     const float halfChunk = (chunkSizeSub * 0.5f);
+    int centerChunkX = (int)Math.Round(playerPosition.x / (float)chunkSizeSub);
+    int centerChunkZ = (int)Math.Round(playerPosition.z / (float)chunkSizeSub);
     
-    int centerChunkX = (int)Math.Round((playerPosition.x + halfChunk) / (float)chunkSizeSub);
-    int centerChunkZ = (int)Math.Round((playerPosition.z + halfChunk) / (float)chunkSizeSub);
-    
-    // Old grid covered roughly +/- renderDistance/2 around center
     int maxRing = renderDistance / 2;
     if (maxRing < 1) maxRing = 1;
     
@@ -108,6 +109,7 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
             
             // Distance check is cheap (do this before frustum)
             glm::vec2 chunkPos(chunkWorldX, chunkWorldZ);
+            
             if (glm::distance(chunkPos, playerPos) > streamRadius)
                 return;
             
@@ -118,7 +120,10 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
             glm::vec2 dir = SafeNormalize2(toChunk);
             float dotF = glm::dot(dir, camForwardXZ);
             
-            if (dotF < minForwardDot)
+            // Force load the chunks immediately around the player
+            bool isCenterChunk = (std::abs(dx) <= forceLoadRadius && std::abs(dz) <= forceLoadRadius);
+            
+            if (!isCenterChunk && dotF < minForwardDot)
                 return;
             
             float dist2 = glm::dot(toChunk, toChunk);
@@ -154,7 +159,6 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
         
         // Process this ring’s candidates in forward order
         for (size_t i = 0; i < candidates.size(); ++i) {
-            
             int dx = candidates[i].dx;
             int dz = candidates[i].dz;
             
@@ -166,8 +170,9 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
             
             glm::vec2 chunkPos(chunkWorldX, chunkWorldZ);
             
-            // Frustum test
-            if (useFrustum) {
+            bool isCenterChunk = (std::abs(dx) <= forceLoadRadius && std::abs(dz) <= forceLoadRadius);
+            
+            if (useFrustum && !isCenterChunk) {
                 if (!ChunkIntersectsFrustum(frustum, chunkPos.x, chunkPos.y, (float)chunkSizeSub, inflateAabb))
                     continue;
             }

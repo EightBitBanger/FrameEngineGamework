@@ -20,11 +20,8 @@ Mesh::Mesh() :
     mPrimitive(GL_TRIANGLES),
     mVertexBufferSz(0),
     mIndexBufferSz(0),
-    mAreBuffersAllocated(true)
-{
-    AllocateBuffers();
-    SetDefaultAttributes();
-}
+    mAreBuffersAllocated(false),
+    mDoGenerateBuffers(true) {}
 
 Mesh::~Mesh() {
     FreeBuffers();
@@ -1269,6 +1266,8 @@ void Mesh::AllocateBuffers(void) {
     glGenBuffers(1, &mBufferIndex);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferIndex);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexBufferSz * sizeof(Index), NULL, GL_STATIC_DRAW);
+    
+    SetDefaultAttributes();
 }
 
 void Mesh::FreeBuffers(void) {
