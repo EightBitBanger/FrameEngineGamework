@@ -101,7 +101,7 @@ void Start() {
     
     // World rendering
     GameWorld.chunkSize = 64;
-    GameWorld.renderDistance = 7;
+    GameWorld.renderDistance = 8;
     GameWorld.staticDistance = 0.8f;
     GameWorld.actorDistance  = 0.4f;
     

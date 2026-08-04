@@ -74,7 +74,7 @@ void Start() {
     
     // Create a new camera controller object and 
     // assign it as the engines main camera.
-    Engine.cameraController = Engine.CreateCameraController( glm::vec3(136.0f, 2.7f, 104.0f) );
+    Engine.cameraController = CreateCameraController( glm::vec3(136.0f, 2.7f, 104.0f) );
     
     // Attach the sky to the player
     Weather.SetPlayerObject( Engine.cameraController );
@@ -108,9 +108,9 @@ void Start() {
     Transform* transform = Engine.cameraController->GetComponent<Transform>();
     transform->SetScale(playerScale);
     
-    playerRenderer->mesh = Engine.meshes.cube;
+    playerRenderer->mesh = Resources.meshes.cube;
     playerRenderer->material = Engine.Create<Material>();
-    playerRenderer->material->shader = Engine.shaders.color;
+    playerRenderer->material->shader = Resources.shaders.color;
     playerRenderer->material->ambient = Colors.black;
     playerRenderer->material->diffuse = Colors.dkgray;
     
@@ -384,7 +384,7 @@ void Start() {
     
     
     chassisRenderer->material = Renderer.CreateMaterial();
-    chassisRenderer->material->shader = Engine.shaders.color;
+    chassisRenderer->material->shader = Resources.shaders.color;
     Engine.sceneMain->AddMeshRendererToSceneRoot(chassisRenderer);
     
     chassisRenderer->material->EnableCulling();
@@ -422,7 +422,7 @@ void Start() {
     Material* wheelMaterial = Renderer.CreateMaterial();
     
     Resources.LoadMaterialFromTag("wheel", wheelMaterial, MATERIAL_FILTER_TRILINEAR, MATERIAL_FILTER_LINEAR);
-    wheelMaterial->shader = Engine.shaders.texture;
+    wheelMaterial->shader = Resources.shaders.texture;
     
     MeshTag* meshTag = Resources.FindMeshTag("wheel");
     wheelMesh->AddSubMesh(0.0f, 0.0f, 0.0f, meshTag->subMeshes[0], false);
@@ -669,7 +669,7 @@ void Start() {
             
             meshRenderer->material->ambient = Colors.black;
             meshRenderer->material->diffuse = Colors.white;
-            meshRenderer->material->shader = Engine.shaders.texture;
+            meshRenderer->material->shader = Resources.shaders.texture;
             
             // Shadow volume
             //meshRenderer->material->EnableShadowVolumePass();

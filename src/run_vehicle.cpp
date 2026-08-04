@@ -292,7 +292,7 @@ void Run() {
         Engine.console.WriteDialog(18, "Materials       " + Int.ToString(Renderer.GetNumberOfMaterials()) );
         Engine.console.WriteDialog(19, "RigidBodies     " + Int.ToString(Physics.world->getNbRigidBodies()) );
         Engine.console.WriteDialog(20, "Actors          " + Int.ToString(AI.GetNumberOfActors()) );
-        Engine.console.WriteDialog(21, "Colliders       " + Int.ToString(Engine.mBoxCollider.size()) );
+        //Engine.console.WriteDialog(21, "Colliders       " + Int.ToString(Engine.mBoxCollider.size()) );
         
     }
     
@@ -428,11 +428,7 @@ void Run() {
             }
             
             // Simple speed: walkSpeed vs runSpeed, with Shift as sprint
-            bool shiftPressed =
-                Input.CheckKeyCurrent(VK_SHIFT)  ||
-                Input.CheckKeyCurrent(VK_LSHIFT) ||
-                Input.CheckKeyCurrent(VK_RSHIFT);
-            
+            bool shiftPressed = Input.CheckKeyCurrent(VK_SHIFT);
             float baseSpeed = shiftPressed ? runSpeed : walkSpeed;
             float flySpeed  = baseSpeed;
             
@@ -495,7 +491,7 @@ void Run() {
         force += (inputDir - force) * inputLerp;
         force.y = 0.0f; // no vertical
         
-        bool shiftPressed = Input.CheckKeyCurrent(VK_SHIFT) || Input.CheckKeyCurrent(VK_LSHIFT) || Input.CheckKeyCurrent(VK_RSHIFT);
+        bool shiftPressed = Input.CheckKeyCurrent(VK_SHIFT);
         bool wantsRun = shiftPressed && hasMoveInput;
         
         // Detect run tap edges while moving

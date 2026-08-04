@@ -62,71 +62,37 @@ void Run() {
                 bodyColor *= Colors.MakeRandomGrayScale() * 0.4f;
                 bodyColor *= Color(0.9f, 0.1f, 0.1f);
                 
-                //if (Input.CheckKeyCurrent(VK_T)) {
+                std::string weaponBuildBlade  = "build: 0.0`0.2`0.0: 0.01`0.5`0.2: 0.4`0.4`0.44";
+                std::string weaponBuildHandle = "build: 0.0`-0.39`0.0: 0.25`0.1`0.25: 0.01`0.01`0.03";
+                std::string itemSword = "name:ironsword, damage:8.1, defense:1.0," + weaponBuildBlade +","+ weaponBuildHandle;
+                
+                std::string weaponBuildWood = "build: 0.0`0.1`0.0: 0.2`0.4`0.2: 0.02`0.02`0.001";
+                std::string itemStick = "name:stick, damage:1.2, defense:1.0," + weaponBuildWood;
+                
+                if (Input.CheckKeyCurrent(VK_T)) {
                     AI.genomes.presets.Dwarf(actor);
                     actor->CalculateBoundingRegionFromGenome();
                     
                     float age = Random.Range(actor->physical.GetAdultAge() / 2.0f, actor->physical.GetSeniorAge() * 1.15f);
                     bool sex = actor->physical.GetSexualOrientation();
                     
-                    if (Random.Range(0, 100) > 50) {
-                        
-                        std::string weaponBuildBlade  = "build: 0.0`0.2`0.0: 0.01`0.5`0.2: 0.4`0.4`0.44";
-                        std::string weaponBuildHandle = "build: 0.0`-0.39`0.0: 0.25`0.1`0.25: 0.01`0.01`0.03";
-                        std::string itemSword = "name:ironsword, damage:1.2, defense:1.0," + weaponBuildBlade +","+ weaponBuildHandle;
-                        
-                        std::string weaponBuildWood = "build: 0.0`0.1`0.0: 0.2`0.4`0.2: 0.02`0.02`0.001";
-                        std::string itemStick = "name:stick, damage:1.2, defense:1.0," + weaponBuildWood;
-                        
-                        if (Random.Range(0, 100) > 50) {
-                            actor->inventory.GiveItem(itemSword);
-                            actor->inventory.GiveItem(itemStick);
-                        } else {
-                            actor->inventory.GiveItem(itemStick);
-                            actor->inventory.GiveItem(itemSword);
-                        }
-                    }
-                    
                     actor->physical.SetAge( age );
                     
                     actor->memories.Add("kingdom", "Amethesian Empire");
                     actor->memories.Add("sentience", "quota:0.9");
-                    actor->memories.Add("behavior", "curiosity:0.2, libido:0.08, social:0.1");
+                    actor->memories.Add("behavior", "curiosity:0.3, libido:0.07, social:0.2");
+                    
+                    //give item VS add item ... what the fuck
                     
                     if (sex) {
-                        actor->memories.Add("Snort Fort Empire", "anger:0.7");
+                        actor->inventory.AddItem(itemStick);
+                        actor->memories.Add("Snort Fort Empire", "anger:0.9");
                     } else {
-                        actor->memories.Add("Snort Fort Empire", "fear:0.1");
+                        //actor->memories.Add("Snort Fort Empire", "fear:0.9");
                     }
+                    //actor->memories.Add("Dog", "fear:0.9");
                     
-                    actor->memories.Add("Dog", "fear:0.9");
-                    
-                    //
-                    // Give the actor a weapon
-                    /*
-                    if (age > actor->physical.GetAdultAge() && sex) {
-                        
-                        actor->inventory.holdingRenderer = Engine.Create<MeshRenderer>();
-                        actor->inventory.holdingRenderer->transform.scale = glm::vec3(0.08f, 1.1f, 0.08f);
-                        actor->inventory.damageMul = 200.5f;
-                        
-                        actor->inventory.holdingRenderer->mesh = Resources.meshes.cube;
-                        actor->inventory.holdingRenderer->material = Engine.Create<Material>();
-                        actor->inventory.holdingRenderer->material->shader = Resources.shaders.color;
-                        actor->inventory.holdingRenderer->material->ambient = Colors.white;
-                        actor->inventory.holdingRenderer->material->diffuse = Colors.brown * 0.1f;
-                        
-                        actor->inventory.handPosition = glm::vec3(0.0f, -0.5f, 0.0f);
-                        actor->inventory.handOffset   = glm::vec3(-0.01f, 0.3f, 0.0f);
-                        actor->inventory.handRotation = glm::vec3(1.570795f, 0.0f, 0.0f);
-                        actor->inventory.handScale    = glm::vec3(0.1f, 0.8f, 0.1f);
-                        
-                        Engine.sceneMain->AddMeshRendererToSceneRoot(actor->inventory.holdingRenderer);
-                        
-                    }
-                    */
-                //} else {
-                    /*
+                } else {
                     AI.genomes.presets.HumanWhite(actor);
                     
                     float age = Random.Range(actor->physical.GetAdultAge() / 2.0f, actor->physical.GetSeniorAge() * 1.15f);
@@ -136,18 +102,15 @@ void Run() {
                     
                     actor->memories.Add("kingdom", "Snort Fort Empire");
                     actor->memories.Add("sentience", "quota:0.9");
-                    actor->memories.Add("behavior", "curiosity:0.07, libido:0.01, social:0.3");
+                    actor->memories.Add("behavior", "curiosity:0.3, libido:0.07, social:0.2");
                     
                     if (sex) {
-                        actor->memories.Add("Amethesian Empire", "anger:0.7");
+                        actor->inventory.AddItem(itemSword);
+                        actor->memories.Add("Amethesian Empire", "anger:0.9");
                     } else {
-                        actor->memories.Add("Amethesian Empire", "fear:0.3");
+                        //actor->memories.Add("Amethesian Empire", "fear:0.9");
                     }
-                    
-                    actor->memories.Add("Dog", "fear:0.9");
-                    */
-                    
-                //}
+                }
                 
                 actor->RebuildGeneticExpression();
                 actor->isActive = true;
@@ -156,7 +119,14 @@ void Run() {
         
     }
     
-    
+    if (Input.CheckMouseRightPressed()) {
+        actorCheck = AI.Raycast(from, forward, distance);
+        if (actorCheck != nullptr) {
+            
+            actorCheck->memories.Add("test", "????????????????????????????????????????????????????????");
+        }
+        
+    }
     
     
     
@@ -226,26 +196,44 @@ void Run() {
             case ActorState::Mode::RunTo:         mode = "Running"; break;
             case ActorState::Mode::WalkTo:        mode = "Walking"; break;
         }
-        Engine.console.WriteDialog( 8, "State  " + mode );
+        Engine.console.WriteDialog(8, "State  " + mode );
         
         // Emotional state
         
-        Engine.console.WriteDialog( 10, "anger     " + Float.ToString(actorTarget->emotions.current.anger));
-        Engine.console.WriteDialog( 11, "fear      " + Float.ToString(actorTarget->emotions.current.fear));
-        Engine.console.WriteDialog( 12, "comfort   " + Float.ToString(actorTarget->emotions.current.comfort));
-        Engine.console.WriteDialog( 13, "curiosity " + Float.ToString(actorTarget->emotions.current.curiosity));
-        Engine.console.WriteDialog( 14, "fatigue   " + Float.ToString(actorTarget->emotions.current.fatigue));
-        Engine.console.WriteDialog( 15, "libido    " + Float.ToString(actorTarget->emotions.current.libido));
-        Engine.console.WriteDialog( 16, "stress    " + Float.ToString(actorTarget->emotions.current.stress));
-        Engine.console.WriteDialog( 17, "social    " + Float.ToString(actorTarget->emotions.current.social));
+        Engine.console.WriteDialog(10, "anger     " + Float.ToString(actorTarget->emotions.current.anger));
+        Engine.console.WriteDialog(11, "fear      " + Float.ToString(actorTarget->emotions.current.fear));
+        Engine.console.WriteDialog(12, "comfort   " + Float.ToString(actorTarget->emotions.current.comfort));
+        Engine.console.WriteDialog(13, "curiosity " + Float.ToString(actorTarget->emotions.current.curiosity));
+        Engine.console.WriteDialog(14, "fatigue   " + Float.ToString(actorTarget->emotions.current.fatigue));
+        Engine.console.WriteDialog(15, "libido    " + Float.ToString(actorTarget->emotions.current.libido));
+        Engine.console.WriteDialog(16, "stress    " + Float.ToString(actorTarget->emotions.current.stress));
+        Engine.console.WriteDialog(17, "social    " + Float.ToString(actorTarget->emotions.current.social));
         
         // Cool down counters
         
-        Engine.console.WriteDialog( 19, "Attack        " + Float.ToString(actorTarget->counters.GetCoolDownAttack()));
-        Engine.console.WriteDialog( 20, "Breeding      " + Float.ToString(actorTarget->counters.GetCoolDownBreeding()));
-        Engine.console.WriteDialog( 21, "Movement      " + Float.ToString(actorTarget->counters.GetCoolDownMovement()));
-        Engine.console.WriteDialog( 22, "Observe       " + Float.ToString(actorTarget->counters.GetCoolDownObservation()));
-        Engine.console.WriteDialog( 23, "Socialize     " + Float.ToString(actorTarget->counters.GetCoolDownSocial()));
+        Engine.console.WriteDialog(19, "Attack        " + Float.ToString(actorTarget->counters.GetCoolDownAttack()));
+        Engine.console.WriteDialog(20, "Breeding      " + Float.ToString(actorTarget->counters.GetCoolDownBreeding()));
+        Engine.console.WriteDialog(21, "Movement      " + Float.ToString(actorTarget->counters.GetCoolDownMovement()));
+        Engine.console.WriteDialog(22, "Observe       " + Float.ToString(actorTarget->counters.GetCoolDownObservation()));
+        Engine.console.WriteDialog(23, "Socialize     " + Float.ToString(actorTarget->counters.GetCoolDownSocial()));
+        
+        // Memories
+        Engine.console.textDialog[25]->color = Colors.green * 0.8f;
+        Engine.console.WriteDialog(25, "[Memories]");
+        
+        unsigned int numberOfMemories = actorTarget->memories.GetNumberOfMemories();
+        for (unsigned int i=0; i < DIALOG_NUMBER_OF_ELEMENTS; i++) 
+            Engine.console.WriteDialog(26 + i, "");
+        
+        for (unsigned int i=0; i < numberOfMemories && i < DIALOG_NUMBER_OF_ELEMENTS; i++) {
+            std::string memory;
+            
+            std::string name = actorTarget->memories.GetMemoryNameByIndex(i);
+            std::string value = actorTarget->memories.GetMemoryValueByIndex(i);
+            
+            memory = name + " == " + value;
+            Engine.console.WriteDialog(26 + i, memory);
+        }
         
         // Update bounding box
         glm::vec3 boundsMax = actorTarget->GetBoundingBoxMax();
