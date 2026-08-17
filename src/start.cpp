@@ -6,6 +6,10 @@
 MeshRenderer* boundsRenderer = nullptr;
 Panel* selectedTab = nullptr;
 
+std::vector<std::pair<std::string, glm::vec3>> QueryWorld(const glm::vec3& position, float range) {return GameWorld.QueryRadiusNames(position, range);}
+bool PlaceWorld(const std::string& type, const glm::vec3& position, const glm::vec3& rotation) {return GameWorld.PlaceDecorAt(type, position, rotation);}
+bool RemoveWorld(const glm::vec3& position) {return GameWorld.RemoveDecorAt(position);}
+
 void Start() {
     // Key bindings
     Input.BindKeyPressToFunction(VK_F4,     keyBindF4);
@@ -101,13 +105,16 @@ void Start() {
     
     // World rendering
     GameWorld.chunkSize = 64;
-    GameWorld.renderDistance = 8;
-    GameWorld.staticDistance = 0.8f;
-    GameWorld.actorDistance  = 0.4f;
+    GameWorld.renderDistance = 13;
+    GameWorld.staticDistance = 0.6f;
+    GameWorld.actorDistance  = 0.3f;
     
     GameWorld.world.snowCapHeight = 20.0f;
     GameWorld.world.snowCapBias = 8.0f;
     GameWorld.world.waterLevel = -8.0f;
+    
+    // Set the world query callback
+    AI.SetWorldRaycastCallback(QueryWorld, PlaceWorld, RemoveWorld);
     
     // Physics
     
@@ -130,5 +137,7 @@ void Start() {
         //Inventory.LoadFromFile("worlds/" + GameWorld.world.name);
         
     }
+    Weather.Update();
+    
 }
 
