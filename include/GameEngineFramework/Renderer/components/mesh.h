@@ -83,8 +83,11 @@ public:
     /// Rotate a sub mesh around an arbitrary world-space point.
     bool ChangeSubMeshRotationAroundPoint(unsigned int index, float angle, glm::vec3 axis, glm::vec3 center);
     
-    /// Update the scale of a sub mesh.
+    /// Multiply the scale of a sub mesh.
     bool ChangeSubMeshScale(unsigned int index, float x, float y, float z);
+    
+    /// Add scale to a sub mesh.
+    bool ChangeSubMeshAddScale(unsigned int index, float scaleX, float scaleY, float scaleZ);
     
     /// Update the points of a sub mesh.
     bool ChangeSubMeshPoints(unsigned int index, std::vector<glm::vec3> points);

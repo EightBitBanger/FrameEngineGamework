@@ -10,6 +10,15 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/Biome.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/Structure.h>
 #include <GameEngineFramework/Plugins/ChunkSpawner/StaticObject.h>
+#include <GameEngineFramework/Plugins/ChunkSpawner/HeightMapping.h>
+
+#include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
+
+#include <utility>
+
+extern ParticleSystem Particle;
+
+ENGINE_API glm::vec3 SnapAxes(glm::vec3 p, glm::bvec3 axes, float grid, glm::vec3 origin = glm::vec3(0.0f));
 
 struct DecorationHitInfo {
     bool didHit = false;
@@ -24,6 +33,14 @@ struct DecorationHitInfo {
     glm::vec3 rotation;
 };
 
+struct NearbyStaticInfo {
+    std::string type;
+    std::string mesh;
+    glm::vec3 worldPosition;
+    glm::vec3 rotation;
+    glm::vec3 scale;
+    float distance;
+};
 
 class ENGINE_API ChunkManager {
 public:
@@ -84,77 +101,47 @@ public:
     bool ApplyWorldRule(std::string key, std::string value);
     
     // Biome generation
+    
     void GenerateBiome(glm::vec3* colorField, float* heightField, Chunk* chunk, Biome* biome, float* weightMask, float* totalWeights);
     
-    
-    /// Set a layer of perlin noise into a color field.
-    void AddColorFieldFromPerlinNoise(glm::vec3* colorField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, Color color, int offsetX, int offsetZ);
-    
-    // World generation
-    
-    /// Initiates a height field grid array of points and set them to zero.
-    void SetHeightFieldValues(float* heightField, unsigned int width, unsigned int height, float value);
-    
-    /// Add a layer of perlin noise into a height field. The minimum 
-    /// height value will be returned.
-    float AddHeightFieldFromPerlinNoise(float* heightField, unsigned int width, unsigned int height, float noiseWidth, float noiseHeight, float noiseMul, int offsetX, int offsetZ, float heightThreshold, int seed);
-    
-    // Color field
-    
-    /// Initiates a color field grid array of colors and set them to zero.
-    void SetColorFieldValues(glm::vec3* colorField, unsigned int width, unsigned int height, Color color, float noise);
-    
-    /// Generate a color field containing a color range from from low to high. The bias will determine the fade 
-    /// from the low color to the high color based on the height field values.
-    void GenerateColorFieldFromHeightField(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color low, Color high, float bias, float beginHeight);
-    
-    /// Smooth the terrain height starting at a given height level and moving downward.
-    void GenerateWaterTableFromHeightField(float* heightField, unsigned int width, unsigned int height, float tableHeight);
-    
-    /// Generate a snow cap effect of a given color capColor and starting at the height beginHeight.
-    /// The bias will determine how much snow will be added.
-    void AddColorFieldSnowCap(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color capColor, float beginHeight, float bias);
-    
-    /// Generate a water level effect.
-    void AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color waterColor, float beginHeight, float bias, float waterTableHeight);
+    // Auxiliary
     
     /// Translate a color by name to a color value.
     Color GetColorByName(const std::string& name);
     
-    // Mapping to a mesh
+    // Raycast / query
     
-    /// Apply the height field values to a mesh.
-    void AddHeightFieldToMesh(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int subTessX=1.0f, unsigned int subTessZ=1.0f);
+    /// Queries all static objects within a given radius around a world position.
+    std::vector<NearbyStaticInfo> QueryRadius(const glm::vec3& centerPosition, float range);
     
-    /// Apply a reduced quality version of the height field values to a mesh. This function will
-    /// reduce the mesh by one half of the original size.
-    void AddHeightFieldToMeshSimplified(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int simplifyFactor);
+    /// Queries static objects in range and returns a list of (Name, WorldPosition) pairs.
+    std::vector<std::pair<std::string, glm::vec3>> QueryRadiusNames(const glm::vec3& centerPosition, float range);
     
-    void AddHeightFieldToMeshLOD(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int lodFactor);
+    /// Query for a decoration using a raycast
+    DecorationHitInfo QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
     
-    /// Apply the height field values to the mesh using a quality resolution value.
-    void AddHeightFieldToMeshReduced(Mesh* mesh, float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int resolution);
+    /// World query function
+    std::string QueryWorld(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
     
-    /// Generate a height field mesh from perlin noise.
-    Mesh* CreateMeshFromHeightField(float* heightField, glm::vec3* colorField, unsigned int width, unsigned int height, float offsetX, float offsetZ);
+    /// Decoration functions
+    void AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, const glm::vec3& position, const glm::vec3& rotation, glm::vec3 scale = glm::vec3(0.0f), glm::vec3 color = glm::vec3(-1.0f), int function = -1);
     
-    /// Apply a height stepping effect to the mesh.
-    void AddHeightStepToMesh(float* heightField, unsigned int width, unsigned int height);
+    // Decoration placement
+    bool PlaceDecor(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance, float threshold);
+    bool PlaceStructure(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance = 100.0f, float threshold = 0.5f);
+    bool PlaceDecorAt(const std::string& type, const glm::vec3& position, const glm::vec3& rotation = glm::vec3(0.0f));
+    bool PlaceStructureAt(const std::string& name, const glm::vec3& worldPosition);
+    
+    // Decoration removal
+    bool RemoveDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
+    bool RemoveDecorAt(const glm::vec3& position, float tolerance = 0.1f);
     
     void Initiate(void);
     
-    void Update(void);
+    void Update(float deltaTime);
+    void UpdateStaticObjects(float deltaTime);
     
-    // Decoration functions
-    void AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, const glm::vec3& position, const glm::vec3& rotation);
-    
-    DecorationHitInfo QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
-    bool PlaceDecor(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance, float threshold);
-    bool RemoveDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
-    
-    
-    //void DecodeGenome(std::string name, Actor* actorPtr);
-    
+    // Internal chunk decoration
     void Decorate(Chunk* chunk);
     
     // Build functions
@@ -181,6 +168,8 @@ public:
     PoolAllocator<Chunk> chunks;
     
 private:
+    
+    HeightMapping generation;
     
     // Chunk generation thread
     std::thread* generationThread;
@@ -209,24 +198,14 @@ private:
     int mChunkCounterX;
     int mChunkCounterZ;
     
-    // Cool down counters
-    
-    unsigned int mBreedingCoolDown;
-    unsigned int mDeathCoolDown;
-    
-    // Mesh cache
-public:
-    
     std::unordered_map<std::string, unsigned int> mStaticMeshToIndex;
     std::unordered_map<unsigned int, std::string> mStaticIndexToMesh;
     
     std::unordered_map<std::string, SubMesh> mStaticMeshes;
     
-private:
-    
     Mesh* waterMesh;
     
-    // World fogs
+    // World fog layers
     
     Fog* fogWater;
     

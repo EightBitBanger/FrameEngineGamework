@@ -1,48 +1,25 @@
 #ifndef CORE_PROFILER
 #define CORE_PROFILER
 
-#include <GameEngineFramework/Timer/Timer.h>
+#include <GameEngineFramework/Profiler/scopeprofile.h>
+
+#include <map>
+#include <string>
+#include <mutex>
 
 class ENGINE_API ProfilerTimer {
-    
 public:
+    void SubmitProfile(ScopeProfile& profile);
     
-    /// Profile result for the render system.
-    float profileRenderSystem;
+    /// Safely retrieves a snapshot of current profiling results
+    std::map<std::string, float> GetProfiles();
     
-    /// Profile result for the physics system.
-    float profilePhysicsSystem;
-    
-    /// Profile result for the engine system.
-    float profileGameEngineUpdate;
-    
-    /// Profile result for the AI system.
-    float profileActorAI;
-    
-    /// Begin the profile timer.
-    void Begin(void);
-    
-    /// Check the elapse time since begin.
-    float Query(void);
-    
-    /// Check if the profiler is active.
-    bool CheckIsProfilerActive(void);
-    
-    /// Start the profiler.
-    void Activate(void);
-    
-    /// Stop the profiler.
-    void Deactivate(void);
-    
-    ProfilerTimer();
+    /// Clear the frame timers for the next frame update loop
+    void Reset();
     
 private:
-    
-    // Should the profiler profile the system update functions
-    bool isActive;
-    
-    Timer timer;
-    
+    std::map<std::string, float> mDeltaList;
+    std::mutex mux;
 };
 
 #endif

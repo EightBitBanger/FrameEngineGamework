@@ -7,6 +7,7 @@
 #include <GameEngineFramework/Plugins/WeatherSystem/WeatherSystem.h>
 #include <GameEngineFramework/Plugins/ParticleSystem/ParticleSystem.h>
 #include <GameEngineFramework/Plugins/VehicleSystem/VehicleSystem.h>
+#include <GameEngineFramework/Plugins/NameSystem/NameSystem.h>
 
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 #include <GameEngineFramework/Plugins/InventorySystem/InventorySystem.h>

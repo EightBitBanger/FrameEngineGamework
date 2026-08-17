@@ -4,6 +4,7 @@
 class ENGINE_API ClassDefinition {
 public:
     unsigned int id;
+    short function;
     
     std::string mesh;
     
@@ -21,13 +22,15 @@ public:
     
     ClassDefinition() : 
         id(0),
+        function(0),
         mesh(""),
         width(0.0f),
         height(0.0f),
         colorMin(0.0, 0.0, 0.0),
         colorMax(0.0, 0.0, 0.0),
         stackMax(1),
-        bitmap("")
+        bitmap(""),
+        alignment(0)
     {}
 };
 

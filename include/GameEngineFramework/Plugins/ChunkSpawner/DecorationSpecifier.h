@@ -37,9 +37,7 @@ public:
         
         threshold(0.1f),
         noise(0.1f)
-    {
-    }
-    
+    {}
 };
 
 #endif

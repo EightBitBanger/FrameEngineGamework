@@ -10,22 +10,26 @@ public:
         unsigned int heightMin;
         unsigned int heightMax;
         glm::vec3 position;
+        glm::vec3 rotation;
         
         SubStructureStack() : 
             name(""),
             heightMin(0),
             heightMax(0),
-            position({0.0f}) {}
+            position({0.0f}),
+            rotation({0.0f}) {}
     };
     
     class SubStructurePlace {
     public:
         std::string name;
         glm::vec3 position;
+        glm::vec3 rotation;
         
         SubStructurePlace() : 
-            name(""),
-            position({0.0f}) {}
+            name(""), 
+            position({0.0f}), 
+            rotation({0.0f}) {}
     };
     
     class SubStructureFill {

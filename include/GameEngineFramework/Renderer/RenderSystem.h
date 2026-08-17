@@ -293,7 +293,7 @@ private:
     
     // Passes
     
-    bool GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection);
+    bool GeometryPass(MeshRenderer* currentEntity, Mesh* mesh, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection);
     bool ShadowVolumePass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection);
     bool SortingPass(glm::vec3& eye, std::vector<MeshRenderer*>* renderQueueGroup);
     Mesh* LevelOfDetailPass(MeshRenderer* currentEntity, glm::vec3& eye);

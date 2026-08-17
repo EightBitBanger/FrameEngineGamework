@@ -3,6 +3,11 @@
 
 #include <GameEngineFramework/Engine/Engine.h>
 
+class ENGINE_API StaticAnimation {
+public:
+    size_t staticIndex;      // Index into the chunk->statics vector
+};
+
 class ENGINE_API StaticObject {
 public:
     glm::vec3 position;
@@ -11,9 +16,10 @@ public:
     glm::vec3 color;
     unsigned int mesh;
     unsigned int type;
+    short function;
+    
     StaticObject();
 };
-
 
 // Structure for saving static elements to file
 struct StaticElement {
@@ -23,7 +29,7 @@ struct StaticElement {
     glm::vec3 color;
     unsigned int mesh;
     unsigned int type;
+    short function;
 };
-
 
 #endif
