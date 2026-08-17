@@ -19,14 +19,26 @@ public:
     
     EmotionalEmbedding();
     
+    // Set all emotions to zero.
     void Clear();
     
-    float* GetEmotionByName(std::string name);
+    // Set all emotions to random values.
+    void Randomize();
     
-    float* GetEmotionByTrigger(TriggerType type);
+    // Randomize appropriate emotions and zero the rest.
+    void Initiate();
+    
+    float* GetEmotionByName(std::string name);
+    float* GetEmotionByTrigger(const TriggerType& type);
+    
+    EmotionalEmbedding& operator=(const EmotionalEmbedding& rhs);
+    EmotionalEmbedding& operator=(float scalar);
     
     EmotionalEmbedding& operator+=(const EmotionalEmbedding& rhs);
+    EmotionalEmbedding& operator*=(const EmotionalEmbedding& rhs);
+    EmotionalEmbedding& operator*=(float scalar);
     EmotionalEmbedding& operator/=(float scalar);
+    
     EmotionalEmbedding operator*(float scalar) const;
 };
 

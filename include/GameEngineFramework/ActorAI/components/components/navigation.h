@@ -52,6 +52,9 @@ private:
     
     Actor* mTargetActor;     // Target actor currently in focus
     
+    // List of static objects in the area
+    std::vector<std::pair<std::string, glm::vec3>> mQueryStatic;
+    
     // List of points to determine height
     // Height is updated on another thread
     std::vector<glm::vec3> mQueryPoints;

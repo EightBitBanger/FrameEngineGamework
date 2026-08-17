@@ -20,7 +20,7 @@
 #include <GameEngineFramework/ActorAI/components/components/vocal.h>
 #include <GameEngineFramework/ActorAI/components/components/state.h>
 #include <GameEngineFramework/ActorAI/components/components/animation.h>
-#include <GameEngineFramework/ActorAI/components/components/idiosync.h>
+#include <GameEngineFramework/ActorAI/components/components/memory.h>
 #include <GameEngineFramework/ActorAI/components/components/genetics.h>
 #include <GameEngineFramework/ActorAI/components/components/biological.h>
 #include <GameEngineFramework/ActorAI/components/components/emotional.h>

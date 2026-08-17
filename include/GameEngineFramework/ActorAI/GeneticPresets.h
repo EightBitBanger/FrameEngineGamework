@@ -43,6 +43,7 @@ public:
         void Bear(Actor* targetActor);
         void Dog(Actor* targetActor);
         void Cat(Actor* targetActor);
+        void Rabbit(Actor* targetActor);
         
         void Sheep(Actor* targetActor);
         void Boar(Actor* targetActor);

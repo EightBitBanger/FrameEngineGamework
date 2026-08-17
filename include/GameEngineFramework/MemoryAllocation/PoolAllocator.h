@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <cstdint>
 
+#define  DEFAULT_POOL_SZ   128
+
 #define  ENABLE_CONSOLE_DEBUG__
 #define  ENABLE_DEBUG_DETAILS__
 //#define  ENABLE_LEAK_DETECTION__
@@ -34,12 +36,12 @@ public:
     T* operator[](unsigned int const i) { return m_activeList[i]; }
     
     PoolAllocator() : 
-        m_poolSz(80),
+        m_poolSz(DEFAULT_POOL_SZ),
         m_poolCount(0) 
     {allocatePool();}
     
     PoolAllocator(CustomAllocator customAllocator) : 
-        m_poolSz(customAllocator.poolSize > 0 ? customAllocator.poolSize : 80),
+        m_poolSz(customAllocator.poolSize > 0 ? customAllocator.poolSize : DEFAULT_POOL_SZ),
         m_poolCount(0) 
     {
         int count = (customAllocator.poolCount < 1) ? 1 : customAllocator.poolCount;
@@ -121,11 +123,11 @@ public:
         std::lock_guard<std::mutex> lock(mux);
         if (!objectPtr) return false;
         
-        // Validate that this pointer is currently active (O(1) membership)
+        // Validate pointer is active
         auto it = m_activeIndex.find(objectPtr);
         if (it == m_activeIndex.end()) return false;
         
-        // Locate pool by address range (few pools => trivial)
+        // Locate pool by address range
         int poolIdx = findOwningPool(objectPtr);
         if (poolIdx < 0) return false;
         
@@ -144,7 +146,7 @@ public:
 #endif
         pool.pushFree(slotIdx);
         
-        // Remove from active list in O(1): swap-erase
+        // Remove from active list swap-erase
         int idx = it->second;
         int lastIdx = static_cast<int>(m_activeList.size()) - 1;
         if (idx != lastIdx) {

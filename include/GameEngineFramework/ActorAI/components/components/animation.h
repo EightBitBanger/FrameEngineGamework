@@ -13,6 +13,8 @@ public:
     AnimationState();
     
 private:
+    // Animation timer
+    float mWalkTime;
     
     // List of animation states for each genetic component
     std::vector<glm::vec4> mAnimation;

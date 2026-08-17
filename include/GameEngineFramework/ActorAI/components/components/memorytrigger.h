@@ -34,6 +34,7 @@ public:
     std::string name;
     
     float value = 0.0f;
+    glm::vec3 vector = glm::vec3(0.0f);
 };
 
 #endif

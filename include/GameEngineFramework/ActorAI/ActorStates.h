@@ -12,6 +12,9 @@ enum class Mode {
     Idle,
     Sleeping,
     
+    MovePlanting,
+    MoveHarvesting,
+    
     MoveHunting,
     MoveBreed,
     MoveSocialize,
