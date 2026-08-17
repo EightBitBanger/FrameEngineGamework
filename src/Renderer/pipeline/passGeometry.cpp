@@ -4,7 +4,7 @@
 #include <GameEngineFramework/Types/Types.h>
 
 
-bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection) {
+bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, Mesh* mesh, glm::vec3& eye, glm::vec3& cameraAngle, glm::mat4& viewProjection) {
     
     // Set the projection
     mCurrentShader->SetProjectionMatrix( viewProjection );
@@ -22,7 +22,7 @@ bool RenderSystem::GeometryPass(MeshRenderer* currentEntity, glm::vec3& eye, glm
     mCurrentShader->SetMaterialSpecular(mCurrentMaterial->specular);
     
     // Render the geometry
-    currentEntity->mesh->DrawIndexArray();
+    mesh->DrawIndexArray();
     mNumberOfDrawCalls++;
     
     return true;

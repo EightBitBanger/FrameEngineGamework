@@ -1,10 +1,11 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
+#include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
+
 bool ChunkManager::LoadChunk(Chunk* chunk) {
     std::string chunkPosStr = Float.ToString( chunk->x ) + "_" + Float.ToString( chunk->y );
     std::string worldChunks = "worlds\\" + world.name + "\\chunks\\";
     std::string worldStatic = "worlds\\" + world.name + "\\static\\";
-    
     std::string chunkName = worldChunks + chunkPosStr;
     std::string staticName = worldStatic + chunkPosStr;
     
@@ -14,12 +15,11 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
         if (fileSize != 0) {
             std::string dataBuffer;
             dataBuffer.resize(fileSize);
-            
             Serializer.Deserialize(chunkName, (void*)dataBuffer.data(), fileSize);
             std::vector<std::string> bufferArray = String.Explode(dataBuffer, '\n');
             
             unsigned int numberOfLines = bufferArray.size();
-            for (unsigned int i=0; i < numberOfLines; i++) {
+            for (unsigned int i = 0; i < numberOfLines; i++) {
                 std::string lineString = bufferArray[i];
                 std::vector<std::string> lineArray = String.Explode(lineString, '~');
                 if (lineArray.size() < 7) 
@@ -37,10 +37,10 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
                 unsigned long long int age = String.ToLongUint( lineArray[3] );
                 actor->physical.SetAge(age);
                 
-                // Load in hand item
+                // Load inventory
                 std::string& itemClassList = lineArray[4];
                 std::vector<std::string> itemList = String.Explode(itemClassList, '#');
-                for (unsigned int a=0; a < itemList.size(); a++) {
+                for (unsigned int a = 0; a < itemList.size(); a++) {
                     actor->inventory.GiveItem( itemList[a] );
                 }
                 
@@ -52,49 +52,50 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
                 
                 // Memories
                 std::vector<std::string> memories = String.Explode(lineArray[6], '|');
-                for (unsigned int m=0; m < memories.size(); m++) {
+                for (unsigned int m = 0; m < memories.size(); m++) {
                     const std::string& memory = memories[m];
                     if (!memory.empty()) {
                         std::vector<std::string> pairSplit = String.Explode(memory, '=');
-                        
                         if (pairSplit.size() == 2) {
                             actor->memories.Add(pairSplit[0], pairSplit[1]);
                         }
                     }
                 }
-                
             }
-            
         }
-        
     }
     
-    // Load static
-    
+    // Load static objects
     if (Serializer.CheckExists( staticName )) {
         MeshRenderer* meshRenderer = chunk->staticObject->GetComponent<MeshRenderer>();
         Mesh* staticMesh = meshRenderer->mesh;
         
         unsigned int fileSize = Serializer.GetFileSize(staticName);
         unsigned int numberOfStaticElements = fileSize / sizeof(StaticElement);
-        
-        StaticElement staticElements[numberOfStaticElements];
-        Serializer.Deserialize(staticName, (void*)staticElements, fileSize);
-        
-        unsigned int currentIndex = sizeof(unsigned int)-1;
-        
-        for (unsigned int i=0; i < numberOfStaticElements; i++) {
-            glm::vec3 position = staticElements[i].position;
-            glm::vec3 rotation = staticElements[i].rotation;
-            glm::vec3 scale    = staticElements[i].scale;
-            glm::vec3 color    = staticElements[i].color;
+        if (numberOfStaticElements > 0) {
+            std::vector<StaticElement> staticElements(numberOfStaticElements);
+            Serializer.Deserialize(staticName, (void*)staticElements.data(), fileSize);
             
-            AddDecor(chunk, mStaticIndexToMesh[staticElements[i].mesh], world.classIndexToName[staticElements[i].type], position, rotation);
+            for (unsigned int i = 0; i < numberOfStaticElements; i++) {
+                glm::vec3 position = staticElements[i].position;
+                glm::vec3 rotation = staticElements[i].rotation;
+                glm::vec3 scale    = staticElements[i].scale;
+                glm::vec3 color    = staticElements[i].color;
+                int function       = staticElements[i].function;
+                
+                AddDecor(chunk, 
+                         mStaticIndexToMesh[staticElements[i].mesh], 
+                         world.classIndexToName[staticElements[i].type], 
+                         position, 
+                         rotation, 
+                         scale, 
+                         color, 
+                         function);
+            }
         }
         
         staticMesh->Load();
     }
     
-    return 1;
+    return true;
 }
-

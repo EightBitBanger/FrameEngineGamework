@@ -44,7 +44,6 @@ void Emitter::AddParticle(glm::vec3 position, glm::vec3 initialScale, glm::vec3 
     unsigned int numberOfVertices = particleSubMesh.vertexBuffer.size();
     
     for (unsigned int i = 0; i < numberOfVertices; i++) {
-        
         particleSubMesh.vertexBuffer[i].x *= initialScale.x;
         particleSubMesh.vertexBuffer[i].y *= initialScale.y;
         particleSubMesh.vertexBuffer[i].z *= initialScale.z;
@@ -59,18 +58,16 @@ void Emitter::AddParticle(glm::vec3 position, glm::vec3 initialScale, glm::vec3 
     mParticlePositions.push_back(position);
     mParticleVelocities.push_back(force);
     mParticleScale.push_back(glm::vec3(1.0f));
-    mParticleColors.push_back(glm::vec3(colorBegin.r, colorBegin.g, colorBegin.b));
+    mParticleColors.push_back(glm::vec4(colorBegin.r, colorBegin.g, colorBegin.b, colorBegin.a));
 }
 
 unsigned int Emitter::ResetParticle(unsigned int index, glm::vec3 initialScale, Color initialColor) {
-    // Reset mesh fully
     SubMesh particleSubMesh;
     Resources.meshes.cube->GetSubMesh(0, particleSubMesh);
     
     unsigned int numberOfVertices = particleSubMesh.vertexBuffer.size();
     
     for (unsigned int i = 0; i < numberOfVertices; i++) {
-        
         particleSubMesh.vertexBuffer[i].x *= initialScale.x;
         particleSubMesh.vertexBuffer[i].y *= initialScale.y;
         particleSubMesh.vertexBuffer[i].z *= initialScale.z;
@@ -103,7 +100,7 @@ unsigned int Emitter::ResetParticle(unsigned int index, glm::vec3 initialScale, 
     }
     mParticleVelocities[index] = direction + randomVelocity;
     
-    mParticleColors[index] = glm::vec3(colorBegin.r, colorBegin.g, colorBegin.b);
+    mParticleColors[index] = glm::vec4(colorBegin.r, colorBegin.g, colorBegin.b, colorBegin.a);
     return index;
 }
 

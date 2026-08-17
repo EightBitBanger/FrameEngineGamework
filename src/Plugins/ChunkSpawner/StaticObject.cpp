@@ -6,4 +6,5 @@ StaticObject::StaticObject() :
     scale(glm::vec3(1)),
     color(glm::vec3(0)),
     mesh(0),
-    type(0) {}
+    type(0),
+    function(0) {}

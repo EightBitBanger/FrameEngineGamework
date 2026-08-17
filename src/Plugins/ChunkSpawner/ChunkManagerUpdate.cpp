@@ -1,18 +1,25 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
+#include <unordered_set>
 
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
+#include <GameEngineFramework/Engine/EngineSystems.h>
 
-void ChunkManager::Update(void) {
+void ChunkManager::Update(float deltaTime) {
     if (Engine.cameraController == nullptr || !world.doGenerateChunks)
         return;
     
     glm::vec3 playerPosition = Engine.cameraController->GetPosition();
     
     InitializePlayerHeight(playerPosition);
+    
     UpdateFogSettings(playerPosition);
+    
     DestroyChunks(playerPosition);
+    
     GenerateChunks(playerPosition);
+    
+    UpdateStaticObjects(deltaTime);
 }
 
 static Frustum BuildStreamingFrustumFromCamera(Camera& cam) {
@@ -46,11 +53,116 @@ struct RingCandidate {
     float dist2;
 };
 
-static glm::vec2 SafeNormalize2(const glm::vec2& v) {
+static glm::vec2 NormalizeSqrt(const glm::vec2& v) {
     float len2 = glm::dot(v, v);
     if (len2 <= 0.000001f)
         return glm::vec2(0.0f, 0.0f);
     return v / std::sqrt(len2);
+}
+
+void ChunkManager::UpdateStaticObjects(float deltaTime) {
+    if (chunks.Size() == 0) 
+        return;
+    
+    const float maxAllowedDelta = 0.01f;
+    float growthDelta = std::min(deltaTime, maxAllowedDelta);
+    
+    const float ticksPerPlantPerSecond  = 90.3f;
+    static float tickAccumulator        = 0.0f;
+    
+    std::vector<Chunk*> activeChunks;
+    size_t totalActivePlants = 0;
+    for (unsigned int c = 0; c < chunks.Size(); c++) {
+        Chunk* chunk = chunks[c];
+        if (chunk->isActive && !chunk->animatedStatics.empty()) {
+            activeChunks.push_back(chunk);
+            totalActivePlants += chunk->animatedStatics.size();
+        }
+    }
+    
+    if (totalActivePlants == 0)
+        return;
+    
+    float ticksToRunFloat = (float)totalActivePlants * ticksPerPlantPerSecond * growthDelta + tickAccumulator;
+    unsigned int numTicks = (unsigned int)ticksToRunFloat;
+    tickAccumulator       = ticksToRunFloat - (float)numTicks;
+    
+    std::unordered_set<Chunk*> modifiedChunks;
+    
+    for (unsigned int t = 0; t < numTicks; t++) {
+        size_t currentTotal = 0;
+        for (Chunk* chunk : activeChunks) {
+            currentTotal += chunk->animatedStatics.size();
+        }
+        
+        if (currentTotal == 0)
+            break;
+        
+        int globalPlantIdx = Random.Range(0, (int)currentTotal - 1);
+        
+        Chunk* targetChunk = nullptr;
+        size_t localPlantIdx = 0;
+        for (Chunk* chunk : activeChunks) {
+            if ((size_t)globalPlantIdx < chunk->animatedStatics.size()) {
+                targetChunk   = chunk;
+                localPlantIdx = (size_t)globalPlantIdx;
+                break;
+            }
+            globalPlantIdx -= (int)chunk->animatedStatics.size();
+        }
+        
+        if (!targetChunk || localPlantIdx >= targetChunk->animatedStatics.size())
+            continue;
+        
+        StaticAnimation& ref = targetChunk->animatedStatics[localPlantIdx];
+        
+        if (ref.staticIndex >= targetChunk->statics.size()) {
+            targetChunk->animatedStatics.erase(targetChunk->animatedStatics.begin() + localPlantIdx);
+            continue;
+        }
+        
+        StaticObject& obj = targetChunk->statics[ref.staticIndex];
+        std::string typeName = world.classIndexToName[obj.type];
+        ClassDefinition& def = world.classDefinitions[typeName];
+        
+        // Target full height from ClassDefinition
+        float maxScale = 1.0f;
+        float baseScaleY = maxScale * 0.1f; // Sprout starting height
+        
+        // Store old scale before incrementing
+        float oldScaleY = obj.scale.y;
+        
+        // Make growth step relative
+        float growthStep = (maxScale - baseScaleY) * 0.1f; 
+        obj.scale.y = std::min(obj.scale.y + growthStep, maxScale);
+        
+        // Calculate proportional factor to scale current vertices in mesh buffer
+        float factorY = (oldScaleY > 0.0f) ? (obj.scale.y / oldScaleY) : 1.0f;
+        
+        // Update color progression
+        float progress = glm::clamp((obj.scale.y - baseScaleY) / (maxScale - baseScaleY), 0.0f, 1.0f);
+        Color currentColor = Colors.Lerp(def.colorMin, def.colorMax, progress);
+        obj.color = currentColor.ToVec3();
+        
+        // Apply scale factor (X and Z unchanged at 1.0, Y scaled by factorY)
+        Mesh* staticMesh = targetChunk->staticObject->GetComponent<MeshRenderer>()->mesh;
+        staticMesh->ChangeSubMeshScale(ref.staticIndex, 1.0f, factorY, 1.0f);
+        staticMesh->ChangeSubMeshColor(ref.staticIndex, currentColor);
+        
+        modifiedChunks.insert(targetChunk);
+        
+        // Handle full growth completion
+        if (obj.scale.y >= maxScale) {
+            obj.function = 0;
+            targetChunk->animatedStatics.erase(targetChunk->animatedStatics.begin() + localPlantIdx);
+        }
+    }
+    
+    // Push updated mesh data to GPU
+    for (Chunk* chunk : modifiedChunks) {
+        Mesh* staticMesh = chunk->staticObject->GetComponent<MeshRenderer>()->mesh;
+        staticMesh->Load();
+    }
 }
 
 void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
@@ -71,7 +183,7 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
     if (useFrustum) {
         frustum = BuildStreamingFrustumFromCamera(*camPtr);
     
-        camForwardXZ = SafeNormalize2(glm::vec2(camPtr->forward.x, camPtr->forward.z));
+        camForwardXZ = NormalizeSqrt(glm::vec2(camPtr->forward.x, camPtr->forward.z));
         camPosXZ     = glm::vec2(camPtr->transform.position.x, camPtr->transform.position.z);
     }
     
@@ -117,7 +229,7 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
             glm::vec2 chunkCenterXZ(chunkWorldX + halfChunk, chunkWorldZ + halfChunk);
             glm::vec2 toChunk = chunkCenterXZ - camPosXZ;
             
-            glm::vec2 dir = SafeNormalize2(toChunk);
+            glm::vec2 dir = NormalizeSqrt(toChunk);
             float dotF = glm::dot(dir, camForwardXZ);
             
             // Force load the chunks immediately around the player
@@ -208,9 +320,31 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
                     
                     int chunkSZ = chunkSize + 1;
                     
-                    Mesh* chunkMesh = chunk->gameObject->GetComponent<MeshRenderer>()->mesh;
-                    AddHeightFieldToMesh(chunkMesh, chunk->heightField, chunk->colorField, chunkSZ, chunkSZ, 0, 0, 1, 1);
+                    // Main chunk mesh
+                    
+                    MeshRenderer* chunkRenderer = chunk->gameObject->GetComponent<MeshRenderer>();
+                    Mesh* chunkMesh = chunkRenderer->mesh;
+                    
+                    generation.AddHeightFieldToMesh(chunkMesh, chunk->heightField, chunk->colorField, chunkSZ, chunkSZ, 0, 0, 1, 1);
                     chunkMesh->Load();
+                    
+                    // Level of detail
+                    // Seems to not work
+                    /*
+                    LevelOfDetail lod;
+                    lod.distance = 150.0f;
+                    
+                    SubMesh subMesh;
+                    if (chunkMesh->GenerateSimplifiedLOD(0, 1.0f, subMesh)) {
+                        lod.mesh = Engine.Create<Mesh>();
+                        lod.mesh->AddSubMesh(0, 0, 0, subMesh, true);
+                        chunkRenderer->AddLevelOfDetail(lod);
+                        
+                        lod.mesh->Load();
+                    } else {
+                        Engine.console.Print("No output senior");
+                    }
+                    */
                     
                     // Physics
                     chunk->rigidBody = Physics.world->createRigidBody(rp3d::Transform::identity());

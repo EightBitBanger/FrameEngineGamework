@@ -37,7 +37,7 @@ GameObject* CreateCameraController(glm::vec3 position) {
     collider->setCollisionCategoryBits((unsigned short)LayerMask::Ground);
     
     rigidBody->updateMassPropertiesFromColliders();
-    Engine.cameraController->SetLinearDamping(2.4f);
+    Engine.cameraController->SetLinearDamping(4.4f);
     
     return cameraController;
 }
@@ -46,43 +46,48 @@ void CameraControllerUpdate(void) {
     Camera* mainCamera = Engine.sceneMain->camera;
     if (mainCamera == nullptr) 
         return;
-    glm::vec3 forward = mainCamera->forward;
-    glm::vec3 from = mainCamera->transform.position;
-    
-    const float forceAccelerate = 38.0f;
+        
+    const float forceAccelerate = 42.0f;
     const float fovMaxPullback  = 3.0f;
+    const float fovBase         = 60.0f;
+    
+    const float fovSmoothFactor = 0.14f; 
     
     glm::vec3 force(0);
     
-    if (mainCamera != nullptr) {
+    // No movement when paused
+    if (!Platform.isPaused) {
+        // WASD Directional
+        if (Input.CheckKeyCurrent(VK_W)) { force += mainCamera->forward; }
+        if (Input.CheckKeyCurrent(VK_S)) { force -= mainCamera->forward; }
+        if (Input.CheckKeyCurrent(VK_A)) { force -= mainCamera->right; }
+        if (Input.CheckKeyCurrent(VK_D)) { force += mainCamera->right; }
         
-        // No movement when paused
-        if (!Platform.isPaused) {
-            
-            // WASD Directional
-            if (Input.CheckKeyCurrent(VK_W)) {force += mainCamera->forward;}
-            if (Input.CheckKeyCurrent(VK_S)) {force -= mainCamera->forward;}
-            if (Input.CheckKeyCurrent(VK_A)) {force -= mainCamera->right;}
-            if (Input.CheckKeyCurrent(VK_D)) {force += mainCamera->right;}
-            
-            // Space/Shift Elevation
-            if (Input.CheckKeyCurrent(VK_SPACE)) {force += mainCamera->up;}
-            if (Input.CheckKeyCurrent(VK_SHIFT)) {force -= mainCamera->up;}
-        }
-        
-        force *= forceAccelerate * forceAccelerate;
-        
-        Engine.cameraController->AddForce(force.x, force.y, force.z);
-        
-        rp3d::RigidBody* rigidBody = Engine.cameraController->GetComponent<rp3d::RigidBody>();
-        rp3d::Vector3 forceVec3 = rigidBody->getLinearVelocity();
-        float forceLen = glm::length(glm::vec3(forceVec3.x, forceVec3.y, forceVec3.z));
-        
-        // Field of view zoom effect
-        float fovPullback = (forceLen / 1.0f) * 0.4f;
-        if (fovPullback > fovMaxPullback) 
-            fovPullback = fovMaxPullback;
-        Engine.sceneMain->camera->fov = 60 + fovPullback;
-        
+        // Space/Shift Elevation
+        if (Input.CheckKeyCurrent(VK_SPACE)) { force += mainCamera->up; }
+        if (Input.CheckKeyCurrent(VK_SHIFT)) { force -= mainCamera->up; }
     }
+    
+    force *= forceAccelerate * forceAccelerate;
+    Engine.cameraController->AddForce(force.x, force.y, force.z);
+    
+    rp3d::RigidBody* rigidBody = Engine.cameraController->GetComponent<rp3d::RigidBody>();
+    rp3d::Vector3 forceVec3 = rigidBody->getLinearVelocity();
+    glm::vec3 velocity = glm::vec3(forceVec3.x, forceVec3.y, forceVec3.z);
+    
+    // Calculate forward velocity component using Dot Product
+    float forwardSpeed = glm::dot(velocity, mainCamera->forward);
+    
+    // Only pull back when moving forward
+    float targetPullback = 0.0f;
+    if (forwardSpeed > 0.0f) {
+        targetPullback = forwardSpeed * 0.1f;
+        if (targetPullback > fovMaxPullback) {
+            targetPullback = fovMaxPullback;
+        }
+    }
+    
+    // Smoothly interpolate (lerp) from current FOV to target FOV
+    float targetFov = fovBase + targetPullback;
+    mainCamera->fov = glm::mix(mainCamera->fov, targetFov, fovSmoothFactor);
 }

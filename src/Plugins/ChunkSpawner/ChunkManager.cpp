@@ -27,12 +27,10 @@ ChunkManager::ChunkManager() :
     mChunkCounterX(0),
     mChunkCounterZ(0),
     
-    mBreedingCoolDown(10),
-    mDeathCoolDown(10),
-    
     waterMesh(nullptr),
     
-    fogWater(nullptr) {}
+    fogWater(nullptr) 
+{}
 
 
 void ChunkManager::Initiate(void) {
@@ -58,7 +56,10 @@ void ChunkManager::Initiate(void) {
     Resources.meshes.leaf->ChangeSubMeshScale(0, scaler, scaler, scaler);
     //Resources.meshes.log->ChangeSubMeshScale(0, scaler, 1.0f, scaler);
     
+    
     // Get sub meshes
+    std::vector<std::pair<std::string, SubMesh>> staticMeshEntries;
+    
     SubMesh subMeshWallHorz;
     SubMesh subMeshWallVert;
     SubMesh subMeshPlain;
@@ -82,29 +83,28 @@ void ChunkManager::Initiate(void) {
     Resources.meshes.leaf->GetSubMesh(0, subMeshLeaf);
     Resources.meshes.log->GetSubMesh(0, subMeshLog);
     
-    mStaticMeshes["wallhorizontal"]  = subMeshWallHorz;
-    mStaticMeshes["wallverticle"]    = subMeshWallVert;
-    mStaticMeshes["cube"]            = subMeshCube;
-    mStaticMeshes["plain"]           = subMeshPlain;
-    mStaticMeshes["grass"]           = subMeshGrass;
-    mStaticMeshes["leaf"]            = subMeshLeaf;
-    mStaticMeshes["log"]             = subMeshLog;
+    staticMeshEntries.push_back({"wallhorizontal", subMeshWallHorz});
+    staticMeshEntries.push_back({"wallverticle", subMeshWallVert});
+    staticMeshEntries.push_back({"cube", subMeshCube});
+    staticMeshEntries.push_back({"plain", subMeshPlain});
+    staticMeshEntries.push_back({"grass", subMeshGrass});
+    staticMeshEntries.push_back({"leaf", subMeshLeaf});
+    staticMeshEntries.push_back({"log", subMeshLog});
     
-    mStaticMeshToIndex["wallhorizontal"]  = 1;
-    mStaticMeshToIndex["wallverticle"]    = 2;
-    mStaticMeshToIndex["cube"]            = 3;
-    mStaticMeshToIndex["plain"]           = 4;
-    mStaticMeshToIndex["grass"]           = 5;
-    mStaticMeshToIndex["leaf"]            = 6;
-    mStaticMeshToIndex["log"]             = 7;
+    Mesh* mesh = Engine.Create<Mesh>();
+    mesh->AddCube(0, 0, 0, 0.5f, 0.5f - 0.25f, 0.5f, Colors.white);
+    SubMesh subMesh;
+    mesh->GetSubMesh(0, subMesh);
     
-    mStaticIndexToMesh[1] = "wallhorizontal";
-    mStaticIndexToMesh[2] = "wallverticle";
-    mStaticIndexToMesh[3] = "cube";
-    mStaticIndexToMesh[4] = "plain";
-    mStaticIndexToMesh[5] = "grass";
-    mStaticIndexToMesh[6] = "leaf";
-    mStaticIndexToMesh[7] = "log";
+    staticMeshEntries.push_back({"slab", subMesh});
+    
+    unsigned int index=1;
+    for (const auto& pair : staticMeshEntries) {
+        mStaticMeshes[pair.first] = pair.second;
+        mStaticMeshToIndex[pair.first] = index;
+        mStaticIndexToMesh[index] = pair.first;
+        index++;
+    }
     
     waterMesh      = Engine.Create<Mesh>();
     waterMaterial  = Engine.Create<Material>();
@@ -165,7 +165,7 @@ void ChunkManager::Initiate(void) {
                         
                         if (params[p] == "stack") {
                             params.erase(params.begin());
-                            if (params.size() < 6) 
+                            if (params.size() < 9) 
                                 continue;
                             
                             ClassStructure::SubStructureStack stack;
@@ -178,6 +178,10 @@ void ChunkManager::Initiate(void) {
                                                String.ToFloat(params[p+4]),
                                                String.ToFloat(params[p+5])};
                             
+                            stack.rotation  = {String.ToFloat(params[p+6]),
+                                               String.ToFloat(params[p+7]),
+                                               String.ToFloat(params[p+8])};
+                            
                             structure.stacks.push_back(stack);
                             
                             continue;
@@ -185,14 +189,17 @@ void ChunkManager::Initiate(void) {
                         
                         if (params[p] == "place") {
                             params.erase(params.begin());
-                            if (params.size() < 4) 
+                            if (params.size() < 7) 
                                 continue;
                             
                             ClassStructure::SubStructurePlace place;
-                            place.name    = params[p];
+                            place.name      = params[p];
                             place.position  = {String.ToFloat(params[p+1]),
                                                String.ToFloat(params[p+2]),
                                                String.ToFloat(params[p+3])};
+                            place.rotation  = {String.ToFloat(params[p+4]),
+                                               String.ToFloat(params[p+5]),
+                                               String.ToFloat(params[p+6])};
                             
                             structure.places.push_back(place);
                             continue;
@@ -244,8 +251,6 @@ void ChunkManager::Initiate(void) {
         
     }
     
-    
-    
     //
     // Load item classes
     std::string classesPath = versionsDirectory + version + classesDirectory;
@@ -267,32 +272,69 @@ void ChunkManager::Initiate(void) {
             
             ClassDefinition definition;
             
-            std::string index      = loader.assetData["id"][0];
-            std::string mesh       = loader.assetData["mesh"][0];
-            std::string width      = loader.assetData["width"][0];
-            std::string height     = loader.assetData["height"][0];
-            std::string colorMin;
-            std::string colorMax;
-            std::string stackMax   = loader.assetData["stackMax"][0];
-            std::string bitmap     = loader.assetData["bitmap"][0];
+            // Check 'id'
+            if (loader.assetData.find("id") != loader.assetData.end() && !loader.assetData["id"].empty()) {
+                definition.id = String.ToInt(loader.assetData["id"][0]);
+            }
             
-            for (unsigned int a=0; a < loader.assetData["colorMin"].size(); a++) colorMin += loader.assetData["colorMin"][a];
-            for (unsigned int a=0; a < loader.assetData["colorMax"].size(); a++) colorMax += loader.assetData["colorMax"][a];
+            // Check 'function'
+            if (loader.assetData.find("function") != loader.assetData.end() && !loader.assetData["function"].empty()) {
+                definition.function = String.ToUint(loader.assetData["function"][0]);
+            }
             
-            if (loader.assetData.find("id") != loader.assetData.end())        definition.id        = String.ToInt(index);
-            if (loader.assetData.find("mesh") != loader.assetData.end())      definition.mesh      = mesh;
-            if (loader.assetData.find("width") != loader.assetData.end())     definition.width     = String.ToFloat(width);
-            if (loader.assetData.find("height") != loader.assetData.end())    definition.height    = String.ToFloat(height);
+            // Check 'mesh'
+            if (loader.assetData.find("mesh") != loader.assetData.end() && !loader.assetData["mesh"].empty()) {
+                std::string meshVal = loader.assetData["mesh"][0];
+                definition.mesh = (meshVal == "none") ? "" : meshVal;
+            } else {
+                definition.mesh = "";
+            }
             
-            if (loader.assetData.find("colorMin") != loader.assetData.end())  definition.colorMin  = GetColorByName(colorMin);
-            if (loader.assetData.find("colorMax") != loader.assetData.end())  definition.colorMax  = GetColorByName(colorMax);
+            // Check 'width'
+            if (loader.assetData.find("width") != loader.assetData.end() && !loader.assetData["width"].empty()) {
+                definition.width = String.ToFloat(loader.assetData["width"][0]);
+            }
             
-            if (loader.assetData.find("stackMax") != loader.assetData.end())  definition.stackMax  = String.ToUint(stackMax);
-            if (loader.assetData.find("bitmap")   != loader.assetData.end())  definition.bitmap    = bitmap;
+            // Check 'height'
+            if (loader.assetData.find("height") != loader.assetData.end() && !loader.assetData["height"].empty()) {
+                definition.height = String.ToFloat(loader.assetData["height"][0]);
+            }
             
-            if (loader.assetData.find("alignment") != loader.assetData.end()) {
-                std::string alignment = loader.assetData["alignment"][0];
-                if (alignment == "grid") definition.alignment = 1;
+            // Check 'colorMin'
+            if (loader.assetData.find("colorMin") != loader.assetData.end() && !loader.assetData["colorMin"].empty()) {
+                std::string colorMinStr = "";
+                for (unsigned int a=0; a < loader.assetData["colorMin"].size(); a++) {
+                    colorMinStr += loader.assetData["colorMin"][a];
+                }
+                definition.colorMin = GetColorByName(colorMinStr);
+            }
+            
+            // Check 'colorMax'
+            if (loader.assetData.find("colorMax") != loader.assetData.end() && !loader.assetData["colorMax"].empty()) {
+                std::string colorMaxStr = "";
+                for (unsigned int a=0; a < loader.assetData["colorMax"].size(); a++) {
+                    colorMaxStr += loader.assetData["colorMax"][a];
+                }
+                definition.colorMax = GetColorByName(colorMaxStr);
+            }
+            
+            // Check 'stackMax'
+            if (loader.assetData.find("stackMax") != loader.assetData.end() && !loader.assetData["stackMax"].empty()) {
+                definition.stackMax = String.ToUint(loader.assetData["stackMax"][0]);
+            }
+            
+            // Check 'bitmap'
+            if (loader.assetData.find("bitmap") != loader.assetData.end() && !loader.assetData["bitmap"].empty()) {
+                definition.bitmap = loader.assetData["bitmap"][0];
+            }
+            
+            // Check 'alignment'
+            if (loader.assetData.find("alignment") != loader.assetData.end() && !loader.assetData["alignment"].empty()) {
+                if (loader.assetData["alignment"][0] == "grid") {
+                    definition.alignment = 1;
+                } else {
+                    definition.alignment = 0;
+                }
             } else {
                 definition.alignment = 0;
             }
@@ -385,6 +427,10 @@ void ChunkManager::Initiate(void) {
                 for (unsigned int l=0; l < loader.rawData.size(); l++) {
                     std::string& line = loader.rawData[l];
                     
+                    size_t firstChar = line.find_first_not_of(" \t\r\n");
+                    if (firstChar == std::string::npos || line[firstChar] == ';') 
+                        continue;
+                    
                     if (line.find("perlin") != std::string::npos) {
                         line.erase(line.begin(), line.begin()+6);
                         std::vector<std::string> splitLines = String.Explode(line, ' ');
@@ -432,14 +478,15 @@ Actor* ChunkManager::SummonActor(glm::vec3 position) {
     Actor* actor = AI.CreateActor();
     actor->navigation.SetPosition(position);
     actor->navigation.SetTargetPoint(position);
-    std::string timeMin = "0";
-    std::string timeMax = "24000";
     
-    std::string homePosition = Float.ToString(position.x) + "," +
-                               Float.ToString(position.y) + "," +
-                               Float.ToString(position.z) + "," + timeMin + "," + timeMax;
+    std::string homePosition = Float.ToString(position.x) + "`" +
+                               Float.ToString(position.y) + "`" +
+                               Float.ToString(position.z);
     
-    actor->memories.Add("home", homePosition);
+    actor->memories.Add("home", "home:" + homePosition);
+    
+    actor->memories.Add("sentience", "quota:0.3");
+    actor->memories.Add("behavior",  "curiosity:0.14, libido:0.04, social:0.08");
     
     return actor;
 }

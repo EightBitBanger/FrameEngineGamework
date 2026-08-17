@@ -15,5 +15,4 @@ Chunk::Chunk() :
     meshCollider(nullptr),
     heightField(nullptr),
     colorField(nullptr)
-{
-}
+{}

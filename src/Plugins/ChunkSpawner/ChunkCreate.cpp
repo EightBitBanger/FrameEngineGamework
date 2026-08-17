@@ -7,7 +7,7 @@ Chunk* ChunkManager::CreateChunk(float x, float y) {
     chunk->x = x;
     chunk->y = y;
     
-    chunk->gameObject = Engine.Create<GameObject>();
+    chunk->gameObject   = Engine.Create<GameObject>();
     chunk->staticObject = Engine.Create<GameObject>();
     
     chunk->gameObject->name = Float.ToString(x) + "_" + Float.ToString(y);
@@ -16,7 +16,7 @@ Chunk* ChunkManager::CreateChunk(float x, float y) {
     chunk->gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     chunk->staticObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     
-    MeshRenderer* chunkRenderer = chunk->gameObject->GetComponent<MeshRenderer>();
+    MeshRenderer* chunkRenderer  = chunk->gameObject->GetComponent<MeshRenderer>();
     MeshRenderer* staticRenderer = chunk->staticObject->GetComponent<MeshRenderer>();
     
     chunk->gameObject->renderDistance   = (renderDistance * chunkSize) * 0.5f;
@@ -27,7 +27,6 @@ Chunk* ChunkManager::CreateChunk(float x, float y) {
     glm::vec3 boundMax(chunkSize, 100, chunkSize);
     
     chunkRenderer->SetBoundingBox(boundMin, boundMax);
-    
     staticRenderer->SetBoundingBox(boundMin, boundMax);
     
     // Chunk renderer
@@ -127,8 +126,8 @@ void ChunkManager::GenerateChunkBiomes(Chunk* chunk) {
     chunk->heightField = (float*)malloc(sizeof(float) * (chunkSZ * chunkSZ));
     chunk->colorField = (glm::vec3*)malloc(sizeof(glm::vec3) * (chunkSZ * chunkSZ));
     
-    SetHeightFieldValues(chunk->heightField, chunkSZ, chunkSZ, 0);
-    SetColorFieldValues(chunk->colorField, chunkSZ, chunkSZ, Colors.black, 0.01f);
+    generation.SetHeightFieldValues(chunk->heightField, chunkSZ, chunkSZ, 0);
+    generation.SetColorFieldValues(chunk->colorField, chunkSZ, chunkSZ, Colors.black, 0.01f);
     
     // Generate terrain base color
     

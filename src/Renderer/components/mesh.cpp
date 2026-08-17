@@ -569,6 +569,7 @@ bool Mesh::ChangeSubMeshRotation(unsigned int index, float angle, glm::vec3 axis
     SubMesh& subMesh = mSubMesh[index];
     
     glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis);
+    glm::mat3 rotationMat3 = glm::mat3(rotationMatrix);
     glm::vec3 pivot = subMesh.position;
     
     unsigned int start = subMesh.vertexBegin;
@@ -576,12 +577,22 @@ bool Mesh::ChangeSubMeshRotation(unsigned int index, float angle, glm::vec3 axis
     
     for (unsigned int i = start; i < end; i++) {
         Vertex& vertex = mVertexBuffer[i];
+        
+        // Transform vertex position
         glm::vec4 localPos(vertex.x - pivot.x, vertex.y - pivot.y, vertex.z - pivot.z, 1.0f);
         glm::vec4 rotated = rotationMatrix * localPos;
         
         vertex.x = rotated.x + pivot.x;
         vertex.y = rotated.y + pivot.y;
         vertex.z = rotated.z + pivot.z;
+        
+        // Transform vertex normal direction
+        glm::vec3 normal(vertex.nx, vertex.ny, vertex.nz);
+        glm::vec3 rotatedNormal = rotationMat3 * normal;
+        
+        vertex.nx = rotatedNormal.x;
+        vertex.ny = rotatedNormal.y;
+        vertex.nz = rotatedNormal.z;
     }
     return true;
 }
@@ -592,6 +603,7 @@ bool Mesh::ChangeSubMeshRotationAroundPoint(unsigned int index, float angle, glm
     const SubMesh& subMesh = mSubMesh[index];
     
     glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), axis);
+    glm::mat3 rotationMat3 = glm::mat3(rotationMatrix);
     
     unsigned int start = subMesh.vertexBegin;
     unsigned int end   = start + subMesh.vertexCount;
@@ -599,12 +611,21 @@ bool Mesh::ChangeSubMeshRotationAroundPoint(unsigned int index, float angle, glm
     for (unsigned int i = start; i < end; ++i) {
         Vertex& v = mVertexBuffer[i];
         
+        // Transform vertex position
         glm::vec4 toLocal(v.x - center.x, v.y - center.y, v.z - center.z, 1.0f);
         glm::vec4 rotated = rotationMatrix * toLocal;
         
         v.x = rotated.x + center.x;
         v.y = rotated.y + center.y;
         v.z = rotated.z + center.z;
+        
+        // Transform vertex normal direction
+        glm::vec3 normal(v.nx, v.ny, v.nz);
+        glm::vec3 rotatedNormal = rotationMat3 * normal;
+        
+        v.nx = rotatedNormal.x;
+        v.ny = rotatedNormal.y;
+        v.nz = rotatedNormal.z;
     }
     return true;
 }
@@ -621,10 +642,30 @@ bool Mesh::ChangeSubMeshScale(unsigned int index, float scaleX, float scaleY, fl
     
     for (unsigned int i = start; i < end; ++i) {
         Vertex& vertex = mVertexBuffer[i];
-
+        
         vertex.x = (vertex.x - pivot.x) * scaleX + pivot.x;
         vertex.y = (vertex.y - pivot.y) * scaleY + pivot.y;
         vertex.z = (vertex.z - pivot.z) * scaleZ + pivot.z;
+    }
+    return true;
+}
+
+bool Mesh::ChangeSubMeshAddScale(unsigned int index, float scaleX, float scaleY, float scaleZ) {
+    if (index >= mSubMesh.size()) 
+        return false;
+    
+    SubMesh& subMesh = mSubMesh[index];
+    glm::vec3 pivot = subMesh.position;
+    
+    unsigned int start = subMesh.vertexBegin;
+    unsigned int end   = start + subMesh.vertexCount;
+    
+    for (unsigned int i = start; i < end; ++i) {
+        Vertex& vertex = mVertexBuffer[i];
+        
+        vertex.x = (vertex.x - pivot.x) * (1.0f + scaleX) + pivot.x;
+        vertex.y = (vertex.y - pivot.y) * (1.0f + scaleY) + pivot.y;
+        vertex.z = (vertex.z - pivot.z) * (1.0f + scaleZ) + pivot.z;
     }
     return true;
 }
@@ -679,33 +720,33 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
     // Use the existing vector-based simplifier
     std::vector<Vertex> lodVertices;
     std::vector<Index>  lodIndices;
-
+    
     if (!GenerateSimplifiedLOD(submeshIndex, reductionFactor, lodVertices, lodIndices)) {
         return false;
     }
-
+    
     if (submeshIndex >= mSubMesh.size()) {
         return false;
     }
-
+    
     const SubMesh& sourceSubMesh = mSubMesh[submeshIndex];
-
+    
     // Build a standalone SubMesh using the simplified data.
     // vertexBegin/indexBegin are 0 because this is not yet packed
     // into Mesh::mVertexBuffer / mIndexBuffer.
     SubMesh lodSubMesh;
     lodSubMesh.vertexBuffer.swap(lodVertices);
     lodSubMesh.indexBuffer.swap(lodIndices);
-
+    
     lodSubMesh.vertexBegin = 0;
     lodSubMesh.indexBegin  = 0;
     lodSubMesh.vertexCount = static_cast<unsigned int>(lodSubMesh.vertexBuffer.size());
     lodSubMesh.indexCount  = static_cast<unsigned int>(lodSubMesh.indexBuffer.size());
-
+    
     // Keep original name/position (caller can rename if desired)
     lodSubMesh.name     = sourceSubMesh.name;
     lodSubMesh.position = sourceSubMesh.position;
-
+    
     outSubMesh = lodSubMesh;
     return true;
 }
@@ -794,9 +835,18 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
         targetVertexCountF = 3.0f;
     }
 
-    float cellsPerAxisF = glm::pow(targetVertexCountF, 1.0f / 3.0f);
+    // Adaptive dimension check: 2D planar surfaces (like heightfields) vs 3D volume meshes
+    float cellsPerAxisF;
+    if (extent.y < boundaryEps || (extent.y < extent.x * 0.15f && extent.y < extent.z * 0.15f)) {
+        // 2D surface grid: Target = cells * cells
+        cellsPerAxisF = glm::sqrt(targetVertexCountF);
+    } else {
+        // 3D volume grid: Target = cells * cells * cells
+        cellsPerAxisF = glm::pow(targetVertexCountF, 1.0f / 3.0f);
+    }
+
     if (cellsPerAxisF < 2.0f) {
-        cellsPerAxisF = 2.0f; // at least 2 cells per axis so we preserve min/max
+        cellsPerAxisF = 2.0f; // At least 2 cells per axis to preserve boundaries
     }
 
     unsigned int cellsPerAxis = static_cast<unsigned int>(cellsPerAxisF);
@@ -848,7 +898,7 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
         glm::vec3 pos(v.x, v.y, v.z);
         glm::vec3 relative = (pos - minPos) / extent;
 
-        // Clamp to [0,1]
+        // Clamp relative coordinates to [0, 1]
         if (relative.x < 0.0f) relative.x = 0.0f;
         if (relative.y < 0.0f) relative.y = 0.0f;
         if (relative.z < 0.0f) relative.z = 0.0f;
@@ -920,7 +970,7 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
             avgNormal = glm::vec3(0.0f, 1.0f, 0.0f);
         }
 
-        // Snap to global bounds if this cluster contains boundary verts
+        // Snap to global bounds if cluster contains boundary vertices
         if (cluster.hasMinX && !cluster.hasMaxX) {
             avgPos.x = minPos.x;
         } else if (cluster.hasMaxX && !cluster.hasMinX) {
@@ -1000,7 +1050,6 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
 
     return true;
 }
-
 
 void Mesh::Load(void) {
     doLoadBuffer = true;

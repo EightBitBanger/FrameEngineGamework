@@ -1,30 +1,25 @@
 #include <GameEngineFramework/Profiler/profiler.h>
+#include <SDL3/SDL.h>
 
-ProfilerTimer::ProfilerTimer() : 
-    profileRenderSystem(0),
-    profilePhysicsSystem(0),
-    profileGameEngineUpdate(0),
-    profileActorAI(0),
-    isActive(false)
-{
+void ProfilerTimer::SubmitProfile(ScopeProfile& profile) {
+    Uint64 endTimeNS = SDL_GetTicksNS();
+    
+    // Convert nanosecond difference to milliseconds in 64-bit precision
+    double elapsedMs = static_cast<double>(endTimeNS - profile.mStartTimeNS) / 1000000.0;
+    
+    std::lock_guard<std::mutex> lock(mux);
+    // Accumulate time so multiple iterations in a frame add together
+    mDeltaList[profile.mName] += static_cast<float>(elapsedMs);
 }
 
-void ProfilerTimer::Begin(void) {
-    timer.Update();
+std::map<std::string, float> ProfilerTimer::GetProfiles() {
+    std::lock_guard<std::mutex> lock(mux);
+    return mDeltaList;
 }
 
-float ProfilerTimer::Query(void) {
-    return timer.GetCurrentDelta();
-}
-
-bool ProfilerTimer::CheckIsProfilerActive(void) {
-    return isActive;
-}
-
-void ProfilerTimer::Activate(void) {
-    isActive = true;
-}
-
-void ProfilerTimer::Deactivate(void) {
-    isActive = false;
+void ProfilerTimer::Reset() {
+    std::lock_guard<std::mutex> lock(mux);
+    for (std::pair<const std::string, float>& pair : mDeltaList) {
+        pair.second = 0.0f;
+    }
 }

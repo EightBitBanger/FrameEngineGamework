@@ -1,7 +1,7 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
 bool ChunkManager::DestroyChunk(Chunk* chunk) {
-    MeshRenderer* chunkRenderer = chunk->gameObject->GetComponent<MeshRenderer>();
+    MeshRenderer* chunkRenderer  = chunk->gameObject->GetComponent<MeshRenderer>();
     MeshRenderer* staticRenderer = chunk->staticObject->GetComponent<MeshRenderer>();
     
     Engine.sceneMain->RemoveMeshRendererFromSceneRoot( chunkRenderer, RENDER_QUEUE_GEOMETRY );
@@ -19,8 +19,12 @@ bool ChunkManager::DestroyChunk(Chunk* chunk) {
         chunk->meshCollider = nullptr;
     }
     
-    chunks.Destroy(chunk);
+    // Destroy attached chunk particle emitters
+    for (Emitter* emitter : chunk->emitters) {
+        Particle.DestroyEmitter(emitter);
+    }
+    chunk->emitters.clear();
     
+    chunks.Destroy(chunk);
     return true;
 }
-

@@ -6,8 +6,6 @@ extern ProfilerTimer Profiler;
 int dbgCounter = 0;
 
 void RenderSystem::RenderFrame(void) {
-    Profiler.Begin();
-    
     glm::mat4 viewProjection;
     glm::vec3 eye;
     
@@ -132,7 +130,6 @@ void RenderSystem::RenderFrame(void) {
                 }
                 BindMesh( mesh );
                 
-                
                 // Handle buffer load and unload
                 
                 if (mesh->doUnloadBuffer) {
@@ -198,7 +195,7 @@ void RenderSystem::RenderFrame(void) {
                 shaderPtr->SetTextureSamplerScale(scales);
                 shaderPtr->SetTextureSamplerPosition(offsets);
                 
-                GeometryPass(currentEntity, eye, scenePtr->camera->forward, viewProjection);
+                GeometryPass(currentEntity, mesh, eye, scenePtr->camera->forward, viewProjection);
                 
                 if (currentEntity->material->mDoShadowPass) 
                     shadowList.push_back(currentEntity);
@@ -228,8 +225,6 @@ void RenderSystem::RenderFrame(void) {
     }
     
     mNumberOfFrames++;
-    
-    Profiler.profileRenderSystem = Profiler.Query();
     
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::EndFrame::");

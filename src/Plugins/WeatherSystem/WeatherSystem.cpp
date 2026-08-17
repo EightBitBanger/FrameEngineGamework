@@ -159,8 +159,7 @@ void WeatherSystem::Initiate(void) {
 void WeatherSystem::Update(void) {
     
     // Advance world time
-    mWorldTime += 0.25f;
-    
+    //mWorldTime += 0.25f;
     if (mWorldTime > 24000.0f)
         mWorldTime = 0.0f;
     
@@ -173,14 +172,11 @@ void WeatherSystem::Update(void) {
         lightRiseFall = Float.Lerp(0.0f, 1.0f, fullDayRange);
     }
     
-    // NOTE: do not shadow the member variable; keep state coherent for debugging.
     mLightIntensity = lightRiseFall - 0.224f;
-    
     if (mLightIntensity < 0.0f)
         mLightIntensity = 0.0f;
     
     mLightIntensity *= 8.0f;
-    
     if (mLightIntensity > 1.0f)
         mLightIntensity = 1.0f;
     
@@ -195,8 +191,6 @@ void WeatherSystem::Update(void) {
     
     // World lighting
     if (mWorldMaterial != nullptr && mStaticMaterial != nullptr) {
-        
-        // Capture base ambient targets once (or the first time both materials are valid).
         if (!mCapturedAmbientBase) {
             mWorldAmbientBase    = mWorldMaterial->ambient;
             mStaticAmbientBase   = mStaticMaterial->ambient;
@@ -227,56 +221,37 @@ void WeatherSystem::Update(void) {
     float skyColor = Math.Lerp(mSkyLightLow, mSkyLightHigh, mLightIntensity);
     SetSkyAmbientColor(Colors.MakeGrayScale(skyColor));
     
-    // Interpolate fog cycle
-    float fogBiasMax = 36000.0f;
-    
-    if (mWeatherFogCounter != 0.0f) {
-        mWeatherFogCounter++;
-        
-        if (mWeatherFogCounter > fogBiasMax)
-            mWeatherFogCounter = 0.0f;
-    }
-    
+    // Smoothly update light bias
     mFogLightBias = Float.Lerp(mFogLightBias, mLightIntensity, 0.18f);
     
-    float fogBias = mWeatherFogCounter / fogBiasMax;
+    // Calculate target fog colors driven by world light bias without corrupting base targets
+    Color targetColorNear = Colors.Lerp(Colors.black, mWorldFogColorNear, mFogLightBias);
+    Color targetColorFar  = Colors.Lerp(Colors.black, mWorldFogColorFar,  mFogLightBias);
     
-    // Calculate fog color from time
-    
-    Color finalColorNear = Colors.Lerp(mFogWorld->fogColorBegin, mWorldFogColorNear, fogBias);
-    Color finalColorFar  = Colors.Lerp(mFogWorld->fogColorEnd,   mWorldFogColorFar,  fogBias);
-    
-    finalColorNear = Colors.Lerp(Colors.black, finalColorNear, mFogLightBias);
-    finalColorFar  = Colors.Lerp(Colors.black, finalColorFar,  mFogLightBias);
-    
-    mFogWorld->fogDensity = Float.Lerp(mFogWorld->fogDensity, mWorldFogDensity, fogBias);
-    mFogWorld->fogBegin = Float.Lerp(mFogWorld->fogBegin, mWorldFogNear, fogBias);
-    mFogWorld->fogEnd = Float.Lerp(mFogWorld->fogEnd, mWorldFogFar, fogBias);
-    mFogWorld->fogColorBegin = finalColorNear;
-    mFogWorld->fogColorEnd = finalColorFar;
+    // Smoothly transition fog properties frame-by-frame
+    float fogBlendRate = 0.05f;
+    mFogWorld->fogDensity    = Float.Lerp(mFogWorld->fogDensity,    mWorldFogDensity,   fogBlendRate);
+    mFogWorld->fogBegin      = Float.Lerp(mFogWorld->fogBegin,      mWorldFogNear,      fogBlendRate);
+    mFogWorld->fogEnd        = Float.Lerp(mFogWorld->fogEnd,        mWorldFogFar,       fogBlendRate);
+    mFogWorld->fogColorBegin = Colors.Lerp(mFogWorld->fogColorBegin, targetColorNear,    fogBlendRate);
+    mFogWorld->fogColorEnd   = Colors.Lerp(mFogWorld->fogColorEnd,   targetColorFar,     fogBlendRate);
     
     // Shift to the next weather cycle
     if (mNextWeather != mCurrentWeather) {
         // Begin shift
         if (mWeatherShiftCounter == 0.0f) {
             AddWeather(mNextWeather);
-            
-            // Trigger the fog to begin shifting
-            mWeatherFogCounter = 1.0f;
         }
         
         mWeatherShiftCounter++;
         if (mWeatherShiftCounter > weatherStateCounter) {
             mWeatherShiftCounter = 0.0f;
-            
-            // Finish shift
+            // Finish shift and finalize emitters
             SetWeather(mNextWeather);
-            mCurrentWeather = mNextWeather;
         }
     }
     
-    // Water effect
-    
+    // Water underwater effect
     if (mPlayerTransform != nullptr) {
         if (mPlayerTransform->position.y < mWorldWaterLevel) {
             mFogWater->fogHeightCutoff = 1000.0f;
@@ -366,74 +341,68 @@ void WeatherSystem::SetFogRangeColor(Color nearColor, Color farColor) {
 }
 
 void WeatherSystem::SetWeather(WeatherType type) {
-
+    mCurrentWeather = type;
+    mNextWeather = type;
+    
     if (type == WeatherType::Clear) {
         mRainEmitter->Deactivate();
         mSnowEmitter->Deactivate();
-
         FogClear();
-
         return;
     }
-
+    
     if (type == WeatherType::Rain) {
         mRainEmitter->Activate();
         mSnowEmitter->Deactivate();
-
-        mWeatherFogCounter = 1.0f;
-
+        
         mWorldFogDensity   = 0.87f;
         mWorldFogNear      = 30.0f;
         mWorldFogFar       = 200.0f;
         mWorldFogColorNear = Colors.gray;
         mWorldFogColorFar  = Colors.gray;
-
         return;
     }
-
+    
     if (type == WeatherType::Snow) {
         mRainEmitter->Deactivate();
         mSnowEmitter->Activate();
-
-        mWeatherFogCounter = 1.0f;
-
+        
         mWorldFogDensity   = 1.1f;
         mWorldFogNear      = 20.0f;
         mWorldFogFar       = 400.0f;
         mWorldFogColorNear = Colors.ltgray;
         mWorldFogColorFar  = Colors.white;
-
         return;
     }
 }
 
 void WeatherSystem::SetWeatherNext(WeatherType type) {
     mNextWeather = type;
+    
     if (type == WeatherType::Clear) {
-        FogClear();
+        mWorldFogDensity   = 20.0f;
+        mWorldFogNear      = 100.0f;
+        mWorldFogFar       = 8000.0f;
+        mWorldFogColorNear = Colors.ltgray * 0.7f;
+        mWorldFogColorFar  = Colors.Lerp(Colors.blue, Colors.gray, 0.8f);
         return;
     }
-
+    
     if (type == WeatherType::Rain) {
-        mWeatherFogCounter = 1.0f;
-
-        mWorldFogDensity   = 40.0f;
-        mWorldFogNear      = 0.0f;
-        mWorldFogFar       = 10.0f;
-        mWorldFogColorNear = Colors.ltgray;
+        mWorldFogDensity   = 0.87f;
+        mWorldFogNear      = 30.0f;
+        mWorldFogFar       = 200.0f;
+        mWorldFogColorNear = Colors.gray;
         mWorldFogColorFar  = Colors.gray;
         return;
     }
-
+    
     if (type == WeatherType::Snow) {
-        mWeatherFogCounter = 1.0f;
-
-        mWorldFogDensity   = 8.0f;
-        mWorldFogNear      = 100.0f;
-        mWorldFogFar       = 200.0f;
+        mWorldFogDensity   = 1.1f;
+        mWorldFogNear      = 20.0f;
+        mWorldFogFar       = 400.0f;
         mWorldFogColorNear = Colors.ltgray;
         mWorldFogColorFar  = Colors.white;
-
         return;
     }
 }
