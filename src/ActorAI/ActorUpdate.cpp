@@ -24,8 +24,6 @@ void ActorSystem::Update(void) {
     
     if (mMainTimer.Update()) 
         UpdateTick();
-    
-    Profiler.profileActorAI = mAnimationTimer.GetCurrentDelta();
 }
 
 
@@ -64,22 +62,12 @@ void ActorSystem::UpdateFast() {
     }
 }
 
-float counter=0.0f;
-
 void ActorSystem::UpdateTick(void) {
     unsigned int numberOfActors = mActors.Size();
     for (unsigned int i = 0; i < numberOfActors; i++) {
         Actor* actor = mActors[i];
-        
         if (actor->isGarbage || !actor->isActive) 
             continue;
-        
-        // Check update memories
-        if (actor->memories.mDoUpdateMemories) {
-            actor->memories.mDoUpdateMemories = false;
-            
-            actor->memories.UpdateMemories();
-        }
         
         // Cull updates for far away actors
         float distance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
@@ -87,50 +75,60 @@ void ActorSystem::UpdateTick(void) {
             continue;
         
         // Update tick divider
+        
         actor->mUpdateCounter++;
-        if (actor->mUpdateCounter > 20) {
-            actor->mUpdateCounter=0;
-            
+        
+        if ((actor->mUpdateCounter % 5) == 0) 
+            actor->physical.mAge++;
+        
+        // Get actor sentience score and emotional state
+        const std::vector<MemoryTrigger>& sentienceList = actor->memories.mMemoryTriggers["sentience"];
+        float sentientScore = !sentienceList.empty() ? sentienceList[0].value : 0.0f;
+        EmotionalEmbedding& emotion = actor->emotions.current;
+        
+        if ((actor->mUpdateCounter % 20) == 0) {
             HandleCooldownCounters(actor);
             
-            actor->physical.mAge++;
-            
             // Run neural state update
-            UpdateActorState(actor);
+            UpdateActorState(actor, emotion, sentientScore);
             
-            // Keep actor nearby its associated "home" location
-            if (actor->state.mode != ActorState::Mode::MoveAttack && 
-                actor->state.mode != ActorState::Mode::MoveFlee) 
-                HandleHomeLocation(actor);
+            // Target observation
+            UpdateGazeTarget(actor);
             
             // Compile list of nearby actors
-            HandleTargettingMechanics(actor);
+            UpdateTargetingMechanics(actor);
             
+            // Evaluate Thought Matrix across targets
+            UpdateThoughtMatrix(actor, emotion, sentientScore);
+        }
+        
+        if (actor->mUpdateCounter > 40) {
+            actor->mUpdateCounter = 0;
+            
+            // Process behavioral idiosyncrasies
+            ProcessMemoryTriggers(actor, emotion);
+            
+            // Check update memories
+            actor->memories.UpdateMemories();
+            
+            // Trigger physical expression if the expression age was achieved
             unsigned int numberOfGenes = actor->genetics.GetNumberOfGenes();
-            for (unsigned int a=0; a < numberOfGenes; a++) {
-                
-                // Trigger physical expression if the expression age was achieved
+            for (unsigned int a = 0; a < numberOfGenes; a++) {
                 if (actor->physical.mAge == actor->genetics.mGenes[a].expressionAge) 
                     actor->RebuildGeneticExpression();
             }
-            
         }
-        
     }
     
     // Garbage collection pass
     for (unsigned int i = 0; i < numberOfActors; i++) {
         Actor* actor = mActors[i];
-        
         UpdateGarbageCollection(actor);
     }
     
     // Flush and clear debug renderer for the next frame
     if (mDebugLineRenderer) {
         std::lock_guard<std::mutex> lock(Renderer.mux);
-        
-        //mDebugLineRenderer->mesh->ClearSubMeshes();
-        //mDebugLineRenderer->mesh->Load();
     }
 }
 

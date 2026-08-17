@@ -45,9 +45,6 @@ int main(int argc, char* argv[]) {
     
     Start();
     
-    // Fire up the profiler
-    Profiler.Activate();
-    
     // Initiate timers
     Time.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     Time.Update();
@@ -323,15 +320,7 @@ int main(int argc, char* argv[]) {
                 
                 //Network.Update();
                 
-                // --- Profiling ---
-                if (Profiler.CheckIsProfilerActive()) 
-                    Profiler.Begin();
-                
                 Engine.Update();
-                
-                // --- Profiling ---
-                if (Profiler.CheckIsProfilerActive()) 
-                    Profiler.profileGameEngineUpdate = Profiler.Query();
                 
                 fixedAccumulator -= fixedUpdateTimeout;
                 
@@ -350,10 +339,6 @@ int main(int argc, char* argv[]) {
         
         if (Time.Update()) {
             
-            // --- Profiling ---
-            if (Profiler.CheckIsProfilerActive()) 
-                Profiler.Begin();
-            
             // Draw the current frame state
             Renderer.RenderFrame();
             
@@ -370,10 +355,6 @@ int main(int argc, char* argv[]) {
             SwapBuffers( (HDC)Platform.deviceContext );
 #endif
             
-            // --- Profiling ---
-            if (Profiler.CheckIsProfilerActive()) 
-                Profiler.profileRenderSystem = Profiler.Query();
-            
         }
         
         
@@ -383,19 +364,10 @@ int main(int argc, char* argv[]) {
         
         if (PhysicsTime.Update()) {
             
-            // --- Profiling ---
-            if (Profiler.CheckIsProfilerActive()) 
-                Profiler.Begin();
-            
             Physics.world->update( PHYSICS_TIME_STEP );
             
             // Generate the physics debug meshes
             Engine.UpdatePhysicsDebugRenderer();
-            
-            
-            // --- Profiling ---
-            if (Profiler.CheckIsProfilerActive()) 
-                Profiler.profilePhysicsSystem = Profiler.Query();
             
         }
         
@@ -434,6 +406,7 @@ int main(int argc, char* argv[]) {
     Resources.DestroyAssets();
     Platform.DestroyWindowHandle();
     
+    Log.Shutdown();
     return 0;
 }
 

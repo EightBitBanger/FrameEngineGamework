@@ -3,6 +3,9 @@
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Math/Random.h>
+#include <GameEngineFramework/Timer/Timer.h>
+
+extern Timer Time;
 
 static float WrapDeg360(float deg) {
     deg = std::fmod(deg, 360.0f);
@@ -25,22 +28,52 @@ static float LerpAngleDeg(float fromDeg, float toDeg, float t) {
     return WrapDeg360(fromDeg + d * t);
 }
 
+float ActorSystem::CalculateLimbSwingAngle(Actor* actor, unsigned int a) {
+    float maxRange = actor->genetics.mGenes[a].animationRange;
+    bool doInverse = actor->genetics.mGenes[a].doInverseAnimation;
+    
+    // Calculate phase angle (0 to 2PI)
+    float phase = actor->animation.mWalkTime;
+    if (doInverse) {
+        // 180 degrees phase offset for opposing limb
+        phase += glm::pi<float>();
+    }
+    
+    // Pure mathematical sine wave swing (-maxRange to +maxRange)
+    return std::sin(phase) * glm::radians(maxRange);
+}
+
 void ActorSystem::UpdateAnimationState(Actor* actor) {
+    ScopeProfile profile("AI-animation");
+    
     float distance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
     float distanceMax = mActorRenderDistance / 2.0f;
+    
+    // Advance walk cycle based on actor speed (once per actor update)
+    if (actor->state.mIsWalking || actor->state.mIsRunning) {
+        float speedMultiplier = actor->state.mIsRunning ? actor->physical.mSpeedMul : 1.0f;
+        float cycleSpeed = actor->physical.mSpeed * speedMultiplier * 4.0f; 
+        
+        actor->animation.mWalkTime += cycleSpeed * 0.04f; 
+
+        // Wrap phase within [0, 2*PI]
+        if (actor->animation.mWalkTime > glm::two_pi<float>()) {
+            actor->animation.mWalkTime = std::fmod(actor->animation.mWalkTime, glm::two_pi<float>());
+        }
+    }
     
     for (unsigned int a = 0; a < actor->genetics.mGeneticRenderers.size(); a++) {
         MeshRenderer* geneRenderer = actor->genetics.mGeneticRenderers[a];
         
         if (distance > distanceMax) {
-            if (a > 0) {// Never deactivate the first renderer
+            if (a > 0) { // Never deactivate the first renderer
                 geneRenderer->isActive = false;
             }
         } else {
             geneRenderer->isActive = true;
         }
         
-        //  Skip genes that should not express
+        // Skip genes that should not express
         if (!actor->genetics.mGenes[a].doExpress) {
             geneRenderer->isActive = false;
             continue;
@@ -96,7 +129,6 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
     }
 }
 
-
 void ActorSystem::UpdateAnimationHead(glm::mat4& matrix, Actor* actor, MeshRenderer* geneRenderer, unsigned int a) {
     // Rotate to body orientation
     float bodyRotationLength = glm::length(actor->navigation.mRotation);
@@ -146,7 +178,7 @@ void ActorSystem::UpdateAnimationBody(glm::mat4& matrix, Actor* actor, MeshRende
 }
 
 void ActorSystem::UpdateAnimationLimb(glm::mat4& matrix, Actor* actor, unsigned int a) {
-    // Rotate
+    // Rotate body
     float bodyRotationLength = glm::length(actor->navigation.mRotation);
     if (bodyRotationLength != 0.0f) 
         matrix = glm::rotate(matrix, glm::radians(bodyRotationLength), glm::normalize(actor->navigation.mRotation));
@@ -156,7 +188,8 @@ void ActorSystem::UpdateAnimationLimb(glm::mat4& matrix, Actor* actor, unsigned 
     
     if ((actor->genetics.mGenes[a].animationType != ActorState::Animation::Limb && 
         actor->genetics.mGenes[a].animationType != ActorState::Animation::LimbHolding) || 
-        !actor->state.mIsWalking) {
+        (!actor->state.mIsWalking && !actor->state.mIsRunning)) {
+        
         // Rotate gene
         glm::vec3 baseRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, actor->genetics.mGenes[a].rotation.y, actor->genetics.mGenes[a].rotation.z);
         float geneRotationLength = glm::length(baseRotation);
@@ -165,26 +198,25 @@ void ActorSystem::UpdateAnimationLimb(glm::mat4& matrix, Actor* actor, unsigned 
         
         // Genetic translation
         matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
-        
         return;
     }
     
     // Apply animation
-    ApplyAnimationRotation(matrix, actor, a);
+    glm::vec3 baseRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, actor->genetics.mGenes[a].rotation.y, actor->genetics.mGenes[a].rotation.z);
+    float geneRotationLength = glm::length(baseRotation);
+    if (geneRotationLength != 0.0f) 
+        matrix = glm::rotate(matrix, geneRotationLength, glm::normalize(baseRotation));
     
-    matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
-    
-    // Update animation state
-    glm::vec4 animationFactor = glm::vec4(actor->genetics.mGenes[a].animationAxis.x, 
-                                          actor->genetics.mGenes[a].animationAxis.y, 
-                                          actor->genetics.mGenes[a].animationAxis.z, 0);
-    // Calculate limb swing
-    float animationMaxSwingRange = actor->genetics.mGenes[a].animationRange;
-    if (actor->animation.mAnimation[a].w < 0) {
-        HandleAnimationSwing(actor, a, animationFactor, animationMaxSwingRange, false);
-    } else {
-        HandleAnimationSwing(actor, a, animationFactor, animationMaxSwingRange, true);
+    float swingAngle = CalculateLimbSwingAngle(actor, a);
+    glm::vec3 swingAxis(actor->genetics.mGenes[a].animationAxis.x, 
+                        actor->genetics.mGenes[a].animationAxis.y, 
+                        actor->genetics.mGenes[a].animationAxis.z);
+    if (glm::length(swingAxis) > 0.0f) {
+        matrix = glm::rotate(matrix, swingAngle, glm::normalize(swingAxis));
     }
+    
+    // Genetic translation
+    matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
 }
 
 void ActorSystem::UpdateAnimationInHand(glm::mat4& matrix, Actor* actor, unsigned int a) {
@@ -192,7 +224,11 @@ void ActorSystem::UpdateAnimationInHand(glm::mat4& matrix, Actor* actor, unsigne
     
     glm::vec3 attackStance(-1.5f, 0.0f, 0.0f);
     
-    // Rotate
+    bool hasActiveWeapon = (actor->inventory.holdingRenderer != nullptr && 
+                            actor->inventory.holdingRenderer->isActive && 
+                            !actor->inventory.inHandItemClass.empty());
+    
+    // Rotate body
     float bodyRotationLength = glm::length(actor->navigation.mRotation);
     if (bodyRotationLength != 0.0f) 
         matrix = glm::rotate(matrix, glm::radians(bodyRotationLength), glm::normalize(actor->navigation.mRotation));
@@ -202,7 +238,8 @@ void ActorSystem::UpdateAnimationInHand(glm::mat4& matrix, Actor* actor, unsigne
     
     if ((actor->genetics.mGenes[a].animationType != ActorState::Animation::Limb && 
         actor->genetics.mGenes[a].animationType != ActorState::Animation::LimbHolding) || 
-        !actor->state.mIsWalking) {
+        (!actor->state.mIsWalking && !actor->state.mIsRunning)) {
+        
         // Rotate gene
         glm::vec3 baseRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, actor->genetics.mGenes[a].rotation.y, actor->genetics.mGenes[a].rotation.z);
         float geneRotationLength = glm::length(baseRotation);
@@ -215,52 +252,55 @@ void ActorSystem::UpdateAnimationInHand(glm::mat4& matrix, Actor* actor, unsigne
     } else {
         
         // Apply animation
-        if (actor->state.mode == ActorState::Mode::MoveAttack && 
-            actor->inventory.holdingRenderer != nullptr) {
-            
+        if (actor->state.mode == ActorState::Mode::MoveAttack && hasActiveWeapon) {
             float attackStanceLength = glm::length(attackStance);
             matrix = glm::rotate(matrix, attackStanceLength, glm::normalize(attackStance));
+        } else {
+            glm::vec3 baseRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, actor->genetics.mGenes[a].rotation.y, actor->genetics.mGenes[a].rotation.z);
+            float geneRotationLength = glm::length(baseRotation);
+            if (geneRotationLength != 0.0f) 
+                matrix = glm::rotate(matrix, geneRotationLength, glm::normalize(baseRotation));
             
-        } else {
-            ApplyAnimationRotation(matrix, actor, a);
+            if (actor->state.mIsWalking || actor->state.mIsRunning) {
+                float swingAngle = CalculateLimbSwingAngle(actor, a);
+                glm::vec3 swingAxis(actor->genetics.mGenes[a].animationAxis.x, 
+                                    actor->genetics.mGenes[a].animationAxis.y, 
+                                    actor->genetics.mGenes[a].animationAxis.z);
+                if (glm::length(swingAxis) > 0.0f) {
+                    matrix = glm::rotate(matrix, swingAngle, glm::normalize(swingAxis));
+                }
+            }
         }
         
+        // Genetic translation
         matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
-        
-        // Update animation state
-        glm::vec4 animationFactor = glm::vec4(actor->genetics.mGenes[a].animationAxis.x, 
-                                            actor->genetics.mGenes[a].animationAxis.y, 
-                                            actor->genetics.mGenes[a].animationAxis.z, 0);
-        // Calculate limb swing
-        float animationMaxSwingRange = actor->genetics.mGenes[a].animationRange;
-        if (actor->animation.mAnimation[a].w < 0) {
-            HandleAnimationSwing(actor, a, animationFactor, animationMaxSwingRange, false);
-        } else {
-            HandleAnimationSwing(actor, a, animationFactor, animationMaxSwingRange, true);
-        }
     }
     
     // Item positional offset
-    
-    if (actor->inventory.holdingRenderer != nullptr) {
+    if (hasActiveWeapon) {
         if (bodyRotationLength != 0.0f) 
             matrixHand = glm::rotate(matrixHand, glm::radians(bodyRotationLength), glm::normalize(actor->navigation.mRotation));
         
         matrixHand = glm::translate(matrixHand, glm::vec3(actor->genetics.mGenes[a].offset.x, actor->genetics.mGenes[a].offset.y, actor->genetics.mGenes[a].offset.z));
         
         if (actor->state.mode == ActorState::Mode::MoveAttack) {
-            
             float attackStanceLength = glm::length(attackStance);
             matrixHand = glm::rotate(matrixHand, attackStanceLength, glm::normalize(attackStance));
-            
-        } else {
-            ApplyAnimationRotation(matrixHand, actor, a);
+        } else if (actor->state.mIsWalking || actor->state.mIsRunning) {
+            float swingAngle = CalculateLimbSwingAngle(actor, a);
+            glm::vec3 swingAxis(actor->genetics.mGenes[a].animationAxis.x, 
+                                actor->genetics.mGenes[a].animationAxis.y, 
+                                actor->genetics.mGenes[a].animationAxis.z);
+            if (glm::length(swingAxis) > 0.0f) {
+                matrixHand = glm::rotate(matrixHand, swingAngle, glm::normalize(swingAxis));
+            }
         }
         
         matrixHand = glm::translate(matrixHand, actor->inventory.handPosition);
         
         float handRotationLength = glm::length(actor->inventory.handRotation);
-        matrixHand = glm::rotate(matrixHand, handRotationLength, actor->inventory.handRotation);
+        if (handRotationLength != 0.0f)
+            matrixHand = glm::rotate(matrixHand, handRotationLength, actor->inventory.handRotation);
         
         matrixHand = glm::translate(matrixHand, actor->inventory.handOffset);
         
@@ -269,7 +309,6 @@ void ActorSystem::UpdateAnimationInHand(glm::mat4& matrix, Actor* actor, unsigne
         actor->inventory.holdingRenderer->isActive = true;
         actor->inventory.holdingRenderer->transform.matrix = matrixHand;
     }
-    
 }
 
 void ActorSystem::UpdateTargetRotation(Actor* actor) {
@@ -304,7 +343,6 @@ void ActorSystem::UpdateTargetRotation(Actor* actor) {
     float t = glm::clamp(actor->physical.mSnapSpeed, 0.0f, 1.0f);
     
     actor->navigation.mRotation.y = LerpAngleDeg(currentYaw, desiredYaw, t);
-    
     actor->navigation.mRotation.x = Math.Lerp(actor->navigation.mRotation.x, 0.0f, t);
     actor->navigation.mRotation.z = Math.Lerp(actor->navigation.mRotation.z, 0.0f, t);
 }
@@ -342,7 +380,6 @@ void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned i
     }
 }
 
-
 void ActorSystem::ApplyAnimationRotation(glm::mat4& matrix, Actor* actor, unsigned int a) {
     EnsureNonZeroAnimationState(actor, a);
     glm::vec3 geneRotation = glm::vec3(actor->genetics.mGenes[a].rotation.x, 
@@ -379,4 +416,3 @@ void ActorSystem::EnsureNonZeroAnimationState(Actor* actor, unsigned int a) {
     if (actor->animation.mAnimation[a].z == 0.0f) 
         actor->animation.mAnimation[a].z += 0.0001f;
 }
-

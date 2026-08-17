@@ -4,8 +4,9 @@
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Math/Random.h>
 
-
 void ActorSystem::HandleMovementMechanics(Actor* actor) {
+    ScopeProfile profile("AI-mechanics");
+    
     glm::vec3 targetPosition(0.0f);
     if (actor->navigation.mTargetActor != nullptr) 
         targetPosition = actor->navigation.mTargetActor->navigation.mPosition;
@@ -35,25 +36,8 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             actor->state.mIsWalking = true;
             actor->state.mIsRunning = true;
             
-            if (actor->navigation.mTargetActor != nullptr) {
-                glm::vec3 targetPos = actor->navigation.mTargetActor->navigation.mPosition;
-                
-                // 1. Generate a deterministic unique angle for this actor (using its memory address)
-                uintptr_t actorId = reinterpret_cast<uintptr_t>(actor);
-                float angleDeg = static_cast<float>(actorId % 360);
-                float angleRad = glm::radians(angleDeg);
-                
-                // 2. Set the offset radius slightly inside their maximum attack range
-                float attackRadius = actor->behavior.GetDistanceToAttack() * 0.5f;
-                
-                // 3. Offset the target point around the enemy
-                actor->navigation.mTargetPoint.x = targetPos.x + std::cos(angleRad) * attackRadius;
-                actor->navigation.mTargetPoint.y = targetPos.y;
-                actor->navigation.mTargetPoint.z = targetPos.z + std::sin(angleRad) * attackRadius;
-                
-                // 4. Keep looking directly at the center of the target actor
-                actor->navigation.mTargetLook = targetPos;
-            }
+            // Apply group noise offsets
+            CalculateTargetOffsetting(actor, 1.1f);
             actor->state.mIsFacing = true;
             
             forward = CalculateForwardVelocity(actor);
@@ -67,10 +51,43 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             actor->state.mIsWalking = true;
             actor->state.mIsRunning = true;
             
-            actor->navigation.mTargetPoint.x = targetPosition.x;
-            actor->navigation.mTargetPoint.z = targetPosition.z;
-            actor->navigation.mTargetLook = targetPosition;
-            actor->state.mIsFacing = false;
+            bool hasHome = false;
+            glm::vec3 homePos(0.0f);
+            
+            // Direct zero-allocation vector retrieval
+            std::unordered_map<std::string, std::vector<MemoryTrigger>>::iterator homeIt = actor->memories.mMemoryTriggers.find("home");
+            if (homeIt != actor->memories.mMemoryTriggers.end() && !homeIt->second.empty()) {
+                homePos = homeIt->second[0].vector;
+                hasHome = true;
+            }
+            
+            if (hasHome) {
+                float walkRadius = actor->behavior.GetDistanceToWalk();
+                float distToTarget = glm::distance(
+                    glm::vec3(actor->navigation.mPosition.x, 0.0f, actor->navigation.mPosition.z),
+                    glm::vec3(actor->navigation.mTargetPoint.x, 0.0f, actor->navigation.mTargetPoint.z)
+                );
+                float distTargetToHome = glm::distance(
+                    glm::vec3(actor->navigation.mTargetPoint.x, 0.0f, actor->navigation.mTargetPoint.z),
+                    glm::vec3(homePos.x, 0.0f, homePos.z)
+                );
+                
+                // Pick a new point inside the home radius if outside or arrived
+                if (distTargetToHome > walkRadius || distToTarget < actor->behavior.GetDistanceToInflict()) {
+                    actor->navigation.mTargetPoint.x = homePos.x + Random.Range(-walkRadius, walkRadius);
+                    actor->navigation.mTargetPoint.y = homePos.y;
+                    actor->navigation.mTargetPoint.z = homePos.z + Random.Range(-walkRadius, walkRadius);
+                }
+                
+                actor->navigation.mTargetLook = actor->navigation.mTargetPoint;
+                actor->state.mIsFacing = true;
+            } else {
+                // Fallback: Run directly away from target
+                actor->navigation.mTargetPoint.x = targetPosition.x;
+                actor->navigation.mTargetPoint.z = targetPosition.z;
+                actor->navigation.mTargetLook = targetPosition;
+                actor->state.mIsFacing = false;
+            }
             
             forward = CalculateForwardVelocity(actor);
             forward *= speedScaler * actor->physical.mSpeedMul;
@@ -85,38 +102,45 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             HandleTargetDistance(actor);
             break;
             
-            // Special movement and interaction
-            
         case ActorState::Mode::MoveHunting:
-            
-            
             break;
             
-        case ActorState::Mode::MoveBreed:
+        case ActorState::Mode::MoveBreed: {
+            if (actor->navigation.mTargetActor == nullptr || 
+                !actor->navigation.mTargetActor->isActive || 
+                actor->navigation.mTargetActor->isGarbage) {
+                actor->navigation.mTargetActor = nullptr;
+                actor->state.mode = ActorState::Mode::Idle;
+                break;
+            }
+            
             actor->state.mIsWalking = true;
             actor->state.mIsRunning = false;
-            
             actor->navigation.mTargetPoint.x = targetPosition.x;
             actor->navigation.mTargetPoint.z = targetPosition.z;
             actor->navigation.mTargetLook = targetPosition;
             actor->state.mIsFacing = true;
             
             forward = CalculateForwardVelocity(actor);
-            forward *= speedScaler * actor->physical.mSpeedMul;
+            float breedDistance = actor->behavior.GetDistanceToInflict();
+            forward *= ApplyApproachSlowdown(actor, targetPosition, speedScaler, breedDistance);
             
             if (actor->navigation.mTargetActor != nullptr) {
                 if (!HandleBreedWith(actor, actor->navigation.mTargetActor)) {
-                    if (glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition) < actor->behavior.mDistanceToInflict) {
-                        // Failure to reproduce
+                    float dist = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition);
+                    // Relaxed distance threshold ensures actors stop walking if breeding fails or completes
+                    if (dist <= breedDistance * 1.25f) {
                         actor->counters.mBreedingCoolDownCounter = actor->behavior.mCooldownBreed;
                         actor->state.mode = ActorState::Mode::Idle;
+                        actor->state.mIsWalking = false;
+                        forward = glm::vec3(0.0f);
                     }
                 }
             }
-            
             break;
+        }
             
-        case ActorState::Mode::MoveSocialize:
+        case ActorState::Mode::MoveSocialize: {
             if (actor->navigation.mTargetActor == nullptr || 
                 !actor->navigation.mTargetActor->isActive || 
                 actor->navigation.mTargetActor->isGarbage) {
@@ -128,23 +152,27 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             actor->state.mIsWalking = true;
             actor->state.mIsRunning = false;
             
+            // Direct movement target prevents mutual orbiting/chasing loops
             actor->navigation.mTargetPoint.x = targetPosition.x;
             actor->navigation.mTargetPoint.z = targetPosition.z;
             actor->navigation.mTargetLook = targetPosition;
             actor->state.mIsFacing = true;
             
             forward = CalculateForwardVelocity(actor);
-            forward *= speedScaler * actor->physical.mSpeedMul;
+            float socialDistance = actor->behavior.GetDistanceToInflict() * 1.5f;
+            forward *= ApplyApproachSlowdown(actor, targetPosition, speedScaler, socialDistance);
             
             if (!HandleSocializeWith(actor, actor->navigation.mTargetActor)) {
-                if (glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition) < actor->behavior.mDistanceToInflict) {
-                    // Failure to socialize - set social cooldown counter
-                    
+                float dist = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition);
+                if (dist <= socialDistance) {
                     actor->counters.mSocialCoolDownCounter = actor->behavior.mCooldownSocial;
                     actor->state.mode = ActorState::Mode::Idle;
+                    actor->state.mIsWalking = false;
+                    forward = glm::vec3(0.0f);
                 }
             }
             break;
+        }
             
         case ActorState::Mode::MoveTo:
             forward = CalculateForwardVelocity(actor);
@@ -176,4 +204,3 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
     
     actor->navigation.mVelocity = forward;
 }
-

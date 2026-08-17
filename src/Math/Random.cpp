@@ -18,12 +18,12 @@ int NumberGeneration::GetSeed(void) {
 }
 
 int NumberGeneration::Range(int min, int max) {
-    std::uniform_int_distribution<int> dist(min, max - 1);
+    std::uniform_int_distribution<int> dist(min, max);
     return dist(mGenerator);
 }
 
 unsigned int NumberGeneration::Range(unsigned int min, unsigned int max) {
-    std::uniform_int_distribution<int> dist(min, max - 1);
+    std::uniform_int_distribution<int> dist(min, max);
     return static_cast<unsigned int>( dist(mGenerator) );
 }
 

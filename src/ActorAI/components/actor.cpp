@@ -70,8 +70,8 @@ void Actor::Reset(void) {
     behavior.mDistanceToInflict    = 5.24f;
     
     behavior.mCooldownAttack       = 2;
-    behavior.mCooldownObserve      = 16;
-    behavior.mCooldownSocial       = 8;
+    behavior.mCooldownObserve      = 8;
+    behavior.mCooldownSocial       = 3;
     behavior.mCooldownMove         = 8;
     behavior.mCooldownBreed        = 220;
     
@@ -101,7 +101,7 @@ void Actor::Reset(void) {
     biological.strength  = 1.0f;
     
     // Emotions
-    emotions.current.Clear();
+    emotions.current.Initiate();
     
     // Physical
     physical.mAge            = 0;
@@ -110,7 +110,7 @@ void Actor::Reset(void) {
     physical.mSpeed          = 1.5f;
     physical.mSpeedYouth     = 0.8f;
     physical.mSpeedMul       = 1.3f;
-    physical.mSnapSpeed      = 0.07f;
+    physical.mSnapSpeed      = 0.1f;
     physical.mYouthScale     = 0.5f;
     physical.mAdultScale     = 1.0f;
     physical.mSexualOrientation = false;

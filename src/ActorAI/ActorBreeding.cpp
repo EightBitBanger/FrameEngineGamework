@@ -30,10 +30,10 @@ bool ActorSystem::HandleBreedWith(Actor* actor, Actor* target) {
     // Behavioral recombination
     CombineParentMemories(actor, target, offspring);
     
-    std::string homePosition = Float.ToString(spawnPoint.x) + "," +
-                               Float.ToString(spawnPoint.y) + "," +
+    std::string homePosition = Float.ToString(spawnPoint.x) + "`" +
+                               Float.ToString(spawnPoint.y) + "`" +
                                Float.ToString(spawnPoint.z);
-    offspring->memories.Add("home", homePosition);
+    offspring->memories.Add("home", "home:" + homePosition);
     
     offspring->navigation.SetPosition(spawnPoint);
     offspring->navigation.SetTargetPoint(spawnPoint);

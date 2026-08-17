@@ -362,8 +362,9 @@ void PlatformLayer::SetClipboardText(std::string text) {
         CloseClipboard();
     }
     
+#else
+    Engine.console.Print("Error: No platform support for clipboard copying");
 #endif
-    
     return;
 }
 

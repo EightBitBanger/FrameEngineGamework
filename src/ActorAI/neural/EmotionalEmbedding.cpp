@@ -1,4 +1,9 @@
+#include <GameEngineFramework/ActorAI/ActorSystem.h>
 #include <GameEngineFramework/ActorAI/neural/EmotionalEmbedding.h>
+#include <GameEngineFramework/Math/Random.h>
+
+extern UniversalConstants UniversalConst;
+extern NumberGeneration Random;
 
 EmotionalEmbedding::EmotionalEmbedding() {
     Clear();
@@ -27,6 +32,59 @@ void EmotionalEmbedding::Clear() {
     social    = 0.0f;
 }
 
+void EmotionalEmbedding::Randomize() {
+    float min = UniversalConst.emotionalThreshold * 0.2f;
+    float max = UniversalConst.emotionalThreshold * 0.8f;
+    fear      = Random.Range(min, max);
+    anger     = Random.Range(min, max);
+    comfort   = Random.Range(min, max);
+    curiosity = Random.Range(min, max);
+    fatigue   = Random.Range(min, max);
+    stress    = Random.Range(min, max);
+    libido    = Random.Range(min, max);
+    social    = Random.Range(min, max);
+}
+
+void EmotionalEmbedding::Initiate() {
+    float min = UniversalConst.emotionalThreshold * 0.2f;
+    float max = UniversalConst.emotionalThreshold * 0.8f;
+    fear      = 0.0f;
+    anger     = 0.0f;
+    comfort   = Random.Range(min, max);
+    curiosity = Random.Range(min, max);
+    fatigue   = 0.0f;
+    stress    = 0.0f;
+    libido    = 0.0f;
+    social    = Random.Range(min, max);
+}
+
+// Assignment: Copy from another EmotionalEmbedding
+EmotionalEmbedding& EmotionalEmbedding::operator=(const EmotionalEmbedding& rhs) {
+    fear      = rhs.fear;
+    anger     = rhs.anger;
+    comfort   = rhs.comfort;
+    curiosity = rhs.curiosity;
+    fatigue   = rhs.fatigue;
+    stress    = rhs.stress;
+    libido    = rhs.libido;
+    social    = rhs.social;
+    return *this;
+}
+
+// Assignment: Set all components to a scalar
+EmotionalEmbedding& EmotionalEmbedding::operator=(float scalar) {
+    fear      = scalar;
+    anger     = scalar;
+    comfort   = scalar;
+    curiosity = scalar;
+    fatigue   = scalar;
+    stress    = scalar;
+    libido    = scalar;
+    social    = scalar;
+    return *this;
+}
+
+// Compound Addition (Component-wise)
 EmotionalEmbedding& EmotionalEmbedding::operator+=(const EmotionalEmbedding& rhs) {
     fear      += rhs.fear;
     anger     += rhs.anger;
@@ -39,6 +97,33 @@ EmotionalEmbedding& EmotionalEmbedding::operator+=(const EmotionalEmbedding& rhs
     return *this;
 }
 
+// Compound Multiplication (Component-wise)
+EmotionalEmbedding& EmotionalEmbedding::operator*=(const EmotionalEmbedding& rhs) {
+    fear      *= rhs.fear;
+    anger     *= rhs.anger;
+    comfort   *= rhs.comfort;
+    curiosity *= rhs.curiosity;
+    fatigue   *= rhs.fatigue;
+    stress    *= rhs.stress;
+    libido    *= rhs.libido;
+    social    *= rhs.social;
+    return *this;
+}
+
+// Compound Multiplication (Scalar)
+EmotionalEmbedding& EmotionalEmbedding::operator*=(float scalar) {
+    fear      *= scalar;
+    anger     *= scalar;
+    comfort   *= scalar;
+    curiosity *= scalar;
+    fatigue   *= scalar;
+    stress    *= scalar;
+    libido    *= scalar;
+    social    *= scalar;
+    return *this;
+}
+
+// Compound Division (Scalar)
 EmotionalEmbedding& EmotionalEmbedding::operator/=(float scalar) {
     if (scalar != 0.0f) {
         fear      /= scalar;
@@ -53,6 +138,7 @@ EmotionalEmbedding& EmotionalEmbedding::operator/=(float scalar) {
     return *this;
 }
 
+// Binary Multiplication (Scalar)
 EmotionalEmbedding EmotionalEmbedding::operator*(float scalar) const {
     EmotionalEmbedding result;
     result.fear      = this->fear      * scalar;
@@ -66,7 +152,7 @@ EmotionalEmbedding EmotionalEmbedding::operator*(float scalar) const {
     return result;
 }
 
-float* EmotionalEmbedding::GetEmotionByTrigger(TriggerType type) {
+float* EmotionalEmbedding::GetEmotionByTrigger(const TriggerType& type) {
     switch (type) {
         case TriggerType::Fear:      return &fear;
         case TriggerType::Anger:     return &anger;

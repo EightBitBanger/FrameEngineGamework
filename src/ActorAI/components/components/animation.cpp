@@ -1,3 +1,5 @@
 #include <GameEngineFramework/ActorAI/ActorSystem.h>
 
-AnimationState::AnimationState() {}
+AnimationState::AnimationState() : 
+    mWalkTime(0.0f)
+{}

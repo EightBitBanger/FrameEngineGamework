@@ -74,6 +74,12 @@ void ActorSystem::DebugRenderDrawLine(glm::vec3 from, glm::vec3 to, Color color)
     mDebugLineRenderer->mesh->Load();
 }
 
+void ActorSystem::SetWorldRaycastCallback(WorldRaycastCallback query, WorldPlaceCallback place, WorldRemoveCallback destroy) {
+    mWorldRaycastCallback = std::move(query);
+    mWorldPlaceCallback   = std::move(place);
+    mWorldRemoveCallback  = std::move(destroy);
+}
+
 void ActorSystem::Shutdown(void) {
     std::lock_guard<std::mutex> lock(mux);
     isActorThreadActive = false;

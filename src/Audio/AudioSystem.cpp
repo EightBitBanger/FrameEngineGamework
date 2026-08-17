@@ -26,7 +26,7 @@ static inline double ClampDouble(double v, double a, double b) {
     return v;
 }
 
-static inline glm::vec2 SafeNormalize2(const glm::vec2& v, const glm::vec2& fallback) {
+static inline glm::vec2 NormalizeSqrt(const glm::vec2& v, const glm::vec2& fallback) {
     float len2 = glm::dot(v, v);
     if (len2 > 1.0e-12f) {
         return v / std::sqrt(len2);
@@ -187,9 +187,9 @@ void AudioSystem::MixActiveSounds(std::vector<int32_t>& buffer) {
             glm::vec3 toSound3   = sound->mPosition - listenerPosition;
             glm::vec3 srcDir3    = SafeNormalize3(toSound3, glm::vec3(0.0f, 0.0f, 1.0f));
             
-            glm::vec2 forwardXZ  = SafeNormalize2(glm::vec2(listenerDirection.x, listenerDirection.z),
+            glm::vec2 forwardXZ  = NormalizeSqrt(glm::vec2(listenerDirection.x, listenerDirection.z),
                                                 glm::vec2(0.0f, 1.0f));
-            glm::vec2 soundXZ    = SafeNormalize2(glm::vec2(srcDir3.x, srcDir3.z),
+            glm::vec2 soundXZ    = NormalizeSqrt(glm::vec2(srcDir3.x, srcDir3.z),
                                                 glm::vec2(0.0f, 1.0f));
             
             // 2D cross product: negative=left, positive=right

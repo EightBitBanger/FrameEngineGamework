@@ -6,8 +6,25 @@
 extern UniversalConstants UniversalConst;
 extern EngineSystemManager Engine;
 
+const std::string memory_blank = "";
+const std::vector<std::string> emotStringLookup = {
+    "curiosity",
+    "libido",
+    "social",
+    "speak",
+    "anger",
+    "fear",
+    "comfort",
+    "fatigue",
+    "stress",
+    "home",
+    "sentience",
+    "speak_voice",
+    "behavior"
+};
+
 TriggerType StringToTriggerType(const std::string& str);
-std::string TriggerTypeToString(TriggerType type);
+const std::string& TriggerTypeToString(TriggerType type);
 
 bool ActorSystem::IsMemoryShareable(TriggerType type) {
     switch (type) {
@@ -21,19 +38,46 @@ bool ActorSystem::IsMemoryShareable(TriggerType type) {
     }
 }
 
+thread_local std::vector<std::pair<std::string, std::string>> candidates;
+
 void ActorSystem::ShareMemories(Actor* source, Actor* target) {
     if (source == nullptr || target == nullptr) 
         return;
-
-    for (auto it = source->memories.mMemories.begin(); it != source->memories.mMemories.end(); ++it) {
+    
+    // Collect all shareable memories not already known by target
+    candidates.clear();
+    for (std::unordered_map<std::string, std::string>::iterator it = source->memories.mMemories.begin(); it != source->memories.mMemories.end(); ++it) {
         const std::string& key = it->first;
-        const std::string& value = it->second;
-        
         TriggerType type = StringToTriggerType(key);
         
         if (IsMemoryShareable(type) && !target->memories.CheckExists(key)) {
-            target->memories.Add(key, value);
+            candidates.push_back(*it);
         }
+    }
+    
+    if (candidates.empty()) 
+        return;
+    
+    // Shuffle candidates
+    for (size_t i = candidates.size() - 1; i > 0; --i) {
+        size_t j = static_cast<size_t>(Random.Range(0.0f, 0.999f) * (i + 1));
+        std::swap(candidates[i], candidates[j]);
+    }
+    
+    // Determine how many memories to share
+    size_t countToShare = 1;
+    if (candidates.size() > 1) {
+        float roll = Random.Range(0.0f, 1.0f);
+        if (roll > 0.66f && candidates.size() >= 3) {
+            countToShare = 3;
+        } else if (roll > 0.33f) {
+            countToShare = 2;
+        }
+    }
+    
+    // Transfer the chosen candidates
+    for (size_t i = 0; i < countToShare && i < candidates.size(); ++i) {
+        target->memories.Add(candidates[i].first, candidates[i].second);
     }
 }
 
@@ -45,19 +89,39 @@ bool ActorSystem::HandleSocializeWith(Actor* actor, Actor* target) {
         return false;
     
     float distance = glm::distance(actor->navigation.mPosition, target->navigation.mPosition);
-    if (distance > actor->behavior.GetDistanceToInflict()) 
+    float socialDistance = actor->behavior.GetDistanceToInflict() * 1.5f;
+    if (distance > socialDistance) 
         return false;
     
-    // Extract emotional values for the acting actor
-    float comfort = actor->emotions.GetComfort();
-    float anger = actor->emotions.current.anger;
+    // Sentience differential comparison
+    float sentienceA = 0.0f;
+    float sentienceB = 0.0f;
     
-    // Comfort increases success chance, while anger acts as a direct penalty
-    float shareProbability = glm::clamp(comfort - anger, 0.0f, 1.0f);
+    std::unordered_map<std::string, std::vector<MemoryTrigger>>::iterator itA = actor->memories.mMemoryTriggers.find("sentience");
+    if (itA != actor->memories.mMemoryTriggers.end() && !itA->second.empty()) {
+        sentienceA = itA->second[0].value;
+    }
     
-    if (Random.Range(0.0f, 1.0f) < shareProbability) {
-        ShareMemories(actor, target);
-        ShareMemories(target, actor);
+    std::unordered_map<std::string, std::vector<MemoryTrigger>>::iterator itB = target->memories.mMemoryTriggers.find("sentience");
+    if (itB != target->memories.mMemoryTriggers.end() && !itB->second.empty()) {
+        sentienceB = itB->second[0].value;
+    }
+    
+    // Maximum allowed difference in sentience to exchange memories
+    const float maxSentienceDelta = 0.3f; 
+    
+    // Only allow sharing if the gap between their sentience levels is within range
+    if (std::abs(sentienceA - sentienceB) <= maxSentienceDelta) {
+        // Extract emotional values for the acting actor
+        float comfort = actor->emotions.GetComfort();
+        float anger = actor->emotions.current.anger;
+        
+        // Comfort increases success chance, while anger acts as a direct penalty
+        float shareProbability = glm::clamp(comfort - anger, 0.0f, 1.0f);
+        if (Random.Range(0.0f, 1.0f) < shareProbability) {
+            ShareMemories(actor, target);
+            ShareMemories(target, actor);
+        }
     }
     
     // Boost comfort
@@ -70,11 +134,16 @@ bool ActorSystem::HandleSocializeWith(Actor* actor, Actor* target) {
     actor->emotions.current.social  = 0.0f;
     target->emotions.current.social = 0.0f;
     
+    // Drop social
     actor->memories.ScaleEmotion(TriggerType::Social, 0.1f);
     target->memories.ScaleEmotion(TriggerType::Social, 0.1f);
     
-    actor->counters.mSocialCoolDownCounter  = actor->behavior.mCooldownObserve;
-    target->counters.mSocialCoolDownCounter = actor->behavior.mCooldownObserve;
+    // Bump up curiosity
+    actor->memories.ScaleEmotion(TriggerType::Curiosity, 1.3f);
+    target->memories.ScaleEmotion(TriggerType::Curiosity, 1.3f);
+    
+    actor->counters.mSocialCoolDownCounter  = actor->behavior.mCooldownSocial;
+    target->counters.mSocialCoolDownCounter = actor->behavior.mCooldownSocial;
     
     actor->state.mode = ActorState::Mode::Idle;
     target->state.mode = ActorState::Mode::Idle;
@@ -83,39 +152,39 @@ bool ActorSystem::HandleSocializeWith(Actor* actor, Actor* target) {
 
 TriggerType StringToTriggerType(const std::string& str) {
     static const std::unordered_map<std::string, TriggerType> lookup = {
-        {"curiosity",   TriggerType::Curiosity},
-        {"libido",      TriggerType::Libido},
-        {"social",      TriggerType::Social},
-        {"speak",       TriggerType::Speak},
-        {"anger",       TriggerType::Anger},
-        {"fear",        TriggerType::Fear},
-        {"comfort",     TriggerType::Comfort},
-        {"fatigue",     TriggerType::Fatigue},
-        {"stress",      TriggerType::Stress},
-        {"home",        TriggerType::Home},
-        {"sentience",   TriggerType::Sentience},
-        {"speak_voice", TriggerType::SpeakVoice},
-        {"behavior",    TriggerType::Behavior}
+        {emotStringLookup[0],   TriggerType::Curiosity},
+        {emotStringLookup[1],   TriggerType::Libido},
+        {emotStringLookup[2],   TriggerType::Social},
+        {emotStringLookup[3],   TriggerType::Speak},
+        {emotStringLookup[4],   TriggerType::Anger},
+        {emotStringLookup[5],   TriggerType::Fear},
+        {emotStringLookup[6],   TriggerType::Comfort},
+        {emotStringLookup[7],   TriggerType::Fatigue},
+        {emotStringLookup[8],   TriggerType::Stress},
+        {emotStringLookup[9],   TriggerType::Home},
+        {emotStringLookup[10],  TriggerType::Sentience},
+        {emotStringLookup[11],  TriggerType::SpeakVoice},
+        {emotStringLookup[12],  TriggerType::Behavior}
     };
     auto it = lookup.find(str);
     return (it != lookup.end()) ? it->second : TriggerType::Unknown;
 }
 
-std::string TriggerTypeToString(TriggerType type) {
+const std::string& TriggerTypeToString(TriggerType type) {
     switch (type) {
-        case TriggerType::Curiosity:  return "curiosity";
-        case TriggerType::Libido:     return "libido";
-        case TriggerType::Social:     return "social";
-        case TriggerType::Speak:      return "speak";
-        case TriggerType::Anger:      return "anger";
-        case TriggerType::Fear:       return "fear";
-        case TriggerType::Comfort:    return "comfort";
-        case TriggerType::Fatigue:    return "fatigue";
-        case TriggerType::Stress:     return "stress";
-        case TriggerType::Home:       return "home";
-        case TriggerType::Sentience:  return "sentience";
-        case TriggerType::SpeakVoice: return "speak_voice";
-        case TriggerType::Behavior:   return "behavior";
-        default:                      return "unknown";
+        case TriggerType::Curiosity:  return emotStringLookup[0];
+        case TriggerType::Libido:     return emotStringLookup[1];
+        case TriggerType::Social:     return emotStringLookup[2];
+        case TriggerType::Speak:      return emotStringLookup[3];
+        case TriggerType::Anger:      return emotStringLookup[4];
+        case TriggerType::Fear:       return emotStringLookup[5];
+        case TriggerType::Comfort:    return emotStringLookup[6];
+        case TriggerType::Fatigue:    return emotStringLookup[7];
+        case TriggerType::Stress:     return emotStringLookup[8];
+        case TriggerType::Home:       return emotStringLookup[9];
+        case TriggerType::Sentience:  return emotStringLookup[10];
+        case TriggerType::SpeakVoice: return emotStringLookup[11];
+        case TriggerType::Behavior:   return emotStringLookup[12];
+        default:                      return memory_blank;
     }
 }

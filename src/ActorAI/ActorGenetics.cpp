@@ -234,6 +234,7 @@ void ActorSystem::CombineParentMemories(const Actor* parentA, const Actor* paren
                             blended.name = aIt->name;
                             blended.type = aIt->type;
                             blended.value = (aIt->value + bIt->value) * 0.5f;
+                            blended.vector = (aIt->vector + bIt->vector) * 0.5f;
                             blendedTriggers.push_back(blended);
                             foundMatch = true;
                             break;
@@ -272,7 +273,14 @@ void ActorSystem::CombineParentMemories(const Actor* parentA, const Actor* paren
                     if (tIt != blendedTriggers.begin()) {
                         serializedString += ",";
                     }
-                    serializedString += tIt->name + ":" + std::to_string(tIt->value);
+                    if (tIt->type == TriggerType::Home) {
+                        serializedString += tIt->name + ":" + 
+                                            std::to_string(tIt->vector.x) + "`" + 
+                                            std::to_string(tIt->vector.y) + "`" + 
+                                            std::to_string(tIt->vector.z);
+                    } else {
+                        serializedString += tIt->name + ":" + std::to_string(tIt->value);
+                    }
                 }
                 child->memories.mMemories[category] = serializedString;
             }
