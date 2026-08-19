@@ -19,11 +19,21 @@ bool ChunkManager::DestroyChunk(Chunk* chunk) {
         chunk->meshCollider = nullptr;
     }
     
-    // Destroy attached chunk particle emitters
+    // Destroy particle emitters
     for (Emitter* emitter : chunk->emitters) {
         Particle.DestroyEmitter(emitter);
     }
     chunk->emitters.clear();
+    
+    // Destroy pickups
+    for (StaticPickup& pickup : chunk->pickups) {
+        if (pickup.renderer != nullptr) {
+            Engine.sceneMain->RemoveMeshRendererFromSceneRoot(pickup.renderer, RENDER_QUEUE_GEOMETRY);
+            Engine.Destroy<MeshRenderer>(pickup.renderer);
+            pickup.renderer = nullptr;
+        }
+    }
+    chunk->pickups.clear();
     
     chunks.Destroy(chunk);
     return true;

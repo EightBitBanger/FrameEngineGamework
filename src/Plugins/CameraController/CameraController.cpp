@@ -37,7 +37,7 @@ GameObject* CreateCameraController(glm::vec3 position) {
     collider->setCollisionCategoryBits((unsigned short)LayerMask::Ground);
     
     rigidBody->updateMassPropertiesFromColliders();
-    Engine.cameraController->SetLinearDamping(4.4f);
+    Engine.cameraController->SetLinearDamping(7.0f);
     
     return cameraController;
 }

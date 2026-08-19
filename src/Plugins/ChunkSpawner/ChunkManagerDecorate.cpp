@@ -241,7 +241,6 @@ void ChunkManager::Decorate(Chunk* chunk) {
     staticMesh->Load();
 }
 
-
 void ChunkManager::AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, 
                            const glm::vec3& position, const glm::vec3& rotation, glm::vec3 scale, glm::vec3 color, int function) {
     ClassDefinition definition = world.classDefinitions[type];
@@ -374,6 +373,7 @@ bool RayIntersectsAABB(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
 }
 
 std::vector<NearbyStaticInfo> ChunkManager::QueryRadius(const glm::vec3& position, float range) {
+    std::lock_guard<std::mutex> lock(mux);
     std::vector<NearbyStaticInfo> results;
     
     // Center position projected onto the XZ plane for chunk distance check
@@ -425,7 +425,7 @@ std::vector<NearbyStaticInfo> ChunkManager::QueryRadius(const glm::vec3& positio
     return results;
 }
 
-std::vector<std::pair<std::string, glm::vec3>> ChunkManager::QueryRadiusNames(const glm::vec3& position, float range) {
+std::vector<std::pair<std::string, glm::vec3>> ChunkManager::QueryDecorNames(const glm::vec3& position, float range) {
     std::lock_guard<std::mutex> lock(mux);
     std::vector<std::pair<std::string, glm::vec3>> results;
     
@@ -459,6 +459,7 @@ std::vector<std::pair<std::string, glm::vec3>> ChunkManager::QueryRadiusNames(co
 }
 
 DecorationHitInfo ChunkManager::QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold) {
+    std::lock_guard<std::mutex> lock(mux);
     DecorationHitInfo result;
     direction = glm::normalize(direction);
     float bestDot = -1.0f;
@@ -547,6 +548,7 @@ std::string ChunkManager::QueryWorld(glm::vec3 position, glm::vec3 direction, fl
 }
 
 bool ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold) {
+    std::lock_guard<std::mutex> lock(mux);
     float closestHitDist = maxDistance + 1.0f;
     int bestChunkIndex = -1;
     int bestSubMeshIndex = -1;

@@ -537,23 +537,21 @@ Color ChunkManager::GetColorByName(const std::string& name) {
 
 
 
-bool ChunkManager::WorldDirectoryInitiate(void) {
+bool ChunkManager::InitiateWorldDirectory(void) {
     std::string worldName   = "worlds\\" + world.name;
     std::string worldChunks = "worlds\\" + world.name + "\\chunks";
     std::string worldStatic = "worlds\\" + world.name + "\\static";
+    std::string worldItems  = "worlds\\" + world.name + "\\items";
     
-    // Check world directory structure exists
     if (!fs.DirectoryExists(worldName)) {
         fs.DirectoryCreate(worldName);
-        
-        if (!fs.DirectoryExists(worldChunks))
-            fs.DirectoryCreate(worldChunks);
-        
-        if (!fs.DirectoryExists(worldStatic))
-            fs.DirectoryCreate(worldStatic);
-        
+        if (!fs.DirectoryExists(worldChunks)) fs.DirectoryCreate(worldChunks);
+        if (!fs.DirectoryExists(worldStatic)) fs.DirectoryCreate(worldStatic);
+        if (!fs.DirectoryExists(worldItems))  fs.DirectoryCreate(worldItems);
         return false;
     }
+    
+    if (!fs.DirectoryExists(worldItems)) fs.DirectoryCreate(worldItems);
     return true;
 }
 

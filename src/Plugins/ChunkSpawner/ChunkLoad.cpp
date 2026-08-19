@@ -1,13 +1,14 @@
 #include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
 
-#include <GameEngineFramework/Plugins/ChunkSpawner/ChunkManager.h>
-
 bool ChunkManager::LoadChunk(Chunk* chunk) {
     std::string chunkPosStr = Float.ToString( chunk->x ) + "_" + Float.ToString( chunk->y );
     std::string worldChunks = "worlds\\" + world.name + "\\chunks\\";
     std::string worldStatic = "worlds\\" + world.name + "\\static\\";
-    std::string chunkName = worldChunks + chunkPosStr;
+    std::string worldItems  = "worlds\\" + world.name + "\\items\\";
+    
+    std::string chunkName  = worldChunks + chunkPosStr;
     std::string staticName = worldStatic + chunkPosStr;
+    std::string itemsName  = worldItems + chunkPosStr;
     
     // Load actors
     if (Serializer.CheckExists( chunkName )) {
@@ -37,21 +38,27 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
                 unsigned long long int age = String.ToLongUint( lineArray[3] );
                 actor->physical.SetAge(age);
                 
-                // Load inventory
-                std::string& itemClassList = lineArray[4];
+                actor->biological.health     = String.ToFloat( lineArray[4] );
+                actor->biological.hunger     = String.ToFloat( lineArray[5] );
+                actor->biological.defense    = String.ToFloat( lineArray[6] );
+                actor->biological.strength   = String.ToFloat( lineArray[7] );
+                actor->biological.saturation = String.ToFloat( lineArray[8] );
+                
+                // Load inventory items
+                std::string& itemClassList = lineArray[9];
                 std::vector<std::string> itemList = String.Explode(itemClassList, '#');
                 for (unsigned int a = 0; a < itemList.size(); a++) {
                     actor->inventory.GiveItem( itemList[a] );
                 }
                 
                 // Set genome
-                AI.genomes.InjectGenome(actor, lineArray[5]);
+                AI.genomes.InjectGenome(actor, lineArray[10]);
                 actor->RebuildGeneticExpression();
                 
                 actor->isActive = true;
                 
                 // Memories
-                std::vector<std::string> memories = String.Explode(lineArray[6], '|');
+                std::vector<std::string> memories = String.Explode(lineArray[11], '|');
                 for (unsigned int m = 0; m < memories.size(); m++) {
                     const std::string& memory = memories[m];
                     if (!memory.empty()) {
@@ -97,5 +104,57 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
         staticMesh->Load();
     }
     
+    // Load item pickups
+    if (Serializer.CheckExists(itemsName)) {
+        unsigned int fileSize = Serializer.GetFileSize(itemsName);
+        if (fileSize > 0) {
+            std::string dataBuffer;
+            dataBuffer.resize(fileSize);
+            Serializer.Deserialize(itemsName, (void*)dataBuffer.data(), fileSize);
+            
+            std::vector<std::string> lines = String.Explode(dataBuffer, '\n');
+            for (const std::string& line : lines) {
+                std::vector<std::string> parts = String.Explode(line, '~');
+                if (parts.size() < 4) 
+                    continue;
+    
+                glm::vec3 localPos(
+                    String.ToFloat(parts[0]),
+                    String.ToFloat(parts[1]),
+                    String.ToFloat(parts[2])
+                );
+                std::string itemClassification = parts[3];
+    
+                // Instantiate MeshRenderer
+                MeshRenderer* pickupRenderer = Engine.Create<MeshRenderer>();
+                pickupRenderer->mesh         = Engine.Create<Mesh>();
+                pickupRenderer->material     = Engine.Create<Material>();
+    
+                pickupRenderer->material->shader  = Resources.shaders.color;
+                pickupRenderer->material->ambient = Colors.white;
+                pickupRenderer->material->diffuse = Colors.white;
+    
+                build.BuildItemMesh(pickupRenderer->mesh, itemClassification);
+    
+                // Reconstruct world space position
+                glm::vec3 worldPos = localPos + glm::vec3(chunk->x, 0.0f, chunk->y);
+                pickupRenderer->transform.position = worldPos;
+                pickupRenderer->transform.UpdateMatrix();
+                pickupRenderer->isActive = true;
+    
+                Engine.sceneMain->AddMeshRendererToSceneRoot(pickupRenderer, RENDER_QUEUE_GEOMETRY);
+    
+                // Rebuild StaticPickup entry
+                StaticPickup pickup;
+                pickup.position       = localPos;
+                pickup.rotation       = glm::vec3(0.0f);
+                pickup.scale          = glm::vec3(0.5f);
+                pickup.classification = itemClassification;
+                pickup.renderer       = pickupRenderer;
+    
+                chunk->pickups.push_back(pickup);
+            }
+        }
+    }
     return true;
 }

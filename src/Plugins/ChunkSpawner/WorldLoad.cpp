@@ -11,7 +11,7 @@ bool ChunkManager::LoadWorld(void) {
     world.doGenerateChunks = true;
     generating.clear();
     
-    if (!WorldDirectoryInitiate()) {
+    if (!InitiateWorldDirectory()) {
         // Initiate default new world settings
         
         AddWorldRule("do_auto_breeding", "true");

@@ -12,7 +12,7 @@ bool ChunkManager::SaveWorld(void) {
         return false;
     
     // Setup world directory structure
-    WorldDirectoryInitiate();
+    InitiateWorldDirectory();
     
     std::string worldName   = "worlds/" + world.name;
     
