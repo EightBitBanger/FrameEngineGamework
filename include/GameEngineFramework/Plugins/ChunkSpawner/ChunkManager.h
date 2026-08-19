@@ -42,6 +42,12 @@ struct NearbyStaticInfo {
     float distance;
 };
 
+struct NearbyPickupInfo {
+    std::string classification;
+    glm::vec3 worldPosition;
+    float distance;
+};
+
 class ENGINE_API ChunkManager {
 public:
     
@@ -61,36 +67,6 @@ public:
     int worldSeed;
     
     ChunkManager();
-    
-    Actor* SummonActor(glm::vec3 position);
-    void KillActor(Actor* actor);
-    
-    Chunk* FindChunk(int x, int z);
-    
-    bool WorldDirectoryInitiate(void);
-    
-    // Save / load
-    
-    unsigned int GetWorldVersion(void);
-    
-    bool SaveChunk(Chunk* chunk, bool doClearActors);
-    bool LoadChunk(Chunk* chunk);
-    
-    bool SaveWorld(void);
-    bool LoadWorld(void);
-    
-    // Purge
-    
-    void ClearWorld(void);
-    bool DestroyWorld(std::string worldname);
-    
-    // Chunks
-    
-    Chunk* CreateChunk(float x, float y);
-    bool DestroyChunk(Chunk* chunk);
-    
-    void GenerateChunkBiomes(Chunk* chunk);
-    void GenerateChunkBlendMasks(Chunk* chunk);
     
     // World rules
     
@@ -114,45 +90,89 @@ public:
     /// Queries all static objects within a given radius around a world position.
     std::vector<NearbyStaticInfo> QueryRadius(const glm::vec3& centerPosition, float range);
     
-    /// Queries static objects in range and returns a list of (Name, WorldPosition) pairs.
-    std::vector<std::pair<std::string, glm::vec3>> QueryRadiusNames(const glm::vec3& centerPosition, float range);
-    
-    /// Query for a decoration using a raycast
-    DecorationHitInfo QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
-    
-    /// World query function
+    /// General query over all types of world objects.
     std::string QueryWorld(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
     
-    /// Decoration functions
-    void AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, const glm::vec3& position, const glm::vec3& rotation, glm::vec3 scale = glm::vec3(0.0f), glm::vec3 color = glm::vec3(-1.0f), int function = -1);
+    // Decorations
     
-    // Decoration placement
     bool PlaceDecor(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance, float threshold);
-    bool PlaceStructure(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance = 100.0f, float threshold = 0.5f);
     bool PlaceDecorAt(const std::string& type, const glm::vec3& position, const glm::vec3& rotation = glm::vec3(0.0f));
+    
+    bool PlaceStructure(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance = 100.0f, float threshold = 0.5f);
     bool PlaceStructureAt(const std::string& name, const glm::vec3& worldPosition);
     
-    // Decoration removal
     bool RemoveDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
     bool RemoveDecorAt(const glm::vec3& position, float tolerance = 0.1f);
     
-    void Initiate(void);
+    /// Query static decor via raycast.
+    DecorationHitInfo QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
     
-    void Update(float deltaTime);
-    void UpdateStaticObjects(float deltaTime);
+    /// Query static objects in range and return a list of (name, position) pairs.
+    std::vector<std::pair<std::string, glm::vec3>> QueryDecorNames(const glm::vec3& centerPosition, float range);
+    
+    // Item pickups
+    
+    bool PlacePickup(glm::vec3 position, glm::vec3 direction, float maxDistance, const std::string& itemClassification);
+    bool PlacePickupAt(const std::string& itemClassification, const glm::vec3& position);
+    bool RemovePickup(glm::vec3 position, glm::vec3 direction, float maxDistance, std::string& collectedItem);
+    bool RemovePickupAt(const glm::vec3& position, float tolerance = 0.1f, std::string* collectedItem = nullptr);
+    bool QueryPickup(glm::vec3 position, glm::vec3 direction, float maxDistance, std::string& queriedItem);
+    
+    /// Query pickups via raycast.
+    std::vector<NearbyPickupInfo> QueryPickupNearest(glm::vec3 position, float maxDistance, size_t count = 1);
+    
+    /// Query pickups in range and return a list of (name, position) pairs.
+    std::vector<std::pair<std::string, glm::vec3>> QueryPickupNames(const glm::vec3& position, float range);
+    
+    // Actors
+    
+    Actor* SummonActor(glm::vec3 position);
+    void KillActor(Actor* actor);
+    
+    // Save / load
+    
+    unsigned int GetWorldVersion(void);
+    
+    bool SaveChunk(Chunk* chunk, bool doClearActors);
+    bool LoadChunk(Chunk* chunk);
+    
+    bool SaveWorld(void);
+    bool LoadWorld(void);
+    
+    // Purge
+    
+    void ClearWorld(void);
+    bool DestroyWorld(std::string worldname);
+    
+    // Chunks
+    
+    Chunk* FindChunk(int x, int z);
+    Chunk* CreateChunk(float x, float y);
+    bool DestroyChunk(Chunk* chunk);
+    
+    void GenerateChunkBiomes(Chunk* chunk);
+    void GenerateChunkBlendMasks(Chunk* chunk);
     
     // Internal chunk decoration
+    
     void Decorate(Chunk* chunk);
     
-    // Build functions
+    bool BuildDecorStructure(Chunk* chunk, glm::vec3 position, const std::string& pattern, const std::string& name, const std::string& mesh);
+    
     class ENGINE_API BuildFunctions {
     public:
         
         void StackAtAngle(Structure& structure, glm::vec3 position, glm::vec3 scale, glm::vec3 angle, float stepHeight, int length, Color color);
         
+        void BuildItemMesh(Mesh* targetMesh, const std::string& itemClassification, const glm::vec3& offset = glm::vec3(0.0f));
+        
     } build;
     
-    bool BuildDecorStructure(Chunk* chunk, glm::vec3 position, const std::string& pattern, const std::string& name, const std::string& mesh);
+    void Initiate(void);
+    bool InitiateWorldDirectory(void);
+    
+    void Update(float deltaTime);
+    void UpdateStaticObjects(float deltaTime);
     
     // World materials
     
@@ -168,6 +188,9 @@ public:
     PoolAllocator<Chunk> chunks;
     
 private:
+    
+    // Internal decoration mesh combiner function
+    void AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, const glm::vec3& position, const glm::vec3& rotation, glm::vec3 scale = glm::vec3(0.0f), glm::vec3 color = glm::vec3(-1.0f), int function = -1);
     
     HeightMapping generation;
     

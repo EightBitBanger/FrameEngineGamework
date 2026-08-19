@@ -21,7 +21,18 @@ public:
     StaticObject();
 };
 
-// Structure for saving static elements to file
+class ENGINE_API StaticPickup {
+public:
+    glm::vec3 position;
+    glm::vec3 rotation;
+    glm::vec3 scale;
+    std::string classification;
+    
+    MeshRenderer* renderer;
+    
+    StaticPickup();
+};
+
 struct StaticElement {
     glm::vec3 position;
     glm::vec3 rotation;

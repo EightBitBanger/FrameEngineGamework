@@ -44,14 +44,14 @@ public:
     /// Base list of all static geometry in this chunk.
     std::vector<StaticObject> statics;
     
-    /// Quick lookup list for active static objects.
+    /// Quick lookup list for animated static objects.
     std::vector<StaticAnimation> animatedStatics;
-    
-    /// List of the location of any structures on this chunk.
-    std::vector<glm::vec3> structures;
     
     /// Active particle emitters in this chunk.
     std::vector<Emitter*> emitters;
+    
+    /// List of item pickups in this chunk.
+    std::vector<StaticPickup> pickups;
     
     /// Biome region tracking map.
     std::vector<int> biomeMap;
