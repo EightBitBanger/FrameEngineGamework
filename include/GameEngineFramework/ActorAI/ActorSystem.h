@@ -29,6 +29,7 @@ public:
     
     const float sentienceThreshold   = 0.8f;
     const float emotionalThreshold   = 0.5f;
+    const float biologicalThreshold  = 0.5f;
 };
 
 class ENGINE_API ActorSystem {
@@ -37,7 +38,7 @@ public:
     
     using WorldRaycastCallback = std::function< std::vector<std::pair<std::string, glm::vec3>>(const glm::vec3& position, float range) >;
     using WorldPlaceCallback   = std::function< bool(const std::string& type, const glm::vec3& worldPosition, const glm::vec3& rotation) >;
-    using WorldRemoveCallback  = std::function< bool(const glm::vec3& worldPosition) >;
+    using WorldRemoveCallback  = std::function< bool(const glm::vec3& worldPosition, std::string& collectedItem) >;
     
     ActorSystem();
     
@@ -119,7 +120,7 @@ public:
     /// Draw a debug line in the debug renderer.
     void DebugRenderDrawLine(glm::vec3 from, glm::vec3 to, Color color);
     
-    /// Register the external world raycast query callback
+    /// Register the static geometry world raycast.
     void SetWorldRaycastCallback(WorldRaycastCallback query, WorldPlaceCallback place, WorldRemoveCallback destroy);
     
 private:
@@ -138,6 +139,8 @@ private:
     void UpdateActorState(Actor* actor, EmotionalEmbedding& emotion, float sentientScore);
     void UpdateGazeTarget(Actor* actor);
     void UpdateThoughtMatrix(Actor* actor, EmotionalEmbedding& emotion, float sentientScore);
+    bool UpdateEnvironmentalDomain(Actor* actor, float range);
+    void UpdateTargetingMechanics(Actor* actor);
     
     void ApplyEmotionThresholds(const MemoryTrigger& trigger, EmotionalEmbedding& embedding);
     bool EvaluateEmotionalBehavior(Actor* actor, Actor* targetActor, float threshold, EmotionalEmbedding& embedding);
@@ -149,8 +152,6 @@ private:
     int GetSocialGroupSize(Actor* focalActor);
     
     // Mechanical
-    void UpdateTargetingMechanics(Actor* actor);
-    
     void HandleMovementMechanics(Actor* actor);
     float ApplyApproachSlowdown(Actor* actor, const glm::vec3& targetPosition, float currentSpeedScaler, float targetStopDistance);
     

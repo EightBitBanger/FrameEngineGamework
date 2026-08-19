@@ -14,6 +14,8 @@ public:
     float health;
     /// How hungry the actor is.
     float hunger;
+    /// How full the actor is.
+    float saturation;
     
     /// Attack damage ability.
     float strength;
@@ -27,6 +29,7 @@ private:
     // Biological elements
     std::vector<Bio> mBiologics;
     
+    unsigned int mHungerCounter;
 };
 
 #endif
