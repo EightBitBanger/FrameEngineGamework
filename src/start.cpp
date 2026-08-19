@@ -6,9 +6,9 @@
 MeshRenderer* boundsRenderer = nullptr;
 Panel* selectedTab = nullptr;
 
-std::vector<std::pair<std::string, glm::vec3>> QueryWorld(const glm::vec3& position, float range) {return GameWorld.QueryRadiusNames(position, range);}
-bool PlaceWorld(const std::string& type, const glm::vec3& position, const glm::vec3& rotation) {return GameWorld.PlaceDecorAt(type, position, rotation);}
-bool RemoveWorld(const glm::vec3& position) {return GameWorld.RemoveDecorAt(position);}
+std::vector<std::pair<std::string, glm::vec3>> QueryWorld(const glm::vec3& position, float range) {return GameWorld.QueryPickupNames(position, range);}
+bool PlaceWorld(const std::string& type, const glm::vec3& position, const glm::vec3& rotation) {return GameWorld.PlacePickupAt(type, position);}
+bool RemoveWorld(const glm::vec3& position, std::string& collectedItem) {return GameWorld.RemovePickupAt(position, 0.1f, &collectedItem);}
 
 void Start() {
     // Key bindings
@@ -105,7 +105,7 @@ void Start() {
     
     // World rendering
     GameWorld.chunkSize = 64;
-    GameWorld.renderDistance = 13;
+    GameWorld.renderDistance = 11;
     GameWorld.staticDistance = 0.6f;
     GameWorld.actorDistance  = 0.3f;
     

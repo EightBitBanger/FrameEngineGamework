@@ -58,57 +58,6 @@ void ClearAllDialogLines() {
     }
 }
 
-void CreateFireAndSmokeEffect(ParticleSystem& particleSystem, glm::vec3 spawnPos) {
-    // Fire emitter
-    Emitter* fire = particleSystem.CreateEmitter();
-    fire->type = EmitterType::Point;
-    fire->position = spawnPos;
-    
-    fire->direction = glm::vec3(0.0f, 0.001f, 0.0f);
-    fire->velocity = glm::vec3(0.0f, 0.12f, 0.0f);
-    fire->velocityBias = 0.001f;
-    
-    fire->scale = glm::vec3(0.04f);
-    fire->scaleTo = glm::vec3(1.006f);
-    
-    fire->colorBegin = Color(1.0f, 0.7f, 0.1f);
-    fire->colorEnd = Color(0.8f, 0.1f, 0.0f);
-    fire->colorBias = 0.04f;
-    
-    fire->spread = 0.0f;
-    fire->angle = 0.3f;
-    fire->width = 1.3f;
-    fire->height = 0.4f;
-    
-    fire->maxParticles = 5;
-    fire->spawnRate = 30.0f;
-    
-    // Smoke emitter
-    Emitter* smoke = particleSystem.CreateEmitter();
-    smoke->type = EmitterType::Point;
-    smoke->position = spawnPos + glm::vec3(0.0f, 0.2f, 0.0f);
-    
-    smoke->direction = glm::vec3(0.0f, 0.002f, 0.0f);
-    smoke->velocity = glm::vec3(0.0f, 0.04f, 0.0f);
-    smoke->velocityBias = 0.002f;
-    
-    smoke->scale = glm::vec3(0.08f);
-    smoke->scaleTo = glm::vec3(1.004f);
-    
-    smoke->colorBegin = Color(0.25f, 0.25f, 0.25f, 0.1f);
-    smoke->colorEnd = Color(0.65f, 0.65f, 0.65f, 0.0f);
-    smoke->colorBias = 0.015f;
-    
-    smoke->spread = 0.0f;
-    smoke->angle = 0.2f;
-    smoke->width = 2.5f;
-    smoke->height = 13.0f;
-    
-    smoke->maxParticles = 20;
-    smoke->spawnRate = 80.0f;
-}
-
-
 void Run() {
     Camera* mainCamera = Engine.sceneMain->camera;
     if (mainCamera == nullptr) 
@@ -123,48 +72,87 @@ void Run() {
     
     if (Engine.cameraController == nullptr) 
         return;
+    if (Input.CheckKeyPressed(VK_M)) {
+        std::vector<std::pair<std::string, glm::vec3>> names = GameWorld.QueryPickupNames(from, 3.0f);
+        
+        for (unsigned int i=0; i < names.size(); i++) {
+            Engine.console.Print(names[i].first);
+        }
+    }
     
     // Left-click target selection handling
     if (Input.CheckMouseLeftPressed()) {
         Input.SetMouseLeftPressed(false);
-        
         Actor* newTarget = AI.Raycast(from, forward, 100.0f);
         
         // If selection changed (including deselecting / clicking away into nullptr)
         if (newTarget != actorTarget) {
             actorTarget = newTarget;
             ClearAllDialogLines();
+            return;
         }
+        
+        
+        if (newTarget == nullptr) {
+            
+            std::string weaponBuildBlade  = "build: 0.0,0.2,0.0: 0.001,0.5,0.02: 0.4,0.4,0.44";
+            std::string weaponBuildHandle = "build: 0.0,-0.39,0.0: 0.025,0.1,0.025: 0.01,0.01,0.03";
+            std::string weaponBuildGuard  = "build: 0.0,-0.28,0.0: 0.025,0.01,0.08: 0.2,0.1,0.01";
+            std::string itemSword = "name:ironsword; damage:8.1; defense:1.0;" + weaponBuildBlade +";"+ weaponBuildHandle +";"+ weaponBuildGuard;
+            
+            GameWorld.PlacePickup(from, forward, 10.0f, itemSword);
+        }
+        
     }
     
     if (Input.CheckMouseRightPressed()) {
-        Input.ClearMouseRight();
         
-        Hit hit;
-        if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
-            glm::vec3 pos(0);
+        std::string collected;
+        if (GameWorld.RemovePickup(from, forward, 10.0f, collected)) {
             
-            //for (unsigned int i=0; i < 8; i++) {
-                
-                //float rx = Random.Range(-4.0f, 4.0f);
-                //float ry = 0.0f;
-                //float rz = Random.Range(-4.0f, 4.0f);
-                //pos = glm::vec3(rx, ry, rz);
-                
-                std::string structureName = "campfire";
-                
-                const float grid = 1.0f;
-                const glm::vec3 gridOrigin(0.5f, 0.5f, 0.5f);
-                hit.point = SnapAxes(hit.point, glm::bvec3(true, false, true), grid, gridOrigin);
-                
-                //CreateFireAndSmokeEffect(Particle, hit.point + glm::vec3(0, 0.6f, 0));
-                
-                if (!GameWorld.PlaceStructure(hit.point + pos, glm::vec3(0, -1, 0), structureName, 100.0f, 0.01f)) {
-                    Engine.console.Print("Structure '"+structureName+"' does not exist");
-                }
-                
-            //}
+            Engine.console.Print("item  " + collected);
+        }
+        
+        std::string structureName = "";
+        if (Input.CheckKeyCurrent(VK_H)) {structureName = "teepee"; Input.ClearMouseRight();}
+        if (Input.CheckKeyCurrent(VK_C)) {structureName = "campfire"; Input.ClearMouseRight();}
+        if (Input.CheckKeyCurrent(VK_K)) {structureName = "KILL_TARGET";}
+        if (Input.CheckKeyCurrent(VK_T)) {structureName = "DECOR_DESTROY";}
+        
+        if (structureName != "DECOR_DESTROY") {
             
+            GameWorld.RemoveDecor(from, forward, 10.0f, 1.0f);
+            
+        } else if (structureName != "KILL_TARGET") {
+            Actor* actor = AI.Raycast(from, forward, 100.0f);
+            
+            if (actor != nullptr) {
+                actor->biological.health = 0;
+            }
+            
+        } else if (structureName != "") {
+            Hit hit;
+            if (Physics.Raycast(from, forward, 100, hit, LayerMask::Ground)) {
+                glm::vec3 pos(0);
+                
+                //for (unsigned int i=0; i < 8; i++) {
+                    
+                    //float rx = Random.Range(-4.0f, 4.0f);
+                    //float ry = 0.0f;
+                    //float rz = Random.Range(-4.0f, 4.0f);
+                    //pos = glm::vec3(rx, ry, rz);
+                    
+                    const float grid = 1.0f;
+                    const glm::vec3 gridOrigin(0.5f, 0.5f, 0.5f);
+                    hit.point = SnapAxes(hit.point, glm::bvec3(true, false, true), grid, gridOrigin);
+                    
+                    if (!GameWorld.PlaceStructure(hit.point + pos, glm::vec3(0, -1, 0), structureName, 100.0f, 0.01f)) {
+                        Engine.console.Print("Structure '"+structureName+"' does not exist");
+                    }
+                    
+                //}
+                
+            }
         }
         
         /*
@@ -174,12 +162,13 @@ void Run() {
             actor->memories.SetEmotion(TriggerType::Anger, 1.0f);
         }
         */
+        
     }
     
     if (Input.CheckMouseMiddlePressed()) {
-        Input.ClearMouseMiddle();
+        //Input.ClearMouseMiddle();
         
-        for (unsigned int i=0; i < 4; i++) {
+        for (unsigned int i=0; i < 1; i++) {
             float randAmount = 4.0f;
             float xx = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
             float zz = Random.Range(0.0f, randAmount) - Random.Range(0.0f, randAmount);
@@ -199,14 +188,18 @@ void Run() {
                 bodyColor *= Colors.MakeRandomGrayScale() * 0.4f;
                 bodyColor *= Color(0.9f, 0.1f, 0.1f);
                 
-                std::string weaponBuildBlade  = "build: 0.0`0.2`0.0: 0.01`0.5`0.2: 0.4`0.4`0.44";
-                std::string weaponBuildHandle = "build: 0.0`-0.39`0.0: 0.25`0.1`0.25: 0.01`0.01`0.03";
-                std::string itemSword = "name:ironsword, damage:8.1, defense:1.0," + weaponBuildBlade +","+ weaponBuildHandle;
+                std::string weaponBuildBlade  = "build: 0.0,0.3,0.0: 0.001,0.5,0.02: 0.4,0.4,0.44";
+                std::string weaponBuildHandle = "build: 0.0,-0.25,0.0: 0.025,0.1,0.025: 0.01,0.01,0.03";
+                std::string weaponBuildGuard  = "build: 0.0,-0.15,0.0: 0.025,0.01,0.08: 0.2,0.1,0.01";
+                std::string itemSword = "name:ironsword; damage:8.1; defense:1.0;" + weaponBuildBlade +";"+ weaponBuildHandle +";"+ weaponBuildGuard;
                 
-                std::string weaponBuildWood = "build: 0.0`0.1`0.0: 0.2`0.4`0.2: 0.02`0.02`0.001";
-                std::string itemStick = "name:stick, damage:2.2, defense:1.0," + weaponBuildWood;
+                std::string weaponBuildWood = "build: 0.0,0.1,0.0: 0.02,0.3,0.02: 0.02,0.02,0.001";
+                std::string itemStick = "name:stick; damage:2.2; defense:1.0;" + weaponBuildWood;
                 
                 if (Input.CheckKeyCurrent(VK_T)) {
+                    
+                    // Dwarf
+                    
                     AI.genomes.presets.Dwarf(actor);
                     actor->CalculateBoundingRegionFromGenome();
                     
@@ -222,23 +215,29 @@ void Run() {
                     actor->memories.Add("behavior", "curiosity:0.14, libido:0.04, social:0.08");
                     
                     if (sex) {
-                        actor->inventory.AddItem(itemStick);
+                        //actor->inventory.AddItem(itemStick);
                         actor->memories.Add("Amethesian Empire", "anger:0.9");
                     } else {
                         actor->memories.Add("Amethesian Empire", "fear:0.9");
                     }
                 } else if (Input.CheckKeyCurrent(VK_P)) {
+                    
+                    // Rabbit
+                    
                     AI.genomes.presets.Rabbit(actor);
                     actor->CalculateBoundingRegionFromGenome();
                     
                     float age = Random.Range(actor->physical.GetAdultAge() / 2.0f, actor->physical.GetSeniorAge() * 1.15f);
                     bool sex = actor->physical.GetSexualOrientation();
                     
-                    actor->memories.Add("behavior", "curiosity:0.14, libido:0.05, social:0.08");
+                    actor->memories.Add("behavior", "curiosity:0.14, libido:0.06, social:0.08");
                     
                     actor->physical.SetAge( age );
                     
                 } else if (Input.CheckKeyCurrent(VK_O)) {
+                    
+                    // Spider
+                    
                     AI.genomes.presets.Spider(actor);
                     actor->CalculateBoundingRegionFromGenome();
                     
@@ -247,6 +246,9 @@ void Run() {
                     
                     actor->physical.SetAge( age );
                 } else {
+                    
+                    // Human
+                    
                     AI.genomes.presets.HumanWhite(actor);
                     actor->CalculateBoundingRegionFromGenome();
                     
@@ -260,9 +262,10 @@ void Run() {
                     actor->memories.Add("kingdom", "Amethesian Empire");
                     actor->memories.Add("sentience", "quota:0.9");
                     actor->memories.Add("behavior", "curiosity:0.14, libido:0.04, social:0.08");
+                    actor->memories.Add("trade", "farmer");
                     
                     if (sex) {
-                        actor->inventory.AddItem(itemSword);
+                        //actor->inventory.AddItem(itemSword);
                         actor->memories.Add("Snort Fort Empire", "anger:0.9");
                     } else {
                         actor->memories.Add("Snort Fort Empire", "fear:0.9");
@@ -324,12 +327,16 @@ void Run() {
         else 
             Engine.console.WriteDialog( 2, "Female");
         
-        Engine.console.textDialog[4]->color = Colors.green * Colors.yellow * 0.9f;
-        Engine.console.WriteDialog( 4, "[ Vitality ]" );
-        Engine.console.WriteDialog( 5, "Health   " + Int.ToString( actorTarget->biological.health ) );
+        Engine.console.WriteDialog( 3, "Generation " + Int.ToString( actorTarget->genetics.GetGeneration() ) );
         
-        Engine.console.textDialog[7]->color = Colors.green * Colors.yellow * 0.9f;
-        Engine.console.WriteDialog( 7, "[ Mental ]" );
+        Engine.console.textDialog[5]->color = Colors.green * Colors.yellow * 0.9f;
+        Engine.console.WriteDialog( 5, "[ Vitality ]" );
+        Engine.console.WriteDialog( 6, "Health      " + Float.ToString( actorTarget->biological.health ) );
+        Engine.console.WriteDialog( 7, "Hunger      " + Float.ToString( actorTarget->biological.hunger) );
+        Engine.console.WriteDialog( 8, "Saturation  " + Float.ToString( actorTarget->biological.saturation) );
+        
+        Engine.console.textDialog[10]->color = Colors.green * Colors.yellow * 0.9f;
+        Engine.console.WriteDialog( 10, "[ Mental ]" );
         
         std::string mode = "unknown";
         
@@ -345,39 +352,40 @@ void Run() {
             case ActorState::Mode::RunTo:         mode = "Running"; break;
             case ActorState::Mode::WalkTo:        mode = "Walking"; break;
         }
-        Engine.console.WriteDialog(8, "State  " + mode );
+        Engine.console.WriteDialog(11, "State  " + mode );
         
         // Emotional state
-        Engine.console.WriteDialog(10, "anger     " + Float.ToString(actorTarget->emotions.current.anger));
-        Engine.console.WriteDialog(11, "fear      " + Float.ToString(actorTarget->emotions.current.fear));
-        Engine.console.WriteDialog(12, "comfort   " + Float.ToString(actorTarget->emotions.current.comfort));
-        Engine.console.WriteDialog(13, "curiosity " + Float.ToString(actorTarget->emotions.current.curiosity));
-        Engine.console.WriteDialog(14, "fatigue   " + Float.ToString(actorTarget->emotions.current.fatigue));
-        Engine.console.WriteDialog(15, "libido    " + Float.ToString(actorTarget->emotions.current.libido));
-        Engine.console.WriteDialog(16, "stress    " + Float.ToString(actorTarget->emotions.current.stress));
-        Engine.console.WriteDialog(17, "social    " + Float.ToString(actorTarget->emotions.current.social));
+        Engine.console.WriteDialog(13, "anger     " + Float.ToString(actorTarget->emotions.current.anger));
+        Engine.console.WriteDialog(14, "fear      " + Float.ToString(actorTarget->emotions.current.fear));
+        Engine.console.WriteDialog(15, "comfort   " + Float.ToString(actorTarget->emotions.current.comfort));
+        Engine.console.WriteDialog(16, "curiosity " + Float.ToString(actorTarget->emotions.current.curiosity));
+        Engine.console.WriteDialog(17, "fatigue   " + Float.ToString(actorTarget->emotions.current.fatigue));
+        Engine.console.WriteDialog(18, "libido    " + Float.ToString(actorTarget->emotions.current.libido));
+        Engine.console.WriteDialog(19, "stress    " + Float.ToString(actorTarget->emotions.current.stress));
+        Engine.console.WriteDialog(20, "social    " + Float.ToString(actorTarget->emotions.current.social));
         
         // Cool down counters
-        Engine.console.WriteDialog(19, "Attack        " + Float.ToString(actorTarget->counters.GetCoolDownAttack()));
-        Engine.console.WriteDialog(20, "Breeding      " + Float.ToString(actorTarget->counters.GetCoolDownBreeding()));
-        Engine.console.WriteDialog(21, "Movement      " + Float.ToString(actorTarget->counters.GetCoolDownMovement()));
-        Engine.console.WriteDialog(22, "Observe       " + Float.ToString(actorTarget->counters.GetCoolDownObservation()));
-        Engine.console.WriteDialog(23, "Socialize     " + Float.ToString(actorTarget->counters.GetCoolDownSocial()));
+        Engine.console.WriteDialog(22, "Attack        " + Float.ToString(actorTarget->counters.GetCoolDownAttack()));
+        Engine.console.WriteDialog(23, "Breeding      " + Float.ToString(actorTarget->counters.GetCoolDownBreeding()));
+        Engine.console.WriteDialog(24, "Movement      " + Float.ToString(actorTarget->counters.GetCoolDownMovement()));
+        Engine.console.WriteDialog(25, "Observe       " + Float.ToString(actorTarget->counters.GetCoolDownObservation()));
+        Engine.console.WriteDialog(26, "Socialize     " + Float.ToString(actorTarget->counters.GetCoolDownSocial()));
         
         // Memories
-        Engine.console.textDialog[25]->color = Colors.green * 0.8f;
-        Engine.console.WriteDialog(25, "[Memories]");
+        Engine.console.textDialog[28]->color = Colors.green * 0.8f;
+        Engine.console.WriteDialog(28, "[Memories]");
         
         unsigned int numberOfMemories = actorTarget->memories.GetNumberOfMemories();
-        for (unsigned int i=0; i < DIALOG_NUMBER_OF_ELEMENTS; i++) 
-            Engine.console.WriteDialog(26 + i, "");
         
+        // Clear elements
+        for (unsigned int i=0; i < DIALOG_NUMBER_OF_ELEMENTS; i++) 
+            Engine.console.WriteDialog(29 + i, "");
         for (unsigned int i=0; i < numberOfMemories && i < DIALOG_NUMBER_OF_ELEMENTS; i++) {
             std::string memory;
             std::string name = actorTarget->memories.GetMemoryNameByIndex(i);
             std::string value = actorTarget->memories.GetMemoryValueByIndex(i);
             memory = name + " == " + value;
-            Engine.console.WriteDialog(26 + i, memory);
+            Engine.console.WriteDialog(29 + i, memory);
         }
         
         // Update bounding box
