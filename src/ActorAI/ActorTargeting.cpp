@@ -315,6 +315,39 @@ void ActorSystem::UpdateGazeTarget(Actor* actor) {
     actor->navigation.mTargetLook = actor->navigation.mPosition + CalculateForwardVelocity(actor) * 10.0f;
 }
 
+bool ActorSystem::UpdateEnvironmentalDomain(Actor* actor, float range) {
+    if (mWorldRaycastCallback == nullptr || mWorldRemoveCallback == nullptr)
+        return false;
+    
+    // Query static world items around the actor's position within radius
+    std::vector<std::pair<std::string, glm::vec3>> nearbyItems = 
+        mWorldRaycastCallback(actor->navigation.mPosition, range);
+    
+    if (nearbyItems.empty())
+        return false;
+    
+    for (const auto& itemPair : nearbyItems) {
+        const std::string& itemType = itemPair.first;
+        const glm::vec3& itemPos = itemPair.second;
+        
+        // Check if the item descriptor already exists in the actor's inventory
+        const std::vector<std::string>& inventoryList = actor->inventory.itemClassList;
+        if (std::find(inventoryList.begin(), inventoryList.end(), itemType) != inventoryList.end()) {
+            continue; // Skip duplicate item
+        }
+        
+        std::string collectedItem;
+        
+        // Remove item from world and add to inventory if valid
+        if (mWorldRemoveCallback(itemPos, collectedItem)) {
+            actor->inventory.AddItem(collectedItem);
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 bool ActorSystem::HandleEscapeEvade(Actor* actor, Actor* target) {
     /*
     float currentDist = glm::distance(actor->navigation.mPosition, target->navigation.mPosition);

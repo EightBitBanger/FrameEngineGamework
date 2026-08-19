@@ -182,126 +182,17 @@ void ActorSystem::CombineParentMemories(const Actor* parentA, const Actor* paren
     if (parentA == nullptr || parentB == nullptr || child == nullptr) return;
     child->memories.Clear();
     
-    // First, discover every unique memory category across both parents
-    std::vector<std::string> allCategories;
+    // Determine parent roles (mSexualOrientation: true = male, false = female)
+    const Actor* father = parentA->physical.mSexualOrientation ? parentA : parentB;
+    const Actor* mother = parentA->physical.mSexualOrientation ? parentB : parentA;
     
-    for (std::unordered_map<std::string, std::string>::const_iterator it = parentA->memories.mMemories.begin();
-         it != parentA->memories.mMemories.end(); ++it) {
-        allCategories.push_back(it->first);
-    }
+    // Pick father if child is male, or mother if female
+    const Actor* chosenParent = child->physical.mSexualOrientation ? father : mother;
     
-    for (std::unordered_map<std::string, std::string>::const_iterator it = parentB->memories.mMemories.begin();
-         it != parentB->memories.mMemories.end(); ++it) {
-        
-        bool alreadyExists = false;
-        for (std::vector<std::string>::const_iterator catIt = allCategories.begin(); catIt != allCategories.end(); ++catIt) {
-            if (*catIt == it->first) {
-                alreadyExists = true;
-                break;
-            }
-        }
-        if (!alreadyExists) {
-            allCategories.push_back(it->first);
-        }
-    }
-    
-    // Process each category dynamically
-    for (std::vector<std::string>::const_iterator catIt = allCategories.begin(); catIt != allCategories.end(); ++catIt) {
-        const std::string& category = *catIt;
-        
-        std::unordered_map<std::string, std::vector<MemoryTrigger>>::const_iterator mapItA = 
-            parentA->memories.mMemoryTriggers.find(category);
-        std::unordered_map<std::string, std::vector<MemoryTrigger>>::const_iterator mapItB = 
-            parentB->memories.mMemoryTriggers.find(category);
-        
-        bool hasTriggersA = (mapItA != parentA->memories.mMemoryTriggers.end() && !mapItA->second.empty());
-        bool hasTriggersB = (mapItB != parentB->memories.mMemoryTriggers.end() && !mapItB->second.empty());
-        
-        // This category contains parsed numeric MemoryTriggers that can be blended
-        if (hasTriggersA || hasTriggersB) {
-            std::vector<MemoryTrigger> blendedTriggers;
-            
-            if (hasTriggersA && hasTriggersB) {
-                const std::vector<MemoryTrigger>& triggersA = mapItA->second;
-                const std::vector<MemoryTrigger>& triggersB = mapItB->second;
-                
-                // Match and blend combinations from Parent A
-                for (std::vector<MemoryTrigger>::const_iterator aIt = triggersA.begin(); aIt != triggersA.end(); ++aIt) {
-                    bool foundMatch = false;
-                    for (std::vector<MemoryTrigger>::const_iterator bIt = triggersB.begin(); bIt != triggersB.end(); ++bIt) {
-                        if (aIt->name == bIt->name) {
-                            MemoryTrigger blended;
-                            blended.name = aIt->name;
-                            blended.type = aIt->type;
-                            blended.value = (aIt->value + bIt->value) * 0.5f;
-                            blended.vector = (aIt->vector + bIt->vector) * 0.5f;
-                            blendedTriggers.push_back(blended);
-                            foundMatch = true;
-                            break;
-                        }
-                    }
-                    if (!foundMatch) {
-                        blendedTriggers.push_back(*aIt);
-                    }
-                }
-                
-                // Append entirely unique sub-traits found only in Parent B
-                for (std::vector<MemoryTrigger>::const_iterator bIt = triggersB.begin(); bIt != triggersB.end(); ++bIt) {
-                    bool foundMatch = false;
-                    for (std::vector<MemoryTrigger>::const_iterator aIt = triggersA.begin(); aIt != triggersA.end(); ++aIt) {
-                        if (bIt->name == aIt->name) {
-                            foundMatch = true;
-                            break;
-                        }
-                    }
-                    if (!foundMatch) {
-                        blendedTriggers.push_back(*bIt);
-                    }
-                }
-            } 
-            else if (hasTriggersA) {
-                blendedTriggers = mapItA->second;
-            } 
-            else {
-                blendedTriggers = mapItB->second;
-            }
-            
-            // Serialize the dynamically generated collection back into the string structure
-            if (!blendedTriggers.empty()) {
-                std::string serializedString = "";
-                for (std::vector<MemoryTrigger>::const_iterator tIt = blendedTriggers.begin(); tIt != blendedTriggers.end(); ++tIt) {
-                    if (tIt != blendedTriggers.begin()) {
-                        serializedString += ",";
-                    }
-                    if (tIt->type == TriggerType::Home) {
-                        serializedString += tIt->name + ":" + 
-                                            std::to_string(tIt->vector.x) + "`" + 
-                                            std::to_string(tIt->vector.y) + "`" + 
-                                            std::to_string(tIt->vector.z);
-                    } else {
-                        serializedString += tIt->name + ":" + std::to_string(tIt->value);
-                    }
-                }
-                child->memories.mMemories[category] = serializedString;
-            }
-        }
-        
-        // Plain-text identifier value string
-        else {
-            std::unordered_map<std::string, std::string>::const_iterator rawItA = parentA->memories.mMemories.find(category);
-            std::unordered_map<std::string, std::string>::const_iterator rawItB = parentB->memories.mMemories.find(category);
-            
-            if (rawItA != parentA->memories.mMemories.end() && rawItB != parentB->memories.mMemories.end()) {
-                // If both parents have different raw text values, fallback safely (e.g., inherit from Parent A)
-                child->memories.mMemories[category] = rawItA->second;
-            }
-            else if (rawItA != parentA->memories.mMemories.end()) {
-                child->memories.mMemories[category] = rawItA->second;
-            }
-            else if (rawItB != parentB->memories.mMemories.end()) {
-                child->memories.mMemories[category] = rawItB->second;
-            }
-        }
+    // Copy memories from the selected parent
+    for (std::unordered_map<std::string, std::string>::const_iterator it = chosenParent->memories.mMemories.begin();
+         it != chosenParent->memories.mMemories.end(); ++it) {
+        child->memories.mMemories[it->first] = it->second;
     }
     
     child->memories.mDoUpdateMemories = true;

@@ -107,7 +107,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor, Color& limb, Color&
     targetActor->behavior.SetCooldownObserve(8);
     targetActor->behavior.SetCooldownSocial(3);
     
-    targetActor->biological.health = 200;
+    targetActor->biological.health = 220;
     targetActor->biological.strength = 80;
     targetActor->biological.defense = 2;
     
@@ -119,6 +119,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor, Color& limb, Color&
     Color limbColor = limb;
     Color bodyColor = body;
     Color beardColor = Colors.gray;
+    Color eyeColor   = Colors.black;
     
     float headSize   = (Random.Range(0, 99) * 0.0001f);
     float breastSize = (Random.Range(0, 99) * 0.00054f);
@@ -147,8 +148,8 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor, Color& limb, Color&
     
     // Beard
     Gene geneBeard;
-    geneBeard.offset    = Codon(0, 0, 0.08f);
-    geneBeard.position  = Codon(0, 1.2, 0);
+    geneBeard.offset    = Codon(0, 0, 0);
+    geneBeard.position  = Codon(0, 1.2, 0.08f);
     geneBeard.rotation  = Codon(0, 0, 0);
     geneBeard.scale     = Codon(headSize + 0.17, 0.2, 0.1f);
     geneBeard.color.x   = beardColor.r;
@@ -161,6 +162,19 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor, Color& limb, Color&
     
     //geneBeard.colorIndex         = 1;
     geneBeard.animationType      = ActorState::Animation::Head;
+    
+    // Eyes
+    Gene geneEyeLeft;
+    geneEyeLeft.offset    = Codon(0, 0, 0);
+    geneEyeLeft.position  = Codon(0.07f, 1.42f, 0.16f);
+    geneEyeLeft.rotation  = Codon(0, 0, 0);
+    geneEyeLeft.scale     = Codon(0.03f, 0.03f, 0.03f);
+    geneEyeLeft.color.x   = eyeColor.r;
+    geneEyeLeft.color.y   = eyeColor.g;
+    geneEyeLeft.color.z   = eyeColor.b;
+    geneEyeLeft.animationType = ActorState::Animation::Head;
+    Gene geneEyeRight = geneEyeLeft;
+    geneEyeRight.position.x = -geneEyeRight.position.x;
     
     // Neck
     Gene geneNeck;
@@ -200,7 +214,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor, Color& limb, Color&
     geneBreastRight.color.y   = bodyColor.g;
     geneBreastRight.color.z   = bodyColor.b;
     geneBreastRight.form             = ActorState::Genetic::Female;
-    geneBreastRight.scaleIndex       = 5;
+    geneBreastRight.scaleIndex       = 7;
     geneBreastRight.colorIndex       = 1;
     geneBreastRight.expressionFactor = 1.5;
     geneBreastRight.expressionMax    = 1.4;
@@ -255,7 +269,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor, Color& limb, Color&
     geneLimbFrontLeft.color.z   = limbColor.b;
     geneLimbFrontLeft.animationAxis    = Codon(1, 0, 0);
     geneLimbFrontLeft.animationRange   = 13;
-    geneLimbFrontLeft.colorIndex       = 7;
+    geneLimbFrontLeft.colorIndex       = 9;
     geneLimbFrontLeft.animationType = ActorState::Animation::Limb;
     
     // Right arm
@@ -270,7 +284,7 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor, Color& limb, Color&
     geneLimbFrontRight.doInverseAnimation = true;
     geneLimbFrontRight.animationAxis      = Codon(1, 0, 0);
     geneLimbFrontRight.animationRange     = 13;
-    geneLimbFrontRight.colorIndex         = 8;
+    geneLimbFrontRight.colorIndex         = 10;
     geneLimbFrontRight.animationType = ActorState::Animation::LimbHolding;
     
     // Left Leg
@@ -305,6 +319,8 @@ void GeneticPresets::ActorPresets::Human(Actor* targetActor, Color& limb, Color&
     targetActor->genetics.AddGene(geneHead);
     targetActor->genetics.AddGene(geneNeck);
     targetActor->genetics.AddGene(geneBeard);
+    targetActor->genetics.AddGene(geneEyeLeft);
+    targetActor->genetics.AddGene(geneEyeRight);
     targetActor->genetics.AddGene(geneBreastLeft);
     targetActor->genetics.AddGene(geneBreastRight);
     targetActor->genetics.AddGene(geneShoulderLeft);
@@ -2148,7 +2164,7 @@ void GeneticPresets::ActorPresets::Dwarf(Actor* targetActor) {
     Color skinColor  = Colors.Lerp(Colors.white, Colors.yellow, 0.45f) * 0.5f + (Colors.red * 0.07f);
     Color bodyColor  = Colors.Lerp(Colors.brown, Colors.dkgray, 0.35f) * Colors.MakeGrayScale(0.22f);
     Color beardColor = Colors.Range(Colors.gray, Colors.dkgray) * Colors.MakeGrayScale(0.12f);
-    Color eyeColor   = Colors.green * 0.09f + (Colors.red * 0.01f);
+    Color eyeColor   = Colors.black * 0.09f + (Colors.red * 0.01f);
     
     if (Random.Range(0, 100) > 60)
         beardColor = Colors.brown * Colors.MakeGrayScale(0.12f);

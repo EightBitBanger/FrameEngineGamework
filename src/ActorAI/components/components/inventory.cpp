@@ -121,10 +121,11 @@ void InventoryManager::BuildHandMesh(const std::string& itemClassification) {
     
     Mesh* handMesh = holdingRenderer->mesh;
     handMesh->ClearSubMeshes();
-    std::vector<std::string> itemData = String.Explode(itemClassification, ',');
+    
+    std::vector<std::string> itemData = String.Explode(itemClassification, ';');
     if (itemData.empty()) 
         return;
-        
+    
     for (unsigned int i = 0; i < itemData.size(); i++) {
         std::vector<std::string> kvPair = String.Explode(itemData[i], ':');
         if (kvPair.size() < 2) 
@@ -144,9 +145,11 @@ void InventoryManager::BuildHandMesh(const std::string& itemClassification) {
             String.RemoveWhiteSpace(position);
             String.RemoveWhiteSpace(scale);
             String.RemoveWhiteSpace(color);
-            std::vector<std::string> vecPosStr   = String.Explode(position, '`');
-            std::vector<std::string> vecScaleStr = String.Explode(scale, '`');
-            std::vector<std::string> vecColorStr = String.Explode(color, '`');
+            
+            std::vector<std::string> vecPosStr   = String.Explode(position, ',');
+            std::vector<std::string> vecScaleStr = String.Explode(scale, ',');
+            std::vector<std::string> vecColorStr = String.Explode(color, ',');
+            
             if (vecPosStr.size() != 3 || vecScaleStr.size() != 3 || vecColorStr.size() != 3) 
                 continue;
             float posX = String.ToFloat(vecPosStr[0]);
@@ -165,10 +168,11 @@ void InventoryManager::BuildHandMesh(const std::string& itemClassification) {
         }
     }
     
+    // TODO actors own hand offset should factor in
     handPosition = glm::vec3(0.0f, -0.5f, 0.0f);
     handOffset   = glm::vec3(-0.01f, 0.3f, 0.0f);
     handRotation = glm::vec3(1.570795f, 0.0f, 0.0f);
-    handScale    = glm::vec3(0.1f, 0.8f, 0.1f);
+    handScale    = glm::vec3(1.0f, 1.0f, 1.0f);
     handMesh->Load();
     holdingRenderer->isActive = true;
 }

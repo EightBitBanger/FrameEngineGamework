@@ -164,12 +164,6 @@ std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
     AppendFloat(genetics, sourceActor->physical.GetYouthScale(),       ':');
     AppendFloat(genetics, sourceActor->physical.GetAdultScale(),       ':');
     
-    // Biological
-    AppendFloat(genetics, sourceActor->biological.health,              ':');
-    AppendFloat(genetics, sourceActor->biological.hunger,              ':');
-    AppendFloat(genetics, sourceActor->biological.strength,            ':');
-    AppendFloat(genetics, sourceActor->biological.defense,             ':');
-    
     // Personality
     AppendFloat(genetics, sourceActor->behavior.GetPredatorState(),    ':');
     AppendFloat(genetics, sourceActor->behavior.GetPreyState(),        ':');
@@ -308,46 +302,37 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, const std::string& genome)
         targetActor->physical.SetAdultScale( String.ToFloat(traits[7]) );
     }
     
-    // Biological
-    if (numberOfTraits > 11) {
-        targetActor->biological.health   = String.ToFloat(traits[8]);
-        targetActor->biological.hunger   = String.ToFloat(traits[9]);
-        
-        targetActor->biological.strength = String.ToFloat(traits[10]);
-        targetActor->biological.defense  = String.ToFloat(traits[11]);
-    }
-    
     // Personality
-    if (numberOfTraits > 25) {
-        targetActor->behavior.SetPredatorState(       String.ToFloat(traits[12]) );
-        targetActor->behavior.SetPreyState(           String.ToFloat(traits[13]) );
+    if (numberOfTraits > 21) {
+        targetActor->behavior.SetPredatorState(       String.ToFloat(traits[8]) );
+        targetActor->behavior.SetPreyState(           String.ToFloat(traits[9]) );
         
-        targetActor->behavior.SetDistanceToFocus(     String.ToFloat(traits[14]) );
-        targetActor->behavior.SetDistanceToWalk(      String.ToFloat(traits[15]) );
-        targetActor->behavior.SetDistanceToAttack(    String.ToFloat(traits[16]) );
-        targetActor->behavior.SetDistanceToFlee(      String.ToFloat(traits[17]) );
-        targetActor->behavior.SetDistanceToInflict(   String.ToFloat(traits[18]) );
+        targetActor->behavior.SetDistanceToFocus(     String.ToFloat(traits[10]) );
+        targetActor->behavior.SetDistanceToWalk(      String.ToFloat(traits[11]) );
+        targetActor->behavior.SetDistanceToAttack(    String.ToFloat(traits[12]) );
+        targetActor->behavior.SetDistanceToFlee(      String.ToFloat(traits[13]) );
+        targetActor->behavior.SetDistanceToInflict(   String.ToFloat(traits[14]) );
         
-        targetActor->behavior.SetCooldownAttack(      String.ToUint(traits[19]) );
-        targetActor->behavior.SetCooldownObserve(     String.ToUint(traits[20]) );
-        targetActor->behavior.SetCooldownSocial(      String.ToUint(traits[21]) );
-        targetActor->behavior.SetCooldownMove(        String.ToUint(traits[22]) );
-        targetActor->behavior.SetCooldownBreed(       String.ToUint(traits[23]) );
+        targetActor->behavior.SetCooldownAttack(      String.ToUint(traits[15]) );
+        targetActor->behavior.SetCooldownObserve(     String.ToUint(traits[16]) );
+        targetActor->behavior.SetCooldownSocial(      String.ToUint(traits[17]) );
+        targetActor->behavior.SetCooldownMove(        String.ToUint(traits[18]) );
+        targetActor->behavior.SetCooldownBreed(       String.ToUint(traits[19]) );
         
-        targetActor->behavior.SetHeightPreferenceMin( String.ToFloat(traits[24]) );
-        targetActor->behavior.SetHeightPreferenceMax( String.ToFloat(traits[25]) );
+        targetActor->behavior.SetHeightPreferenceMin( String.ToFloat(traits[20]) );
+        targetActor->behavior.SetHeightPreferenceMax( String.ToFloat(traits[21]) );
     }
     
     // Characteristics
-    if (numberOfTraits > 28) {
-        targetActor->genetics.SetGeneration(String.ToUint(traits[26]));
+    if (numberOfTraits > 24) {
+        targetActor->genetics.SetGeneration(String.ToUint(traits[22]));
         
-        if (String.ToUint(traits[27]) == 0)
+        if (String.ToUint(traits[23]) == 0)
             targetActor->physical.SetSexualOrientation(true);   // Male
         else
             targetActor->physical.SetSexualOrientation(false);  // Female
         
-        targetActor->physical.mAgeAdult = String.ToFloat(traits[28]);
+        targetActor->physical.mAgeAdult = String.ToFloat(traits[24]);
     }
     
     // Extract genes from the genome string
@@ -456,10 +441,9 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
     offspring->physical.mYouthScale  = Float.Lerp(parentA->physical.mYouthScale,  parentB->physical.mYouthScale, gradient);
     offspring->physical.mAdultScale  = Float.Lerp(parentA->physical.mAdultScale,  parentB->physical.mAdultScale, gradient);
     
-    // Increment generation
-    unsigned int generation = parentA->genetics.GetGeneration();
-    
-    offspring->genetics.SetGeneration( generation );
+    // Increment generation based on the maximum parent generation
+    unsigned int maxParentGen = std::max(parentA->genetics.GetGeneration(), parentB->genetics.GetGeneration()) + 1;
+    offspring->genetics.SetGeneration(maxParentGen);
     
     // Random new sexual orientation
     if (Random.Range(0, 100) > 60) {

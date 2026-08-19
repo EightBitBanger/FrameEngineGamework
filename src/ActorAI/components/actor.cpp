@@ -95,10 +95,12 @@ void Actor::Reset(void) {
     genetics.ClearPhenome();
     
     // Biological
-    biological.health    = 10.0f;
-    biological.hunger    = 0.0f;
-    biological.defense   = 0.0f;
-    biological.strength  = 1.0f;
+    biological.health         = 10.0f;
+    biological.hunger         = 0.0f;
+    biological.saturation     = 1.0f;
+    biological.defense        = 0.0f;
+    biological.strength       = 1.0f;
+    biological.mHungerCounter = 0;
     
     // Emotions
     emotions.current.Initiate();

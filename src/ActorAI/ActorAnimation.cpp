@@ -223,7 +223,6 @@ void ActorSystem::UpdateAnimationInHand(glm::mat4& matrix, Actor* actor, unsigne
     glm::mat4 matrixHand = matrix;
     
     glm::vec3 attackStance(-1.5f, 0.0f, 0.0f);
-    
     bool hasActiveWeapon = (actor->inventory.holdingRenderer != nullptr && 
                             actor->inventory.holdingRenderer->isActive && 
                             !actor->inventory.inHandItemClass.empty());
@@ -248,7 +247,6 @@ void ActorSystem::UpdateAnimationInHand(glm::mat4& matrix, Actor* actor, unsigne
         
         // Genetic translation
         matrix = glm::translate(matrix, glm::vec3(actor->genetics.mGenes[a].position.x, actor->genetics.mGenes[a].position.y, actor->genetics.mGenes[a].position.z));
-        
     } else {
         
         // Apply animation
@@ -298,12 +296,25 @@ void ActorSystem::UpdateAnimationInHand(glm::mat4& matrix, Actor* actor, unsigne
         
         matrixHand = glm::translate(matrixHand, actor->inventory.handPosition);
         
+        // Normalize vector axis to prevent GLM shear/skewing
         float handRotationLength = glm::length(actor->inventory.handRotation);
         if (handRotationLength != 0.0f)
-            matrixHand = glm::rotate(matrixHand, handRotationLength, actor->inventory.handRotation);
+            matrixHand = glm::rotate(matrixHand, handRotationLength, glm::normalize(actor->inventory.handRotation));
         
         matrixHand = glm::translate(matrixHand, actor->inventory.handOffset);
         
+        // Undo body age scaling on the held item matrix
+        float ageScaler = 1.0f;
+        if (actor->physical.mAge < actor->physical.mAgeAdult) {
+            ageScaler = (float)actor->physical.mAge / (float)actor->physical.mAgeAdult;
+        }
+        float ageScale = Math.Lerp((float)actor->physical.mYouthScale, (float)actor->physical.mAdultScale, ageScaler);
+        
+        if (ageScale > 0.0f) {
+            matrixHand = glm::scale(matrixHand, glm::vec3(1.0f / ageScale));
+        }
+        
+        // Apply item scale
         matrixHand = glm::scale(matrixHand, actor->inventory.handScale);
         
         actor->inventory.holdingRenderer->isActive = true;

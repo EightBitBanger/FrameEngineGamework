@@ -86,6 +86,9 @@ void ActorSystem::UpdateTick(void) {
         float sentientScore = !sentienceList.empty() ? sentienceList[0].value : 0.0f;
         EmotionalEmbedding& emotion = actor->emotions.current;
         
+        //
+        // 
+        
         if ((actor->mUpdateCounter % 20) == 0) {
             HandleCooldownCounters(actor);
             
@@ -100,6 +103,11 @@ void ActorSystem::UpdateTick(void) {
             
             // Evaluate Thought Matrix across targets
             UpdateThoughtMatrix(actor, emotion, sentientScore);
+            
+            // Process interactable items in the immediate surroundings
+            const float interactionRange = 3.0f;
+            UpdateEnvironmentalDomain(actor, interactionRange);
+            
         }
         
         if (actor->mUpdateCounter > 40) {

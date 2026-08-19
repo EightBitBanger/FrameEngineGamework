@@ -7,8 +7,18 @@ extern EngineSystemManager Engine;
 bool ActorSystem::HandleBreedWith(Actor* actor, Actor* target) {
     if (actor->counters.GetCoolDownBreeding() > 0 || target->counters.GetCoolDownBreeding() > 0) 
         return false;
-    if (actor->physical.mAge < actor->physical.mAgeAdult || target->physical.mAge >= target->physical.mAgeSenior) 
+    if (actor->physical.mAge < actor->physical.mAgeAdult || actor->physical.mAge > actor->physical.mAgeSenior || 
+        target->physical.mAge < target->physical.mAgeAdult || target->physical.mAge > target->physical.mAgeSenior) 
         return false;
+    
+    if (mActiveActors.size() > 200) 
+            return false;
+    
+    if (actor->biological.hunger > UniversalConst.biologicalThreshold) {
+        
+        // TODO remove this when reproduction is more balanced...
+        //return false;
+    }
     
     // Check to ensure actors are of opposite sexes
     if (actor->physical.mSexualOrientation == target->physical.mSexualOrientation) 
