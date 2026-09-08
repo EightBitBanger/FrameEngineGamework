@@ -1,7 +1,7 @@
 #ifndef AI_ACTOR_PHYSICAL
 #define AI_ACTOR_PHYSICAL
 
-#include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/configuration.h>
 
 class ENGINE_API PhysicalAttributes {
     friend class Actor;
@@ -56,6 +56,8 @@ public:
     bool GetSexualOrientation(void);
     
     PhysicalAttributes();
+    
+    void Reset();
     
 private:
     

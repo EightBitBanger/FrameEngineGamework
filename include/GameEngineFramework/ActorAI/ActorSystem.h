@@ -23,6 +23,10 @@
 #include <chrono>
 #include <functional>
 
+#include <fstream>
+#include <vector>
+#include <string>
+
 class UniversalConstants {
     friend class ActorSystem;
 public:
@@ -32,13 +36,50 @@ public:
     const float biologicalThreshold  = 0.5f;
 };
 
+enum class GenealogyEventType : unsigned int {
+    Birth = 0,
+    Death = 1
+};
+
+class ENGINE_API Genealogy {
+public:
+    GenealogyEventType eventType;
+    std::string        family;
+    std::string        actor;      // Child at birth, or deceased actor name
+    std::string        father;     // Father name (birth events)
+    std::string        mother;     // Mother name (birth events)
+    std::string        details;    // Cause of death or birth notes
+    unsigned int       generation;
+    unsigned long int  age;
+    glm::vec3          position;
+
+    Genealogy() 
+        : eventType(GenealogyEventType::Birth), 
+          family(""), 
+          actor(""), 
+          father(""), 
+          mother(""), 
+          details(""), 
+          generation(0), 
+          age(0), 
+          position(0.0f) 
+    {}
+};
+
 class ENGINE_API ActorSystem {
     friend class InventoryManager;
+    friend class EngineSystemManager;
 public:
     
-    using WorldRaycastCallback = std::function< std::vector<std::pair<std::string, glm::vec3>>(const glm::vec3& position, float range) >;
-    using WorldPlaceCallback   = std::function< bool(const std::string& type, const glm::vec3& worldPosition, const glm::vec3& rotation) >;
-    using WorldRemoveCallback  = std::function< bool(const glm::vec3& worldPosition, std::string& collectedItem) >;
+    using WorldPickupQueryCallback = std::function< std::vector<std::pair<std::string, glm::vec3>>(const glm::vec3& position, float range) >;
+    using WorldPickupPlaceCallback   = std::function< bool(const std::string& type, const glm::vec3& worldPosition, const glm::vec3& rotation) >;
+    using WorldPickupRemoveCallback  = std::function< bool(const glm::vec3& worldPosition, std::string& collectedItem) >;
+    
+    using WorldStaticRaycastCallback = std::function< std::vector<std::pair<std::string, glm::vec3>>(const glm::vec3& position, float range) >;
+    using WorldStaticPlaceCallback   = std::function< bool(const std::string& type, const glm::vec3& worldPosition, const glm::vec3& rotation) >;
+    using WorldStaticRemoveCallback  = std::function< bool(const glm::vec3& worldPosition, std::string& collectedItem) >;
+    
+    using WorldGetNameCallback = std::function< std::string(int language, int namePart) >;
     
     ActorSystem();
     
@@ -57,9 +98,6 @@ public:
     /// Get an actor from the simulation by its index.
     Actor* GetActor(unsigned int index);
     
-    /// Signal to the AI thread to update the simulation.
-    void UpdateSendSignal(void);
-    
     /// Set the update distance from the camera position.
     void SetActorUpdateDistance(float distance);
     /// Set the render distance from the camera position.
@@ -72,6 +110,23 @@ public:
     
     /// Set the current time of day for the actor system.
     void SetTimeOfDay(float time);
+    /// Get the current time of day for the actor system.
+    float GetTimeOfDay(void);
+    
+    /// Record a birth event to the genealogy log.
+    void RecordBirth(Actor* child, Actor* father, Actor* mother, const std::string& familyName, const glm::vec3& position);
+
+    /// Record a death event to the genealogy log.
+    void RecordDeath(Actor* actor, const std::string& cause);
+
+    /// Export the unified chronological genealogy log to a CSV file.
+    bool DumpGenealogy(const std::string& filename);
+
+    /// Get all genealogy records in chronological order.
+    std::vector<Genealogy> GetGenealogy(void);
+
+    /// Clear the genealogy log.
+    void ClearGenealogy(void);
     
     
     // Internal
@@ -82,8 +137,8 @@ public:
     /// Shutdown the actor AI system.
     void Shutdown(void);
     
-    /// Update the actors in the simulation.
-    void Update();
+    /// Update the actors animation cycles.
+    void UpdateThinking(void);
     
     /// Genetic entity definitions.
     GeneticPresets genomes;
@@ -105,11 +160,8 @@ public:
     /// Get the number of renderers from dead actors.
     unsigned int GetNumberOfDeadRenderers();
     
-    /// Get a renderer from a dead actor.
-    MeshRenderer* GetDeadRenderer(unsigned int index);
-    
-    /// Remove a renderer from the dead actor renderer list.
-    MeshRenderer* RemoveDeadRenderer(unsigned int index);
+    /// Swap the list of dead actor renderers.
+    void SwapDeadRendererList(std::vector<MeshRenderer*>& newList);
     
     /// Enable the debug line renderer.
     bool DebugRendererEnable(void);
@@ -120,26 +172,37 @@ public:
     /// Draw a debug line in the debug renderer.
     void DebugRenderDrawLine(glm::vec3 from, glm::vec3 to, Color color);
     
-    /// Register the static geometry world raycast.
-    void SetWorldRaycastCallback(WorldRaycastCallback query, WorldPlaceCallback place, WorldRemoveCallback destroy);
+    /// Register the pickup object interaction functions.
+    void SetWorldPickupCallbacks(WorldPickupQueryCallback query, WorldPickupPlaceCallback place, WorldPickupRemoveCallback destroy);
     
-private:
+    /// Register the static geometry world interaction functions.
+    void SetWorldStaticCallbacks(WorldPickupQueryCallback query, WorldPickupPlaceCallback place, WorldPickupRemoveCallback destroy);
     
-    // Update at the rate of tick
-    void UpdateTick();
-    // Update at the frame rate
-    void UpdateFast();
+    /// Register the name generator for actor naming.
+    void SetNameGenerator(WorldGetNameCallback getter);
+    
+    /// Set the simulation time multiplier.
+    void SetTimeScale(float scale);
+    /// Get the current simulation time multiplier.
+    float GetTimeScale(void);
     
     // Master update timer
-    Timer mMainTimer;
+    Timer mainTimer;
+    // Auxiliary fast update timer
+    Timer auxiliaryTimer;
     // Animation update timer
-    Timer mAnimationTimer;
+    Timer animationTimer;
+    
+    void UpdateTick();
+    void UpdateFast();
+    void UpdateFastAnimation();
+    
+private:
     
     // Behavioral
     void UpdateActorState(Actor* actor, EmotionalEmbedding& emotion, float sentientScore);
     void UpdateGazeTarget(Actor* actor);
     void UpdateThoughtMatrix(Actor* actor, EmotionalEmbedding& emotion, float sentientScore);
-    bool UpdateEnvironmentalDomain(Actor* actor, float range);
     void UpdateTargetingMechanics(Actor* actor);
     
     void ApplyEmotionThresholds(const MemoryTrigger& trigger, EmotionalEmbedding& embedding);
@@ -188,7 +251,7 @@ private:
     void ClearOldGeneticRenderers(Actor* actor);
     MeshRenderer* CreateMeshRendererForGene(Actor* actor, unsigned int geneIndex, Mesh* sourceMesh);
     void ExpressActorGenetics(Actor* actor);
-    void CombineParentMemories(const Actor* parentA, const Actor* parentB, Actor* child);
+    void CombineParentMemories(Actor* parentA, Actor* parentB, Actor* child);
     
     // Inventory
     bool UpdateActorInventory(Actor* actor);
@@ -219,9 +282,15 @@ private:
     float mTimeOfDay;
     
     // World query ray cast callback function
-    WorldRaycastCallback mWorldRaycastCallback = nullptr;
-    WorldPlaceCallback   mWorldPlaceCallback   = nullptr;
-    WorldRemoveCallback  mWorldRemoveCallback  = nullptr;
+    WorldPickupQueryCallback   mWorldPickupQueryCallback;
+    WorldPickupPlaceCallback   mWorldPickupPlaceCallback;
+    WorldPickupRemoveCallback  mWorldPickupRemoveCallback;
+    
+    WorldStaticRaycastCallback mWorldStaticQueryCallback;
+    WorldStaticPlaceCallback   mWorldStaticPlaceCallback;
+    WorldStaticRemoveCallback  mWorldStaticRemoveCallback;
+    
+    WorldGetNameCallback       mWorldGetNameCallback;
     
     // Debug line renderer
     MeshRenderer* mDebugLineRenderer;
@@ -229,6 +298,7 @@ private:
     std::vector<MeshRenderer*> mDeadActorRenderers;
     
     std::thread* mActorSystemThread;
+    std::thread* mAnimationThread;
     std::mutex mux;
     
     PoolAllocator<Actor> mActors;
@@ -236,7 +306,12 @@ private:
     std::vector<Actor*> mActiveActors;
     std::vector<Actor*> mFreeActors;
     
+    std::vector<Genealogy> mGenealogy;
+    
     unsigned int mNumberOfActors;
+    
+    float mTimeScale;
+    double mFrameTimeCurrent;
 };
 
 

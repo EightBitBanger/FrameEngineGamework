@@ -1,7 +1,7 @@
 #ifndef AI_ACTOR_BEHAVIOR
 #define AI_ACTOR_BEHAVIOR
 
-#include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/configuration.h>
 class Actor;
 
 class ENGINE_API Behavior {
@@ -82,6 +82,8 @@ public:
     bool GetPreyState(void);
     
     Behavior();
+    
+    void Reset();
     
 private:
     

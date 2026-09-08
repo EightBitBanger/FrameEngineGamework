@@ -19,6 +19,9 @@ public:
     
     EmotionalEmbedding();
     
+    // Reset the emotional state.
+    void Reset();
+    
     // Set all emotions to zero.
     void Clear();
     

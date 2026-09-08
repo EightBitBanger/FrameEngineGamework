@@ -277,9 +277,9 @@ public:
     
 private:
     
-    // Create a game object and return its pointer.
+    // Create a game object and return its pointer
     GameObject* CreateGameObject(void);
-    // Destroy a game object.
+    // Destroy a game object
     bool DestroyGameObject(GameObject* gameObjectPtr);
     
     // List of active game objects

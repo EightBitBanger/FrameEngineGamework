@@ -25,7 +25,9 @@ enum class Mode {
     
     MoveTo,
     WalkTo,
-    RunTo
+    RunTo,
+    
+    Frozen    // Hold state for editing / debugging
 };
 
 enum class Genetic : unsigned int {

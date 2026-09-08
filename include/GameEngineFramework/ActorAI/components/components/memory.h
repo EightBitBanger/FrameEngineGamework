@@ -1,7 +1,7 @@
 #ifndef AI_ACTOR_MEMORIES
 #define AI_ACTOR_MEMORIES
 
-#include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/configuration.h>
 #include <GameEngineFramework/ActorAI/components/components/memorytrigger.h>
 
 class ENGINE_API MemorySystem {
@@ -51,6 +51,8 @@ public:
     void UpdateMemories(void);
     
     MemorySystem();
+    
+    void Reset();
     
 private:
     

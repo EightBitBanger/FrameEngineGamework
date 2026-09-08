@@ -5,7 +5,6 @@
 
 
 class ENGINE_API Viewport {
-    
 public:
     
     /// View left.
@@ -19,7 +18,6 @@ public:
     
     Viewport();
     Viewport(int x, int y, int w, int h);
-    
 };
 
 #endif

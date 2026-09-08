@@ -1,7 +1,7 @@
 #ifndef AI_ACTOR_GENETICS
 #define AI_ACTOR_GENETICS
 
-#include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/configuration.h>
 
 class ENGINE_API GeneticsSystem {
     friend class Actor;
@@ -28,12 +28,21 @@ public:
     /// Get the number of genes in the genome.
     unsigned int GetNumberOfGenes(void);
     
+    /// Get the number of phenotypes in this actor.
+    unsigned int GetNumberOfPhens(void);
+    
     /// Get a gene from the genome.
     Gene GetGeneFromGenome(unsigned int index);
+    
+    /// Set a gene in the genome at the given index.
+    void SetGeneFromGenome(unsigned int index, Gene& gene);
     
     /// Get a phenotype from the actor. The number of phenotypes
     /// should match the number of genes.
     Phen GetPhenFromPhenotype(unsigned int index);
+    
+    /// Set a phenotypic expression to the actor.
+    void SetPhenFromPhenotype(unsigned int index, Phen& phen);
     
     /// Get the number of mesh renderers associated with this actor.
     unsigned int GetNumberOfMeshRenderers(void);
@@ -42,6 +51,8 @@ public:
     MeshRenderer* GetMeshRendererAtIndex(unsigned int index);
     
     GeneticsSystem();
+    
+    void Reset();
     
 private:
     

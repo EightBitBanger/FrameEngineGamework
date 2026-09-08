@@ -17,6 +17,7 @@
 #include <GameEngineFramework/ActorAI/components/components/inventory.h>
 #include <GameEngineFramework/ActorAI/components/components/navigation.h>
 #include <GameEngineFramework/ActorAI/components/components/behavior.h>
+#include <GameEngineFramework/ActorAI/components/components/circadian.h>
 #include <GameEngineFramework/ActorAI/components/components/vocal.h>
 #include <GameEngineFramework/ActorAI/components/components/state.h>
 #include <GameEngineFramework/ActorAI/components/components/animation.h>
@@ -70,15 +71,18 @@ public:
     /// Update the bounding area by the positional offsets of the genetic elements.
     void CalculateBoundingRegionFromGenome(void);
     
-    /// Re-initiate the state of the actor. The mesh renderers will not be
-    /// reset as they are owned and must be reset by the engine system.
+    /// Re-initiate the state of the actor sub systems.
     void Reset(void);
+    
+    /// Snap head facing and look target straight forward aligned with body rotation.
+    void SnapHeadStraight(void);
     
     Actor();
     
     InventoryManager     inventory;
     NavigationSystem     navigation;
     Behavior             behavior;
+    Circadian            sleep;
     VocalSynthesizer     voice;
     State                state;
     AnimationState       animation;
@@ -101,8 +105,11 @@ private:
     
     // Counter to offset the update calls
     unsigned int mUpdateCounter;
+    unsigned int mThoughtCounter;
     
     std::vector<Actor*> mTargets;
+    
+    std::mutex mux;
 };
 
 

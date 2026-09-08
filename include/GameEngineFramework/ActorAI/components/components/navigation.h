@@ -1,7 +1,7 @@
 #ifndef AI_ACTOR_NAVIGATION
 #define AI_ACTOR_NAVIGATION
 
-#include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/configuration.h>
 class Actor;
 
 class ENGINE_API NavigationSystem {
@@ -22,19 +22,26 @@ public:
     glm::vec3 GetTargetPoint(void);
     
     /// Set the actor with which this actor should breed.
-    Actor* GetBreedWithActor(void);
-    /// Get the actor with which this actor should breed.
     void SetBreedWithActor(Actor* actorPtr);
+    /// Get the actor with which this actor should breed.
+    Actor* GetBreedWithActor(void);
     
     /// Set the target actor with which this actor should interact.
-    Actor* GetTargetActor(void);
-    /// Get the target actor with which this actor should interact.
     void SetTargetActor(Actor* actorPtr);
+    /// Get the target actor with which this actor should interact.
+    Actor* GetTargetActor(void);
+    
+    /// Set the velocity vector.
+    void SetVelocity(const glm::vec3& velocity);
+    /// Get the velocity vector.
+    glm::vec3 GetVelocity(void);
     
     /// Get the distance to the currently focused actor.
     float GetDistanceToTarget(void);
     
     NavigationSystem();
+    
+    void Reset();
     
 private:
     

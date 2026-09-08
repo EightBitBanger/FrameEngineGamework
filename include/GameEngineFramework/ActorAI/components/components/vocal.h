@@ -1,7 +1,7 @@
 #ifndef AI_ACTOR_VOCALS
 #define AI_ACTOR_VOCALS
 
-#include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/configuration.h>
 
 class ENGINE_API VocalSynthesizer {
 public:

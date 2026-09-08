@@ -1,7 +1,7 @@
 #ifndef AI_ACTOR_COOLDOWN
 #define AI_ACTOR_COOLDOWN
 
-#include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/configuration.h>
 
 class ENGINE_API CooldownCounters {
     friend class Actor;
@@ -36,6 +36,8 @@ public:
     unsigned int GetCoolDownBreeding(void);
     
     CooldownCounters();
+    
+    void Reset();
     
 private:
     

@@ -1,7 +1,7 @@
 #ifndef AI_ACTOR_USER
 #define AI_ACTOR_USER
 
-#include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/configuration.h>
 
 class ENGINE_API UserVariables {
     friend class Actor;
@@ -21,6 +21,8 @@ public:
     void* GetUserDataB(void);
     
     UserVariables();
+    
+    void Reset();
     
 private:
     

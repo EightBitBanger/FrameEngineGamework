@@ -54,6 +54,8 @@ public:
     
     InventoryManager();
     
+    void Reset();
+    
 private:
     
     bool doEquipWeapon;

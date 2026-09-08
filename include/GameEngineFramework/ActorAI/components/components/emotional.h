@@ -1,7 +1,7 @@
 #ifndef AI_ACTOR_EMOTIONAL
 #define AI_ACTOR_EMOTIONAL
 
-#include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/configuration.h>
 
 class ENGINE_API EmotionalState {
     friend class Actor;
@@ -63,6 +63,7 @@ public:
     
     EmotionalState();
     
+    void Reset();
 };
 
 #endif

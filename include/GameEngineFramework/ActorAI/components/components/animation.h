@@ -1,7 +1,7 @@
 #ifndef AI_ACTOR_ANIMATION
 #define AI_ACTOR_ANIMATION
 
-#include <GameEngineFramework/ActorAI/ActorSystem.h>
+#include <GameEngineFramework/configuration.h>
 
 class ENGINE_API AnimationState {
     friend class Actor;
@@ -10,9 +10,19 @@ class ENGINE_API AnimationState {
     friend class EngineSystemManager;
 public:
     
+    /// Set the animation rate.
+    void SetAnimationCycleRate(float rate);
+    
+    /// Get the animation rate.
+    float GetAnimationCycleRate(void);
+    
     AnimationState();
     
 private:
+    
+    // Rate at which the animation will cycle
+    float mWalkRate;
+    
     // Animation timer
     float mWalkTime;
     
