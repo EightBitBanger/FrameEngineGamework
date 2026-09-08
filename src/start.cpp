@@ -4,33 +4,39 @@
 #include <GameEngineFramework/Plugins/plugins.h>
 
 MeshRenderer* boundsRenderer = nullptr;
-Panel* selectedTab = nullptr;
 
-std::vector<std::pair<std::string, glm::vec3>> QueryWorld(const glm::vec3& position, float range) {return GameWorld.QueryPickupNames(position, range);}
-bool PlaceWorld(const std::string& type, const glm::vec3& position, const glm::vec3& rotation) {return GameWorld.PlacePickupAt(type, position);}
-bool RemoveWorld(const glm::vec3& position, std::string& collectedItem) {return GameWorld.RemovePickupAt(position, 0.1f, &collectedItem);}
+std::vector<std::pair<std::string, glm::vec3>> QueryPickups(const glm::vec3& position, float range) {return GameWorld.QueryPickupNames(position, range);}
+bool PlacePickup(const std::string& type, const glm::vec3& position, const glm::vec3& rotation) {GameWorld.QueuePickupAt(type, position, rotation); return true;}
+bool RemovePickup(const glm::vec3& position, std::string& collectedItem) {return GameWorld.RemovePickupAt(position, 0.1f, &collectedItem);}
+
+std::vector<std::pair<std::string, glm::vec3>> QueryStatic(const glm::vec3& position, float range) {return GameWorld.QueryDecorNames(position, range);}
+bool PlaceStatic(const std::string& type, const glm::vec3& position, const glm::vec3& rotation) {GameWorld.QueueDecorAt(type, position, rotation); return true;}
+bool RemoveStatic(const glm::vec3& position, std::string& collectedItem) {return GameWorld.RemoveDecorAt(position, 0.1f); collectedItem = "";}
+
+std::string GetName(int language, int namePart) {
+    std::vector<std::string> germanPrefixes       = {"Eisen", "Stark", "Rosen", "Adel", "Wald", "Kaiser", "Nord", "Donner"};
+    std::vector<std::string> germanNames          = {"berg", "stein", "burg", "feld", "gard", "muth", "brand", "hart", "vogel", "wolf"};
+    std::vector<std::string> germanSuffixes       = {"er", "en", "ung", "ich", "heim", "stadt", "dorf", "mann", "dort"};
+    std::vector<std::string> germanCoreSuffixes   = {"art", "old", "hard", "rich", "mann", "mund", "vald", "mar", "st", "cht"};
+    
+    std::vector<std::string> norsePrefixes        = {"Skar", "Varg", "Thor", "Grim", "Bjor", "Rune", "Hild", "Fen", "Krag", "Tyr"};
+    std::vector<std::string> norseNames           = {"val", "mund", "gard", "geir", "kell", "ulf", "dorn", "var", "brand", "skald"};
+    std::vector<std::string> norseSuffixes        = {"heim", "dottir", "son", "vir", "fjell", "rok", "vik"};
+    std::vector<std::string> norseCoreSuffixes    = {"ar", "ur", "ir", "ald", "ing", "or"};
+    NameGenerator generator;
+    
+    switch (namePart) {
+    case 0: return generator.GenerateFirstName(germanPrefixes, germanNames, germanSuffixes, germanCoreSuffixes); break; // Shorter first name
+    case 1: return generator.GenerateIncarnation(germanPrefixes, germanNames, germanSuffixes, germanCoreSuffixes); break; // Longer family name
+    }
+    return "";
+}
 
 void Start() {
     // Key bindings
     Input.BindKeyPressToFunction(VK_F4,     keyBindF4);
     Input.BindKeyPressToFunction(VK_F11,    keyBindFullscreen);
     Input.BindKeyPressToFunction(VK_ESCAPE, keyBindEscape);
-    
-    // Load the required command functions
-    Engine.console.Enable();
-    
-    Engine.console.RegisterCommand("summon",  FuncSummon);
-    Engine.console.RegisterCommand("list",    FuncList);
-    
-    Engine.console.RegisterCommand("save",    FuncSave);
-    Engine.console.RegisterCommand("load",    FuncLoad);
-    Engine.console.RegisterCommand("remove",  FuncRemove);
-    
-    Engine.console.RegisterCommand("clear",   FuncClear);
-    Engine.console.RegisterCommand("seed",    FuncSeed);
-    
-    Engine.console.RegisterCommand("time",    FuncTime);
-    Engine.console.RegisterCommand("weather", FuncWeather);
     
     // Selection bounds renderer
     boundsRenderer = Engine.Create<MeshRenderer>();
@@ -46,18 +52,7 @@ void Start() {
     
     Engine.sceneMain->AddMeshRendererToSceneRoot(boundsRenderer);
     
-    // Selection tab
-    /*
-    selectedTab = UI.CreatePanel();
-    selectedTab->x = 0;
-    selectedTab->y = 0;
-    selectedTab->w = 200;
-    selectedTab->h = 32;
-    */
-    
-    
     // Initiate platform
-    //Platform.EnableVSync();
     Platform.ShowMouseCursor();
     Platform.isPaused = true;
     
@@ -68,40 +63,37 @@ void Start() {
     // Initiate client version
     std::string version = "0.1.0";
     GameWorld.version = version;
-    //Inventory.version = version;
     
     // User plug-in initiation
     GameWorld.Initiate();
     Weather.Initiate();
     Particle.Initiate();
-    //Inventory.Initiate(8, Platform.windowArea.w, Platform.windowArea.h);
     
     // Create a camera controller
-    
-    CreateCameraController(glm::vec3(0, 10, 0));
+    CreateCameraController(glm::vec3(0, 0, 0), CameraType::Free);
     
     // Disable mouse look on startup.
     Engine.sceneMain->camera->DisableMouseLook();
     
+    // InspectorWindow is dynamically registered in OpenActorInspector() when an actor is clicked
+    UI.AddUIFrameCallback(MainMenu);
     
     // Weather system
+    GameWorld.worldMaterial->ambient = Colors.MakeGrayScale(0.9f);
+    GameWorld.staticMaterial->ambient = Colors.MakeGrayScale(0.4f);
+    
+    GameWorld.worldMaterial->diffuse = Colors.MakeGrayScale(0.4f);
+    GameWorld.staticMaterial->diffuse = Colors.MakeGrayScale(0.4f);
     
     Weather.SetPlayerObject(Engine.cameraController);
     Weather.SetWorldMaterial(GameWorld.worldMaterial);
     Weather.SetStaticMaterial(GameWorld.staticMaterial);
     Weather.SetWaterMaterial(GameWorld.waterMaterial);
     
-    GameWorld.worldMaterial->ambient = Colors.MakeGrayScale(0.1f);
-    GameWorld.staticMaterial->ambient = Colors.MakeGrayScale(0.1f);
-    
-    GameWorld.worldMaterial->diffuse = Colors.MakeGrayScale(0.3f);
-    GameWorld.staticMaterial->diffuse = Colors.MakeGrayScale(0.3f);
-    
     // Lighting levels
-    Weather.SetWorldLightLevel(0.02f, 0.8f);
-    Weather.SetSkyLightLevel(0.01f, 0.2f);
-    
-    GameWorld.world.ambientLight = 0.0f;
+    Weather.SetWorldLightLevel(0.01f, 0.9f);
+    Weather.SetSkyLightLevel(0.01f, 0.4f);
+    Weather.SetWorldLightAmbience(Color(0.0f, 0.0f, 1.0f) + Colors.MakeGrayScale(0.3f));
     
     // World rendering
     GameWorld.chunkSize = 64;
@@ -113,31 +105,13 @@ void Start() {
     GameWorld.world.snowCapBias = 8.0f;
     GameWorld.world.waterLevel = -8.0f;
     
+    Weather.SetTime(5000);
+    
     // Set the world query callback
-    AI.SetWorldRaycastCallback(QueryWorld, PlaceWorld, RemoveWorld);
+    AI.SetWorldPickupCallbacks(QueryPickups, PlacePickup, RemovePickup);
+    AI.SetWorldStaticCallbacks(QueryStatic, PlaceStatic, RemoveStatic);
+    AI.SetNameGenerator(GetName);
     
     // Physics
-    
     Physics.SetWorldGravity(0.0f, -9.81f, 0.0f);
-    //Engine.EnablePhysicsDebugRenderer();
-    //AI.DebugRendererEnable();
-    
-    // Load world
-    if (!GameWorld.LoadWorld()) {
-        Engine.console.Print("Generating default world");
-        
-        GameWorld.worldSeed = Random.Range(100, 10000000) - Random.Range(100, 10000000);
-        Weather.SetTime(9000);
-        Weather.SetWeather(WeatherType::Clear);
-        
-        GameWorld.SaveWorld();
-    } else {
-        // Load existing world
-        
-        //Inventory.LoadFromFile("worlds/" + GameWorld.world.name);
-        
-    }
-    Weather.Update();
-    
 }
-
