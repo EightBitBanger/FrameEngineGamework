@@ -7,20 +7,22 @@
 
 #include <deque>
 
+#define  CHUNK_IS_ACTIVE      0x01
+#define  CHUNK_IS_GENERATED   0x02
+#define  CHUNK_IS_COMPLETE    0x04
+#define  CHUNK_DO_UPDATE      0x08
 
 class ENGINE_API Chunk {
 public:
     
     Chunk();
     
-    /// Is the chunk active in the scene
-    bool isActive;
+    uint8_t flags;
     
-    /// Is this chunk finished generating
+    //bool isActive;
     bool isGenerated;
-    
-    /// Is the chunk fully generated
     bool isComplete;
+    bool doUpdate;
     
     /// Current seed used to generate this chunk
     int seed;
@@ -34,6 +36,7 @@ public:
     
     GameObject* gameObject;
     GameObject* staticObject;
+    GameObject* pickupObject;
     
     rp3d::RigidBody* rigidBody;
     
@@ -63,6 +66,7 @@ public:
     /// Generation fields
     float* heightField;
     glm::vec3* colorField;
+    glm::vec3* colorAdditive;
     
 };
 

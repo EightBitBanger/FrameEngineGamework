@@ -20,6 +20,23 @@ public:
     /// Generate a water level effect.
     void AddColorFieldWaterTable(glm::vec3* colorField, float* heightField, unsigned int width, unsigned int height, Color waterColor, float beginHeight, float bias, float waterTableHeight);
     
+    // Color effects
+    
+    /// Clears or resets a color additive field to zero.
+    void ClearColorAdditive(glm::vec3* colorAdditive, unsigned int width, unsigned int height, const glm::vec3& clearColor = glm::vec3(0.0f));
+    
+    /// Blends base color with additive/multiplicative color offsets and stores in outFinalColors.
+    void BlendColorFields(glm::vec3* outFinalColors, const glm::vec3* baseColors, const glm::vec3* additiveColors, unsigned int size, bool multiply = false);
+    
+    /// Applies height field and combined color fields to mesh quads.
+    void AddHeightFieldToMesh(Mesh* mesh, float* heightField, glm::vec3* colorField, glm::vec3* colorAdditive, unsigned int width, unsigned int height, float offsetX, float offsetZ, unsigned int subTessX = 1, unsigned int subTessZ = 1);
+    
+    /// Modifies additive colors in a radius around a local grid point.
+    void ApplyColorAdditiveBrush(glm::vec3* colorAdditive, unsigned int width, unsigned int height, float localX, float localZ, float radius, const glm::vec3& color, float intensity, bool additive = true);
+    
+    /// Fades all additive color values toward zero by a given decay rate.
+    void FadeColorAdditive(glm::vec3* colorAdditive, unsigned int width, unsigned int height, float decayRate);
+    
     // Mesh mapping
     
     /// Apply the height field values to a mesh.

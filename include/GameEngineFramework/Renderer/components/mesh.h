@@ -92,6 +92,12 @@ public:
     /// Update the points of a sub mesh.
     bool ChangeSubMeshPoints(unsigned int index, std::vector<glm::vec3> points);
     
+    /// Set a uniform normal direction of a sub mesh.
+    bool ChangeSubMeshNormals(unsigned int index, glm::vec3 normal);
+    
+    /// Add a uniform normal direction to a sub mesh.
+    bool ChangeSubMeshNormalsAdditive(unsigned int index, glm::vec3 normal);
+    
     /// Clear all sub meshes in the mesh.
     void ClearSubMeshes(void);
     
@@ -163,6 +169,9 @@ public:
     
     /// Generate normals for the current vertex buffer.
     void CalculateNormals(void);
+    
+    /// Generate normals for sub mesh.
+    bool CalculateSubMeshNormals(unsigned int index);
     
     /// Set normals to a default value for the current vertex buffer.
     void SetNormals(glm::vec3 normals);

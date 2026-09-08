@@ -48,6 +48,12 @@ struct NearbyPickupInfo {
     float distance;
 };
 
+struct PendingRequest {
+    std::string classification;
+    glm::vec3 position;
+    glm::vec3 rotation;
+};
+
 class ENGINE_API ChunkManager {
 public:
     
@@ -76,15 +82,6 @@ public:
     bool SetWorldRule(std::string key, std::string value);
     bool ApplyWorldRule(std::string key, std::string value);
     
-    // Biome generation
-    
-    void GenerateBiome(glm::vec3* colorField, float* heightField, Chunk* chunk, Biome* biome, float* weightMask, float* totalWeights);
-    
-    // Auxiliary
-    
-    /// Translate a color by name to a color value.
-    Color GetColorByName(const std::string& name);
-    
     // Raycast / query
     
     /// Queries all static objects within a given radius around a world position.
@@ -103,6 +100,7 @@ public:
     
     bool RemoveDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
     bool RemoveDecorAt(const glm::vec3& position, float tolerance = 0.1f);
+    bool RemoveDecorByIndex(Chunk* chunk, size_t index, bool rebuildMesh = true);
     
     /// Query static decor via raycast.
     DecorationHitInfo QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold);
@@ -110,10 +108,13 @@ public:
     /// Query static objects in range and return a list of (name, position) pairs.
     std::vector<std::pair<std::string, glm::vec3>> QueryDecorNames(const glm::vec3& centerPosition, float range);
     
+    /// Thread-safe method to queue static object placement from background threads
+    void QueueDecorAt(const std::string& type, const glm::vec3& position, const glm::vec3& rotation = glm::vec3(0.0f));
+    
     // Item pickups
     
     bool PlacePickup(glm::vec3 position, glm::vec3 direction, float maxDistance, const std::string& itemClassification);
-    bool PlacePickupAt(const std::string& itemClassification, const glm::vec3& position);
+    bool PlacePickupAt(const std::string& itemClassification, const glm::vec3& position, const glm::vec3& rotation);
     bool RemovePickup(glm::vec3 position, glm::vec3 direction, float maxDistance, std::string& collectedItem);
     bool RemovePickupAt(const glm::vec3& position, float tolerance = 0.1f, std::string* collectedItem = nullptr);
     bool QueryPickup(glm::vec3 position, glm::vec3 direction, float maxDistance, std::string& queriedItem);
@@ -123,6 +124,23 @@ public:
     
     /// Query pickups in range and return a list of (name, position) pairs.
     std::vector<std::pair<std::string, glm::vec3>> QueryPickupNames(const glm::vec3& position, float range);
+    
+    /// Thread-safe method to queue item drops from background threads
+    void QueuePickupAt(const std::string& itemClassification, const glm::vec3& position, const glm::vec3& rotation);
+    
+    // Chunk color manipulation
+    
+    /// Sets an additive color value at a specific world position.
+    bool SetWorldColorAdditive(const glm::vec3& worldPosition, const Color& color);
+    
+    /// Applies an additive color brush in a radius around a world position (supports snow, tilling, scorch marks).
+    bool AddWorldColorAdditiveRadius(const glm::vec3& worldPosition, float radius, const glm::vec3& color, float intensity = 1.0f, bool additive = true);
+    
+    /// Fades all additive effects within a chunk over time (for melting snow, drying soil).
+    void DecayChunkColorAdditive(Chunk* chunk, float decayRate);
+    
+    /// Refreshes the GPU mesh vertex colors for a chunk without regenerating geometry.
+    void RebuildChunkMeshColors(Chunk* chunk);
     
     // Actors
     
@@ -154,17 +172,17 @@ public:
     void GenerateChunkBlendMasks(Chunk* chunk);
     
     // Internal chunk decoration
-    
     void Decorate(Chunk* chunk);
-    
     bool BuildDecorStructure(Chunk* chunk, glm::vec3 position, const std::string& pattern, const std::string& name, const std::string& mesh);
+
+    void BuildItemMesh(Mesh* targetMesh, const std::string& itemClassification, const glm::vec3& offset = glm::vec3(0.0f));
+    unsigned int AddPickupToMesh(Mesh* targetMesh, const std::string& itemClassification, const glm::vec3& position, const glm::vec3& rotation);
+    void RebuildPickupMesh(Chunk* chunk);
     
     class ENGINE_API BuildFunctions {
     public:
         
         void StackAtAngle(Structure& structure, glm::vec3 position, glm::vec3 scale, glm::vec3 angle, float stepHeight, int length, Color color);
-        
-        void BuildItemMesh(Mesh* targetMesh, const std::string& itemClassification, const glm::vec3& offset = glm::vec3(0.0f));
         
     } build;
     
@@ -173,6 +191,8 @@ public:
     
     void Update(float deltaTime);
     void UpdateStaticObjects(float deltaTime);
+    void UpdatePickupObjects(float deltaTime);
+    void ProcessPendingRequests();
     
     // World materials
     
@@ -192,6 +212,12 @@ private:
     // Internal decoration mesh combiner function
     void AddDecor(Chunk* chunk, const std::string& mesh, const std::string& type, const glm::vec3& position, const glm::vec3& rotation, glm::vec3 scale = glm::vec3(0.0f), glm::vec3 color = glm::vec3(-1.0f), int function = -1);
     
+    // Biome generation
+    void GenerateBiome(glm::vec3* colorField, float* heightField, Chunk* chunk, Biome* biome, float* weightMask, float* totalWeights);
+    
+    // Translate a color by name to a color value.
+    Color GetColorByName(const std::string& name);
+    
     HeightMapping generation;
     
     // Chunk generation thread
@@ -208,6 +234,7 @@ private:
     void UpdateFogSettings(const glm::vec3 &playerPosition);
     
     void InitializePlayerHeight(glm::vec3 &playerPosition);
+    void KeepPlayerAboveGround(glm::vec3 &playerPosition, float playerHeightOffset);
     
     // List of world rules
     
@@ -232,6 +259,13 @@ private:
     
     Fog* fogWater;
     
+    // Item request queue
+    
+    std::vector<PendingRequest> mPendingRequests;
+    std::mutex mPendingRequestsMutex;
+    
+    std::vector<PendingRequest> mPendingStaticRequests;
+    std::mutex mPendingStaticRequestsMutex;
 };
 
 #endif

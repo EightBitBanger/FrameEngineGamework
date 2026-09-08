@@ -3,7 +3,12 @@
 
 #include <GameEngineFramework/Engine/Engine.h>
 
-ENGINE_API GameObject* CreateCameraController(glm::vec3 position);
+enum class CameraType {
+    Free,
+    RTS
+};
+
+ENGINE_API GameObject* CreateCameraController(glm::vec3 position, CameraType type);
 
 ENGINE_API void CameraControllerUpdate(void);
 

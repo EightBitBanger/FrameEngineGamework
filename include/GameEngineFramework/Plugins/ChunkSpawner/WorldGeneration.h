@@ -52,27 +52,7 @@ public:
     
     std::unordered_map<std::string, ClassStructure> classStructures;
     
-    WorldGeneration() :
-        name("default"),
-        
-        doGenerateChunks(false),
-        doAutoBreeding(true),
-        
-        snowCapHeight(60.0f),
-        snowCapBias(2.0f),
-        snowCapColor(0.7f, 0.85f, 1.1f, 1.0f),
-        
-        waterLevel(-21.0f),
-        ambientLight(0.0f),
-        
-        waterColorLow(Colors.black),
-        waterColorHigh(Colors.blue),
-        
-        staticColorLow(Colors.black),
-        staticColorHigh(Colors.white),
-        
-        actorColorLow(Colors.black),
-        actorColorHigh(Colors.white) {}
+    WorldGeneration();
 };
 
 

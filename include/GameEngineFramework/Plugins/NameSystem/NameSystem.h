@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
+#include <mutex>
 
 // Embedded Xorshift32 PRNG — Fast, completely isolated, and deterministic
 struct InternalPRNG {
@@ -49,6 +50,14 @@ public:
         'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z'
     };
     
+    // Generate a shorter first name
+    std::string GenerateFirstName(
+        const std::vector<std::string>& prefixes,
+        const std::vector<std::string>& names,
+        const std::vector<std::string>& suffixes = {},
+        const std::vector<std::string>& coreSuffixes = {}
+    );
+    
     // Mutates a single source name with optional custom core suffixes
     std::string GenerateIncarnation(
         const std::string& sourceName,
@@ -70,6 +79,8 @@ public:
     );
     
 private:
+    std::mutex mux;
+    
     InternalPRNG prng;
     
     bool IsVowel(char c) const;

@@ -41,7 +41,9 @@ public:
     
     /// Set the universal lighting level.
     void SetWorldLightLevel(float low, float high);
-    /// Set the sky lighting level
+    /// Set the world ambient lighting level.
+    void SetWorldLightAmbience(Color color);
+    /// Set the sky lighting level.
     void SetSkyLightLevel(float low, float high);
     
     /// Set the current weather cycle.
@@ -75,9 +77,18 @@ public:
     /// Reset the world fog.
     void FogClear(void);
     
+    /// Set the time scale multiplier value.
+    void SetTimeScale(float scale);
+    
+    /// Get the time scale multiplier value.
+    float GetTimeScale(void);
+    
 private:
     
+    void UpdateSunAndLighting(void);
+    
     float mWorldTime;
+    float mTimeScale;
     
     float mWorldLightLow;
     float mWorldLightHigh;
@@ -88,12 +99,15 @@ private:
     float mLightIntensity;
     glm::vec3 mLightAngle;
     
+    Color mAmbientColor;
+    
     Transform* mPlayerTransform;
     
     // Sun
     GameObject* mSunObject;
     Light* mSunLight;
     Transform* mLightTransform;
+    MeshRenderer* mSunRenderer;
     
     // Sky
     GameObject* mSkyObject;

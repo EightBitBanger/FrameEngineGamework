@@ -30,6 +30,9 @@ public:
     
     MeshRenderer* renderer;
     
+    unsigned int subMeshStartIndex;
+    unsigned int subMeshCount;
+    
     StaticPickup();
 };
 

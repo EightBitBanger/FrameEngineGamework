@@ -181,13 +181,16 @@ public:
     void SetViewport(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
     
     /// Draw the current frame as it stands.
-    void RenderFrame(void);
+    void RenderFrame(float deltaTime);
     
     /// Return a list of any and all openGL error codes.
     std::vector<std::string> GetGLErrorCodes(std::string errorLocationString);
     
     /// Get number of draw calls made in the last frame.
     unsigned int GetNumberOfDrawCalls(void);
+    
+    /// Get number of draw calls made in the last frame.
+    unsigned int GetFPS(void);
     
     // Culling
     
@@ -213,7 +216,7 @@ private:
     unsigned int mNumberOfDrawCalls;
     
     // Frame counter
-    unsigned long long int mNumberOfFrames;
+    unsigned int mNumberOfFrames;
     
     // Render queue group
     std::vector<Scene*>  mActiveScenes;
