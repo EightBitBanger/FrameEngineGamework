@@ -21,3 +21,17 @@ void FuncWeather(std::vector<std::string> args);  // Weather control
 
 void EventLostFocus(void);                        // Window lost focus callback
 void EventOnResize(void);                         // Window resized callback
+
+bool MainMenu(void);
+
+// Inspector window
+void OpenActorInspector(Actor* target);
+void CloseActorInspector();
+bool InspectorWindow(void);
+
+// Gene editor window
+void OpenGeneEditor(Actor* target);
+void CloseGeneEditor();
+bool GeneEditorWindow(void);
+
+void RestoreCameraControllerToOrbitalView(Actor* target);

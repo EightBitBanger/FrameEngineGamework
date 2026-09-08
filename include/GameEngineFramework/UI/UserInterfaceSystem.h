@@ -49,8 +49,16 @@ public:
     /// Destroy a button element and free its memory.
     bool DestroyButton(Button* buttonPtr);
     
+    /// Add a UI frame callback function.
+    void AddUIFrameCallback(bool (*new_func)(void));
+    
+    /// Clear all active UI frame callbacks
+    void ClearUIFrameCallbacks(void);
+    
 private:
     
+    std::vector<bool (*)(void)> mFrames;
+ 
     uint64_t uniqueID;
     
     // Update systems
