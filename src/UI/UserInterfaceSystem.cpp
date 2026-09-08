@@ -86,6 +86,14 @@ void UserInterfaceSystem::Render(void) {
     UpdateTextElements();
     UpdateButtonElements();
     
+    for (auto it = mFrames.begin(); it != mFrames.end(); ) {
+        if (!(*it)()) {
+            it = mFrames.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     
@@ -328,4 +336,12 @@ bool UserInterfaceSystem::DestroyButton(Button* buttonPtr) {
     bool wasSpriteDeleted = mSpriteElements.Destroy( buttonPtr->sprite );
     bool wasButtonDeleted = mButtonElements.Destroy(buttonPtr);
     return wasButtonDeleted && wasSpriteDeleted;
+}
+
+void UserInterfaceSystem::AddUIFrameCallback(bool (*new_func)(void)) {
+    mFrames.push_back(new_func);
+}
+
+void UserInterfaceSystem::ClearUIFrameCallbacks(void) {
+    mFrames.clear();
 }
