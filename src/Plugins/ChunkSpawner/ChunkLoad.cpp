@@ -23,7 +23,7 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
             for (unsigned int i = 0; i < numberOfLines; i++) {
                 std::string lineString = bufferArray[i];
                 std::vector<std::string> lineArray = String.Explode(lineString, '~');
-                if (lineArray.size() < 7) 
+                if (lineArray.size() < 17) 
                     continue;
                 
                 // Position
@@ -44,21 +44,31 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
                 actor->biological.strength   = String.ToFloat( lineArray[7] );
                 actor->biological.saturation = String.ToFloat( lineArray[8] );
                 
+                actor->sleep.SetCurrentSleepStart( String.ToFloat( lineArray[9] ) );
+                actor->sleep.SetCurrentDuration( String.ToFloat( lineArray[10] ) );
+                
+                actor->counters.SetCoolDownAttack(     String.ToFloat(lineArray[11]) );
+                actor->counters.SetCoolDownBreeding(   String.ToFloat(lineArray[12]) );
+                actor->counters.SetCoolDownMovement(   String.ToFloat(lineArray[13]) );
+                actor->counters.SetCoolDownObservation(String.ToFloat(lineArray[14]) );
+                actor->counters.SetCoolDownSocial(     String.ToFloat(lineArray[15]) );
+                
                 // Load inventory items
-                std::string& itemClassList = lineArray[9];
+                std::string& itemClassList = lineArray[16];
                 std::vector<std::string> itemList = String.Explode(itemClassList, '#');
                 for (unsigned int a = 0; a < itemList.size(); a++) {
                     actor->inventory.GiveItem( itemList[a] );
                 }
                 
                 // Set genome
-                AI.genomes.InjectGenome(actor, lineArray[10]);
+                AI.genomes.InjectGenome(actor, lineArray[17]);
                 actor->RebuildGeneticExpression();
+                actor->CalculateBoundingRegionFromGenome();
                 
                 actor->isActive = true;
                 
                 // Memories
-                std::vector<std::string> memories = String.Explode(lineArray[11], '|');
+                std::vector<std::string> memories = String.Explode(lineArray[18], '|');
                 for (unsigned int m = 0; m < memories.size(); m++) {
                     const std::string& memory = memories[m];
                     if (!memory.empty()) {
@@ -115,45 +125,32 @@ bool ChunkManager::LoadChunk(Chunk* chunk) {
             std::vector<std::string> lines = String.Explode(dataBuffer, '\n');
             for (const std::string& line : lines) {
                 std::vector<std::string> parts = String.Explode(line, '~');
-                if (parts.size() < 4) 
+                if (parts.size() < 7) 
                     continue;
-    
+                
                 glm::vec3 localPos(
                     String.ToFloat(parts[0]),
                     String.ToFloat(parts[1]),
                     String.ToFloat(parts[2])
                 );
-                std::string itemClassification = parts[3];
-    
-                // Instantiate MeshRenderer
-                MeshRenderer* pickupRenderer = Engine.Create<MeshRenderer>();
-                pickupRenderer->mesh         = Engine.Create<Mesh>();
-                pickupRenderer->material     = Engine.Create<Material>();
-    
-                pickupRenderer->material->shader  = Resources.shaders.color;
-                pickupRenderer->material->ambient = Colors.white;
-                pickupRenderer->material->diffuse = Colors.white;
-    
-                build.BuildItemMesh(pickupRenderer->mesh, itemClassification);
-    
-                // Reconstruct world space position
-                glm::vec3 worldPos = localPos + glm::vec3(chunk->x, 0.0f, chunk->y);
-                pickupRenderer->transform.position = worldPos;
-                pickupRenderer->transform.UpdateMatrix();
-                pickupRenderer->isActive = true;
-    
-                Engine.sceneMain->AddMeshRendererToSceneRoot(pickupRenderer, RENDER_QUEUE_GEOMETRY);
-    
-                // Rebuild StaticPickup entry
+                glm::vec3 localRot(
+                    String.ToFloat(parts[3]),
+                    String.ToFloat(parts[4]),
+                    String.ToFloat(parts[5])
+                );
+                std::string itemClassification = parts[6];
+                
                 StaticPickup pickup;
                 pickup.position       = localPos;
-                pickup.rotation       = glm::vec3(0.0f);
+                pickup.rotation       = localRot;
                 pickup.scale          = glm::vec3(0.5f);
                 pickup.classification = itemClassification;
-                pickup.renderer       = pickupRenderer;
-    
+                pickup.renderer       = nullptr;
+                
                 chunk->pickups.push_back(pickup);
             }
+            
+            RebuildPickupMesh(chunk);
         }
     }
     return true;

@@ -344,7 +344,9 @@ unsigned int RenderSystem::GetNumberOfDrawCalls(void) {
     return mNumberOfDrawCalls;
 }
 
-
+unsigned int RenderSystem::GetFPS(void) {
+    return mNumberOfFrames;
+}
 
 //
 // Render thread

@@ -32,59 +32,31 @@ void ChunkManager::BuildFunctions::StackAtAngle(Structure& structure, glm::vec3 
     }
 }
 
-void ChunkManager::BuildFunctions::BuildItemMesh(Mesh* targetMesh, const std::string& itemClassification, const glm::vec3& offset) {
-    if (targetMesh == nullptr || itemClassification.empty()) 
+void ChunkManager::BuildItemMesh(Mesh* targetMesh, const std::string& itemClassification, const glm::vec3& offset) {
+    if (targetMesh == nullptr) 
         return;
-    
     targetMesh->ClearSubMeshes();
-    
-    std::vector<std::string> itemData = String.Explode(itemClassification, ';');
-    if (itemData.empty()) 
+    AddPickupToMesh(targetMesh, itemClassification, offset, glm::vec3(0.0f));
+    targetMesh->Load();
+}
+
+void ChunkManager::RebuildPickupMesh(Chunk* chunk) {
+    if (chunk == nullptr || chunk->pickupObject == nullptr) 
         return;
     
-    for (unsigned int i = 0; i < itemData.size(); i++) {
-        std::vector<std::string> kvPair = String.Explode(itemData[i], ':');
-        if (kvPair.size() < 2) 
-            continue;
-        
-        std::string key = kvPair[0];
-        String.RemoveWhiteSpace(key);
-        
-        if (key == "build" && kvPair.size() >= 4) {
-            std::string position = kvPair[1];
-            std::string scale    = kvPair[2];
-            std::string color    = kvPair[3];
-            
-            String.RemoveWhiteSpace(position);
-            String.RemoveWhiteSpace(scale);
-            String.RemoveWhiteSpace(color);
-            
-            std::vector<std::string> vecPosStr   = String.Explode(position, ',');
-            std::vector<std::string> vecScaleStr = String.Explode(scale, ',');
-            std::vector<std::string> vecColorStr = String.Explode(color, ',');
-            
-            if (vecPosStr.size() != 3 || vecScaleStr.size() != 3 || vecColorStr.size() != 3) 
-                continue;
-            
-            // Sub-cube local positions relative to item center
-            float posX = String.ToFloat(vecPosStr[0]);
-            float posY = String.ToFloat(vecPosStr[1]);
-            float posZ = String.ToFloat(vecPosStr[2]);
-            
-            float scaleX = String.ToFloat(vecScaleStr[0]);
-            float scaleY = String.ToFloat(vecScaleStr[1]);
-            float scaleZ = String.ToFloat(vecScaleStr[2]);
-            
-            float colorX = String.ToFloat(vecColorStr[0]);
-            float colorY = String.ToFloat(vecColorStr[1]);
-            float colorZ = String.ToFloat(vecColorStr[2]);
-            
-            Color colorVec(colorX, colorY, colorZ);
-            targetMesh->AddCube(posX, posY, posZ, scaleX, scaleY, scaleZ, colorVec);
-        }
+    MeshRenderer* pickupRenderer = chunk->pickupObject->GetComponent<MeshRenderer>();
+    if (pickupRenderer == nullptr || pickupRenderer->mesh == nullptr) 
+        return;
+    
+    Mesh* pickupMesh = pickupRenderer->mesh;
+    pickupMesh->ClearSubMeshes();
+    
+    for (StaticPickup& pickup : chunk->pickups) {
+        pickup.subMeshStartIndex = pickupMesh->GetSubMeshCount();
+        pickup.subMeshCount = AddPickupToMesh(pickupMesh, pickup.classification, pickup.position, pickup.rotation);
     }
     
-    targetMesh->Load();
+    pickupMesh->Load();
 }
 
 bool ChunkManager::BuildDecorStructure(Chunk* chunk, glm::vec3 position, const std::string& pattern, const std::string& name, const std::string& mesh) {

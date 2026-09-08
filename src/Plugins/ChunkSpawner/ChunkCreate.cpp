@@ -2,25 +2,31 @@
 
 Chunk* ChunkManager::CreateChunk(float x, float y) {
     Chunk* chunk = chunks.Create();
-    chunk->isActive = false;
+    chunk->flags &= CHUNK_IS_ACTIVE;
     
     chunk->x = x;
     chunk->y = y;
     
     chunk->gameObject   = Engine.Create<GameObject>();
     chunk->staticObject = Engine.Create<GameObject>();
+    chunk->pickupObject = Engine.Create<GameObject>();
     
-    chunk->gameObject->name = Float.ToString(x) + "_" + Float.ToString(y);
+    chunk->gameObject->name   = Float.ToString(x) + "_" + Float.ToString(y);
+    chunk->staticObject->name = chunk->gameObject->name + "_static";
+    chunk->pickupObject->name = chunk->gameObject->name + "_pickups";
     
     // Add renderers
     chunk->gameObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     chunk->staticObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
+    chunk->pickupObject->AddComponent( Engine.CreateComponent<MeshRenderer>() );
     
     MeshRenderer* chunkRenderer  = chunk->gameObject->GetComponent<MeshRenderer>();
     MeshRenderer* staticRenderer = chunk->staticObject->GetComponent<MeshRenderer>();
+    MeshRenderer* pickupRenderer = chunk->pickupObject->GetComponent<MeshRenderer>();
     
     chunk->gameObject->renderDistance   = (renderDistance * chunkSize) * 0.5f;
     chunk->staticObject->renderDistance = (renderDistance * chunkSize) * 0.5f * staticDistance;
+    chunk->pickupObject->renderDistance = (renderDistance * chunkSize) * 0.5f * staticDistance;
     
     // Bounding box area
     glm::vec3 boundMin(-chunkSize, -100, -chunkSize);
@@ -28,11 +34,10 @@ Chunk* ChunkManager::CreateChunk(float x, float y) {
     
     chunkRenderer->SetBoundingBox(boundMin, boundMax);
     staticRenderer->SetBoundingBox(boundMin, boundMax);
+    pickupRenderer->SetBoundingBox(boundMin, boundMax);
     
     // Chunk renderer
-    
     Transform* chunkTransform = chunk->gameObject->GetComponent<Transform>();
-    
     chunkTransform->SetPosition(x, 0, y);
     chunkTransform->scale = glm::vec3( 1, 1, 1 );
     
@@ -42,9 +47,7 @@ Chunk* ChunkManager::CreateChunk(float x, float y) {
     chunkRenderer->material = worldMaterial;
     
     // Static renderer
-    
     Transform* staticTransform = chunk->staticObject->GetComponent<Transform>();
-    
     staticTransform->SetPosition( x, 0, y);
     staticTransform->scale = glm::vec3( 1, 1, 1 );
     
@@ -52,6 +55,16 @@ Chunk* ChunkManager::CreateChunk(float x, float y) {
     staticRenderer->mesh->isShared = false;
     staticRenderer->EnableFrustumCulling();
     staticRenderer->material = staticMaterial;
+    
+    // Pickup renderer
+    Transform* pickupTransform = chunk->pickupObject->GetComponent<Transform>();
+    pickupTransform->SetPosition( x, 0, y);
+    pickupTransform->scale = glm::vec3( 1, 1, 1 );
+    
+    pickupRenderer->mesh = Engine.Create<Mesh>();
+    pickupRenderer->mesh->isShared = false;
+    pickupRenderer->EnableFrustumCulling();
+    pickupRenderer->material = staticMaterial;
     
     return chunk;
 }
@@ -124,10 +137,13 @@ void ChunkManager::GenerateChunkBiomes(Chunk* chunk) {
     unsigned int numberOfBiomes = world.biomes.size();
     
     chunk->heightField = (float*)malloc(sizeof(float) * (chunkSZ * chunkSZ));
-    chunk->colorField = (glm::vec3*)malloc(sizeof(glm::vec3) * (chunkSZ * chunkSZ));
-    
     generation.SetHeightFieldValues(chunk->heightField, chunkSZ, chunkSZ, 0);
+    
+    chunk->colorField = (glm::vec3*)malloc(sizeof(glm::vec3) * (chunkSZ * chunkSZ));
     generation.SetColorFieldValues(chunk->colorField, chunkSZ, chunkSZ, Colors.black, 0.01f);
+    
+    chunk->colorAdditive = (glm::vec3*)malloc(sizeof(glm::vec3) * fieldSize);
+    generation.ClearColorAdditive(chunk->colorAdditive, chunkSZ, chunkSZ, glm::vec3(0.0f));
     
     // Generate terrain base color
     

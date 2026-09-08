@@ -11,15 +11,19 @@ void ChunkManager::Update(float deltaTime) {
     
     glm::vec3 playerPosition = Engine.cameraController->GetPosition();
     
+    KeepPlayerAboveGround(playerPosition, 0.5f);
     InitializePlayerHeight(playerPosition);
     
     UpdateFogSettings(playerPosition);
     
     DestroyChunks(playerPosition);
-    
     GenerateChunks(playerPosition);
     
     UpdateStaticObjects(deltaTime);
+    
+    UpdatePickupObjects(deltaTime);
+    
+    ProcessPendingRequests();
 }
 
 static Frustum BuildStreamingFrustumFromCamera(Camera& cam) {
@@ -60,6 +64,22 @@ static glm::vec2 NormalizeSqrt(const glm::vec2& v) {
     return v / std::sqrt(len2);
 }
 
+void ChunkManager::UpdatePickupObjects(float deltaTime) {
+    if (chunks.Size() == 0) 
+        return;
+    
+    for (unsigned int c = 0; c < chunks.Size(); c++) {
+        Chunk* chunk = chunks[c];
+        if (!(chunk->flags & CHUNK_IS_ACTIVE)) 
+            continue;
+        
+        if (chunk->doUpdate) {
+            chunk->doUpdate = false;
+            RebuildPickupMesh(chunk);
+        }
+    }
+}
+
 void ChunkManager::UpdateStaticObjects(float deltaTime) {
     if (chunks.Size() == 0) 
         return;
@@ -67,98 +87,118 @@ void ChunkManager::UpdateStaticObjects(float deltaTime) {
     const float maxAllowedDelta = 0.01f;
     float growthDelta = std::min(deltaTime, maxAllowedDelta);
     
-    const float ticksPerPlantPerSecond  = 90.3f;
-    static float tickAccumulator        = 0.0f;
-    
-    std::vector<Chunk*> activeChunks;
-    size_t totalActivePlants = 0;
-    for (unsigned int c = 0; c < chunks.Size(); c++) {
-        Chunk* chunk = chunks[c];
-        if (chunk->isActive && !chunk->animatedStatics.empty()) {
-            activeChunks.push_back(chunk);
-            totalActivePlants += chunk->animatedStatics.size();
-        }
-    }
-    
-    if (totalActivePlants == 0)
-        return;
-    
-    float ticksToRunFloat = (float)totalActivePlants * ticksPerPlantPerSecond * growthDelta + tickAccumulator;
-    unsigned int numTicks = (unsigned int)ticksToRunFloat;
-    tickAccumulator       = ticksToRunFloat - (float)numTicks;
+    const float plantGrowthMul = 1.0f;
+    float baseGrowthStep = growthDelta * plantGrowthMul * AI.GetTimeScale();
     
     std::unordered_set<Chunk*> modifiedChunks;
     
-    for (unsigned int t = 0; t < numTicks; t++) {
-        size_t currentTotal = 0;
-        for (Chunk* chunk : activeChunks) {
-            currentTotal += chunk->animatedStatics.size();
-        }
+    for (unsigned int c = 0; c < chunks.Size(); c++) {
+        Chunk* chunk = chunks[c];
+        if (!(chunk->flags & CHUNK_IS_ACTIVE) || chunk->animatedStatics.empty()) 
+            continue;
         
-        if (currentTotal == 0)
-            break;
+        bool chunkModified = false;
+        Mesh* staticMesh = chunk->staticObject->GetComponent<MeshRenderer>()->mesh;
         
-        int globalPlantIdx = Random.Range(0, (int)currentTotal - 1);
-        
-        Chunk* targetChunk = nullptr;
-        size_t localPlantIdx = 0;
-        for (Chunk* chunk : activeChunks) {
-            if ((size_t)globalPlantIdx < chunk->animatedStatics.size()) {
-                targetChunk   = chunk;
-                localPlantIdx = (size_t)globalPlantIdx;
-                break;
+        for (int i = (int)chunk->animatedStatics.size() - 1; i >= 0; i--) {
+            StaticAnimation& ref = chunk->animatedStatics[i];
+            
+            if (ref.staticIndex >= chunk->statics.size()) {
+                chunk->animatedStatics.erase(chunk->animatedStatics.begin() + i);
+                continue;
             }
-            globalPlantIdx -= (int)chunk->animatedStatics.size();
+            
+            StaticObject& obj = chunk->statics[ref.staticIndex];
+            std::string typeName = world.classIndexToName[obj.type];
+            ClassDefinition& def = world.classDefinitions[typeName];
+            
+            // Retain original growth scaling factors
+            float maxScale = 1.0f;
+            float baseScaleY = maxScale * 0.1f;
+            float oldScaleY = obj.scale.y;
+            
+            float randomVariance = (float)Random.Range(1, 1000) * 0.001f;
+            float appliedGrowthStep = baseGrowthStep * randomVariance;
+            
+            obj.scale.y = std::min(obj.scale.y + appliedGrowthStep, maxScale);
+            float factorY = (oldScaleY > 0.0f) ? (obj.scale.y / oldScaleY) : 1.0f;
+            
+            float progress = glm::clamp((obj.scale.y - baseScaleY) / (maxScale - baseScaleY), 0.0f, 1.0f);
+            Color currentColor = Colors.Lerp(def.colorMin, def.colorMax, progress);
+            obj.color = currentColor.ToVec3();
+            
+            staticMesh->ChangeSubMeshScale(ref.staticIndex, 1.0f, factorY, 1.0f);
+            staticMesh->ChangeSubMeshColor(ref.staticIndex, currentColor);
+            
+            chunkModified = true;
+            
+            if (obj.scale.y >= maxScale) {
+                const float saturationValue = 0.3f;
+                
+                std::string red   = Float.ToString(def.colorMax.r);
+                std::string green = Float.ToString(def.colorMax.g);
+                std::string blue  = Float.ToString(def.colorMax.b);
+                
+                std::string meshType = def.mesh;
+                
+                std::string stackMax    = UInt.ToString(def.stackMax);
+                std::string saturation  = Float.ToString(saturationValue);
+                
+                
+                // Use the exact dimensions the static object reached upon completion
+                float itemWidth  = obj.scale.x;
+                float itemHeight = obj.scale.y;
+                
+                std::string buildPart = "build: " + meshType + ": 0.0,0.0,0.0: " + 
+                Float.ToString(itemWidth) + "," + Float.ToString(itemHeight) + "," + Float.ToString(itemWidth) +
+                ": " + red + "," + green + "," + blue;
+                
+                std::string itemData  = "name:"+typeName+";"+
+                                        "crop;"+
+                                        "stackMax:"+stackMax+";"+
+                                        "saturation:"+saturation+";"+
+                                        buildPart;
+                
+                glm::vec3 position = obj.position + glm::vec3(chunk->x, 0.0f, chunk->y);
+                
+                if (RemoveDecorByIndex(chunk, ref.staticIndex, false)) {
+                    // Determine yield count
+                    int dropCount = Random.Range(4, 8);
+                    const float minRadius = 0.25f;
+                    const float maxRadius = 0.3f;
+                    
+                    for (int d = 0; d < dropCount; d++) {
+                        // Generate a random angle and distance around the plant
+                        float angleDeg = Random.Range(0.0f, 360.0f);
+                        float distance = Random.Range(minRadius, maxRadius);
+                        float rad = glm::radians(angleDeg);
+                        
+                        glm::vec3 dropPos = position;
+                        dropPos.x += std::cos(rad) * distance;
+                        dropPos.z += std::sin(rad) * distance;
+                        
+                        // Raycast down to prevent pickups from floating or sinking into slopes
+                        Hit groundHit;
+                        glm::vec3 rayOrigin = dropPos + glm::vec3(0.0f, 2.0f, 0.0f);
+                        if (Physics.Raycast(rayOrigin, glm::vec3(0.0f, -1.0f, 0.0f), 5.0f, groundHit, LayerMask::Ground)) {
+                            dropPos.y = groundHit.point.y;
+                        }
+                        
+                        // Add randomized yaw rotation for visual variety
+                        glm::vec3 dropRot(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
+                        
+                        PlacePickupAt(itemData, dropPos, dropRot);
+                    }
+                }
+            }
         }
         
-        if (!targetChunk || localPlantIdx >= targetChunk->animatedStatics.size())
-            continue;
-        
-        StaticAnimation& ref = targetChunk->animatedStatics[localPlantIdx];
-        
-        if (ref.staticIndex >= targetChunk->statics.size()) {
-            targetChunk->animatedStatics.erase(targetChunk->animatedStatics.begin() + localPlantIdx);
-            continue;
-        }
-        
-        StaticObject& obj = targetChunk->statics[ref.staticIndex];
-        std::string typeName = world.classIndexToName[obj.type];
-        ClassDefinition& def = world.classDefinitions[typeName];
-        
-        // Target full height from ClassDefinition
-        float maxScale = 1.0f;
-        float baseScaleY = maxScale * 0.1f; // Sprout starting height
-        
-        // Store old scale before incrementing
-        float oldScaleY = obj.scale.y;
-        
-        // Make growth step relative
-        float growthStep = (maxScale - baseScaleY) * 0.1f; 
-        obj.scale.y = std::min(obj.scale.y + growthStep, maxScale);
-        
-        // Calculate proportional factor to scale current vertices in mesh buffer
-        float factorY = (oldScaleY > 0.0f) ? (obj.scale.y / oldScaleY) : 1.0f;
-        
-        // Update color progression
-        float progress = glm::clamp((obj.scale.y - baseScaleY) / (maxScale - baseScaleY), 0.0f, 1.0f);
-        Color currentColor = Colors.Lerp(def.colorMin, def.colorMax, progress);
-        obj.color = currentColor.ToVec3();
-        
-        // Apply scale factor (X and Z unchanged at 1.0, Y scaled by factorY)
-        Mesh* staticMesh = targetChunk->staticObject->GetComponent<MeshRenderer>()->mesh;
-        staticMesh->ChangeSubMeshScale(ref.staticIndex, 1.0f, factorY, 1.0f);
-        staticMesh->ChangeSubMeshColor(ref.staticIndex, currentColor);
-        
-        modifiedChunks.insert(targetChunk);
-        
-        // Handle full growth completion
-        if (obj.scale.y >= maxScale) {
-            obj.function = 0;
-            targetChunk->animatedStatics.erase(targetChunk->animatedStatics.begin() + localPlantIdx);
+        if (chunkModified) {
+            modifiedChunks.insert(chunk);
         }
     }
     
-    // Push updated mesh data to GPU
+    // Push updated mesh data to GPU only once per affected chunk
     for (Chunk* chunk : modifiedChunks) {
         Mesh* staticMesh = chunk->staticObject->GetComponent<MeshRenderer>()->mesh;
         staticMesh->Load();
@@ -294,21 +334,24 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
                 if (chunk == nullptr)
                     continue;
                 
-                // Fade-in only when it’s wanted by view
-                if (!chunk->isActive) {
-                    chunk->fadeIn += 1;
+                // Fade-in
+                if (!(chunk->flags & CHUNK_IS_ACTIVE)) {
+                    chunk->fadeIn += 1.0f;
                     
-                    if (chunk->fadeIn > 10) {
-                        chunk->isActive = true;
+                    if (chunk->fadeIn > 10.0f) {
+                        chunk->flags |= CHUNK_IS_ACTIVE;
                         
                         MeshRenderer* chunkRenderer  = chunk->gameObject->GetComponent<MeshRenderer>();
                         MeshRenderer* staticRenderer = chunk->staticObject->GetComponent<MeshRenderer>();
+                        MeshRenderer* pickupRenderer = chunk->pickupObject->GetComponent<MeshRenderer>();
                         
-                        chunkRenderer->isActive = true;
+                        chunkRenderer->isActive  = true;
                         staticRenderer->isActive = true;
+                        pickupRenderer->isActive = true;
                         
                         Engine.sceneMain->AddMeshRendererToSceneRoot(chunkRenderer,  RENDER_QUEUE_GEOMETRY);
                         Engine.sceneMain->AddMeshRendererToSceneRoot(staticRenderer, RENDER_QUEUE_GEOMETRY);
+                        Engine.sceneMain->AddMeshRendererToSceneRoot(pickupRenderer, RENDER_QUEUE_GEOMETRY);
                     }
                 }
                 
@@ -380,9 +423,6 @@ void ChunkManager::GenerateChunks(const glm::vec3& playerPosition) {
                         Random.SetSeed(chunk->seed);
                         Decorate(chunk);
                     }
-                    
-                    free(chunk->heightField);
-                    free(chunk->colorField);
                 }
                 
                 continue;
@@ -465,3 +505,42 @@ void ChunkManager::InitializePlayerHeight(glm::vec3 &playerPosition) {
     }
 }
 
+void ChunkManager::KeepPlayerAboveGround(glm::vec3 &playerPosition, float playerHeightOffset) {
+    Hit hit;
+    // Cast downwards from slightly above the player's current position
+    glm::vec3 rayOrigin = playerPosition + glm::vec3(0.0f, 2.0f, 0.0f);
+    
+    if (Physics.Raycast(rayOrigin, glm::vec3(0.0f, -1.0f, 0.0f), 10000.0f, hit, LayerMask::Ground)) {
+        float minHeight = hit.point.y + playerHeightOffset;
+        if (playerPosition.y < minHeight) {
+            playerPosition.y = minHeight;
+            Engine.cameraController->SetPosition(playerPosition);
+        }
+    }
+}
+
+void ChunkManager::ProcessPendingRequests() {
+    // Process Pickups
+    std::vector<PendingRequest> localPickups;
+    {
+        std::lock_guard<std::mutex> lock(mPendingRequestsMutex);
+        if (!mPendingRequests.empty()) {
+            localPickups.swap(mPendingRequests);
+        }
+    }
+    for (const auto& pending : localPickups) {
+        PlacePickupAt(pending.classification, pending.position, pending.rotation);
+    }
+    
+    // Process static objects
+    std::vector<PendingRequest> localStatics;
+    {
+        std::lock_guard<std::mutex> lock(mPendingStaticRequestsMutex);
+        if (!mPendingStaticRequests.empty()) {
+            localStatics.swap(mPendingStaticRequests);
+        }
+    }
+    for (const auto& pending : localStatics) {
+        PlaceDecorAt(pending.classification, pending.position, pending.rotation);
+    }
+}

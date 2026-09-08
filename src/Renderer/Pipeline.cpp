@@ -5,11 +5,12 @@ extern ProfilerTimer Profiler;
 
 int dbgCounter = 0;
 
-void RenderSystem::RenderFrame(void) {
+void RenderSystem::RenderFrame(float deltaTime) {
     glm::mat4 viewProjection;
     glm::vec3 eye;
     
     mNumberOfDrawCalls = 0;
+    mNumberOfFrames++;
     
     if (doUpdateLightsEveryFrame) {
         mNumberOfLights = 0;
@@ -223,8 +224,6 @@ void RenderSystem::RenderFrame(void) {
             }
         }
     }
-    
-    mNumberOfFrames++;
     
 #ifdef RENDERER_CHECK_OPENGL_ERRORS
     GetGLErrorCodes("OnRender::EndFrame::");

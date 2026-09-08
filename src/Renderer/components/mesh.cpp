@@ -709,6 +709,40 @@ bool Mesh::ChangeSubMeshPoints(unsigned int index, std::vector<glm::vec3> points
     return true;
 }
 
+bool Mesh::ChangeSubMeshNormals(unsigned int index, glm::vec3 normal) {
+    if (index >= mSubMesh.size()) 
+        return false;
+    
+    SubMesh& subMesh = mSubMesh[index];
+    
+    std::vector<Vertex>::iterator itStart = mVertexBuffer.begin() + subMesh.vertexBegin;
+    std::vector<Vertex>::iterator itEnd   = itStart + subMesh.vertexCount;
+    
+    for (std::vector<Vertex>::iterator it = itStart; it != itEnd; ++it) {
+        it->nx = normal.x;
+        it->ny = normal.y;
+        it->nz = normal.z;
+    }
+    return true;
+}
+
+bool Mesh::ChangeSubMeshNormalsAdditive(unsigned int index, glm::vec3 normal) {
+    if (index >= mSubMesh.size()) 
+        return false;
+    
+    SubMesh& subMesh = mSubMesh[index];
+    
+    std::vector<Vertex>::iterator itStart = mVertexBuffer.begin() + subMesh.vertexBegin;
+    std::vector<Vertex>::iterator itEnd   = itStart + subMesh.vertexCount;
+    
+    for (std::vector<Vertex>::iterator it = itStart; it != itEnd; ++it) {
+        it->nx += normal.x;
+        it->ny += normal.y;
+        it->nz += normal.z;
+    }
+    return true;
+}
+
 void Mesh::ClearSubMeshes(void) {
     mSubMesh.clear();
     mVertexBuffer.clear();
@@ -754,45 +788,43 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
 bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFactor, std::vector<Vertex>& outVertices, std::vector<Index>& outIndices) {
     outVertices.clear();
     outIndices.clear();
-
+    
     if (submeshIndex >= mSubMesh.size()) {
         return false;
     }
-
+    
     if (reductionFactor <= 0.0f || reductionFactor > 1.0f) {
         return false;
     }
-
+    
     const SubMesh& sourceSubMesh = mSubMesh[submeshIndex];
-
+    
     // Extract source vertices/indices for this submesh
     std::vector<Vertex> srcVertices;
     std::vector<Index>  srcIndices;
-
+    
     srcVertices.reserve(sourceSubMesh.vertexCount);
     srcIndices.reserve(sourceSubMesh.indexCount);
-
+    
     std::vector<Vertex>::const_iterator vBegin =
         mVertexBuffer.begin() + sourceSubMesh.vertexBegin;
     std::vector<Vertex>::const_iterator vEnd =
         vBegin + sourceSubMesh.vertexCount;
-
+    
     srcVertices.insert(srcVertices.end(), vBegin, vEnd);
-
+    
     std::vector<Index>::const_iterator iBegin =
         mIndexBuffer.begin() + sourceSubMesh.indexBegin;
     std::vector<Index>::const_iterator iEnd =
         iBegin + sourceSubMesh.indexCount;
-
+    
     srcIndices.insert(srcIndices.end(), iBegin, iEnd);
-
+    
     if (srcVertices.empty() || srcIndices.size() < 3) {
         return false;
     }
-
-    // ------------------------------------------------------------
-    // Step 1: Compute bounding box of the vertices
-    // ------------------------------------------------------------
+    
+    // Compute bounding box of the vertices
     glm::vec3 minPos(
         std::numeric_limits<float>::max(),
         std::numeric_limits<float>::max(),
@@ -803,38 +835,36 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
         -std::numeric_limits<float>::max(),
         -std::numeric_limits<float>::max()
     );
-
+    
     for (size_t i = 0; i < srcVertices.size(); ++i) {
         const Vertex& v = srcVertices[i];
         if (v.x < minPos.x) minPos.x = v.x;
         if (v.y < minPos.y) minPos.y = v.y;
         if (v.z < minPos.z) minPos.z = v.z;
-
+    
         if (v.x > maxPos.x) maxPos.x = v.x;
         if (v.y > maxPos.y) maxPos.y = v.y;
         if (v.z > maxPos.z) maxPos.z = v.z;
     }
-
+    
     glm::vec3 extent = maxPos - minPos;
-
+    
     const float epsilon = 1e-5f;
     if (extent.x < epsilon) extent.x = 1.0f;
     if (extent.y < epsilon) extent.y = 1.0f;
     if (extent.z < epsilon) extent.z = 1.0f;
-
+    
     // A small tolerance for detecting boundary vertices
     float maxExtent = glm::max(extent.x, glm::max(extent.y, extent.z));
     float boundaryEps = maxExtent * 1e-3f; // 0.1% of the largest dimension
-
-    // ------------------------------------------------------------
-    // Step 2: Decide grid resolution from target vertex count
-    // ------------------------------------------------------------
+    
+    // Decide grid resolution from target vertex count
     float srcVertexCountF     = static_cast<float>(srcVertices.size());
     float targetVertexCountF  = srcVertexCountF * reductionFactor;
     if (targetVertexCountF < 3.0f) {
         targetVertexCountF = 3.0f;
     }
-
+    
     // Adaptive dimension check: 2D planar surfaces (like heightfields) vs 3D volume meshes
     float cellsPerAxisF;
     if (extent.y < boundaryEps || (extent.y < extent.x * 0.15f && extent.y < extent.z * 0.15f)) {
@@ -844,33 +874,31 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
         // 3D volume grid: Target = cells * cells * cells
         cellsPerAxisF = glm::pow(targetVertexCountF, 1.0f / 3.0f);
     }
-
+    
     if (cellsPerAxisF < 2.0f) {
         cellsPerAxisF = 2.0f; // At least 2 cells per axis to preserve boundaries
     }
-
+    
     unsigned int cellsPerAxis = static_cast<unsigned int>(cellsPerAxisF);
     if (cellsPerAxis < 2u) {
         cellsPerAxis = 2u;
     }
-
-    // ------------------------------------------------------------
-    // Step 3: Cluster vertices into grid cells, track boundary flags
-    // ------------------------------------------------------------
+    
+    // Cluster vertices into grid cells, track boundary flags
     struct Cluster {
         glm::vec3 positionSum;
         glm::vec3 normalSum;
         glm::vec3 colorSum;
         glm::vec2 uvSum;
         unsigned int count;
-
+        
         bool hasMinX;
         bool hasMaxX;
         bool hasMinY;
         bool hasMaxY;
         bool hasMinZ;
         bool hasMaxZ;
-
+        
         Cluster()
             : positionSum(0.0f)
             , normalSum(0.0f)
@@ -885,19 +913,19 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
             , hasMaxZ(false)
         {}
     };
-
+    
     std::unordered_map<std::uint64_t, unsigned int> cellToClusterIndex;
     std::vector<Cluster> clusterList;
     std::vector<unsigned int> vertexToCluster(srcVertices.size(), 0);
-
+    
     clusterList.reserve(static_cast<size_t>(targetVertexCountF));
-
+    
     for (size_t i = 0; i < srcVertices.size(); ++i) {
         const Vertex& v = srcVertices[i];
-
+        
         glm::vec3 pos(v.x, v.y, v.z);
         glm::vec3 relative = (pos - minPos) / extent;
-
+        
         // Clamp relative coordinates to [0, 1]
         if (relative.x < 0.0f) relative.x = 0.0f;
         if (relative.y < 0.0f) relative.y = 0.0f;
@@ -905,19 +933,19 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
         if (relative.x > 1.0f) relative.x = 1.0f;
         if (relative.y > 1.0f) relative.y = 1.0f;
         if (relative.z > 1.0f) relative.z = 1.0f;
-
+        
         unsigned int ix = static_cast<unsigned int>(relative.x * static_cast<float>(cellsPerAxis - 1));
         unsigned int iy = static_cast<unsigned int>(relative.y * static_cast<float>(cellsPerAxis - 1));
         unsigned int iz = static_cast<unsigned int>(relative.z * static_cast<float>(cellsPerAxis - 1));
-
+        
         std::uint64_t key = 0;
         key |= static_cast<std::uint64_t>(ix);
         key |= static_cast<std::uint64_t>(iy) << 21;
         key |= static_cast<std::uint64_t>(iz) << 42;
-
+        
         std::unordered_map<std::uint64_t, unsigned int>::iterator it =
             cellToClusterIndex.find(key);
-
+        
         unsigned int clusterIndex;
         if (it == cellToClusterIndex.end()) {
             clusterList.push_back(Cluster());
@@ -926,50 +954,48 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
         } else {
             clusterIndex = it->second;
         }
-
+        
         Cluster& cluster = clusterList[clusterIndex];
-
+        
         cluster.positionSum += pos;
         cluster.normalSum   += glm::vec3(v.nx, v.ny, v.nz);
         cluster.colorSum    += glm::vec3(v.r, v.g, v.b);
         cluster.uvSum       += glm::vec2(v.u, v.v);
         cluster.count++;
-
+        
         if (glm::abs(pos.x - minPos.x) <= boundaryEps) cluster.hasMinX = true;
         if (glm::abs(pos.x - maxPos.x) <= boundaryEps) cluster.hasMaxX = true;
         if (glm::abs(pos.y - minPos.y) <= boundaryEps) cluster.hasMinY = true;
         if (glm::abs(pos.y - maxPos.y) <= boundaryEps) cluster.hasMaxY = true;
         if (glm::abs(pos.z - minPos.z) <= boundaryEps) cluster.hasMinZ = true;
         if (glm::abs(pos.z - maxPos.z) <= boundaryEps) cluster.hasMaxZ = true;
-
+        
         vertexToCluster[i] = clusterIndex;
     }
-
+    
     if (clusterList.empty()) {
         return false;
     }
-
-    // ------------------------------------------------------------
-    // Step 4: Build new vertex buffer from clusters, snapping bounds
-    // ------------------------------------------------------------
+    
+    // Build new vertex buffer from clusters, snapping bounds
     const size_t newVertexCount = clusterList.size();
     outVertices.resize(newVertexCount);
-
+    
     for (size_t ci = 0; ci < newVertexCount; ++ci) {
         const Cluster& cluster = clusterList[ci];
         float invCount = 1.0f / static_cast<float>(cluster.count);
-
+        
         glm::vec3 avgPos    = cluster.positionSum * invCount;
         glm::vec3 avgColor  = cluster.colorSum * invCount;
         glm::vec3 avgNormal = cluster.normalSum * invCount;
         glm::vec2 avgUv     = cluster.uvSum * invCount;
-
+        
         if (glm::length(avgNormal) > epsilon) {
             avgNormal = glm::normalize(avgNormal);
         } else {
             avgNormal = glm::vec3(0.0f, 1.0f, 0.0f);
         }
-
+        
         // Snap to global bounds if cluster contains boundary vertices
         if (cluster.hasMinX && !cluster.hasMaxX) {
             avgPos.x = minPos.x;
@@ -986,68 +1012,66 @@ bool Mesh::GenerateSimplifiedLOD(unsigned int submeshIndex, float reductionFacto
         } else if (cluster.hasMaxZ && !cluster.hasMinZ) {
             avgPos.z = maxPos.z;
         }
-
+        
         Vertex v;
         v.x  = avgPos.x;
         v.y  = avgPos.y;
         v.z  = avgPos.z;
-
+        
         v.r  = avgColor.x;
         v.g  = avgColor.y;
         v.b  = avgColor.z;
-
+        
         v.nx = avgNormal.x;
         v.ny = avgNormal.y;
         v.nz = avgNormal.z;
-
+        
         v.u  = avgUv.x;
         v.v  = avgUv.y;
-
+        
         outVertices[ci] = v;
     }
-
-    // ------------------------------------------------------------
-    // Step 5: Rebuild index buffer using cluster indices
-    // ------------------------------------------------------------
+    
+    // Rebuild index buffer using cluster indices
     outIndices.reserve(srcIndices.size());
-
+    
     for (size_t i = 0; i + 2 < srcIndices.size(); i += 3) {
         unsigned int i0 = srcIndices[i + 0].index;
         unsigned int i1 = srcIndices[i + 1].index;
         unsigned int i2 = srcIndices[i + 2].index;
-
+        
         if (i0 >= srcVertices.size() || i1 >= srcVertices.size() || i2 >= srcVertices.size()) {
             continue;
         }
-
+        
         unsigned int c0 = vertexToCluster[i0];
         unsigned int c1 = vertexToCluster[i1];
         unsigned int c2 = vertexToCluster[i2];
-
+        
         // Skip degenerate triangles after clustering
         if (c0 == c1 || c1 == c2 || c0 == c2) {
             continue;
         }
-
+        
         Index outI0;
         Index outI1;
         Index outI2;
-
+        
         outI0.index = c0;
         outI1.index = c1;
         outI2.index = c2;
-
+        
         outIndices.push_back(outI0);
         outIndices.push_back(outI1);
         outIndices.push_back(outI2);
     }
-
+    
     if (outIndices.size() < 3) {
         outVertices.clear();
         outIndices.clear();
         return false;
     }
-
+    
     return true;
 }
 
@@ -1177,6 +1201,67 @@ void Mesh::CalculateNormals(void) {
             mVertexBuffer[i + j].nz = -normal.z;
         }
     }
+}
+
+bool Mesh::CalculateSubMeshNormals(unsigned int index) {
+    if (index >= mSubMesh.size())
+        return false;
+    
+    SubMesh& subMesh = mSubMesh[index];
+    if (subMesh.indexCount < 3)
+        return false;
+    
+    // Reset current normals to zero for accumulation
+    for (unsigned int i = 0; i < subMesh.vertexCount; ++i) {
+        Vertex& v = mVertexBuffer[subMesh.vertexBegin + i];
+        v.nx = 0.0f;
+        v.ny = 0.0f;
+        v.nz = 0.0f;
+    }
+    
+    // Accumulate triangle face normals onto vertices
+    for (unsigned int i = 0; i + 2 < subMesh.indexCount; i += 3) {
+        unsigned int i0 = mIndexBuffer[subMesh.indexBegin + i + 0].index;
+        unsigned int i1 = mIndexBuffer[subMesh.indexBegin + i + 1].index;
+        unsigned int i2 = mIndexBuffer[subMesh.indexBegin + i + 2].index;
+        
+        if (i0 >= mVertexBuffer.size() || i1 >= mVertexBuffer.size() || i2 >= mVertexBuffer.size())
+            continue;
+        
+        Vertex& v0 = mVertexBuffer[i0];
+        Vertex& v1 = mVertexBuffer[i1];
+        Vertex& v2 = mVertexBuffer[i2];
+        
+        glm::vec3 p0(v0.x, v0.y, v0.z);
+        glm::vec3 p1(v1.x, v1.y, v1.z);
+        glm::vec3 p2(v2.x, v2.y, v2.z);
+        
+        glm::vec3 faceNormal = glm::cross(p1 - p0, p2 - p0);
+        float len = glm::length(faceNormal);
+        if (len > 1e-6f) {
+            faceNormal /= len;
+            v0.nx += faceNormal.x; v0.ny += faceNormal.y; v0.nz += faceNormal.z;
+            v1.nx += faceNormal.x; v1.ny += faceNormal.y; v1.nz += faceNormal.z;
+            v2.nx += faceNormal.x; v2.ny += faceNormal.y; v2.nz += faceNormal.z;
+        }
+    }
+    
+    // Normalize accumulated vectors
+    for (unsigned int i = 0; i < subMesh.vertexCount; ++i) {
+        Vertex& v = mVertexBuffer[subMesh.vertexBegin + i];
+        glm::vec3 n(v.nx, v.ny, v.nz);
+        float len = glm::length(n);
+        if (len > 1e-6f) {
+            n /= len;
+        } else {
+            n = glm::vec3(0.0f, 1.0f, 0.0f);
+        }
+        v.nx = n.x;
+        v.ny = n.y;
+        v.nz = n.z;
+    }
+    
+    return true;
 }
 
 void Mesh::SetNormals(glm::vec3 normals) {

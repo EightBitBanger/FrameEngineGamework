@@ -32,6 +32,28 @@ ChunkManager::ChunkManager() :
     fogWater(nullptr) 
 {}
 
+WorldGeneration::WorldGeneration() : 
+    name(""),
+    
+    doGenerateChunks(false),
+    doAutoBreeding(true),
+    
+    snowCapHeight(60.0f),
+    snowCapBias(2.0f),
+    snowCapColor(0.7f, 0.85f, 1.1f, 1.0f),
+    
+    waterLevel(-21.0f),
+    ambientLight(0.0f),
+    
+    waterColorLow(Colors.black),
+    waterColorHigh(Colors.blue),
+    
+    staticColorLow(Colors.black),
+    staticColorHigh(Colors.white),
+    
+    actorColorLow(Colors.black),
+    actorColorHigh(Colors.white) 
+{}
 
 void ChunkManager::Initiate(void) {
     // Fire up the generation thread
@@ -479,14 +501,14 @@ Actor* ChunkManager::SummonActor(glm::vec3 position) {
     actor->navigation.SetPosition(position);
     actor->navigation.SetTargetPoint(position);
     
-    std::string homePosition = Float.ToString(position.x) + "`" +
-                               Float.ToString(position.y) + "`" +
+    std::string homePosition = Float.ToString(position.x) + "," +
+                               Float.ToString(position.y) + "," +
                                Float.ToString(position.z);
     
     actor->memories.Add("home", "home:" + homePosition);
     
     actor->memories.Add("sentience", "quota:0.3");
-    actor->memories.Add("behavior",  "curiosity:0.14, libido:0.04, social:0.08");
+    actor->memories.Add("behavior",  "curiosity:0.14 ^ libido:0.04 ^ social:0.08");
     
     return actor;
 }
@@ -585,6 +607,7 @@ bool ChunkManager::DestroyWorld(std::string worldname) {
     
     fs.DirectoryDelete( worldPath + "\\chunks" );
     fs.DirectoryDelete( worldPath + "\\static" );
+    fs.DirectoryDelete( worldPath + "\\items" );
     fs.DirectoryDelete( worldPath );
     return true;
 }

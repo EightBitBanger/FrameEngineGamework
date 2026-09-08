@@ -44,11 +44,20 @@ bool ChunkManager::SaveChunk(Chunk* chunk, bool doClearActors) {
             
             std::string age = IntLong.ToString( actor->physical.GetAge() );
             
-            std::string health     = Float.ToString( actor->biological.health );
-            std::string hunger     = Float.ToString( actor->biological.hunger );
-            std::string defense    = Float.ToString( actor->biological.defense );
-            std::string strength   = Float.ToString( actor->biological.strength );
-            std::string saturation = Float.ToString( actor->biological.saturation );
+            std::string health            = Float.ToString( actor->biological.health );
+            std::string hunger            = Float.ToString( actor->biological.hunger );
+            std::string defense           = Float.ToString( actor->biological.defense );
+            std::string strength          = Float.ToString( actor->biological.strength );
+            std::string saturation        = Float.ToString( actor->biological.saturation );
+            
+            std::string sleepStart        = Float.ToString( actor->sleep.GetCurrentSleepStart() );
+            std::string sleepDuration     = Float.ToString( actor->sleep.GetCurrentDuration() );
+            
+            std::string cooldownAttack    = Float.ToString( actor->counters.GetCoolDownAttack() );
+            std::string cooldownBreeding  = Float.ToString( actor->counters.GetCoolDownBreeding() );
+            std::string cooldownMovement  = Float.ToString( actor->counters.GetCoolDownMovement() );
+            std::string cooldownObserve   = Float.ToString( actor->counters.GetCoolDownObservation() );
+            std::string cooldownSocial    = Float.ToString( actor->counters.GetCoolDownSocial() );
             
             std::string items = "";
             unsigned int numberOfItems = actor->inventory.itemClassList.size();
@@ -83,6 +92,15 @@ bool ChunkManager::SaveChunk(Chunk* chunk, bool doClearActors) {
                                     defense + "~" + 
                                     strength + "~" + 
                                     saturation + "~" + 
+                                    
+                                    sleepStart + "~" + 
+                                    sleepDuration + "~" + 
+                                    
+                                    cooldownAttack + "~" + 
+                                    cooldownBreeding + "~" + 
+                                    cooldownMovement + "~" + 
+                                    cooldownObserve + "~" + 
+                                    cooldownSocial + "~" + 
                                     
                                     items + "~" + 
                                     genome + "~" + 
@@ -130,7 +148,7 @@ bool ChunkManager::SaveChunk(Chunk* chunk, bool doClearActors) {
         // Despawn saved actors marked for removal
         for (unsigned int a = 0; a < terminationList.size(); a++) 
             KillActor( terminationList[a] );
-            
+        
         unsigned int bufferSz = buffer.size();
         if (bufferSz != 0) 
             Serializer.Serialize(chunkName, (void*)buffer.data(), bufferSz);
@@ -158,9 +176,14 @@ bool ChunkManager::SaveChunk(Chunk* chunk, bool doClearActors) {
         std::string itemBuffer = "";
         for (const StaticPickup& pickup : chunk->pickups) {
             itemBuffer += Float.ToString(pickup.position.x) + "~" +
-                        Float.ToString(pickup.position.y) + "~" +
-                        Float.ToString(pickup.position.z) + "~" +
-                        pickup.classification + "\n";
+                          Float.ToString(pickup.position.y) + "~" +
+                          Float.ToString(pickup.position.z) + "~" +
+                          
+                          Float.ToString(pickup.rotation.x) + "~" +
+                          Float.ToString(pickup.rotation.y) + "~" +
+                          Float.ToString(pickup.rotation.z) + "~" +
+                          
+                          pickup.classification + "\n";
         }
         
         Serializer.Serialize(itemsName, (void*)itemBuffer.data(), itemBuffer.size());

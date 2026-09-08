@@ -117,6 +117,7 @@ std::string NameGenerator::GenerateIncarnation(
     const std::vector<std::string>& names,
     const std::vector<std::string>& suffixes,
     const std::vector<std::string>& coreSuffixes) {
+    std::lock_guard<std::mutex> lock(mux);
     std::string prefix = "";
     std::string coreName = "";
     std::string suffix = "";
@@ -141,6 +142,77 @@ std::string NameGenerator::GenerateIncarnation(
     if (result.empty()) return "";
     
     // Normalize casing (First letter capitalized, rest lowercase)
+    result[0] = std::toupper(static_cast<unsigned char>(result[0]));
+    for (size_t i = 1; i < result.length(); ++i) {
+        result[i] = std::tolower(static_cast<unsigned char>(result[i]));
+    }
+    
+    return result;
+}
+
+std::string NameGenerator::GenerateFirstName(
+    const std::vector<std::string>& prefixes,
+    const std::vector<std::string>& names,
+    const std::vector<std::string>& suffixes,
+    const std::vector<std::string>& coreSuffixes) {
+    std::lock_guard<std::mutex> lock(mux);
+    
+    // Collect all valid roots (prefixes + names) to pull authentic thematic roots
+    std::vector<std::string> roots;
+    roots.insert(roots.end(), prefixes.begin(), prefixes.end());
+    roots.insert(roots.end(), names.begin(), names.end());
+    
+    if (roots.empty()) return "";
+    
+    // Pick a single base root
+    std::string root = roots[prng.range(0, roots.size() - 1)];
+    
+    // If the selected root is already quite long (> 4 chars), trim it down to a single punchy syllable
+    if (root.length() > 4 && prng.range(1, 100) <= 60) {
+        size_t cutLen = prng.range(3, 4);
+        root = root.substr(0, cutLen);
+    }
+    
+    // Light Mutation (20% chance per character to avoid over-distorting the ethnic root)
+    for (size_t i = 0; i < root.length(); ++i) {
+        if (prng.range(1, 100) <= 20) {
+            if (IsVowel(root[i])) {
+                root[i] = vowels[prng.range(0, vowels.size() - 1)];
+            } else if (std::isalpha(static_cast<unsigned char>(root[i]))) {
+                root[i] = consonants[prng.range(0, consonants.size() - 1)];
+            }
+        }
+    }
+    
+    // Optional short ending (prefer coreSuffixes or single-syllable suffixes)
+    // 55% chance to attach an ending; 45% chance to leave as a strong monosyllabic root (e.g., "Grim", "Stark", "Wolf")
+    std::string ending = "";
+    if (prng.range(1, 100) <= 55) {
+        const std::vector<std::string>& endingPool = !coreSuffixes.empty() ? coreSuffixes : suffixes;
+        
+        if (!endingPool.empty()) {
+            std::string candidate = endingPool[prng.range(0, endingPool.size() - 1)];
+            // Reject compound suffixes (e.g., "dottir", "stadt", "dorf") to keep names short
+            if (candidate.length() <= 3) {
+                ending = candidate;
+            }
+        }
+    }
+    
+    // Combine root and ending
+    std::string result = root + ending;
+    
+    // Prevent awkward double vowels/consonants at the joint (e.g., "Thor" + "rok" -> "Thorok")
+    if (result.length() >= 2 && !ending.empty()) {
+        char lastRoot = std::tolower(static_cast<unsigned char>(root.back()));
+        char firstEnd = std::tolower(static_cast<unsigned char>(ending.front()));
+        
+        if (lastRoot == firstEnd) {
+            result = root + ending.substr(1);
+        }
+    }
+    
+    // 4. Normalize Casing (e.g., "thoralf" -> "Thoralf")
     result[0] = std::toupper(static_cast<unsigned char>(result[0]));
     for (size_t i = 1; i < result.length(); ++i) {
         result[i] = std::tolower(static_cast<unsigned char>(result[i]));

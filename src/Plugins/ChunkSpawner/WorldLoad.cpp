@@ -3,7 +3,7 @@
 
 #include <GameEngineFramework/Plugins/plugins.h>
 
-unsigned int ChunkManager::GetWorldVersion(void) {return 80085;}
+unsigned int ChunkManager::GetWorldVersion(void) {return String.ToInt(version);}
 
 bool ChunkManager::LoadWorld(void) {
     std::lock_guard<std::mutex> lock(mux);

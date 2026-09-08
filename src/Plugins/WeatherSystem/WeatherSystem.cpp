@@ -9,6 +9,7 @@ WeatherSystem::WeatherSystem() :
     weatherStateCounter(320),
     
     mWorldTime(0.0f),
+    mTimeScale(0.25f),
     
     mWorldLightLow(0.0087f),
     mWorldLightHigh(0.87f),
@@ -19,11 +20,14 @@ WeatherSystem::WeatherSystem() :
     mLightIntensity(1.0f),
     mLightAngle(glm::vec3(0)),
     
+    mAmbientColor(Colors.MakeGrayScale(0.1f)),
+    
     mPlayerTransform(nullptr),
     
     mSunObject(nullptr),
     mSunLight(nullptr),
     mLightTransform(nullptr),
+    mSunRenderer(nullptr),
     
     mSkyObject(nullptr),
     mSkyMaterial(nullptr),
@@ -62,56 +66,53 @@ WeatherSystem::WeatherSystem() :
 }
 
 void WeatherSystem::Initiate(void) {
-    //
-    // Sun
-    
-    // Initiate sun angle
-    mLightAngle.y = -15.0f;
+    // Sun tilt angle (yaw tilt on horizon)
+    mLightAngle = glm::vec3(0.0f, -15.0f, 0.0f);
     
     mSunObject = Engine.Create<GameObject>();
     mSunObject->AddComponent(Engine.CreateComponent<Light>());
-    
     mLightTransform = mSunObject->GetComponent<Transform>();
     
-    // Starting direction
-    mLightTransform->RotateEuler(0.0f, -1.0f, 0.0f);
-    
-    // Set light parameters
+    // Set directional light parameters
     mSunLight = mSunObject->GetComponent<Light>();
-    
     mSunLight->type      = LIGHT_TYPE_DIRECTIONAL;
-    mSunLight->intensity = 0.7f;
+    mSunLight->intensity = 0.0f;
     mSunLight->color     = Colors.white;
-    
     Engine.sceneMain->AddLightToSceneRoot(mSunLight);
     
-    //
+    // Visual Sun Renderer
+    mSunRenderer = Engine.Create<MeshRenderer>();
+    mSunRenderer->mesh = Engine.Create<Mesh>();
+    mSunRenderer->mesh->AddSphere(0.0f, 0.0f, 0.0f, 45.0f, 16, 16, Colors.white, false);
+    mSunRenderer->mesh->Load();
+    
+    mSunRenderer->material = Engine.Create<Material>();
+    mSunRenderer->material->shader = Resources.shaders.colorUnlit;
+    mSunRenderer->material->ambient = Colors.white;
+    mSunRenderer->material->diffuse = Colors.white;
+    
+    mSunRenderer->material->DisableDepthTest();
+    mSunRenderer->material->DisableShadowVolumePass();
+    mSunRenderer->material->DisableCulling();
+    mSunRenderer->DisableFrustumCulling();
+    
+    Engine.sceneMain->AddMeshRendererToSceneRoot(mSunRenderer, RENDER_QUEUE_BACKGROUND);
+    mSunRenderer->isActive = true;
+    
     // Sky
-    
-    // Amount of fade bias from the color "skyHigh" to "skyLow".
     float colorBias = 1.0f;
-    
-    // Generate the sky which will be returned as a game object.
-    // This game object will contain a mesh renderer to draw the sky.
     mSkyObject = Weather.CreateSky("sky", Colors.blue, Colors.blue, colorBias);
-    
-    // Add the sky's mesh renderer to the main scene.
     Engine.sceneMain->AddMeshRendererToSceneRoot(mSkyObject->GetComponent<MeshRenderer>(), RENDER_QUEUE_SKY);
     
-    // Sky rendering colors
     MeshRenderer* skyRenderer = mSkyObject->GetComponent<MeshRenderer>();
     mSkyMaterial = skyRenderer->material;
     mSkyMaterial->diffuse = Colors.dkgray;
     mSkyMaterial->ambient = Colors.black;
     
     // World fog
-    
     mFogWorld = Renderer.CreateFog();
-    
     Engine.sceneMain->AddFogLayerToScene(mFogWorld);
-    
     mFogWorld->fogActive = true;
-    
     mFogWorld->fogDensity = mWorldFogDensity;
     mFogWorld->fogBegin = mWorldFogNear;
     mFogWorld->fogEnd = mWorldFogFar;
@@ -119,7 +120,6 @@ void WeatherSystem::Initiate(void) {
     mFogWorld->fogColorEnd = mWorldFogColorFar;
     
     // Rain emitter
-    
     mRainEmitter = Particle.CreateEmitter();
     mRainEmitter->type = EmitterType::AreaEffector;
     mRainEmitter->position = glm::vec3(0, 0, 0);
@@ -134,7 +134,6 @@ void WeatherSystem::Initiate(void) {
     mRainEmitter->heightMinimum = 0.0f;
     
     // Snow emitter
-    
     mSnowEmitter = Particle.CreateEmitter();
     mSnowEmitter->type = EmitterType::AreaEffector;
     mSnowEmitter->position = glm::vec3(0, 0, 0);
@@ -148,80 +147,21 @@ void WeatherSystem::Initiate(void) {
     mSnowEmitter->maxParticles = 2000;
     mSnowEmitter->heightMinimum = 0.0f;
     
-    // Water fog layer
     mFogWater = Renderer.CreateFog();
-    //Engine.sceneMain->AddFogLayerToScene(mFogWater);
-    
-    // Zero the weather systems
     SetWeather(WeatherType::Clear);
+    UpdateSunAndLighting();
 }
 
 void WeatherSystem::Update(void) {
+    mWorldTime += mTimeScale * 0.25f;
+    while (mWorldTime >= 24000.0f)
+        mWorldTime -= 24000.0f;
+    while (mWorldTime < 0.0f)
+        mWorldTime += 24000.0f;
     
-    // Advance world time
-    //mWorldTime += 0.25f;
-    if (mWorldTime > 24000.0f)
-        mWorldTime = 0.0f;
+    UpdateSunAndLighting();
     
-    float fullDayRange = mWorldTime / 24000.0f;
-    float lightRiseFall;
-    
-    if (fullDayRange > 0.5f) {
-        lightRiseFall = Float.Lerp(1.0f, 0.0f, fullDayRange);
-    } else {
-        lightRiseFall = Float.Lerp(0.0f, 1.0f, fullDayRange);
-    }
-    
-    mLightIntensity = lightRiseFall - 0.224f;
-    if (mLightIntensity < 0.0f)
-        mLightIntensity = 0.0f;
-    
-    mLightIntensity *= 8.0f;
-    if (mLightIntensity > 1.0f)
-        mLightIntensity = 1.0f;
-    
-    // Calculate sun angle
-    mLightAngle.z = Float.Lerp(-90.0f, 90.0f, fullDayRange);
-    
-    mLightTransform->SetIdentity();
-    mLightTransform->RotateEuler(mLightAngle.x, mLightAngle.y, mLightAngle.z);
-    
-    // Sun brightness
-    mSunLight->intensity = Float.Lerp(mWorldLightLow, mWorldLightHigh, mLightIntensity);
-    
-    // World lighting
-    if (mWorldMaterial != nullptr && mStaticMaterial != nullptr) {
-        if (!mCapturedAmbientBase) {
-            mWorldAmbientBase    = mWorldMaterial->ambient;
-            mStaticAmbientBase   = mStaticMaterial->ambient;
-            mCapturedAmbientBase = true;
-        }
-        
-        Color ambientWorld  = Colors.Lerp(Colors.black, mWorldAmbientBase,  mLightIntensity);
-        Color ambientStatic = Colors.Lerp(Colors.black, mStaticAmbientBase, mLightIntensity);
-        
-        Renderer.SetAmbientIllumination(ambientWorld);
-        
-        mWorldMaterial->ambient  = ambientWorld;
-        mStaticMaterial->ambient = ambientStatic;
-    }
-    
-    // Water lighting
-    Color waterColorLow  = Colors.blue;
-    Color waterColorHigh = Colors.blue;
-    
-    waterColorLow  *= Colors.MakeGrayScale(0.2f);
-    waterColorHigh *= Colors.MakeGrayScale(0.7f);
-    
-    if (mWaterMaterial != nullptr) {
-        mWaterMaterial->diffuse = Colors.Lerp(waterColorLow, waterColorHigh, mLightIntensity);
-    }
-    
-    // Set sky color
-    float skyColor = Math.Lerp(mSkyLightLow, mSkyLightHigh, mLightIntensity);
-    SetSkyAmbientColor(Colors.MakeGrayScale(skyColor));
-    
-    // Smoothly update light bias
+    // Smoothly update light bias and fog
     mFogLightBias = Float.Lerp(mFogLightBias, mLightIntensity, 0.18f);
     
     // Calculate target fog colors driven by world light bias without corrupting base targets
@@ -270,6 +210,84 @@ void WeatherSystem::Update(void) {
         }
     }
 }
+void WeatherSystem::UpdateSunAndLighting(void) {
+    float fullDayRange = mWorldTime / 24000.0f;
+    
+    // Calculate continuous solar orbit angle in radians:
+    // Sunrise (tick 6000)  = -PI/2
+    // Noon    (tick 12000) =  0
+    // Sunset  (tick 18000) = +PI/2
+    // Midnight(tick 0/24000)= ±PI
+    float solarAngleRad = glm::radians((fullDayRange * 360.0f) - 180.0f);
+    float tiltRad       = glm::radians(mLightAngle.y);
+    
+    // Compute directional vector pointing from scene center toward the sun
+    glm::vec3 sunDirection = glm::normalize(glm::vec3(
+        -sinf(solarAngleRad) * cosf(tiltRad), // East (+X) to West (-X)
+         cosf(solarAngleRad),                  // Altitude (Zenith at noon, negative at night)
+         sinf(tiltRad) * cosf(solarAngleRad)   // Azimuth slant
+    ));
+    
+    // Align light transform pitch and yaw without roll flips
+    mLightAngle.x = glm::degrees(solarAngleRad);
+    mLightTransform->SetIdentity();
+    mLightTransform->RotateEuler(mLightAngle.x, mLightAngle.y, 0.0f);
+    
+    // Compute daytime intensity based on elevation above horizon
+    if (sunDirection.y > 0.0f) {
+        mLightIntensity = glm::clamp(sunDirection.y * 4.0f, 0.0f, 1.0f);
+    } else {
+        mLightIntensity = 0.0f;
+    }
+    
+    // Update directional light component
+    if (mSunLight != nullptr) {
+        mSunLight->intensity = Float.Lerp(mWorldLightLow, mWorldLightHigh, mLightIntensity);
+        // Direction vector traveling from the sun into the scene
+        mSunLight->direction = -sunDirection;
+    }
+    
+    // Visual sun mesh positioning
+    if (mSunRenderer != nullptr) {
+        //mSunRenderer->isActive = true;
+            
+            glm::vec3 centerPos = (mPlayerTransform != nullptr) ? mPlayerTransform->position : glm::vec3(0.0f);
+            const float sunDistance = 1500.0f;
+            glm::vec3 sunPosition = centerPos + (sunDirection * sunDistance);
+            
+            mSunRenderer->transform.SetIdentity();
+            mSunRenderer->transform.Translate(sunPosition);
+            mSunRenderer->transform.position = sunPosition;
+            
+            Color sunsetColor     = Colors.red;
+            Color noonColor       = Colors.Lerp(Colors.yellow, Colors.white, 0.2f);
+            Color currentSunColor = Colors.Lerp(sunsetColor, noonColor, mLightIntensity);
+            
+            mSunRenderer->material->ambient = currentSunColor;
+            mSunRenderer->material->diffuse = currentSunColor;
+    }
+    
+    // World & static ambient lighting updates
+    if (mWorldMaterial != nullptr && mStaticMaterial != nullptr) {
+        if (!mCapturedAmbientBase) {
+            mWorldAmbientBase    = mWorldMaterial->ambient;
+            mStaticAmbientBase   = mStaticMaterial->ambient;
+            mCapturedAmbientBase = true;
+        }
+        
+        Color ambientWorld  = Colors.Lerp(mAmbientColor, mWorldAmbientBase,  mLightIntensity);
+        Color ambientStatic = Colors.Lerp(mAmbientColor, mStaticAmbientBase, mLightIntensity);
+        
+        mWorldMaterial->ambient  = ambientWorld;
+        mStaticMaterial->ambient = ambientStatic;
+    }
+    
+    // Sky dome coloring
+    if (mSkyMaterial != nullptr) {
+        float skyColor = Math.Lerp(mSkyLightLow, mSkyLightHigh, mLightIntensity);
+        SetSkyAmbientColor(Colors.MakeGrayScale(skyColor));
+    }
+}
 
 void WeatherSystem::SetSkyAmbientColor(Color skyColor) {
     mSkyMaterial->ambient = skyColor;
@@ -284,20 +302,18 @@ void WeatherSystem::SetPlayerObject(GameObject* player) {
 
 void WeatherSystem::SetWorldMaterial(Material* materialPtr) {
     mWorldMaterial = materialPtr;
-
     if (mWorldMaterial != nullptr) {
-        mWorldAmbientBase    = mWorldMaterial->ambient;
-        mCapturedAmbientBase = (mStaticMaterial != nullptr);
+        mWorldAmbientBase = mWorldMaterial->ambient;
     }
+    mCapturedAmbientBase = false;
 }
 
 void WeatherSystem::SetStaticMaterial(Material* materialPtr) {
     mStaticMaterial = materialPtr;
-
     if (mStaticMaterial != nullptr) {
-        mStaticAmbientBase   = mStaticMaterial->ambient;
-        mCapturedAmbientBase = (mWorldMaterial != nullptr);
+        mStaticAmbientBase = mStaticMaterial->ambient;
     }
+    mCapturedAmbientBase = false;
 }
 
 void WeatherSystem::SetWaterMaterial(Material* materialPtr) {
@@ -306,6 +322,7 @@ void WeatherSystem::SetWaterMaterial(Material* materialPtr) {
 
 void WeatherSystem::SetTime(float newTime) {
     mWorldTime = newTime;
+    UpdateSunAndLighting();
 }
 
 float WeatherSystem::GetTime(void) {
@@ -315,6 +332,10 @@ float WeatherSystem::GetTime(void) {
 void WeatherSystem::SetWorldLightLevel(float low, float high) {
     mWorldLightLow  = low;
     mWorldLightHigh = high;
+}
+
+void WeatherSystem::SetWorldLightAmbience(Color color) {
+    mAmbientColor = color;
 }
 
 void WeatherSystem::SetSkyLightLevel(float low, float high) {
@@ -445,13 +466,21 @@ void WeatherSystem::SetWeatherCycleCounter(float counter) {
 void WeatherSystem::FogClear(void) {
     // Trigger the fog to shift
     mWeatherFogCounter = 1.0f;
-
+    
     mWorldFogDensity = 20.0f;
     mWorldFogNear    = 100.0f;
     mWorldFogFar     = 8000.0f;
-
+    
     mWorldFogColorNear = Colors.ltgray * 0.7f;
     mWorldFogColorFar  = Colors.Lerp(Colors.blue, Colors.gray, 0.8f);
+}
+
+void WeatherSystem::SetTimeScale(float scale) {
+    mTimeScale = scale;
+}
+
+float WeatherSystem::GetTimeScale(void) {
+    return mTimeScale;
 }
 
 GameObject* WeatherSystem::CreateSky(const std::string& meshTagName, Color low, Color high, float biasMul) {

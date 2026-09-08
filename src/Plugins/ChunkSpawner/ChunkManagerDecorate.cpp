@@ -281,9 +281,10 @@ void ChunkManager::AddDecor(Chunk* chunk, const std::string& mesh, const std::st
         staticMesh->ChangeSubMeshRotation(indexMesh, rotation.x, glm::vec3(1, 0, 0));
         staticMesh->ChangeSubMeshRotation(indexMesh, rotation.y, glm::vec3(0, 1, 0));
         staticMesh->ChangeSubMeshRotation(indexMesh, rotation.z, glm::vec3(0, 0, 1));
+        
+        staticMesh->ChangeSubMeshNormalsAdditive(indexMesh, glm::vec3(0.0f, 0.5f, 0.0f));
     }
     
-    // Register static object for chunk tracking
     StaticObject staticObject;
     staticObject.position = position;
     staticObject.rotation = rotation;
@@ -300,7 +301,10 @@ void ChunkManager::AddDecor(Chunk* chunk, const std::string& mesh, const std::st
         ref.staticIndex = chunk->statics.size() - 1;
         chunk->animatedStatics.push_back(ref);
     }
-
+    
+    //
+    // TODO split this off elsewhere
+    //
     // Spawn fire and smoke particle system emitters for function 5
     if (finalFunction == 5) {
         glm::vec3 worldPos = position + glm::vec3(chunk->x, 0.0f, chunk->y);
@@ -458,6 +462,14 @@ std::vector<std::pair<std::string, glm::vec3>> ChunkManager::QueryDecorNames(con
     return results;
 }
 
+void ChunkManager::QueueDecorAt(const std::string& type, const glm::vec3& position, const glm::vec3& rotation) {
+    if (type.empty())
+        return;
+    
+    std::lock_guard<std::mutex> lock(mPendingStaticRequestsMutex);
+    mPendingStaticRequests.push_back({ type, position, rotation });
+}
+
 DecorationHitInfo ChunkManager::QueryDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold) {
     std::lock_guard<std::mutex> lock(mux);
     DecorationHitInfo result;
@@ -545,92 +557,6 @@ std::string ChunkManager::QueryWorld(glm::vec3 position, glm::vec3 direction, fl
     return info.type + "," + Float.ToString(info.hitPoint.x) + ", " + 
                              Float.ToString(info.hitPoint.y) + ", " + 
                              Float.ToString(info.hitPoint.z);
-}
-
-bool ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold) {
-    std::lock_guard<std::mutex> lock(mux);
-    float closestHitDist = maxDistance + 1.0f;
-    int bestChunkIndex = -1;
-    int bestSubMeshIndex = -1;
-    glm::vec3 bestLocalPos(0.0f);
-    glm::vec3 rayDir = glm::normalize(direction);
-    
-    for (unsigned int i = 0; i < chunks.Size(); i++) {
-        Chunk& chunk = *chunks[i];
-        glm::vec3 chunkPos = glm::vec3(chunk.x, 0.0f, chunk.y);
-        
-        glm::vec3 pos2D(position.x, 0.0f, position.z);
-        if (glm::distance(chunkPos, pos2D) > (chunkSize * 0.707f + maxDistance)) 
-            continue;
-            
-        Mesh* chunkMesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
-        unsigned int subCount = chunkMesh->GetSubMeshCount();
-        
-        SubMesh subMesh;
-        for (unsigned int s = 0; s < subCount; s++) {
-            chunkMesh->GetSubMesh(s, subMesh);
-            glm::vec3 worldPos = subMesh.position + glm::vec3(chunk.x, 0.0f, chunk.y);
-            
-            if (glm::distance(worldPos, position) > maxDistance) 
-                continue;
-                
-            glm::vec3 boxScale(2.0f);
-            if (s < chunk.statics.size()) {
-                boxScale = glm::max(chunk.statics[s].scale, glm::vec3(1.0f));
-            }
-            
-            glm::vec3 min = worldPos - (boxScale * 0.5f);
-            glm::vec3 max = worldPos + (boxScale * 0.5f);
-            float hitDistance = 0.0f;
-            if (!RayIntersectsAABB(position, rayDir, min, max, hitDistance)) 
-                continue;
-            if (hitDistance > maxDistance) 
-                continue;
-                
-            if (hitDistance < closestHitDist) {
-                closestHitDist = hitDistance;
-                bestChunkIndex = (int)i;
-                bestSubMeshIndex = (int)s;
-                bestLocalPos = subMesh.position;
-            }
-        }
-    }
-    
-    // Remove candidate and synchronize animatedStatics
-    if (bestChunkIndex != -1) {
-        Chunk& chunk = *chunks[bestChunkIndex];
-        Mesh* mesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
-        
-        auto removeStaticAt = [&](size_t idx) {
-            chunk.statics.erase(chunk.statics.begin() + idx);
-            for (int a = (int)chunk.animatedStatics.size() - 1; a >= 0; a--) {
-                if (chunk.animatedStatics[a].staticIndex == idx) {
-                    chunk.animatedStatics.erase(chunk.animatedStatics.begin() + a);
-                } else if (chunk.animatedStatics[a].staticIndex > idx) {
-                    chunk.animatedStatics[a].staticIndex--;
-                }
-            }
-        };
-
-        const float epsilon = 0.01f;
-        for (size_t i = 0; i < chunk.statics.size(); ++i) {
-            if (glm::distance(chunk.statics[i].position, bestLocalPos) > epsilon) 
-                continue;
-            removeStaticAt(i);
-            mesh->RemoveSubMesh(bestSubMeshIndex);
-            mesh->Load();
-            return true;
-        }
-        
-        if (bestSubMeshIndex < (int)chunk.statics.size()) {
-            removeStaticAt(bestSubMeshIndex);
-            mesh->RemoveSubMesh(bestSubMeshIndex);
-            mesh->Load();
-            return true;
-        }
-    }
-
-    return false;
 }
 
 bool ChunkManager::PlaceDecor(glm::vec3 position, glm::vec3 direction, const std::string& name, float maxDistance, float threshold) {
@@ -1149,6 +1075,107 @@ bool ChunkManager::PlaceStructureAt(const std::string& name, const glm::vec3& po
     return true;
 }
 
+bool ChunkManager::RemoveDecor(glm::vec3 position, glm::vec3 direction, float maxDistance, float threshold) {
+    std::lock_guard<std::mutex> lock(mux);
+    float closestHitDist = maxDistance + 1.0f;
+    int bestChunkIndex = -1;
+    int bestSubMeshIndex = -1;
+    glm::vec3 bestLocalPos(0.0f);
+    glm::vec3 rayDir = glm::normalize(direction);
+    
+    for (unsigned int i = 0; i < chunks.Size(); i++) {
+        Chunk& chunk = *chunks[i];
+        glm::vec3 chunkPos = glm::vec3(chunk.x, 0.0f, chunk.y);
+        
+        glm::vec3 pos2D(position.x, 0.0f, position.z);
+        if (glm::distance(chunkPos, pos2D) > (chunkSize * 0.707f + maxDistance)) 
+            continue;
+            
+        Mesh* chunkMesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
+        unsigned int subCount = chunkMesh->GetSubMeshCount();
+        
+        SubMesh subMesh;
+        for (unsigned int s = 0; s < subCount; s++) {
+            chunkMesh->GetSubMesh(s, subMesh);
+            glm::vec3 worldPos = subMesh.position + glm::vec3(chunk.x, 0.0f, chunk.y);
+            
+            if (glm::distance(worldPos, position) > maxDistance) 
+                continue;
+                
+            glm::vec3 boxScale(2.0f);
+            if (s < chunk.statics.size()) {
+                boxScale = glm::max(chunk.statics[s].scale, glm::vec3(1.0f));
+            }
+            
+            glm::vec3 min = worldPos - (boxScale * 0.5f);
+            glm::vec3 max = worldPos + (boxScale * 0.5f);
+            float hitDistance = 0.0f;
+            if (!RayIntersectsAABB(position, rayDir, min, max, hitDistance)) 
+                continue;
+            if (hitDistance > maxDistance) 
+                continue;
+                
+            if (hitDistance < closestHitDist) {
+                closestHitDist = hitDistance;
+                bestChunkIndex = (int)i;
+                bestSubMeshIndex = (int)s;
+                bestLocalPos = subMesh.position;
+            }
+        }
+    }
+    
+    // Remove candidate, destroy particle emitters, and synchronize animatedStatics
+    if (bestChunkIndex != -1) {
+        Chunk& chunk = *chunks[bestChunkIndex];
+        Mesh* mesh = chunk.staticObject->GetComponent<MeshRenderer>()->mesh;
+        
+        auto removeStaticAt = [&](size_t idx) {
+            StaticObject& obj = chunk.statics[idx];
+            glm::vec3 worldPos = obj.position + glm::vec3(chunk.x, 0.0f, chunk.y);
+            
+            // Destroy associated particle emitters (e.g. function 5 fire and smoke)
+            if (obj.function == 5) {
+                for (int e = (int)chunk.emitters.size() - 1; e >= 0; e--) {
+                    Emitter* emitter = chunk.emitters[e];
+                    if (glm::distance(emitter->position, worldPos) < 0.5f ||
+                        glm::distance(emitter->position, worldPos + glm::vec3(0.0f, 0.2f, 0.0f)) < 0.5f) {
+                        Particle.DestroyEmitter(emitter);
+                        chunk.emitters.erase(chunk.emitters.begin() + e);
+                    }
+                }
+            }
+            
+            chunk.statics.erase(chunk.statics.begin() + idx);
+            for (int a = (int)chunk.animatedStatics.size() - 1; a >= 0; a--) {
+                if (chunk.animatedStatics[a].staticIndex == idx) {
+                    chunk.animatedStatics.erase(chunk.animatedStatics.begin() + a);
+                } else if (chunk.animatedStatics[a].staticIndex > idx) {
+                    chunk.animatedStatics[a].staticIndex--;
+                }
+            }
+        };
+        
+        const float epsilon = 0.01f;
+        for (size_t i = 0; i < chunk.statics.size(); ++i) {
+            if (glm::distance(chunk.statics[i].position, bestLocalPos) > epsilon) 
+                continue;
+            removeStaticAt(i);
+            mesh->RemoveSubMesh(bestSubMeshIndex);
+            mesh->Load();
+            return true;
+        }
+        
+        if (bestSubMeshIndex < (int)chunk.statics.size()) {
+            removeStaticAt(bestSubMeshIndex);
+            mesh->RemoveSubMesh(bestSubMeshIndex);
+            mesh->Load();
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 bool ChunkManager::RemoveDecorAt(const glm::vec3& position, float tolerance) {
     float halfChunk = chunkSize * 0.5f;
     Chunk* targetChunk = nullptr;
@@ -1165,8 +1192,26 @@ bool ChunkManager::RemoveDecorAt(const glm::vec3& position, float tolerance) {
     if (!targetChunk) return false;
     
     glm::vec3 localTarget = position - glm::vec3(targetChunk->x, 0.0f, targetChunk->y);
-    for (size_t i = 0; i < targetChunk->statics.size(); ++i) {
+    bool objectsRemoved = false;
+    
+    // Iterate backward to safely erase multiple elements
+    for (int i = (int)targetChunk->statics.size() - 1; i >= 0; --i) {
         if (glm::distance(targetChunk->statics[i].position, localTarget) <= tolerance) {
+            StaticObject& obj = targetChunk->statics[i];
+            glm::vec3 worldPos = obj.position + glm::vec3(targetChunk->x, 0.0f, targetChunk->y);
+            
+            // Destroy associated particle emitters
+            if (obj.function == 5) {
+                for (int e = (int)targetChunk->emitters.size() - 1; e >= 0; e--) {
+                    Emitter* emitter = targetChunk->emitters[e];
+                    if (glm::distance(emitter->position, worldPos) < 0.5f ||
+                        glm::distance(emitter->position, worldPos + glm::vec3(0.0f, 0.2f, 0.0f)) < 0.5f) {
+                        Particle.DestroyEmitter(emitter);
+                        targetChunk->emitters.erase(targetChunk->emitters.begin() + e);
+                    }
+                }
+            }
+            
             targetChunk->statics.erase(targetChunk->statics.begin() + i);
             
             // Synchronize animatedStatics tracking indices
@@ -1180,14 +1225,63 @@ bool ChunkManager::RemoveDecorAt(const glm::vec3& position, float tolerance) {
             
             Mesh* mesh = targetChunk->staticObject->GetComponent<MeshRenderer>()->mesh;
             mesh->RemoveSubMesh(static_cast<unsigned int>(i));
-            mesh->Load();
-            return true;
+            
+            objectsRemoved = true;
         }
+    }
+    
+    // Load the mesh once after all overlapping objects are removed
+    if (objectsRemoved) {
+        Mesh* mesh = targetChunk->staticObject->GetComponent<MeshRenderer>()->mesh;
+        mesh->Load();
+        return true;
     }
     
     return false;
 }
 
+bool ChunkManager::RemoveDecorByIndex(Chunk* targetChunk, size_t index, bool rebuildMesh) {
+    if (!targetChunk || index >= targetChunk->statics.size()) {
+        return false;
+    }
+    
+    StaticObject& obj = targetChunk->statics[index];
+    glm::vec3 worldPos = obj.position + glm::vec3(targetChunk->x, 0.0f, targetChunk->y);
+    
+    // Destroy associated particle emitters
+    if (obj.function == 5) {
+        for (int e = (int)targetChunk->emitters.size() - 1; e >= 0; e--) {
+            Emitter* emitter = targetChunk->emitters[e];
+            if (glm::distance(emitter->position, worldPos) < 0.5f ||
+                glm::distance(emitter->position, worldPos + glm::vec3(0.0f, 0.2f, 0.0f)) < 0.5f) {
+                Particle.DestroyEmitter(emitter);
+                targetChunk->emitters.erase(targetChunk->emitters.begin() + e);
+            }
+        }
+    }
+    
+    // Remove the object from the primary array
+    targetChunk->statics.erase(targetChunk->statics.begin() + index);
+    
+    // Synchronize animatedStatics tracking indices
+    for (int a = (int)targetChunk->animatedStatics.size() - 1; a >= 0; a--) {
+        if (targetChunk->animatedStatics[a].staticIndex == index) {
+            targetChunk->animatedStatics.erase(targetChunk->animatedStatics.begin() + a);
+        } else if (targetChunk->animatedStatics[a].staticIndex > index) {
+            targetChunk->animatedStatics[a].staticIndex--;
+        }
+    }
+    
+    // Remove mesh data
+    Mesh* mesh = targetChunk->staticObject->GetComponent<MeshRenderer>()->mesh;
+    mesh->RemoveSubMesh(static_cast<unsigned int>(index));
+    
+    if (rebuildMesh) {
+        mesh->Load();
+    }
+    
+    return true;
+}
 
 float Snap1D(float v, float grid, float origin) {
     return origin + std::round((v - origin) / grid) * grid;
