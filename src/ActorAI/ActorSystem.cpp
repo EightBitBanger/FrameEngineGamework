@@ -4,6 +4,8 @@
 #include <GameEngineFramework/Logging/Logging.h>
 #include <GameEngineFramework/Math/Random.h>
 
+#include <fstream>
+
 extern Logger Log;
 extern ActorSystem AI;
 extern NumberGeneration Random;
@@ -13,9 +15,9 @@ UniversalConstants UniversalConst;
 // Actor system thread
 bool isActorThreadActive = true;
 bool doUpdate = false;
-void actorThreadMain(void);
 
-int tickCounter=0;
+void actorThreadMain(void);
+void actorThreadThinking(void);
 
 ActorSystem::ActorSystem() : 
     sceneMain(nullptr), 
@@ -27,19 +29,36 @@ ActorSystem::ActorSystem() :
     mWorldWaterLevel(0.0f), 
     mTimeOfDay(0.0f), 
     mDebugLineRenderer(nullptr), 
-    mNumberOfActors(0) 
+    mNumberOfActors(0),
+    mTimeScale(0.5f),
+    mFrameTimeCurrent(0.0d)
 {}
 
 void ActorSystem::Initiate(void) {
+    mTimeScale = 0.5f;
     
-    mMainTimer.SetRefreshRate(20);
-    mAnimationTimer.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
+    mainTimer.SetRefreshRate(20.0f);
+    auxiliaryTimer.SetRefreshRate(30.0f);
+    animationTimer.SetRefreshRate(RENDER_FRAMES_PER_SECOND);
     
-    // Fire up the actor thread
+    // Fire up the actor system & animation thread
     mActorSystemThread = new std::thread( actorThreadMain );
+    mAnimationThread   = new std::thread( actorThreadThinking );
     Log.Write( " >> Starting thread AI" );
 }
 
+void ActorSystem::SetTimeScale(float scale) {
+    std::lock_guard<std::mutex> lock(mux);
+    mTimeScale = (scale < 0.01f) ? 0.01f : scale; // Avoid division by zero or negative time
+    mainTimer.SetRefreshRate(static_cast<int>(20.0f * mTimeScale));
+    animationTimer.SetRefreshRate(static_cast<int>(RENDER_FRAMES_PER_SECOND * mTimeScale));
+    auxiliaryTimer.SetRefreshRate(static_cast<int>(30.0f * mTimeScale));
+}
+
+float ActorSystem::GetTimeScale(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    return mTimeScale;
+}
 bool ActorSystem::DebugRendererEnable(void) {
     if (mDebugLineRenderer == nullptr) {
         mDebugLineRenderer = Renderer.CreateMeshRenderer();
@@ -74,16 +93,27 @@ void ActorSystem::DebugRenderDrawLine(glm::vec3 from, glm::vec3 to, Color color)
     mDebugLineRenderer->mesh->Load();
 }
 
-void ActorSystem::SetWorldRaycastCallback(WorldRaycastCallback query, WorldPlaceCallback place, WorldRemoveCallback destroy) {
-    mWorldRaycastCallback = std::move(query);
-    mWorldPlaceCallback   = std::move(place);
-    mWorldRemoveCallback  = std::move(destroy);
+void ActorSystem::SetWorldPickupCallbacks(WorldPickupQueryCallback query, WorldPickupPlaceCallback place, WorldPickupRemoveCallback destroy) {
+    mWorldPickupQueryCallback = std::move(query);
+    mWorldPickupPlaceCallback   = std::move(place);
+    mWorldPickupRemoveCallback  = std::move(destroy);
+}
+
+void ActorSystem::SetWorldStaticCallbacks(WorldStaticRaycastCallback query, WorldStaticPlaceCallback place, WorldStaticRemoveCallback destroy) {
+    mWorldStaticQueryCallback = std::move(query);
+    mWorldStaticPlaceCallback   = std::move(place);
+    mWorldStaticRemoveCallback  = std::move(destroy);
+}
+
+void ActorSystem::SetNameGenerator(WorldGetNameCallback getter) {
+    mWorldGetNameCallback = std::move(getter);
 }
 
 void ActorSystem::Shutdown(void) {
     std::lock_guard<std::mutex> lock(mux);
     isActorThreadActive = false;
     mActorSystemThread->join();
+    mAnimationThread->join();
 }
 
 void ActorSystem::SetWaterLevel(float waterLevel) {
@@ -101,6 +131,10 @@ void ActorSystem::SetTimeOfDay(float time) {
     mTimeOfDay = time;
 }
 
+float ActorSystem::GetTimeOfDay(void) {
+    return mTimeOfDay;
+}
+
 void ActorSystem::SetPlayerWorldPosition(glm::vec3 position) {
     std::lock_guard<std::mutex> lock(mux);
     mPlayerPosition = position;
@@ -109,11 +143,6 @@ void ActorSystem::SetPlayerWorldPosition(glm::vec3 position) {
 glm::vec3 ActorSystem::GetPlayerWorldPosition(void) {
     std::lock_guard<std::mutex> lock(mux);
     return mPlayerPosition;
-}
-
-void ActorSystem::UpdateSendSignal(void) {
-    std::lock_guard<std::mutex> lock(mux);
-    doUpdate = true;
 }
 
 Actor* ActorSystem::CreateActor(void) {
@@ -173,16 +202,9 @@ unsigned int ActorSystem::GetNumberOfDeadRenderers() {
     return mDeadActorRenderers.size();
 }
 
-MeshRenderer* ActorSystem::GetDeadRenderer(unsigned int index) {
+void ActorSystem::SwapDeadRendererList(std::vector<MeshRenderer*>& newList) {
     std::lock_guard<std::mutex> lock(mux);
-    return mDeadActorRenderers[index];
-}
-
-MeshRenderer* ActorSystem::RemoveDeadRenderer(unsigned int index) {
-    std::lock_guard<std::mutex> lock(mux);
-    MeshRenderer* renderer = mDeadActorRenderers[index];
-    mDeadActorRenderers.erase(mDeadActorRenderers.begin() + index);
-    return renderer;
+    mDeadActorRenderers.swap(newList);
 }
 
 bool ActorSystem::UpdateGarbageCollection(Actor* actor) {
@@ -278,21 +300,112 @@ Actor* ActorSystem::Raycast(const glm::vec3& position, const glm::vec3& directio
     return closestActor;
 }
 
+void ActorSystem::RecordBirth(Actor* child, Actor* father, Actor* mother, const std::string& familyName, const glm::vec3& position) {
+    std::lock_guard<std::mutex> lock(mux);
+    
+    Genealogy entry;
+    entry.eventType  = GenealogyEventType::Birth;
+    entry.actor      = child->GetName().empty() ? "Actor_" + std::to_string(reinterpret_cast<uintptr_t>(child)) : child->GetName();
+    entry.father     = father->GetName().empty() ? "Actor_" + std::to_string(reinterpret_cast<uintptr_t>(father)) : father->GetName();
+    entry.mother     = mother->GetName().empty() ? "Actor_" + std::to_string(reinterpret_cast<uintptr_t>(mother)) : mother->GetName();
+    entry.family     = familyName.empty() ? "Independent" : familyName;
+    entry.generation = child->genetics.GetGeneration();
+    entry.age        = child->physical.GetAge();
+    entry.position   = position;
+    entry.details    = "Birth";
+    
+    mGenealogy.push_back(entry);
+}
+
+void ActorSystem::RecordDeath(Actor* actor, const std::string& cause) {
+    if (!actor) return;
+    std::lock_guard<std::mutex> lock(mux);
+    
+    if (actor->isGarbage) return;
+    
+    Genealogy entry;
+    entry.eventType  = GenealogyEventType::Death;
+    entry.actor      = actor->GetName().empty() ? "Actor_" + std::to_string(reinterpret_cast<uintptr_t>(actor)) : actor->GetName();
+    entry.family     = actor->memories.Get("family").empty() ? "Independent" : actor->memories.Get("family");
+    entry.father     = "";
+    entry.mother     = "";
+    entry.generation = actor->genetics.GetGeneration();
+    entry.age        = actor->physical.GetAge();
+    entry.position   = actor->navigation.GetPosition();
+    entry.details    = cause;
+    
+    mGenealogy.push_back(entry);
+}
+
+bool ActorSystem::DumpGenealogy(const std::string& filename) {
+    std::lock_guard<std::mutex> lock(mux);
+    
+    std::ofstream file(filename, std::ios::out | std::ios::trunc);
+    if (!file.is_open()) {
+        Log.Write(" [!] Error: Failed to open genealogy export file: " + filename);
+        return false;
+    }
+    
+    file << "Event,Actor,Family,Generation,Age,Father,Mother,Details,PosX,PosY,PosZ\n";
+    
+    for (const Genealogy& entry : mGenealogy) {
+        file << (entry.eventType == GenealogyEventType::Birth ? "BIRTH" : "DEATH") << ","
+            << entry.actor      << ","
+            << entry.family     << ","
+            << entry.generation << ","
+            << entry.age        << ","
+            << entry.father     << ","
+            << entry.mother     << ","
+            << "\"" << entry.details << "\","
+            << entry.position.x << ","
+            << entry.position.y << ","
+            << entry.position.z << "\n";
+    }
+    
+    file.close();
+    Log.Write(" >> Unified genealogy tree successfully exported to: " + filename);
+    return true;
+}
+
+std::vector<Genealogy> ActorSystem::GetGenealogy(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    return mGenealogy;
+}
+
+void ActorSystem::ClearGenealogy(void) {
+    std::lock_guard<std::mutex> lock(mux);
+    mGenealogy.clear();
+}
 
 //
 // Actor system thread
 //
 
-void actorThreadMain() {
+void actorThreadMain(void) {
     while (isActorThreadActive) {
         std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
-        if (!doUpdate) 
-            continue;
         
-        AI.Update();
+        if (AI.animationTimer.Update()) 
+            AI.UpdateFast();
+        
+        if (AI.mainTimer.Update()) 
+            AI.UpdateTick();
+        
     }
     
     std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(100) );
     Log.Write( " >> Shutting down on thread AI" );
 }
 
+void actorThreadThinking(void) {
+    while (isActorThreadActive) {
+        std::this_thread::sleep_for( std::chrono::duration<float, std::milli>(1) );
+        
+        if (AI.auxiliaryTimer.Update()) 
+            AI.UpdateThinking();
+        
+    }
+    
+    std::this_thread::sleep_for( std::chrono::duration<float, std::micro>(150) );
+    Log.Write( " >> Shutting down on thread AI::Animation" );
+}

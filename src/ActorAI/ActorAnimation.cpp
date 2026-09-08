@@ -5,8 +5,6 @@
 #include <GameEngineFramework/Math/Random.h>
 #include <GameEngineFramework/Timer/Timer.h>
 
-extern Timer Time;
-
 static float WrapDeg360(float deg) {
     deg = std::fmod(deg, 360.0f);
     if (deg < 0.0f) deg += 360.0f;
@@ -39,7 +37,7 @@ float ActorSystem::CalculateLimbSwingAngle(Actor* actor, unsigned int a) {
         phase += glm::pi<float>();
     }
     
-    // Pure mathematical sine wave swing (-maxRange to +maxRange)
+    // Generate sine wave swing (-maxRange to +maxRange)
     return std::sin(phase) * glm::radians(maxRange);
 }
 
@@ -49,13 +47,13 @@ void ActorSystem::UpdateAnimationState(Actor* actor) {
     float distance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
     float distanceMax = mActorRenderDistance / 2.0f;
     
-    // Advance walk cycle based on actor speed (once per actor update)
+    // Advance walk cycle based on actor speed
     if (actor->state.mIsWalking || actor->state.mIsRunning) {
         float speedMultiplier = actor->state.mIsRunning ? actor->physical.mSpeedMul : 1.0f;
-        float cycleSpeed = actor->physical.mSpeed * speedMultiplier * 4.0f; 
+        float cycleSpeed = actor->physical.mSpeed * speedMultiplier * actor->animation.mWalkRate; 
         
-        actor->animation.mWalkTime += cycleSpeed * 0.04f; 
-
+        actor->animation.mWalkTime += cycleSpeed * 0.04f * mTimeScale * (float)mFrameTimeCurrent;
+        
         // Wrap phase within [0, 2*PI]
         if (actor->animation.mWalkTime > glm::two_pi<float>()) {
             actor->animation.mWalkTime = std::fmod(actor->animation.mWalkTime, glm::two_pi<float>());
@@ -327,7 +325,6 @@ void ActorSystem::UpdateTargetRotation(Actor* actor) {
     float  dz    = actor->navigation.mPosition.z - actor->navigation.mTargetPoint.z;
     float  dist2 = (dx * dx) + (dz * dz);
     
-    // Check if we're basically at the point, the direction is unstable
     if (dist2 < 0.000001f)
         return;
     
@@ -351,7 +348,8 @@ void ActorSystem::UpdateTargetRotation(Actor* actor) {
         return;
     }
     
-    float t = glm::clamp(actor->physical.mSnapSpeed, 0.0f, 1.0f);
+    // Scale snap rotation rate by mTimeScale
+    float t = glm::clamp(actor->physical.mSnapSpeed * mTimeScale * (float)mFrameTimeCurrent, 0.0f, 1.0f);
     
     actor->navigation.mRotation.y = LerpAngleDeg(currentYaw, desiredYaw, t);
     actor->navigation.mRotation.x = Math.Lerp(actor->navigation.mRotation.x, 0.0f, t);
@@ -359,6 +357,13 @@ void ActorSystem::UpdateTargetRotation(Actor* actor) {
 }
 
 void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned int a) {
+    // Lock head straight forward while frozen
+    if (actor->state.mode == ActorState::Mode::Frozen) {
+        actor->navigation.mFacing = actor->navigation.mRotation;
+        actor->navigation.mLookAt = actor->navigation.mRotation;
+        return;
+    }
+    
     float xx = actor->navigation.mPosition.x - actor->navigation.mTargetLook.x;
     float zz = actor->navigation.mPosition.z - actor->navigation.mTargetLook.z;
     
@@ -381,11 +386,13 @@ void ActorSystem::UpdateHeadRotation(glm::mat4& matrix, Actor* actor, unsigned i
         glm::vec3 fadeFrom( actor->navigation.mFacing );
         glm::vec3 fadeTo( actor->navigation.mLookAt );
         
-        glm::vec3 fadeValue;
-        fadeValue.x = Math.Lerp(fadeFrom.x, fadeTo.x, actor->physical.mSnapSpeed);
+        // Scale head rotation step by mTimeScale
+        float snapFactor = glm::clamp(actor->physical.mSnapSpeed * mTimeScale * (float)mFrameTimeCurrent, 0.0f, 1.0f);
         
-        fadeValue.y = LerpAngleDeg(fadeFrom.y, fadeTo.y, actor->physical.mSnapSpeed);
-        fadeValue.z = Math.Lerp(fadeFrom.z, fadeTo.z, actor->physical.mSnapSpeed);
+        glm::vec3 fadeValue;
+        fadeValue.x = Math.Lerp(fadeFrom.x, fadeTo.x, snapFactor);
+        fadeValue.y = LerpAngleDeg(fadeFrom.y, fadeTo.y, snapFactor);
+        fadeValue.z = Math.Lerp(fadeFrom.z, fadeTo.z, snapFactor);
         
         actor->navigation.mFacing = fadeValue;
     }

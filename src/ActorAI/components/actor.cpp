@@ -12,7 +12,8 @@ Actor::Actor() :
     mName(""),
     mBoundingBoxMin(-0.5f, -0.5f, -0.5f),
     mBoundingBoxMax(0.5f, 0.5f, 0.5f),
-    mUpdateCounter(0)
+    mUpdateCounter(0),
+    mThoughtCounter(0)
 {}
 
 void Actor::SetName(const std::string& newName) {
@@ -36,98 +37,32 @@ void Actor::Reset(void) {
     mBoundingBoxMin = {-0.5f, -0.5f, -0.5f};
     mBoundingBoxMax = {0.5f, 0.5f, 0.5f};
     
-    mUpdateCounter = (unsigned int)Random.Range(0, 8);
+    mUpdateCounter = (unsigned int)Random.Range(0, 40);
+    mThoughtCounter = (unsigned int)Random.Range(0, 40);
     
-    // Inventory
-    inventory.damageMul       = 1.0f;
-    inventory.defenseMul      = 1.0f;
-    inventory.handPosition    = glm::vec3(0.0f, 0.0f, 0.0f);
-    inventory.handOffset      = glm::vec3(0.0f, 0.0f, 0.0f);
-    inventory.handRotation    = glm::vec3(0.0f, 0.0f, 0.0f);
-    inventory.handScale       = glm::vec3(1.0f, 1.0f, 1.0f);
-    inventory.holdingRenderer = nullptr;
-    inventory.itemClassList.clear();
-    
-    // Navigation
-    navigation.mVelocity  = glm::vec3(0);
-    navigation.mPosition  = glm::vec3(0);
-    navigation.mRotation  = glm::vec3(0);
-    navigation.mFacing    = glm::vec3(0);
-    navigation.mLookAt    = glm::vec3(0);
-    
-    navigation.mRotateTo         = glm::vec3(0);
-    navigation.mTargetPoint      = glm::vec3(0);
-    navigation.mTargetLook       = glm::vec3(0);
-    navigation.mDistanceToTarget = 0;
-    navigation.mTargetActor      = nullptr;
-    navigation.mQueryPoints.clear();
-    
-    // Behavior
-    behavior.mDistanceToFocus      = 50.0f;
-    behavior.mDistanceToWalk       = 30.0f;
-    behavior.mDistanceToAttack     = 30.0f;
-    behavior.mDistanceToFlee       = 20.0f;
-    behavior.mDistanceToInflict    = 5.24f;
-    
-    behavior.mCooldownAttack       = 2;
-    behavior.mCooldownObserve      = 8;
-    behavior.mCooldownSocial       = 3;
-    behavior.mCooldownMove         = 8;
-    behavior.mCooldownBreed        = 220;
-    
-    behavior.mHeightPreferenceMin  = 0.0f;
-    behavior.mHeightPreferenceMax  = 1000.0f;
-    
-    // State
-    state.mode          = ActorState::Mode::Idle;
-    state.mIsWalking    = false;
-    state.mIsRunning    = false;
-    state.mIsFacing     = true;
-    
-    // Idiosyncrasies
+    inventory.Reset();
+    navigation.Reset();
+    behavior.Reset();
+    sleep.Reset();
+    state.Reset();
     memories.Clear();
+    genetics.Reset();
+    biological.Reset();
+    emotions.Reset();
+    physical.Reset();
+    counters.Reset();
+    user.Reset();
+}
+
+void Actor::SnapHeadStraight(void) {
+    state.mIsFacing = true;
+    navigation.mFacing = navigation.mRotation;
+    navigation.mLookAt = navigation.mRotation;
     
-    // Genetics
-    genetics.mDoUpdateGenetics     = false;
-    genetics.mDoReexpressGenetics  = false;
-    genetics.mGeneration           = 0;
-    genetics.ClearGenome();
-    genetics.ClearPhenome();
-    
-    // Biological
-    biological.health         = 10.0f;
-    biological.hunger         = 0.0f;
-    biological.saturation     = 1.0f;
-    biological.defense        = 0.0f;
-    biological.strength       = 1.0f;
-    biological.mHungerCounter = 0;
-    
-    // Emotions
-    emotions.current.Initiate();
-    
-    // Physical
-    physical.mAge            = 0;
-    physical.mAgeAdult       = 20000.0f;
-    physical.mAgeSenior      = 70000.0f;
-    physical.mSpeed          = 1.5f;
-    physical.mSpeedYouth     = 0.8f;
-    physical.mSpeedMul       = 1.3f;
-    physical.mSnapSpeed      = 0.1f;
-    physical.mYouthScale     = 0.5f;
-    physical.mAdultScale     = 1.0f;
-    physical.mSexualOrientation = false;
-    
-    // Cool-down timers
-    counters.mObservationCoolDownCounter = 0;
-    counters.mSocialCoolDownCounter      = 0;
-    counters.mAttackCoolDownCounter      = 0;
-    counters.mMovementCoolDownCounter    = 0;
-    counters.mBreedingCoolDownCounter    = 0;
-    
-    // User variables
-    user.mBitmask    = 0;
-    user.mUserDataA  = nullptr;
-    user.mUserDataB  = nullptr;
+    // Project target look straight along the current body yaw
+    float yawRad = glm::radians(-(navigation.mRotation.y - 90.0f));
+    glm::vec3 forward(std::cos(yawRad), 0.0f, std::sin(yawRad));
+    navigation.mTargetLook = navigation.mPosition + forward * 10.0f;
 }
 
 // Bounding box

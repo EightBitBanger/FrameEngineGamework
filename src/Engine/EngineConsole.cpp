@@ -41,12 +41,21 @@ void ConsoleReturnCallback(std::string& console_text) {
         Engine.console.Disable();
         Platform.Pause();
         
-        if (Engine.cameraController != nullptr) {
-            Camera* mainCamera = Engine.cameraController->GetComponent<Camera>();
-            mainCamera->EnableMouseLook();
+        if (Platform.isPaused) {
+            Platform.ShowMouseCursor();
+            Engine.sceneMain->camera->DisableMouseLook();
+            
+            Input.ClearKeys();
+        } else {
+            Platform.HideMouseCursor();
+            Input.SetMousePosition(Renderer.displayCenter.x, Renderer.displayCenter.y);
+            
+            Engine.sceneMain->camera->EnableMouseLook();
+            Engine.console.ClearInput();
+            
+            Time.Update();
+            PhysicsTime.Update();
         }
-        Engine.console.ClearInput();
-        Platform.HideMouseCursor();
     }
 }
 

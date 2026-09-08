@@ -20,7 +20,9 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
     if (actor->physical.mAge < actor->physical.mAgeAdult) 
         ageScaler = (float)actor->physical.mAge / (float)actor->physical.mAgeAdult;
     ageScaler = glm::clamp(ageScaler, 0.0f, 1.0f);
-    speedScaler = Math.Lerp(actor->physical.mSpeedYouth, actor->physical.mSpeed, ageScaler) * 0.01;
+    
+    double scaledDelta = mFrameTimeCurrent * mTimeScale;
+    speedScaler = Math.Lerp(actor->physical.mSpeedYouth, actor->physical.mSpeed, ageScaler) * 0.008f * scaledDelta * 2.0f;
     
     switch (actor->state.mode) {
         
@@ -30,6 +32,17 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             actor->state.mIsRunning = false;
             
             actor->navigation.mVelocity *= glm::vec3(0, 1, 0);
+            break;
+        
+        case ActorState::Mode::MovePlanting:
+        case ActorState::Mode::MoveHarvesting:
+            actor->state.mIsWalking = false;
+            actor->state.mIsRunning = false;
+            actor->navigation.mVelocity *= glm::vec3(0, 1, 0);
+            
+            if (actor->counters.mMovementCoolDownCounter == 0) {
+                actor->state.mode = ActorState::Mode::Idle;
+            }
             break;
             
         case ActorState::Mode::MoveAttack:
@@ -54,7 +67,6 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             bool hasHome = false;
             glm::vec3 homePos(0.0f);
             
-            // Direct zero-allocation vector retrieval
             std::unordered_map<std::string, std::vector<MemoryTrigger>>::iterator homeIt = actor->memories.mMemoryTriggers.find("home");
             if (homeIt != actor->memories.mMemoryTriggers.end() && !homeIt->second.empty()) {
                 homePos = homeIt->second[0].vector;
@@ -106,35 +118,48 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             break;
             
         case ActorState::Mode::MoveBreed: {
-            if (actor->navigation.mTargetActor == nullptr || 
-                !actor->navigation.mTargetActor->isActive || 
-                actor->navigation.mTargetActor->isGarbage) {
+            Actor* target = actor->navigation.mTargetActor;
+            
+            // Target actor disappeared, became inactive, or marked garbage
+            if (target == nullptr || !target->isActive || target->isGarbage) {
                 actor->navigation.mTargetActor = nullptr;
                 actor->state.mode = ActorState::Mode::Idle;
+                actor->state.mIsWalking = false;
                 break;
             }
             
             actor->state.mIsWalking = true;
             actor->state.mIsRunning = false;
-            actor->navigation.mTargetPoint.x = targetPosition.x;
-            actor->navigation.mTargetPoint.z = targetPosition.z;
-            actor->navigation.mTargetLook = targetPosition;
+            actor->navigation.mTargetPoint.x = target->navigation.mPosition.x;
+            actor->navigation.mTargetPoint.z = target->navigation.mPosition.z;
+            actor->navigation.mTargetLook  = target->navigation.mPosition;
             actor->state.mIsFacing = true;
             
             forward = CalculateForwardVelocity(actor);
             float breedDistance = actor->behavior.GetDistanceToInflict();
-            forward *= ApplyApproachSlowdown(actor, targetPosition, speedScaler, breedDistance);
+            forward *= ApplyApproachSlowdown(actor, target->navigation.mPosition, speedScaler, breedDistance);
             
-            if (actor->navigation.mTargetActor != nullptr) {
-                if (!HandleBreedWith(actor, actor->navigation.mTargetActor)) {
-                    float dist = glm::distance(actor->navigation.mPosition, actor->navigation.mTargetActor->navigation.mPosition);
-                    // Relaxed distance threshold ensures actors stop walking if breeding fails or completes
-                    if (dist <= breedDistance * 1.25f) {
-                        actor->counters.mBreedingCoolDownCounter = actor->behavior.mCooldownBreed;
-                        actor->state.mode = ActorState::Mode::Idle;
-                        actor->state.mIsWalking = false;
-                        forward = glm::vec3(0.0f);
+            float currentDistance = glm::distance(actor->navigation.mPosition, target->navigation.mPosition);
+            
+            // Once inside interaction range, execute reproduction
+            if (currentDistance <= breedDistance) {
+                if (!HandleBreedWith(actor, target)) {
+                    // Breeding failed at contact range
+                    actor->counters.mBreedingCoolDownCounter = actor->behavior.mCooldownSocial;
+                    actor->state.mode = ActorState::Mode::Idle;
+                    actor->state.mIsWalking = false;
+                    actor->navigation.mTargetActor = nullptr;
+                    
+                    if (target->state.mode == ActorState::Mode::MoveBreed && target->navigation.mTargetActor == actor) {
+                        target->counters.mBreedingCoolDownCounter = target->behavior.mCooldownSocial;
+                        target->state.mode = ActorState::Mode::Idle;
+                        target->state.mIsWalking = false;
+                        target->navigation.mTargetActor = nullptr;
                     }
+                    
+                    forward = glm::vec3(0.0f);
+                } else {
+                    forward = glm::vec3(0.0f);
                 }
             }
             break;
@@ -152,7 +177,6 @@ void ActorSystem::HandleMovementMechanics(Actor* actor) {
             actor->state.mIsWalking = true;
             actor->state.mIsRunning = false;
             
-            // Direct movement target prevents mutual orbiting/chasing loops
             actor->navigation.mTargetPoint.x = targetPosition.x;
             actor->navigation.mTargetPoint.z = targetPosition.z;
             actor->navigation.mTargetLook = targetPosition;

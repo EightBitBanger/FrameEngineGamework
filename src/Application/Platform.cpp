@@ -26,8 +26,7 @@ PlatformLayer::PlatformLayer() :
     
     mIsWindowRunning(false),
     mVSyncEnabled(false)
-{
-}
+{}
 
 void PlatformLayer::Pause(void) {
     isPaused = !isPaused;

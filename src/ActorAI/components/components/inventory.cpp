@@ -14,6 +14,19 @@ InventoryManager::InventoryManager() :
     doBuildHandMesh(false)
 {}
 
+void InventoryManager::Reset() {
+    damageMul        = 1.0f;
+    defenseMul       = 1.0f;
+    inHandItemClass  = "";
+    handPosition     = glm::vec3(0.0f, 0.0f, 0.0f);
+    handOffset       = glm::vec3(0.0f, 0.0f, 0.0f);
+    handRotation     = glm::vec3(0.0f, 0.0f, 0.0f);
+    handScale        = glm::vec3(1.0f, 1.0f, 1.0f);
+    holdingRenderer  = nullptr;
+    doEquipWeapon    = false;
+    itemClassList.clear();
+}
+
 bool InventoryManager::AddItem(const std::string& itemClassification) {
     if (itemClassification.empty()) 
         return false;
@@ -61,21 +74,28 @@ bool InventoryManager::EquipItem(const std::string& itemClassification) {
 bool InventoryManager::EquipWeapon() {
     if (itemClassList.empty()) 
         return false;
+    
     int maxIndex = -1;
     float maxDamage = -1.0f;
     
     for (unsigned int i = 0; i < itemClassList.size(); ++i) {
         float itemDamage = 1.0f;
-        std::vector<std::string> itemData = String.Explode(itemClassList[i], ',');
+        
+        // Split item classification by semicolon
+        std::vector<std::string> itemData = String.Explode(itemClassList[i], ';');
+        if (itemData.empty()) 
+            continue;
         
         for (unsigned int j = 0; j < itemData.size(); ++j) {
             std::vector<std::string> kvPair = String.Explode(itemData[j], ':');
-            if (kvPair.size() >= 2) {
-                std::string key = kvPair[0];
-                String.RemoveWhiteSpace(key);
-                if (key == "damage") {
-                    itemDamage = String.ToFloat(kvPair[1]);
-                }
+            if (kvPair.size() < 2) 
+                continue;
+            
+            std::string key = kvPair[0];
+            String.RemoveWhiteSpace(key);
+            
+            if (key == "damage") {
+                itemDamage = String.ToFloat(kvPair[1]);
             }
         }
         
@@ -106,7 +126,6 @@ void InventoryManager::BuildHandMesh(const std::string& itemClassification) {
     if (itemClassification.empty()) 
         return;
     
-    // Allocate the MeshRenderer on first build if it doesn't exist
     if (holdingRenderer == nullptr) {
         MeshRenderer* newRenderer = Renderer.CreateMeshRenderer();
         newRenderer->mesh     = Renderer.CreateMesh();
@@ -130,6 +149,7 @@ void InventoryManager::BuildHandMesh(const std::string& itemClassification) {
         std::vector<std::string> kvPair = String.Explode(itemData[i], ':');
         if (kvPair.size() < 2) 
             continue;
+        
         std::string key = kvPair[0];
         String.RemoveWhiteSpace(key);
         
@@ -137,11 +157,13 @@ void InventoryManager::BuildHandMesh(const std::string& itemClassification) {
             damageMul = String.ToFloat(kvPair[1]);
         } else if (key == "defense") { 
             defenseMul = String.ToFloat(kvPair[1]);
-        } else if (key == "build" && kvPair.size() >= 4) {
-            std::string& position = kvPair[1];
-            std::string& scale    = kvPair[2];
-            std::string& color    = kvPair[3];
+        } else if (key == "build" && kvPair.size() >= 5) {
+            std::string mesh     = kvPair[1];
+            std::string position = kvPair[2];
+            std::string scale    = kvPair[3];
+            std::string color    = kvPair[4];
             
+            String.RemoveWhiteSpace(mesh);
             String.RemoveWhiteSpace(position);
             String.RemoveWhiteSpace(scale);
             String.RemoveWhiteSpace(color);
@@ -152,6 +174,7 @@ void InventoryManager::BuildHandMesh(const std::string& itemClassification) {
             
             if (vecPosStr.size() != 3 || vecScaleStr.size() != 3 || vecColorStr.size() != 3) 
                 continue;
+            
             float posX = String.ToFloat(vecPosStr[0]);
             float posY = String.ToFloat(vecPosStr[1]);
             float posZ = String.ToFloat(vecPosStr[2]);
@@ -163,16 +186,20 @@ void InventoryManager::BuildHandMesh(const std::string& itemClassification) {
             float colorX = String.ToFloat(vecColorStr[0]);
             float colorY = String.ToFloat(vecColorStr[1]);
             float colorZ = String.ToFloat(vecColorStr[2]);
+            
             Color colorVec(colorX, colorY, colorZ);
-            handMesh->AddCube(posX, posY, posZ, scaleX, scaleY, scaleZ, colorVec);
+            
+            if (mesh == "cube") {
+                handMesh->AddCube(posX, posY, posZ, scaleX, scaleY, scaleZ, colorVec);
+            }
         }
     }
     
-    // TODO actors own hand offset should factor in
-    handPosition = glm::vec3(0.0f, -0.5f, 0.0f);
-    handOffset   = glm::vec3(-0.01f, 0.3f, 0.0f);
+    handPosition = glm::vec3(0.08f, -0.5f, 0.0f);
+    handOffset   = glm::vec3(0.0f, 0.5f, 0.0f);
     handRotation = glm::vec3(1.570795f, 0.0f, 0.0f);
     handScale    = glm::vec3(1.0f, 1.0f, 1.0f);
+    
     handMesh->Load();
     holdingRenderer->isActive = true;
 }

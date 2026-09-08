@@ -15,6 +15,14 @@ MemorySystem::MemorySystem() :
     mDoUpdateMemories(false)
 {}
 
+void MemorySystem::Reset() {
+    mDoUpdateMemories = false;
+    
+    mMemories.clear();
+    mMemoryTriggers.clear();
+    thoughtProcessProjectionMatrix.clear();
+}
+
 void MemorySystem::Add(const std::string& name, const std::string& memory) {
     mMemories[name] = memory;
     mDoUpdateMemories = true;
@@ -196,7 +204,8 @@ void MemorySystem::UpdateMemories(void) {
     mMemoryTriggers.clear();
     for (auto it = mMemories.begin(); it != mMemories.end(); ++it) {
         std::vector<MemoryTrigger> triggers;
-        std::vector<std::string> values = String.Explode(it->second, ','); 
+        // Split individual memory triggers using '^'
+        std::vector<std::string> values = String.Explode(it->second, '^'); 
         
         for (unsigned int i = 0; i < values.size(); i++) {
             std::string& value = values[i];
@@ -210,8 +219,8 @@ void MemorySystem::UpdateMemories(void) {
             trigger.name = kvPair[0];
             trigger.type = StringToTriggerType(trigger.name);
             
-            // Check if the payload contains 3D vector
-            std::vector<std::string> vecSplit = String.Explode(kvPair[1], '`');
+            // Check if payload contains a comma-separated 3D vector
+            std::vector<std::string> vecSplit = String.Explode(kvPair[1], ',');
             if (vecSplit.size() >= 3) {
                 trigger.vector.x = String.ToFloat(vecSplit[0]);
                 trigger.vector.y = String.ToFloat(vecSplit[1]);

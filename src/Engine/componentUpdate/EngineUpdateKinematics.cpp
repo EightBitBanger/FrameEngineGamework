@@ -35,17 +35,20 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
     
     // Process dead renderers into physical objects
     if (AI.GetNumberOfDeadRenderers() > 0) {
-        mux.unlock();
         
-        while (AI.GetNumberOfDeadRenderers() > 0) {
-            MeshRenderer* deadRenderer = AI.RemoveDeadRenderer(0);
+        std::vector<MeshRenderer*> deadRendererList;
+        AI.SwapDeadRendererList(deadRendererList);
+        
+        for (unsigned int r=0; r < deadRendererList.size(); r++) {
+            MeshRenderer* deadRenderer = deadRendererList[r];
             
             sceneMain->RemoveMeshRendererFromSceneRoot(deadRenderer, RENDER_QUEUE_GEOMETRY);
             deadRenderer->isActive = false;
             
-            Destroy(deadRenderer);
+            Renderer.DestroyMeshRenderer(deadRenderer);
             
             /*
+            
             GameObject* gameObject = Create<GameObject>();
             gameObject->AddComponent( CreateComponentFromObject<MeshRenderer>(deadRenderer) );
             gameObject->AddComponent( CreateComponent<rp3d::RigidBody>() );
@@ -70,8 +73,9 @@ void EngineSystemManager::UpdateKinematics(unsigned int index) {
             rigidBody->setTransform(bodyTransform);
             rigidBody->enableGravity(true);
             rigidBody->updateMassPropertiesFromColliders();
+            
             */
+            
         }
-        mux.lock();
     }
 }

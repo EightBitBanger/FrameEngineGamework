@@ -9,6 +9,10 @@ EmotionalEmbedding::EmotionalEmbedding() {
     Clear();
 }
 
+void EmotionalEmbedding::Reset() {
+    Initiate();
+}
+
 float* EmotionalEmbedding::GetEmotionByName(std::string name) {
     if (name == "fear")      return &fear; else 
     if (name == "anger")     return &anger; else 

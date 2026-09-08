@@ -56,7 +56,13 @@ void ActorSystem::UpdateActorState(Actor* actor, EmotionalEmbedding& emotion, fl
     // Keep actor nearby its associated "home" location
     if (actor->state.mode != ActorState::Mode::MoveAttack && 
         actor->state.mode != ActorState::Mode::MoveFlee && 
-        actor->state.mode != ActorState::Mode::MoveHunting) {
+        actor->state.mode != ActorState::Mode::MoveHunting &&
+        actor->state.mode != ActorState::Mode::MoveBreed &&
+        actor->state.mode != ActorState::Mode::MoveSocialize &&
+        actor->state.mode != ActorState::Mode::MovePlanting &&
+        actor->state.mode != ActorState::Mode::MoveHarvesting &&
+        actor->state.mode != ActorState::Mode::Sleeping) {
+        
         HandleHomeLocation(actor);
     }
     
@@ -82,6 +88,25 @@ void ActorSystem::UpdateActorState(Actor* actor, EmotionalEmbedding& emotion, fl
 
 void ActorSystem::UpdateThoughtMatrix(Actor* actor, EmotionalEmbedding& emotion, float sentientScore) {
     ScopeProfile profile("AI-thinking");
+    
+    // Preserve active breeding and socialization states unless interrupted by a threat
+    if ((actor->state.mode == ActorState::Mode::MoveBreed || actor->state.mode == ActorState::Mode::MoveSocialize) && 
+        actor->navigation.mTargetActor != nullptr) {
+        
+        float maxThreat = glm::max(actor->emotions.current.anger, actor->emotions.current.fear);
+        if (maxThreat >= UniversalConst.emotionalThreshold) {
+            actor->state.mode = ActorState::Mode::Idle;
+            actor->navigation.mTargetActor = nullptr;
+        } else if (actor->navigation.mTargetActor->isActive && !actor->navigation.mTargetActor->isGarbage) {
+            // Partner is still valid; keep walking and skip state re-evaluation
+            actor->memories.thoughtProcessProjectionMatrix.push_back(emotion);
+            ProjectEmotionalHistory(actor, emotion, sentientScore);
+            return;
+        } else {
+            actor->navigation.mTargetActor = nullptr;
+            actor->state.mode = ActorState::Mode::Idle;
+        }
+    }
     
     tThoughtMatrix.clear();
     int bestTargetIndex = EvaluateThoughtMatrix(actor, emotion, sentientScore, tThoughtMatrix);
@@ -114,6 +139,10 @@ void ActorSystem::UpdateThoughtMatrix(Actor* actor, EmotionalEmbedding& emotion,
         }
         
         actor->navigation.mTargetActor = nullptr;
+        
+        // Evaluate solo behaviors
+        EvaluateEmotionalBehavior(actor, nullptr, UniversalConst.emotionalThreshold, emotion);
+        
         actor->memories.thoughtProcessProjectionMatrix.push_back(emotion);
     }
     
@@ -137,7 +166,9 @@ void ActorSystem::ProcessMemoryTriggers(Actor* actor, EmotionalEmbedding& emotio
                 break;
                 
             case TriggerType::Libido:
-                if (actor->counters.mBreedingCoolDownCounter == 0 && actor->physical.mAge >= actor->physical.mAgeAdult) {
+                if (actor->counters.mBreedingCoolDownCounter == 0 && 
+                    actor->physical.mAge >= actor->physical.mAgeAdult &&
+                    actor->biological.hunger <= UniversalConst.biologicalThreshold) {
                     emotion.libido += chance;
                 }
                 break;
@@ -306,168 +337,4 @@ int ActorSystem::EvaluateThoughtMatrix(Actor* actor, const EmotionalEmbedding& b
     }
     
     return bestTargetIndex;
-}
-
-bool ActorSystem::EvaluateEmotionalBehavior(Actor* actor, Actor* targetActor, float threshold, EmotionalEmbedding& emotion) {
-    // Lock on combat target while active or recovering from cooldown
-    if ((actor->state.mode == ActorState::Mode::MoveAttack || actor->counters.mAttackCoolDownCounter > 0) && 
-        actor->navigation.mTargetActor != nullptr && 
-        actor->navigation.mTargetActor->isActive && 
-        !actor->navigation.mTargetActor->isGarbage) {
-        targetActor = actor->navigation.mTargetActor;
-    }
-    
-    // =========================================================================
-    // SURVIVAL & COMBAT (Fear > Anger)
-    
-    // Fear (Fleeing)
-    if (emotion.fear >= threshold && emotion.fear >= emotion.anger) {
-        emotion.comfort *= 0.1f;
-        actor->memories.ScaleEmotion(TriggerType::Comfort, 0.1f);
-        
-        if (actor->state.mode != ActorState::Mode::MoveFlee) {
-            if (targetActor != nullptr && glm::distance(actor->navigation.mPosition, targetActor->navigation.mPosition) <= actor->behavior.GetDistanceToFlee()) {
-                if (Random.Range(0.0f, 1.0f) < glm::pow(emotion.fear, threshold)) {
-                    actor->state.mode = ActorState::Mode::MoveFlee;
-                    actor->inventory.UnequipItem();
-                    actor->navigation.mTargetActor = targetActor;
-                    return true;
-                }
-            }
-        } else {
-            return true;
-        }
-    }
-    
-    // Anger (Attacking)
-    bool isHostile = (emotion.anger >= threshold || actor->counters.mAttackCoolDownCounter > 0);
-    if (emotion.anger >= threshold && emotion.anger > emotion.fear) {
-        if (actor->counters.mAttackCoolDownCounter == 0) {
-            actor->state.mode = ActorState::Mode::MoveAttack;
-            emotion.comfort *= 0.3f;
-            actor->memories.ScaleEmotion(TriggerType::Comfort, 0.3f);
-            
-            if (actor->inventory.inHandItemClass.empty()) 
-                actor->inventory.EquipWeapon();
-            actor->navigation.mTargetActor = targetActor;
-            actor->navigation.mDistanceToTarget = glm::distance(
-                glm::vec3(targetActor->navigation.mPosition.x, 0.0f, targetActor->navigation.mPosition.z),
-                glm::vec3(actor->navigation.mPosition.x, 0.0f, actor->navigation.mPosition.z)
-            );
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
-    // Block non-combat behaviors completely while hostile
-    if (isHostile) {
-        return false;
-    }
-    
-    // =========================================================================
-    // SOCIALIZATION (Socialize > Breed)
-    
-    bool isSocialEligible = (emotion.social >= threshold && 
-                            actor->counters.mSocialCoolDownCounter == 0 &&
-                            emotion.stress < UniversalConst.emotionalThreshold && 
-                            emotion.fear < UniversalConst.emotionalThreshold && 
-                            emotion.anger < UniversalConst.emotionalThreshold);
-    if (isSocialEligible && targetActor != nullptr) {
-        // Verify target availability (Idle/Wandering OR social group size < 4)
-        bool isTargetAvailable = false;
-        if (targetActor->state.mode == ActorState::Mode::Idle || 
-            targetActor->state.mode == ActorState::Mode::MoveRandom) {
-            isTargetAvailable = true;
-        } else if (targetActor->state.mode == ActorState::Mode::MoveSocialize) {
-            if (GetSocialGroupSize(targetActor) < 4) {
-                isTargetAvailable = true;
-            }
-        }
-        
-        if (isTargetAvailable && Random.Range(0.0f, 1.0f) < glm::pow(emotion.social, threshold)) {
-            // Lock active actor into socializing toward targetActor
-            actor->navigation.mTargetActor = targetActor;
-            actor->state.mode = ActorState::Mode::MoveSocialize;
-            
-            glm::vec3 pos = actor->navigation.mPosition;
-            glm::vec3 tarPos = targetActor->navigation.mPosition;
-            float dist = glm::distance(glm::vec3(tarPos.x, 0.0f, tarPos.z), glm::vec3(pos.x, 0.0f, pos.z));
-            actor->navigation.mDistanceToTarget = dist;
-            
-            // If target was unengaged, lock them back onto initiating actor
-            if (targetActor->state.mode != ActorState::Mode::MoveSocialize) {
-                targetActor->navigation.mTargetActor = actor;
-                targetActor->state.mode = ActorState::Mode::MoveSocialize;
-                targetActor->navigation.mDistanceToTarget = dist;
-            }
-            
-            return true;
-        }
-        return false;
-    }
-
-    // =========================================================================
-    // REPRODUCTION
-    
-    bool isBreedEligible = (emotion.libido >= threshold && 
-                        actor->counters.mBreedingCoolDownCounter == 0 &&
-                        emotion.fear < UniversalConst.emotionalThreshold &&
-                        emotion.anger < UniversalConst.emotionalThreshold);
-    if (isBreedEligible) {
-        if (Random.Range(0.0f, 1.0f) < glm::pow(emotion.libido, threshold)) {
-            Actor* viableMate = nullptr;
-            for (Actor* candidate : actor->mTargets) {
-                if (!candidate || !candidate->isActive || candidate->isGarbage) continue;
-                if (candidate->physical.GetSexualOrientation() != actor->physical.GetSexualOrientation() &&
-                    candidate->physical.mAge >= candidate->physical.mAgeAdult &&
-                    candidate->physical.mAge < candidate->physical.mAgeSenior &&
-                    candidate->counters.GetCoolDownBreeding() == 0) {
-                    viableMate = candidate;
-                    break;
-                }
-            }
-            
-            if (viableMate != nullptr) {
-                // Lock active actor onto viableMate
-                actor->navigation.mTargetActor = viableMate;
-                actor->state.mode = ActorState::Mode::MoveBreed;
-                
-                glm::vec3 pos = actor->navigation.mPosition;
-                glm::vec3 tarPos = viableMate->navigation.mPosition;
-                float dist = glm::distance(glm::vec3(tarPos.x, 0.0f, tarPos.z), glm::vec3(pos.x, 0.0f, pos.z));
-                actor->navigation.mDistanceToTarget = dist;
-                
-                // Lock viableMate back onto the initiating actor
-                if (viableMate->state.mode != ActorState::Mode::MoveBreed) {
-                    viableMate->navigation.mTargetActor = actor;
-                    viableMate->state.mode = ActorState::Mode::MoveBreed;
-                    viableMate->navigation.mDistanceToTarget = dist;
-                }
-                
-                return true;
-            } else {
-                actor->counters.mBreedingCoolDownCounter = actor->behavior.mCooldownObserve;
-                actor->emotions.current.libido *= 0.5f;
-                actor->memories.ScaleEmotion(TriggerType::Libido, 0.5f);
-            }
-        }
-    }
-    
-    // =========================================================================
-    // WANDER / EXPLORATION
-    
-    if (emotion.curiosity >= threshold && actor->state.mode == ActorState::Mode::Idle) {
-        if (Random.Range(0.0f, 1.0f) < glm::pow(emotion.curiosity, threshold)) {
-            actor->state.mode = ActorState::Mode::MoveRandom;
-            CalculateRandomLocalPoint(actor);
-            actor->navigation.mDistanceToTarget = glm::distance(
-                glm::vec3(actor->navigation.mTargetPoint.x, 0.0f, actor->navigation.mTargetPoint.z),
-                glm::vec3(actor->navigation.mPosition.x, 0.0f, actor->navigation.mPosition.z)
-            );
-            return true;
-        }
-    }
-
-    return false;
 }

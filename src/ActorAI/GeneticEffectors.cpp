@@ -7,6 +7,8 @@
 #include <GameEngineFramework/Types/Types.h>
 #include <GameEngineFramework/Serialization/Serialization.h>
 
+#include <sstream>
+
 extern Serialization     Serializer;
 extern NumberGeneration  Random;
 extern ColorPreset       Colors;
@@ -157,17 +159,14 @@ std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
     AppendFloat(genetics, sourceActor->physical.GetSpeed(),            ':');
     AppendFloat(genetics, sourceActor->physical.GetSpeedMultiplier(),  ':');
     AppendFloat(genetics, sourceActor->physical.GetSpeedYouth(),       ':');
-    
     AppendFloat(genetics, sourceActor->physical.GetAdultAge(),         ':');
     AppendFloat(genetics, sourceActor->physical.GetSeniorAge(),        ':');
-    
     AppendFloat(genetics, sourceActor->physical.GetYouthScale(),       ':');
     AppendFloat(genetics, sourceActor->physical.GetAdultScale(),       ':');
     
     // Personality
     AppendFloat(genetics, sourceActor->behavior.GetPredatorState(),    ':');
     AppendFloat(genetics, sourceActor->behavior.GetPreyState(),        ':');
-    
     AppendFloat(genetics, sourceActor->behavior.GetDistanceToFocus(),  ':');
     AppendFloat(genetics, sourceActor->behavior.GetDistanceToWalk(),   ':');
     AppendFloat(genetics, sourceActor->behavior.GetDistanceToAttack(), ':');
@@ -183,17 +182,26 @@ std::string GeneticPresets::ExtractGenome(Actor* sourceActor) {
     AppendFloat(genetics, sourceActor->behavior.GetHeightPreferenceMin(), ':');
     AppendFloat(genetics, sourceActor->behavior.GetHeightPreferenceMax(), ':');
     
+    // Biological
+    AppendFloat(genetics, sourceActor->biological.healthMax, ':');
+    
+    // Animation
+    AppendFloat(genetics, sourceActor->animation.mWalkRate, ':');
+    
+    // Circadian rhythm
+    AppendFloat(genetics, sourceActor->sleep.mPreferredSleepStart, ':');
+    AppendFloat(genetics, sourceActor->sleep.mPreferredDuration, ':');
+    
     // Characteristics
     AppendUInt(genetics, static_cast<unsigned int>(sourceActor->genetics.GetGeneration()), ':');
     
+    // Sexual Orientation (0 = Male, 1 = Female) - end traits section without trailing colon
     if (sourceActor->physical.GetSexualOrientation() == true)
-        genetics += "0:";
+        genetics += "0";
     else
-        genetics += "1:";
+        genetics += "1";
     
-    AppendFloat(genetics, sourceActor->physical.GetAdultAge(), '\0');
-    
-    // Genes
+    // Genes (# delimited section)
     for (unsigned int i = 0; i < numberOfGenes; ++i) {
         Gene gene = sourceActor->genetics.GetGeneFromGenome(i);
         
@@ -284,58 +292,64 @@ bool GeneticPresets::InjectGenome(Actor* targetActor, const std::string& genome)
     std::size_t firstHash = genome.find('#');
     std::string traitsSection = (firstHash != std::string::npos) ? genome.substr(0, firstHash) : genome;
     
-    std::vector<std::string> traits = String.Explode(traitsSection, ':');
-    unsigned int numberOfTraits = static_cast<unsigned int>(traits.size());
+    // Stream reader helpers for cleaner sequential trait extraction
+    std::stringstream ss(traitsSection);
+    std::string token;
+    
+    auto nextString = [&ss, &token]() -> bool {
+        return static_cast<bool>(std::getline(ss, token, ':'));
+    };
+    auto nextFloat = [&]() -> float { return nextString() ? String.ToFloat(token) : 0.0f; };
+    auto nextUint  = [&]() -> unsigned int { return nextString() ? String.ToUint(token) : 0; };
+    
+    // Name
+    if (nextString()) targetActor->SetName(token);
     
     // Physical
-    if (numberOfTraits > 7) {
-        targetActor->SetName(traits[0]);
-        
-        targetActor->physical.SetSpeed(           String.ToFloat(traits[1]) );
-        targetActor->physical.SetSpeedMultiplier( String.ToFloat(traits[2]) );
-        targetActor->physical.SetSpeedYouth(      String.ToFloat(traits[3]) );
-        
-        targetActor->physical.SetAdultAge(  String.ToFloat(traits[4]) );
-        targetActor->physical.SetSeniorAge( String.ToFloat(traits[5]) );
-        
-        targetActor->physical.SetYouthScale( String.ToFloat(traits[6]) );
-        targetActor->physical.SetAdultScale( String.ToFloat(traits[7]) );
-    }
+    targetActor->physical.SetSpeed(nextFloat());
+    targetActor->physical.SetSpeedMultiplier(nextFloat());
+    targetActor->physical.SetSpeedYouth(nextFloat());
     
-    // Personality
-    if (numberOfTraits > 21) {
-        targetActor->behavior.SetPredatorState(       String.ToFloat(traits[8]) );
-        targetActor->behavior.SetPreyState(           String.ToFloat(traits[9]) );
-        
-        targetActor->behavior.SetDistanceToFocus(     String.ToFloat(traits[10]) );
-        targetActor->behavior.SetDistanceToWalk(      String.ToFloat(traits[11]) );
-        targetActor->behavior.SetDistanceToAttack(    String.ToFloat(traits[12]) );
-        targetActor->behavior.SetDistanceToFlee(      String.ToFloat(traits[13]) );
-        targetActor->behavior.SetDistanceToInflict(   String.ToFloat(traits[14]) );
-        
-        targetActor->behavior.SetCooldownAttack(      String.ToUint(traits[15]) );
-        targetActor->behavior.SetCooldownObserve(     String.ToUint(traits[16]) );
-        targetActor->behavior.SetCooldownSocial(      String.ToUint(traits[17]) );
-        targetActor->behavior.SetCooldownMove(        String.ToUint(traits[18]) );
-        targetActor->behavior.SetCooldownBreed(       String.ToUint(traits[19]) );
-        
-        targetActor->behavior.SetHeightPreferenceMin( String.ToFloat(traits[20]) );
-        targetActor->behavior.SetHeightPreferenceMax( String.ToFloat(traits[21]) );
-    }
+    targetActor->physical.SetAdultAge(nextFloat());
+    targetActor->physical.SetSeniorAge(nextFloat());
+    
+    targetActor->physical.SetYouthScale(nextFloat());
+    targetActor->physical.SetAdultScale(nextFloat());
+    
+    // Behavior & Personality
+    targetActor->behavior.SetPredatorState(nextFloat());
+    targetActor->behavior.SetPreyState(nextFloat());
+    
+    targetActor->behavior.SetDistanceToFocus(nextFloat());
+    targetActor->behavior.SetDistanceToWalk(nextFloat());
+    targetActor->behavior.SetDistanceToAttack(nextFloat());
+    targetActor->behavior.SetDistanceToFlee(nextFloat());
+    targetActor->behavior.SetDistanceToInflict(nextFloat());
+    
+    targetActor->behavior.SetCooldownAttack(nextUint());
+    targetActor->behavior.SetCooldownObserve(nextUint());
+    targetActor->behavior.SetCooldownSocial(nextUint());
+    targetActor->behavior.SetCooldownMove(nextUint());
+    targetActor->behavior.SetCooldownBreed(nextUint());
+    
+    targetActor->behavior.SetHeightPreferenceMin(nextFloat());
+    targetActor->behavior.SetHeightPreferenceMax(nextFloat());
+    
+    // Biological
+    targetActor->biological.healthMax = nextFloat();
+    
+    // Animation
+    targetActor->animation.mWalkRate = nextFloat();
+    
+    // Circadian rhythm
+    targetActor->sleep.mPreferredSleepStart  = nextFloat();
+    targetActor->sleep.mPreferredDuration    = nextFloat();
     
     // Characteristics
-    if (numberOfTraits > 24) {
-        targetActor->genetics.SetGeneration(String.ToUint(traits[22]));
-        
-        if (String.ToUint(traits[23]) == 0)
-            targetActor->physical.SetSexualOrientation(true);   // Male
-        else
-            targetActor->physical.SetSexualOrientation(false);  // Female
-        
-        targetActor->physical.mAgeAdult = String.ToFloat(traits[24]);
-    }
+    targetActor->genetics.SetGeneration(nextUint());
+    targetActor->physical.SetSexualOrientation(nextUint() == 0); // 0 = Male (true), 1 = Female (false)
     
-    // Extract genes from the genome string
+    // Gene Extraction
     std::vector<std::string> genes = String.Explode(genome, '#');
     unsigned int numberOfGenes = static_cast<unsigned int>(genes.size());
     
@@ -401,45 +415,81 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
     if (Random.Range(0, 100) > 50) 
         gradient = 1.0f;
     
-    // Distance parameters
-    float DistanceToFocusA  = parentA->behavior.GetDistanceToFocus();
-    float DistanceToAttackA = parentA->behavior.GetDistanceToAttack();
-    float DistanceToFleeA   = parentA->behavior.GetDistanceToFlee();
-    float DistanceToWalkA   = parentA->behavior.GetDistanceToWalk();
-    float HeightPrefMaxA    = parentA->behavior.GetHeightPreferenceMax();
-    float HeightPrefMinA    = parentA->behavior.GetHeightPreferenceMin();
+    // =========================================================================
+    // Behavior & Personality
     
-    float DistanceToFocusB  = parentB->behavior.GetDistanceToFocus();
-    float DistanceToAttackB = parentB->behavior.GetDistanceToAttack();
-    float DistanceToFleeB   = parentB->behavior.GetDistanceToFlee();
-    float DistanceToWalkB   = parentB->behavior.GetDistanceToWalk();
-    float HeightPrefMaxB    = parentB->behavior.GetHeightPreferenceMax();
-    float HeightPrefMinB    = parentB->behavior.GetHeightPreferenceMin();
+    float DistanceToFocusA   = parentA->behavior.GetDistanceToFocus();
+    float DistanceToAttackA  = parentA->behavior.GetDistanceToAttack();
+    float DistanceToFleeA    = parentA->behavior.GetDistanceToFlee();
+    float DistanceToWalkA    = parentA->behavior.GetDistanceToWalk();
+    float DistanceToInflictA = parentA->behavior.GetDistanceToInflict();
+    float HeightPrefMaxA     = parentA->behavior.GetHeightPreferenceMax();
+    float HeightPrefMinA     = parentA->behavior.GetHeightPreferenceMin();
     
-    float DistanceToFocus   = Float.Lerp(DistanceToFocusA,  DistanceToFocusB,   gradient);
-    float DistanceToAttack  = Float.Lerp(DistanceToAttackA, DistanceToAttackB,  gradient);
-    float DistanceToFlee    = Float.Lerp(DistanceToFleeA,   DistanceToFleeB,    gradient);
-    float DistanceToWalk    = Float.Lerp(DistanceToWalkA,   DistanceToWalkB,    gradient);
-    float HeightPrefMax     = Float.Lerp(HeightPrefMaxA,    HeightPrefMaxB,     gradient);
-    float HeightPrefMin     = Float.Lerp(HeightPrefMinA,    HeightPrefMinB,     gradient);
+    float DistanceToFocusB   = parentB->behavior.GetDistanceToFocus();
+    float DistanceToAttackB  = parentB->behavior.GetDistanceToAttack();
+    float DistanceToFleeB    = parentB->behavior.GetDistanceToFlee();
+    float DistanceToWalkB    = parentB->behavior.GetDistanceToWalk();
+    float DistanceToInflictB = parentB->behavior.GetDistanceToInflict();
+    float HeightPrefMaxB     = parentB->behavior.GetHeightPreferenceMax();
+    float HeightPrefMinB     = parentB->behavior.GetHeightPreferenceMin();
     
-    offspring->behavior.SetDistanceToFocus(DistanceToFocus);
-    offspring->behavior.SetDistanceToAttack(DistanceToAttack);
-    offspring->behavior.SetDistanceToFlee(DistanceToFlee);
-    offspring->behavior.SetDistanceToWalk(DistanceToWalk);
-    offspring->behavior.SetHeightPreferenceMax(HeightPrefMax);
-    offspring->behavior.SetHeightPreferenceMin(HeightPrefMin);
+    offspring->behavior.SetDistanceToFocus  (Float.Lerp(DistanceToFocusA,   DistanceToFocusB,   gradient));
+    offspring->behavior.SetDistanceToAttack (Float.Lerp(DistanceToAttackA,  DistanceToAttackB,  gradient));
+    offspring->behavior.SetDistanceToFlee   (Float.Lerp(DistanceToFleeA,    DistanceToFleeB,    gradient));
+    offspring->behavior.SetDistanceToWalk   (Float.Lerp(DistanceToWalkA,    DistanceToWalkB,    gradient));
+    offspring->behavior.SetDistanceToInflict(Float.Lerp(DistanceToInflictA, DistanceToInflictB, gradient));
+    offspring->behavior.SetHeightPreferenceMax(Float.Lerp(HeightPrefMaxA,   HeightPrefMaxB,     gradient));
+    offspring->behavior.SetHeightPreferenceMin(Float.Lerp(HeightPrefMinA,   HeightPrefMinB,     gradient));
     
-    // Physical
-    offspring->physical.mAgeAdult    = Float.Lerp(parentA->physical.mAgeAdult,    parentB->physical.mAgeAdult, gradient);
-    offspring->physical.mAgeSenior   = Float.Lerp(parentA->physical.mAgeSenior,   parentB->physical.mAgeSenior, gradient);
+    // Predator / Prey state
+    offspring->behavior.SetPredatorState(gradient > 0.5f ? parentB->behavior.GetPredatorState() : parentA->behavior.GetPredatorState());
+    offspring->behavior.SetPreyState    (gradient > 0.5f ? parentB->behavior.GetPreyState()     : parentA->behavior.GetPreyState());
     
-    offspring->physical.mSpeed       = Float.Lerp(parentA->physical.mSpeed,       parentB->physical.mSpeed, gradient);
-    offspring->physical.mSnapSpeed   = Float.Lerp(parentA->physical.mSnapSpeed,   parentB->physical.mSnapSpeed, gradient);
-    offspring->physical.mSpeedMul    = Float.Lerp(parentA->physical.mSpeedMul,    parentB->physical.mSpeedMul, gradient);
-    offspring->physical.mSpeedYouth  = Float.Lerp(parentA->physical.mSpeedYouth,  parentB->physical.mSpeedYouth, gradient);
-    offspring->physical.mYouthScale  = Float.Lerp(parentA->physical.mYouthScale,  parentB->physical.mYouthScale, gradient);
-    offspring->physical.mAdultScale  = Float.Lerp(parentA->physical.mAdultScale,  parentB->physical.mAdultScale, gradient);
+    // Behavioral Cooldowns
+    offspring->behavior.SetCooldownAttack (static_cast<unsigned int>(Float.Lerp(parentA->behavior.GetCooldownAttack(),  parentB->behavior.GetCooldownAttack(),  gradient)));
+    offspring->behavior.SetCooldownObserve(static_cast<unsigned int>(Float.Lerp(parentA->behavior.GetCooldownObserve(), parentB->behavior.GetCooldownObserve(), gradient)));
+    offspring->behavior.SetCooldownSocial (static_cast<unsigned int>(Float.Lerp(parentA->behavior.GetCooldownSocial(),  parentB->behavior.GetCooldownSocial(),  gradient)));
+    offspring->behavior.SetCooldownMove   (static_cast<unsigned int>(Float.Lerp(parentA->behavior.GetCooldownMove(),    parentB->behavior.GetCooldownMove(),    gradient)));
+    offspring->behavior.SetCooldownBreed  (static_cast<unsigned int>(Float.Lerp(parentA->behavior.GetCooldownBreed(),   parentB->behavior.GetCooldownBreed(),   gradient)));
+    
+    // =========================================================================
+    // Circadian Rhythm
+    
+    float preferredSleepStart = Float.Lerp(parentA->sleep.GetPreferredSleepStart(), parentB->sleep.GetPreferredSleepStart(), gradient);
+    float preferredDuration   = Float.Lerp(parentA->sleep.GetPreferredDuration(),   parentB->sleep.GetPreferredDuration(),   gradient);
+    float entrainmentRate     = Float.Lerp(parentA->sleep.GetEntrainmentRate(),     parentB->sleep.GetEntrainmentRate(),     gradient);
+    
+    offspring->sleep.SetPreferredSleepStart(preferredSleepStart);
+    offspring->sleep.SetPreferredDuration(preferredDuration);
+    offspring->sleep.SetEntrainmentRate(entrainmentRate);
+    
+    // Initialize starting state to the inherited baseline schedule
+    offspring->sleep.SetCurrentSleepStart(preferredSleepStart);
+    offspring->sleep.SetCurrentDuration(preferredDuration);
+    
+    // =========================================================================
+    // Animation & Biological
+    
+    offspring->animation.mWalkRate   = Float.Lerp(parentA->animation.mWalkRate, parentB->animation.mWalkRate, gradient);
+    
+    offspring->biological.healthMax  = Float.Lerp(parentA->biological.healthMax,  parentB->biological.healthMax,  gradient);
+    offspring->biological.health     = offspring->biological.healthMax;
+    offspring->biological.strength   = Float.Lerp(parentA->biological.strength,   parentB->biological.strength,   gradient);
+    offspring->biological.defense    = Float.Lerp(parentA->biological.defense,    parentB->biological.defense,    gradient);
+    
+    // =========================================================================
+    // Physical Attributes
+    
+    offspring->physical.mAgeAdult    = Float.Lerp(parentA->physical.mAgeAdult,    parentB->physical.mAgeAdult,    gradient);
+    offspring->physical.mAgeSenior   = Float.Lerp(parentA->physical.mAgeSenior,   parentB->physical.mAgeSenior,   gradient);
+    
+    offspring->physical.mSpeed       = Float.Lerp(parentA->physical.mSpeed,       parentB->physical.mSpeed,       gradient);
+    offspring->physical.mSnapSpeed   = Float.Lerp(parentA->physical.mSnapSpeed,   parentB->physical.mSnapSpeed,   gradient);
+    offspring->physical.mSpeedMul    = Float.Lerp(parentA->physical.mSpeedMul,    parentB->physical.mSpeedMul,    gradient);
+    offspring->physical.mSpeedYouth  = Float.Lerp(parentA->physical.mSpeedYouth,  parentB->physical.mSpeedYouth,  gradient);
+    offspring->physical.mYouthScale  = Float.Lerp(parentA->physical.mYouthScale,  parentB->physical.mYouthScale,  gradient);
+    offspring->physical.mAdultScale  = Float.Lerp(parentA->physical.mAdultScale,  parentB->physical.mAdultScale,  gradient);
     
     // Increment generation based on the maximum parent generation
     unsigned int maxParentGen = std::max(parentA->genetics.GetGeneration(), parentB->genetics.GetGeneration()) + 1;
@@ -454,12 +504,24 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
     
     // Inheritance bias
     offspring->genetics.mGenes.clear();
-    for (unsigned int i=0; i < numberOfGenesA; i++) {
-        if (Random.Range(0, 100) > 50) 
-            {gradient = 0.0f;} else {gradient = 1.0f;}
+    std::vector<float> geneGradients(numberOfGenesA, 0.0f);
+    
+    for (unsigned int i = 0; i < numberOfGenesA; i++) {
+        float geneGradient = (Random.Range(0, 100) > 50) ? 0.0f : 1.0f;
+        
+        // If this gene links to an earlier gene via scaleIndex, inherit from the same parent
+        unsigned int scaleIndex = parentA->genetics.mGenes[i].scaleIndex;
+        if (scaleIndex > 0) {
+            unsigned int parentGeneIndex = scaleIndex - 1;
+            if (parentGeneIndex < i) {
+                geneGradient = geneGradients[parentGeneIndex];
+            }
+        }
+        
+        geneGradients[i] = geneGradient;
         
         Gene geneticVariant = Lerp(parentA->genetics.mGenes[i], 
-                                   parentB->genetics.mGenes[i], gradient);
+                                parentB->genetics.mGenes[i], geneGradient);
         offspring->genetics.mGenes.push_back(geneticVariant);
     }
     
@@ -500,13 +562,19 @@ bool GeneticPresets::BlendGenomes(Actor* parentA, Actor* parentB, Actor* offspri
                 unsigned int j = gene.scaleIndex - 1; // 1-based -> 0-based
                 if (j < numberOfGenes && j != i) {
                     Gene& parent = offspring->genetics.mGenes[j];
-                    // Copy parent scale (genotype scale)
+                    // Copy parent scale (genotype scale) and expression attributes
                     if (gene.scale.x != parent.scale.x || 
                         gene.scale.y != parent.scale.y || 
-                        gene.scale.z != parent.scale.z) {
+                        gene.scale.z != parent.scale.z ||
+                        gene.expressionFactor != parent.expressionFactor ||
+                        gene.expressionMax != parent.expressionMax ||
+                        gene.expressionAge != parent.expressionAge) {
                         gene.scale.x = parent.scale.x;
                         gene.scale.y = parent.scale.y;
                         gene.scale.z = parent.scale.z;
+                        gene.expressionFactor = parent.expressionFactor;
+                        gene.expressionMax = parent.expressionMax;
+                        gene.expressionAge = parent.expressionAge;
                         wasChanged = true;
                     }
                 } else {
@@ -527,36 +595,229 @@ void GeneticPresets::ClearGenes(Actor* actorPtr) {
 }
 
 void GeneticPresets::ExposeToRadiation(Actor* actorPtr, float radiationAmount) {
+    if (!actorPtr || actorPtr->genetics.mGenes.empty()) 
+        return;
     
-    float radiation = Random.Range(0.0f, radiationAmount) - Random.Range(0.0f, radiationAmount);
+    // Radiation input and scale bounds
+    const float kMaxRadiationCap        = 2.45f;
+    const float kMinScaleClamp          = 0.01f;
+    const float kMaxScaleClamp          = 2.0f;
+    
+    // Skeletal posture and distortion multipliers
+    const float kHunchIntensity         = 1.0f;
+    const float kTwistIntensity         = 1.0f;
+    const float kAsymmetryIntensity     = 1.0f;
+    const float kBodyBulgeIntensity     = 0.3f;
+    const float kLimbSplayIntensity     = 1.0f;
+    
+    // Locomotion and animation multipliers
+    const float kGaitBreakChance        = 30.0f;
+    const float kGaitSwingScale         = 1.0f;
+    
+    // Palette shift modifiers
+    const float kRedDampenMultiplier    = 1.001f;
+    const float kGreenTintMultiplier    = 1.003f;
+    const float kBlueDampenMultiplier   = 1.002f;
+    
+    // Biological inflammation multiplier
+    const float kInflammationMultiplier = 1.0f;
+    
+    // Random genetic noise multiplier
+    const float kRandomNoiseIntensity   = 60.0f;
+    
+    // Growth spawning and maturation parameters
+    const float kGrowthChance           = 60.0f;
+    const float kGrowthSurfaceChance    = 80.0f;
+    const unsigned int kMaxGrowthSpawns = 3;
+    const unsigned int kMaxGenomeSize   = 64;
+    const float kGrowthScaleRatioMin    = 0.35f;
+    const float kGrowthScaleRatioMax    = 0.85f;
+    const float kGrowthAgeDelayMin      = 0;
+    const float kGrowthAgeDelayMax      = actorPtr->physical.mAgeSenior;
+    
+    // Its stronger than you think
+    radiationAmount *= 0.1f;
     
     unsigned int numberOfGenes = actorPtr->genetics.mGenes.size();
+    float radNorm = glm::clamp(radiationAmount * 0.1f, 0.0f, kMaxRadiationCap);
     
-    for (unsigned int i=0; i < numberOfGenes; i++) {
-        
+    // Deformity parameters
+    float globalHunch = Random.Range(0.1f, 0.4f) * radNorm * kHunchIntensity;
+    float globalTwist = Random.Range(-0.35f, 0.35f) * radNorm * kTwistIntensity;
+    bool breakGait    = (Random.Range(0, 100) < static_cast<int>(kGaitBreakChance * radNorm));
+    
+    // Asymmetric hypertrophy bias
+    bool asymmetryBias = (Random.Range(0, 100) > 50);
+    
+    for (unsigned int i = 0; i < numberOfGenes; i++) {
         Gene& gene = actorPtr->genetics.mGenes[i];
         
-        gene.offset.x += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
-        gene.offset.y += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
-        gene.offset.z += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
+        // Lateral positioning
+        float lateralPos = gene.position.x + gene.offset.x;
+        bool isLeft  = lateralPos < -0.05f;
+        bool isRight = lateralPos > 0.05f;
         
-        gene.position.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.position.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.position.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        // Asymmetric scale modification
+        float scaleMod = 1.0f;
+        if (isLeft) {
+            scaleMod = asymmetryBias ? (1.0f + Random.Range(0.2f, 0.8f) * radNorm * kAsymmetryIntensity) 
+                                     : (1.0f / (1.0f + Random.Range(0.2f, 0.5f) * radNorm * kAsymmetryIntensity));
+        } else if (isRight) {
+            scaleMod = (!asymmetryBias) ? (1.0f + Random.Range(0.2f, 0.8f) * radNorm * kAsymmetryIntensity) 
+                                        : (1.0f / (1.0f + Random.Range(0.2f, 0.5f) * radNorm * kAsymmetryIntensity));
+        } else {
+            // Central body bulging
+            gene.scale.x *= (1.0f + Random.Range(-0.2f, 0.6f) * radNorm * kBodyBulgeIntensity);
+            gene.scale.z *= (1.0f + Random.Range(-0.2f, 0.6f) * radNorm * kBodyBulgeIntensity);
+            gene.scale.y *= (1.0f - Random.Range(0.1f, 0.3f) * radNorm * kBodyBulgeIntensity);
+        }
         
-        gene.rotation.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.rotation.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.rotation.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        // Apply scale clamping with minimum bound
+        gene.scale.x = glm::clamp(gene.scale.x * scaleMod, kMinScaleClamp, kMaxScaleClamp);
+        gene.scale.y = glm::clamp(gene.scale.y * scaleMod, kMinScaleClamp, kMaxScaleClamp);
+        gene.scale.z = glm::clamp(gene.scale.z * scaleMod, kMinScaleClamp, kMaxScaleClamp);
         
-        gene.scale.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.scale.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
-        gene.scale.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100)) * 0.001f) * radiation;
+        // Skeletal offsets and joint displacement
+        if (gene.animationType == ActorState::Animation::Head) {
+            gene.offset.y -= globalHunch * 0.4f;
+            gene.offset.z += globalHunch * 0.5f;
+            gene.rotation.x += globalHunch;
+            gene.rotation.z += globalTwist;
+        } else if (gene.animationType == ActorState::Animation::Body) {
+            gene.offset.y -= globalHunch * 0.2f;
+            gene.rotation.x += globalHunch * 0.5f;
+            gene.rotation.y += globalTwist * 0.5f;
+        } else if (gene.animationType == ActorState::Animation::Limb || 
+                   gene.animationType == ActorState::Animation::LimbHolding) {
+            gene.rotation.z += (isLeft ? -1.0f : 1.0f) * Random.Range(0.1f, 0.4f) * radNorm * kLimbSplayIntensity;
+            gene.rotation.x += Random.Range(-0.2f, 0.2f) * radNorm * kLimbSplayIntensity;
         
-        gene.color.x += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
-        gene.color.y += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
-        gene.color.z += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100)) * 0.0001f) * radiation;
+            // Gait desynchronization
+            if (breakGait && Random.Range(0, 100) < 50) {
+                gene.animationRange *= Random.Range(0.3f * kGaitSwingScale, 1.8f * kGaitSwingScale);
+                if (Random.Range(0, 100) < 25) {
+                    gene.doInverseAnimation = !gene.doInverseAnimation;
+                }
+            }
+        }
         
+        // Sickly palette shift
+        gene.color.x = glm::clamp(gene.color.x * (1.0f - kRedDampenMultiplier * radNorm * 0.1f), 0.0f, 1.0f);
+        gene.color.y = glm::clamp(gene.color.y * (1.0f + kGreenTintMultiplier * radNorm * 0.1f), 0.0f, 1.0f);
+        gene.color.z = glm::clamp(gene.color.z * (1.0f - kBlueDampenMultiplier * radNorm * 0.1f), 0.0f, 1.0f);
+        
+        // Random genetic noise
+        if (kRandomNoiseIntensity > 0.0f) {
+            float noise = (Random.Range(0.0f, radNorm * 0.1f) - Random.Range(0.0f, radNorm * 0.1f)) * kRandomNoiseIntensity;
+            
+            gene.offset.x += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100) * 0.0001f)) * noise * 0.3f;
+            gene.offset.y += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100) * 0.0001f)) * noise * 0.3f;
+            gene.offset.z += ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100) * 0.0001f)) * noise * 0.3f;
+            
+            gene.position.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100) * 0.001f)) * noise * 0.3f;
+            gene.position.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100) * 0.001f)) * noise * 0.3f;
+            gene.position.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100) * 0.001f)) * noise * 0.3f;
+            
+            gene.rotation.x += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100) * 0.001f)) * noise * 16.0f;
+            gene.rotation.y += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100) * 0.001f)) * noise * 16.0f;
+            gene.rotation.z += ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100) * 0.001f)) * noise * 16.0f;
+            
+            gene.scale.x = glm::clamp(gene.scale.x + ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100) * 0.001f)) * noise, kMinScaleClamp, kMaxScaleClamp);
+            gene.scale.y = glm::clamp(gene.scale.y + ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100) * 0.001f)) * noise, kMinScaleClamp, kMaxScaleClamp);
+            gene.scale.z = glm::clamp(gene.scale.z + ((Random.Range(0, 100) * 0.001f) - (Random.Range(0, 100) * 0.001f)) * noise, kMinScaleClamp, kMaxScaleClamp);
+            
+            gene.color.x = glm::clamp(gene.color.x + ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100) * 0.0001f)) * noise, 0.0f, 1.0f);
+            gene.color.y = glm::clamp(gene.color.y + ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100) * 0.0001f)) * noise, 0.0f, 1.0f);
+            gene.color.z = glm::clamp(gene.color.z + ((Random.Range(0, 100) * 0.0001f) - (Random.Range(0, 100) * 0.0001f)) * noise, 0.0f, 1.0f);
+        }
+        
+        // Biological inflammation
+        if (i < actorPtr->biological.mBiologics.size()) {
+            actorPtr->biological.mBiologics[i].inflammation += Random.Range(0.05f, 0.25f) * radNorm * kInflammationMultiplier;
+            actorPtr->biological.mBiologics[i].tint.y += 0.1f * radNorm * kGreenTintMultiplier;
+        }
     }
+    
+    // Bulbous growths and structural malformations
+    if (Random.Range(0, 100) < static_cast<int>(kGrowthChance * radNorm * 10.0f) && numberOfGenes < kMaxGenomeSize) {
+        unsigned int growthsToSpawn = static_cast<unsigned int>(Random.Range(1.0f, static_cast<float>(kMaxGrowthSpawns)));
+        
+        for (unsigned int g = 0; g < growthsToSpawn && actorPtr->genetics.mGenes.size() < kMaxGenomeSize; g++) {
+            // Select random host gene to spawn from
+            unsigned int hostIndex = static_cast<unsigned int>(Random.Range(0.0f, static_cast<float>(numberOfGenes - 1)));
+            const Gene& host = actorPtr->genetics.mGenes[hostIndex];
+            
+            // Base growth configuration matched directly to host kinematics
+            Gene growth = host;
+            
+            // Age dependent expression matching sexual attribute morphology
+            growth.form             = actorPtr->physical.GetSexualOrientation() ? ActorState::Genetic::Male : ActorState::Genetic::Female;
+            growth.expressionAge    = Random.Range(kGrowthAgeDelayMin, kGrowthAgeDelayMax);
+            growth.expressionFactor = Random.Range(1.2f, 1.5f);
+            growth.expressionMax    = 1.8f;
+            growth.doExpress        = true;
+            growth.scaleIndex       = 0;
+            growth.colorIndex       = 0;
+            
+            // Form a cubic growth scaled from host limb thickness
+            float hostThickness = (host.scale.x + host.scale.z) * 0.5f;
+            float cubeDimension = hostThickness * Random.Range(kGrowthScaleRatioMin, kGrowthScaleRatioMax) * radNorm;
+            cubeDimension = glm::clamp(cubeDimension, kMinScaleClamp, kMaxScaleClamp);
+            
+            growth.scale = Codon(
+                glm::clamp(cubeDimension * Random.Range(0.9f, 1.1f), kMinScaleClamp, kMaxScaleClamp),
+                glm::clamp(cubeDimension * Random.Range(0.9f, 1.1f), kMinScaleClamp, kMaxScaleClamp),
+                glm::clamp(cubeDimension * Random.Range(0.9f, 1.1f), kMinScaleClamp, kMaxScaleClamp)
+            );
+            
+            // Radial orientation along host cross section
+            float angle = Random.Range(0.0f, glm::two_pi<float>());
+            
+            // Determine surface vs internal distribution
+            bool isSurfaceGrowth = (Random.Range(0.0f, 100.0f) < kGrowthSurfaceChance);
+            float surfaceDistance = isSurfaceGrowth 
+                ? Random.Range(0.75f, 1.05f) 
+                : Random.Range(0.05f, 0.45f);
+            
+            float lateralOffsetX = std::cos(angle) * (host.scale.x * 0.5f) * surfaceDistance;
+            float lateralOffsetZ = std::sin(angle) * (host.scale.z * 0.5f) * surfaceDistance;
+            float verticalOffset = Random.Range(-host.scale.y * 0.35f, host.scale.y * 0.35f);
+            
+            growth.position = Codon(
+                host.position.x + lateralOffsetX,
+                host.position.y + verticalOffset,
+                host.position.z + lateralOffsetZ
+            );
+            
+            // Discoloration derived from host pigmentation
+            growth.color.x = glm::clamp(host.color.x * 0.8f + (0.1f * radNorm), 0.0f, 1.0f);
+            growth.color.y = glm::clamp(host.color.y * (1.0f + kGreenTintMultiplier * radNorm), 0.0f, 1.0f);
+            growth.color.z = glm::clamp(host.color.z * 0.5f, 0.0f, 1.0f);
+            
+            actorPtr->genetics.AddGene(growth);
+            
+            // Dormant scale phenotype before reaching expression age
+            Phen phen;
+            float dormantScale = isSurfaceGrowth 
+                ? Random.Range(0.15f, 0.35f) 
+                : Random.Range(0.05f, 0.15f);
+            phen.scale = Codon(dormantScale, dormantScale, dormantScale);
+            actorPtr->genetics.mPhen.push_back(phen);
+            
+            // Biological inflammation overlay
+            Bio bio;
+            bio.inflammation = Random.Range(0.05f, 0.3f) * radNorm * kInflammationMultiplier;
+            bio.tint.y = 0.15f * radNorm * kGreenTintMultiplier;
+            actorPtr->biological.mBiologics.push_back(bio);
+        }
+        
+        // Rebuild renderer list for newly added geometry
+        actorPtr->genetics.mDoUpdateGenetics = true;
+    }
+    
+    // Rebuild genetic expression and collision bounding volume
+    actorPtr->RebuildGeneticExpression();
+    actorPtr->CalculateBoundingRegionFromGenome();
 }
 
 Gene GeneticPresets::Lerp(Gene geneA, Gene geneB, float bias) {

@@ -15,50 +15,49 @@ extern ProfilerTimer Profiler;
 extern bool isActorThreadActive;
 extern bool doUpdate;
 
-extern int tickCounter;
-
-
-void ActorSystem::Update(void) {
-    if (mAnimationTimer.Update()) 
-        UpdateFast();
-    
-    if (mMainTimer.Update()) 
-        UpdateTick();
-}
-
-
 void ActorSystem::UpdateFast() {
-    std::lock_guard<std::mutex> lock(Renderer.mux);
-    
     unsigned int numberOfActors = mActiveActors.size();
+    mFrameTimeCurrent = mainTimer.GetCurrentDelta();
+    
     for (unsigned int i = 0; i < numberOfActors; i++) {
         Actor* actor = mActiveActors[i];
+        std::lock_guard<std::mutex> lock(actor->mux);
+        
+        // Skip physical locomotion and body yaw turning while frozen
+        if (actor->state.mode != ActorState::Mode::Frozen) {
+            HandleMovementMechanics(actor);
+            UpdateTargetRotation(actor);
+            HandleVitality(actor);
+        } else {
+            actor->navigation.mVelocity = glm::vec3(0.0f);
+            actor->state.mIsWalking = false;
+            actor->state.mIsRunning = false;
+        }
         
         if (actor->isGarbage || !actor->isActive) 
             continue;
         
-        // Cycle the animation states
-        UpdateAnimationState(actor);
+        {
+            std::lock_guard<std::mutex> lock(Renderer.mux);
+            
+            // Keep animations and gene rendering active so edits appear immediately
+            UpdateAnimationState(actor);
+            
+            float distance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
+            if (distance > mActorUpdateDistance / 2.0f) 
+                continue;
+            
+            UpdateActorGenetics(actor);
+            ExpressActorGenetics(actor);
+            UpdateActorInventory(actor);
+        }
         
-        float distance = glm::distance(mPlayerPosition, actor->navigation.mPosition);
-        if (distance > mActorUpdateDistance / 2.0f) 
-            continue;
-        
-        // Genetic expression update
-        UpdateActorGenetics(actor);
-        ExpressActorGenetics(actor);
-        
-        // Inventory selection
-        UpdateActorInventory(actor);
-        
-        // Update actor mechanical / locomotion
-        HandleMovementMechanics(actor);
-        
-        // Target tracking orientations
-        UpdateTargetRotation(actor);
-        
-        // Handle death and health effects
-        HandleVitality(actor);
+        // Skip physical locomotion and body yaw turning while frozen
+        if (actor->state.mode != ActorState::Mode::Frozen) {
+            HandleMovementMechanics(actor);
+            UpdateTargetRotation(actor);
+            HandleVitality(actor);
+        }
     }
 }
 
@@ -66,6 +65,8 @@ void ActorSystem::UpdateTick(void) {
     unsigned int numberOfActors = mActors.Size();
     for (unsigned int i = 0; i < numberOfActors; i++) {
         Actor* actor = mActors[i];
+        std::lock_guard<std::mutex> lock(actor->mux);
+        
         if (actor->isGarbage || !actor->isActive) 
             continue;
         
@@ -78,46 +79,8 @@ void ActorSystem::UpdateTick(void) {
         
         actor->mUpdateCounter++;
         
-        if ((actor->mUpdateCounter % 5) == 0) 
+        if ((actor->mUpdateCounter % 5) == 0) {
             actor->physical.mAge++;
-        
-        // Get actor sentience score and emotional state
-        const std::vector<MemoryTrigger>& sentienceList = actor->memories.mMemoryTriggers["sentience"];
-        float sentientScore = !sentienceList.empty() ? sentienceList[0].value : 0.0f;
-        EmotionalEmbedding& emotion = actor->emotions.current;
-        
-        //
-        // 
-        
-        if ((actor->mUpdateCounter % 20) == 0) {
-            HandleCooldownCounters(actor);
-            
-            // Run neural state update
-            UpdateActorState(actor, emotion, sentientScore);
-            
-            // Target observation
-            UpdateGazeTarget(actor);
-            
-            // Compile list of nearby actors
-            UpdateTargetingMechanics(actor);
-            
-            // Evaluate Thought Matrix across targets
-            UpdateThoughtMatrix(actor, emotion, sentientScore);
-            
-            // Process interactable items in the immediate surroundings
-            const float interactionRange = 3.0f;
-            UpdateEnvironmentalDomain(actor, interactionRange);
-            
-        }
-        
-        if (actor->mUpdateCounter > 40) {
-            actor->mUpdateCounter = 0;
-            
-            // Process behavioral idiosyncrasies
-            ProcessMemoryTriggers(actor, emotion);
-            
-            // Check update memories
-            actor->memories.UpdateMemories();
             
             // Trigger physical expression if the expression age was achieved
             unsigned int numberOfGenes = actor->genetics.GetNumberOfGenes();
@@ -126,6 +89,22 @@ void ActorSystem::UpdateTick(void) {
                     actor->RebuildGeneticExpression();
             }
         }
+        
+        if ((actor->mUpdateCounter % 20) == 0) {
+            HandleCooldownCounters(actor);
+            
+            // Target observation
+            if (actor->state.mode != ActorState::Mode::Frozen) {
+                UpdateGazeTarget(actor);
+            }
+        }
+        
+        if (actor->mUpdateCounter > 40) {
+            
+            actor->RebuildGeneticExpression();
+            actor->mUpdateCounter = 0;
+        }
+        
     }
     
     // Garbage collection pass
@@ -133,10 +112,40 @@ void ActorSystem::UpdateTick(void) {
         Actor* actor = mActors[i];
         UpdateGarbageCollection(actor);
     }
-    
-    // Flush and clear debug renderer for the next frame
-    if (mDebugLineRenderer) {
-        std::lock_guard<std::mutex> lock(Renderer.mux);
-    }
 }
 
+void ActorSystem::UpdateThinking(void) {
+    unsigned int numberOfActors = mActiveActors.size();
+    for (unsigned int i = 0; i < numberOfActors; i++) {
+        Actor* actor = mActiveActors[i];
+        std::lock_guard<std::mutex> lock(actor->mux);
+        
+        if (actor->isGarbage || !actor->isActive || actor->state.mode == ActorState::Mode::Frozen)
+            continue;
+        
+        actor->mThoughtCounter++;
+        if (actor->mThoughtCounter > 40) {
+            actor->mThoughtCounter = 0;
+            
+            // Get actor sentience score and emotional state
+            const std::vector<MemoryTrigger>& sentienceList = actor->memories.mMemoryTriggers["sentience"];
+            float sentientScore = !sentienceList.empty() ? sentienceList[0].value : 0.0f;
+            EmotionalEmbedding& emotion = actor->emotions.current;
+            
+            // Compile list of nearby actors
+            UpdateTargetingMechanics(actor);
+            
+            // Run neural state update
+            UpdateActorState(actor, emotion, sentientScore);
+            
+            // Evaluate Thought Matrix across targets
+            UpdateThoughtMatrix(actor, emotion, sentientScore);
+            
+            // Process behavioral idiosyncrasies
+            ProcessMemoryTriggers(actor, emotion);
+            
+            // Check update memories
+            actor->memories.UpdateMemories();
+        }
+    }
+}

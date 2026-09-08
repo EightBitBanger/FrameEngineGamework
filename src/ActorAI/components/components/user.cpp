@@ -6,6 +6,12 @@ UserVariables::UserVariables() :
     mUserDataB(nullptr)
 {}
 
+void UserVariables::Reset() {
+    mBitmask    = 0;
+    mUserDataA  = nullptr;
+    mUserDataB  = nullptr;
+}
+
 void UserVariables::SetUserDataA(void* ptr) {
     mUserDataA = ptr;
 }

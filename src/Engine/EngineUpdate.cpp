@@ -8,8 +8,6 @@ extern IntType Int;
 
 extern ProfilerTimer Profiler;
 
-int lastKey;
-
 void EngineSystemManager::Update(void) {
     
     // Update command console

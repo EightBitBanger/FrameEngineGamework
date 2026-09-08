@@ -19,6 +19,26 @@ Behavior::Behavior() :
 	mHeightPreferenceMax(0)
 {}
 
+void Behavior::Reset() {
+    mIsPredator    = false;
+    mIsPrey        = false;
+    
+    mDistanceToFocus      = 50.0f;
+    mDistanceToWalk       = 30.0f;
+    mDistanceToAttack     = 30.0f;
+    mDistanceToFlee       = 20.0f;
+    mDistanceToInflict    = 5.24f;
+    
+    mCooldownAttack       = 2;
+    mCooldownObserve      = 8;
+    mCooldownSocial       = 3;
+    mCooldownMove         = 8;
+    mCooldownBreed        = 220;
+    
+    mHeightPreferenceMin  = 0.0f;
+    mHeightPreferenceMax  = 1000.0f;
+}
+
 void Behavior::SetDistanceToFocus(float distance) {
     mDistanceToFocus = distance;
 }

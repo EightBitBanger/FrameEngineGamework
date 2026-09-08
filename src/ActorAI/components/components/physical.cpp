@@ -7,11 +7,24 @@ PhysicalAttributes::PhysicalAttributes() :
     mSpeed(0),
     mSpeedYouth(0),
     mSpeedMul(0),
-    mSnapSpeed(0.07f),
+    mSnapSpeed(1.4f),
     mYouthScale(1),
     mAdultScale(1),
     mSexualOrientation(false)
 {}
+
+void PhysicalAttributes::Reset() {
+    mAge            = 0;
+    mAgeAdult       = 20000.0f;
+    mAgeSenior      = 70000.0f;
+    mSpeed          = 1.5f;
+    mSpeedYouth     = 0.8f;
+    mSpeedMul       = 1.3f;
+    mSnapSpeed      = 1.4f;
+    mYouthScale     = 0.5f;
+    mAdultScale     = 1.0f;
+    mSexualOrientation = false;
+}
 
 void PhysicalAttributes::SetAge(unsigned long int newAge) {
     mAge = newAge;

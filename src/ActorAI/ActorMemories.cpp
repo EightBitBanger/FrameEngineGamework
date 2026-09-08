@@ -48,6 +48,15 @@ void ActorSystem::ShareMemories(Actor* source, Actor* target) {
     candidates.clear();
     for (std::unordered_map<std::string, std::string>::iterator it = source->memories.mMemories.begin(); it != source->memories.mMemories.end(); ++it) {
         const std::string& key = it->first;
+        
+        // Prevent memories from spreading through conversation
+        if (key == "trade" || 
+            key == "name" || 
+            key == "sentience" || 
+            key == "family") {
+            continue;
+        }
+        
         TriggerType type = StringToTriggerType(key);
         
         if (IsMemoryShareable(type) && !target->memories.CheckExists(key)) {
@@ -107,21 +116,73 @@ bool ActorSystem::HandleSocializeWith(Actor* actor, Actor* target) {
         sentienceB = itB->second[0].value;
     }
     
-    // Maximum allowed difference in sentience to exchange memories
-    const float maxSentienceDelta = 0.3f; 
+    const float maxSentienceDelta = 0.1f; 
     
-    // Only allow sharing if the gap between their sentience levels is within range
     if (std::abs(sentienceA - sentienceB) <= maxSentienceDelta) {
-        // Extract emotional values for the acting actor
         float comfort = actor->emotions.GetComfort();
         float anger = actor->emotions.current.anger;
         
-        // Comfort increases success chance, while anger acts as a direct penalty
         float shareProbability = glm::clamp(comfort - anger, 0.0f, 1.0f);
         if (Random.Range(0.0f, 1.0f) < shareProbability) {
             ShareMemories(actor, target);
             ShareMemories(target, actor);
         }
+    }
+    
+    // =========================================================================
+    // INVENTORY / FOOD SHARING LOGIC
+    // =========================================================================
+    auto TransferFoodSurplus = [](Actor* giver, Actor* receiver) {
+        const std::string& giverTrade = giver->memories.Get("trade");
+        bool isFarmer = (!giverTrade.empty() && giverTrade.rfind("farmer:", 0) == 0);
+        
+        // Farmers reserve at least 2 crops as seed stock; others reserve at least 1 food item
+        size_t reserveCount = isFarmer ? 2 : 1;
+        
+        std::vector<unsigned int> foodIndices;
+        for (unsigned int i = 0; i < giver->inventory.itemClassList.size(); ++i) {
+            const std::string& itemStr = giver->inventory.itemClassList[i];
+            if (itemStr.find("crop") != std::string::npos || itemStr.find("saturation") != std::string::npos) {
+                foodIndices.push_back(i);
+            }
+        }
+        
+        if (foodIndices.size() <= reserveCount) {
+            return;
+        }
+        
+        // Transfer up to half of surplus food
+        size_t surplus = foodIndices.size() - reserveCount;
+        size_t itemsToGive = std::max<size_t>(1, surplus / 2);
+        
+        for (size_t k = 0; k < itemsToGive && !foodIndices.empty(); ++k) {
+            unsigned int itemIndex = foodIndices.back();
+            foodIndices.pop_back();
+        
+            std::string itemClassification = giver->inventory.itemClassList[itemIndex];
+            giver->inventory.RemoveItem(itemIndex);
+            receiver->inventory.AddItem(itemClassification);
+        }
+    };
+    
+    size_t foodCountA = 0;
+    for (const std::string& itemStr : actor->inventory.itemClassList) {
+        if (itemStr.find("crop") != std::string::npos || itemStr.find("saturation") != std::string::npos) {
+            foodCountA++;
+        }
+    }
+    
+    size_t foodCountB = 0;
+    for (const std::string& itemStr : target->inventory.itemClassList) {
+        if (itemStr.find("crop") != std::string::npos || itemStr.find("saturation") != std::string::npos) {
+            foodCountB++;
+        }
+    }
+    
+    if (foodCountA > foodCountB + 1) {
+        TransferFoodSurplus(actor, target);
+    } else if (foodCountB > foodCountA + 1) {
+        TransferFoodSurplus(target, actor);
     }
     
     // Boost comfort
@@ -131,8 +192,8 @@ bool ActorSystem::HandleSocializeWith(Actor* actor, Actor* target) {
     // Zero out social & curiosity drives for both actors
     actor->emotions.current.curiosity  = 0.0f;
     target->emotions.current.curiosity = 0.0f;
-    actor->emotions.current.social  = 0.0f;
-    target->emotions.current.social = 0.0f;
+    actor->emotions.current.social     = 0.0f;
+    target->emotions.current.social    = 0.0f;
     
     // Drop social
     actor->memories.ScaleEmotion(TriggerType::Social, 0.1f);

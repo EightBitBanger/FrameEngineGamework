@@ -136,17 +136,19 @@ glm::vec3 ActorSystem::CalculateForwardVelocity(Actor* actor) {
 
 
 glm::vec3 ActorSystem::CalculateRandomLocalPoint(Actor* actor) {
-    glm::vec3 position(0);
-    position.x = actor->navigation.mPosition.x;
-    position.z = actor->navigation.mPosition.z;
+    float walkMaxRadius = actor->behavior.GetDistanceToWalk();
+    float walkMinRadius = actor->behavior.GetDistanceToInflict();
     
-    position.x += Random.Range(0.0f, actor->behavior.GetDistanceToWalk()) - Random.Range(0.0f, actor->behavior.GetDistanceToWalk());
-    position.z += Random.Range(0.0f, actor->behavior.GetDistanceToWalk()) - Random.Range(0.0f, actor->behavior.GetDistanceToWalk());
+    float angle = Random.Range(0.0f, glm::two_pi<float>());
+    float dist  = Random.Range(walkMinRadius, walkMaxRadius);
     
-    actor->navigation.mTargetPoint.x = position.x;
-    actor->navigation.mTargetPoint.y = 0.0f;
-    actor->navigation.mTargetPoint.z = position.z;
-    return position;
+    actor->navigation.mTargetPoint.x = actor->navigation.mPosition.x + std::cos(angle) * dist;
+    actor->navigation.mTargetPoint.y = actor->navigation.mPosition.y;
+    actor->navigation.mTargetPoint.z = actor->navigation.mPosition.z + std::sin(angle) * dist;
+    actor->navigation.mTargetLook  = actor->navigation.mTargetPoint;
+    actor->state.mIsFacing = true;
+    
+    return actor->navigation.mTargetPoint;
 }
 
 void ActorSystem::CalculateTargetOffsetting(Actor* actor, float distanceScale) {
@@ -253,6 +255,12 @@ bool ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
         
         actor->emotions.current.anger *= 0.1f;
         actor->memories.ScaleEmotion(TriggerType::Anger, 0.1f);
+        
+        std::string attackerName = actor->GetName().empty() 
+            ? "Actor_" + std::to_string(reinterpret_cast<uintptr_t>(actor)) 
+            : actor->GetName();
+        
+        RecordDeath(target, " slain by " + attackerName);
     }
     
     actor->emotions.current.comfort *= 0.5f;
@@ -262,6 +270,12 @@ bool ActorSystem::HandleInflictDamage(Actor* actor, Actor* target) {
 }
 
 void ActorSystem::UpdateGazeTarget(Actor* actor) {
+    // Lock head during sleep
+    if (actor->state.mode == ActorState::Mode::Sleeping) {
+        actor->navigation.mTargetLook = actor->navigation.mPosition + CalculateForwardVelocity(actor) * 10.0f;
+        return;
+    }
+    
     // High Priority: Combat, Fleeing, or Socializing
     if (actor->navigation.mTargetActor != nullptr && 
         (actor->state.mode == ActorState::Mode::MoveAttack || 
@@ -313,39 +327,6 @@ void ActorSystem::UpdateGazeTarget(Actor* actor) {
     
     // 15% Chance: Default - Look straight ahead in walking direction
     actor->navigation.mTargetLook = actor->navigation.mPosition + CalculateForwardVelocity(actor) * 10.0f;
-}
-
-bool ActorSystem::UpdateEnvironmentalDomain(Actor* actor, float range) {
-    if (mWorldRaycastCallback == nullptr || mWorldRemoveCallback == nullptr)
-        return false;
-    
-    // Query static world items around the actor's position within radius
-    std::vector<std::pair<std::string, glm::vec3>> nearbyItems = 
-        mWorldRaycastCallback(actor->navigation.mPosition, range);
-    
-    if (nearbyItems.empty())
-        return false;
-    
-    for (const auto& itemPair : nearbyItems) {
-        const std::string& itemType = itemPair.first;
-        const glm::vec3& itemPos = itemPair.second;
-        
-        // Check if the item descriptor already exists in the actor's inventory
-        const std::vector<std::string>& inventoryList = actor->inventory.itemClassList;
-        if (std::find(inventoryList.begin(), inventoryList.end(), itemType) != inventoryList.end()) {
-            continue; // Skip duplicate item
-        }
-        
-        std::string collectedItem;
-        
-        // Remove item from world and add to inventory if valid
-        if (mWorldRemoveCallback(itemPos, collectedItem)) {
-            actor->inventory.AddItem(collectedItem);
-            return true;
-        }
-    }
-    
-    return false;
 }
 
 bool ActorSystem::HandleEscapeEvade(Actor* actor, Actor* target) {

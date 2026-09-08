@@ -8,6 +8,14 @@ CooldownCounters::CooldownCounters() :
     mBreedingCoolDownCounter(0)
 {}
 
+void CooldownCounters::Reset() {
+    mObservationCoolDownCounter = 0;
+    mSocialCoolDownCounter      = 0;
+    mAttackCoolDownCounter      = 0;
+    mMovementCoolDownCounter    = 0;
+    mBreedingCoolDownCounter    = 0;
+}
+
 void CooldownCounters::SetCoolDownObservation(unsigned int counter) {
     mObservationCoolDownCounter = counter;
 }

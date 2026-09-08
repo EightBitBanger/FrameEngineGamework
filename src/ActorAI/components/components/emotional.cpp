@@ -2,6 +2,10 @@
 
 EmotionalState::EmotionalState() {}
 
+void EmotionalState::Reset() {
+    current.Initiate();
+}
+
 void EmotionalState::SetFear(float fear) {
     current.fear = fear;
 }

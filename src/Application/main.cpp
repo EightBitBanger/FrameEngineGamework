@@ -64,8 +64,6 @@ int main(int argc, char* argv[]) {
     double tickUpdateMax = tickUpdateTimeout * 100;
     tickTimer.Update();
     
-    AI.UpdateSendSignal(); // Kick off AI updates
-    
     while (Platform.isActive) {
         
 #ifdef PLATFORM_LINUX
@@ -303,8 +301,6 @@ int main(int argc, char* argv[]) {
             
             fixedTimer.Update();
             
-            AI.UpdateSendSignal();
-            
             // Call extra updates on accumulated time
             for (int i=0; i < 2; i++) {
                 
@@ -340,7 +336,7 @@ int main(int argc, char* argv[]) {
         if (Time.Update()) {
             
             // Draw the current frame state
-            Renderer.RenderFrame();
+            Renderer.RenderFrame((float)Time.GetCurrentDelta());
             
             // Draw the UI overlay
             UI.Render();

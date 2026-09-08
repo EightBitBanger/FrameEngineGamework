@@ -106,7 +106,7 @@ void EngineSystemManager::Initiate() {
     
     // Initiate console
     console.input = UI.CreateTextField();
-    console.input->doStayInFocus = true;
+    console.input->doStayInFocus = false;
     
     // Initiate console 
     for (unsigned int i=0; i < CONSOLE_NUMBER_OF_ELEMENTS; i++) {
@@ -187,7 +187,6 @@ GameObject* EngineSystemManager::GetGameObject(unsigned int index) {
 unsigned int EngineSystemManager::GetStreamSize(void) {
     return mStreamSize;
 }
-
 
 //
 // Physics debug renderer
